@@ -1,0 +1,23 @@
+<svg width="128" height="128" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Thynkr icon light">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#9F7AEA"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.8" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Core node network for dark backgrounds (white strokes) -->
+  <circle cx="32" cy="32" r="19" stroke="url(#g1)" stroke-width="2.5" opacity="0.7"/>
+  <path d="M22 28 C24 22, 40 22, 42 28 C44 34, 36 36, 32 40 C28 36, 20 34, 22 28 Z" fill="none" stroke="#FFFFFF" stroke-width="2.2"/>
+  <circle cx="24" cy="24" r="2.8" fill="#FFFFFF" filter="url(#glow)"/>
+  <circle cx="40" cy="24" r="2.8" fill="#FFFFFF" filter="url(#glow)"/>
+  <circle cx="32" cy="42" r="2.8" fill="#FFFFFF" filter="url(#glow)"/>
+  <path d="M24 24 L40 24 L32 42 Z" fill="none" stroke="url(#g1)" stroke-width="2.2" stroke-linecap="round"/>
+  <rect x="24" y="46" width="16" height="2.5" rx="1.25" fill="#FFFFFF" opacity="0.9"/>
+</svg>

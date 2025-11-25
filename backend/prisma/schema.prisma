@@ -1,0 +1,359 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  FREE
+  PRO
+  PREMIUM
+  ADMIN
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELED
+  PAST_DUE
+  TRIALING
+}
+
+model User {
+  id                String        @id @default(cuid())
+  email             String        @unique
+  username          String        @unique
+  password          String
+  firstName         String?
+  lastName          String?
+  avatarUrl         String?
+  theme             String        @default("light") // "light" or "dark"
+  preferredLanguage String        @default("en")
+  role              Role          @default(FREE)
+  emailVerified     Boolean       @default(false)
+  emailVerifyToken  String?       @unique
+  passwordResetToken String?      @unique
+  passwordResetExpires DateTime?
+  
+  stripeCustomerId  String?       @unique
+  subscription      Subscription?
+  refreshTokens     RefreshToken[]
+  
+  // Study system relations
+  uploadedFiles     UploadedFile[]
+  folders           Folder[]
+  quizAttempts      QuizAttempt[]
+  coursesCreated    Course[]
+  
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  lastLoginAt       DateTime?
+
+  @@index([email])
+  @@index([username])
+  @@index([stripeCustomerId])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+model Subscription {
+  id                    String             @id @default(cuid())
+  userId                String             @unique
+  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  stripeSubscriptionId  String             @unique
+  stripePriceId         String
+  status                SubscriptionStatus @default(INACTIVE)
+  
+  currentPeriodStart    DateTime?
+  currentPeriodEnd      DateTime?
+  cancelAtPeriodEnd     Boolean            @default(false)
+  
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([stripeSubscriptionId])
+  @@map("subscriptions")
+}
+
+model Content {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  content     String   @db.Text
+  slug        String   @unique
+  
+  // Access control
+  requiredRole Role    @default(FREE)
+  featured    Boolean  @default(false)
+  published   Boolean  @default(true)
+  
+  thumbnail   String?
+  tags        String[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([requiredRole])
+  @@index([featured])
+  @@map("content")
+}
+
+model AdminLog {
+  id        String   @id @default(cuid())
+  action    String
+  details   String?  @db.Text
+  userId    String?
+  userEmail String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("admin_logs")
+}
+
+// AI Study System Models
+
+enum FileStatus {
+  UPLOADED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum QuizDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model Folder {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name        String
+  parentId    String?
+  parent      Folder?       @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Folder[]      @relation("FolderHierarchy")
+  
+  files       UploadedFile[]
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([parentId])
+  @@map("folders")
+}
+
+model UploadedFile {
+  id            String       @id @default(cuid())
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  folderId      String?
+  folder        Folder?      @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  
+  fileName      String
+  originalName  String
+  fileType      String
+  fileSize      Int
+  filePath      String
+  
+  status        FileStatus   @default(UPLOADED)
+  extractedText String?      @db.Text
+  
+  summaries     FileSummary[]
+  notes         FileNotes[]
+  quizzes       Quiz[]
+  flashcardSets FlashcardSet[]
+  courseLessons CourseLesson[]
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([folderId])
+  @@index([status])
+  @@map("uploaded_files")
+}
+
+model FileSummary {
+  id          String       @id @default(cuid())
+  fileId      String
+  file        UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  
+  content     String       @db.Text
+  language    String       @default("en")
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([fileId, language])
+  @@map("file_summaries")
+}
+
+model FileNotes {
+  id          String       @id @default(cuid())
+  fileId      String
+  file        UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  
+  keyPoints   String[]
+  detailed    String       @db.Text
+  language    String       @default("en")
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([fileId, language])
+  @@map("file_notes")
+}
+
+model Quiz {
+  id          String         @id @default(cuid())
+  fileId      String
+  file        UploadedFile   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  
+  title       String
+  difficulty  QuizDifficulty
+  questions   QuizQuestion[]
+  attempts    QuizAttempt[]
+  language    String         @default("en")
+  
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([fileId])
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id          String   @id @default(cuid())
+  quizId      String
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  
+  question    String   @db.Text
+  options     String[]
+  correctAnswer String
+  explanation String?  @db.Text
+  order       Int
+  
+  createdAt   DateTime @default(now())
+
+  @@index([quizId])
+  @@map("quiz_questions")
+}
+
+model QuizAttempt {
+  id          String   @id @default(cuid())
+  quizId      String
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  answers     Json
+  score       Int
+  totalQuestions Int
+  
+  createdAt   DateTime @default(now())
+
+  @@index([quizId])
+  @@index([userId])
+  @@map("quiz_attempts")
+}
+
+model FlashcardSet {
+  id          String       @id @default(cuid())
+  fileId      String
+  file        UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  
+  title       String
+  cards       Flashcard[]
+  language    String       @default("en")
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([fileId])
+  @@map("flashcard_sets")
+}
+
+model Flashcard {
+  id          String       @id @default(cuid())
+  setId       String
+  set         FlashcardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+  
+  front       String       @db.Text
+  back        String       @db.Text
+  order       Int
+  
+  createdAt   DateTime     @default(now())
+
+  @@index([setId])
+  @@map("flashcards")
+}
+
+model Course {
+  id          String         @id @default(cuid())
+  title       String
+  description String?
+  slug        String         @unique
+  bannerImage String?
+  coverImage  String?
+  published   Boolean        @default(false)
+  createdBy   String
+  creator     User           @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  lessons     CourseLesson[]
+
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([slug])
+  @@index([published])
+  @@index([createdBy])
+  @@map("courses")
+}
+
+model CourseLesson {
+  id          String       @id @default(cuid())
+  courseId    String
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  fileId      String
+  file        UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?
+  order       Int          @default(0)
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([courseId, order])
+  @@unique([courseId, fileId])
+  @@index([courseId])
+  @@index([fileId])
+  @@map("course_lessons")
+}
+

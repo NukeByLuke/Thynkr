@@ -1,0 +1,163 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: thynkr
+          POSTGRES_PASSWORD: thynkr_test
+          POSTGRES_DB: thynkr_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint backend
+        run: pnpm --filter backend lint
+
+      - name: Lint frontend
+        run: pnpm --filter frontend lint
+
+      - name: Generate Prisma Client
+        run: pnpm --filter backend db:generate
+
+      - name: Run backend tests
+        run: pnpm --filter backend test
+        env:
+          DATABASE_URL: postgresql://thynkr:thynkr_test@localhost:5432/thynkr_test
+          REDIS_URL: redis://localhost:6379
+          JWT_ACCESS_SECRET: test_access_secret
+          JWT_REFRESH_SECRET: test_refresh_secret
+          STRIPE_SECRET_KEY: sk_test_fake
+          NODE_ENV: test
+
+      - name: Run frontend tests
+        run: pnpm --filter frontend test
+
+      - name: Build backend
+        run: pnpm --filter backend build
+
+      - name: Build frontend
+        run: pnpm --filter frontend build
+        env:
+          VITE_API_URL: http://localhost:3001/api
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: thynkr
+          POSTGRES_PASSWORD: thynkr_test
+          POSTGRES_DB: thynkr_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Browsers
+        run: pnpm --filter frontend exec playwright install --with-deps
+
+      - name: Generate Prisma Client
+        run: pnpm --filter backend db:generate
+
+      - name: Run migrations
+        run: pnpm --filter backend db:migrate
+        env:
+          DATABASE_URL: postgresql://thynkr:thynkr_test@localhost:5432/thynkr_test
+
+      - name: Seed database
+        run: pnpm --filter backend db:seed
+        env:
+          DATABASE_URL: postgresql://thynkr:thynkr_test@localhost:5432/thynkr_test
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
+        env:
+          DATABASE_URL: postgresql://thynkr:thynkr_test@localhost:5432/thynkr_test
+          JWT_ACCESS_SECRET: test_access_secret
+          JWT_REFRESH_SECRET: test_refresh_secret
+          STRIPE_SECRET_KEY: sk_test_fake
+          VITE_API_URL: http://localhost:3001/api
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 30

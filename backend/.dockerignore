@@ -1,0 +1,49 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output
+dist
+build
+.next
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Git
+.git
+.gitignore
+
+# Testing
+coverage
+.nyc_output
+
+# Misc
+*.log
+.cache
+tmp
+temp
+
+# Prisma: include migrations in production builds
+# (Do not ignore the migrations directory.)
+prisma/migrations/_to_delete
+
+# Uploads (keep the directory structure but not content)
+uploads/*
+!uploads/.gitkeep

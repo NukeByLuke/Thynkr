@@ -1,0 +1,93 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-thynkr}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-thynkr_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-thynkr_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - thynkr-network
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - thynkr-network
+
+  backend:
+    image: nukebyluke/thynkr-backend:latest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-thynkr}:${POSTGRES_PASSWORD:-thynkr_dev_password}@postgres:5432/${POSTGRES_DB:-thynkr_db}
+      REDIS_URL: redis://redis:6379
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-pk_test_placeholder}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
+      STRIPE_PRICE_PRO_MONTHLY: ${STRIPE_PRICE_PRO_MONTHLY:-price_test_pro_monthly}
+      STRIPE_PRICE_PRO_YEARLY: ${STRIPE_PRICE_PRO_YEARLY:-price_test_pro_yearly}
+      STRIPE_PRICE_PREMIUM_MONTHLY: ${STRIPE_PRICE_PREMIUM_MONTHLY:-price_test_premium_monthly}
+      STRIPE_PRICE_PREMIUM_YEARLY: ${STRIPE_PRICE_PREMIUM_YEARLY:-price_test_premium_yearly}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-dummy}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend/uploads:/app/uploads
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3001/health || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - thynkr-network
+
+  frontend:
+    image: nukebyluke/thynkr-frontend:latest
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/lib/letsencrypt:/var/lib/letsencrypt:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost/ > /dev/null || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - thynkr-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  thynkr-network:
+    driver: bridge
