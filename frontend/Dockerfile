@@ -41,8 +41,8 @@ FROM nginx:alpine AS runner
 # Copy built files from builder
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy nginx config - use local config for dev (override in compose file for prod)
+COPY nginx.local.conf /etc/nginx/conf.d/default.conf
 
 # No Basic Auth; the SPA handles a themed preview gate
 
@@ -55,4 +55,3 @@ HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
-
