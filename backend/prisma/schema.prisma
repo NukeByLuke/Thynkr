@@ -1,0 +1,611 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  BASIC
+  STANDARD
+  PREMIUM
+  ADMIN
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELED
+  PAST_DUE
+  TRIALING
+}
+
+model User {
+  id                String        @id @default(cuid())
+  email             String        @unique
+  username          String        @unique
+  password          String
+  firstName         String?
+  lastName          String?
+  avatarUrl         String?
+  theme             String        @default("light") // "light" or "dark"
+  preferredLanguage String        @default("en")
+  ttsVoice          String        @default("alloy") // TTS voice preference
+  ttsSpeed          Float         @default(1.0) // TTS speed preference (0.25-4.0)
+  role              Role          @default(BASIC)
+  emailVerified     Boolean       @default(false)
+  emailVerifyToken  String?       @unique
+  passwordResetToken String?      @unique
+  passwordResetExpires DateTime?
+  
+  stripeCustomerId  String?       @unique
+  subscription      Subscription?
+  refreshTokens     RefreshToken[]
+  
+  // Study system relations
+  uploadedFiles     UploadedFile[]
+  folders           Folder[]
+  quizAttempts      QuizAttempt[]
+  coursesCreated    Course[]
+  tutorSessions     TutorSession[]
+  studySessions     StudySession[]
+  studyStreak       StudyStreak?
+  studyPacks        StudyPack[]
+  
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  lastLoginAt       DateTime?
+
+  @@index([email])
+  @@index([username])
+  @@index([stripeCustomerId])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+model Subscription {
+  id                    String             @id @default(cuid())
+  userId                String             @unique
+  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  stripeSubscriptionId  String             @unique
+  stripePriceId         String
+  status                SubscriptionStatus @default(INACTIVE)
+  planType              Role               @default(BASIC)
+  billingCycle          BillingCycle       @default(MONTHLY)
+  
+  currentPeriodStart    DateTime?
+  currentPeriodEnd      DateTime?
+  cancelAtPeriodEnd     Boolean            @default(false)
+  
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([stripeSubscriptionId])
+  @@map("subscriptions")
+}
+
+model Content {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  content     String   @db.Text
+  slug        String   @unique
+  
+  // Access control
+  requiredRole Role    @default(BASIC)
+  featured    Boolean  @default(false)
+  published   Boolean  @default(true)
+  
+  thumbnail   String?
+  tags        String[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([requiredRole])
+  @@index([featured])
+  @@map("content")
+}
+
+model AdminLog {
+  id        String   @id @default(cuid())
+  action    String
+  details   String?  @db.Text
+  userId    String?
+  userEmail String?
+  userRole  String?
+  ipAddress String?
+  status    String   @default("SUCCESS") // SUCCESS, WARNING, ERROR
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([action])
+  @@index([status])
+  @@map("admin_logs")
+}
+
+enum PaymentStatus {
+  SUCCEEDED
+  FAILED
+  PENDING
+  REFUNDED
+}
+
+model Payment {
+  id                  String        @id @default(cuid())
+  userId              String
+  userEmail           String
+  stripePaymentId     String        @unique
+  stripeInvoiceId     String?
+  amount              Int           // Amount in cents
+  currency            String        @default("usd")
+  status              PaymentStatus @default(PENDING)
+  planType            Role          @default(STANDARD)
+  billingCycle        BillingCycle  @default(MONTHLY)
+  description         String?
+  
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("payments")
+}
+
+// AI Study System Models
+
+enum FileStatus {
+  UPLOADED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum QuizDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum CourseVisibility {
+  PRIVATE
+  PUBLIC
+}
+
+enum CourseCategory {
+  MATHEMATICS
+  SCIENCE
+  TECHNOLOGY
+  ENGINEERING
+  LANGUAGES
+  HUMANITIES
+  BUSINESS
+  ARTS
+  HEALTH
+  LAW
+  OTHER
+}
+
+model Folder {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name        String
+  parentId    String?
+  parent      Folder?       @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Folder[]      @relation("FolderHierarchy")
+  
+  files       UploadedFile[]
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([parentId])
+  @@map("folders")
+}
+
+model UploadedFile {
+  id            String       @id @default(cuid())
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  folderId      String?
+  folder        Folder?      @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  
+  fileName      String
+  originalName  String
+  fileType      String
+  fileSize      Int
+  filePath      String
+  
+  status        FileStatus   @default(UPLOADED)
+  extractedText String?      @db.Text
+  
+  summaries     FileSummary[]
+  notes         FileNotes[]
+  quizzes       Quiz[]
+  flashcardSets FlashcardSet[]
+  tutorSessions TutorSessionFile[]
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([folderId])
+  @@index([status])
+  @@map("uploaded_files")
+}
+
+model FileSummary {
+  id          String       @id @default(cuid())
+  fileId      String
+  file        UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  
+  content     String       @db.Text
+  language    String       @default("en")
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([fileId, language])
+  @@map("file_summaries")
+}
+
+model FileNotes {
+  id          String       @id @default(cuid())
+  fileId      String
+  file        UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  
+  keyPoints   String[]
+  detailed    String       @db.Text
+  language    String       @default("en")
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([fileId, language])
+  @@map("file_notes")
+}
+
+model Quiz {
+  id          String         @id @default(cuid())
+  fileId      String
+  file        UploadedFile   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  
+  title       String
+  difficulty  QuizDifficulty
+  questions   QuizQuestion[]
+  attempts    QuizAttempt[]
+  language    String         @default("en")
+  
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([fileId])
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id          String   @id @default(cuid())
+  quizId      String
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  
+  question    String   @db.Text
+  options     String[]
+  correctAnswer String
+  explanation String?  @db.Text
+  order       Int
+  
+  createdAt   DateTime @default(now())
+
+  @@index([quizId])
+  @@map("quiz_questions")
+}
+
+model QuizAttempt {
+  id          String   @id @default(cuid())
+  quizId      String
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  answers     Json
+  score       Int
+  totalQuestions Int
+  
+  createdAt   DateTime @default(now())
+
+  @@index([quizId])
+  @@index([userId])
+  @@map("quiz_attempts")
+}
+
+model FlashcardSet {
+  id          String       @id @default(cuid())
+  fileId      String
+  file        UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  
+  title       String
+  cards       Flashcard[]
+  language    String       @default("en")
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([fileId])
+  @@map("flashcard_sets")
+}
+
+model Flashcard {
+  id          String       @id @default(cuid())
+  setId       String
+  set         FlashcardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+  
+  front       String       @db.Text
+  back        String       @db.Text
+  order       Int
+  
+  createdAt   DateTime     @default(now())
+
+  @@index([setId])
+  @@map("flashcards")
+}
+
+model Course {
+  id          String           @id @default(cuid())
+  title       String
+  description String?          @db.Text
+  slug        String           @unique
+  bannerImage String?
+  coverImage  String?
+  category    CourseCategory   @default(OTHER)
+  visibility  CourseVisibility @default(PRIVATE)
+  published   Boolean          @default(false)
+  shareToken  String?          @unique  // For private course sharing
+  
+  createdBy   String
+  creator     User             @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  
+  files       CourseFile[]
+  studyPacks  StudyPack[]
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([slug])
+  @@index([visibility])
+  @@index([published])
+  @@index([createdBy])
+  @@index([shareToken])
+  @@index([category])
+  @@map("courses")
+}
+
+model CourseFile {
+  id          String   @id @default(cuid())
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  name        String
+  originalName String
+  fileName    String
+  filePath    String
+  fileType    String
+  fileSize    Int
+  order       Int      @default(0)
+  
+  // AI content relation
+  aiContent   CourseFileAI?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([courseId])
+  @@map("course_files")
+}
+
+// ============ AI TUTOR SYSTEM ============
+
+model TutorSession {
+  id          String              @id @default(cuid())
+  userId      String
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title       String              @default("New Chat")
+  messages    TutorMessage[]
+  files       TutorSessionFile[]
+  
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([userId])
+  @@map("tutor_sessions")
+}
+
+model TutorMessage {
+  id          String        @id @default(cuid())
+  sessionId   String
+  session     TutorSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  role        String        // 'user' or 'assistant'
+  content     String        @db.Text
+  
+  createdAt   DateTime      @default(now())
+
+  @@index([sessionId])
+  @@map("tutor_messages")
+}
+
+model TutorSessionFile {
+  id          String        @id @default(cuid())
+  sessionId   String
+  session     TutorSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  fileId      String
+  file        UploadedFile  @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime      @default(now())
+
+  @@unique([sessionId, fileId])
+  @@index([sessionId])
+  @@index([fileId])
+  @@map("tutor_session_files")
+}
+
+// ============ STUDY PROGRESS & STREAKS ============
+
+enum StudyActivityType {
+  FILE_UPLOAD
+  SUMMARY_VIEW
+  NOTES_VIEW
+  QUIZ_ATTEMPT
+  FLASHCARD_STUDY
+  TUTOR_CHAT
+  TTS_GENERATE
+  STUDY_PACK_CREATE
+}
+
+model StudySession {
+  id              String            @id @default(cuid())
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  activityType    StudyActivityType
+  fileId          String?
+  durationMinutes Int               @default(0)
+  
+  createdAt       DateTime          @default(now())
+
+  @@index([userId])
+  @@index([userId, createdAt])
+  @@map("study_sessions")
+}
+
+model StudyStreak {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  currentStreak   Int      @default(0)
+  longestStreak   Int      @default(0)
+  lastStudyDate   DateTime?
+  
+  totalStudyDays  Int      @default(0)
+  totalMinutes    Int      @default(0)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("study_streaks")
+}
+
+// ============ COURSE FILE AI ============
+
+model CourseFileAI {
+  id        String   @id @default(cuid())
+  fileId    String   @unique
+  file      CourseFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  
+  // Extracted text from the file (cached for AI processing)
+  extractedText String? @db.Text
+  
+  // AI-generated content (stored as JSON)
+  summary   Json?    // { content: string, sections?: { title: string, content: string }[] }
+  notes     Json?    // { keyPoints: string[], detailed: string }
+  quiz      Json?    // { title: string, questions: [{ question, options, correctAnswer, explanation }] }
+  cards     Json?    // { title: string, cards: [{ front, back }] }
+  
+  // Generation metadata
+  summaryGeneratedAt   DateTime?
+  notesGeneratedAt     DateTime?
+  quizGeneratedAt      DateTime?
+  cardsGeneratedAt     DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([fileId])
+  @@map("course_file_ai")
+}
+
+// ============ STUDY PACKS (Combined Multi-File Study) ============
+
+model StudyPack {
+  id          String   @id @default(cuid())
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  courseId    String?
+  course      Course?  @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  
+  fileIds     String[] // IDs of selected files
+  fileHash    String   // Hash of sorted fileIds for idempotency lookup
+  title       String
+  
+  // AI-generated content
+  pages       Json?    // [{ pageNumber: number, heading: string, content: string }]
+  quiz        Json?    // { title: string, questions: [...], difficulty: string }
+  cards       Json?    // { title: string, cards: [{ front, back }] }
+  
+  // Share token for private sharing
+  shareToken  String?  @unique
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([ownerId, fileHash])
+  @@index([ownerId])
+  @@index([courseId])
+  @@index([shareToken])
+  @@map("study_packs")
+}
+
+// ============ STUDY CACHE (Multi-file combined AI content) ============
+
+model StudyCache {
+  id          String   @id @default(cuid())
+  userId      String
+  courseId    String
+  fileIds     String[] // Sorted array of file IDs
+  fileHash    String   // Hash of sorted fileIds for quick lookup
+  type        String   // "summary" | "notes" | "quiz" | "flashcards"
+  result      Json     // The cached AI-generated content
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, courseId, fileHash, type])
+  @@index([userId])
+  @@index([courseId])
+  @@index([fileHash])
+  @@map("study_cache")
+}
+
+

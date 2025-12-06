@@ -1,0 +1,20 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Simplified icon for favicon - dark theme -->
+  <rect width="32" height="32" rx="6" fill="#0F172A"/>
+  <path d="M16 2L28 14L16 26L4 14L16 2Z" fill="url(#grad1)" stroke="#22D3EE" stroke-width="1.5"/>
+  <ellipse cx="16" cy="19" rx="2" ry="1.25" fill="#A5B4FC"/>
+  <rect x="15" y="17.5" width="2" height="1.5" rx="0.25" fill="#A5B4FC"/>
+  <path d="M16 9C13.5 9 11.5 11 11.5 13.5C11.5 14.5 11.75 15.4 12.25 16.1C12.5 16.5 12.75 16.85 12.75 17.25V18H19.25V17.25C19.25 16.85 19.5 16.5 19.75 16.1C20.25 15.4 20.5 14.5 20.5 13.5C20.5 11 18.5 9 16 9Z" fill="url(#grad2)"/>
+  <circle cx="19" cy="10.5" r="0.75" fill="#22D3EE"/>
+  
+  <defs>
+    <linearGradient id="grad1" x1="4" y1="2" x2="28" y2="26">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+    <linearGradient id="grad2" x1="11.5" y1="9" x2="20.5" y2="18">
+      <stop offset="0%" stop-color="#818CF8"/>
+      <stop offset="100%" stop-color="#A5B4FC"/>
+    </linearGradient>
+  </defs>
+</svg>

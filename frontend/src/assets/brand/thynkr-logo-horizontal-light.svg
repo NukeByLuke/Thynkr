@@ -1,0 +1,21 @@
+<svg width="640" height="160" viewBox="0 0 640 160" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Thynkr logo light">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="160" y2="160" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#9F7AEA"/>
+    </linearGradient>
+  </defs>
+  <!-- Icon -->
+  <g transform="translate(16,16) scale(1.1)">
+    <circle cx="48" cy="48" r="28" stroke="url(#g1)" stroke-width="3" opacity="0.8"/>
+    <path d="M34 44 C37 34, 59 34, 62 44 C65 54, 54 57, 48 64 C42 57, 31 54, 34 44 Z" fill="none" stroke="#FFFFFF" stroke-width="3"/>
+    <circle cx="36" cy="36" r="4" fill="#FFFFFF"/>
+    <circle cx="60" cy="36" r="4" fill="#FFFFFF"/>
+    <circle cx="48" cy="66" r="4" fill="#FFFFFF"/>
+    <path d="M36 36 L60 36 L48 66 Z" fill="none" stroke="url(#g1)" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <!-- Wordmark -->
+  <g transform="translate(120,98)">
+    <text x="0" y="0" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="56" font-weight="700" fill="#FFFFFF" letter-spacing="0.5">Thynkr</text>
+  </g>
+</svg>

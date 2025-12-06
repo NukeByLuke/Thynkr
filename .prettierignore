@@ -1,0 +1,20 @@
+# TypeScript CSS Tailwind definitions
+frontend/src/index.css
+
+# Generated Prisma files
+backend/node_modules/@prisma/
+**/node_modules/@prisma/
+
+# Environment files (contain secrets)
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Config files
+*.config.js
+*.config.ts

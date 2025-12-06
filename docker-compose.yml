@@ -1,0 +1,115 @@
+# Thynkr Development Environment
+# Docker Compose configuration for local development with PostgreSQL, Redis, Backend, and Frontend services.
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database - Primary data store for users, courses, and study materials
+  postgres:
+    image: postgres:16-alpine
+    container_name: thynkr-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: thynkr
+      POSTGRES_PASSWORD: thynkr_dev_password
+      POSTGRES_DB: thynkr_db
+    ports:
+      - '5435:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U thynkr']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - thynkr-network
+
+  # Redis Cache - Session management and rate limiting
+  redis:
+    image: redis:7-alpine
+    container_name: thynkr-redis
+    restart: unless-stopped
+    ports:
+      - '6380:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - thynkr-network
+
+  # Backend API - Fastify REST API with AI-powered study tools
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: thynkr-backend
+    restart: unless-stopped
+    ports:
+      - '3003:3001'
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://thynkr:thynkr_dev_password@postgres:5432/thynkr_db
+      REDIS_URL: redis://redis:6379
+      FRONTEND_URL: http://localhost:5175
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-dummy}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      # JWT secrets - use your values from .env
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      # Stripe keys (optional)
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-pk_test_placeholder}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
+      STRIPE_PRICE_STANDARD_MONTHLY: ${STRIPE_PRICE_STANDARD_MONTHLY:-price_test_standard_monthly}
+      STRIPE_PRICE_STANDARD_YEARLY: ${STRIPE_PRICE_STANDARD_YEARLY:-price_test_standard_yearly}
+      STRIPE_PRICE_PREMIUM_MONTHLY: ${STRIPE_PRICE_PREMIUM_MONTHLY:-price_test_premium_monthly}
+      STRIPE_PRICE_PREMIUM_YEARLY: ${STRIPE_PRICE_PREMIUM_YEARLY:-price_test_premium_yearly}
+      ENABLE_EMAIL_VERIFICATION: "false"
+      ENABLE_ANALYTICS: "false"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend/uploads:/app/uploads
+    networks:
+      - thynkr-network
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:3001/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend - React SPA built with Vite, served via Nginx
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:3003/api
+    container_name: thynkr-frontend
+    restart: unless-stopped
+    ports:
+      - '5175:80'
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - thynkr-network
+
+# Persistent volumes for database and cache data
+volumes:
+  postgres_data:
+  redis_data:
+
+# Internal bridge network for service communication
+networks:
+  thynkr-network:
+    driver: bridge
