@@ -44,7 +44,6 @@ export default function Navbar() {
   };
 
   const isActive = (path: string) => location.pathname === path;
-  const isHomePath = location.pathname === '/' || location.pathname === '/pricing';
 
   return (
     <nav className="backdrop-blur-lg bg-white/90 dark:bg-slate-900/90 border-b border-white/20 dark:border-white/10 sticky top-0 z-50 shadow-[0_2px_10px_rgba(0,0,0,0.1)]">
@@ -70,9 +69,9 @@ export default function Navbar() {
               </Link>
             )}
             <Link
-              to="/pricing"
+              to="/"
               className={`text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-sm flex items-center ${
-                isHomePath
+                isActive('/')
                   ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
                   : ''
               }`}
@@ -348,9 +347,9 @@ export default function Navbar() {
                   </Link>
                 )}
                 <Link
-                  to="/pricing"
+                  to="/"
                   className={`flex items-center px-3 py-2 rounded-lg text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-sm hover:translate-x-1 ${
-                    isActive('/pricing')
+                    isActive('/')
                       ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
                       : ''
                   }`}

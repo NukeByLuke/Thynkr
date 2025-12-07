@@ -60,7 +60,7 @@ export default function DesktopSidebar() {
 
   const navItems = [
     ...(user?.role === 'ADMIN' ? [{ icon: BarChart3, label: 'Dashboard', path: '/admin' }] : []),
-    { icon: Home, label: 'Home', path: '/home' },
+    { icon: Home, label: 'Home', path: '/' },
     { icon: GraduationCap, label: 'Study', path: '/study' },
     { icon: BookOpen, label: 'Courses', path: '/courses' },
     { icon: FolderOpen, label: 'Files', path: '/files' },
@@ -71,6 +71,9 @@ export default function DesktopSidebar() {
   ];
 
   const isActive = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/' || location.pathname === '/study';
+    }
     if (path === '/courses') {
       return location.pathname === '/courses' || location.pathname.startsWith('/courses/');
     }
