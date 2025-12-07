@@ -11,6 +11,7 @@ import {
   Clock,
   BarChart3,
   GraduationCap,
+  Home,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -59,6 +60,7 @@ export default function DesktopSidebar() {
 
   const navItems = [
     ...(user?.role === 'ADMIN' ? [{ icon: BarChart3, label: 'Dashboard', path: '/admin' }] : []),
+    { icon: Home, label: 'Home', path: '/home' },
     { icon: GraduationCap, label: 'Study', path: '/study' },
     { icon: BookOpen, label: 'Courses', path: '/courses' },
     { icon: FolderOpen, label: 'Files', path: '/files' },

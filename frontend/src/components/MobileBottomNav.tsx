@@ -33,7 +33,7 @@ export default function MobileBottomNav() {
   };
 
   const navItems = [
-    { icon: Home, label: 'Home', path: '/pricing' },
+    { icon: Home, label: 'Home', path: '/home' },
     { icon: GraduationCap, label: 'Study', path: '/study' },
     { icon: MessageSquare, label: 'AI Tutor', path: '/tutor' },
     { icon: TrendingUp, label: 'Progress', path: '/progress' },
@@ -41,8 +41,8 @@ export default function MobileBottomNav() {
   ];
 
   const isActive = (path: string) => {
-    if (path === '/pricing') {
-      return location.pathname === '/pricing';
+    if (path === '/home') {
+      return location.pathname === '/home';
     }
     return location.pathname.startsWith(path);
   };
