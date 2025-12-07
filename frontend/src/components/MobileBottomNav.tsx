@@ -72,6 +72,50 @@ export default function MobileBottomNav() {
           {navItems.map((item, index) => {
             const Icon = item.icon;
             const active = isActive(item.path);
+            const isHome = item.path === '/';
+
+            // Home button redirects to external domain
+            if (isHome) {
+              return (
+                <button
+                  key={item.path}
+                  onClick={() => (window.location.href = 'https://thynkr.ca')}
+                  className={`flex flex-col items-center justify-center flex-1 h-full relative group ${
+                    index === 2 ? 'invisible' : '' // Hide middle item for FAB space
+                  }`}
+                >
+                  <motion.div
+                    whileTap={{ scale: 0.85 }}
+                    className="flex flex-col items-center justify-center gap-1"
+                  >
+                    <div
+                      className={`p-2 rounded-xl transition-all ${
+                        active
+                          ? 'bg-gradient-to-br from-brand-500 to-accent-500 shadow-lg shadow-brand-500/30'
+                          : 'bg-transparent'
+                      }`}
+                    >
+                      <Icon
+                        className={`w-5 h-5 transition-colors ${
+                          active
+                            ? 'text-white'
+                            : 'text-gray-500 dark:text-gray-400 group-active:text-gray-700 dark:group-active:text-gray-300'
+                        }`}
+                      />
+                    </div>
+                    <span
+                      className={`text-[10px] font-medium transition-colors ${
+                        active
+                          ? 'text-brand-600 dark:text-brand-400'
+                          : 'text-gray-500 dark:text-gray-400 group-active:text-gray-700 dark:group-active:text-gray-300'
+                      }`}
+                    >
+                      {item.label}
+                    </span>
+                  </motion.div>
+                </button>
+              );
+            }
 
             return (
               <Link

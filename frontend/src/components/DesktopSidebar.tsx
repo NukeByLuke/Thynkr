@@ -158,6 +158,57 @@ export default function DesktopSidebar() {
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
+          const isHome = item.path === '/';
+
+          // Home button redirects to external domain
+          if (isHome) {
+            return (
+              <motion.div key={item.path} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <button
+                  onClick={() => (window.location.href = 'https://thynkr.ca')}
+                  className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 group relative w-full ${
+                    active
+                      ? 'bg-white/5 text-white shadow-[0_0_15px_rgba(124,58,237,0.3)]'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5 hover:shadow-[0_0_10px_rgba(124,58,237,0.15)]'
+                  } ${!isSidebarOpen && 'justify-center'}`}
+                >
+                  {active && (
+                    <div
+                      className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-[3px] bg-gradient-to-b from-[#7c3aed] to-[#3b82f6] rounded-full"
+                      style={{
+                        boxShadow: '0 0 8px rgba(124, 58, 237, 0.6)',
+                      }}
+                    />
+                  )}
+                  <div
+                    className={`flex items-center justify-center w-6 h-6 ${active ? 'drop-shadow-[0_0_6px_rgba(124,58,237,0.6)]' : ''}`}
+                  >
+                    <Icon className="w-6 h-6 flex-shrink-0" strokeWidth={2} />
+                  </div>
+                  <AnimatePresence mode="wait">
+                    {isSidebarOpen && (
+                      <motion.span
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: 'auto' }}
+                        exit={{ opacity: 0, width: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="font-medium whitespace-nowrap overflow-hidden text-sm"
+                      >
+                        {item.label}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Tooltip for collapsed state */}
+                  {!isSidebarOpen && (
+                    <div className="absolute left-full ml-4 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-50">
+                      {item.label}
+                    </div>
+                  )}
+                </button>
+              </motion.div>
+            );
+          }
 
           return (
             <motion.div key={item.path} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
