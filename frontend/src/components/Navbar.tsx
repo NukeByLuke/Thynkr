@@ -14,6 +14,7 @@ import {
   MessageCircle,
   Flame,
   LibraryBig,
+  Home,
 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
@@ -153,6 +154,17 @@ export default function Navbar() {
                     Packs
                   </Link>
                 )}
+                <Link
+                  to="/pricing"
+                  className={`text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-sm flex items-center gap-1 ${
+                    isActive('/pricing')
+                      ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                      : ''
+                  }`}
+                >
+                  <Home className="w-4 h-4" />
+                  Home
+                </Link>
               </>
             )}
 
@@ -335,6 +347,18 @@ export default function Navbar() {
                     Courses
                   </Link>
                 )}
+                <Link
+                  to="/pricing"
+                  className={`flex items-center px-3 py-2 rounded-lg text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-sm hover:translate-x-1 ${
+                    isActive('/pricing')
+                      ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                      : ''
+                  }`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Home className="w-4 h-4 mr-2" />
+                  Home
+                </Link>
               </>
             )}
             {isAuthenticated ? (

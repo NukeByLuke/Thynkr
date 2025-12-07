@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  BookOpen,
+  Home,
   GraduationCap,
   MessageSquare,
   TrendingUp,
@@ -33,7 +33,7 @@ export default function MobileBottomNav() {
   };
 
   const navItems = [
-    { icon: BookOpen, label: 'Courses', path: '/courses' },
+    { icon: Home, label: 'Home', path: '/pricing' },
     { icon: GraduationCap, label: 'Study', path: '/study' },
     { icon: MessageSquare, label: 'AI Tutor', path: '/tutor' },
     { icon: TrendingUp, label: 'Progress', path: '/progress' },
@@ -41,8 +41,8 @@ export default function MobileBottomNav() {
   ];
 
   const isActive = (path: string) => {
-    if (path === '/courses') {
-      return location.pathname === '/courses' || location.pathname.startsWith('/courses/');
+    if (path === '/pricing') {
+      return location.pathname === '/pricing';
     }
     return location.pathname.startsWith(path);
   };
