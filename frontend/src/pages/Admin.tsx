@@ -492,7 +492,7 @@ const SubscriptionBadge = ({ subscription }: { subscription: User['subscription'
     premium: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
   };
 
-  const plan = subscription.plan.toLowerCase();
+  const plan = subscription.plan?.toLowerCase() || 'basic';
   const style = planStyles[plan] || planStyles.basic;
 
   return (
@@ -3770,7 +3770,7 @@ export default function Admin() {
       if (subscriptionFilter === 'none') {
         users = users.filter((u) => !u.subscription);
       } else {
-        users = users.filter((u) => u.subscription?.plan.toLowerCase() === subscriptionFilter);
+        users = users.filter((u) => u.subscription?.plan?.toLowerCase() === subscriptionFilter);
       }
     }
 
