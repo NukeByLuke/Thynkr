@@ -46,6 +46,18 @@ async function start() {
       done(null as any);
     });
 
+    // Add content type parser for Stripe webhooks to preserve raw body
+    server.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req, body, done) => {
+      try {
+        (req as any).rawBody = body;
+        const json = JSON.parse(body.toString('utf8'));
+        done(null, json);
+      } catch (err: any) {
+        err.statusCode = 400;
+        done(err, undefined);
+      }
+    });
+
     // Register security plugins
     await server.register(helmet, {
       contentSecurityPolicy: {
