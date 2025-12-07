@@ -36,7 +36,7 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 
 /**
  * Custom hook to handle authentication-based redirects
- * Redirects authenticated users from public pages to dashboard
+ * Redirects authenticated users from login/register pages to dashboard
  */
 function useAuthRedirects() {
   const { user, isLoading } = useAuth();
@@ -46,10 +46,11 @@ function useAuthRedirects() {
   useEffect(() => {
     if (isLoading) return;
 
-    const publicAuthPages = ['/login', '/register', '/'];
-    const isOnPublicAuthPage = publicAuthPages.includes(location.pathname);
+    // Only redirect from login/register pages, allow access to homepage (/)
+    const authOnlyPages = ['/login', '/register'];
+    const isOnAuthOnlyPage = authOnlyPages.includes(location.pathname);
 
-    if (user && isOnPublicAuthPage) {
+    if (user && isOnAuthOnlyPage) {
       navigate('/study', { replace: true });
     }
   }, [user, isLoading, location.pathname, navigate]);
