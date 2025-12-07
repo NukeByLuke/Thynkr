@@ -52,8 +52,9 @@ async function getFileText(fileId: string, filePath: string, fileType: string): 
     return existing.extractedText;
   }
 
-  // Check if file exists
-  const fullPath = path.resolve(filePath);
+  // Check if file exists - resolve path relative to uploads directory
+  const uploadsDir = path.join(process.cwd(), 'uploads');
+  const fullPath = path.join(uploadsDir, filePath);
   try {
     await fs.access(fullPath);
   } catch {

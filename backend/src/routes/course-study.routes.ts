@@ -52,11 +52,14 @@ async function getFileText(fileId: string, filePath: string, fileType: string): 
     return existing.extractedText;
   }
 
-  const fullPath = path.resolve(filePath);
+  // Resolve file path relative to uploads directory
+  const uploadsDir = path.join(process.cwd(), 'uploads');
+  const fullPath = path.join(uploadsDir, filePath);
   try {
     await fs.access(fullPath);
-  } catch {
-    throw new Error(`File not found: ${fileId}`);
+  } catch (error) {
+    logger.error({ error, fileId, filePath, fullPath }, 'File not accessible');
+    throw new Error(`File not found: ${fileId} at ${fullPath}`);
   }
 
   const extractedText = await fileProcessor.extractText(fullPath, fileType);
