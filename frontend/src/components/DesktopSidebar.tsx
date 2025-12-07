@@ -72,7 +72,8 @@ export default function DesktopSidebar() {
 
   const isActive = (path: string) => {
     if (path === '/') {
-      return location.pathname === '/' || location.pathname === '/study';
+      // Home button is never active in the sidebar (it redirects externally)
+      return false;
     }
     if (path === '/courses') {
       return location.pathname === '/courses' || location.pathname.startsWith('/courses/');

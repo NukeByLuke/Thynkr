@@ -42,7 +42,8 @@ export default function MobileBottomNav() {
 
   const isActive = (path: string) => {
     if (path === '/') {
-      return location.pathname === '/' || location.pathname === '/study';
+      // Home button is never active in mobile nav (it redirects externally)
+      return false;
     }
     return location.pathname.startsWith(path);
   };
