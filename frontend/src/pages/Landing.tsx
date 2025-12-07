@@ -3,11 +3,10 @@
  * Marketing homepage with hero section, features, pricing, and CTAs for new visitors.
  */
 
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Button from '@/components/Button';
 import { motion } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
 import {
   ArrowRight,
   Zap,
@@ -37,13 +36,6 @@ const staggerContainer = {
 };
 
 export default function Landing() {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  // Redirect authenticated users to their courses
-  if (!isLoading && isAuthenticated) {
-    return <Navigate to="/my-courses" replace />;
-  }
-
   return (
     <>
       <Helmet>
