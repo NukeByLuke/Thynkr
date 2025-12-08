@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import prisma from './client';
 import { logger } from '../lib/logger';
+import seedCoursesWithInternalFiles from './seed-courses-internal';
 
 async function seed() {
   try {
@@ -265,128 +266,8 @@ This is available to all members as security is everyone's responsibility!`,
       logger.info(`Created/verified content: ${contentData.title}`);
     }
 
-    // Create sample math courses
-    // First, get the premium user to be the course creator
-    const premiumUser = await prisma.user.findUnique({
-      where: { email: 'premium@test.local' },
-    });
-
-    if (premiumUser) {
-      const mathCourses = [
-        {
-          title: 'Calculus Essentials',
-          description: 'Master derivatives, integrals, and limits with AI-generated examples.',
-          slug: 'calculus-essentials',
-          category: 'MATHEMATICS' as const,
-          visibility: 'PUBLIC' as const,
-          published: true,
-          createdBy: premiumUser.id,
-          files: [
-            {
-              name: 'Derivatives Notes',
-              originalName: 'Derivatives_Notes.pdf',
-              fileName: 'derivatives_notes.pdf',
-              filePath: 'courses/sample/derivatives_notes.pdf',
-              fileType: 'application/pdf',
-              fileSize: 245000,
-              order: 0,
-            },
-            {
-              name: 'Integration Practice',
-              originalName: 'Integration_Practice.pdf',
-              fileName: 'integration_practice.pdf',
-              filePath: 'courses/sample/integration_practice.pdf',
-              fileType: 'application/pdf',
-              fileSize: 312000,
-              order: 1,
-            },
-          ],
-        },
-        {
-          title: 'Algebra Foundations',
-          description: 'Learn the core rules of algebra, linear equations, and factoring.',
-          slug: 'algebra-foundations',
-          category: 'MATHEMATICS' as const,
-          visibility: 'PUBLIC' as const,
-          published: true,
-          createdBy: premiumUser.id,
-          files: [
-            {
-              name: 'Equations Worksheet',
-              originalName: 'Equations_Worksheet.pdf',
-              fileName: 'equations_worksheet.pdf',
-              filePath: 'courses/sample/equations_worksheet.pdf',
-              fileType: 'application/pdf',
-              fileSize: 189000,
-              order: 0,
-            },
-            {
-              name: 'Factoring Guide',
-              originalName: 'Factoring_Guide.pdf',
-              fileName: 'factoring_guide.pdf',
-              filePath: 'courses/sample/factoring_guide.pdf',
-              fileType: 'application/pdf',
-              fileSize: 156000,
-              order: 1,
-            },
-          ],
-        },
-        {
-          title: 'Statistics for Beginners',
-          description: 'Understand probability, data visualization, and hypothesis testing.',
-          slug: 'statistics-for-beginners',
-          category: 'MATHEMATICS' as const,
-          visibility: 'PUBLIC' as const,
-          published: true,
-          createdBy: premiumUser.id,
-          files: [
-            {
-              name: 'Probability Basics',
-              originalName: 'ProbabilityBasics.pdf',
-              fileName: 'probability_basics.pdf',
-              filePath: 'courses/sample/probability_basics.pdf',
-              fileType: 'application/pdf',
-              fileSize: 278000,
-              order: 0,
-            },
-            {
-              name: 'Data Graphs',
-              originalName: 'DataGraphs.docx',
-              fileName: 'data_graphs.docx',
-              filePath: 'courses/sample/data_graphs.docx',
-              fileType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-              fileSize: 134000,
-              order: 1,
-            },
-          ],
-        },
-      ];
-
-      for (const courseData of mathCourses) {
-        const { files, ...courseInfo } = courseData;
-
-        // Check if course already exists
-        const existingCourse = await prisma.course.findUnique({
-          where: { slug: courseInfo.slug },
-        });
-
-        if (!existingCourse) {
-          const course = await prisma.course.create({
-            data: {
-              ...courseInfo,
-              files: {
-                create: files,
-              },
-            },
-          });
-          logger.info(`Created course: ${course.title} with ${files.length} files`);
-        } else {
-          logger.info(`Course already exists: ${courseInfo.title}`);
-        }
-      }
-    } else {
-      logger.warn('Premium user not found, skipping course creation');
-    }
+    // Seed courses with comprehensive internal AI files
+    await seedCoursesWithInternalFiles();
 
     logger.info('✅ Database seed completed successfully');
   } catch (error) {

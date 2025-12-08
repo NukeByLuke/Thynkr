@@ -1,6 +1,18 @@
 -- Update Role enum: Add new values (BASIC, STANDARD)
-ALTER TYPE "Role" ADD VALUE IF NOT EXISTS 'BASIC';
-ALTER TYPE "Role" ADD VALUE IF NOT EXISTS 'STANDARD';
+-- Note: ALTER TYPE ADD VALUE cannot run inside a transaction block
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'BASIC' AND enumtypid = 'Role'::regtype) THEN
+        ALTER TYPE "Role" ADD VALUE 'BASIC';
+    END IF;
+END $$;
+
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'STANDARD' AND enumtypid = 'Role'::regtype) THEN
+        ALTER TYPE "Role" ADD VALUE 'STANDARD';
+    END IF;
+END $$;
 
 -- Add BillingCycle enum
 DO $$ BEGIN

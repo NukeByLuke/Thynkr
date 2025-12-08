@@ -212,6 +212,11 @@ enum CourseCategory {
   OTHER
 }
 
+enum FileAccessType {
+  INTERNAL
+  DOWNLOADABLE
+}
+
 model Folder {
   id          String        @id @default(cuid())
   userId      String
@@ -410,9 +415,9 @@ model Course {
 }
 
 model CourseFile {
-  id          String   @id @default(cuid())
+  id          String         @id @default(cuid())
   courseId    String
-  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course      Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
   
   name        String
   originalName String
@@ -420,15 +425,17 @@ model CourseFile {
   filePath    String
   fileType    String
   fileSize    Int
-  order       Int      @default(0)
+  order       Int            @default(0)
+  accessType  FileAccessType @default(INTERNAL)
   
   // AI content relation
   aiContent   CourseFileAI?
   
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
   @@index([courseId])
+  @@index([accessType])
   @@map("course_files")
 }
 
