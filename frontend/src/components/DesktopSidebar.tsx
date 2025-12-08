@@ -19,6 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigation } from '@/contexts/NavigationContext';
 import { useState, useEffect } from 'react';
 import Logo from './Logo';
+import SidebarGreeting from './SidebarGreeting';
 
 export default function DesktopSidebar() {
   const { user, logout } = useAuth();
@@ -26,7 +27,6 @@ export default function DesktopSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [greeting, setGreeting] = useState('');
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -35,13 +35,6 @@ export default function DesktopSidebar() {
 
     return () => clearInterval(timer);
   }, []);
-
-  useEffect(() => {
-    const hour = currentTime.getHours();
-    if (hour < 12) setGreeting('Good morning');
-    else if (hour < 18) setGreeting('Good afternoon');
-    else setGreeting('Good evening');
-  }, [currentTime]);
 
   const formatTime = () => {
     return new Intl.DateTimeFormat('en-US', {
@@ -138,9 +131,7 @@ export default function DesktopSidebar() {
                   <span className="font-medium">{formatTime()}</span>
                 </div>
                 <div className="text-xs text-gray-500">{formatDate()}</div>
-                <div className="text-sm font-medium text-white pt-2">
-                  {greeting}, {user?.username || 'User'}
-                </div>
+                <SidebarGreeting />
               </div>
             </motion.div>
           )}
