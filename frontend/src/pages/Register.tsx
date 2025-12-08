@@ -33,6 +33,8 @@ export default function Register() {
 
       if (details && Array.isArray(details)) {
         setError(`${errorMessage}: ${details.map((d: any) => d.message).join(', ')}`);
+      } else if (errorMessage.includes('Username or email already in use')) {
+        setError('This username and email are already registered. Please use different credentials or sign in.');
       } else if (errorMessage.includes('Email already in use')) {
         setError('This email is already registered. Please use a different email or sign in.');
       } else if (errorMessage.includes('Username already taken')) {

@@ -24,19 +24,19 @@ export class AuthService {
    * @returns Newly created user object (excluding password)
    */
   async register(data: RegisterInput) {
-    // Check if email already exists
-    const existingEmail = await prisma.user.findUnique({
-      where: { email: data.email },
-    });
+    // Check if email or username already exists
+    const [existingEmail, existingUsername] = await Promise.all([
+      prisma.user.findUnique({ where: { email: data.email } }),
+      prisma.user.findUnique({ where: { username: data.username } }),
+    ]);
+
+    if (existingEmail && existingUsername) {
+      throw new Error('Username or email already in use');
+    }
 
     if (existingEmail) {
       throw new Error('Email already in use');
     }
-
-    // Check if username already exists
-    const existingUsername = await prisma.user.findUnique({
-      where: { username: data.username },
-    });
 
     if (existingUsername) {
       throw new Error('Username already taken');
