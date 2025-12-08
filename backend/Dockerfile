@@ -71,7 +71,6 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
   CMD wget --spider -q http://localhost:3001/health || exit 1
 
-# Run migrations on startup, then start server
-# Clean up any stray empty migration directories (e.g., _to_delete) to avoid P3015
-CMD sh -c "rm -rf prisma/migrations/_to_delete && npx prisma migrate deploy && node dist/index.js"
+# Start server directly (database schema managed separately via db push)
+CMD ["node", "dist/index.js"]
 
