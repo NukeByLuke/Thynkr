@@ -8,7 +8,6 @@ import {
   LogOut,
   Menu,
   X,
-  Clock,
   BarChart3,
   GraduationCap,
   Home,
@@ -17,40 +16,14 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigation } from '@/contexts/NavigationContext';
-import { useState, useEffect } from 'react';
 import Logo from './Logo';
-import SidebarGreeting from './SidebarGreeting';
+import SidebarHeader from './SidebarHeader';
 
 export default function DesktopSidebar() {
   const { user, logout } = useAuth();
   const { isSidebarOpen, toggleSidebar } = useNavigation();
   const location = useLocation();
   const navigate = useNavigate();
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 60000); // Update every minute
-
-    return () => clearInterval(timer);
-  }, []);
-
-  const formatTime = () => {
-    return new Intl.DateTimeFormat('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    }).format(currentTime);
-  };
-
-  const formatDate = () => {
-    return new Intl.DateTimeFormat('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-    }).format(currentTime);
-  };
 
   const navItems = [
     ...(user?.role === 'ADMIN' ? [{ icon: BarChart3, label: 'Dashboard', path: '/admin' }] : []),
@@ -116,33 +89,10 @@ export default function DesktopSidebar() {
           </motion.button>
         )}
 
+        {/* Unified Header Section - Clock & Greeting */}
         <AnimatePresence mode="wait">
-          {isSidebarOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="overflow-hidden mt-4"
-            >
-              <div className="space-y-1 text-sm">
-                <div className="flex items-center gap-2 text-gray-400">
-                  <Clock className="w-4 h-4" />
-                  <span className="font-medium">{formatTime()}</span>
-                </div>
-                <div className="text-xs text-gray-500">{formatDate()}</div>
-                <SidebarGreeting />
-              </div>
-            </motion.div>
-          )}
+          <SidebarHeader isExpanded={isSidebarOpen} />
         </AnimatePresence>
-
-        {!isSidebarOpen && (
-          <div className="flex flex-col items-center gap-1 text-xs text-gray-400 mt-4">
-            <Clock className="w-4 h-4" />
-            <span className="font-medium text-[10px]">{formatTime().split(' ')[0]}</span>
-          </div>
-        )}
       </div>
 
       {/* Middle Section - Navigation Links */}
