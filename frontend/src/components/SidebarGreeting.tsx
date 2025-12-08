@@ -52,7 +52,7 @@ const SidebarGreeting = ({ timePeriod: _timePeriod }: SidebarGreetingProps) => {
         duration: 0.6,
         ease: [0.4, 0, 0.2, 1],
       }}
-      className="pt-2 relative"
+      className="pt-2.5 relative"
     >
       {/* Gradient background glow */}
       <motion.div
@@ -67,10 +67,10 @@ const SidebarGreeting = ({ timePeriod: _timePeriod }: SidebarGreetingProps) => {
         }}
       />
 
-      <p className="text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] relative z-10">
+      <p className="text-[13px] leading-relaxed font-medium text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] via-purple-400 to-[#06B6D4] relative z-10 dark:from-[#8B5CF6] dark:via-purple-500 dark:to-[#06B6D4] px-1">
         {message}{' '}
         <motion.span
-          className="opacity-80 inline-block"
+          className="opacity-90 inline-block"
           role="img"
           aria-label="greeting emoji"
           animate={{

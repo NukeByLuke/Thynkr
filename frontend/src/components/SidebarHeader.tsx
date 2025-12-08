@@ -57,7 +57,7 @@ const SidebarHeader = ({ isExpanded, aiAssistMode = false }: SidebarHeaderProps)
   if (!isExpanded) {
     // Collapsed state - show minimal clock icon with pulsating glow
     return (
-      <div className="flex flex-col items-center gap-1 text-xs text-gray-400 mt-4 relative">
+      <div className="flex flex-col items-center gap-1.5 mt-4 relative rounded-lg py-3 bg-gradient-to-b from-white/5 to-transparent">
         <motion.div
           animate={{
             boxShadow: isClockGlowing
@@ -73,11 +73,13 @@ const SidebarHeader = ({ isExpanded, aiAssistMode = false }: SidebarHeaderProps)
             repeat: Infinity,
             ease: 'easeInOut',
           }}
-          className="rounded-full p-1"
+          className="rounded-full p-1.5"
         >
-          <Clock className="w-4 h-4" />
+          <Clock className="w-4 h-4 text-gray-300 dark:text-gray-400" />
         </motion.div>
-        <span className="font-medium text-[10px]">{formatTime().split(' ')[0]}</span>
+        <span className="font-semibold text-[10px] text-gray-300 dark:text-gray-400">
+          {formatTime().split(' ')[0]}
+        </span>
       </div>
     );
   }
@@ -89,12 +91,12 @@ const SidebarHeader = ({ isExpanded, aiAssistMode = false }: SidebarHeaderProps)
       animate={{ opacity: 1, height: 'auto' }}
       exit={{ opacity: 0, height: 0 }}
       transition={{ duration: 0.3 }}
-      className="overflow-hidden"
+      className="overflow-hidden mt-4"
     >
-      <div className="py-4 space-y-2 text-center group transition-all duration-300 hover:bg-white/5 rounded-lg px-2 relative">
+      <div className="py-5 px-3 space-y-3 text-center group transition-all duration-300 hover:bg-white/[0.07] rounded-xl bg-gradient-to-b from-white/5 to-transparent backdrop-blur-sm relative">
         {/* Clock Section with Pulsating Glow */}
-        <div className="space-y-1 relative">
-          <div className="flex items-center justify-center gap-2 text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
+        <div className="space-y-1.5 relative">
+          <div className="flex items-center justify-center gap-2.5 text-gray-300 dark:text-gray-400 group-hover:text-gray-200 dark:group-hover:text-gray-300 transition-colors duration-300">
             <motion.div
               animate={{
                 boxShadow: isClockGlowing
@@ -110,9 +112,9 @@ const SidebarHeader = ({ isExpanded, aiAssistMode = false }: SidebarHeaderProps)
                 repeat: Infinity,
                 ease: 'easeInOut',
               }}
-              className="rounded-full p-1.5 relative"
+              className="rounded-full p-2 relative"
             >
-              <Clock className="w-4 h-4 relative z-10" />
+              <Clock className="w-[18px] h-[18px] relative z-10" />
               {/* Gradient glow backdrop */}
               <motion.div
                 className="absolute inset-0 rounded-full bg-gradient-to-br from-[#8B5CF6] via-purple-500 to-[#06B6D4] opacity-20 blur-md"
@@ -127,9 +129,9 @@ const SidebarHeader = ({ isExpanded, aiAssistMode = false }: SidebarHeaderProps)
                 }}
               />
             </motion.div>
-            <span className="font-medium">{formatTime()}</span>
+            <span className="font-semibold text-base tracking-tight">{formatTime()}</span>
           </div>
-          <div className="text-xs text-gray-500">{formatDate()}</div>
+          <div className="text-xs font-medium text-gray-400 dark:text-gray-500">{formatDate()}</div>
         </div>
 
         {/* Greeting Section with Time Period Key for Crossfade */}
@@ -142,7 +144,7 @@ const SidebarHeader = ({ isExpanded, aiAssistMode = false }: SidebarHeaderProps)
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex items-center justify-center gap-2 mt-2"
+            className="flex items-center justify-center gap-2 mt-1 pt-2 border-t border-white/5"
           >
             <motion.div
               animate={{
@@ -173,9 +175,9 @@ const SidebarHeader = ({ isExpanded, aiAssistMode = false }: SidebarHeaderProps)
                 }}
               />
             </motion.div>
-            <span className="text-[10px] text-gray-400 flex items-center gap-1">
+            <span className="text-[10px] font-medium text-gray-300 dark:text-gray-400 flex items-center gap-1.5">
               <Sparkles className="w-3 h-3" />
-              AI Assist
+              AI Assist Active
             </span>
           </motion.div>
         )}
