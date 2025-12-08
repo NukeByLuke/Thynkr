@@ -12,6 +12,7 @@ import {
   BarChart3,
   GraduationCap,
   Home,
+  DollarSign,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -68,6 +69,7 @@ export default function DesktopSidebar() {
     ...(user?.role === 'PREMIUM' || user?.role === 'ADMIN'
       ? [{ icon: MessageCircle, label: 'AI Tutor', path: '/tutor' }]
       : []),
+    { icon: DollarSign, label: 'Pricing', path: '/pricing' },
   ];
 
   const isActive = (path: string) => {

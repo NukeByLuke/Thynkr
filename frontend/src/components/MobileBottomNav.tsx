@@ -3,10 +3,10 @@ import {
   Home,
   GraduationCap,
   MessageSquare,
-  TrendingUp,
   Settings,
   Plus,
   Clock,
+  DollarSign,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -36,7 +36,7 @@ export default function MobileBottomNav() {
     { icon: Home, label: 'Home', path: '/' },
     { icon: GraduationCap, label: 'Study', path: '/study' },
     { icon: MessageSquare, label: 'AI Tutor', path: '/tutor' },
-    { icon: TrendingUp, label: 'Progress', path: '/progress' },
+    { icon: DollarSign, label: 'Pricing', path: '/pricing' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 
