@@ -1,12 +1,17 @@
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 
+interface SidebarGreetingProps {
+  timePeriod?: string;
+}
+
 /**
  * SidebarGreeting Component
- * Displays personalized time-based greetings with smooth fade-in animation
+ * Displays personalized time-based greetings with smooth crossfade animation
  * Works in both light and dark mode with adaptive gradient styling
+ * Enhanced with gradient transitions when greeting changes
  */
-const SidebarGreeting = () => {
+const SidebarGreeting = ({ timePeriod: _timePeriod }: SidebarGreetingProps) => {
   const { user } = useAuth();
 
   const getGreeting = (): { message: string; emoji: string } => {
@@ -40,16 +45,44 @@ const SidebarGreeting = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-      className="pt-2"
+      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+      transition={{
+        duration: 0.6,
+        ease: [0.4, 0, 0.2, 1],
+      }}
+      className="pt-2 relative"
     >
-      <p className="text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-[#7C3AED] to-[#06B6D4]">
+      {/* Gradient background glow */}
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-r from-[#8B5CF6]/10 via-purple-500/5 to-[#06B6D4]/10 rounded-lg blur-xl"
+        animate={{
+          opacity: [0.3, 0.5, 0.3],
+        }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+
+      <p className="text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] relative z-10">
         {message}{' '}
-        <span className="opacity-80" role="img" aria-label="greeting emoji">
+        <motion.span
+          className="opacity-80 inline-block"
+          role="img"
+          aria-label="greeting emoji"
+          animate={{
+            rotate: [0, 10, -10, 0],
+          }}
+          transition={{
+            duration: 0.8,
+            ease: 'easeInOut',
+          }}
+        >
           {emoji}
-        </span>
+        </motion.span>
       </p>
     </motion.div>
   );
