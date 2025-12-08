@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, RotateCcw, Shuffle } from 'lucide-react';
 
@@ -95,37 +96,42 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-0">
-      <div className="mb-4 sm:mb-6 text-center">
-        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{title}</h3>
-        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-2">
+      <div className="mb-6 sm:mb-8 text-center">
+        <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">{title}</h3>
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-3">
           Card {currentIndex + 1} of {displayCards.length}
-          {shuffledCards && <span className="ml-2 text-primary-500">(Shuffled)</span>}
+          {shuffledCards && <span className="ml-2 text-teal-600 dark:text-teal-400 font-semibold">(Shuffled)</span>}
         </p>
       </div>
 
       {/* Shuffle & Reset Controls */}
-      <div className="flex justify-center gap-2 mb-4">
-        <button
+      <div className="flex justify-center gap-3 mb-6">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={handleShuffle}
-          className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 bg-teal-50 dark:bg-teal-900/30 hover:bg-teal-100 dark:hover:bg-teal-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
         >
           <Shuffle className="w-4 h-4" />
           Shuffle
-        </button>
+        </motion.button>
         {shuffledCards && (
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleReset}
-            className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 bg-teal-50 dark:bg-teal-900/30 hover:bg-teal-100 dark:hover:bg-teal-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
           >
             <RotateCcw className="w-4 h-4" />
             Reset Order
-          </button>
+          </motion.button>
         )}
       </div>
 
       {/* Flashcard with Animation */}
       <div
-        className="relative w-full h-64 sm:h-80 cursor-pointer perspective-1000"
+        className="relative w-full h-72 sm:h-96 cursor-pointer"
+        style={{ perspective: '1500px' }}
         onClick={handleFlip}
         onKeyDown={handleKeyPress}
         tabIndex={0}
@@ -140,78 +146,118 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            transition={{ type: 'spring', stiffness: 250, damping: 25 }}
             className="absolute w-full h-full"
           >
             <motion.div
               animate={{ rotateY: isFlipped ? 180 : 0 }}
-              transition={{ duration: 0.5, type: 'spring', stiffness: 200 }}
+              transition={{ duration: 0.6, type: 'spring', stiffness: 180, damping: 15 }}
               style={{ transformStyle: 'preserve-3d' }}
               className="w-full h-full"
             >
               {/* Front */}
               <div
-                className="absolute w-full h-full bg-white dark:bg-gray-800 rounded-xl shadow-lg border-2 border-gray-200 dark:border-gray-700 flex items-center justify-center p-4 sm:p-8 overflow-y-auto"
+                className="absolute w-full h-full bg-gradient-to-br from-white to-teal-50/30 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-2xl border-2 border-teal-100 dark:border-gray-700 flex items-center justify-center p-6 sm:p-10 overflow-y-auto"
                 style={{ backfaceVisibility: 'hidden' }}
               >
                 <div className="text-center w-full">
-                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2 sm:mb-4 uppercase tracking-wide font-medium">
+                  <p className="text-sm sm:text-base text-teal-600 dark:text-teal-400 mb-3 sm:mb-5 uppercase tracking-wide font-bold">
                     Question
                   </p>
                   <div className="prose prose-sm sm:prose-xl dark:prose-invert max-w-none">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeHighlight]}
                       components={{
                         p: ({ node, ...props }) => (
                           <p
-                            className="text-base sm:text-2xl font-medium text-gray-900 dark:text-white"
+                            className="text-lg sm:text-3xl font-bold text-gray-900 dark:text-white mb-4"
                             {...props}
                           />
                         ),
-                        strong: ({ node, ...props }) => <strong className="font-bold" {...props} />,
-                        code: ({ node, ...props }) => (
-                          <code
-                            className="bg-gray-100 dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 px-1 sm:px-2 py-1 rounded text-sm sm:text-xl font-mono"
-                            {...props}
-                          />
-                        ),
+                        h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4" {...props} />,
+                        h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3" {...props} />,
+                        h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2" {...props} />,
+                        strong: ({ node, ...props }) => <strong className="font-bold text-teal-900 dark:text-teal-300" {...props} />,
+                        em: ({ node, ...props }) => <em className="italic" {...props} />,
+                        ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-2 text-left marker:text-teal-500" {...props} />,
+                        ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-2 text-left marker:text-teal-500" {...props} />,
+                        li: ({ node, ...props }) => <li className="leading-relaxed text-base sm:text-xl" {...props} />,
+                        code: ({ node, className, children, ...props }) => {
+                          const isInline = !className;
+                          return isInline ? (
+                            <code
+                              className="bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2 py-1 rounded-lg text-sm sm:text-lg font-mono border border-teal-200 dark:border-teal-800"
+                              {...props}
+                            >
+                              {children}
+                            </code>
+                          ) : (
+                            <code
+                              className={`block bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 rounded-xl overflow-x-auto text-xs sm:text-sm font-mono shadow-lg border border-gray-700 my-4 ${className || ''}`}
+                              {...props}
+                            >
+                              {children}
+                            </code>
+                          );
+                        },
                       }}
                     >
                       {currentCard.front}
                     </ReactMarkdown>
                   </div>
-                  <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500 mt-4 sm:mt-6">
-                    Click or press Space to flip
+                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-5 sm:mt-8 font-medium">
+                    💡 Click or press Space to flip
                   </p>
                 </div>
               </div>
 
               {/* Back */}
               <div
-                className="absolute w-full h-full bg-gradient-to-br from-primary-600 to-indigo-600 dark:from-primary-700 dark:to-indigo-700 rounded-xl shadow-lg flex items-center justify-center p-4 sm:p-8 overflow-y-auto"
+                className="absolute w-full h-full bg-gradient-to-br from-teal-600 via-cyan-600 to-blue-600 dark:from-teal-700 dark:via-cyan-700 dark:to-blue-700 rounded-2xl shadow-2xl flex items-center justify-center p-6 sm:p-10 overflow-y-auto"
                 style={{
                   backfaceVisibility: 'hidden',
                   transform: 'rotateY(180deg)',
                 }}
               >
                 <div className="text-center w-full">
-                  <p className="text-xs sm:text-sm text-white/80 mb-2 sm:mb-4 uppercase tracking-wide font-medium">
+                  <p className="text-sm sm:text-base text-white/90 mb-3 sm:mb-5 uppercase tracking-wide font-bold">
                     Answer
                   </p>
                   <div className="prose prose-sm sm:prose-xl prose-invert max-w-none">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeHighlight]}
                       components={{
                         p: ({ node, ...props }) => (
-                          <p className="text-base sm:text-2xl font-medium text-white" {...props} />
+                          <p className="text-lg sm:text-3xl font-bold text-white mb-4" {...props} />
                         ),
-                        strong: ({ node, ...props }) => <strong className="font-bold" {...props} />,
-                        code: ({ node, ...props }) => (
-                          <code
-                            className="bg-white/20 text-white px-1 sm:px-2 py-1 rounded text-sm sm:text-xl font-mono"
-                            {...props}
-                          />
-                        ),
+                        h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-white mb-4" {...props} />,
+                        h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-white mb-3" {...props} />,
+                        h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-white mb-2" {...props} />,
+                        strong: ({ node, ...props }) => <strong className="font-bold text-white" {...props} />,
+                        em: ({ node, ...props }) => <em className="italic text-white/90" {...props} />,
+                        ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-2 text-left marker:text-white/70" {...props} />,
+                        ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-2 text-left marker:text-white/70" {...props} />,
+                        li: ({ node, ...props }) => <li className="leading-relaxed text-base sm:text-xl text-white" {...props} />,
+                        code: ({ node, className, children, ...props }) => {
+                          const isInline = !className;
+                          return isInline ? (
+                            <code
+                              className="bg-white/20 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-sm sm:text-lg font-mono border border-white/30"
+                              {...props}
+                            >
+                              {children}
+                            </code>
+                          ) : (
+                            <code
+                              className={`block bg-gray-900 dark:bg-black/40 text-gray-100 p-4 rounded-xl overflow-x-auto text-xs sm:text-sm font-mono shadow-lg border border-white/20 my-4 ${className || ''}`}
+                              {...props}
+                            >
+                              {children}
+                            </code>
+                          );
+                        },
                       }}
                     >
                       {currentCard.back}
@@ -225,23 +271,27 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
       </div>
 
       {/* Navigation */}
-      <div className="mt-4 sm:mt-8 flex items-center justify-between gap-2">
-        <button
+      <div className="mt-6 sm:mt-10 flex items-center justify-between gap-3">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={handlePrevious}
           disabled={currentIndex === 0}
-          className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base shadow-sm"
+          className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-teal-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-teal-50 dark:hover:bg-gray-700 hover:border-teal-300 dark:hover:border-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm sm:text-base shadow-md font-semibold"
         >
           <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           <span className="hidden sm:inline">Previous</span>
-        </button>
+        </motion.button>
 
         {/* Progress dots - show limited on mobile */}
         <div className="flex space-x-1 sm:space-x-2 justify-center items-center">
           {displayCards.length <= 10 ? (
             // Show all dots if 10 or fewer cards
             displayCards.map((_, index) => (
-              <button
+              <motion.button
                 key={index}
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => {
                   setDirection(index > currentIndex ? 1 : -1);
                   setCurrentIndex(index);
@@ -249,8 +299,8 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
                 }}
                 className={`w-2 h-2 rounded-full transition-all flex-shrink-0 ${
                   index === currentIndex
-                    ? 'bg-primary-600 dark:bg-primary-400 w-6 sm:w-8'
-                    : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+                    ? 'bg-gradient-to-r from-teal-600 to-cyan-600 w-6 sm:w-8 shadow-md'
+                    : 'bg-gray-300 dark:bg-gray-600 hover:bg-teal-400 dark:hover:bg-teal-500'
                 }`}
                 aria-label={`Go to card ${index + 1}`}
               />
@@ -285,14 +335,16 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
           )}
         </div>
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={handleNext}
           disabled={currentIndex === displayCards.length - 1}
-          className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base shadow-sm"
+          className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-teal-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-teal-50 dark:hover:bg-gray-700 hover:border-teal-300 dark:hover:border-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm sm:text-base shadow-md font-semibold"
         >
           <span className="hidden sm:inline">Next</span>
           <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-        </button>
+        </motion.button>
       </div>
 
       {/* Keyboard shortcuts hint */}

@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
+import { motion } from 'framer-motion';
 
 interface QuizQuestion {
   id: string;
@@ -72,7 +74,12 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
   if (isSubmitted && results && currentIndex === questions.length - 1) {
     return (
       <div className="max-w-2xl mx-auto px-4 sm:px-0">
-        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-8 text-center">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="bg-gradient-to-br from-white to-teal-50/30 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-xl border-2 border-teal-100 dark:border-gray-700 p-6 sm:p-10 text-center"
+        >
           <div className="mb-4 sm:mb-6">
             {results.percentage >= 70 ? (
               <svg
@@ -104,8 +111,8 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Quiz Complete!</h2>
           <p className="text-base sm:text-lg text-gray-600 mb-4 sm:mb-6">Here's how you did:</p>
 
-          <div className="bg-gray-50 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
-            <div className="text-4xl sm:text-5xl font-bold text-indigo-600 mb-2">
+          <div className="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8 border-2 border-teal-100 dark:border-teal-800 shadow-md">
+            <div className="text-5xl sm:text-6xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent mb-3">
               {results.percentage}%
             </div>
             <p className="text-sm sm:text-base text-gray-600">
@@ -114,20 +121,24 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
           </div>
 
           <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setCurrentIndex(0)}
-              className="px-4 sm:px-6 py-2 sm:py-3 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors text-sm sm:text-base"
+              className="px-6 sm:px-8 py-3 bg-white dark:bg-gray-800 border-2 border-teal-300 dark:border-teal-600 rounded-xl text-gray-700 dark:text-gray-300 font-semibold hover:bg-teal-50 dark:hover:bg-gray-700 transition-all duration-300 shadow-md text-sm sm:text-base"
             >
               Review Answers
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={handleRestart}
-              className="px-4 sm:px-6 py-2 sm:py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors text-sm sm:text-base"
+              className="px-6 sm:px-8 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
             >
               Try Again
-            </button>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
@@ -146,9 +157,9 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
           </span>
         </div>
         {/* Progress bar */}
-        <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+        <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
           <div
-            className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
+            className="bg-gradient-to-r from-teal-600 to-cyan-600 h-2 rounded-full transition-all duration-300 shadow-sm"
             style={{
               width: `${((currentIndex + 1) / questions.length) * 100}%`,
             }}
@@ -157,50 +168,95 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
       </div>
 
       {/* Question */}
-      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-8 mb-4 sm:mb-6">
-        <div className="prose prose-sm sm:prose-lg max-w-none mb-4 sm:mb-6">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="bg-gradient-to-br from-white to-teal-50/30 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-lg border-2 border-teal-100 dark:border-gray-700 p-6 sm:p-10 mb-6 sm:mb-8"
+      >
+        <div className="prose prose-sm sm:prose-lg dark:prose-invert max-w-none mb-6 sm:mb-8">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeHighlight]}
             components={{
               p: ({ node, ...props }) => (
-                <h4 className="text-base sm:text-xl font-semibold text-gray-900" {...props} />
+                <h4 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white mb-4" {...props} />
               ),
-              strong: ({ node, ...props }) => <strong className="font-bold" {...props} />,
-              code: ({ node, ...props }) => (
-                <code
-                  className="bg-gray-100 text-indigo-600 px-1.5 sm:px-2 py-1 rounded text-sm sm:text-base font-mono"
-                  {...props}
-                />
-              ),
+              h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4" {...props} />,
+              h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3" {...props} />,
+              h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2" {...props} />,
+              strong: ({ node, ...props }) => <strong className="font-bold text-teal-900 dark:text-teal-300" {...props} />,
+              em: ({ node, ...props }) => <em className="italic text-gray-700 dark:text-gray-300" {...props} />,
+              ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-2 text-gray-700 dark:text-gray-300 marker:text-teal-500" {...props} />,
+              ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-2 text-gray-700 dark:text-gray-300 marker:text-teal-500" {...props} />,
+              li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
+              code: ({ node, className, children, ...props }) => {
+                const isInline = !className;
+                return isInline ? (
+                  <code
+                    className="bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2 py-1 rounded-lg text-sm font-mono border border-teal-200 dark:border-teal-800 shadow-sm"
+                    {...props}
+                  >
+                    {children}
+                  </code>
+                ) : (
+                  <code
+                    className={`block bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 rounded-xl overflow-x-auto text-sm font-mono shadow-lg border border-gray-700 dark:border-gray-800 my-4 ${className || ''}`}
+                    {...props}
+                  >
+                    {children}
+                  </code>
+                );
+              },
             }}
           >
             {currentQuestion.question}
           </ReactMarkdown>
         </div>
 
-        <div className="space-y-2 sm:space-y-3">
+        <div className="space-y-3 sm:space-y-4">
           {currentQuestion.options.map((option, index) => {
             const isSelected = userAnswer === option;
             const isCorrect = isSubmitted && option === currentQuestion.correctAnswer;
             const isWrong = isSubmitted && isSelected && option !== currentQuestion.correctAnswer;
 
             return (
-              <button
+              <motion.button
                 key={index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1, duration: 0.3 }}
                 onClick={() => handleAnswerSelect(option)}
                 disabled={isSubmitted}
-                className={`w-full text-left p-3 sm:p-4 rounded-lg border-2 transition-all text-sm sm:text-base ${
+                whileHover={!isSubmitted ? { scale: 1.02, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" } : {}}
+                whileTap={!isSubmitted ? { scale: 0.98 } : {}}
+                className={`w-full text-left p-4 sm:p-5 rounded-xl border-2 transition-all duration-300 text-sm sm:text-base shadow-sm ${
                   isCorrect
-                    ? 'border-green-500 bg-green-50'
+                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20 dark:border-green-600'
                     : isWrong
-                      ? 'border-red-500 bg-red-50'
+                      ? 'border-red-500 bg-red-50 dark:bg-red-900/20 dark:border-red-600'
                       : isSelected
-                        ? 'border-indigo-600 bg-indigo-50'
-                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                        ? 'border-teal-600 bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 dark:border-teal-500 shadow-md'
+                        : 'border-gray-200 dark:border-gray-600 hover:border-teal-300 dark:hover:border-teal-600 bg-white dark:bg-gray-800'
                 } ${isSubmitted ? 'cursor-not-allowed' : 'cursor-pointer'}`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-medium pr-2">{option}</span>
+                  <div className="font-medium pr-2 flex-1">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeHighlight]}
+                      components={{
+                        p: ({ node, ...props }) => <span className="inline" {...props} />,
+                        strong: ({ node, ...props }) => <strong className="font-bold" {...props} />,
+                        em: ({ node, ...props }) => <em className="italic" {...props} />,
+                        code: ({ node, ...props }) => (
+                          <code className="bg-gray-100 dark:bg-gray-700 text-teal-600 dark:text-teal-400 px-1.5 py-0.5 rounded text-xs font-mono" {...props} />
+                        ),
+                      }}
+                    >
+                      {option}
+                    </ReactMarkdown>
+                  </div>
                   {isSubmitted && (
                     <>
                       {isCorrect && (
@@ -232,14 +288,19 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
                     </>
                   )}
                 </div>
-              </button>
+              </motion.button>
             );
           })}
         </div>
 
         {/* Explanation */}
         {isSubmitted && (
-          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="mt-6 sm:mt-8 p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-800 shadow-md"
+          >
             <div className="flex items-start">
               <svg
                 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mt-0.5 mr-2 flex-shrink-0"
@@ -253,23 +314,40 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
                 />
               </svg>
               <div className="flex-1">
-                <p className="font-semibold text-blue-900 mb-1 text-sm sm:text-base">Explanation</p>
-                <div className="prose prose-sm prose-blue max-w-none">
+                <p className="font-bold text-blue-900 dark:text-blue-300 mb-3 text-base sm:text-lg">Explanation</p>
+                <div className="prose prose-sm dark:prose-invert max-w-none">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeHighlight]}
                     components={{
                       p: ({ node, ...props }) => (
-                        <p className="text-blue-800 text-xs sm:text-sm" {...props} />
+                        <p className="text-blue-800 dark:text-blue-200 text-sm sm:text-base leading-relaxed mb-3" {...props} />
                       ),
                       strong: ({ node, ...props }) => (
-                        <strong className="font-semibold text-blue-900" {...props} />
+                        <strong className="font-bold text-blue-900 dark:text-blue-100" {...props} />
                       ),
-                      code: ({ node, ...props }) => (
-                        <code
-                          className="bg-blue-100 text-blue-900 px-1.5 py-0.5 rounded text-xs font-mono"
-                          {...props}
-                        />
-                      ),
+                      em: ({ node, ...props }) => <em className="italic" {...props} />,
+                      ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-2 text-blue-800 dark:text-blue-200 marker:text-blue-500" {...props} />,
+                      ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-2 text-blue-800 dark:text-blue-200 marker:text-blue-500" {...props} />,
+                      li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
+                      code: ({ node, className, children, ...props }) => {
+                        const isInline = !className;
+                        return isInline ? (
+                          <code
+                            className="bg-blue-100 dark:bg-blue-900/40 text-blue-900 dark:text-blue-200 px-2 py-0.5 rounded-lg text-xs font-mono border border-blue-200 dark:border-blue-800"
+                            {...props}
+                          >
+                            {children}
+                          </code>
+                        ) : (
+                          <code
+                            className={`block bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 rounded-xl overflow-x-auto text-xs font-mono shadow-lg border border-gray-700 my-3 ${className || ''}`}
+                            {...props}
+                          >
+                            {children}
+                          </code>
+                        );
+                      },
                     }}
                   >
                     {currentQuestion.explanation}
@@ -277,42 +355,48 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
 
       {/* Navigation */}
       <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={handlePrevious}
           disabled={currentIndex === 0}
-          className="px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
+          className="px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-sm text-sm sm:text-base"
         >
           <span className="hidden sm:inline">← Previous</span>
           <span className="sm:hidden">←</span>
-        </button>
+        </motion.button>
 
         {!isSubmitted && allQuestionsAnswered && currentIndex === questions.length - 1 && (
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleSubmit}
-            className="px-4 sm:px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors text-sm sm:text-base"
+            className="px-6 sm:px-8 py-2.5 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
           >
             Submit Quiz
-          </button>
+          </motion.button>
         )}
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={handleNext}
           disabled={currentIndex === questions.length - 1}
-          className="px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
+          className="px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-sm text-sm sm:text-base"
         >
           <span className="hidden sm:inline">Next →</span>
           <span className="sm:hidden">→</span>
-        </button>
+        </motion.button>
       </div>
 
       {/* Question indicators */}
-      <div className="mt-4 sm:mt-6 flex flex-wrap gap-1.5 sm:gap-2 justify-center">
+      <div className="mt-6 sm:mt-8 flex flex-wrap gap-2 sm:gap-3 justify-center">
         {questions.map((question, index) => {
           const isAnswered = isQuestionAnswered(question.id);
           const isCurrent = index === currentIndex;
@@ -320,23 +404,25 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
           const isWrong = isSubmitted && !results?.results[question.id]?.correct && isAnswered;
 
           return (
-            <button
+            <motion.button
               key={question.id}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               onClick={() => setCurrentIndex(index)}
-              className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg font-medium transition-colors text-sm sm:text-base ${
-                isCurrent ? 'ring-2 ring-indigo-600 ring-offset-2' : ''
+              className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl font-semibold transition-all duration-300 shadow-sm text-sm sm:text-base ${
+                isCurrent ? 'ring-2 ring-teal-600 dark:ring-teal-400 ring-offset-2 dark:ring-offset-gray-900' : ''
               } ${
                 isCorrect
-                  ? 'bg-green-500 text-white'
+                  ? 'bg-green-500 text-white hover:bg-green-600'
                   : isWrong
-                    ? 'bg-red-500 text-white'
+                    ? 'bg-red-500 text-white hover:bg-red-600'
                     : isAnswered
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
             >
               {index + 1}
-            </button>
+            </motion.button>
           );
         })}
       </div>
