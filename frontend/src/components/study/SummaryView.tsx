@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
 import { RefreshCw } from 'lucide-react';
 
 interface SummaryViewProps {
@@ -11,15 +12,15 @@ interface SummaryViewProps {
 
 export default function SummaryView({ content, onRegenerate, isRegenerating }: SummaryViewProps) {
   return (
-    <div className="max-w-none">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
-        <div className="flex items-center justify-between mb-6 pb-3 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Summary</h3>
+    <div className="max-w-none animate-fade-in">
+      <div className="bg-gradient-to-br from-white to-teal-50/30 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-lg border border-teal-100 dark:border-gray-700 p-10">
+        <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-teal-200 dark:border-gray-700">
+          <h3 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">Summary</h3>
           {onRegenerate && (
             <button
               onClick={onRegenerate}
               disabled={isRegenerating}
-              className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 bg-primary-50 dark:bg-primary-900/30 hover:bg-primary-100 dark:hover:bg-primary-900/50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 bg-teal-50 dark:bg-teal-900/30 hover:bg-teal-100 dark:hover:bg-teal-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               title="Regenerate summary with latest AI"
             >
               <RefreshCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
@@ -30,16 +31,17 @@ export default function SummaryView({ content, onRegenerate, isRegenerating }: S
         <div className="prose prose-lg dark:prose-invert max-w-none">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeHighlight]}
             components={{
               h1: ({ node, ...props }) => (
                 <h1
-                  className="text-3xl font-bold text-gray-900 dark:text-white mt-8 mb-4 pb-2 border-b-2 border-primary-500 dark:border-primary-400"
+                  className="text-3xl font-bold text-gray-900 dark:text-white mt-8 mb-5 pb-3 border-b-2 border-teal-500 dark:border-teal-400"
                   {...props}
                 />
               ),
               h2: ({ node, ...props }) => (
                 <h2
-                  className="text-2xl font-bold text-gray-900 dark:text-white mt-7 mb-3"
+                  className="text-2xl font-bold text-gray-900 dark:text-white mt-7 mb-4"
                   {...props}
                 />
               ),
@@ -57,23 +59,23 @@ export default function SummaryView({ content, onRegenerate, isRegenerating }: S
               ),
               p: ({ node, ...props }) => (
                 <p
-                  className="text-gray-700 dark:text-gray-300 leading-relaxed mb-5 text-base"
+                  className="text-gray-700 dark:text-gray-300 leading-loose mb-6 text-lg"
                   {...props}
                 />
               ),
               ul: ({ node, ...props }) => (
                 <ul
-                  className="list-disc ml-6 space-y-2 mb-5 text-gray-700 dark:text-gray-300 marker:text-primary-500 dark:marker:text-primary-400"
+                  className="list-disc ml-7 space-y-3 mb-6 text-gray-700 dark:text-gray-300 marker:text-teal-500 dark:marker:text-teal-400"
                   {...props}
                 />
               ),
               ol: ({ node, ...props }) => (
                 <ol
-                  className="list-decimal ml-6 space-y-2 mb-5 text-gray-700 dark:text-gray-300 marker:text-primary-500 dark:marker:text-primary-400"
+                  className="list-decimal ml-7 space-y-3 mb-6 text-gray-700 dark:text-gray-300 marker:text-teal-500 dark:marker:text-teal-400"
                   {...props}
                 />
               ),
-              li: ({ node, ...props }) => <li className="leading-relaxed pl-2" {...props} />,
+              li: ({ node, ...props }) => <li className="leading-loose pl-2" {...props} />,
               strong: ({ node, ...props }) => (
                 <strong className="font-bold text-gray-900 dark:text-white" {...props} />
               ),
@@ -84,14 +86,14 @@ export default function SummaryView({ content, onRegenerate, isRegenerating }: S
                 const isInline = !className;
                 return isInline ? (
                   <code
-                    className="bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-md text-sm font-mono border border-primary-200 dark:border-primary-800"
+                    className="bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2.5 py-1 rounded-lg text-sm font-mono border border-teal-200 dark:border-teal-800 shadow-sm"
                     {...props}
                   >
                     {children}
                   </code>
                 ) : (
                   <code
-                    className="block bg-gray-900 dark:bg-gray-950 text-gray-100 p-5 rounded-xl overflow-x-auto text-sm font-mono shadow-lg border border-gray-700 dark:border-gray-800 my-4"
+                    className={`block bg-gray-900 dark:bg-gray-950 text-gray-100 p-6 rounded-2xl overflow-x-auto text-sm font-mono shadow-xl border border-gray-700 dark:border-gray-800 my-6 ${className || ''}`}
                     {...props}
                   >
                     {children}

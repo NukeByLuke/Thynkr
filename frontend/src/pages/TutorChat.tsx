@@ -6,6 +6,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
 import toast from 'react-hot-toast';
 import {
   MessageCircle,
@@ -698,15 +699,15 @@ export default function TutorChat() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] bg-gradient-to-br from-teal-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
       {/* Create Chat Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 max-h-[90vh] overflow-hidden flex flex-col">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-2 border-teal-100 dark:border-gray-700 p-6 max-h-[90vh] overflow-hidden flex flex-col animate-scale-in">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
               Start a new Tutor Chat
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-base text-gray-600 dark:text-gray-400 mb-5">
               Select one or more study files to ground the AI tutor.
             </p>
             <div className="flex-1 max-h-72 overflow-y-auto space-y-2">
@@ -735,15 +736,15 @@ export default function TutorChat() {
                 </label>
               ))}
             </div>
-            <div className="mt-4 flex justify-end gap-2">
+            <div className="mt-6 flex justify-end gap-3">
               <button
-                className="px-3 py-1.5 text-sm rounded border border-gray-300 dark:border-gray-600"
+                className="px-5 py-2.5 text-sm font-medium rounded-xl border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300"
                 onClick={() => setShowCreateModal(false)}
               >
                 Cancel
               </button>
               <button
-                className="px-3 py-1.5 text-sm rounded bg-primary-600 hover:bg-primary-700 text-white disabled:bg-gray-400"
+                className="px-5 py-2.5 text-sm font-semibold rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white disabled:from-gray-400 disabled:to-gray-400 shadow-lg hover:shadow-xl transition-all duration-300"
                 disabled={selectedCreateFiles.length === 0 || createSessionMutation.isPending}
                 onClick={() => createSessionMutation.mutate({ fileIds: selectedCreateFiles })}
               >
@@ -762,18 +763,18 @@ export default function TutorChat() {
       )}
       <div
         className={`${
-          showSidebar ? 'w-64 absolute md:relative z-40 h-full' : 'w-0'
-        } flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 overflow-hidden`}
+          showSidebar ? 'w-64 absolute md:relative z-40 h-full shadow-xl' : 'w-0'
+        } flex-shrink-0 bg-white dark:bg-gray-800 border-r-2 border-teal-100 dark:border-gray-700 transition-all duration-300 overflow-hidden`}
       >
         <div className="p-4 space-y-4 h-full flex flex-col">
           {/* New Chat Button */}
           <button
             onClick={() => setShowCreateModal(true)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
             disabled={createSessionMutation.isPending}
           >
             <Plus className="w-5 h-5" />
-            <span className="text-sm font-medium">New Chat</span>
+            <span className="text-sm font-semibold">New Chat</span>
           </button>
 
           {/* Session List */}
@@ -781,10 +782,10 @@ export default function TutorChat() {
             {sessions.map((session) => (
               <div
                 key={session.id}
-                className={`group relative p-3 rounded-lg cursor-pointer transition-colors ${
+                className={`group relative p-4 rounded-xl cursor-pointer transition-all duration-300 ${
                   currentSessionId === session.id
-                    ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-500'
-                    : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
+                    ? 'bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border-l-4 border-teal-500 shadow-md'
+                    : 'bg-gray-50 dark:bg-gray-700 hover:bg-gradient-to-r hover:from-gray-100 hover:to-gray-50 dark:hover:bg-gray-600 hover:shadow-md'
                 }`}
                 onClick={() => {
                   if (editingSessionId !== session.id) {
@@ -865,16 +866,16 @@ export default function TutorChat() {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-3 md:px-4 py-2 md:py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-          <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex items-center justify-between px-4 md:px-6 py-4 md:py-5 bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 border-b-2 border-teal-500 shadow-lg flex-shrink-0">
+          <div className="flex items-center gap-3 md:gap-4">
             <button
               onClick={() => setShowSidebar(!showSidebar)}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-white/20 backdrop-blur-sm rounded-xl transition-all duration-300"
             >
-              <Menu className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              <Menu className="w-5 h-5 text-white" />
             </button>
-            <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-primary-600 hidden sm:block" />
-            <h1 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white">
+            <Sparkles className="w-6 h-6 md:w-7 md:h-7 text-yellow-300 hidden sm:block animate-pulse" />
+            <h1 className="text-lg md:text-2xl font-bold text-white tracking-tight">
               AI Tutor
             </h1>
           </div>
@@ -883,11 +884,11 @@ export default function TutorChat() {
           {currentSessionId && (
             <div className="relative flex items-center gap-2 ml-2">
               <div className="hidden md:flex items-center gap-2 max-w-xs lg:max-w-md overflow-x-auto">
-                <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <FileText className="w-4 h-4 text-white flex-shrink-0" />
                 {(currentSession?.files || []).slice(0, 2).map((f) => (
                   <span
                     key={f.file.id}
-                    className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-600 whitespace-nowrap"
+                    className="text-xs px-3 py-1.5 rounded-xl bg-white/20 backdrop-blur-sm text-white border border-white/30 whitespace-nowrap shadow-sm"
                   >
                     {f.file.originalName.length > 20
                       ? f.file.originalName.substring(0, 17) + '...'
@@ -1009,14 +1010,14 @@ export default function TutorChat() {
                 className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} max-w-[85%] md:max-w-[75%]`}
               >
                 <div
-                  className={`rounded-2xl px-3 md:px-4 py-2 ${
+                  className={`rounded-2xl px-4 md:px-5 py-3 shadow-md hover:shadow-lg transition-shadow duration-300 ${
                     message.role === 'user'
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700'
+                      ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-2 border-teal-100 dark:border-gray-700'
                   }`}
                 >
                   <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 text-sm md:text-base">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>{message.content}</ReactMarkdown>
                   </div>
                 </div>
                 <span className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
@@ -1044,24 +1045,24 @@ export default function TutorChat() {
               </div>
 
               {/* Message Content */}
-              <div className="flex flex-col items-start max-w-[85%] md:max-w-[75%]">
-                <div className="rounded-2xl px-3 md:px-4 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700">
+              <div className="flex flex-col items-start max-w-[85%] md:max-w-[75%] animate-fade-in">
+                <div className="rounded-2xl px-4 md:px-5 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-2 border-teal-100 dark:border-gray-700 shadow-lg">
                   {streamingMessage ? (
                     <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 text-sm md:text-base">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamingMessage}</ReactMarkdown>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>{streamingMessage}</ReactMarkdown>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-1 py-1">
+                    <div className="flex items-center gap-1.5 py-1">
                       <div
-                        className="w-2 h-2 bg-primary-600 rounded-full animate-bounce"
+                        className="w-2.5 h-2.5 bg-teal-600 rounded-full animate-bounce"
                         style={{ animationDelay: '0ms' }}
                       />
                       <div
-                        className="w-2 h-2 bg-primary-600 rounded-full animate-bounce"
+                        className="w-2.5 h-2.5 bg-cyan-600 rounded-full animate-bounce"
                         style={{ animationDelay: '150ms' }}
                       />
                       <div
-                        className="w-2 h-2 bg-primary-600 rounded-full animate-bounce"
+                        className="w-2.5 h-2.5 bg-blue-600 rounded-full animate-bounce"
                         style={{ animationDelay: '300ms' }}
                       />
                     </div>
@@ -1116,7 +1117,7 @@ export default function TutorChat() {
 
         {/* Input Area - pinned to bottom on mobile */}
         {currentSessionId && (
-          <div className="sticky bottom-0 p-3 md:p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 pb-safe">
+          <div className="sticky bottom-0 p-4 md:p-6 bg-gradient-to-t from-white to-transparent dark:from-gray-800 dark:to-transparent border-t-2 border-teal-100 dark:border-gray-700 pb-safe backdrop-blur-sm">
             <div className="max-w-4xl mx-auto">
               {(!currentSession?.files || currentSession.files.length === 0) && (
                 <div className="mb-2 text-sm text-amber-700 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded p-2 flex items-start gap-2">
@@ -1126,14 +1127,14 @@ export default function TutorChat() {
                   </span>
                 </div>
               )}
-              <div className="flex items-end gap-2">
+              <div className="flex items-end gap-3">
                 <textarea
                   ref={textareaRef}
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Ask me anything..."
-                  className="flex-1 resize-none rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 md:px-4 py-2.5 md:py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent max-h-32 overflow-y-auto text-base"
+                  className="flex-1 resize-none rounded-2xl border-2 border-teal-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 md:px-5 py-3 md:py-4 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 max-h-32 overflow-y-auto text-base shadow-sm hover:shadow-md transition-shadow duration-300"
                   rows={1}
                   disabled={
                     isStreaming || !currentSession?.files || currentSession.files.length === 0
@@ -1147,7 +1148,7 @@ export default function TutorChat() {
                     !currentSession?.files ||
                     currentSession.files.length === 0
                   }
-                  className="p-2.5 md:p-3 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white rounded-lg transition-colors disabled:cursor-not-allowed flex-shrink-0"
+                  className="p-3 md:p-4 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 disabled:from-gray-300 disabled:to-gray-400 dark:disabled:from-gray-600 dark:disabled:to-gray-700 text-white rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:cursor-not-allowed flex-shrink-0"
                 >
                   <Send className="w-5 h-5" />
                 </button>

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
 import { RefreshCw } from 'lucide-react';
 
 interface NotesViewProps {
@@ -17,14 +18,14 @@ export default function NotesView({
   isRegenerating,
 }: NotesViewProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fade-in">
       {/* Regenerate Button */}
       {onRegenerate && (
         <div className="flex justify-end">
           <button
             onClick={onRegenerate}
             disabled={isRegenerating}
-            className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 bg-primary-50 dark:bg-primary-900/30 hover:bg-primary-100 dark:hover:bg-primary-900/50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 bg-teal-50 dark:bg-teal-900/30 hover:bg-teal-100 dark:hover:bg-teal-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             title="Regenerate notes with latest AI"
           >
             <RefreshCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
@@ -34,8 +35,8 @@ export default function NotesView({
       )}
 
       {/* Key Points */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 border border-blue-100 dark:border-blue-800">
-        <h3 className="text-xl font-semibold text-blue-900 dark:text-blue-300 mb-4 flex items-center">
+      <div className="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-2xl p-8 border-2 border-teal-100 dark:border-teal-800 shadow-lg">
+        <h3 className="text-2xl font-bold text-teal-900 dark:text-teal-300 mb-6 flex items-center">
           <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"
@@ -45,22 +46,23 @@ export default function NotesView({
           </svg>
           Key Points
         </h3>
-        <ul className="space-y-3">
+        <ul className="space-y-4">
           {keyPoints.map((point, index) => (
-            <li key={index} className="flex items-start">
-              <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-blue-200 dark:bg-blue-800 text-blue-700 dark:text-blue-200 text-sm font-semibold mr-3 mt-0.5">
+            <li key={index} className="flex items-start group">
+              <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 text-white text-base font-bold mr-4 mt-1 shadow-md group-hover:shadow-lg transition-shadow duration-300">
                 {index + 1}
               </span>
-              <div className="text-blue-900 dark:text-blue-100 leading-relaxed prose prose-blue dark:prose-invert max-w-none">
+              <div className="text-teal-900 dark:text-teal-100 leading-loose prose prose-teal dark:prose-invert max-w-none text-lg">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeHighlight]}
                   components={{
                     p: ({ node, ...props }) => <span className="inline" {...props} />,
-                    strong: ({ node, ...props }) => <strong className="font-semibold" {...props} />,
+                    strong: ({ node, ...props }) => <strong className="font-bold" {...props} />,
                     em: ({ node, ...props }) => <em className="italic" {...props} />,
                     code: ({ node, ...props }) => (
                       <code
-                        className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-1 py-0.5 rounded text-sm font-mono"
+                        className="bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200 px-2 py-1 rounded-lg text-sm font-mono shadow-sm"
                         {...props}
                       />
                     ),
@@ -75,8 +77,8 @@ export default function NotesView({
       </div>
 
       {/* Detailed Notes */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+      <div className="bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-gray-800 rounded-2xl p-8 border-2 border-blue-100 dark:border-gray-700 shadow-lg">
+        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
           <svg className="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
@@ -90,6 +92,7 @@ export default function NotesView({
         <div className="prose prose-lg dark:prose-invert max-w-none">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeHighlight]}
             components={{
               h1: ({ node, ...props }) => (
                 <h1

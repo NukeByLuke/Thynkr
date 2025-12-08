@@ -600,36 +600,36 @@ export default function Study() {
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
-      {/* Study Header with Emerald-Blue Gradient */}
-      <div className="bg-gradient-to-r from-[#10b981] to-[#3b82f6] shadow-lg">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl">
-              <GraduationCap className="h-6 w-6 text-white" />
+    <div className="h-full flex flex-col overflow-hidden bg-gradient-to-br from-teal-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
+      {/* Study Header with Teal Gradient */}
+      <div className="bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500 shadow-lg">
+        <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-10 py-8">
+          <div className="flex items-center gap-4 mb-3">
+            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
+              <GraduationCap className="h-7 w-7 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-white">Study</h1>
+            <h1 className="text-4xl font-bold text-white tracking-tight">Study Mode</h1>
           </div>
-          <p className="text-white/90 text-sm ml-14">Upload materials and let AI help you learn</p>
+          <p className="text-white/95 text-base ml-16">Upload materials and let AI help you learn smarter</p>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-10 py-8">
           {/* Upload Area */}
           <div
             onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-lg p-8 text-center mb-8 cursor-pointer transition-all duration-200 ${
+            className={`border-2 border-dashed rounded-2xl p-10 text-center mb-10 cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl ${
               isDragging
-                ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 dark:border-brand-400'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-brand-400 dark:hover:border-brand-500 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20 dark:border-teal-400 shadow-teal-200 dark:shadow-teal-900/50'
+                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-teal-400 dark:hover:border-teal-500 hover:bg-teal-50/50 dark:hover:bg-gray-800/80'
             }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
             <svg
-              className={`mx-auto h-12 w-12 mb-4 ${isDragging ? 'text-brand-600 dark:text-brand-400' : 'text-gray-400 dark:text-gray-500'}`}
+              className={`mx-auto h-14 w-14 mb-5 transition-colors duration-300 ${isDragging ? 'text-teal-600 dark:text-teal-400' : 'text-gray-400 dark:text-gray-500'}`}
               stroke="currentColor"
               fill="none"
               viewBox="0 0 48 48"
@@ -641,10 +641,10 @@ export default function Study() {
                 strokeLinejoin="round"
               />
             </svg>
-            <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              {isDragging ? 'Drop files here' : 'Click to upload or drag and drop'}
+            <p className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+              {isDragging ? '✨ Drop files here' : 'Click to upload or drag and drop'}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-base text-gray-600 dark:text-gray-400">
               PDF, DOC/DOCX, TXT, or PowerPoint files
             </p>
             <input
@@ -657,26 +657,26 @@ export default function Study() {
               onChange={handleFileSelect}
             />
             {uploadMutation.isPending && (
-              <div className="mt-4">
-                <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-brand-600 dark:border-brand-400"></div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              <div className="mt-6 animate-fade-in">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 dark:border-teal-400"></div>
+                <p className="text-base text-gray-700 dark:text-gray-300 mt-3 font-medium">
                   Uploading and processing...
                 </p>
               </div>
             )}
             {uploadError && (
-              <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <div className="mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl shadow-sm animate-fade-in">
                 <p className="text-sm text-red-700 dark:text-red-400">{uploadError}</p>
               </div>
             )}
           </div>
 
           {/* Files Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-              <div className="p-4 border-b dark:border-gray-700">
-                <h2 className="font-semibold text-gray-900 dark:text-white">Your Files</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{files.length} files</p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="p-6 border-b dark:border-gray-700">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Your Files</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{files.length} files</p>
               </div>
               <div className="divide-y dark:divide-gray-700 max-h-[600px] overflow-y-auto">
                 {files.length === 0 ? (
@@ -697,8 +697,8 @@ export default function Study() {
                         setSelectedQuiz(null);
                         setSelectedFlashcardSet(null);
                       }}
-                      className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                        selectedFile?.id === file.id ? 'bg-indigo-50 dark:bg-indigo-900/30' : ''
+                      className={`w-full p-5 text-left hover:bg-gradient-to-r hover:from-teal-50 hover:to-blue-50 dark:hover:bg-gray-700 transition-all duration-200 ${
+                        selectedFile?.id === file.id ? 'bg-gradient-to-r from-teal-50 to-blue-50 dark:from-teal-900/30 dark:to-blue-900/30 border-l-4 border-teal-500' : ''
                       }`}
                     >
                       <p className="text-sm font-medium truncate text-gray-900 dark:text-white">
@@ -728,14 +728,14 @@ export default function Study() {
                   />
                 </div>
               ) : (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-                  <div className="p-6 border-b dark:border-gray-700">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                  <div className="p-8 border-b dark:border-gray-700">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                       {selectedFile.originalName}
                     </h2>
                   </div>
                   <div className="border-b dark:border-gray-700">
-                    <div className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 overflow-x-auto scrollbar-hide">
+                    <div className="flex space-x-6 sm:space-x-10 px-6 sm:px-8 overflow-x-auto scrollbar-hide">
                       {(['summary', 'notes', 'flashcards', 'quizzes'] as TabType[]).map((tab) => (
                         <button
                           key={tab}
@@ -744,10 +744,10 @@ export default function Study() {
                             setSelectedQuiz(null);
                             setSelectedFlashcardSet(null);
                           }}
-                          className={`py-3 sm:py-4 border-b-2 capitalize transition-colors whitespace-nowrap text-sm sm:text-base ${
+                          className={`py-4 sm:py-5 border-b-3 capitalize transition-all duration-300 whitespace-nowrap text-base sm:text-lg ${
                             activeTab === tab
-                              ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 font-medium'
-                              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                              ? 'border-teal-600 dark:border-teal-400 text-teal-600 dark:text-teal-400 font-bold shadow-sm'
+                              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 hover:border-teal-300'
                           }`}
                         >
                           {tab}
@@ -755,7 +755,7 @@ export default function Study() {
                       ))}
                     </div>
                   </div>
-                  <div className="p-6">{renderTabContent()}</div>
+                  <div className="p-8">{renderTabContent()}</div>
                 </div>
               )}
             </div>

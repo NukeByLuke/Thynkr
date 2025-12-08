@@ -1,0 +1,122 @@
+/* Custom animations for Study Mode and AI Tutor */
+
+/* Code syntax highlighting */
+.hljs {
+  @apply bg-gray-900 dark:bg-gray-950 text-gray-100 rounded-2xl p-6;
+}
+
+.hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-section, .hljs-link {
+  @apply text-teal-400;
+}
+
+.hljs-string, .hljs-title, .hljs-name, .hljs-type {
+  @apply text-cyan-300;
+}
+
+.hljs-attribute, .hljs-symbol, .hljs-bullet, .hljs-addition, .hljs-variable, .hljs-template-tag, .hljs-template-variable {
+  @apply text-blue-300;
+}
+
+.hljs-comment, .hljs-quote, .hljs-deletion, .hljs-meta {
+  @apply text-gray-500 italic;
+}
+
+.hljs-number, .hljs-regexp, .hljs-selector-id, .hljs-selector-class {
+  @apply text-purple-300;
+}
+
+.hljs-function, .hljs-built_in, .hljs-builtin-name, .hljs-title.function {
+  @apply text-yellow-300;
+}
+
+.hljs-tag, .hljs-attr, .hljs-selector-attr, .hljs-selector-pseudo {
+  @apply text-green-300;
+}
+
+.hljs-doctag, .hljs-keyword {
+  @apply font-semibold;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(20, 184, 166, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(20, 184, 166, 0.5);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Smooth transitions for all interactive elements */
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Code block styling improvements */
+pre code.hljs {
+  @apply rounded-2xl p-6 shadow-xl;
+}
+
+/* Markdown prose improvements */
+.prose code {
+  @apply rounded-lg px-2.5 py-1;
+}
+
+.prose pre {
+  @apply rounded-2xl shadow-xl my-6;
+}
+
+.prose h1, .prose h2, .prose h3 {
+  @apply scroll-mt-20;
+}
+
+/* Custom scrollbar for better UX */
+.scrollbar-custom::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800 rounded-full;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  @apply bg-teal-400 dark:bg-teal-600 rounded-full;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  @apply bg-teal-500 dark:bg-teal-500;
+}
