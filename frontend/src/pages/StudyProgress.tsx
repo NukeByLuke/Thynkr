@@ -91,8 +91,8 @@ const badges: Badge[] = [
     name: 'Quiz Ace',
     description: 'Achieve 80%+ average quiz score',
     icon: Brain,
-    color: 'text-purple-500',
-    bgColor: 'bg-purple-100 dark:bg-purple-900/30',
+    color: 'text-brand-500',
+    bgColor: 'bg-brand-100 dark:bg-brand-900/30',
     requirement: (data) => data.quizPerformance.averageScore >= 80,
     tier: 'silver',
   },
@@ -154,8 +154,8 @@ const badges: Badge[] = [
     name: 'Active Learner',
     description: 'Complete 10+ study sessions this week',
     icon: Zap,
-    color: 'text-indigo-500',
-    bgColor: 'bg-indigo-100 dark:bg-indigo-900/30',
+    color: 'text-brand-500',
+    bgColor: 'bg-brand-100 dark:bg-brand-900/30',
     requirement: (data) => data.weeklyStats.sessionsCount >= 10,
     tier: 'silver',
   },
@@ -165,7 +165,7 @@ const tierColors = {
   bronze: 'border-amber-600',
   silver: 'border-gray-400',
   gold: 'border-yellow-400',
-  platinum: 'border-purple-400',
+  platinum: 'border-brand-400',
 };
 
 const activityIcons: Record<string, typeof Flame> = {

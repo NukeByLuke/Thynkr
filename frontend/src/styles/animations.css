@@ -6,15 +6,15 @@
 }
 
 .hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-section, .hljs-link {
-  @apply text-teal-400;
+  @apply text-purple-400;
 }
 
 .hljs-string, .hljs-title, .hljs-name, .hljs-type {
-  @apply text-cyan-300;
+  @apply text-cyan-400;
 }
 
 .hljs-attribute, .hljs-symbol, .hljs-bullet, .hljs-addition, .hljs-variable, .hljs-template-tag, .hljs-template-variable {
-  @apply text-blue-300;
+  @apply text-cyan-300;
 }
 
 .hljs-comment, .hljs-quote, .hljs-deletion, .hljs-meta {
@@ -61,10 +61,10 @@
 
 @keyframes glow-pulse {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(20, 184, 166, 0.3);
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.3), 0 0 40px rgba(6, 182, 212, 0.2);
   }
   50% {
-    box-shadow: 0 0 30px rgba(20, 184, 166, 0.5);
+    box-shadow: 0 0 30px rgba(124, 58, 237, 0.4), 0 0 50px rgba(6, 182, 212, 0.3);
   }
 }
 
@@ -114,9 +114,9 @@ pre code.hljs {
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb {
-  @apply bg-teal-400 dark:bg-teal-600 rounded-full;
+  @apply bg-gradient-to-br from-brand-500 to-accent-500 rounded-full;
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-  @apply bg-teal-500 dark:bg-teal-500;
+  @apply bg-gradient-to-br from-brand-600 to-accent-600 rounded-full;
 }

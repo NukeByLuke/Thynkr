@@ -97,10 +97,10 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-0">
       <div className="mb-6 sm:mb-8 text-center">
-        <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">{title}</h3>
+        <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-transparent">{title}</h3>
         <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-3">
           Card {currentIndex + 1} of {displayCards.length}
-          {shuffledCards && <span className="ml-2 text-teal-600 dark:text-teal-400 font-semibold">(Shuffled)</span>}
+          {shuffledCards && <span className="ml-2 text-brand-600 dark:text-brand-400 font-semibold">(Shuffled)</span>}
         </p>
       </div>
 
@@ -110,7 +110,7 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleShuffle}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 bg-teal-50 dark:bg-teal-900/30 hover:bg-teal-100 dark:hover:bg-teal-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
         >
           <Shuffle className="w-4 h-4" />
           Shuffle
@@ -120,7 +120,7 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleReset}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 bg-teal-50 dark:bg-teal-900/30 hover:bg-teal-100 dark:hover:bg-teal-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
           >
             <RotateCcw className="w-4 h-4" />
             Reset Order
@@ -157,11 +157,11 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
             >
               {/* Front */}
               <div
-                className="absolute w-full h-full bg-gradient-to-br from-white to-teal-50/30 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-2xl border-2 border-teal-100 dark:border-gray-700 flex items-center justify-center p-6 sm:p-10 overflow-y-auto"
+                className="absolute w-full h-full bg-gradient-to-br from-white to-brand-50/50 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-2xl border-2 border-brand-100/50 dark:border-gray-700 flex items-center justify-center p-6 sm:p-10 overflow-y-auto"
                 style={{ backfaceVisibility: 'hidden' }}
               >
                 <div className="text-center w-full">
-                  <p className="text-sm sm:text-base text-teal-600 dark:text-teal-400 mb-3 sm:mb-5 uppercase tracking-wide font-bold">
+                  <p className="text-sm sm:text-base text-brand-600 dark:text-brand-400 mb-3 sm:mb-5 uppercase tracking-wide font-bold">
                     Question
                   </p>
                   <div className="prose prose-sm sm:prose-xl dark:prose-invert max-w-none">
@@ -178,16 +178,16 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
                         h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4" {...props} />,
                         h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3" {...props} />,
                         h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2" {...props} />,
-                        strong: ({ node, ...props }) => <strong className="font-bold text-teal-900 dark:text-teal-300" {...props} />,
+                        strong: ({ node, ...props }) => <strong className="font-bold text-brand-900 dark:text-brand-300" {...props} />,
                         em: ({ node, ...props }) => <em className="italic" {...props} />,
-                        ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-2 text-left marker:text-teal-500" {...props} />,
-                        ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-2 text-left marker:text-teal-500" {...props} />,
+                        ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-2 text-left marker:text-brand-500" {...props} />,
+                        ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-2 text-left marker:text-brand-500" {...props} />,
                         li: ({ node, ...props }) => <li className="leading-relaxed text-base sm:text-xl" {...props} />,
                         code: ({ node, className, children, ...props }) => {
                           const isInline = !className;
                           return isInline ? (
                             <code
-                              className="bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2 py-1 rounded-lg text-sm sm:text-lg font-mono border border-teal-200 dark:border-teal-800"
+                              className="bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 px-2 py-1 rounded-lg text-sm sm:text-lg font-mono border border-brand-200 dark:border-brand-800"
                               {...props}
                             >
                               {children}
@@ -214,7 +214,7 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
 
               {/* Back */}
               <div
-                className="absolute w-full h-full bg-gradient-to-br from-teal-600 via-cyan-600 to-blue-600 dark:from-teal-700 dark:via-cyan-700 dark:to-blue-700 rounded-2xl shadow-2xl flex items-center justify-center p-6 sm:p-10 overflow-y-auto"
+                className="absolute w-full h-full bg-gradient-to-br from-brand-600 to-accent-600 dark:from-brand-700 dark:to-accent-700 rounded-2xl shadow-2xl flex items-center justify-center p-6 sm:p-10 overflow-y-auto"
                 style={{
                   backfaceVisibility: 'hidden',
                   transform: 'rotateY(180deg)',
@@ -277,7 +277,7 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
           whileTap={{ scale: 0.95 }}
           onClick={handlePrevious}
           disabled={currentIndex === 0}
-          className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-teal-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-teal-50 dark:hover:bg-gray-700 hover:border-teal-300 dark:hover:border-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm sm:text-base shadow-md font-semibold"
+          className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-brand-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-brand-50 dark:hover:bg-gray-700 hover:border-brand-300 dark:hover:border-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm sm:text-base shadow-md font-semibold"
         >
           <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           <span className="hidden sm:inline">Previous</span>
@@ -299,8 +299,8 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
                 }}
                 className={`w-2 h-2 rounded-full transition-all flex-shrink-0 ${
                   index === currentIndex
-                    ? 'bg-gradient-to-r from-teal-600 to-cyan-600 w-6 sm:w-8 shadow-md'
-                    : 'bg-gray-300 dark:bg-gray-600 hover:bg-teal-400 dark:hover:bg-teal-500'
+                    ? 'bg-gradient-to-r from-brand-600 to-accent-600 w-6 sm:w-8 shadow-md'
+                    : 'bg-gray-300 dark:bg-gray-600 hover:bg-brand-400 dark:hover:bg-brand-500'
                 }`}
                 aria-label={`Go to card ${index + 1}`}
               />
@@ -340,7 +340,7 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
           whileTap={{ scale: 0.95 }}
           onClick={handleNext}
           disabled={currentIndex === displayCards.length - 1}
-          className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-teal-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-teal-50 dark:hover:bg-gray-700 hover:border-teal-300 dark:hover:border-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm sm:text-base shadow-md font-semibold"
+          className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-brand-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-brand-50 dark:hover:bg-gray-700 hover:border-brand-300 dark:hover:border-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm sm:text-base shadow-md font-semibold"
         >
           <span className="hidden sm:inline">Next</span>
           <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />

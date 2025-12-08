@@ -13,14 +13,14 @@ interface SummaryViewProps {
 export default function SummaryView({ content, onRegenerate, isRegenerating }: SummaryViewProps) {
   return (
     <div className="max-w-none animate-fade-in">
-      <div className="bg-gradient-to-br from-white to-teal-50/30 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-lg border border-teal-100 dark:border-gray-700 p-10">
-        <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-teal-200 dark:border-gray-700">
-          <h3 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">Summary</h3>
+      <div className="bg-gradient-to-br from-white to-brand-50/50 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-lg border border-brand-100/50 dark:border-gray-700 p-10">
+        <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-brand-200/50 dark:border-gray-700">
+          <h3 className="text-3xl font-bold bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-transparent">Summary</h3>
           {onRegenerate && (
             <button
               onClick={onRegenerate}
               disabled={isRegenerating}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 bg-teal-50 dark:bg-teal-900/30 hover:bg-teal-100 dark:hover:bg-teal-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               title="Regenerate summary with latest AI"
             >
               <RefreshCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
@@ -35,7 +35,7 @@ export default function SummaryView({ content, onRegenerate, isRegenerating }: S
             components={{
               h1: ({ node, ...props }) => (
                 <h1
-                  className="text-3xl font-bold text-gray-900 dark:text-white mt-8 mb-5 pb-3 border-b-2 border-teal-500 dark:border-teal-400"
+                  className="text-3xl font-bold text-gray-900 dark:text-white mt-8 mb-5 pb-3 border-b-2 border-brand-500 dark:border-brand-400"
                   {...props}
                 />
               ),
@@ -65,13 +65,13 @@ export default function SummaryView({ content, onRegenerate, isRegenerating }: S
               ),
               ul: ({ node, ...props }) => (
                 <ul
-                  className="list-disc ml-7 space-y-3 mb-6 text-gray-700 dark:text-gray-300 marker:text-teal-500 dark:marker:text-teal-400"
+                  className="list-disc ml-7 space-y-3 mb-6 text-gray-700 dark:text-gray-300 marker:text-brand-500 dark:marker:text-brand-400"
                   {...props}
                 />
               ),
               ol: ({ node, ...props }) => (
                 <ol
-                  className="list-decimal ml-7 space-y-3 mb-6 text-gray-700 dark:text-gray-300 marker:text-teal-500 dark:marker:text-teal-400"
+                  className="list-decimal ml-7 space-y-3 mb-6 text-gray-700 dark:text-gray-300 marker:text-brand-500 dark:marker:text-brand-400"
                   {...props}
                 />
               ),
@@ -86,7 +86,7 @@ export default function SummaryView({ content, onRegenerate, isRegenerating }: S
                 const isInline = !className;
                 return isInline ? (
                   <code
-                    className="bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2.5 py-1 rounded-lg text-sm font-mono border border-teal-200 dark:border-teal-800 shadow-sm"
+                    className="bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 px-2.5 py-1 rounded-lg text-sm font-mono border border-brand-200 dark:border-brand-800 shadow-sm"
                     {...props}
                   >
                     {children}

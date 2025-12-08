@@ -600,9 +600,9 @@ export default function Study() {
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-gradient-to-br from-teal-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
+    <div className="h-full flex flex-col overflow-hidden bg-gradient-to-br from-purple-50/30 via-cyan-50/30 to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
       {/* Study Header with Teal Gradient */}
-      <div className="bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500 shadow-lg">
+      <div className="bg-gradient-to-r from-brand-500 to-accent-500 shadow-lg">
         <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-10 py-8">
           <div className="flex items-center gap-4 mb-3">
             <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
@@ -697,8 +697,8 @@ export default function Study() {
                         setSelectedQuiz(null);
                         setSelectedFlashcardSet(null);
                       }}
-                      className={`w-full p-5 text-left hover:bg-gradient-to-r hover:from-teal-50 hover:to-blue-50 dark:hover:bg-gray-700 transition-all duration-200 ${
-                        selectedFile?.id === file.id ? 'bg-gradient-to-r from-teal-50 to-blue-50 dark:from-teal-900/30 dark:to-blue-900/30 border-l-4 border-teal-500' : ''
+                      className={`w-full p-5 text-left hover:bg-gradient-to-r hover:from-brand-50/50 hover:to-accent-50/50 dark:hover:bg-gray-700 transition-all duration-200 ${
+                        selectedFile?.id === file.id ? 'bg-gradient-to-r from-brand-50/50 to-accent-50/50 dark:from-brand-900/20 dark:to-accent-900/20 border-l-4 border-brand-500' : ''
                       }`}
                     >
                       <p className="text-sm font-medium truncate text-gray-900 dark:text-white">

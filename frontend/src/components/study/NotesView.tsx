@@ -25,7 +25,7 @@ export default function NotesView({
           <button
             onClick={onRegenerate}
             disabled={isRegenerating}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 bg-teal-50 dark:bg-teal-900/30 hover:bg-teal-100 dark:hover:bg-teal-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             title="Regenerate notes with latest AI"
           >
             <RefreshCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
@@ -35,8 +35,8 @@ export default function NotesView({
       )}
 
       {/* Key Points */}
-      <div className="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-2xl p-8 border-2 border-teal-100 dark:border-teal-800 shadow-lg">
-        <h3 className="text-2xl font-bold text-teal-900 dark:text-teal-300 mb-6 flex items-center">
+      <div className="bg-gradient-to-br from-brand-50/50 to-accent-50/50 dark:from-brand-900/20 dark:to-accent-900/20 rounded-2xl p-8 border-2 border-brand-100/50 dark:border-brand-800 shadow-lg">
+        <h3 className="text-2xl font-bold text-brand-900 dark:text-brand-300 mb-6 flex items-center">
           <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"
@@ -49,10 +49,10 @@ export default function NotesView({
         <ul className="space-y-4">
           {keyPoints.map((point, index) => (
             <li key={index} className="flex items-start group">
-              <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 text-white text-base font-bold mr-4 mt-1 shadow-md group-hover:shadow-lg transition-shadow duration-300">
+              <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 text-white text-base font-bold mr-4 mt-1 shadow-md group-hover:shadow-lg transition-shadow duration-300">
                 {index + 1}
               </span>
-              <div className="text-teal-900 dark:text-teal-100 leading-loose prose prose-teal dark:prose-invert max-w-none text-lg">
+              <div className="text-brand-900 dark:text-brand-100 leading-loose prose prose-brand dark:prose-invert max-w-none text-lg">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   rehypePlugins={[rehypeHighlight]}
@@ -62,7 +62,7 @@ export default function NotesView({
                     em: ({ node, ...props }) => <em className="italic" {...props} />,
                     code: ({ node, ...props }) => (
                       <code
-                        className="bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200 px-2 py-1 rounded-lg text-sm font-mono shadow-sm"
+                        className="bg-brand-100 dark:bg-brand-900 text-brand-800 dark:text-brand-200 px-2 py-1 rounded-lg text-sm font-mono shadow-sm"
                         {...props}
                       />
                     ),

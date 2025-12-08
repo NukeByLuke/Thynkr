@@ -119,7 +119,7 @@ export default function Account() {
       case 'STANDARD':
         return 'bg-blue-100 text-blue-700';
       case 'PREMIUM':
-        return 'bg-purple-100 text-purple-700';
+        return 'bg-brand-100 text-brand-700';
       case 'ADMIN':
         return 'bg-red-100 text-red-700';
       default:
@@ -348,8 +348,8 @@ export default function Account() {
                 {/* Upgrade CTA for Basic Users */}
                 {user?.role === 'BASIC' && (
                   <div className="pt-4 border-t">
-                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6">
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">Upgrade Your Plan</h3>
+                    <div className="bg-gradient-to-r from-brand-50 to-accent-50 dark:from-brand-900/20 dark:to-accent-900/20 rounded-lg p-6">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Upgrade Your Plan</h3>
                       <p className="text-gray-600 mb-4">
                         Unlock premium content and exclusive features with Pro or Premium membership
                       </p>

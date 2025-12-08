@@ -145,7 +145,7 @@ export default function SavedPacks() {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
           <div className="max-w-2xl mx-auto px-4">
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center">
-              <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+              <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-brand-600 to-accent-600 flex items-center justify-center">
                 <Lock className="w-8 h-8 text-white" />
               </div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
@@ -158,7 +158,7 @@ export default function SavedPacks() {
               </p>
               <a
                 href="/pricing"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg shadow-purple-500/25"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-xl hover:from-brand-700 hover:to-accent-700 transition-all shadow-lg shadow-brand-500/25"
               >
                 <Sparkles className="w-5 h-5" />
                 Upgrade Now
@@ -199,7 +199,7 @@ export default function SavedPacks() {
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl">
+              <div className="p-2 bg-gradient-to-br from-brand-600 to-accent-600 rounded-xl">
                 <BookOpen className="h-6 w-6 text-white" />
               </div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Saved Packs</h1>
@@ -256,7 +256,7 @@ export default function SavedPacks() {
                   placeholder="Search packs..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
             </div>
@@ -294,7 +294,7 @@ export default function SavedPacks() {
                               type="text"
                               value={editingTitle}
                               onChange={(e) => setEditingTitle(e.target.value)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+                              className="flex-1 px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500"
                               autoFocus
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') handleSaveTitle(pack.id);
@@ -320,7 +320,7 @@ export default function SavedPacks() {
                           </h3>
                         )}
                         {pack.courseName && (
-                          <p className="text-sm text-purple-600 dark:text-purple-400 mt-1 flex items-center gap-1">
+                          <p className="text-sm text-brand-600 dark:text-brand-400 mt-1 flex items-center gap-1">
                             <GraduationCap className="w-3 h-3" />
                             {pack.courseName}
                           </p>
@@ -392,7 +392,7 @@ export default function SavedPacks() {
                   <div className="p-4 pt-0">
                     <button
                       onClick={() => setActiveStudyPackId(pack.id)}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg shadow-purple-500/25"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-xl hover:from-brand-700 hover:to-accent-700 transition-all shadow-lg shadow-brand-500/25"
                     >
                       <Sparkles className="w-4 h-4" />
                       Open Study Pack

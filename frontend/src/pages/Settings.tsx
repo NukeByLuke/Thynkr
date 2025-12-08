@@ -90,14 +90,14 @@ function TTSSettings() {
                 onClick={() => setVoice(v.id as TTSVoice)}
                 className={`p-3 rounded-lg border-2 text-left transition-all ${
                   voice === v.id
-                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                    ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
                     : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                 }`}
               >
                 <p
                   className={`font-medium ${
                     voice === v.id
-                      ? 'text-indigo-700 dark:text-indigo-300'
+                      ? 'text-brand-700 dark:text-brand-300'
                       : 'text-gray-900 dark:text-white'
                   }`}
                 >
@@ -121,7 +121,7 @@ function TTSSettings() {
                 onClick={() => setSpeed(s.value)}
                 className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
                   speed === s.value
-                    ? 'bg-indigo-500 text-white'
+                    ? 'bg-brand-600 text-white'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
               >
@@ -136,7 +136,7 @@ function TTSSettings() {
           <button
             onClick={handleTestVoice}
             disabled={isLoading || testPlaying}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 disabled:opacity-50 transition-all"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-lg hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all"
           >
             {isLoading || testPlaying ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -387,7 +387,7 @@ export default function Settings() {
                             alt="Avatar"
                             className={`w-20 h-20 rounded-full object-cover border-2 ${
                               avatarFile
-                                ? 'border-indigo-500 ring-2 ring-indigo-300'
+                                ? 'border-brand-500 ring-2 ring-brand-300'
                                 : 'border-gray-200 dark:border-gray-600'
                             }`}
                             onError={() => {
@@ -410,7 +410,7 @@ export default function Settings() {
                         <button
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
-                          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                          className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
                         >
                           <Image className="w-4 h-4 inline mr-2" />
                           Change Picture
@@ -418,7 +418,7 @@ export default function Settings() {
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                           PNG, JPG up to 2MB
                           {avatarFile && (
-                            <span className="text-indigo-600 dark:text-indigo-400 font-medium">
+                            <span className="text-brand-600 dark:text-brand-400 font-medium">
                               {' '}
                               • New image selected
                             </span>
@@ -465,7 +465,7 @@ export default function Settings() {
                         onChange={(e) => setUsername(e.target.value)}
                         placeholder="Choose a unique username"
                         required
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                       />
                     )}
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -502,7 +502,7 @@ export default function Settings() {
                     <select
                       value={preferredLanguage}
                       onChange={(e) => setPreferredLanguage(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                     >
                       {SUPPORTED_LANGUAGES.map((lang) => (
                         <option key={lang.code} value={lang.code}>
@@ -546,7 +546,7 @@ export default function Settings() {
                       type="password"
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                       required
                     />
                   </div>
@@ -559,7 +559,7 @@ export default function Settings() {
                       type="password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                       required
                     />
                   </div>
@@ -572,7 +572,7 @@ export default function Settings() {
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                       required
                     />
                   </div>
@@ -606,7 +606,7 @@ export default function Settings() {
                           value="light"
                           checked={themeMode === 'light'}
                           onChange={() => handleThemeChange('light')}
-                          className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 focus:ring-2"
+                          className="w-4 h-4 text-brand-600 focus:ring-brand-500 focus:ring-2"
                         />
                         <div className="flex items-center gap-2">
                           <Sun className="w-4 h-4 text-gray-600 dark:text-gray-400" />
@@ -622,7 +622,7 @@ export default function Settings() {
                           value="dark"
                           checked={themeMode === 'dark'}
                           onChange={() => handleThemeChange('dark')}
-                          className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 focus:ring-2"
+                          className="w-4 h-4 text-brand-600 focus:ring-brand-500 focus:ring-2"
                         />
                         <div className="flex items-center gap-2">
                           <Moon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
@@ -638,7 +638,7 @@ export default function Settings() {
                           value="system"
                           checked={themeMode === 'system'}
                           onChange={() => handleThemeChange('system')}
-                          className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 focus:ring-2"
+                          className="w-4 h-4 text-brand-600 focus:ring-brand-500 focus:ring-2"
                         />
                         <div className="flex items-center gap-2">
                           <div className="w-4 h-4 rounded-full border-2 border-gray-600 dark:border-gray-400 relative">

@@ -699,7 +699,7 @@ export default function TutorChat() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] bg-gradient-to-br from-teal-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
+    <div className="flex h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] bg-gradient-to-br from-purple-50/30 via-cyan-50/30 to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
       {/* Create Chat Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
@@ -744,7 +744,7 @@ export default function TutorChat() {
                 Cancel
               </button>
               <button
-                className="px-5 py-2.5 text-sm font-semibold rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white disabled:from-gray-400 disabled:to-gray-400 shadow-lg hover:shadow-xl transition-all duration-300"
+                className="px-5 py-2.5 text-sm font-semibold rounded-xl bg-gradient-to-r from-brand-600 to-accent-600 hover:from-brand-700 hover:to-accent-700 text-white disabled:from-gray-400 disabled:to-gray-400 shadow-lg hover:shadow-xl transition-all duration-300"
                 disabled={selectedCreateFiles.length === 0 || createSessionMutation.isPending}
                 onClick={() => createSessionMutation.mutate({ fileIds: selectedCreateFiles })}
               >
@@ -770,7 +770,7 @@ export default function TutorChat() {
           {/* New Chat Button */}
           <button
             onClick={() => setShowCreateModal(true)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-brand-600 to-accent-600 hover:from-brand-700 hover:to-accent-700 text-white rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
             disabled={createSessionMutation.isPending}
           >
             <Plus className="w-5 h-5" />
@@ -784,7 +784,7 @@ export default function TutorChat() {
                 key={session.id}
                 className={`group relative p-4 rounded-xl cursor-pointer transition-all duration-300 ${
                   currentSessionId === session.id
-                    ? 'bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border-l-4 border-teal-500 shadow-md'
+                    ? 'bg-gradient-to-r from-brand-50/50 to-accent-50/50 dark:from-brand-900/20 dark:to-accent-900/20 border-l-4 border-brand-500 shadow-md'
                     : 'bg-gray-50 dark:bg-gray-700 hover:bg-gradient-to-r hover:from-gray-100 hover:to-gray-50 dark:hover:bg-gray-600 hover:shadow-md'
                 }`}
                 onClick={() => {
@@ -866,7 +866,7 @@ export default function TutorChat() {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 md:px-6 py-4 md:py-5 bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 border-b-2 border-teal-500 shadow-lg flex-shrink-0">
+        <div className="flex items-center justify-between px-4 md:px-6 py-4 md:py-5 bg-gradient-to-r from-brand-600 to-accent-600 border-b-2 border-brand-500/50 shadow-lg flex-shrink-0">
           <div className="flex items-center gap-3 md:gap-4">
             <button
               onClick={() => setShowSidebar(!showSidebar)}
@@ -1012,7 +1012,7 @@ export default function TutorChat() {
                 <div
                   className={`rounded-2xl px-4 md:px-5 py-3 shadow-md hover:shadow-lg transition-shadow duration-300 ${
                     message.role === 'user'
-                      ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white'
+                      ? 'bg-gradient-to-r from-brand-600 to-accent-600 text-white'
                       : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-2 border-teal-100 dark:border-gray-700'
                   }`}
                 >
@@ -1039,7 +1039,7 @@ export default function TutorChat() {
             <div className="flex gap-2 md:gap-3 flex-row">
               {/* AI Avatar */}
               <div className="flex-shrink-0">
-                <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-purple-500 via-primary-500 to-blue-500 flex items-center justify-center shadow-md">
+                <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-md">
                   <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-white" />
                 </div>
               </div>
@@ -1148,7 +1148,7 @@ export default function TutorChat() {
                     !currentSession?.files ||
                     currentSession.files.length === 0
                   }
-                  className="p-3 md:p-4 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 disabled:from-gray-300 disabled:to-gray-400 dark:disabled:from-gray-600 dark:disabled:to-gray-700 text-white rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:cursor-not-allowed flex-shrink-0"
+                  className="p-3 md:p-4 bg-gradient-to-r from-brand-600 to-accent-600 hover:from-brand-700 hover:to-accent-700 disabled:from-gray-300 disabled:to-gray-400 dark:disabled:from-gray-600 dark:disabled:to-gray-700 text-white rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:cursor-not-allowed flex-shrink-0"
                 >
                   <Send className="w-5 h-5" />
                 </button>

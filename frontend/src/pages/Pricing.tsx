@@ -272,7 +272,7 @@ export default function Pricing() {
                   return 'ring-2 ring-primary-500 dark:ring-primary-400 bg-gradient-to-br from-primary-50 via-white to-blue-50 dark:from-primary-900/20 dark:via-gray-800 dark:to-blue-900/20 shadow-xl md:scale-105 z-10';
                 }
                 if (plan.id === 'premium') {
-                  return 'bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-purple-900/20 dark:via-gray-800 dark:to-pink-900/20 shadow-lg';
+                  return 'bg-gradient-to-br from-brand-50 via-white to-accent-50 dark:from-brand-900/20 dark:via-gray-800 dark:to-accent-900/20 shadow-lg';
                 }
                 return 'bg-white dark:bg-gray-800 shadow-md';
               };
@@ -295,7 +295,7 @@ export default function Pricing() {
                 }
                 if (plan.id === 'premium') {
                   return (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-brand-600 to-accent-600 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg">
                       👑 Most Powerful
                     </div>
                   );
@@ -309,7 +309,7 @@ export default function Pricing() {
                   return 'bg-gradient-to-br from-primary-100 to-blue-100 dark:from-primary-900/50 dark:to-blue-900/50 text-primary-600 dark:text-primary-400';
                 }
                 if (plan.id === 'premium') {
-                  return 'bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/50 dark:to-pink-900/50 text-purple-600 dark:text-purple-400';
+                  return 'bg-gradient-to-br from-brand-100 to-accent-100 dark:from-brand-900/50 dark:to-accent-900/50 text-brand-600 dark:text-brand-400';
                 }
                 return 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400';
               };
@@ -416,7 +416,7 @@ export default function Pricing() {
                     disabled={isCurrent || isLoading === plan.id}
                     className={`mt-auto py-3 text-base font-semibold transition-all duration-200 ${
                       isCurrent ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'
-                    } ${plan.id === 'premium' ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border-0' : ''}`}
+                    } ${plan.id === 'premium' ? 'bg-gradient-to-r from-brand-600 to-accent-600 hover:from-brand-700 hover:to-accent-700 border-0' : ''}`}
                   >
                     {isLoading === plan.id ? (
                       <span className="flex items-center justify-center gap-2">
@@ -490,8 +490,8 @@ export default function Pricing() {
 
               {/* More Power */}
               <div className="text-center group">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <Bolt className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-100 to-accent-100 dark:from-brand-900/30 dark:to-accent-900/30 mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Bolt className="w-8 h-8 text-brand-600 dark:text-brand-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                   ⚡ More Power

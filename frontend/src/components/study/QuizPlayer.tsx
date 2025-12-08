@@ -78,7 +78,7 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="bg-gradient-to-br from-white to-teal-50/30 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-xl border-2 border-teal-100 dark:border-gray-700 p-6 sm:p-10 text-center"
+          className="bg-gradient-to-br from-white to-brand-50/50 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-xl border-2 border-brand-100/50 dark:border-gray-700 p-6 sm:p-10 text-center"
         >
           <div className="mb-4 sm:mb-6">
             {results.percentage >= 70 ? (
@@ -111,8 +111,8 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Quiz Complete!</h2>
           <p className="text-base sm:text-lg text-gray-600 mb-4 sm:mb-6">Here's how you did:</p>
 
-          <div className="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8 border-2 border-teal-100 dark:border-teal-800 shadow-md">
-            <div className="text-5xl sm:text-6xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent mb-3">
+          <div className="bg-gradient-to-br from-brand-50/50 to-accent-50/50 dark:from-brand-900/20 dark:to-accent-900/20 rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8 border-2 border-brand-100/50 dark:border-brand-800 shadow-md">
+            <div className="text-5xl sm:text-6xl font-bold bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-transparent mb-3">
               {results.percentage}%
             </div>
             <p className="text-sm sm:text-base text-gray-600">
@@ -125,7 +125,7 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setCurrentIndex(0)}
-              className="px-6 sm:px-8 py-3 bg-white dark:bg-gray-800 border-2 border-teal-300 dark:border-teal-600 rounded-xl text-gray-700 dark:text-gray-300 font-semibold hover:bg-teal-50 dark:hover:bg-gray-700 transition-all duration-300 shadow-md text-sm sm:text-base"
+              className="px-6 sm:px-8 py-3 bg-white dark:bg-gray-800 border-2 border-brand-300 dark:border-brand-600 rounded-xl text-gray-700 dark:text-gray-300 font-semibold hover:bg-brand-50 dark:hover:bg-gray-700 transition-all duration-300 shadow-md text-sm sm:text-base"
             >
               Review Answers
             </motion.button>
@@ -133,7 +133,7 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleRestart}
-              className="px-6 sm:px-8 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
+              className="px-6 sm:px-8 py-3 bg-gradient-to-r from-brand-600 to-accent-600 hover:from-brand-700 hover:to-accent-700 text-white rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
             >
               Try Again
             </motion.button>
@@ -159,7 +159,7 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
         {/* Progress bar */}
         <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
           <div
-            className="bg-gradient-to-r from-teal-600 to-cyan-600 h-2 rounded-full transition-all duration-300 shadow-sm"
+            className="bg-gradient-to-r from-brand-600 to-accent-600 h-2 rounded-full transition-all duration-300 shadow-sm"
             style={{
               width: `${((currentIndex + 1) / questions.length) * 100}%`,
             }}
@@ -172,7 +172,7 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="bg-gradient-to-br from-white to-teal-50/30 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-lg border-2 border-teal-100 dark:border-gray-700 p-6 sm:p-10 mb-6 sm:mb-8"
+        className="bg-gradient-to-br from-white to-brand-50/50 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-lg border-2 border-brand-100/50 dark:border-gray-700 p-6 sm:p-10 mb-6 sm:mb-8"
       >
         <div className="prose prose-sm sm:prose-lg dark:prose-invert max-w-none mb-6 sm:mb-8">
           <ReactMarkdown
@@ -185,16 +185,16 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
               h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4" {...props} />,
               h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3" {...props} />,
               h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2" {...props} />,
-              strong: ({ node, ...props }) => <strong className="font-bold text-teal-900 dark:text-teal-300" {...props} />,
+              strong: ({ node, ...props }) => <strong className="font-bold text-brand-900 dark:text-brand-300" {...props} />,
               em: ({ node, ...props }) => <em className="italic text-gray-700 dark:text-gray-300" {...props} />,
-              ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-2 text-gray-700 dark:text-gray-300 marker:text-teal-500" {...props} />,
-              ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-2 text-gray-700 dark:text-gray-300 marker:text-teal-500" {...props} />,
+              ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-2 text-gray-700 dark:text-gray-300 marker:text-brand-500" {...props} />,
+              ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-2 text-gray-700 dark:text-gray-300 marker:text-brand-500" {...props} />,
               li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
               code: ({ node, className, children, ...props }) => {
                 const isInline = !className;
                 return isInline ? (
                   <code
-                    className="bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2 py-1 rounded-lg text-sm font-mono border border-teal-200 dark:border-teal-800 shadow-sm"
+                    className="bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 px-2 py-1 rounded-lg text-sm font-mono border border-brand-200 dark:border-brand-800 shadow-sm"
                     {...props}
                   >
                     {children}
@@ -236,8 +236,8 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
                     : isWrong
                       ? 'border-red-500 bg-red-50 dark:bg-red-900/20 dark:border-red-600'
                       : isSelected
-                        ? 'border-teal-600 bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 dark:border-teal-500 shadow-md'
-                        : 'border-gray-200 dark:border-gray-600 hover:border-teal-300 dark:hover:border-teal-600 bg-white dark:bg-gray-800'
+                        ? 'border-brand-600 bg-gradient-to-r from-brand-50/50 to-accent-50/50 dark:from-brand-900/20 dark:to-accent-900/20 dark:border-brand-500 shadow-md'
+                        : 'border-gray-200 dark:border-gray-600 hover:border-brand-300 dark:hover:border-brand-600 bg-white dark:bg-gray-800'
                 } ${isSubmitted ? 'cursor-not-allowed' : 'cursor-pointer'}`}
               >
                 <div className="flex items-center justify-between">
@@ -250,7 +250,7 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
                         strong: ({ node, ...props }) => <strong className="font-bold" {...props} />,
                         em: ({ node, ...props }) => <em className="italic" {...props} />,
                         code: ({ node, ...props }) => (
-                          <code className="bg-gray-100 dark:bg-gray-700 text-teal-600 dark:text-teal-400 px-1.5 py-0.5 rounded text-xs font-mono" {...props} />
+                          <code className="bg-gray-100 dark:bg-gray-700 text-brand-600 dark:text-brand-400 px-1.5 py-0.5 rounded text-xs font-mono" {...props} />
                         ),
                       }}
                     >
@@ -299,7 +299,7 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             transition={{ duration: 0.4, delay: 0.2 }}
-            className="mt-6 sm:mt-8 p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-800 shadow-md"
+            className="mt-6 sm:mt-8 p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-accent-50/50 dark:from-blue-900/20 dark:to-accent-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-800 shadow-md"
           >
             <div className="flex items-start">
               <svg
@@ -377,7 +377,7 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleSubmit}
-            className="px-6 sm:px-8 py-2.5 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
+            className="px-6 sm:px-8 py-2.5 bg-gradient-to-r from-brand-600 to-accent-600 hover:from-brand-700 hover:to-accent-700 text-white rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
           >
             Submit Quiz
           </motion.button>
@@ -410,14 +410,14 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
               whileTap={{ scale: 0.9 }}
               onClick={() => setCurrentIndex(index)}
               className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl font-semibold transition-all duration-300 shadow-sm text-sm sm:text-base ${
-                isCurrent ? 'ring-2 ring-teal-600 dark:ring-teal-400 ring-offset-2 dark:ring-offset-gray-900' : ''
+                isCurrent ? 'ring-2 ring-brand-600 dark:ring-brand-400 ring-offset-2 dark:ring-offset-gray-900' : ''
               } ${
                 isCorrect
                   ? 'bg-green-500 text-white hover:bg-green-600'
                   : isWrong
                     ? 'bg-red-500 text-white hover:bg-red-600'
                     : isAnswered
-                      ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700'
+                      ? 'bg-gradient-to-r from-brand-600 to-accent-600 text-white hover:from-brand-700 hover:to-accent-700'
                       : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
             >

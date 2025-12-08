@@ -150,9 +150,9 @@ export default function Landing() {
             {/* Flashcards & Quizzes */}
             <motion.div
               variants={fadeInUp}
-              className="group relative bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-8 rounded-2xl border border-purple-100 dark:border-purple-800 hover:shadow-xl transition-all duration-300"
+              className="group relative bg-gradient-to-br from-brand-50 to-accent-50 dark:from-brand-900/20 dark:to-accent-900/20 p-8 rounded-2xl border border-brand-100/50 dark:border-brand-800/50 hover:shadow-xl transition-all duration-300"
             >
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-purple-500 text-white rounded-xl mb-6 group-hover:scale-110 transition-transform">
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-brand-600 text-white rounded-xl mb-6 group-hover:scale-110 transition-transform">
                 <Brain className="w-7 h-7" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">

@@ -86,8 +86,8 @@ const CATEGORIES = [
 
 function getFileIcon(fileType: string) {
   if (fileType.startsWith('image/')) return <Image className="h-5 w-5 text-green-500" />;
-  if (fileType.startsWith('video/')) return <Video className="h-5 w-5 text-purple-500" />;
-  if (fileType.startsWith('audio/')) return <Music className="h-5 w-5 text-pink-500" />;
+  if (fileType.startsWith('video/')) return <Video className="h-5 w-5 text-brand-500" />;
+  if (fileType.startsWith('audio/')) return <Music className="h-5 w-5 text-accent-500" />;
   if (fileType === 'application/pdf') return <FileText className="h-5 w-5 text-red-500" />;
   if (fileType === 'application/zip') return <Archive className="h-5 w-5 text-yellow-500" />;
   return <File className="h-5 w-5 text-gray-500" />;
@@ -112,14 +112,14 @@ function getCategoryGradient(category: string): string {
   const gradients: Record<string, string> = {
     MATHEMATICS: 'from-blue-500 to-indigo-600',
     SCIENCE: 'from-green-500 to-teal-600',
-    TECHNOLOGY: 'from-purple-500 to-pink-600',
+    TECHNOLOGY: 'from-brand-600 to-accent-600',
     ENGINEERING: 'from-orange-500 to-red-600',
     LANGUAGES: 'from-cyan-500 to-blue-600',
     HUMANITIES: 'from-amber-500 to-orange-600',
     BUSINESS: 'from-slate-500 to-gray-700',
     ARTS: 'from-rose-500 to-pink-600',
     HEALTH: 'from-emerald-500 to-green-600',
-    LAW: 'from-indigo-500 to-purple-600',
+    LAW: 'from-brand-600 to-accent-600',
     OTHER: 'from-gray-500 to-slate-600',
   };
   return gradients[category] || gradients['OTHER'];
@@ -402,7 +402,7 @@ export default function MyCourseDetail() {
           <p className="text-red-600 dark:text-red-400">Course not found</p>
           <Link
             to="/courses"
-            className="text-indigo-600 dark:text-indigo-400 hover:underline mt-2 inline-block"
+            className="text-brand-600 dark:text-brand-400 hover:underline mt-2 inline-block"
           >
             ← Back to My Courses
           </Link>
@@ -619,7 +619,7 @@ export default function MyCourseDetail() {
                   ) && (
                     <button
                       onClick={() => setShowStudyPanel(true)}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg shadow-purple-500/25"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-xl hover:from-brand-700 hover:to-accent-700 transition-all shadow-lg shadow-brand-500/25"
                     >
                       <GraduationCap className="h-4 w-4" />
                       Study
@@ -784,7 +784,7 @@ export default function MyCourseDetail() {
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => setViewingFile(file)}
-                          className="p-2 text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+                          className="p-2 text-brand-500 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-colors"
                           title="View file"
                         >
                           <Eye className="h-4 w-4" />
@@ -1065,7 +1065,7 @@ export default function MyCourseDetail() {
           <div className="absolute inset-4 md:inset-8 lg:inset-12 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl">
+                <div className="p-2 bg-gradient-to-br from-brand-600 to-accent-600 rounded-xl">
                   <GraduationCap className="h-5 w-5 text-white" />
                 </div>
                 <div>

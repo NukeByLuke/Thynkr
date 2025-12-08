@@ -45,14 +45,14 @@ const CATEGORIES = [
 const CATEGORY_GRADIENTS: Record<string, string> = {
   MATHEMATICS: 'from-blue-500 to-indigo-600',
   SCIENCE: 'from-emerald-500 to-teal-600',
-  TECHNOLOGY: 'from-violet-500 to-purple-600',
+  TECHNOLOGY: 'from-brand-600 to-accent-600',
   ENGINEERING: 'from-orange-500 to-red-600',
   LANGUAGES: 'from-pink-500 to-rose-600',
   HUMANITIES: 'from-amber-500 to-yellow-600',
   BUSINESS: 'from-slate-500 to-gray-600',
   ARTS: 'from-fuchsia-500 to-pink-600',
   HEALTH: 'from-green-500 to-emerald-600',
-  LAW: 'from-indigo-500 to-blue-600',
+  LAW: 'from-brand-600 to-accent-600',
   OTHER: 'from-gray-500 to-slate-600',
 };
 
