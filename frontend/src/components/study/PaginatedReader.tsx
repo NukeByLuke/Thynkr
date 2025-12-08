@@ -12,6 +12,9 @@ import {
   Loader2,
   RefreshCw,
 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
 import api from '../../lib/api';
 import toast from 'react-hot-toast';
 
@@ -259,9 +262,76 @@ export default function PaginatedReader({
           >
             {type === 'summary' ? (
               <div className="prose prose-gray dark:prose-invert max-w-none">
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeHighlight]}
+                  components={{
+                    h1: ({ node, ...props }) => (
+                      <h1
+                        className="text-3xl font-bold text-gray-900 dark:text-white mt-8 mb-5 pb-3 border-b-2 border-brand-500 dark:border-brand-400"
+                        {...props}
+                      />
+                    ),
+                    h2: ({ node, ...props }) => (
+                      <h2
+                        className="text-2xl font-bold text-gray-900 dark:text-white mt-7 mb-4"
+                        {...props}
+                      />
+                    ),
+                    h3: ({ node, ...props }) => (
+                      <h3
+                        className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3"
+                        {...props}
+                      />
+                    ),
+                    p: ({ node, ...props }) => (
+                      <p
+                        className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4"
+                        {...props}
+                      />
+                    ),
+                    strong: ({ node, ...props }) => (
+                      <strong className="font-semibold text-gray-900 dark:text-white" {...props} />
+                    ),
+                    em: ({ node, ...props }) => (
+                      <em className="italic text-gray-700 dark:text-gray-300" {...props} />
+                    ),
+                    ul: ({ node, ...props }) => (
+                      <ul
+                        className="list-disc list-inside space-y-2 my-4 text-gray-700 dark:text-gray-300 marker:text-brand-500"
+                        {...props}
+                      />
+                    ),
+                    ol: ({ node, ...props }) => (
+                      <ol
+                        className="list-decimal list-inside space-y-2 my-4 text-gray-700 dark:text-gray-300 marker:text-brand-500"
+                        {...props}
+                      />
+                    ),
+                    li: ({ node, ...props }) => (
+                      <li className="leading-relaxed" {...props} />
+                    ),
+                    code: ({ node, inline, className, children, ...props }: any) => {
+                      return inline ? (
+                        <code
+                          className="px-1.5 py-0.5 bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded text-sm font-mono border border-brand-200 dark:border-brand-700"
+                          {...props}
+                        >
+                          {children}
+                        </code>
+                      ) : (
+                        <code
+                          className={`block bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 rounded-xl overflow-x-auto text-xs font-mono shadow-lg border border-gray-700 my-3 ${className || ''}`}
+                          {...props}
+                        >
+                          {children}
+                        </code>
+                      );
+                    },
+                  }}
+                >
                   {(page as SummaryPage).content}
-                </p>
+                </ReactMarkdown>
               </div>
             ) : (
               <div className="space-y-6">
@@ -294,9 +364,76 @@ export default function PaginatedReader({
                     Detailed Notes
                   </h4>
                   <div className="prose prose-gray dark:prose-invert max-w-none">
-                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeHighlight]}
+                      components={{
+                        h1: ({ node, ...props }) => (
+                          <h1
+                            className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4"
+                            {...props}
+                          />
+                        ),
+                        h2: ({ node, ...props }) => (
+                          <h2
+                            className="text-xl font-bold text-gray-900 dark:text-white mt-5 mb-3"
+                            {...props}
+                          />
+                        ),
+                        h3: ({ node, ...props }) => (
+                          <h3
+                            className="text-lg font-semibold text-gray-900 dark:text-white mt-4 mb-2"
+                            {...props}
+                          />
+                        ),
+                        p: ({ node, ...props }) => (
+                          <p
+                            className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4"
+                            {...props}
+                          />
+                        ),
+                        strong: ({ node, ...props }) => (
+                          <strong className="font-semibold text-gray-900 dark:text-white" {...props} />
+                        ),
+                        em: ({ node, ...props }) => (
+                          <em className="italic text-gray-700 dark:text-gray-300" {...props} />
+                        ),
+                        ul: ({ node, ...props }) => (
+                          <ul
+                            className="list-disc list-inside space-y-2 my-4 text-gray-700 dark:text-gray-300 marker:text-brand-500"
+                            {...props}
+                          />
+                        ),
+                        ol: ({ node, ...props }) => (
+                          <ol
+                            className="list-decimal list-inside space-y-2 my-4 text-gray-700 dark:text-gray-300 marker:text-brand-500"
+                            {...props}
+                          />
+                        ),
+                        li: ({ node, ...props }) => (
+                          <li className="leading-relaxed" {...props} />
+                        ),
+                        code: ({ node, inline, className, children, ...props }: any) => {
+                          return inline ? (
+                            <code
+                              className="px-1.5 py-0.5 bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded text-sm font-mono border border-brand-200 dark:border-brand-700"
+                              {...props}
+                            >
+                              {children}
+                            </code>
+                          ) : (
+                            <code
+                              className={`block bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 rounded-xl overflow-x-auto text-xs font-mono shadow-lg border border-gray-700 my-3 ${className || ''}`}
+                              {...props}
+                            >
+                              {children}
+                            </code>
+                          );
+                        },
+                      }}
+                    >
                       {(page as NotesPage).detailed}
-                    </p>
+                    </ReactMarkdown>
                   </div>
                 </div>
               </div>
