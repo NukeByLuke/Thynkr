@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Play, Pause, RotateCcw, RotateCw, Settings, X, Loader2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, RotateCw, Settings, X, Loader2, Repeat } from 'lucide-react';
 import { useTTS, TTS_VOICES, TTS_SPEEDS, TTSVoice } from '../contexts/TTSContext';
 
 interface AudioPlayerProps {
@@ -31,6 +31,8 @@ export default function AudioPlayer({ compact = false, onClose }: AudioPlayerPro
     setVoice,
     setSpeed,
     queue,
+    isLooping,
+    toggleLoop,
   } = useTTS();
 
   const [showSettings, setShowSettings] = useState(false);
@@ -159,6 +161,19 @@ export default function AudioPlayer({ compact = false, onClose }: AudioPlayerPro
             </div>
 
             <div className="flex items-center gap-2">
+              {/* Loop button */}
+              <button
+                onClick={toggleLoop}
+                className={`p-2 rounded-lg transition-colors ${
+                  isLooping
+                    ? 'bg-primary-500/20 text-primary-400'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                }`}
+                aria-label={isLooping ? 'Disable loop' : 'Enable loop'}
+              >
+                <Repeat className="h-5 w-5" />
+              </button>
+
               {/* Settings button */}
               <button
                 onClick={() => setShowSettings(!showSettings)}
@@ -199,9 +214,9 @@ export default function AudioPlayer({ compact = false, onClose }: AudioPlayerPro
               aria-valuemax={duration}
               aria-valuenow={currentTime}
             >
-              {/* Progress fill */}
+              {/* Progress fill - smooth animation */}
               <div
-                className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary-400 to-primary-500 rounded-full transition-all group-hover:from-primary-300 group-hover:to-primary-400"
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary-400 to-primary-500 rounded-full transition-all duration-100 ease-linear group-hover:from-primary-300 group-hover:to-primary-400"
                 style={{ width: `${progress}%` }}
               />
               {/* Knob */}

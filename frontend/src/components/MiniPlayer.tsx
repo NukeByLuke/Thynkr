@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Play,
   Pause,
@@ -10,6 +10,7 @@ import {
   Volume2,
   Settings,
   ListMusic,
+  Repeat,
 } from 'lucide-react';
 import { useTTS, TTS_VOICES, TTS_SPEEDS, TTSVoice } from '../contexts/TTSContext';
 
@@ -39,9 +40,44 @@ export default function MiniPlayer() {
     setSpeed,
     isMinimized,
     setIsMinimized,
+    isLooping,
+    toggleLoop,
   } = useTTS();
 
   const [showSettings, setShowSettings] = useState(false);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    if (!currentTrack) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      // Don't capture if user is typing in an input
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+
+      switch (event.key) {
+        case ' ':
+          event.preventDefault();
+          isPlaying ? pause() : resume();
+          break;
+        case 'ArrowLeft':
+          event.preventDefault();
+          seekRelative(-5);
+          break;
+        case 'ArrowRight':
+          event.preventDefault();
+          seekRelative(5);
+          break;
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentTrack, isPlaying, pause, resume, seekRelative]);
 
   if (!currentTrack) return null;
 
@@ -84,13 +120,13 @@ export default function MiniPlayer() {
           {/* Decorative glow */}
           <div className="absolute inset-0 bg-gradient-to-r from-primary-500/5 via-purple-500/5 to-primary-500/5 pointer-events-none" />
 
-          {/* Progress bar (top) */}
+          {/* Progress bar (top) - smooth animation */}
           <div
             onClick={handleSeekBarClick}
             className="relative h-1 bg-slate-700 cursor-pointer group"
           >
             <div
-              className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary-400 to-primary-500"
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary-400 to-primary-500 transition-all duration-100 ease-linear"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -149,6 +185,19 @@ export default function MiniPlayer() {
                   <RotateCw className="h-4 w-4" />
                 </button>
               </div>
+
+              {/* Loop toggle */}
+              <button
+                onClick={toggleLoop}
+                className={`p-2 rounded-lg transition-colors ${
+                  isLooping
+                    ? 'bg-primary-500/20 text-primary-400'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+                aria-label={isLooping ? 'Disable loop' : 'Enable loop'}
+              >
+                <Repeat className="h-4 w-4" />
+              </button>
 
               {/* Settings */}
               <button

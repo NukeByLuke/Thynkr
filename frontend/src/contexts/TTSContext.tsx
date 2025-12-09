@@ -37,6 +37,20 @@ interface TTSTrack {
   pageNumber?: number;
 }
 
+// Helper functions for position persistence
+const getStoredPosition = (trackId: string): number => {
+  const stored = localStorage.getItem(`tts-position-${trackId}`);
+  return stored ? parseFloat(stored) : 0;
+};
+
+const savePosition = (trackId: string, position: number) => {
+  localStorage.setItem(`tts-position-${trackId}`, position.toString());
+};
+
+const clearPosition = (trackId: string) => {
+  localStorage.removeItem(`tts-position-${trackId}`);
+};
+
 interface TTSContextType {
   // Playback state
   isPlaying: boolean;
@@ -44,6 +58,7 @@ interface TTSContextType {
   currentTrack: TTSTrack | null;
   currentTime: number;
   duration: number;
+  isLooping: boolean;
 
   // Queue
   queue: TTSTrack[];
@@ -59,6 +74,7 @@ interface TTSContextType {
   stop: () => void;
   seekTo: (time: number) => void;
   seekRelative: (seconds: number) => void;
+  toggleLoop: () => void;
 
   // Queue management
   addToQueue: (tracks: TTSTrack[]) => void;
@@ -97,6 +113,10 @@ export function TTSProvider({ children }: TTSProviderProps) {
   const [duration, setDuration] = useState(0);
   const [queue, setQueue] = useState<TTSTrack[]>([]);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isLooping, setIsLooping] = useState(() => {
+    const saved = localStorage.getItem('tts-loop');
+    return saved === 'true';
+  });
 
   // Load preferences from localStorage
   const [voice, setVoiceState] = useState<TTSVoice>(() => {
@@ -109,10 +129,34 @@ export function TTSProvider({ children }: TTSProviderProps) {
     return saved ? parseFloat(saved) : 1.0;
   });
 
+  // Toggle loop mode
+  const toggleLoop = useCallback(() => {
+    setIsLooping((prev) => {
+      const newValue = !prev;
+      localStorage.setItem('tts-loop', String(newValue));
+      if (audioRef.current) {
+        audioRef.current.loop = newValue;
+      }
+      return newValue;
+    });
+  }, []);
+
+  // Save position periodically
+  useEffect(() => {
+    if (!currentTrack || !isPlaying) return;
+    const interval = setInterval(() => {
+      if (audioRef.current && currentTrack) {
+        savePosition(currentTrack.id, audioRef.current.currentTime);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [currentTrack, isPlaying]);
+
   // Initialize audio element
   useEffect(() => {
     const audio = new Audio();
     audio.preload = 'auto';
+    audio.loop = isLooping;
     audioRef.current = audio;
 
     const handleTimeUpdate = () => {
@@ -125,8 +169,12 @@ export function TTSProvider({ children }: TTSProviderProps) {
 
     const handleEnded = () => {
       setIsPlaying(false);
-      // Play next in queue if available
-      if (queue.length > 0) {
+      // Clear saved position when track finishes (not looping since audio.loop handles that)
+      if (currentTrack) {
+        clearPosition(currentTrack.id);
+      }
+      // Play next in queue if available and not looping
+      if (!isLooping && queue.length > 0) {
         const [nextTrack, ...rest] = queue;
         setQueue(rest);
         playTrack(nextTrack);
@@ -151,7 +199,7 @@ export function TTSProvider({ children }: TTSProviderProps) {
       audio.pause();
       audio.src = '';
     };
-  }, []);
+  }, [isLooping, currentTrack]);
 
   // Update playback rate when speed changes
   useEffect(() => {
@@ -221,6 +269,14 @@ export function TTSProvider({ children }: TTSProviderProps) {
 
         audioRef.current.src = url;
         audioRef.current.playbackRate = speed;
+        audioRef.current.loop = isLooping;
+
+        // Restore saved position if available
+        const savedPosition = getStoredPosition(track.id);
+        if (savedPosition > 0) {
+          audioRef.current.currentTime = savedPosition;
+        }
+
         await audioRef.current.play();
         setIsPlaying(true);
       } catch (error) {
@@ -249,6 +305,10 @@ export function TTSProvider({ children }: TTSProviderProps) {
   }, []);
 
   const stop = useCallback(() => {
+    // Clear saved position when manually stopped
+    if (currentTrack) {
+      clearPosition(currentTrack.id);
+    }
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
@@ -261,7 +321,7 @@ export function TTSProvider({ children }: TTSProviderProps) {
     setIsPlaying(false);
     setCurrentTime(0);
     setDuration(0);
-  }, []);
+  }, [currentTrack]);
 
   const seekTo = useCallback(
     (time: number) => {
@@ -304,6 +364,7 @@ export function TTSProvider({ children }: TTSProviderProps) {
     currentTrack,
     currentTime,
     duration,
+    isLooping,
     queue,
     voice,
     speed,
@@ -313,6 +374,7 @@ export function TTSProvider({ children }: TTSProviderProps) {
     stop,
     seekTo,
     seekRelative,
+    toggleLoop,
     addToQueue,
     clearQueue,
     playNext,
