@@ -28,7 +28,7 @@ export default function Login() {
 
     try {
       await login({ email, password });
-      navigate('/study');
+      navigate('/');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Invalid email or password');
     } finally {

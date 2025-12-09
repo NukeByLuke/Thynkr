@@ -96,6 +96,13 @@ export default function Landing() {
               <Button
                 variant="outline"
                 size="lg"
+                onClick={() => (window.location.href = '/login')}
+              >
+                Login
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
                 onClick={() => (window.location.href = '/pricing')}
               >
                 View Pricing

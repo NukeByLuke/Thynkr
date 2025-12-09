@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import {
   ArrowLeft,
   Upload,
@@ -27,6 +28,7 @@ import {
   ChevronDown,
   ImagePlus,
   GraduationCap,
+  User,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
@@ -416,7 +418,12 @@ export default function MyCourseDetail() {
     : `${window.location.origin}/courses/${course.id}`;
 
   return (
-    <div className="h-full bg-gray-50 dark:bg-gray-900">
+    <motion.div
+      className="h-full bg-gray-50 dark:bg-gray-900"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+    >
       {/* Hero Banner with Overlay */}
       <div className="relative h-64 md:h-80 overflow-hidden">
         {course.bannerImage ? (
@@ -484,9 +491,19 @@ export default function MyCourseDetail() {
                 {course.visibility}
               </span>
             </div>
-            <h1 className="text-2xl md:text-4xl font-bold text-white drop-shadow-lg">
+            <h1 className="text-2xl md:text-4xl font-bold text-white drop-shadow-lg mb-3">
               {course.title}
             </h1>
+            <div className="flex flex-wrap items-center gap-4 text-sm text-white/80">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span>{course.creator.name}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                <span>{formatDate(course.createdAt)}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1090,6 +1107,6 @@ export default function MyCourseDetail() {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

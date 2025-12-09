@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Brain } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
 import { clsx } from 'clsx';
 
 interface LogoProps {
@@ -11,10 +10,8 @@ interface LogoProps {
 }
 
 export default function Logo({ variant = 'full', className, animated = true }: LogoProps) {
-  const { isAuthenticated } = useAuth();
-
-  // Route to /study (main dashboard) if logged in, otherwise home
-  const destination = isAuthenticated ? '/study' : '/';
+  // Always navigate to home page
+  const destination = '/';
 
   return (
     <Link

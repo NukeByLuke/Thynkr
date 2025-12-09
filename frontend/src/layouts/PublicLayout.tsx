@@ -1,8 +1,11 @@
 import { Outlet, Link } from 'react-router-dom';
 import Logo from '@/components/Logo';
 import Footer from '@/components/Footer';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function PublicLayout() {
+  const { isAuthenticated } = useAuth();
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
       {/* Header */}
@@ -12,15 +15,26 @@ export default function PublicLayout() {
           <Link to="/pricing" className="hover:text-slate-900 dark:hover:text-slate-100 transition">
             Pricing
           </Link>
-          <Link to="/login" className="hover:text-slate-900 dark:hover:text-slate-100 transition">
-            Login
-          </Link>
-          <Link
-            to="/register"
-            className="ml-2 px-5 py-2.5 bg-gradient-to-r from-brand-500 to-accent-400 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition"
-          >
-            Get Started
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              to="/study"
+              className="ml-2 px-5 py-2.5 bg-gradient-to-r from-brand-500 to-accent-400 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link to="/login" className="hover:text-slate-900 dark:hover:text-slate-100 transition">
+                Login
+              </Link>
+              <Link
+                to="/register"
+                className="ml-2 px-5 py-2.5 bg-gradient-to-r from-brand-500 to-accent-400 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition"
+              >
+                Get Started
+              </Link>
+            </>
+          )}
         </nav>
       </header>
 

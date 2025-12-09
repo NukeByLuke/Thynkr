@@ -25,7 +25,7 @@ export default function Register() {
 
     try {
       await register(formData);
-      navigate('/study');
+      navigate('/');
     } catch (err: any) {
       console.error('Registration error:', err);
       const errorMessage = err.response?.data?.error || err.message || 'Registration failed';

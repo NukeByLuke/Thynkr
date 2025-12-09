@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface BrandLogoProps {
   variant?: 'full' | 'icon';
@@ -15,7 +14,6 @@ export default function BrandLogo({
   className = '',
 }: BrandLogoProps) {
   const [hasAnimated, setHasAnimated] = useState(false);
-  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     // Only animate once on mount
@@ -24,8 +22,8 @@ export default function BrandLogo({
     }
   }, [animated, hasAnimated]);
 
-  // Navigate to dashboard if authenticated, otherwise to landing page
-  const logoDestination = isAuthenticated ? '/study' : '/';
+  // Always navigate to home page
+  const logoDestination = '/';
 
   const iconVariants = {
     hidden: { opacity: 0, scale: 0.8, rotate: -10 },
