@@ -42,16 +42,16 @@ export default function DashboardLayout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
+    <div className="flex min-h-screen">
       {/* Desktop Sidebar */}
       <motion.aside
         initial={false}
-        animate={{ width: isCollapsed ? 80 : 256 }}
-        transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-        className="hidden lg:flex flex-col h-screen bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 sticky top-0"
+        animate={{ width: isCollapsed ? 80 : 280 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 120 }}
+        className="hidden lg:flex flex-col h-screen bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-white/20 dark:border-white/10 sticky top-0 shadow-glass"
       >
         {/* Logo */}
-        <div className="p-6 border-b border-slate-200 dark:border-slate-800">
+        <div className="p-6 border-b border-slate-200/50 dark:border-white/10">
           {isCollapsed ? (
             <Logo variant="icon" animated={false} />
           ) : (
@@ -60,7 +60,7 @@ export default function DashboardLayout() {
         </div>
 
         {/* Clock & Toggle */}
-        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+        <div className="px-6 py-4 border-b border-slate-200/50 dark:border-white/10">
           {!isCollapsed ? (
             <motion.div
               initial={{ opacity: 0 }}
@@ -68,10 +68,12 @@ export default function DashboardLayout() {
               exit={{ opacity: 0 }}
               className="flex items-center justify-between"
             >
-              <div className="flex items-center space-x-2 text-slate-600 dark:text-slate-300">
-                <Clock className="w-5 h-5" />
+              <div className="flex items-center space-x-3 text-slate-600 dark:text-slate-300">
+                <div className="p-2 bg-gradient-to-br from-brand-500/10 to-accent-500/10 rounded-xl">
+                  <Clock className="w-5 h-5 text-brand-600 dark:text-brand-400" />
+                </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium">
+                  <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                     {currentTime.toLocaleTimeString('en-US', {
                       hour: '2-digit',
                       minute: '2-digit',
@@ -113,10 +115,10 @@ export default function DashboardLayout() {
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `relative flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
+                  `relative flex items-center space-x-3 px-4 py-3 rounded-2xl transition-all duration-300 ease-out group ${
                     isActive
-                      ? 'text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-950/30'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/50'
+                      ? 'text-brand-600 dark:text-brand-400 bg-gradient-to-r from-brand-500/10 to-accent-500/10 shadow-sm'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100/80 dark:hover:bg-slate-800/50'
                   }`
                 }
               >
@@ -125,14 +127,14 @@ export default function DashboardLayout() {
                     {isActive && (
                       <motion.div
                         layoutId="activeIndicator"
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-brand-500 to-accent-400 rounded-r-full"
-                        transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                        className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-brand-500 to-accent-500 rounded-r-full"
+                        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                       />
                     )}
                     <Icon
-                      className={`w-5 h-5 transition-all duration-200 ${isActive ? 'drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]' : 'group-hover:drop-shadow-[0_0_6px_rgba(99,102,241,0.3)]'}`}
+                      className={`w-5 h-5 transition-all duration-300 ${isActive ? 'drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]' : 'group-hover:drop-shadow-[0_0_6px_rgba(139,92,246,0.3)]'}`}
                     />
-                    {!isCollapsed && <span className="font-medium">{item.label}</span>}
+                    {!isCollapsed && <span className="font-semibold">{item.label}</span>}
                   </>
                 )}
               </NavLink>
@@ -141,26 +143,26 @@ export default function DashboardLayout() {
         </nav>
 
         {/* Settings & Logout */}
-        <div className="p-3 border-t border-slate-200 dark:border-slate-800 space-y-1">
+        <div className="p-3 border-t border-slate-200/50 dark:border-white/10 space-y-1">
           <NavLink
             to="/account"
             className={({ isActive }) =>
-              `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
+              `flex items-center space-x-3 px-4 py-3 rounded-2xl transition-all duration-300 ease-out group ${
                 isActive
-                  ? 'text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-950/30'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/50'
+                  ? 'text-brand-600 dark:text-brand-400 bg-gradient-to-r from-brand-500/10 to-accent-500/10'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100/80 dark:hover:bg-slate-800/50'
               }`
             }
           >
             <Settings className="w-5 h-5" />
-            {!isCollapsed && <span className="font-medium">Settings</span>}
+            {!isCollapsed && <span className="font-semibold">Settings</span>}
           </NavLink>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30"
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl transition-all duration-300 ease-out text-slate-600 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/80 dark:hover:bg-red-950/30"
           >
             <LogOut className="w-5 h-5" />
-            {!isCollapsed && <span className="font-medium">Logout</span>}
+            {!isCollapsed && <span className="font-semibold">Logout</span>}
           </button>
         </div>
       </motion.aside>
@@ -168,7 +170,7 @@ export default function DashboardLayout() {
       {/* Mobile Hamburger */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-800"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2.5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-soft border border-white/20 dark:border-white/10 transition-all duration-300 hover:shadow-glow-brand"
       >
         {isMobileMenuOpen ? (
           <X className="w-6 h-6 text-slate-600 dark:text-slate-300" />
@@ -189,11 +191,11 @@ export default function DashboardLayout() {
               className="lg:hidden fixed inset-0 bg-black/50 z-40"
             />
             <motion.aside
-              initial={{ x: -256 }}
+              initial={{ x: -280 }}
               animate={{ x: 0 }}
-              exit={{ x: -256 }}
-              transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-              className="lg:hidden fixed left-0 top-0 h-screen w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-50 flex flex-col"
+              exit={{ x: -280 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 120 }}
+              className="lg:hidden fixed left-0 top-0 h-screen w-72 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-r border-white/20 dark:border-white/10 z-50 flex flex-col shadow-glass-lg"
             >
               {/* Logo */}
               <div className="p-6 border-b border-slate-200 dark:border-slate-800">
@@ -286,7 +288,7 @@ export default function DashboardLayout() {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-8 transition-all duration-300">
+      <main className="flex-1 overflow-y-auto p-8 lg:p-10 transition-all duration-300">
         <Outlet />
       </main>
     </div>

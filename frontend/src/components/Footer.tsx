@@ -11,13 +11,13 @@ export default function Footer() {
     <motion.footer
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
       className={`
-        mt-auto transition-colors duration-500 ease-in-out
+        mt-auto transition-all duration-500 ease-in-out backdrop-blur-xl
         ${
           theme === 'dark'
-            ? 'bg-gradient-to-r from-[#0b0f19] to-[#141a29] border-t border-white/10'
-            : 'bg-gradient-to-r from-[#f9fafb] to-[#e9ecf5] border-t border-gray-200'
+            ? 'bg-slate-900/80 border-t border-white/10'
+            : 'bg-white/70 border-t border-white/20'
         }
       `}
     >
@@ -50,50 +50,44 @@ export default function Footer() {
             <Link
               to="/privacy"
               className={`
-                text-sm transition-colors duration-500 relative group
+                text-sm transition-all duration-300 ease-out relative group
                 ${
                   theme === 'dark'
-                    ? 'text-gray-400 hover:text-blue-400'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'text-gray-400 hover:text-brand-400'
+                    : 'text-gray-600 hover:text-brand-600'
                 }
               `}
             >
               Privacy
-              {theme === 'light' && (
-                <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-gradient-to-r from-[#7c3aed] to-[#3b82f6] group-hover:w-full transition-all duration-300" />
-              )}
+              <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-gradient-to-r from-brand-500 to-accent-500 group-hover:w-full transition-all duration-300 ease-out" />
             </Link>
             <Link
               to="/terms"
               className={`
-                text-sm transition-colors duration-500 relative group
+                text-sm transition-all duration-300 ease-out relative group
                 ${
                   theme === 'dark'
-                    ? 'text-gray-400 hover:text-blue-400'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'text-gray-400 hover:text-brand-400'
+                    : 'text-gray-600 hover:text-brand-600'
                 }
               `}
             >
               Terms
-              {theme === 'light' && (
-                <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-gradient-to-r from-[#7c3aed] to-[#3b82f6] group-hover:w-full transition-all duration-300" />
-              )}
+              <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-gradient-to-r from-brand-500 to-accent-500 group-hover:w-full transition-all duration-300 ease-out" />
             </Link>
             <a
               href="mailto:contact@thynkr.ca"
               className={`
-                text-sm transition-colors duration-500 relative group
+                text-sm transition-all duration-300 ease-out relative group
                 ${
                   theme === 'dark'
-                    ? 'text-gray-400 hover:text-blue-400'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'text-gray-400 hover:text-brand-400'
+                    : 'text-gray-600 hover:text-brand-600'
                 }
               `}
             >
               Contact
-              {theme === 'light' && (
-                <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-gradient-to-r from-[#7c3aed] to-[#3b82f6] group-hover:w-full transition-all duration-300" />
-              )}
+              <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-gradient-to-r from-brand-500 to-accent-500 group-hover:w-full transition-all duration-300 ease-out" />
             </a>
           </div>
 
@@ -134,10 +128,10 @@ export default function Footer() {
           <div className="inline-flex flex-wrap justify-center gap-3 text-xs">
             <Link
               to="/privacy"
-              className={`transition-colors duration-500 ${
+              className={`transition-all duration-300 ease-out ${
                 theme === 'dark'
-                  ? 'text-gray-400 hover:text-blue-400'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'text-gray-400 hover:text-brand-400'
+                  : 'text-gray-600 hover:text-brand-600'
               }`}
             >
               Privacy
@@ -151,10 +145,10 @@ export default function Footer() {
             </span>
             <Link
               to="/terms"
-              className={`transition-colors duration-500 ${
+              className={`transition-all duration-300 ease-out ${
                 theme === 'dark'
-                  ? 'text-gray-400 hover:text-blue-400'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'text-gray-400 hover:text-brand-400'
+                  : 'text-gray-600 hover:text-brand-600'
               }`}
             >
               Terms
@@ -168,10 +162,10 @@ export default function Footer() {
             </span>
             <a
               href="mailto:contact@thynkr.ca"
-              className={`transition-colors duration-500 ${
+              className={`transition-all duration-300 ease-out ${
                 theme === 'dark'
-                  ? 'text-gray-400 hover:text-blue-400'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'text-gray-400 hover:text-brand-400'
+                  : 'text-gray-600 hover:text-brand-600'
               }`}
             >
               Contact

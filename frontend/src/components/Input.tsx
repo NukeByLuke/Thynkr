@@ -20,7 +20,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
             {label}
             {props.required && <span className="text-red-500 ml-1">*</span>}
           </label>
@@ -28,20 +28,21 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           className={clsx(
-            'w-full px-4 py-2 border rounded-lg transition-colors duration-200',
-            'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent',
-            'dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400',
+            'w-full px-4 py-3 rounded-2xl transition-all duration-250 ease-out',
+            'bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm',
+            'border-2 focus:outline-none',
+            'placeholder:text-slate-400 dark:placeholder:text-slate-500',
             error
-              ? 'border-red-500 focus:ring-red-500'
-              : 'border-gray-300 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-500',
-            props.disabled && 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed',
+              ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
+              : 'border-slate-200/50 dark:border-slate-700/50 hover:border-brand-300 dark:hover:border-brand-600 focus:border-brand-500 dark:focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20',
+            props.disabled && 'bg-slate-100 dark:bg-slate-800 cursor-not-allowed opacity-60',
             className
           )}
           {...props}
         />
-        {error && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && <p className="mt-2 text-sm text-red-500 dark:text-red-400">{error}</p>}
         {helperText && !error && (
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{helperText}</p>
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{helperText}</p>
         )}
       </div>
     );

@@ -46,8 +46,7 @@ export default function Navbar() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="backdrop-blur-lg bg-white/90 dark:bg-slate-900/90 border-b border-white/20 dark:border-white/10 sticky top-0 z-50 shadow-[0_2px_10px_rgba(0,0,0,0.1)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border-b border-white/20 dark:border-white/10 sticky top-0 z-50 shadow-soft">\n      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
@@ -59,9 +58,9 @@ export default function Navbar() {
             {!isAuthenticated && (
               <Link
                 to="/courses"
-                className={`text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-sm flex items-center ${
+                className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center ${
                   isActive('/courses')
-                    ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                    ? 'bg-gradient-to-r from-brand-500/10 to-accent-500/10 text-brand-600 dark:text-brand-400'
                     : ''
                 }`}
               >
@@ -70,9 +69,9 @@ export default function Navbar() {
             )}
             <Link
               to="/"
-              className={`text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-sm flex items-center ${
+              className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center ${
                 isActive('/')
-                  ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                  ? 'bg-gradient-to-r from-brand-500/10 to-accent-500/10 text-brand-600 dark:text-brand-400'
                   : ''
               }`}
             >
@@ -80,9 +79,9 @@ export default function Navbar() {
             </Link>
             <Link
               to="/pricing"
-              className={`text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-sm flex items-center ${
+              className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center ${
                 isActive('/pricing')
-                  ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                  ? 'bg-gradient-to-r from-brand-500/10 to-accent-500/10 text-brand-600 dark:text-brand-400'
                   : ''
               }`}
             >
@@ -92,9 +91,9 @@ export default function Navbar() {
               <>
                 <Link
                   to="/files"
-                  className={`text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-sm ${
+                  className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 ${
                     isActive('/files')
-                      ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                      ? 'bg-gradient-to-r from-brand-500/10 to-accent-500/10 text-brand-600 dark:text-brand-400'
                       : ''
                   }`}
                 >
@@ -102,9 +101,9 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/study"
-                  className={`text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-sm ${
+                  className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 ${
                     isActive('/study')
-                      ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                      ? 'bg-gradient-to-r from-brand-500/10 to-accent-500/10 text-brand-600 dark:text-brand-400'
                       : ''
                   }`}
                 >
@@ -113,9 +112,9 @@ export default function Navbar() {
                 {(user?.role === 'PREMIUM' || user?.role === 'ADMIN') && (
                   <Link
                     to="/tutor"
-                    className={`text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-sm flex items-center gap-1 ${
+                    className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center gap-1.5 ${
                       isActive('/tutor')
-                        ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                        ? 'bg-gradient-to-r from-brand-500/10 to-accent-500/10 text-brand-600 dark:text-brand-400'
                         : ''
                     }`}
                   >
@@ -125,9 +124,9 @@ export default function Navbar() {
                 )}
                 <Link
                   to="/progress"
-                  className={`text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-sm flex items-center gap-1 ${
+                  className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center gap-1.5 ${
                     isActive('/progress')
-                      ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                      ? 'bg-gradient-to-r from-brand-500/10 to-accent-500/10 text-brand-600 dark:text-brand-400'
                       : ''
                   }`}
                 >
@@ -139,9 +138,9 @@ export default function Navbar() {
                   user?.role === 'ADMIN') && (
                   <Link
                     to="/courses"
-                    className={`text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-sm flex items-center gap-1 ${
+                    className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center gap-1.5 ${
                       isActive('/courses') || location.pathname.startsWith('/courses/')
-                        ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                        ? 'bg-gradient-to-r from-brand-500/10 to-accent-500/10 text-brand-600 dark:text-brand-400'
                         : ''
                     }`}
                   >
@@ -154,9 +153,9 @@ export default function Navbar() {
                   user?.role === 'ADMIN') && (
                   <Link
                     to="/saved-packs"
-                    className={`text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-sm flex items-center gap-1 ${
+                    className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center gap-1.5 ${
                       isActive('/saved-packs')
-                        ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                        ? 'bg-gradient-to-r from-brand-500/10 to-accent-500/10 text-brand-600 dark:text-brand-400'
                         : ''
                     }`}
                   >
@@ -168,13 +167,13 @@ export default function Navbar() {
             )}
 
             {isAuthenticated ? (
-              <div className="flex items-center gap-1 ml-3 pl-3 border-l-2 border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-1 ml-4 pl-4 border-l border-slate-200/50 dark:border-white/10">
                 {user?.role === 'ADMIN' && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => navigate('/admin')}
-                    className="flex items-center gap-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 hover:shadow-sm"
+                    className="flex items-center gap-1.5 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 rounded-2xl transition-all duration-300"
                   >
                     <Shield className="w-4 h-4" />
                     <span>Admin</span>
@@ -184,7 +183,7 @@ export default function Navbar() {
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate('/settings')}
-                  className="flex items-center gap-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 hover:shadow-sm"
+                  className="flex items-center gap-1.5 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 rounded-2xl transition-all duration-300"
                 >
                   <Settings className="w-4 h-4" />
                   <span>Settings</span>
@@ -193,13 +192,13 @@ export default function Navbar() {
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate('/account')}
-                  className="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 hover:shadow-sm"
+                  className="flex items-center gap-2 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 rounded-2xl transition-all duration-300"
                 >
                   {user?.avatarUrl ? (
                     <img
                       src={avatarUrl}
                       alt="Profile"
-                      className="w-6 h-6 rounded-full object-cover border border-gray-300 dark:border-gray-600 transition-transform duration-200 hover:scale-110"
+                      className="w-7 h-7 rounded-full object-cover border-2 border-white/50 dark:border-slate-700 shadow-sm transition-transform duration-300 hover:scale-110"
                       key={user.avatarUrl} // Force re-render when avatar changes
                     />
                   ) : (
@@ -211,19 +210,19 @@ export default function Navbar() {
                   variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  className="hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-700 transition-all duration-200 hover:shadow-sm"
+                  className="hover:bg-red-50/80 dark:hover:bg-red-950/30 hover:text-red-500 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-700 rounded-2xl transition-all duration-300"
                 >
                   <LogOut className="w-4 h-4 mr-1" />
                   Logout
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate('/login')}
-                  className="hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 hover:shadow-sm"
+                  className="hover:bg-slate-100/80 dark:hover:bg-slate-800/50 rounded-2xl transition-all duration-300"
                 >
                   Login
                 </Button>
@@ -231,7 +230,7 @@ export default function Navbar() {
                   variant="primary"
                   size="sm"
                   onClick={() => navigate('/register')}
-                  className="hover:shadow-md transition-all duration-200 hover:scale-105"
+                  className="rounded-2xl hover:scale-105 transition-all duration-300"
                 >
                   Get Started
                 </Button>
@@ -243,7 +242,7 @@ export default function Navbar() {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 p-2"
+              className="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 p-2.5 rounded-2xl hover:bg-slate-100/80 dark:hover:bg-slate-800/50 transition-all duration-300"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>

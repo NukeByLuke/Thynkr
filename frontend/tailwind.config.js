@@ -12,11 +12,11 @@ export default {
           200: '#ddd6fe',
           300: '#c4b5fd',
           400: '#a855f7',
-          500: '#7c3aed',
-          600: '#6d28d9',
-          700: '#5b21b6',
-          800: '#4c1d95',
-          900: '#2e1065',
+          500: '#8B5CF6',
+          600: '#7C3AED',
+          700: '#6D28D9',
+          800: '#5B21B6',
+          900: '#4C1D95',
         },
         // Accent palette (cyan for unified gradient)
         accent: {
@@ -58,25 +58,58 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'Urbanist', 'system-ui', '-apple-system', 'sans-serif'],
-        display: ['Urbanist', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
       },
       spacing: {
         'safe': 'env(safe-area-inset-bottom)',
       },
+      borderRadius: {
+        '4xl': '2rem',
+        '5xl': '2.5rem',
+      },
+      boxShadow: {
+        'glass': '0 4px 30px rgba(0, 0, 0, 0.1)',
+        'glass-lg': '0 8px 40px rgba(0, 0, 0, 0.12)',
+        'glow-brand': '0 0 20px rgba(139, 92, 246, 0.25)',
+        'glow-accent': '0 0 20px rgba(6, 182, 212, 0.25)',
+        'soft': '0 2px 15px rgba(0, 0, 0, 0.08)',
+        'soft-lg': '0 4px 25px rgba(0, 0, 0, 0.1)',
+      },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',
+        'fade-in-up': 'fadeInUp 0.4s ease-out',
         'slide-up': 'slideUp 0.3s ease-out',
+        'blur-in': 'blurIn 0.3s ease-out',
+        'glow-pulse': 'glowPulse 2s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
         slideUp: {
           '0%': { transform: 'translateY(10px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
+        blurIn: {
+          '0%': { opacity: '0', filter: 'blur(10px)' },
+          '100%': { opacity: '1', filter: 'blur(0)' },
+        },
+        glowPulse: {
+          '0%, 100%': { boxShadow: '0 0 15px rgba(139, 92, 246, 0.3)' },
+          '50%': { boxShadow: '0 0 25px rgba(139, 92, 246, 0.5)' },
+        },
+      },
+      transitionTimingFunction: {
+        'premium': 'cubic-bezier(0.4, 0, 0.2, 1)',
+      },
+      backdropBlur: {
+        'xs': '2px',
       },
     },
   },

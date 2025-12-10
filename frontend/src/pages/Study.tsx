@@ -405,7 +405,7 @@ export default function Study() {
             <button
               onClick={() => generateSummaryMutation.mutate({ fileId: selectedFile.id })}
               disabled={generateSummaryMutation.isPending}
-              className="px-6 py-3 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 disabled:opacity-50"
+              className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
             >
               {generateSummaryMutation.isPending ? 'Generating...' : 'Generate Summary'}
             </button>
@@ -431,7 +431,7 @@ export default function Study() {
             <button
               onClick={() => generateNotesMutation.mutate({ fileId: selectedFile.id })}
               disabled={generateNotesMutation.isPending}
-              className="px-6 py-3 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 disabled:opacity-50"
+              className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
             >
               {generateNotesMutation.isPending ? 'Generating...' : 'Generate Notes'}
             </button>
@@ -467,7 +467,7 @@ export default function Study() {
                 generateFlashcardsMutation.mutate({ fileId: selectedFile.id, numCards })
               }
               disabled={generateFlashcardsMutation.isPending}
-              className="px-6 py-3 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 disabled:opacity-50"
+              className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
             >
               {generateFlashcardsMutation.isPending ? 'Generating...' : 'Generate Flashcards'}
             </button>
@@ -539,7 +539,7 @@ export default function Study() {
                     })
                   }
                   disabled={generateQuizMutation.isPending}
-                  className="px-6 py-3 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 disabled:opacity-50"
+                  className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
                 >
                   {generateQuizMutation.isPending ? 'Generating...' : 'Generate Quiz'}
                 </button>
@@ -582,7 +582,7 @@ export default function Study() {
                 })
               }
               disabled={generateQuizMutation.isPending}
-              className="px-6 py-3 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 disabled:opacity-50"
+              className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
             >
               {generateQuizMutation.isPending ? 'Generating...' : 'Generate Quiz'}
             </button>
@@ -600,17 +600,19 @@ export default function Study() {
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-gradient-to-br from-purple-50/30 via-cyan-50/30 to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
-      {/* Study Header with Teal Gradient */}
-      <div className="bg-gradient-to-r from-brand-500 to-accent-500 shadow-lg">
-        <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-10 py-8">
+    <div className="h-full flex flex-col overflow-hidden premium-gradient-bg">
+      {/* Study Header with Premium Gradient */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-600/90 via-brand-500/90 to-accent-500/90 backdrop-blur-xl"></div>
+        <div className="absolute inset-0 bg-gradient-mesh opacity-30"></div>
+        <div className="relative max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-10 py-10">
           <div className="flex items-center gap-4 mb-3">
-            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
+            <div className="p-3 bg-white/20 backdrop-blur-xl rounded-2xl shadow-soft-lg border border-white/20">
               <GraduationCap className="h-7 w-7 text-white" />
             </div>
             <h1 className="text-4xl font-bold text-white tracking-tight">Study Mode</h1>
           </div>
-          <p className="text-white/95 text-base ml-16">Upload materials and let AI help you learn smarter</p>
+          <p className="text-white/90 text-base ml-16">Upload materials and let AI help you learn smarter</p>
         </div>
       </div>
 
@@ -619,10 +621,10 @@ export default function Study() {
           {/* Upload Area */}
           <div
             onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-2xl p-10 text-center mb-10 cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl ${
+            className={`border-2 border-dashed rounded-3xl p-12 text-center mb-10 cursor-pointer transition-all duration-300 ease-out backdrop-blur-xl ${
               isDragging
-                ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20 dark:border-teal-400 shadow-teal-200 dark:shadow-teal-900/50'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-teal-400 dark:hover:border-teal-500 hover:bg-teal-50/50 dark:hover:bg-gray-800/80'
+                ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-900/20 dark:border-brand-400 shadow-glow-brand'
+                : 'border-white/30 dark:border-slate-700/50 bg-white/60 dark:bg-slate-900/60 hover:border-brand-400/50 dark:hover:border-brand-500/50 hover:bg-white/80 dark:hover:bg-slate-900/80 shadow-soft-xl hover:shadow-glow-brand/30'
             }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -673,12 +675,12 @@ export default function Study() {
 
           {/* Files Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <div className="p-6 border-b dark:border-gray-700">
+            <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl shadow-soft-xl border border-white/20 dark:border-slate-700/30 transition-all duration-300 ease-out hover:shadow-soft-2xl">
+              <div className="p-6 border-b border-white/20 dark:border-slate-700/30">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white">Your Files</h2>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{files.length} files</p>
               </div>
-              <div className="divide-y dark:divide-gray-700 max-h-[600px] overflow-y-auto">
+              <div className="divide-y divide-white/10 dark:divide-slate-700/30 max-h-[600px] overflow-y-auto">
                 {files.length === 0 ? (
                   <div className="p-4">
                     <EmptyState
@@ -697,7 +699,7 @@ export default function Study() {
                         setSelectedQuiz(null);
                         setSelectedFlashcardSet(null);
                       }}
-                      className={`w-full p-5 text-left hover:bg-gradient-to-r hover:from-brand-50/50 hover:to-accent-50/50 dark:hover:bg-gray-700 transition-all duration-200 ${
+                      className={`w-full p-5 text-left hover:bg-gradient-to-r hover:from-brand-50/30 hover:to-accent-50/30 dark:hover:from-brand-900/10 dark:hover:to-accent-900/10 transition-all duration-300 ease-out ${
                         selectedFile?.id === file.id ? 'bg-gradient-to-r from-brand-50/50 to-accent-50/50 dark:from-brand-900/20 dark:to-accent-900/20 border-l-4 border-brand-500' : ''
                       }`}
                     >
@@ -720,7 +722,7 @@ export default function Study() {
 
             <div className="lg:col-span-2">
               {!selectedFile ? (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl shadow-soft-xl border border-white/20 dark:border-slate-700/30">
                   <EmptyState
                     icon={<GraduationCap className="h-8 w-8" />}
                     title="Select a file to start"
@@ -728,13 +730,13 @@ export default function Study() {
                   />
                 </div>
               ) : (
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-                  <div className="p-8 border-b dark:border-gray-700">
+                <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl shadow-soft-xl border border-white/20 dark:border-slate-700/30 transition-all duration-300 ease-out hover:shadow-soft-2xl">
+                  <div className="p-8 border-b border-white/20 dark:border-slate-700/30">
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                       {selectedFile.originalName}
                     </h2>
                   </div>
-                  <div className="border-b dark:border-gray-700">
+                  <div className="border-b border-white/20 dark:border-slate-700/30">
                     <div className="flex space-x-6 sm:space-x-10 px-6 sm:px-8 overflow-x-auto scrollbar-hide">
                       {(['summary', 'notes', 'flashcards', 'quizzes'] as TabType[]).map((tab) => (
                         <button
@@ -744,10 +746,10 @@ export default function Study() {
                             setSelectedQuiz(null);
                             setSelectedFlashcardSet(null);
                           }}
-                          className={`py-4 sm:py-5 border-b-3 capitalize transition-all duration-300 whitespace-nowrap text-base sm:text-lg ${
+                          className={`py-4 sm:py-5 border-b-2 capitalize transition-all duration-300 ease-out whitespace-nowrap text-base sm:text-lg ${
                             activeTab === tab
-                              ? 'border-teal-600 dark:border-teal-400 text-teal-600 dark:text-teal-400 font-bold shadow-sm'
-                              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 hover:border-teal-300'
+                              ? 'border-brand-600 dark:border-brand-400 text-brand-600 dark:text-brand-400 font-semibold'
+                              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 hover:border-brand-300/50'
                           }`}
                         >
                           {tab}

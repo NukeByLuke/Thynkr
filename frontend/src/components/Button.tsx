@@ -31,25 +31,25 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg';
+      'inline-flex items-center justify-center font-semibold transition-all duration-250 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl';
 
     const variants = {
       primary:
-        'relative overflow-hidden bg-gradient-to-r from-[#7c3aed] via-[#9333ea] to-[#3b82f6] text-white hover:from-[#7c3aed] hover:via-[#7c3aed] hover:to-[#3b82f6] dark:from-[#7c3aed] dark:via-[#9333ea] dark:to-[#3b82f6] focus:ring-brand-500 shadow-[0_4px_20px_rgba(124,58,237,0.35)] hover:shadow-[0_0_24px_rgba(124,58,237,0.45)]',
+        'relative overflow-hidden bg-gradient-to-r from-[#8B5CF6] via-[#7C3AED] to-[#06B6D4] text-white shadow-soft hover:shadow-glow-brand hover:scale-[1.02] active:scale-[0.98]',
       secondary:
-        'relative overflow-hidden bg-gradient-to-r from-accent-500 to-accent-400 text-white hover:from-accent-400 hover:to-accent-300 focus:ring-accent-500 shadow-[0_4px_20px_rgba(16,185,129,0.35)] hover:shadow-[0_0_24px_rgba(16,185,129,0.45)]',
+        'relative overflow-hidden bg-gradient-to-r from-accent-500 to-accent-400 text-white shadow-soft hover:shadow-glow-accent hover:scale-[1.02] active:scale-[0.98]',
       outline:
-        'border-2 border-brand-500 dark:border-brand-400 text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 focus:ring-brand-500 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)]',
+        'border-2 border-brand-500/30 dark:border-brand-400/30 text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:border-brand-500 dark:hover:border-brand-400 hover:shadow-soft',
       ghost:
-        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 focus:ring-gray-500',
+        'text-slate-600 dark:text-slate-300 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white',
       danger:
-        'bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 focus:ring-red-500 shadow-[0_4px_20px_rgba(239,68,68,0.25)] hover:shadow-[0_0_20px_rgba(239,68,68,0.4)]',
+        'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-soft hover:shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:scale-[1.02] active:scale-[0.98]',
     };
 
     const sizes = {
-      sm: 'px-3 py-1.5 text-sm',
-      md: 'px-4 py-2 text-base',
-      lg: 'px-6 py-3 text-lg',
+      sm: 'px-4 py-2 text-sm',
+      md: 'px-5 py-2.5 text-base',
+      lg: 'px-7 py-3.5 text-lg',
     };
 
     return (

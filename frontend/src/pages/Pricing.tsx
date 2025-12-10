@@ -193,46 +193,51 @@ export default function Pricing() {
         />
       </Helmet>
 
-      <div className="bg-gray-50 dark:bg-gray-900 py-20 min-h-screen">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="py-24 min-h-screen relative">
+        {/* Background decoration */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-50/50 to-transparent dark:via-slate-900/50 pointer-events-none" />
+        <div className="absolute top-20 left-20 w-80 h-80 bg-gradient-to-br from-brand-400/15 to-brand-600/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-accent-400/15 to-accent-600/15 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">
-              Invest in Your Success
+          <div className="text-center mb-16">
+            <h1 className="text-5xl md:text-6xl font-bold text-slate-900 dark:text-white mb-6">
+              Invest in Your <span className="gradient-text">Success</span>
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-400 mb-2">
+            <p className="text-xl text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
               Choose the plan that fits your learning goals — upgrade anytime.
             </p>
-            <p className="text-base text-gray-500 dark:text-gray-500 mb-8">
+            <p className="text-base text-slate-500 dark:text-slate-500 mb-10">
               Every plan includes AI-powered study tools.
             </p>
 
             {/* Billing Toggle */}
-            <div className="inline-flex items-center gap-4 bg-white dark:bg-gray-800 p-1.5 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-2 rounded-2xl shadow-soft border border-white/20 dark:border-white/10">
               <button
                 onClick={() => setBillingCycle('monthly')}
-                className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
                   billingCycle === 'monthly'
-                    ? 'bg-primary-600 text-white shadow-md'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    ? 'bg-gradient-to-r from-brand-500 to-accent-500 text-white shadow-glow-brand'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-700/50'
                 }`}
               >
                 Monthly
               </button>
               <button
                 onClick={() => setBillingCycle('yearly')}
-                className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${
                   billingCycle === 'yearly'
-                    ? 'bg-primary-600 text-white shadow-md'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    ? 'bg-gradient-to-r from-brand-500 to-accent-500 text-white shadow-glow-brand'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-700/50'
                 }`}
               >
                 Yearly
                 <span
-                  className={`text-xs px-2 py-0.5 rounded-full ${
+                  className={`text-xs px-2.5 py-1 rounded-full font-bold ${
                     billingCycle === 'yearly'
                       ? 'bg-white/20 text-white'
-                      : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
+                      : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
                   }`}
                 >
                   Save ~17%
@@ -242,7 +247,7 @@ export default function Pricing() {
           </div>
 
           {/* Pricing Cards */}
-          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto items-stretch">
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
             {plans.map((plan) => {
               const price =
                 billingCycle === 'monthly' ? plan.monthlyPrice : plan.yearlyMonthlyPrice;
@@ -266,15 +271,15 @@ export default function Pricing() {
               // Define card styles based on plan type
               const getCardStyles = () => {
                 if (isCurrent) {
-                  return 'ring-2 ring-green-500 dark:ring-green-400 bg-green-50/50 dark:bg-green-900/10';
+                  return 'ring-2 ring-emerald-500/50 dark:ring-emerald-400/50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-soft-xl';
                 }
                 if (plan.id === 'standard') {
-                  return 'ring-2 ring-primary-500 dark:ring-primary-400 bg-gradient-to-br from-primary-50 via-white to-blue-50 dark:from-primary-900/20 dark:via-gray-800 dark:to-blue-900/20 shadow-xl md:scale-105 z-10';
+                  return 'ring-2 ring-brand-500/50 dark:ring-brand-400/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-glow-brand md:scale-105 z-10';
                 }
                 if (plan.id === 'premium') {
-                  return 'bg-gradient-to-br from-brand-50 via-white to-accent-50 dark:from-brand-900/20 dark:via-gray-800 dark:to-accent-900/20 shadow-lg';
+                  return 'bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-soft-xl hover:shadow-glow-accent';
                 }
-                return 'bg-white dark:bg-gray-800 shadow-md';
+                return 'bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-soft-lg';
               };
 
               // Define badge for each plan
@@ -317,7 +322,7 @@ export default function Pricing() {
               return (
                 <div
                   key={plan.id}
-                  className={`relative flex flex-col p-6 lg:p-8 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${getCardStyles()}`}
+                  className={`relative flex flex-col p-8 lg:p-10 rounded-3xl border border-white/20 dark:border-slate-700/30 transition-all duration-300 ease-out hover:-translate-y-2 ${getCardStyles()}`}
                 >
                   {getBadge()}
 
@@ -456,13 +461,15 @@ export default function Pricing() {
           </div>
 
           {/* Why Upgrade Section */}
-          <div className="mt-20 max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
-              Why Upgrade?
+          <div className="mt-24 max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-12">
+              <span className="bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-transparent">
+                Why Upgrade?
+              </span>
             </h2>
             <div className="grid md:grid-cols-3 gap-8">
               {/* Faster Learning */}
-              <div className="text-center group">
+              <div className="text-center group p-6 rounded-3xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-lg border border-white/20 dark:border-slate-700/30 hover:shadow-soft-xl transition-all duration-300 ease-out">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 mb-4 group-hover:scale-110 transition-transform duration-300">
                   <TrendingUp className="w-8 h-8 text-green-600 dark:text-green-400" />
                 </div>
@@ -476,7 +483,7 @@ export default function Pricing() {
               </div>
 
               {/* Smarter Notes */}
-              <div className="text-center group">
+              <div className="text-center group p-6 rounded-3xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-lg border border-white/20 dark:border-slate-700/30 hover:shadow-soft-xl transition-all duration-300 ease-out">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 mb-4 group-hover:scale-110 transition-transform duration-300">
                   <Brain className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                 </div>
@@ -489,7 +496,7 @@ export default function Pricing() {
               </div>
 
               {/* More Power */}
-              <div className="text-center group">
+              <div className="text-center group p-6 rounded-3xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-lg border border-white/20 dark:border-slate-700/30 hover:shadow-soft-xl transition-all duration-300 ease-out">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-100 to-accent-100 dark:from-brand-900/30 dark:to-accent-900/30 mb-4 group-hover:scale-110 transition-transform duration-300">
                   <Bolt className="w-8 h-8 text-brand-600 dark:text-brand-400" />
                 </div>

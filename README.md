@@ -175,9 +175,9 @@ Contributions are welcome! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) fo
 
 Built with passion by:
 
-- **Luke Dreise**
-- **Ivan Chen**
-- **Harshan Sathiamoorthy**
+- **Luke**
+- **Ivan**
+- **Harshan**
 
 ## 📄 License
 
