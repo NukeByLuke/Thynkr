@@ -1,9 +1,7 @@
 /**
  * OAuth Button Components
- * Thea-style minimal OAuth buttons for Google and Apple sign-in
+ * Thea-inspired clean minimal OAuth buttons for Google and Apple sign-in
  */
-
-import { motion } from 'framer-motion';
 
 interface OAuthButtonProps {
   onClick?: () => void;
@@ -16,7 +14,7 @@ const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 /**
  * Google Sign-In Button
- * White background with colored Google logo, subtle border and shadow
+ * White background with colored Google logo, clean border
  */
 export function GoogleSignInButton({ onClick, isLoading, disabled, label = 'Sign in with Google' }: OAuthButtonProps) {
   const handleClick = () => {
@@ -28,13 +26,11 @@ export function GoogleSignInButton({ onClick, isLoading, disabled, label = 'Sign
   };
 
   return (
-    <motion.button
+    <button
       type="button"
       onClick={handleClick}
       disabled={isLoading || disabled}
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
-      className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700 hover:border-gray-400 dark:hover:border-slate-500 transition-all duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {isLoading ? (
         <LoadingSpinner />
@@ -61,13 +57,13 @@ export function GoogleSignInButton({ onClick, isLoading, disabled, label = 'Sign
           <span>{label}</span>
         </>
       )}
-    </motion.button>
+    </button>
   );
 }
 
 /**
  * Apple Sign-In Button
- * Black background with white Apple logo
+ * White background with black Apple logo (matching Thea style)
  */
 export function AppleSignInButton({ onClick, isLoading, disabled, label = 'Sign in with Apple' }: OAuthButtonProps) {
   const handleClick = () => {
@@ -76,19 +72,17 @@ export function AppleSignInButton({ onClick, isLoading, disabled, label = 'Sign 
     } else {
       window.location.href = `${API_URL}/auth/apple`;
     }
-  };
+  }
 
   return (
-    <motion.button
+    <button
       type="button"
       onClick={handleClick}
       disabled={isLoading || disabled}
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
-      className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-black border border-black rounded-xl text-sm font-medium text-white hover:bg-gray-900 transition-all duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {isLoading ? (
-        <LoadingSpinner light />
+        <LoadingSpinner />
       ) : (
         <>
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -97,7 +91,7 @@ export function AppleSignInButton({ onClick, isLoading, disabled, label = 'Sign 
           <span>{label}</span>
         </>
       )}
-    </motion.button>
+    </button>
   );
 }
 
@@ -107,12 +101,12 @@ export function AppleSignInButton({ onClick, isLoading, disabled, label = 'Sign 
  */
 export function OAuthDivider() {
   return (
-    <div className="relative my-6">
+    <div className="relative my-5">
       <div className="absolute inset-0 flex items-center">
-        <div className="w-full border-t border-gray-200 dark:border-slate-700"></div>
+        <div className="w-full border-t border-slate-200"></div>
       </div>
       <div className="relative flex justify-center text-sm">
-        <span className="px-4 bg-[#F8FAFC] dark:bg-slate-900 text-slate-400 dark:text-slate-500 font-medium">or</span>
+        <span className="px-4 bg-[#E8EDF3] text-slate-400 font-medium">or</span>
       </div>
     </div>
   );

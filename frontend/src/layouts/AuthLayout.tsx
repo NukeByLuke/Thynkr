@@ -1,12 +1,11 @@
 /**
- * AuthLayout - Thea-style 2-column layout for login/signup pages
- * Left: Gradient brand panel with logo, tagline, and footer links
- * Right: Form content with tabs
+ * AuthLayout - Thea-inspired clean 2-column layout for login/signup pages
+ * Left: Centered brand panel with logo, tagline, and footer links
+ * Right: Floating form card with tabs
  */
 
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
-import ThemeToggle from '@/components/ThemeToggle';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -17,133 +16,140 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   const isLogin = location.pathname === '/login';
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-900 flex theme-transition">
-      {/* Left Brand Panel - #1E1B4B with rounded right corners */}
-      <motion.div
-        className="hidden lg:flex lg:w-[45%] xl:w-[40%] bg-[#1E1B4B] rounded-r-[3rem] flex-col justify-between p-10 xl:p-14 relative overflow-hidden"
-        initial={{ x: -30, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-      >
-        {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#7C3AED]/15 to-[#06B6D4]/10 pointer-events-none" />
+    <div className="min-h-screen bg-[#E8EDF3] flex items-center justify-center p-4 lg:p-8">
+      <div className="w-full max-w-[1100px] flex flex-col lg:flex-row gap-6 lg:gap-0">
         
-        {/* Decorative orbs */}
-        <div className="absolute top-20 right-10 w-64 h-64 bg-gradient-to-br from-[#7C3AED]/20 to-transparent rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-10 w-48 h-48 bg-gradient-to-tr from-[#06B6D4]/15 to-transparent rounded-full blur-3xl" />
-        
-        {/* Logo */}
-        <div className="relative z-10">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-200">
-              <span className="text-white font-bold text-xl">T</span>
+        {/* Left Brand Panel - Deep indigo with rounded corners */}
+        <motion.div
+          className="lg:w-[420px] xl:w-[460px] bg-[#1E1B4B] rounded-3xl flex flex-col items-center justify-between p-8 lg:p-12 min-h-[500px] lg:min-h-[600px]"
+          initial={{ x: -20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+        >
+          {/* Spacer for centering */}
+          <div />
+
+          {/* Logo and Tagline - Centered */}
+          <div className="flex flex-col items-center text-center">
+            {/* Logo Icon */}
+            <div className="mb-6">
+              <div className="w-20 h-20 relative">
+                {/* Decorative sparkles */}
+                <svg className="absolute -top-2 -right-1 w-4 h-4 text-pink-300" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" />
+                </svg>
+                <svg className="absolute bottom-2 right-0 w-3 h-3 text-cyan-300" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" />
+                </svg>
+                {/* Main logo - stylized T with feather */}
+                <svg viewBox="0 0 80 80" fill="none" className="w-full h-full">
+                  <path 
+                    d="M40 10C40 10 55 25 55 45C55 55 48 65 40 70C32 65 25 55 25 45C25 25 40 10 40 10Z" 
+                    stroke="white" 
+                    strokeWidth="3" 
+                    fill="none"
+                  />
+                  <path 
+                    d="M40 20L40 55" 
+                    stroke="white" 
+                    strokeWidth="3" 
+                    strokeLinecap="round"
+                  />
+                  <path 
+                    d="M32 30L48 30" 
+                    stroke="white" 
+                    strokeWidth="3" 
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
             </div>
-            <span className="text-2xl font-bold text-white tracking-tight">Thynkr</span>
-          </Link>
-        </div>
+            
+            {/* Brand Name */}
+            <h1 className="text-5xl lg:text-6xl font-light text-white tracking-tight mb-6">
+              Thynkr
+            </h1>
+            
+            {/* Tagline */}
+            <p className="text-white/60 text-lg font-light">
+              turning study time into free time
+            </p>
+          </div>
 
-        {/* Tagline */}
-        <div className="relative z-10 flex-1 flex flex-col justify-center">
-          <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight mb-6">
-            Unlock your
-            <br />
-            <span className="bg-gradient-to-r from-[#7C3AED] to-[#06B6D4] bg-clip-text text-transparent">
-              learning potential
-            </span>
-          </h1>
-          <p className="text-white/70 text-lg max-w-sm leading-relaxed">
-            AI-powered study tools to help you learn smarter, not harder.
-          </p>
-        </div>
+          {/* Footer Links */}
+          <nav className="flex items-center gap-8">
+            <Link
+              to="/about"
+              className="text-white/60 hover:text-white text-sm font-medium transition-colors duration-200 underline underline-offset-2"
+            >
+              About
+            </Link>
+            <Link
+              to="/testimonials"
+              className="text-white/60 hover:text-white text-sm font-medium transition-colors duration-200 underline underline-offset-2"
+            >
+              Testimonials
+            </Link>
+            <Link
+              to="/contact"
+              className="text-white/60 hover:text-white text-sm font-medium transition-colors duration-200 underline underline-offset-2"
+            >
+              Contact
+            </Link>
+          </nav>
+        </motion.div>
 
-        {/* Footer Links */}
-        <nav className="relative z-10 flex items-center gap-6">
-          <Link
-            to="/about"
-            className="text-white/50 hover:text-white text-sm font-medium transition-colors duration-200"
-          >
-            About
-          </Link>
-          <Link
-            to="/testimonials"
-            className="text-white/50 hover:text-white text-sm font-medium transition-colors duration-200"
-          >
-            Testimonials
-          </Link>
-          <Link
-            to="/contact"
-            className="text-white/50 hover:text-white text-sm font-medium transition-colors duration-200"
-          >
-            Contact
-          </Link>
-        </nav>
-      </motion.div>
+        {/* Right Form Panel - Floating card */}
+        <motion.div
+          className="flex-1 flex flex-col items-center lg:items-start lg:pl-8 xl:pl-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1, ease: [0.4, 0, 0.2, 1] }}
+        >
+          {/* Auth Tabs - Pill style */}
+          <div className="flex mb-6 bg-[#D4DCE8] rounded-full p-1 w-fit">
+            <Link
+              to="/login"
+              className={`px-8 py-2.5 text-sm font-medium rounded-full transition-all duration-200 ${
+                isLogin
+                  ? 'bg-[#1E1B4B] text-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Sign in
+            </Link>
+            <Link
+              to="/register"
+              className={`px-8 py-2.5 text-sm font-medium rounded-full transition-all duration-200 ${
+                !isLogin
+                  ? 'bg-[#1E1B4B] text-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Sign up
+            </Link>
+          </div>
 
-      {/* Right Form Panel */}
-      <div className="flex-1 flex flex-col min-h-screen relative">
-        {/* Theme Toggle - Top Right */}
-        <div className="absolute top-4 right-4 lg:top-6 lg:right-6 z-20">
-          <ThemeToggle size="sm" />
-        </div>
-
-        {/* Mobile Header */}
-        <div className="lg:hidden p-6 flex justify-center">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] flex items-center justify-center shadow-md">
-              <span className="text-white font-bold text-lg">T</span>
-            </div>
-            <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Thynkr</span>
-          </Link>
-        </div>
-
-        {/* Form Container */}
-        <div className="flex-1 flex items-center justify-center px-6 py-8 lg:px-12 xl:px-20">
-          <motion.div
-            className="w-full max-w-md"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
-          >
-            {/* Auth Tabs */}
-            <div className="flex mb-8 bg-slate-100 dark:bg-slate-800 rounded-xl p-1">
-              <Link
-                to="/login"
-                className={`flex-1 py-3 text-center text-sm font-semibold rounded-lg transition-all duration-200 ${
-                  isLogin
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                }`}
-              >
-                Sign in
-              </Link>
-              <Link
-                to="/register"
-                className={`flex-1 py-3 text-center text-sm font-semibold rounded-lg transition-all duration-200 ${
-                  !isLogin
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                }`}
-              >
-                Sign up
-              </Link>
-            </div>
-
+          {/* Form Content */}
+          <div className="w-full max-w-[380px]">
             {children}
 
             {/* Terms */}
-            <p className="mt-8 text-center text-xs text-slate-500 dark:text-slate-400">
+            <p className="mt-6 text-center text-xs text-slate-500 leading-relaxed">
               By signing in you agree to Thynkr's{' '}
-              <Link to="/terms" className="text-slate-700 dark:text-slate-300 hover:underline">
+              <Link to="/terms" className="text-slate-700 hover:underline">
                 terms of service
               </Link>
               ,{' '}
-              <Link to="/privacy" className="text-slate-700 dark:text-slate-300 hover:underline">
+              <Link to="/privacy" className="text-slate-700 hover:underline">
                 privacy policy
               </Link>
-              , and cookie usage.
+              ,
+              <br />
+              and cookie usage.
             </p>
-          </motion.div>
-        </div>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

@@ -1,10 +1,10 @@
 /**
- * Login Page - Thea-style minimal student-first experience
- * Clean, warm design with soft colors and smooth animations
+ * Login Page - Thea-inspired clean minimal design
+ * Simple, warm, and homey with clean inputs and clear CTAs
  */
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,7 +14,7 @@ import { GoogleSignInButton, AppleSignInButton, OAuthDivider } from '@/component
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
@@ -47,26 +47,15 @@ export default function Login() {
 
       <AuthLayout>
         {/* OAuth Buttons */}
-        <motion.div
-          className="space-y-3 mb-6"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-        >
+        <div className="space-y-3 mb-4">
           <GoogleSignInButton />
           <AppleSignInButton />
-        </motion.div>
+        </div>
 
         <OAuthDivider />
 
         {/* Login Form */}
-        <motion.form
-          onSubmit={handleSubmit}
-          className="space-y-5"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
-        >
+        <form onSubmit={handleSubmit} className="space-y-4">
           <AnimatePresence mode="wait">
             {error && (
               <motion.div
@@ -74,7 +63,7 @@ export default function Login() {
                 initial={{ opacity: 0, y: -10, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: 'auto' }}
                 exit={{ opacity: 0, y: -10, height: 0 }}
-                className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm"
+                className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm"
               >
                 {error}
               </motion.div>
@@ -82,83 +71,64 @@ export default function Login() {
           </AnimatePresence>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Email
-            </label>
             <input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              placeholder="Email"
               required
-              className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 shadow-sm"
+              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition-colors"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Password
-            </label>
             <input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="Password"
               required
-              className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 shadow-sm"
+              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition-colors"
             />
           </div>
 
           <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 cursor-pointer group">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 dark:border-slate-600 text-blue-500 focus:ring-blue-500/20 transition-colors"
+                className="w-4 h-4 rounded border-slate-300 text-[#3B82F6] focus:ring-[#3B82F6]/20"
               />
-              <span className="text-sm text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">Remember me</span>
+              <span className="text-sm text-slate-600">Remember me</span>
             </label>
-            <a
-              href="/forgot-password"
-              className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+            <Link
+              to="/forgot-password"
+              className="text-sm text-[#3B82F6] hover:text-[#2563EB] font-medium"
             >
               Forgot password?
-            </a>
+            </Link>
           </div>
 
+          {/* Primary CTA - Blue */}
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3 px-4 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-medium rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    fill="none"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
-                Signing in...
-              </span>
-            ) : (
-              'Sign in'
-            )}
+            {isLoading ? 'Signing in...' : 'Sign in'}
           </button>
-        </motion.form>
+
+          {/* Secondary CTA - Purple gradient for Register */}
+          <Link
+            to="/register"
+            className="block w-full py-3 px-4 bg-gradient-to-r from-[#C4B5FD] to-[#DDD6FE] hover:from-[#A78BFA] hover:to-[#C4B5FD] text-[#5B21B6] font-medium rounded-full text-center transition-all"
+          >
+            Create a free account
+          </Link>
+        </form>
       </AuthLayout>
     </>
   );
