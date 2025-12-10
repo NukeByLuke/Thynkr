@@ -30,20 +30,12 @@ export function GoogleSignInButton({ onClick, isLoading, disabled, label = 'Sign
       type="button"
       onClick={handleClick}
       disabled={isLoading || disabled}
-      className="w-full h-11 flex items-center justify-center gap-3 px-4 text-sm font-medium border transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full h-11 flex items-center justify-center gap-3 px-4 text-sm font-medium border transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
       style={{ 
         backgroundColor: '#FFFFFF', 
         color: '#1F2937',
         borderColor: '#E5E7EB',
-        borderRadius: '8px'
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = '#F9FAFB';
-        e.currentTarget.style.borderColor = '#D1D5DB';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = '#FFFFFF';
-        e.currentTarget.style.borderColor = '#E5E7EB';
+        borderRadius: '12px'
       }}
     >
       {isLoading ? (
@@ -93,20 +85,12 @@ export function AppleSignInButton({ onClick, isLoading, disabled, label = 'Sign 
       type="button"
       onClick={handleClick}
       disabled={isLoading || disabled}
-      className="w-full h-11 flex items-center justify-center gap-3 px-4 text-sm font-medium border transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full h-11 flex items-center justify-center gap-3 px-4 text-sm font-medium border transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
       style={{ 
         backgroundColor: '#FFFFFF', 
         color: '#1F2937',
         borderColor: '#E5E7EB',
-        borderRadius: '8px'
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = '#F9FAFB';
-        e.currentTarget.style.borderColor = '#D1D5DB';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = '#FFFFFF';
-        e.currentTarget.style.borderColor = '#E5E7EB';
+        borderRadius: '12px'
       }}
     >
       {isLoading ? (

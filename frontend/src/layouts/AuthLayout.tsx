@@ -118,13 +118,13 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           {/* Auth Tabs */}
           <div 
             className="flex mb-8 p-1"
-            style={{ backgroundColor: '#F3F4F6', borderRadius: '8px' }}
+            style={{ backgroundColor: '#E5E7EB', borderRadius: '12px' }}
           >
             <Link
               to="/login"
               className="flex-1 py-2.5 text-sm font-medium text-center transition-all duration-200"
               style={isLogin 
-                ? { backgroundColor: '#1F2937', color: '#FFFFFF', borderRadius: '6px' }
+                ? { backgroundColor: '#D1D5DB', color: '#1F2937', borderRadius: '10px' }
                 : { backgroundColor: 'transparent', color: '#6B7280' }
               }
             >
@@ -134,7 +134,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
               to="/register"
               className="flex-1 py-2.5 text-sm font-medium text-center transition-all duration-200"
               style={!isLogin 
-                ? { backgroundColor: '#1F2937', color: '#FFFFFF', borderRadius: '6px' }
+                ? { backgroundColor: '#D1D5DB', color: '#1F2937', borderRadius: '10px' }
                 : { backgroundColor: 'transparent', color: '#6B7280' }
               }
             >

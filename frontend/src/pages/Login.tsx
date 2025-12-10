@@ -84,7 +84,7 @@ export default function Login() {
                 backgroundColor: '#FFFFFF', 
                 color: '#1F2937', 
                 borderColor: '#E5E7EB',
-                borderRadius: '8px'
+                borderRadius: '12px'
               }}
               onFocus={(e) => {
                 e.target.style.borderColor = '#06B6D4';
@@ -110,7 +110,7 @@ export default function Login() {
                 backgroundColor: '#FFFFFF', 
                 color: '#1F2937', 
                 borderColor: '#E5E7EB',
-                borderRadius: '8px'
+                borderRadius: '12px'
               }}
               onFocus={(e) => {
                 e.target.style.borderColor = '#06B6D4';
@@ -132,12 +132,12 @@ export default function Login() {
                 className="w-4 h-4 border-gray-300 text-cyan-500 focus:ring-cyan-500/20"
                 style={{ borderRadius: '4px' }}
               />
-              <span className="text-sm" style={{ color: '#6B7280' }}>Remember me</span>
+              <span className="text-sm" style={{ color: '#64748B' }}>Remember me</span>
             </label>
             <Link
               to="/forgot-password"
               className="text-sm font-medium hover:underline"
-              style={{ color: '#06B6D4' }}
+              style={{ color: '#64748B' }}
             >
               Forgot password?
             </Link>
@@ -147,14 +147,8 @@ export default function Login() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full h-11 px-4 text-white font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ backgroundColor: '#06B6D4', borderRadius: '8px' }}
-            onMouseEnter={(e) => {
-              if (!isLoading) e.currentTarget.style.backgroundColor = '#0891B2';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#06B6D4';
-            }}
+            className="w-full h-11 px-4 text-white font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
+            style={{ backgroundColor: '#06B6D4', borderRadius: '9999px' }}
           >
             {isLoading ? 'Signing in...' : 'Sign in'}
           </button>

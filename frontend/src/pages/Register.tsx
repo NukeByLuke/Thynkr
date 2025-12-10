@@ -16,7 +16,7 @@ const inputStyle = {
   backgroundColor: '#FFFFFF',
   color: '#1F2937',
   borderColor: '#E5E7EB',
-  borderRadius: '8px'
+  borderRadius: '12px'
 };
 
 const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -204,14 +204,8 @@ export default function Register() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full h-11 px-4 text-white font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
-            style={{ backgroundColor: '#06B6D4', borderRadius: '8px' }}
-            onMouseEnter={(e) => {
-              if (!isLoading) e.currentTarget.style.backgroundColor = '#0891B2';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#06B6D4';
-            }}
+            className="w-full h-11 px-4 text-white font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-2 hover:opacity-90"
+            style={{ backgroundColor: '#06B6D4', borderRadius: '9999px' }}
           >
             {isLoading ? 'Creating account...' : 'Create free account'}
           </button>
