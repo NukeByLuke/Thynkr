@@ -12,21 +12,28 @@
   }
 
   :root {
-    /* Primary - soft welcoming blue */
-    --color-primary: #60A5FA;
+    /* Primary - accessible blue */
+    --color-primary: #3B82F6;
+    --color-primary-light: #60A5FA;
+    --color-primary-dark: #2563EB;
     /* Secondary - gentle lavender */
-    --color-secondary: #C4B5FD;
+    --color-secondary: #8B5CF6;
+    --color-secondary-light: #A78BFA;
     /* Accent - calming cyan */
-    --color-accent: #22D3EE;
-    /* Light mode backgrounds - warmer, calmer */
-    --color-bg-primary: #FAFBFC;
-    --color-bg-secondary: #F5F7FA;
-    /* Light mode text - softer contrast */
-    --color-text-primary: #1E293B;
-    --color-text-secondary: #64748B;
-    --color-text-tertiary: #94A3B8;
-    /* Transitions - smoother */
-    --transition-theme: 250ms ease-out;
+    --color-accent: #06B6D4;
+    /* Light mode backgrounds - warm and clean */
+    --color-bg-primary: #F9FAFB;
+    --color-bg-secondary: #F3F4F6;
+    --color-bg-tertiary: #FFFFFF;
+    /* Light mode text - deep, accessible contrast (WCAG AA) */
+    --color-text-primary: #111827;
+    --color-text-secondary: #4B5563;
+    --color-text-tertiary: #6B7280;
+    /* Light mode borders */
+    --color-border: #E5E7EB;
+    --color-border-light: #F3F4F6;
+    /* Transitions - smooth theme changes */
+    --transition-theme: 300ms ease-out;
     --transition-base: 200ms ease-out;
     /* Spacing - more generous */
     --spacing-section: 3rem;
@@ -38,13 +45,21 @@
   }
 
   .dark {
-    /* Dark mode backgrounds - softer */
-    --color-bg-primary: #0F172A;
+    /* Dark mode primary - brighter for visibility */
+    --color-primary: #60A5FA;
+    --color-primary-light: #93C5FD;
+    --color-primary-dark: #3B82F6;
+    /* Dark mode backgrounds - soft, not pure black */
+    --color-bg-primary: #111827;
     --color-bg-secondary: #1E293B;
-    /* Dark mode text - gentler contrast */
-    --color-text-primary: #F1F5F9;
-    --color-text-secondary: #CBD5E1;
-    --color-text-tertiary: #64748B;
+    --color-bg-tertiary: #1F2937;
+    /* Dark mode text - gentler contrast (WCAG AA) */
+    --color-text-primary: #F9FAFB;
+    --color-text-secondary: #D1D5DB;
+    --color-text-tertiary: #9CA3AF;
+    /* Dark mode borders */
+    --color-border: #374151;
+    --color-border-light: #1F2937;
   }
 
   html {
@@ -56,7 +71,7 @@
     color: var(--color-text-primary);
     background: var(--color-bg-primary);
     font-family: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    transition: background var(--transition-theme), color var(--transition-theme);
+    transition: background-color var(--transition-theme), color var(--transition-theme);
     letter-spacing: -0.005em;
     line-height: 1.7;
     font-weight: 400;
@@ -64,7 +79,14 @@
   }
 
   .dark body {
-    background: linear-gradient(to bottom, #0F172A 0%, #1E293B 100%);
+    background: var(--color-bg-primary);
+  }
+
+  /* Smooth theme transition for all elements */
+  *, *::before, *::after {
+    transition: background-color var(--transition-theme), 
+                border-color var(--transition-theme),
+                color 150ms ease-out;
   }
 
   h1, h2, h3, h4, h5, h6 {

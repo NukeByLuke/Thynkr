@@ -2,6 +2,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import Button from './Button';
 import Logo from './Logo';
+import ThemeToggle from './ThemeToggle';
 import {
   Menu,
   X,
@@ -168,6 +169,7 @@ export default function Navbar() {
 
             {isAuthenticated ? (
               <div className="flex items-center gap-1 ml-4 pl-4 border-l border-slate-200/50 dark:border-white/10">
+                <ThemeToggle size="sm" />
                 {user?.role === 'ADMIN' && (
                   <Button
                     variant="ghost"
@@ -218,6 +220,7 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex items-center space-x-3">
+                <ThemeToggle size="sm" />
                 <Button
                   variant="ghost"
                   size="sm"
@@ -239,7 +242,8 @@ export default function Navbar() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center gap-2">
+            <ThemeToggle size="sm" />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 p-2.5 rounded-2xl hover:bg-slate-100/80 dark:hover:bg-slate-800/50 transition-all duration-300"
