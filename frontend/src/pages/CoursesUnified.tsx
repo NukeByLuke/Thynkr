@@ -504,6 +504,7 @@ export default function CoursesUnified() {
                             <img
                               src={course.coverImage}
                               alt={course.title}
+                              loading="lazy"
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             />
                           ) : (

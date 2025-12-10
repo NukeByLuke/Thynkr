@@ -199,7 +199,7 @@ export default function DashboardLayout() {
             >
               {/* Logo */}
               <div className="p-6 border-b border-slate-200 dark:border-slate-800">
-                <button onClick={() => setIsMobileMenuOpen(false)} className="inline-flex">
+                <button onClick={() => setIsMobileMenuOpen(false)} className="inline-flex" aria-label="Close menu">
                   <Logo variant="full" animated={false} />
                 </button>
               </div>

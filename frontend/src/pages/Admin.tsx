@@ -825,7 +825,7 @@ const UserViewPanel = ({
       <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-white">User Details</h2>
-          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors" aria-label="Close user details">
             <X className="w-5 h-5 text-white" />
           </button>
         </div>
@@ -2161,6 +2161,7 @@ const CourseInsightsTab = () => {
                       <img
                         src={course.coverImage || course.bannerImage || ''}
                         alt={course.title}
+                        loading="lazy"
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -2307,6 +2308,7 @@ const CourseInsightsTab = () => {
                         <img
                           src={course.coverImage || course.bannerImage || ''}
                           alt=""
+                          loading="lazy"
                           className="w-full h-full object-cover"
                         />
                       ) : (

@@ -452,6 +452,7 @@ export default function CourseDetail() {
               <img
                 src={course.bannerImage}
                 alt={course.title}
+                loading="lazy"
                 className="w-full h-full object-cover"
               />
             </div>

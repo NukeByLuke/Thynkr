@@ -443,7 +443,7 @@ export default function MyCourseDetail() {
             {/* Banner Image (optional, smaller) */}
             {course.bannerImage && (
               <div className="relative w-full md:w-48 h-32 md:h-28 rounded-xl overflow-hidden flex-shrink-0">
-                <img src={course.bannerImage} alt="" className="w-full h-full object-cover" />
+                <img src={course.bannerImage} alt="" loading="lazy" className="w-full h-full object-cover" />
                 {course.isOwner && (
                   <>
                     <input

@@ -1028,6 +1028,7 @@ export default function TutorChat() {
                   <img
                     src={getAvatarUrl(user.avatarUrl)}
                     alt={user.username || 'User'}
+                    loading="lazy"
                     className="w-8 h-8 md:w-9 md:h-9 rounded-full object-cover border-2 border-white dark:border-slate-700 shadow-sm"
                   />
                 ) : (

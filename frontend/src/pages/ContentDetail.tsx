@@ -130,6 +130,7 @@ export default function ContentDetail() {
               <img
                 src={content.thumbnail}
                 alt={content.title}
+                loading="lazy"
                 className="w-full h-full object-cover"
               />
             </div>

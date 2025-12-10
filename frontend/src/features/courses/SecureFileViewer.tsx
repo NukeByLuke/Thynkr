@@ -134,6 +134,7 @@ function ImageViewer({
         <img
           src={url}
           alt={fileName}
+          loading="lazy"
           className="max-w-full max-h-[80vh] object-contain"
           onLoad={() => setLoading(false)}
           onError={() => {
