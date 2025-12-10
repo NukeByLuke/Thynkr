@@ -231,7 +231,7 @@ export default function PaginatedReader({
   return (
     <div className="flex flex-col h-full">
       {/* Header with page info */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <div>
           <h3 className="font-semibold text-gray-900 dark:text-white">{page.fileName}</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -242,7 +242,7 @@ export default function PaginatedReader({
           <button
             onClick={onRegenerate}
             disabled={isRegenerating}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
           >
             <RefreshCw className={`h-4 w-4 ${isRegenerating ? 'animate-spin' : ''}`} />
             Regenerate
@@ -251,7 +251,8 @@ export default function PaginatedReader({
       </div>
 
       {/* Content */}
-      <div ref={contentRef} className="flex-1 overflow-y-auto p-6">
+      <div ref={contentRef} className="flex-1 overflow-y-auto p-6 bg-white dark:bg-gray-900">
+        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentPage}
@@ -268,19 +269,19 @@ export default function PaginatedReader({
                   components={{
                     h1: ({ node, ...props }) => (
                       <h1
-                        className="text-3xl font-bold text-gray-900 dark:text-white mt-8 mb-5 pb-3 border-b-2 border-brand-500 dark:border-brand-400"
+                        className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4 pb-2 border-b border-gray-200 dark:border-gray-700"
                         {...props}
                       />
                     ),
                     h2: ({ node, ...props }) => (
                       <h2
-                        className="text-2xl font-bold text-gray-900 dark:text-white mt-7 mb-4"
+                        className="text-xl font-bold text-gray-900 dark:text-white mt-5 mb-3"
                         {...props}
                       />
                     ),
                     h3: ({ node, ...props }) => (
                       <h3
-                        className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3"
+                        className="text-lg font-semibold text-gray-900 dark:text-white mt-4 mb-2"
                         {...props}
                       />
                     ),
@@ -294,17 +295,17 @@ export default function PaginatedReader({
                       <strong className="font-semibold text-gray-900 dark:text-white" {...props} />
                     ),
                     em: ({ node, ...props }) => (
-                      <em className="italic text-gray-700 dark:text-gray-300" {...props} />
+                      <em className="italic text-gray-600 dark:text-gray-400" {...props} />
                     ),
                     ul: ({ node, ...props }) => (
                       <ul
-                        className="list-disc list-inside space-y-2 my-4 text-gray-700 dark:text-gray-300 marker:text-brand-500"
+                        className="list-disc list-inside space-y-2 my-4 text-gray-700 dark:text-gray-300"
                         {...props}
                       />
                     ),
                     ol: ({ node, ...props }) => (
                       <ol
-                        className="list-decimal list-inside space-y-2 my-4 text-gray-700 dark:text-gray-300 marker:text-brand-500"
+                        className="list-decimal list-inside space-y-2 my-4 text-gray-700 dark:text-gray-300"
                         {...props}
                       />
                     ),
@@ -314,14 +315,14 @@ export default function PaginatedReader({
                     code: ({ node, inline, className, children, ...props }: any) => {
                       return inline ? (
                         <code
-                          className="px-1.5 py-0.5 bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded text-sm font-mono border border-brand-200 dark:border-brand-700"
+                          className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded text-sm font-mono"
                           {...props}
                         >
                           {children}
                         </code>
                       ) : (
                         <code
-                          className={`block bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 rounded-xl overflow-x-auto text-xs font-mono shadow-lg border border-gray-700 my-3 ${className || ''}`}
+                          className={`block bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 p-4 rounded-lg overflow-x-auto text-sm font-mono my-3 border border-gray-200 dark:border-gray-700 ${className || ''}`}
                           {...props}
                         >
                           {children}
@@ -349,10 +350,10 @@ export default function PaginatedReader({
                         transition={{ delay: i * 0.05 }}
                         className="flex items-start gap-3"
                       >
-                        <span className="flex-shrink-0 w-6 h-6 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full flex items-center justify-center text-sm font-medium">
+                        <span className="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-sm font-medium">
                           {i + 1}
                         </span>
-                        <span className="text-gray-700 dark:text-gray-300">{point}</span>
+                        <span className="text-gray-700 dark:text-gray-300 leading-relaxed">{point}</span>
                       </motion.li>
                     ))}
                   </ul>
@@ -370,19 +371,19 @@ export default function PaginatedReader({
                       components={{
                         h1: ({ node, ...props }) => (
                           <h1
-                            className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4"
+                            className="text-xl font-bold text-gray-900 dark:text-white mt-5 mb-3"
                             {...props}
                           />
                         ),
                         h2: ({ node, ...props }) => (
                           <h2
-                            className="text-xl font-bold text-gray-900 dark:text-white mt-5 mb-3"
+                            className="text-lg font-bold text-gray-900 dark:text-white mt-4 mb-2"
                             {...props}
                           />
                         ),
                         h3: ({ node, ...props }) => (
                           <h3
-                            className="text-lg font-semibold text-gray-900 dark:text-white mt-4 mb-2"
+                            className="text-base font-semibold text-gray-900 dark:text-white mt-3 mb-2"
                             {...props}
                           />
                         ),
@@ -396,17 +397,17 @@ export default function PaginatedReader({
                           <strong className="font-semibold text-gray-900 dark:text-white" {...props} />
                         ),
                         em: ({ node, ...props }) => (
-                          <em className="italic text-gray-700 dark:text-gray-300" {...props} />
+                          <em className="italic text-gray-600 dark:text-gray-400" {...props} />
                         ),
                         ul: ({ node, ...props }) => (
                           <ul
-                            className="list-disc list-inside space-y-2 my-4 text-gray-700 dark:text-gray-300 marker:text-brand-500"
+                            className="list-disc list-inside space-y-2 my-4 text-gray-700 dark:text-gray-300"
                             {...props}
                           />
                         ),
                         ol: ({ node, ...props }) => (
                           <ol
-                            className="list-decimal list-inside space-y-2 my-4 text-gray-700 dark:text-gray-300 marker:text-brand-500"
+                            className="list-decimal list-inside space-y-2 my-4 text-gray-700 dark:text-gray-300"
                             {...props}
                           />
                         ),
@@ -416,14 +417,14 @@ export default function PaginatedReader({
                         code: ({ node, inline, className, children, ...props }: any) => {
                           return inline ? (
                             <code
-                              className="px-1.5 py-0.5 bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded text-sm font-mono border border-brand-200 dark:border-brand-700"
+                              className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded text-sm font-mono"
                               {...props}
                             >
                               {children}
                             </code>
                           ) : (
                             <code
-                              className={`block bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 rounded-xl overflow-x-auto text-xs font-mono shadow-lg border border-gray-700 my-3 ${className || ''}`}
+                              className={`block bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 p-4 rounded-lg overflow-x-auto text-sm font-mono my-3 border border-gray-200 dark:border-gray-700 ${className || ''}`}
                               {...props}
                             >
                               {children}
@@ -440,14 +441,15 @@ export default function PaginatedReader({
             )}
           </motion.div>
         </AnimatePresence>
+        </div>
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+      <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <button
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 0}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
           Previous
@@ -459,9 +461,9 @@ export default function PaginatedReader({
             <button
               key={i}
               onClick={() => goToPage(i)}
-              className={`w-2 h-2 rounded-full transition-colors ${
+              className={`w-2 h-2 rounded-full transition-all ${
                 i === currentPage
-                  ? 'bg-primary-600 w-4'
+                  ? 'bg-blue-500 w-4'
                   : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
               }`}
             />
@@ -471,14 +473,14 @@ export default function PaginatedReader({
         <button
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage === totalPages - 1}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Next
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
 
-      {/* TTS Player (Sticky Bottom) */}
+      {/* TTS Player - Minimal rounded design with blue accents */}
       <motion.div
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -489,7 +491,7 @@ export default function PaginatedReader({
           <button
             onClick={() => skipTime(-10)}
             disabled={!audioRef.current?.src}
-            className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-40"
+            className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-40 transition-colors"
             title="Back 10s"
           >
             <SkipBack className="h-4 w-4" />
@@ -499,7 +501,7 @@ export default function PaginatedReader({
           <button
             onClick={togglePlay}
             disabled={isLoadingAudio}
-            className="flex items-center justify-center w-10 h-10 bg-primary-600 hover:bg-primary-700 text-white rounded-full disabled:opacity-50 transition-colors"
+            className="flex items-center justify-center w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-full disabled:opacity-50 transition-colors"
           >
             {isLoadingAudio ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -514,7 +516,7 @@ export default function PaginatedReader({
           <button
             onClick={() => skipTime(10)}
             disabled={!audioRef.current?.src}
-            className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-40"
+            className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-40 transition-colors"
             title="Forward 10s"
           >
             <SkipForward className="h-4 w-4" />
@@ -531,7 +533,7 @@ export default function PaginatedReader({
               max={audioDuration || 100}
               value={audioProgress}
               onChange={handleSeek}
-              className="flex-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
+              className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer accent-blue-500"
             />
             <span className="text-xs text-gray-500 dark:text-gray-400 w-10">
               {formatTime(audioDuration)}
@@ -541,13 +543,13 @@ export default function PaginatedReader({
           {/* Speed Control */}
           <button
             onClick={changeSpeed}
-            className="px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+            className="px-2.5 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
           >
             {playbackSpeed}x
           </button>
 
           {/* Volume Icon */}
-          <button className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+          <button className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
             {isPlaying ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
           </button>
         </div>

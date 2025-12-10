@@ -93,7 +93,7 @@ export default function StudyFlashcards({
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <div>
           <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-orange-500" />
@@ -122,7 +122,7 @@ export default function StudyFlashcards({
             <button
               onClick={onRegenerate}
               disabled={isRegenerating}
-              className="p-2 text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
+              className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
               title="Regenerate flashcards"
             >
               <RefreshCw className={`h-4 w-4 ${isRegenerating ? 'animate-spin' : ''}`} />
@@ -152,9 +152,9 @@ export default function StudyFlashcards({
               animate={{ rotateY: 0, opacity: 1 }}
               exit={{ rotateY: isFlipped ? 90 : -90, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className={`absolute inset-0 rounded-2xl shadow-lg p-6 flex flex-col items-center justify-center text-center ${
+              className={`absolute inset-0 rounded-2xl shadow-sm p-6 flex flex-col items-center justify-center text-center ${
                 isFlipped
-                  ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white'
+                  ? 'bg-blue-500 text-white'
                   : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
               }`}
             >
@@ -199,7 +199,7 @@ export default function StudyFlashcards({
       </div>
 
       {/* Actions */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <div className="flex items-center justify-center gap-4 mb-4">
           <button
             onClick={markAsUnknown}

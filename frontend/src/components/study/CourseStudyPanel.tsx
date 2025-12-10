@@ -182,8 +182,8 @@ export default function CourseStudyPanel({
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-primary-600 to-purple-600">
+      {/* Header - Flat blue bar */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-blue-500">
         <div className="flex items-center gap-3">
           <Sparkles className="h-5 w-5 text-white" />
           <div>
@@ -194,7 +194,7 @@ export default function CourseStudyPanel({
         {onClose && (
           <button
             onClick={onClose}
-            className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg"
+            className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -223,7 +223,7 @@ export default function CourseStudyPanel({
 
         {/* Right: Study Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Tabs */}
+          {/* Tabs - Minimal design */}
           <div className="flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
             {TABS.map((tab) => (
               <button
@@ -232,11 +232,11 @@ export default function CourseStudyPanel({
                 disabled={selectedFileIds.size === 0}
                 className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                   activeTab === tab.id
-                    ? 'border-primary-600 text-primary-600 dark:text-primary-400'
-                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
-                <tab.icon className={`h-4 w-4 ${activeTab === tab.id ? tab.color : ''}`} />
+                <tab.icon className={`h-4 w-4 ${activeTab === tab.id ? 'text-blue-500' : 'text-gray-400'}`} />
                 {tab.label}
               </button>
             ))}
@@ -315,7 +315,7 @@ export default function CourseStudyPanel({
                 </p>
                 <button
                   onClick={() => refetch()}
-                  className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
+                  className="px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-full transition-colors"
                 >
                   Generate {activeTab}
                 </button>

@@ -86,7 +86,7 @@ export default function StudyQuiz({ data, onRegenerate, isRegenerating = false }
 
     if (!showResults) {
       return isSelected
-        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
+        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800';
     }
 
@@ -104,7 +104,7 @@ export default function StudyQuiz({ data, onRegenerate, isRegenerating = false }
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <div>
           <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
             <HelpCircle className="h-4 w-4 text-purple-500" />
@@ -130,7 +130,7 @@ export default function StudyQuiz({ data, onRegenerate, isRegenerating = false }
             <button
               onClick={onRegenerate}
               disabled={isRegenerating}
-              className="p-2 text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
+              className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
               title="Regenerate quiz"
             >
               <RefreshCw className={`h-4 w-4 ${isRegenerating ? 'animate-spin' : ''}`} />
@@ -149,7 +149,7 @@ export default function StudyQuiz({ data, onRegenerate, isRegenerating = false }
                 : scorePercentage >= 40
                   ? 'bg-yellow-500'
                   : 'bg-red-500'
-              : 'bg-primary-500'
+              : 'bg-blue-500'
           }`}
           style={{
             width: showResults
@@ -223,7 +223,7 @@ export default function StudyQuiz({ data, onRegenerate, isRegenerating = false }
             transition={{ duration: 0.2 }}
           >
             {/* Question Number */}
-            <p className="text-sm font-medium text-primary-600 dark:text-primary-400 mb-2">
+            <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-2">
               Question {currentQuestion + 1} of {totalQuestions}
             </p>
 

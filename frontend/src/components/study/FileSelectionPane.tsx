@@ -123,13 +123,13 @@ export default function FileSelectionPane({
         <button
           onClick={toggleSelectAll}
           disabled={disabled || aiCompatibleFiles.length === 0}
-          className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {allAIFilesSelected ? (
-            <CheckSquare className="h-4 w-4 text-primary-600" />
+            <CheckSquare className="h-4 w-4 text-blue-500" />
           ) : someSelected ? (
-            <div className="h-4 w-4 border-2 border-primary-600 rounded flex items-center justify-center">
-              <div className="h-2 w-2 bg-primary-600 rounded-sm" />
+            <div className="h-4 w-4 border-2 border-blue-500 rounded flex items-center justify-center">
+              <div className="h-2 w-2 bg-blue-500 rounded-sm" />
             </div>
           ) : (
             <Square className="h-4 w-4" />
@@ -156,10 +156,10 @@ export default function FileSelectionPane({
                 transition={{ delay: index * 0.03 }}
                 onClick={() => isCompatible && toggleFile(file.id)}
                 disabled={disabled || !isCompatible || isLoading}
-                className={`w-full flex items-center gap-3 p-3 text-left transition-colors border-b border-gray-100 dark:border-gray-700/50 ${
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-colors border-b border-gray-100 dark:border-gray-700/50 ${
                   isCompatible
                     ? isSelected
-                      ? 'bg-primary-50 dark:bg-primary-900/20 hover:bg-primary-100 dark:hover:bg-primary-900/30'
+                      ? 'bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30'
                       : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
                     : 'opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-800/30'
                 }`}
@@ -168,7 +168,7 @@ export default function FileSelectionPane({
                 <div className="flex-shrink-0">
                   {isCompatible ? (
                     isSelected ? (
-                      <CheckSquare className="h-4 w-4 text-primary-600" />
+                      <CheckSquare className="h-4 w-4 text-blue-500" />
                     ) : (
                       <Square className="h-4 w-4 text-gray-400" />
                     )
@@ -185,8 +185,8 @@ export default function FileSelectionPane({
                   <p
                     className={`text-sm font-medium truncate ${
                       isSelected
-                        ? 'text-primary-700 dark:text-primary-300'
-                        : 'text-gray-900 dark:text-white'
+                        ? 'text-blue-700 dark:text-blue-300'
+                        : 'text-gray-700 dark:text-gray-200'
                     }`}
                   >
                     {file.name}
@@ -199,7 +199,7 @@ export default function FileSelectionPane({
                 {/* Status Badge */}
                 <div className="flex-shrink-0">
                   {isCompatible ? (
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium rounded bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400">
                       <Sparkles className="h-3 w-3" />
                     </span>
                   ) : (
