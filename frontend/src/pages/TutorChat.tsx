@@ -1007,28 +1007,31 @@ export default function TutorChat() {
         {/* Messages */}
         <div
           ref={messagesContainerRef}
-          className="relative flex-1 overflow-y-auto p-3 md:p-4 space-y-4 md:space-y-6"
+          className="relative flex-1 overflow-y-auto p-4 md:p-6 space-y-5 md:space-y-6 bg-gray-50/50 dark:bg-slate-900/50"
           key={`messages-container-${displayedMessages.length}-${renderNudge}`}
         >
           {displayedMessages.map((message, index) => (
-            <div
+            <motion.div
               key={`${message.id || 'no-id'}-${message.createdAt || index}`}
-              className={`flex gap-2 md:gap-3 ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, delay: index * 0.02 }}
+              className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
             >
               {/* Avatar */}
               <div className="flex-shrink-0">
                 {message.role === 'assistant' ? (
-                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                  <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
                     <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-white" />
                   </div>
                 ) : user?.avatarUrl ? (
                   <img
                     src={getAvatarUrl(user.avatarUrl)}
                     alt={user.username || 'User'}
-                    className="w-7 h-7 md:w-8 md:h-8 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
+                    className="w-8 h-8 md:w-9 md:h-9 rounded-full object-cover border-2 border-white dark:border-slate-700 shadow-sm"
                   />
                 ) : (
-                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-400 flex items-center justify-center text-white font-semibold text-xs md:text-sm">
+                  <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-gray-500 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
                     {user?.username?.charAt(0).toUpperCase() || 'U'}
                   </div>
                 )}
@@ -1039,17 +1042,17 @@ export default function TutorChat() {
                 className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} max-w-[85%] md:max-w-[75%]`}
               >
                 <div
-                  className={`rounded-xl px-4 md:px-5 py-3 shadow-sm ${
+                  className={`rounded-2xl px-4 md:px-5 py-3.5 shadow-sm ${
                     message.role === 'user'
-                      ? 'bg-white dark:bg-slate-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700'
-                      : 'bg-blue-50 dark:bg-blue-900/20 text-gray-900 dark:text-white border border-blue-100 dark:border-blue-800/50'
+                      ? 'bg-white dark:bg-slate-800 text-gray-900 dark:text-white border border-gray-100 dark:border-slate-700'
+                      : 'bg-[#EFF6FF] dark:bg-blue-900/30 text-gray-900 dark:text-white'
                   }`}
                 >
-                  <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 text-sm md:text-base">
+                  <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 text-sm md:text-base leading-relaxed [&_p]:leading-[1.7]">
                     <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>{message.content}</ReactMarkdown>
                   </div>
                 </div>
-                <span className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
+                <span className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 mt-1.5 px-1">
                   {new Date(message.createdAt).toLocaleTimeString([], {
                     hour: '2-digit',
                     minute: '2-digit',
@@ -1060,96 +1063,114 @@ export default function TutorChat() {
                   <SourcesDisplay sources={message.sources} />
                 )}
               </div>
-            </div>
+            </motion.div>
           ))}
 
           {/* Streaming message with typing indicator */}
           {isStreaming && (
-            <div className="flex gap-2 md:gap-3 flex-row">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex gap-3 flex-row"
+            >
               {/* AI Avatar */}
               <div className="flex-shrink-0">
-                <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
                   <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-white" />
                 </div>
               </div>
 
               {/* Message Content */}
-              <div className="flex flex-col items-start max-w-[85%] md:max-w-[75%] animate-in fade-in duration-300">
-                <div className="rounded-xl px-4 md:px-5 py-3 bg-blue-50 dark:bg-blue-900/20 text-gray-900 dark:text-white border border-blue-100 dark:border-blue-800/50 shadow-sm">
+              <div className="flex flex-col items-start max-w-[85%] md:max-w-[75%]">
+                <div className="rounded-2xl px-4 md:px-5 py-3.5 bg-[#EFF6FF] dark:bg-blue-900/30 text-gray-900 dark:text-white shadow-sm">
                   {streamingMessage ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 text-sm md:text-base">
+                    <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 text-sm md:text-base leading-relaxed [&_p]:leading-[1.7]">
                       <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>{streamingMessage}</ReactMarkdown>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-1.5 py-1">
-                      <div
-                        className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
-                        style={{ animationDelay: '0ms' }}
+                    /* Typing indicator - three dots animation */
+                    <div className="flex items-center gap-1 py-1 px-1">
+                      <motion.div
+                        className="w-2 h-2 bg-blue-400 rounded-full"
+                        animate={{ y: [0, -6, 0] }}
+                        transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
                       />
-                      <div
-                        className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
-                        style={{ animationDelay: '150ms' }}
+                      <motion.div
+                        className="w-2 h-2 bg-blue-500 rounded-full"
+                        animate={{ y: [0, -6, 0] }}
+                        transition={{ duration: 0.6, repeat: Infinity, delay: 0.15 }}
                       />
-                      <div
-                        className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"
-                        style={{ animationDelay: '300ms' }}
+                      <motion.div
+                        className="w-2 h-2 bg-blue-600 rounded-full"
+                        animate={{ y: [0, -6, 0] }}
+                        transition={{ duration: 0.6, repeat: Infinity, delay: 0.3 }}
                       />
                     </div>
                   )}
                 </div>
-                <span className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
+                <span className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 mt-1.5 px-1">
                   typing...
                 </span>
                 {/* Show sources while streaming if available */}
                 {streamingSources.length > 0 && <SourcesDisplay sources={streamingSources} />}
               </div>
-            </div>
+            </motion.div>
           )}
 
           {/* Empty state */}
           {!currentSession && sessions.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <MessageCircle className="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center justify-center h-full text-center"
+            >
+              <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center mb-4">
+                <MessageCircle className="w-8 h-8 text-blue-500" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 Welcome to AI Tutor
               </h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-4 max-w-md">
+              <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md leading-relaxed">
                 Start a new chat to get help with your studies. I can answer questions, explain
                 concepts, and help you understand your materials.
               </p>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors font-medium shadow-sm"
               >
                 Start New Chat
               </button>
-            </div>
+            </motion.div>
           )}
 
           <div ref={messagesEndRef} />
 
           {/* Jump to latest button */}
           {!isAtBottom && hasNewMessages && (
-            <div className="absolute bottom-4 right-4">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="absolute bottom-4 right-4"
+            >
               <button
                 onClick={() => {
                   scrollChatToBottom(true);
                   setHasNewMessages(false);
                 }}
-                className="px-3 py-2 rounded-full shadow-md bg-primary-600 hover:bg-primary-700 text-white text-sm"
+                className="px-4 py-2 rounded-full shadow-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium"
               >
                 Jump to latest
               </button>
-            </div>
+            </motion.div>
           )}
         </div>
 
         {/* Input Area - pinned to bottom on mobile */}
         {currentSessionId && (
-          <div className="sticky bottom-0 p-4 md:p-6 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-gray-700 pb-safe">
+          <div className="sticky bottom-0 p-4 md:p-6 bg-white dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700 pb-safe">
             <div className="max-w-4xl mx-auto">
               {(!currentSession?.files || currentSession.files.length === 0) && (
-                <div className="mb-2 text-sm text-amber-700 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded p-2 flex items-start gap-2">
+                <div className="mb-3 text-sm text-amber-700 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl p-3 flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                   <span>
                     Attach at least one study file to chat. Click "Manage files" above to add files.
@@ -1163,7 +1184,7 @@ export default function TutorChat() {
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Ask me anything..."
-                  className="flex-1 resize-none rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-slate-700 px-4 md:px-5 py-3 md:py-4 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 max-h-32 overflow-y-auto text-base shadow-sm transition-shadow"
+                  className="flex-1 resize-none rounded-2xl border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 px-4 md:px-5 py-3.5 md:py-4 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-slate-600 max-h-32 overflow-y-auto text-base transition-all"
                   rows={1}
                   disabled={
                     isStreaming || !currentSession?.files || currentSession.files.length === 0
@@ -1177,12 +1198,12 @@ export default function TutorChat() {
                     !currentSession?.files ||
                     currentSession.files.length === 0
                   }
-                  className="p-3 md:p-4 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white rounded-xl transition-colors disabled:cursor-not-allowed flex-shrink-0"
+                  className="p-3.5 md:p-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-slate-600 text-white rounded-2xl transition-colors disabled:cursor-not-allowed flex-shrink-0 shadow-sm"
                 >
                   <Send className="w-5 h-5" />
                 </button>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center hidden md:block">
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-2.5 text-center hidden md:block">
                 Press Enter to send, Shift+Enter for new line
               </p>
             </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
   ChevronLeft,
@@ -19,13 +20,14 @@ import {
   Minimize2,
   Volume2,
   ListMusic,
+  FileText,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTTS } from '@/contexts/TTSContext';
 
-type ViewerTab = 'book' | 'quiz' | 'flashcards';
+type ViewerTab = 'summary' | 'notes' | 'quiz' | 'flashcards';
 
 interface PageContent {
   pageNumber: number;
@@ -71,17 +73,25 @@ interface StudyPackViewerProps {
 }
 
 const TABS: { id: ViewerTab; label: string; icon: typeof BookOpen }[] = [
-  { id: 'book', label: 'Book', icon: BookOpen },
+  { id: 'summary', label: 'Summary', icon: BookOpen },
+  { id: 'notes', label: 'Notes', icon: FileText },
   { id: 'quiz', label: 'Quiz', icon: HelpCircle },
   { id: 'flashcards', label: 'Flashcards', icon: Layers },
 ];
+
+// Animation variants for tab content
+const tabContentVariants = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' as const } },
+  exit: { opacity: 0, y: -8, transition: { duration: 0.15, ease: 'easeIn' as const } },
+};
 
 export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewerProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { play, addToQueue, currentTrack, isPlaying, isLoading: ttsLoading } = useTTS();
 
-  const [activeTab, setActiveTab] = useState<ViewerTab>('book');
+  const [activeTab, setActiveTab] = useState<ViewerTab>('summary');
   const [currentPage, setCurrentPage] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -145,7 +155,7 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (activeTab === 'book' && studyPack?.pages) {
+      if (activeTab === 'summary' && studyPack?.pages) {
         if (e.key === 'ArrowLeft') {
           setCurrentPage((p) => Math.max(0, p - 1));
         } else if (e.key === 'ArrowRight') {
@@ -199,10 +209,10 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
     return { correct, total: questions.length };
   }, [studyPack, quizAnswers]);
 
-  // Progress bar for book
+  // Progress bar for summary
   const pageProgress = studyPack?.pages ? ((currentPage + 1) / studyPack.pages.length) * 100 : 0;
 
-  const renderBookTab = () => {
+  const renderSummaryTab = () => {
     if (!studyPack?.pages || studyPack.pages.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -255,19 +265,21 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
     return (
       <div className="flex flex-col h-full">
         {/* Progress bar */}
-        <div className="h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-4">
-          <div
-            className="h-full bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-300"
-            style={{ width: `${pageProgress}%` }}
+        <div className="h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mb-6">
+          <motion.div
+            className="h-full bg-gradient-to-r from-blue-500 to-indigo-500"
+            initial={{ width: 0 }}
+            animate={{ width: `${pageProgress}%` }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
           />
         </div>
 
         {/* TTS Controls */}
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-6">
           <button
             onClick={handleReadPage}
             disabled={ttsLoading}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
               isCurrentPagePlaying
                 ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/25'
                 : 'bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 text-primary-700 dark:text-primary-300 hover:from-primary-100 hover:to-primary-200 dark:hover:from-primary-900/30 dark:hover:to-primary-800/30'
@@ -283,7 +295,7 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
             <button
               onClick={handleReadAllPages}
               disabled={ttsLoading}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl text-sm font-medium transition-colors"
             >
               <ListMusic className="h-4 w-4" />
               Read All ({studyPack.pages.length - currentPage} pages)
@@ -291,41 +303,47 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
           )}
         </div>
 
-        {/* Page content */}
+        {/* Page content - Card-based academic design */}
         <div className="flex-1 overflow-y-auto">
-          <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-gray-800 dark:to-gray-750 rounded-2xl p-8 min-h-[400px] shadow-inner">
+          <motion.div
+            key={currentPage}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+            className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-slate-700"
+          >
             {page.heading && (
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b border-amber-200 dark:border-gray-600">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 pb-3 border-b border-gray-100 dark:border-slate-700">
                 {page.heading}
               </h2>
             )}
-            <div className="prose dark:prose-invert max-w-none">
-              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed text-lg">
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-[1.8] text-base">
                 {page.content}
               </p>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Navigation */}
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100 dark:border-slate-700">
           <button
             onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
             disabled={currentPage === 0}
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-xl disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronLeft className="h-5 w-5" />
             Previous
           </button>
 
-          <div className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
             Page {currentPage + 1} of {studyPack.pages.length}
           </div>
 
           <button
             onClick={() => setCurrentPage((p) => Math.min(studyPack.pages.length - 1, p + 1))}
             disabled={currentPage === studyPack.pages.length - 1}
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-xl disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             Next
             <ChevronRight className="h-5 w-5" />
@@ -353,6 +371,50 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
     );
   };
 
+  // Notes tab - shows key points and summary in card layout
+  const renderNotesTab = () => {
+    if (!studyPack?.pages || studyPack.pages.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <FileText className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">No notes available</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {studyPack.pages.map((page, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, delay: index * 0.05 }}
+            className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-slate-700"
+          >
+            {page.heading && (
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                {page.heading}
+              </h3>
+            )}
+            <p className="text-gray-600 dark:text-gray-300 leading-[1.7] text-sm line-clamp-4">
+              {page.content}
+            </p>
+            <button
+              onClick={() => {
+                setActiveTab('summary');
+                setCurrentPage(index);
+              }}
+              className="mt-3 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+            >
+              Read full page →
+            </button>
+          </motion.div>
+        ))}
+      </div>
+    );
+  };
+
   const renderQuizTab = () => {
     if (!studyPack?.quiz) {
       return (
@@ -367,34 +429,46 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
 
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {studyPack.quiz.title}
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {studyPack.quiz.questions.length} questions • {studyPack.quiz.difficulty} difficulty
-            </p>
-          </div>
-          {showQuizResults && (
-            <div
-              className={`px-4 py-2 rounded-lg font-semibold ${
-                correct === total
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                  : correct >= total / 2
-                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-                    : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-              }`}
-            >
-              Score: {correct}/{total}
+        {/* Quiz header card */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-slate-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {studyPack.quiz.title}
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                {studyPack.quiz.questions.length} questions • {studyPack.quiz.difficulty} difficulty
+              </p>
             </div>
-          )}
+            {showQuizResults && (
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className={`px-4 py-2 rounded-xl font-semibold ${
+                  correct === total
+                    ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                    : correct >= total / 2
+                      ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                      : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                }`}
+              >
+                Score: {correct}/{total}
+              </motion.div>
+            )}
+          </div>
         </div>
 
-        <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2">
+        {/* Questions */}
+        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
           {studyPack.quiz.questions.map((question, qIndex) => (
-            <div key={qIndex} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-              <p className="font-medium text-gray-900 dark:text-white mb-3">
+            <motion.div
+              key={qIndex}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: qIndex * 0.05 }}
+              className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-slate-700"
+            >
+              <p className="font-medium text-gray-900 dark:text-white mb-4 leading-relaxed">
                 {qIndex + 1}. {question.question}
               </p>
               <div className="space-y-2">
@@ -412,16 +486,16 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
                         }
                       }}
                       disabled={showQuizResults}
-                      className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
+                      className={`w-full text-left p-3.5 rounded-xl border-2 transition-all ${
                         showResult
                           ? isCorrect
-                            ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                            ? 'border-green-400 bg-green-50 dark:bg-green-900/20'
                             : isSelected
-                              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                              : 'border-gray-200 dark:border-gray-600'
+                              ? 'border-red-400 bg-red-50 dark:bg-red-900/20'
+                              : 'border-gray-100 dark:border-slate-600'
                           : isSelected
-                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                            : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                            ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                            : 'border-gray-100 dark:border-slate-600 hover:border-gray-200 dark:hover:border-slate-500 hover:bg-gray-50 dark:hover:bg-slate-700'
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -436,11 +510,15 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
                 })}
               </div>
               {showQuizResults && question.explanation && (
-                <p className="mt-3 text-sm text-gray-600 dark:text-gray-400 italic">
+                <motion.p
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="mt-4 text-sm text-gray-600 dark:text-gray-400 italic bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg"
+                >
                   💡 {question.explanation}
-                </p>
+                </motion.p>
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
 
@@ -448,7 +526,7 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
           <button
             onClick={() => setShowQuizResults(true)}
             disabled={Object.keys(quizAnswers).length !== studyPack.quiz!.questions.length}
-            className="w-full py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full py-3.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-sm"
           >
             Check Answers ({Object.keys(quizAnswers).length}/{studyPack.quiz.questions.length}{' '}
             answered)
@@ -459,7 +537,7 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
               setQuizAnswers({});
               setShowQuizResults(false);
             }}
-            className="w-full py-3 border-2 border-primary-500 text-primary-600 dark:text-primary-400 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
+            className="w-full py-3.5 border-2 border-blue-500 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors font-medium"
           >
             Try Again
           </button>
@@ -483,34 +561,41 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
 
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {studyPack.cards.title}
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Card {currentCard + 1} of {cards.length}
-            </p>
+        {/* Header card */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-slate-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {studyPack.cards.title}
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Card {currentCard + 1} of {cards.length}
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Flashcard */}
-        <div
+        {/* Flashcard - with flip animation */}
+        <motion.div
+          key={`${currentCard}-${showCardBack}`}
+          initial={{ opacity: 0, rotateY: showCardBack ? -10 : 10 }}
+          animate={{ opacity: 1, rotateY: 0 }}
+          transition={{ duration: 0.25 }}
           onClick={() => setShowCardBack(!showCardBack)}
-          className="min-h-[250px] p-8 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/30 rounded-2xl cursor-pointer transition-all hover:shadow-lg flex items-center justify-center text-center"
+          className="min-h-[280px] p-8 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 cursor-pointer transition-all hover:shadow-md flex items-center justify-center text-center"
         >
           <div className="max-w-lg">
-            <p className="text-xs uppercase tracking-wider text-primary-600 dark:text-primary-400 mb-3">
+            <p className="text-xs uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-4 font-medium">
               {showCardBack ? 'Answer' : 'Question'}
             </p>
-            <p className="text-xl text-gray-900 dark:text-white leading-relaxed">
+            <p className="text-xl text-gray-900 dark:text-white leading-[1.7]">
               {showCardBack ? card.back : card.front}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-6">
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-8">
               {showCardBack ? 'Click to see question' : 'Click to reveal answer'} • Space to flip
             </p>
           </div>
-        </div>
+        </motion.div>
 
         {/* Navigation */}
         <div className="flex items-center justify-between">
@@ -520,7 +605,7 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
               setShowCardBack(false);
             }}
             disabled={currentCard === 0}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2.5 border border-gray-200 dark:border-slate-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Previous
           </button>
@@ -536,7 +621,7 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
                 }}
                 className={`w-2 h-2 rounded-full transition-colors ${
                   i === currentCard
-                    ? 'bg-primary-500'
+                    ? 'bg-blue-500'
                     : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
                 }`}
               />
@@ -552,7 +637,7 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
               setShowCardBack(false);
             }}
             disabled={currentCard === cards.length - 1}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2.5 border border-gray-200 dark:border-slate-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Next
           </button>
@@ -564,10 +649,14 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
   if (isLoading) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary-500 mx-auto" />
-          <p className="text-gray-600 dark:text-gray-400 mt-4">Loading study pack...</p>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-lg"
+        >
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto" />
+          <p className="text-gray-600 dark:text-gray-400 mt-4 text-center">Loading study pack...</p>
+        </motion.div>
       </div>
     );
   }
@@ -575,31 +664,39 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
   if (error || !studyPack) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 text-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white dark:bg-slate-800 rounded-xl p-8 text-center shadow-lg"
+        >
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <p className="text-gray-600 dark:text-gray-400">Failed to load study pack</p>
           <button
             onClick={onClose}
-            className="mt-4 px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
+            className="mt-4 px-4 py-2 bg-gray-100 dark:bg-slate-700 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
           >
             Close
           </button>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm ${isFullscreen ? 'p-0' : 'p-4'}`}
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm ${isFullscreen ? 'p-0' : 'p-4'}`}
     >
-      <div
-        className={`bg-white dark:bg-gray-800 shadow-xl flex flex-col overflow-hidden transition-all ${
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.2 }}
+        className={`bg-gray-50 dark:bg-slate-900 shadow-xl flex flex-col overflow-hidden transition-all ${
           isFullscreen ? 'w-full h-full rounded-none' : 'w-full max-w-4xl max-h-[90vh] rounded-2xl'
         }`}
       >
         {/* Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
+        <div className="p-4 bg-white dark:bg-slate-800 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             {isEditing ? (
               <div className="flex items-center gap-2 flex-1">
@@ -607,7 +704,7 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
                   type="text"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                  className="flex-1 px-3 py-1.5 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                   autoFocus
                 />
                 <button
@@ -681,25 +778,25 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
             )}
             <button
               onClick={() => setIsFullscreen(!isFullscreen)}
-              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg"
               title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
             >
               {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
             </button>
             <button
               onClick={onClose}
-              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+        {/* Tabs - with smooth indicator */}
+        <div className="flex bg-white dark:bg-slate-800 border-b border-gray-100 dark:border-slate-700 flex-shrink-0 px-2">
           {TABS.map((tab) => {
             const hasContent =
-              tab.id === 'book'
+              tab.id === 'summary' || tab.id === 'notes'
                 ? !!studyPack.pages?.length
                 : tab.id === 'quiz'
                   ? !!studyPack.quiz
@@ -710,9 +807,9 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 disabled={!hasContent}
-                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${
+                className={`relative flex items-center gap-2 px-5 py-3.5 text-sm font-medium transition-colors ${
                   activeTab === tab.id
-                    ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-500'
+                    ? 'text-blue-600 dark:text-blue-400'
                     : hasContent
                       ? 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                       : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
@@ -721,24 +818,42 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
                 <tab.icon className="h-4 w-4" />
                 {tab.label}
                 {!hasContent && <span className="text-xs">(empty)</span>}
+                {activeTab === tab.id && (
+                  <motion.div
+                    layoutId="activeStudyTab"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500"
+                    transition={{ duration: 0.2 }}
+                  />
+                )}
               </button>
             );
           })}
         </div>
 
-        {/* Content */}
+        {/* Content with tab transitions */}
         <div className="flex-1 overflow-y-auto p-6">
-          {activeTab === 'book' && renderBookTab()}
-          {activeTab === 'quiz' && renderQuizTab()}
-          {activeTab === 'flashcards' && renderFlashcardsTab()}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              variants={tabContentVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              {activeTab === 'summary' && renderSummaryTab()}
+              {activeTab === 'notes' && renderNotesTab()}
+              {activeTab === 'quiz' && renderQuizTab()}
+              {activeTab === 'flashcards' && renderFlashcardsTab()}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-          <span>{studyPack.fileIds.length} files combined</span>
+        <div className="p-3 bg-white dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+          <span>{studyPack.fileIds.length} file{studyPack.fileIds.length !== 1 ? 's' : ''} combined</span>
           <span>Use ← → arrows to navigate</span>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
