@@ -2,7 +2,9 @@ import { useState, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { motion } from 'framer-motion';
 import PageContainer from '@/components/layout/PageContainer';
+import { FileListSkeleton, Skeleton } from '@/components/ui/Skeleton';
 import {
   Folder as FolderIcon,
   FolderPlus,
@@ -496,9 +498,34 @@ export default function Files() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen p-6"
+      >
+        <PageContainer>
+          <div className="space-y-6">
+            {/* Header skeleton */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-32 rounded-lg" />
+                <Skeleton className="h-4 w-64 rounded-md" />
+              </div>
+              <Skeleton className="h-12 w-12 rounded-xl" />
+            </div>
+            {/* Upload area skeleton */}
+            <Skeleton className="h-32 w-full rounded-lg" />
+            {/* Folders skeleton */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-20 rounded-xl" />
+              ))}
+            </div>
+            {/* Files skeleton */}
+            <FileListSkeleton count={5} />
+          </div>
+        </PageContainer>
+      </motion.div>
     );
   }
 

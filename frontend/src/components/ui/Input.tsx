@@ -38,11 +38,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             'text-gray-900 dark:text-white',
             'placeholder:text-gray-400 dark:placeholder:text-slate-500',
             error
-              ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-400/30'
+              ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-400/30 focus:shadow-[0_0_0_4px_rgba(248,113,113,0.1)]'
               : clsx(
                   'border-gray-300 dark:border-slate-600',
                   'hover:border-gray-400 dark:hover:border-slate-500',
-                  'focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30'
+                  'focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.1)]'
                 ),
             props.disabled && 'bg-gray-100 dark:bg-slate-900 cursor-not-allowed opacity-60',
             className

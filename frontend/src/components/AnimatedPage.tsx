@@ -9,7 +9,7 @@ interface AnimatedPageProps {
 const pageVariants: Variants = {
   initial: { 
     opacity: 0, 
-    y: 16,
+    y: 12,
     scale: 1,
   },
   animate: { 
@@ -17,16 +17,16 @@ const pageVariants: Variants = {
     y: 0,
     scale: 1,
     transition: {
-      duration: 0.3,
+      duration: 0.25, // 250ms for snappy, polished feel
       ease: [0.25, 0.46, 0.45, 0.94], // Smooth ease-out
-      staggerChildren: 0.08
+      staggerChildren: 0.06
     }
   },
   exit: { 
     opacity: 0, 
-    scale: 0.98,
+    scale: 0.99,
     transition: {
-      duration: 0.2,
+      duration: 0.15, // Fast exit
       ease: [0.55, 0.06, 0.68, 0.19] // Smooth ease-in
     }
   }

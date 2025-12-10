@@ -191,4 +191,33 @@ export function AvatarSkeleton({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   );
 }
 
+/**
+ * Skeleton for chat messages (AI Tutor)
+ */
+export function ChatMessageSkeleton({ isUser = false }: { isUser?: boolean }) {
+  return (
+    <div className={clsx('flex gap-3', isUser && 'flex-row-reverse')}>
+      <Skeleton className="h-8 w-8 rounded-full flex-shrink-0" />
+      <div className={clsx('space-y-2 max-w-[70%]', isUser && 'items-end')}>
+        <Skeleton className={clsx('h-4 rounded-md', isUser ? 'w-48' : 'w-64')} />
+        <Skeleton className={clsx('h-4 rounded-md', isUser ? 'w-32' : 'w-56')} />
+        {!isUser && <Skeleton className="h-4 w-40 rounded-md" />}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Skeleton for chat conversation
+ */
+export function ChatSkeleton({ messageCount = 4 }: { messageCount?: number }) {
+  return (
+    <div className="space-y-6 p-4">
+      {Array.from({ length: messageCount }).map((_, i) => (
+        <ChatMessageSkeleton key={i} isUser={i % 2 === 1} />
+      ))}
+    </div>
+  );
+}
+
 export default Skeleton;

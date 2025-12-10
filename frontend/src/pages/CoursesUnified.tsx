@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { CourseGridSkeleton } from '@/components/ui/Skeleton';
 import VisibilityChip from '@/features/courses/VisibilityChip';
 import EmptyState from '@/components/ui/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
@@ -440,9 +440,9 @@ export default function CoursesUnified() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex justify-center py-20"
+                  transition={{ duration: 0.2 }}
                 >
-                  <LoadingSpinner />
+                  <CourseGridSkeleton count={6} />
                 </motion.div>
               ) : error ? (
                 <motion.div

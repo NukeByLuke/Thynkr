@@ -4,6 +4,7 @@
 // The TutorChat component and its associated logic have been removed.
 import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
@@ -27,6 +28,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import UpgradePrompt, { useTierAccess } from '@/components/UpgradePrompt';
+import { ChatSkeleton, Skeleton } from '@/components/ui/Skeleton';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -673,9 +675,36 @@ export default function TutorChat() {
   // Show loading or nothing while redirecting non-Premium users
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex h-[calc(100vh-4rem)] bg-gray-50 dark:bg-[#1E293B]"
+      >
+        {/* Sidebar skeleton */}
+        <div className="hidden md:flex w-72 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-gray-700 flex-col p-4 space-y-4">
+          <Skeleton className="h-10 w-full rounded-lg" />
+          <div className="space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-12 w-full rounded-lg" />
+            ))}
+          </div>
+        </div>
+        {/* Chat area skeleton */}
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+            <Skeleton className="h-6 w-48 rounded-md" />
+          </div>
+          {/* Messages */}
+          <div className="flex-1 p-4">
+            <ChatSkeleton messageCount={4} />
+          </div>
+          {/* Input */}
+          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+            <Skeleton className="h-12 w-full rounded-xl" />
+          </div>
+        </div>
+      </motion.div>
     );
   }
 
