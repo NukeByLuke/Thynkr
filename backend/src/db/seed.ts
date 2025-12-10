@@ -3,273 +3,279 @@ import prisma from './client';
 import { logger } from '../lib/logger';
 import seedCoursesWithInternalFiles from './seed-courses-internal';
 
-async function seed() {
-  try {
-    logger.info('Starting database seed...');
+/**
+ * Thynkr Database Seed Script
+ * 
+ * Seeds the database with clean sample data:
+ * - 3 Users: admin, instructor (premium), student (basic)
+ * - 5 Courses with realistic academic content
+ * - Sample content articles
+ */
 
-    // Create test users
-    const testUsers = [
-      {
-        email: 'basic@test.local',
-        username: 'basicuser',
-        password: 'Password123!',
-        firstName: 'Basic',
-        lastName: 'User',
-        role: 'BASIC' as const,
-        emailVerified: true,
+async function clearDatabase() {
+  logger.info('🗑️  Clearing existing data...');
+
+  // Clear in order respecting foreign key constraints
+  // Most dependent tables first
+  await prisma.studyCache.deleteMany({});
+  await prisma.studyPack.deleteMany({});
+  await prisma.studySession.deleteMany({});
+  await prisma.studyStreak.deleteMany({});
+  await prisma.courseFileAI.deleteMany({});
+  await prisma.courseFile.deleteMany({});
+  await prisma.course.deleteMany({});
+  await prisma.tutorSessionFile.deleteMany({});
+  await prisma.tutorMessage.deleteMany({});
+  await prisma.tutorSession.deleteMany({});
+  await prisma.flashcard.deleteMany({});
+  await prisma.flashcardSet.deleteMany({});
+  await prisma.quizAttempt.deleteMany({});
+  await prisma.quizQuestion.deleteMany({});
+  await prisma.quiz.deleteMany({});
+  await prisma.fileNotes.deleteMany({});
+  await prisma.fileSummary.deleteMany({});
+  await prisma.uploadedFile.deleteMany({});
+  await prisma.folder.deleteMany({});
+  await prisma.payment.deleteMany({});
+  await prisma.subscription.deleteMany({});
+  await prisma.refreshToken.deleteMany({});
+  await prisma.adminLog.deleteMany({});
+  await prisma.content.deleteMany({});
+  await prisma.user.deleteMany({});
+
+  logger.info('   ✓ All tables cleared');
+}
+
+async function seedUsers() {
+  logger.info('👥 Seeding users...');
+
+  const users = [
+    {
+      email: 'admin@thynkr.app',
+      username: 'admin',
+      password: 'AdminPass123!',
+      firstName: 'Admin',
+      lastName: 'User',
+      role: 'ADMIN' as const,
+      emailVerified: true,
+    },
+    {
+      email: 'instructor@thynkr.app',
+      username: 'instructor',
+      password: 'Instructor123!',
+      firstName: 'Sarah',
+      lastName: 'Johnson',
+      role: 'PREMIUM' as const,
+      emailVerified: true,
+    },
+    {
+      email: 'student@thynkr.app',
+      username: 'student',
+      password: 'Student123!',
+      firstName: 'Alex',
+      lastName: 'Chen',
+      role: 'BASIC' as const,
+      emailVerified: true,
+    },
+  ];
+
+  const createdUsers: { [key: string]: string } = {};
+
+  for (const userData of users) {
+    const hashedPassword = await bcrypt.hash(userData.password, 12);
+
+    const user = await prisma.user.create({
+      data: {
+        ...userData,
+        password: hashedPassword,
       },
-      {
-        email: 'standard@test.local',
-        username: 'standarduser',
-        password: 'Password123!',
-        firstName: 'Standard',
-        lastName: 'User',
-        role: 'STANDARD' as const,
-        emailVerified: true,
-      },
-      {
-        email: 'premium@test.local',
-        username: 'premiumuser',
-        password: 'Password123!',
-        firstName: 'Premium',
-        lastName: 'User',
-        role: 'PREMIUM' as const,
-        emailVerified: true,
-      },
-      {
-        email: 'admin@test.local',
-        username: 'admin',
-        password: 'AdminPass123!',
-        firstName: 'Admin',
-        lastName: 'User',
-        role: 'ADMIN' as const,
-        emailVerified: true,
-      },
-    ];
+    });
 
-    for (const userData of testUsers) {
-      const hashedPassword = await bcrypt.hash(userData.password, 12);
+    createdUsers[userData.username] = user.id;
+    logger.info(`   ✓ ${userData.firstName} ${userData.lastName} (${userData.role})`);
+  }
 
-      await prisma.user.upsert({
-        where: { email: userData.email },
-        create: {
-          ...userData,
-          password: hashedPassword,
-        },
-        update: {},
-      });
+  logger.info(`👥 Created ${users.length} users`);
+  return createdUsers;
+}
 
-      logger.info(`Created/verified user: ${userData.email}`);
-    }
+async function seedContent() {
+  logger.info('📝 Seeding sample content...');
 
-    // Create sample content
-    const sampleContent = [
-      {
-        title: 'Welcome to Thynkr',
-        description: 'Get started with our platform and explore what we offer',
-        content: `# Welcome to Thynkr
+  const sampleContent = [
+    {
+      title: 'Welcome to Thynkr',
+      description: 'Get started with our AI-powered learning platform',
+      content: `# Welcome to Thynkr
 
-Welcome to your new membership platform! This is a free article accessible to all users.
+Welcome to Thynkr — your intelligent study companion powered by AI.
 
 ## What is Thynkr?
 
-Thynkr is a modern membership platform built with cutting-edge technology including React, TypeScript, and Fastify.
+Thynkr transforms how you learn by using artificial intelligence to:
 
-## Features
+- 📚 **Generate summaries** from your course materials
+- 📝 **Create study notes** tailored to your content
+- ❓ **Build quizzes** to test your knowledge
+- 🃏 **Make flashcards** for spaced repetition
+- 🤖 **Chat with an AI tutor** that understands your materials
 
-- 🔐 Secure authentication with JWT
-- 💳 Stripe integration for subscriptions
-- 📚 Role-based content access
-- 🎨 Modern, responsive UI
-- ⚡ Lightning-fast performance
+## Getting Started
 
-Start exploring our content library and upgrade to unlock premium features!`,
-        slug: 'welcome-to-thynkr',
-        requiredRole: 'BASIC' as const,
-        featured: true,
-        published: true,
-        thumbnail: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800',
-        tags: ['getting-started', 'welcome'],
-      },
-      {
-        title: 'Pro Member Benefits',
-        description: 'Discover the exclusive benefits of Pro membership',
-        content: `# Pro Member Benefits
+1. **Upload your materials** — PDFs, documents, or text files
+2. **Let AI analyze** your content
+3. **Study smarter** with generated materials
+4. **Track your progress** with streaks and analytics
 
-Welcome to the Pro tier! As a Pro member, you get access to exclusive content and features.
+Start your learning journey today!`,
+      slug: 'welcome-to-thynkr',
+      requiredRole: 'BASIC' as const,
+      featured: true,
+      published: true,
+      thumbnail: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800',
+      tags: ['getting-started', 'welcome'],
+    },
+    {
+      title: 'Effective Study Techniques',
+      description: 'Science-backed methods to improve your learning',
+      content: `# Effective Study Techniques
 
-## What's Included
+Research shows that certain study methods are far more effective than others.
 
-- Access to Pro-level articles and tutorials
-- Priority support
-- Monthly webinars
-- Community access
-- Early access to new features
+## Active Recall
 
-## Getting the Most Out of Your Membership
+Instead of passive re-reading, test yourself on the material.
+- Use flashcards
+- Take practice quizzes
+- Explain concepts aloud
 
-1. Check out our curated Pro content library
-2. Join our monthly webinars
-3. Connect with other Pro members
-4. Provide feedback on new features
+## Spaced Repetition
 
-Upgrade to Premium for even more benefits!`,
-        slug: 'pro-member-benefits',
-        requiredRole: 'STANDARD' as const,
-        featured: true,
-        published: true,
-        thumbnail: 'https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800',
-        tags: ['pro', 'benefits'],
-      },
-      {
-        title: 'Advanced TypeScript Patterns',
-        description: 'Master advanced TypeScript patterns and techniques',
-        content: `# Advanced TypeScript Patterns
+Spread your studying over time rather than cramming.
+- Review material at increasing intervals
+- Use apps that implement spaced repetition algorithms
 
-This Pro-level tutorial covers advanced TypeScript patterns you'll use in production applications.
+## Interleaving
 
-## Type Guards
+Mix different topics or types of problems in one study session.
+- Improves ability to discriminate between problem types
+- Enhances long-term retention
 
-\`\`\`typescript
-function isString(value: unknown): value is string {
-  return typeof value === 'string';
+## Elaborative Interrogation
+
+Ask "why" and "how" questions about what you're learning.
+- Connect new information to existing knowledge
+- Create meaningful associations
+
+## The Feynman Technique
+
+1. Choose a concept
+2. Teach it to a child (use simple language)
+3. Identify gaps in your explanation
+4. Review and simplify`,
+      slug: 'effective-study-techniques',
+      requiredRole: 'BASIC' as const,
+      featured: true,
+      published: true,
+      thumbnail: 'https://images.unsplash.com/photo-1456324504439-367cee3b3c32?w=800',
+      tags: ['study-tips', 'learning'],
+    },
+    {
+      title: 'Premium Features Guide',
+      description: 'Unlock the full power of Thynkr',
+      content: `# Premium Features Guide
+
+Upgrade to Premium to unlock Thynkr's most powerful features.
+
+## Unlimited AI Generations
+
+- Generate unlimited summaries, notes, quizzes, and flashcards
+- No daily limits on AI tutor conversations
+- Priority access during high-traffic periods
+
+## Advanced Analytics
+
+- Detailed study session tracking
+- Performance trends over time
+- Personalized recommendations
+
+## Course Management
+
+- Create and organize courses
+- Upload unlimited materials
+- Share courses with study groups
+
+## Priority Support
+
+- 24/7 support access
+- Direct email support
+- Feature request priority
+
+## Coming Soon
+
+- Voice-enabled AI tutoring
+- Collaboration features
+- Mobile app`,
+      slug: 'premium-features-guide',
+      requiredRole: 'PREMIUM' as const,
+      featured: false,
+      published: true,
+      thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800',
+      tags: ['premium', 'features'],
+    },
+  ];
+
+  for (const contentData of sampleContent) {
+    await prisma.content.create({
+      data: contentData,
+    });
+
+    logger.info(`   ✓ ${contentData.title}`);
+  }
+
+  logger.info(`📝 Created ${sampleContent.length} content articles`);
 }
-\`\`\`
 
-## Discriminated Unions
+async function seed() {
+  const startTime = Date.now();
+  
+  console.log('\n');
+  logger.info('═══════════════════════════════════════════════════════════');
+  logger.info('              THYNKR DATABASE SEED                          ');
+  logger.info('═══════════════════════════════════════════════════════════');
+  console.log('\n');
 
-\`\`\`typescript
-type Result<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
-\`\`\`
+  try {
+    // Clear all tables
+    await clearDatabase();
 
-## Utility Types
+    // Seed users
+    const users = await seedUsers();
 
-Learn to leverage TypeScript's built-in utility types for cleaner code.
+    // Seed content articles
+    await seedContent();
 
-This is just the beginning - explore more Pro content in our library!`,
-        slug: 'advanced-typescript-patterns',
-        requiredRole: 'STANDARD' as const,
-        featured: false,
-        published: true,
-        thumbnail: 'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800',
-        tags: ['typescript', 'programming', 'tutorial'],
-      },
-      {
-        title: 'Premium Exclusive: Full-Stack Architecture',
-        description: 'Deep dive into production-ready full-stack architecture',
-        content: `# Full-Stack Architecture Masterclass
+    // Seed courses with the instructor (premium user)
+    await seedCoursesWithInternalFiles(users['instructor']);
 
-Welcome to our most comprehensive content - exclusive to Premium members!
+    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
-## Architecture Overview
+    console.log('\n');
+    logger.info('═══════════════════════════════════════════════════════════');
+    logger.info(`✅ DATABASE SEED COMPLETED in ${duration}s`);
+    logger.info('═══════════════════════════════════════════════════════════');
+    console.log('\n');
+    logger.info('📋 Summary:');
+    logger.info('   • 3 Users (admin, instructor, student)');
+    logger.info('   • 5 Courses with 15 total files');
+    logger.info('   • 3 Content articles');
+    console.log('\n');
+    logger.info('🔑 Test Accounts:');
+    logger.info('   • admin@thynkr.app / AdminPass123!');
+    logger.info('   • instructor@thynkr.app / Instructor123!');
+    logger.info('   • student@thynkr.app / Student123!');
+    console.log('\n');
 
-Learn how to design scalable, maintainable full-stack applications from the ground up.
-
-### Frontend Architecture
-
-- Component design patterns
-- State management strategies
-- Performance optimization
-- Testing strategies
-
-### Backend Architecture
-
-- API design best practices
-- Database optimization
-- Caching strategies
-- Security hardening
-
-### DevOps & Deployment
-
-- CI/CD pipelines
-- Container orchestration
-- Monitoring and logging
-- Scaling strategies
-
-## Real-World Case Studies
-
-We'll walk through actual production architectures and the decisions behind them.
-
-## Premium Resources
-
-- Downloadable architecture diagrams
-- Video walkthroughs
-- Code repositories
-- 1-on-1 consultation available
-
-This is the kind of content that sets Premium members apart!`,
-        slug: 'full-stack-architecture-masterclass',
-        requiredRole: 'PREMIUM' as const,
-        featured: true,
-        published: true,
-        thumbnail: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800',
-        tags: ['premium', 'architecture', 'full-stack'],
-      },
-      {
-        title: 'React Performance Optimization',
-        description: 'Boost your React app performance',
-        content: `# React Performance Optimization
-
-Learn to build lightning-fast React applications with these proven techniques.
-
-## Key Topics
-
-- Memoization strategies
-- Code splitting
-- Lazy loading
-- Virtual scrolling
-- Web Workers
-
-Available to Pro and Premium members.`,
-        slug: 'react-performance-optimization',
-        requiredRole: 'STANDARD' as const,
-        featured: false,
-        published: true,
-        thumbnail: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
-        tags: ['react', 'performance', 'optimization'],
-      },
-      {
-        title: 'Security Best Practices',
-        description: 'Essential security practices for modern web apps',
-        content: `# Security Best Practices
-
-Security is paramount. Learn essential practices for protecting your applications and users.
-
-## Topics Covered
-
-- Authentication & Authorization
-- XSS Prevention
-- CSRF Protection
-- SQL Injection Prevention
-- Rate Limiting
-- Security Headers
-
-This is available to all members as security is everyone's responsibility!`,
-        slug: 'security-best-practices',
-        requiredRole: 'BASIC' as const,
-        featured: false,
-        published: true,
-        thumbnail: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800',
-        tags: ['security', 'best-practices'],
-      },
-    ];
-
-    for (const contentData of sampleContent) {
-      await prisma.content.upsert({
-        where: { slug: contentData.slug },
-        create: contentData,
-        update: {},
-      });
-
-      logger.info(`Created/verified content: ${contentData.title}`);
-    }
-
-    // Seed courses with comprehensive internal AI files
-    await seedCoursesWithInternalFiles();
-
-    logger.info('✅ Database seed completed successfully');
   } catch (error) {
     logger.error('❌ Database seed failed:', error);
     throw error;
