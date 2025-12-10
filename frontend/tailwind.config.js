@@ -5,30 +5,30 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Primary - friendly blue (Thea.study inspired)
+        // Primary - soft welcoming blue (Thea.study inspired)
         primary: {
-          50: '#EFF6FF',
-          100: '#DBEAFE',
-          200: '#BFDBFE',
-          300: '#93C5FD',
-          400: '#60A5FA',
-          500: '#3B82F6', // Main primary
-          600: '#2563EB',
-          700: '#1D4ED8',
-          800: '#1E40AF',
+          50: '#F0F9FF',
+          100: '#E0F2FE',
+          200: '#BAE6FD',
+          300: '#7DD3FC',
+          400: '#38BDF8',
+          500: '#60A5FA', // Softer main primary
+          600: '#3B82F6',
+          700: '#2563EB',
+          800: '#1D4ED8',
           900: '#1E3A8A',
         },
-        // Secondary - soft lavender/purple
+        // Secondary - gentle lavender/purple
         secondary: {
-          50: '#F5F3FF',
-          100: '#EDE9FE',
-          200: '#DDD6FE',
-          300: '#C4B5FD',
-          400: '#A78BFA', // Main secondary
-          500: '#8B5CF6',
-          600: '#7C3AED',
-          700: '#6D28D9',
-          800: '#5B21B6',
+          50: '#FAF5FF',
+          100: '#F3E8FF',
+          200: '#E9D5FF',
+          300: '#D8B4FE',
+          400: '#C4B5FD', // Softer main secondary
+          500: '#A78BFA',
+          600: '#8B5CF6',
+          700: '#7C3AED',
+          800: '#6D28D9',
           900: '#4C1D95',
         },
         // Accent - calm cyan/teal
@@ -57,10 +57,10 @@ export default {
           800: '#4C1D95',
           900: '#3B1483',
         },
-        // Background colors
+        // Background colors (warmer, calmer)
         background: {
-          light: '#F9FAFB',
-          'light-alt': '#F3F4F6',
+          light: '#FAFBFC',
+          'light-alt': '#F5F7FA',
           dark: '#0F172A',
           'dark-alt': '#1E293B',
         },
@@ -69,41 +69,44 @@ export default {
         sans: ['Inter', 'Plus Jakarta Sans', 'system-ui', '-apple-system', 'sans-serif'],
         display: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
       },
-      fontSize: {
-        // Base sizes with optimal line heights
-        xs: ['0.75rem', { lineHeight: '1rem' }],
-        sm: ['0.875rem', { lineHeight: '1.25rem' }],
-        base: ['1rem', { lineHeight: '1.6' }],
-        lg: ['1.125rem', { lineHeight: '1.6' }],
-        xl: ['1.25rem', { lineHeight: '1.6' }],
-        '2xl': ['1.5rem', { lineHeight: '1.4' }],
-        '3xl': ['1.875rem', { lineHeight: '1.3' }],
-        '4xl': ['2.25rem', { lineHeight: '1.2' }],
-        '5xl': ['3rem', { lineHeight: '1.1' }],
-      },
+      // Generous spacing
       spacing: {
         'safe': 'env(safe-area-inset-bottom)',
+        '18': '4.5rem',
+        '22': '5.5rem',
+      },
+      fontSize: {
+        // Base sizes with optimal line heights and relaxed spacing
+        xs: ['0.75rem', { lineHeight: '1.125rem' }],
+        sm: ['0.875rem', { lineHeight: '1.375rem' }],
+        base: ['0.9375rem', { lineHeight: '1.7' }],
+        lg: ['1.0625rem', { lineHeight: '1.7' }],
+        xl: ['1.25rem', { lineHeight: '1.6' }],
+        '2xl': ['1.5rem', { lineHeight: '1.5' }],
+        '3xl': ['1.75rem', { lineHeight: '1.4' }],
+        '4xl': ['2rem', { lineHeight: '1.3' }],
+        '5xl': ['2.5rem', { lineHeight: '1.2' }],
       },
       borderRadius: {
         '4xl': '2rem',
         '5xl': '2.5rem',
       },
       boxShadow: {
-        // Subtle ambient shadows (Thea.study inspired - soft and airy)
-        'xs': '0 1px 2px rgba(0, 0, 0, 0.03)',
-        'soft': '0 2px 8px rgba(0, 0, 0, 0.04)',
-        'soft-md': '0 4px 16px rgba(0, 0, 0, 0.05)',
-        'soft-lg': '0 4px 24px rgba(0, 0, 0, 0.05)',
-        'soft-xl': '0 8px 32px rgba(0, 0, 0, 0.06)',
-        // Card shadows
-        'card': '0 2px 12px rgba(0, 0, 0, 0.04)',
-        'card-hover': '0 4px 20px rgba(0, 0, 0, 0.06)',
-        // Button shadows
-        'button': '0 2px 8px rgba(59, 130, 246, 0.15)',
-        'button-hover': '0 4px 12px rgba(59, 130, 246, 0.2)',
-        // Glass effect (lighter)
-        'glass': '0 4px 24px rgba(0, 0, 0, 0.05)',
-        'glass-lg': '0 8px 32px rgba(0, 0, 0, 0.06)',
+        // Ultra-soft ambient shadows (calm, welcoming)
+        'xs': '0 1px 2px rgba(0, 0, 0, 0.02)',
+        'soft': '0 2px 8px rgba(0, 0, 0, 0.03)',
+        'soft-md': '0 4px 16px rgba(0, 0, 0, 0.04)',
+        'soft-lg': '0 6px 24px rgba(0, 0, 0, 0.04)',
+        'soft-xl': '0 8px 32px rgba(0, 0, 0, 0.05)',
+        // Card shadows (minimal, clean)
+        'card': '0 1px 8px rgba(0, 0, 0, 0.03)',
+        'card-hover': '0 4px 16px rgba(0, 0, 0, 0.05)',
+        // Button shadows (subtle primary glow)
+        'button': '0 2px 8px rgba(96, 165, 250, 0.12)',
+        'button-hover': '0 4px 12px rgba(96, 165, 250, 0.18)',
+        // Glass effect (very light)
+        'glass': '0 4px 24px rgba(0, 0, 0, 0.03)',
+        'glass-lg': '0 8px 32px rgba(0, 0, 0, 0.04)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',

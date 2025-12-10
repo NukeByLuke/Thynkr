@@ -10,7 +10,7 @@ interface CardProps
   children: ReactNode;
   hover?: boolean;
   padding?: 'none' | 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'glass' | 'gradient';
+  variant?: 'default' | 'glass' | 'subtle';
 }
 
 export default function Card({
@@ -29,15 +29,15 @@ export default function Card({
   };
 
   const variantClasses = {
-    default: 'bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-700/50 shadow-soft',
-    glass: 'backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border border-white/20 dark:border-slate-700/30 shadow-glass',
-    gradient: 'bg-gradient-to-br from-[#7C3AED]/5 to-[#06B6D4]/5 dark:from-[#7C3AED]/10 dark:to-[#06B6D4]/10 border border-white/20 dark:border-slate-700/30 shadow-soft backdrop-blur-sm',
+    default: 'bg-white dark:bg-slate-800/70 border border-gray-100 dark:border-slate-700/40 shadow-soft',
+    glass: 'backdrop-blur-xl bg-white/80 dark:bg-slate-800/60 border border-gray-100/60 dark:border-slate-700/30 shadow-glass',
+    subtle: 'bg-gray-50/80 dark:bg-slate-800/40 border border-gray-100/80 dark:border-slate-700/30',
   };
 
   const baseClassName = clsx(
-    'rounded-3xl transition-all duration-300 ease-out',
+    'rounded-2xl transition-all duration-300 ease-out',
     variantClasses[variant],
-    hover && 'cursor-pointer hover:shadow-glow-brand hover:scale-[1.02] hover:border-brand-500/20 dark:hover:border-brand-400/20',
+    hover && 'cursor-pointer hover:shadow-soft-md hover:-translate-y-0.5 hover:border-gray-200 dark:hover:border-slate-600',
     paddingClasses[padding],
     className
   );
@@ -46,8 +46,8 @@ export default function Card({
     return (
       <motion.div
         className={baseClassName}
-        whileHover={{ y: -4 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+        whileHover={{ y: -2 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
         {...(props as HTMLMotionProps<'div'>)}
       >
         {children}

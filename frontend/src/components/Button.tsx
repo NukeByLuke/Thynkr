@@ -1,12 +1,14 @@
 /**
  * Button Component
- * Reusable button with variants, sizes, loading states, and gradient brand styling.
+ * Reusable button with calm, welcoming styling and gentle animations.
  */
 
-import { ButtonHTMLAttributes, forwardRef } from 'react';
+import { forwardRef, ReactNode } from 'react';
+import { motion, HTMLMotionProps } from 'framer-motion';
 import { clsx } from 'clsx';
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'ref' | 'children'> {
+  children?: ReactNode;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
@@ -14,7 +16,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 /**
- * Button component with theme-aware styling and loading indicator
+ * Button component with calm, student-friendly styling
  */
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
@@ -31,30 +33,33 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-semibold transition-all duration-250 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl';
+      'inline-flex items-center justify-center font-medium transition-all duration-250 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl';
 
     const variants = {
       primary:
-        'relative overflow-hidden bg-gradient-to-r from-[#7C3AED] to-[#06B6D4] text-white shadow-soft hover:shadow-glow-brand hover:scale-[1.02] active:scale-[0.98]',
+        'bg-primary-500 hover:bg-primary-600 text-white shadow-button hover:shadow-button-hover active:scale-[0.98]',
       secondary:
-        'relative overflow-hidden bg-gradient-to-r from-accent-500 to-accent-400 text-white shadow-soft hover:shadow-glow-accent hover:scale-[1.02] active:scale-[0.98]',
+        'bg-secondary-400 hover:bg-secondary-500 text-white shadow-soft hover:shadow-soft-md active:scale-[0.98]',
       outline:
-        'border-2 border-brand-500/30 dark:border-brand-400/30 text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:border-brand-500 dark:hover:border-brand-400 hover:shadow-soft',
+        'border border-gray-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:border-gray-300 dark:hover:border-slate-500',
       ghost:
-        'text-slate-600 dark:text-slate-300 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white',
+        'text-slate-600 dark:text-slate-400 hover:bg-gray-100/80 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white',
       danger:
-        'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-soft hover:shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:scale-[1.02] active:scale-[0.98]',
+        'bg-red-500 hover:bg-red-600 text-white shadow-soft hover:shadow-soft-md active:scale-[0.98]',
     };
 
     const sizes = {
       sm: 'px-4 py-2 text-sm',
-      md: 'px-5 py-2.5 text-base',
-      lg: 'px-7 py-3.5 text-lg',
+      md: 'px-5 py-2.5 text-sm',
+      lg: 'px-6 py-3 text-base',
     };
 
     return (
-      <button
+      <motion.button
         ref={ref}
+        whileHover={{ scale: disabled || isLoading ? 1 : 1.01 }}
+        whileTap={{ scale: disabled || isLoading ? 1 : 0.98 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         className={clsx(
           baseStyles,
           variants[variant],
@@ -88,7 +93,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           </svg>
         )}
         {children}
-      </button>
+      </motion.button>
     );
   }
 );

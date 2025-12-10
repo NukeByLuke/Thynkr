@@ -1,6 +1,7 @@
 /**
  * Layout Component
  * Main authenticated app layout with responsive sidebar navigation and content area.
+ * Designed for calm, welcoming student-first experience.
  */
 
 import { Outlet } from 'react-router-dom';
@@ -17,7 +18,7 @@ export default function Layout() {
   const { isSidebarOpen } = useNavigation();
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="flex h-screen overflow-hidden bg-[#FAFBFC] dark:bg-slate-900">
       {/* Desktop Sidebar */}
       <DesktopSidebar />
 
@@ -36,10 +37,15 @@ export default function Layout() {
         className="flex flex-col flex-1 overflow-hidden"
       >
         <div className="flex-1 overflow-y-auto">
-          <main className="min-h-full flex flex-col pb-28 lg:pb-0 px-4 sm:px-6 lg:px-8 pt-6">
-            <div className="flex-1">
+          <main className="min-h-full flex flex-col pb-28 lg:pb-0 px-5 sm:px-6 lg:px-8 pt-6">
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="flex-1"
+            >
               <Outlet />
-            </div>
+            </motion.div>
             <Footer />
           </main>
         </div>

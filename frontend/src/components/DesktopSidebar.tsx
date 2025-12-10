@@ -58,10 +58,10 @@ export default function DesktopSidebar() {
       initial={false}
       animate={{ width: isSidebarOpen ? 256 : 80 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="hidden lg:flex flex-col fixed left-0 top-0 h-screen bg-[#0f172a] bg-opacity-90 backdrop-blur-lg border-r border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.25)] z-40 overflow-hidden"
+      className="hidden lg:flex flex-col fixed left-0 top-0 h-screen bg-slate-900 backdrop-blur-lg border-r border-slate-800/50 shadow-soft-lg z-40 overflow-hidden"
     >
       {/* Top Section - Logo & Collapse Button */}
-      <div className="px-4 py-6 border-b border-white/10">
+      <div className="px-4 py-6 border-b border-slate-800/60">
         <div className="flex items-center justify-between">
           <div className={`${!isSidebarOpen && 'mx-auto'}`}>
             <Logo variant={isSidebarOpen ? 'full' : 'icon'} animated={true} />
@@ -112,20 +112,17 @@ export default function DesktopSidebar() {
                   onClick={() => (window.location.href = 'https://thynkr.ca')}
                   className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 group relative w-full ${
                     active
-                      ? 'bg-white/5 text-white shadow-[0_0_15px_rgba(124,58,237,0.3)]'
-                      : 'text-gray-400 hover:text-white hover:bg-white/5 hover:shadow-[0_0_10px_rgba(124,58,237,0.15)]'
+                      ? 'bg-primary-500/10 text-white'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
                   } ${!isSidebarOpen && 'justify-center'}`}
                 >
                   {active && (
                     <div
-                      className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-[3px] bg-gradient-to-b from-[#7c3aed] to-[#3b82f6] rounded-full"
-                      style={{
-                        boxShadow: '0 0 8px rgba(124, 58, 237, 0.6)',
-                      }}
+                      className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-[3px] bg-gradient-to-b from-primary-400 to-primary-500 rounded-full"
                     />
                   )}
                   <div
-                    className={`flex items-center justify-center w-6 h-6 ${active ? 'drop-shadow-[0_0_6px_rgba(124,58,237,0.6)]' : ''}`}
+                    className={`flex items-center justify-center w-6 h-6 ${active ? 'text-primary-400' : ''}`}
                   >
                     <Icon className="w-6 h-6 flex-shrink-0" strokeWidth={2} />
                   </div>
@@ -160,20 +157,17 @@ export default function DesktopSidebar() {
                 to={item.path}
                 className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 group relative ${
                   active
-                    ? 'bg-white/5 text-white shadow-[0_0_15px_rgba(124,58,237,0.3)]'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5 hover:shadow-[0_0_10px_rgba(124,58,237,0.15)]'
+                    ? 'bg-primary-500/10 text-white'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
                 } ${!isSidebarOpen && 'justify-center'}`}
               >
                 {active && (
                   <div
-                    className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-[3px] bg-gradient-to-b from-[#7c3aed] to-[#3b82f6] rounded-full"
-                    style={{
-                      boxShadow: '0 0 8px rgba(124, 58, 237, 0.6)',
-                    }}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-[3px] bg-gradient-to-b from-primary-400 to-primary-500 rounded-full"
                   />
                 )}
                 <div
-                  className={`flex items-center justify-center w-6 h-6 ${active ? 'drop-shadow-[0_0_6px_rgba(124,58,237,0.6)]' : ''}`}
+                  className={`flex items-center justify-center w-6 h-6 ${active ? 'text-primary-400' : ''}`}
                 >
                   <Icon className="w-6 h-6 flex-shrink-0" strokeWidth={2} />
                 </div>
@@ -204,15 +198,15 @@ export default function DesktopSidebar() {
       </nav>
 
       {/* Bottom Section - Settings & Logout */}
-      <div className="px-4 py-6 border-t border-white/10 space-y-2">
+      <div className="px-4 py-6 border-t border-slate-800/60 space-y-2">
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => navigate('/settings')}
           className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 w-full text-left group relative ${
             location.pathname === '/settings'
-              ? 'bg-white/5 text-white shadow-[0_0_15px_rgba(124,58,237,0.3)]'
-              : 'text-gray-400 hover:text-white hover:bg-white/5'
+              ? 'bg-primary-500/10 text-white'
+              : 'text-slate-400 hover:text-white hover:bg-white/5'
           } ${!isSidebarOpen && 'justify-center'}`}
         >
           <div className="flex items-center justify-center w-6 h-6">
