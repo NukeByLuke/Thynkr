@@ -12,7 +12,7 @@ export default function Footer() {
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className="mt-auto backdrop-blur-xl border-t bg-white/70 dark:bg-slate-900/70 border-slate-200/50 dark:border-slate-700/50 theme-transition"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
+      <div className="max-w-6xl mx-auto px-8 lg:px-16">
         {/* Desktop Layout */}
         <div className="hidden md:flex justify-between items-center py-4">
           {/* Left: Logo + Tagline */}

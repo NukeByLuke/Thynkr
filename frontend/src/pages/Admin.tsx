@@ -3848,7 +3848,7 @@ export default function Admin() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header with Gradient */}
       <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-6xl mx-auto px-8 lg:px-16 py-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-white">Admin Dashboard</h1>
@@ -3859,7 +3859,7 @@ export default function Admin() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
+      <div className="max-w-6xl mx-auto px-8 lg:px-16 -mt-6">
         {/* Stat Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatCard

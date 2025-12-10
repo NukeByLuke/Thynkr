@@ -1,6 +1,6 @@
 /**
- * AuthLayout - Thea.study-inspired clean two-column layout
- * No navbar, minimal corners, clean modern aesthetic
+ * AuthLayout - Clean two-column layout for auth pages
+ * No navbar, rounded-2xl corners, soft shadow
  */
 
 import { motion } from 'framer-motion';
@@ -16,16 +16,15 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
   return (
     <div 
-      className="light min-h-screen flex items-center justify-center p-4 lg:p-8"
-      style={{ backgroundColor: '#E8EEF4' }}
+      className="light min-h-screen flex items-center justify-center px-8 py-8"
+      style={{ backgroundColor: '#F1F5F9' }}
       data-theme="light"
     >
-      {/* Centered Card Container - less rounded */}
+      {/* Centered Card Container */}
       <motion.div
-        className="w-full max-w-[1000px] flex flex-col lg:flex-row overflow-hidden"
+        className="w-full max-w-[960px] flex flex-col lg:flex-row overflow-hidden rounded-2xl"
         style={{ 
-          boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-          borderRadius: '16px'
+          boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
         }}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -33,7 +32,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       >
         {/* Left Brand Panel */}
         <div 
-          className="lg:w-[45%] flex flex-col items-center justify-between p-8 lg:p-12 min-h-[200px] lg:min-h-[600px]"
+          className="lg:w-[45%] flex flex-col items-center justify-between p-8 lg:p-10 min-h-[180px] lg:min-h-[560px]"
           style={{ backgroundColor: '#1E1B4B' }}
         >
           {/* Spacer for top */}
@@ -44,20 +43,20 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
             {/* Logo */}
             <div className="mb-6">
               <svg 
-                width="100" 
-                height="100" 
+                width="80" 
+                height="80" 
                 viewBox="0 0 120 120" 
                 fill="none" 
                 className="hidden lg:block"
               >
-                {/* Rocket/pencil icon similar to Thea */}
+                {/* Minimal icon */}
                 <circle cx="60" cy="60" r="50" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" fill="none" />
                 <path 
                   d="M60 25 L75 50 L60 95 L45 50 Z" 
                   fill="white" 
                   opacity="0.9"
                 />
-                <circle cx="60" cy="55" r="8" fill="#06B6D4" />
+                <circle cx="60" cy="55" r="8" fill="#A78BFA" />
               </svg>
               {/* Mobile logo */}
               <div className="lg:hidden flex items-center gap-2">

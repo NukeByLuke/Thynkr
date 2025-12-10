@@ -46,7 +46,7 @@ export default function Layout() {
               <Outlet />
             </div>
             {/* Footer with consistent container spacing */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 w-full mt-8">
+            <div className="max-w-6xl mx-auto px-8 lg:px-16 w-full mt-12">
               <Footer />
             </div>
           </main>

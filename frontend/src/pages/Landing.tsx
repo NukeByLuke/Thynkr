@@ -55,15 +55,11 @@ export default function Landing() {
       </Helmet>
 
       {/* Hero Section */}
-      <section className="relative py-24 md:py-36 overflow-hidden">
-        {/* Soft gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 via-transparent to-secondary-500/5 dark:from-primary-500/10 dark:via-transparent dark:to-secondary-500/10" />
-        
-        {/* Floating gradient orbs - softer */}
-        <div className="absolute top-20 -left-32 w-96 h-96 bg-gradient-to-br from-secondary-400/10 to-secondary-600/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 -right-32 w-96 h-96 bg-gradient-to-br from-primary-400/10 to-primary-600/10 rounded-full blur-3xl" />
+      <section className="relative py-20 md:py-28 overflow-hidden">
+        {/* Subtle background tint */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-6xl mx-auto px-8 lg:px-16 relative">
           <motion.div
             className="text-center"
             initial="hidden"
@@ -72,14 +68,14 @@ export default function Landing() {
           >
             <motion.div
               variants={fadeInUp}
-              className="inline-flex items-center gap-2 bg-secondary-500/10 backdrop-blur-sm text-secondary-600 dark:text-secondary-400 px-5 py-2.5 rounded-full text-sm font-medium mb-10 border border-secondary-500/20"
+              className="inline-flex items-center gap-2 bg-secondary-500/10 text-secondary-600 dark:text-secondary-400 px-4 py-2 rounded-full text-sm font-medium mb-8 border border-secondary-500/20"
             >
               <Sparkles className="w-4 h-4" />
               <span>AI-Powered Learning Platform</span>
             </motion.div>
             <motion.h1
               variants={fadeInUp}
-              className="text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 dark:text-white mb-8 text-balance leading-tight"
+              className="text-4xl md:text-5xl lg:text-6xl font-semibold text-slate-900 dark:text-white mb-6 text-balance leading-tight"
             >
               Study Smarter with
               <span className="gradient-text">
@@ -89,7 +85,7 @@ export default function Landing() {
             </motion.h1>
             <motion.p
               variants={fadeInUp}
-              className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-10 max-w-3xl mx-auto text-balance leading-relaxed"
+              className="text-lg md:text-xl text-slate-600 dark:text-slate-300 mb-10 max-w-2xl mx-auto text-balance leading-relaxed"
             >
               Upload your study materials and let AI create summaries, flashcards, quizzes, and get
               personalized tutoring—all in one place.
@@ -122,11 +118,10 @@ export default function Landing() {
       </section>
 
       {/* Discover Thynkr Features */}
-      <section className="py-24 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-50/30 to-transparent dark:via-slate-900/30" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <section className="py-20 relative">
+        <div className="max-w-6xl mx-auto px-8 lg:px-16 relative">
           <motion.div
-            className="text-center mb-16"
+            className="text-center mb-12"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -258,11 +253,10 @@ export default function Landing() {
       </section>
 
       {/* How It Works */}
-      <section className="py-24 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-50/50 to-white dark:from-slate-900/50 dark:to-slate-950" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <section className="py-20 relative bg-slate-50/50 dark:bg-slate-900/50">
+        <div className="max-w-6xl mx-auto px-8 lg:px-16 relative">
           <motion.div
-            className="text-center mb-16"
+            className="text-center mb-12"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -273,7 +267,7 @@ export default function Landing() {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-10">
+          <div className="grid md:grid-cols-3 gap-8">
             {[
               {
                 step: '01',
@@ -324,9 +318,9 @@ export default function Landing() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+      <section className="py-16 relative">
+        <div className="max-w-6xl mx-auto px-8 lg:px-16">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
               { value: '10K+', label: 'Study Materials', icon: FileText },
               { value: '50K+', label: 'Flashcards Created', icon: Brain },
@@ -341,13 +335,13 @@ export default function Landing() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1, duration: 0.4 }}
               >
-                <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-brand-500/10 to-accent-500/10 backdrop-blur-sm rounded-2xl mb-5 border border-brand-500/20">
-                  <stat.icon className="w-7 h-7 text-brand-600 dark:text-brand-400" />
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-500/10 rounded-xl mb-4 border border-primary-500/20">
+                  <stat.icon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
-                <div className="text-4xl md:text-5xl font-bold gradient-text mb-2">
+                <div className="text-3xl md:text-4xl font-semibold gradient-text mb-1">
                   {stat.value}
                 </div>
-                <div className="text-slate-600 dark:text-slate-400 font-medium">{stat.label}</div>
+                <div className="text-slate-600 dark:text-slate-400 text-sm font-medium">{stat.label}</div>
               </motion.div>
             ))}
           </div>
@@ -355,30 +349,29 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-50/50 to-transparent dark:via-slate-900/50" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">
+      <section className="py-20 relative">
+        <div className="max-w-6xl mx-auto px-8 lg:px-16 relative">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-semibold text-slate-900 dark:text-white mb-4">
               Why Choose <span className="gradient-text">Thynkr</span>?
             </h2>
-            <p className="text-xl text-slate-600 dark:text-slate-300 leading-relaxed">
+            <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
               Built for students who want to succeed
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4 }}
-              className="text-center p-10 rounded-3xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 hover:shadow-glow-brand transition-all duration-300"
+              className="text-center p-8 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300"
             >
-              <div className="inline-flex items-center justify-center w-18 h-18 bg-gradient-to-br from-brand-500/10 to-brand-600/10 dark:from-brand-500/20 dark:to-brand-600/20 text-brand-600 dark:text-brand-400 rounded-2xl mb-8 p-4">
-                <Zap className="w-10 h-10" />
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-primary-500/10 text-primary-600 dark:text-primary-400 rounded-xl mb-6">
+                <Zap className="w-7 h-7" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">
                 Lightning Fast
               </h3>
               <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -391,12 +384,12 @@ export default function Landing() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: 0.1 }}
-              className="text-center p-10 rounded-3xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 hover:shadow-glow-accent transition-all duration-300"
+              className="text-center p-8 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300"
             >
-              <div className="inline-flex items-center justify-center w-18 h-18 bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 dark:from-emerald-500/20 dark:to-emerald-600/20 text-emerald-600 dark:text-emerald-400 rounded-2xl mb-8 p-4">
-                <Shield className="w-10 h-10" />
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl mb-6">
+                <Shield className="w-7 h-7" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">
                 Secure & Private
               </h3>
               <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -409,12 +402,12 @@ export default function Landing() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: 0.2 }}
-              className="text-center p-10 rounded-3xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 hover:shadow-glow-brand transition-all duration-300"
+              className="text-center p-8 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300"
             >
-              <div className="inline-flex items-center justify-center w-18 h-18 bg-gradient-to-br from-accent-500/10 to-accent-600/10 dark:from-accent-500/20 dark:to-accent-600/20 text-accent-600 dark:text-accent-400 rounded-2xl mb-8 p-4">
-                <Users className="w-10 h-10" />
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-secondary-500/10 text-secondary-600 dark:text-secondary-400 rounded-xl mb-6">
+                <Users className="w-7 h-7" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">
                 Community Driven
               </h3>
               <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -426,27 +419,23 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 relative overflow-hidden">
-        {/* Gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.1),transparent_50%)]" />
-        
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
+      <section className="py-20 relative overflow-hidden bg-navy-800 dark:bg-navy-900">
+        <div className="max-w-4xl mx-auto px-8 lg:px-16 text-center relative">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <GraduationCap className="w-20 h-20 mx-auto mb-8 text-white/90" />
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">
+            <GraduationCap className="w-16 h-16 mx-auto mb-6 text-white/80" />
+            <h2 className="text-3xl md:text-4xl font-semibold text-white mb-6">
               Ready to Transform Your Learning?
             </h2>
-            <p className="text-xl text-white/90 mb-10 leading-relaxed">
+            <p className="text-lg text-white/80 mb-8 leading-relaxed">
               Join thousands of students who are already studying smarter with Thynkr
             </p>
             <Link to="/register">
-              <Button size="lg" variant="secondary" className="bg-white text-brand-600 hover:bg-white/90">
+              <Button size="lg" variant="secondary" className="bg-white text-navy-800 hover:bg-white/90">
                 Start Learning for Free
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>

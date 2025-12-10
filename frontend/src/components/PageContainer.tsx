@@ -3,13 +3,17 @@
  * Standard container layout for all pages ensuring consistent spacing,
  * max-width, and alignment across the app.
  * 
+ * Layout rules:
+ * - Max width: 1280px (max-w-6xl)
+ * - Side padding: 2rem mobile, 4rem desktop
+ * - Section spacing: 3rem minimum
+ * - Soft shadows, rounded-2xl corners
+ * 
  * Usage:
  *   <PageContainer>
  *     <PageContainer.Header>Title</PageContainer.Header>
  *     <PageContainer.Section>Content</PageContainer.Section>
  *   </PageContainer>
- * 
- * Design tokens from theme.config.ts
  */
 
 import { ReactNode } from 'react';
@@ -44,7 +48,7 @@ interface HeaderProps {
 
 /**
  * Main page container with consistent max-width and padding
- * Standard: max-w-7xl mx-auto px-4 sm:px-8 lg:px-12
+ * Standard: max-w-6xl (1280px) mx-auto px-8 lg:px-16 py-8
  */
 export default function PageContainer({
   children,
@@ -54,8 +58,8 @@ export default function PageContainer({
   animate = true,
 }: PageContainerProps) {
   const containerClasses = `
-    ${fluid ? 'w-full' : 'max-w-7xl mx-auto'}
-    ${noPadding ? '' : 'px-4 sm:px-8 lg:px-12'}
+    ${fluid ? 'w-full' : 'max-w-6xl mx-auto'}
+    ${noPadding ? '' : 'px-8 lg:px-16 py-8'}
     ${className}
   `.trim();
 
@@ -67,7 +71,7 @@ export default function PageContainer({
         transition={{ duration: 0.3, ease: 'easeOut' }}
         className={containerClasses}
       >
-        <div className="space-y-8">
+        <div className="space-y-12">
           {children}
         </div>
       </motion.div>
@@ -76,7 +80,7 @@ export default function PageContainer({
 
   return (
     <div className={containerClasses}>
-      <div className="space-y-8">
+      <div className="space-y-12">
         {children}
       </div>
     </div>

@@ -444,9 +444,9 @@ export default function CourseDetail() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-8 lg:px-16">
         {/* Course Header */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-soft overflow-hidden mb-6">
           {course.bannerImage && (
             <div className="relative">
               <img

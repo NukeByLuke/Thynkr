@@ -199,7 +199,7 @@ export default function Pricing() {
         <div className="absolute top-20 left-20 w-80 h-80 bg-gradient-to-br from-brand-400/15 to-brand-600/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-accent-400/15 to-accent-600/15 rounded-full blur-3xl pointer-events-none" />
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-6xl mx-auto px-8 lg:px-16 relative">
           {/* Header */}
           <div className="text-center mb-16">
             <h1 className="text-5xl md:text-6xl font-bold text-slate-900 dark:text-white mb-6">

@@ -17,7 +17,7 @@ export default function PublicLayout() {
         transition={{ duration: 0.4 }}
         className="sticky top-0 z-50 backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border-b border-white/20 dark:border-white/10"
       >
-        <div className="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
+        <div className="flex justify-between items-center px-8 lg:px-16 py-4 max-w-6xl mx-auto">
           <Logo variant="full" animated={false} />
           <nav className="flex items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-400">
             <Link 

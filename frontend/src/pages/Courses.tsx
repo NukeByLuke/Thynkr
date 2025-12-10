@@ -84,7 +84,7 @@ function LockedCoursesPage() {
         {/* Hero Section */}
         <div className="relative bg-gradient-to-br from-primary-600 to-primary-800 py-16">
           <div className="absolute inset-0 bg-black/20" />
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="relative max-w-6xl mx-auto px-8 lg:px-16 text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-6">
               <Lock className="h-8 w-8 text-white" />
             </div>
@@ -125,7 +125,7 @@ function LockedCoursesPage() {
         </div>
 
         {/* Locked Courses Preview */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-6xl mx-auto px-8 lg:px-16 py-12">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               Featured Courses
@@ -139,7 +139,7 @@ function LockedCoursesPage() {
             {lockedCourses.map((course, index) => (
               <div
                 key={index}
-                className="relative group block bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden opacity-75"
+                className="relative group block bg-white dark:bg-gray-800 rounded-2xl shadow-soft overflow-hidden opacity-75"
               >
                 {/* Locked Overlay */}
                 <div className="absolute inset-0 bg-gray-900/60 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -224,7 +224,7 @@ function BrowseCoursesPage() {
       </Helmet>
 
       <div className="min-h-screen py-8 md:py-12">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto px-8 lg:px-16">
           <PageHeader
             icon={<Globe className="h-6 w-6" />}
             title="🌍 Browse Courses"
@@ -238,7 +238,7 @@ function BrowseCoursesPage() {
           />
 
           {/* Filters */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-8">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-soft p-4 mb-8">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -299,7 +299,7 @@ function BrowseCoursesPage() {
                 <Link
                   key={course.id}
                   to={`/my-courses/${course.id}`}
-                  className="group block bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                  className="group block bg-white dark:bg-gray-800 rounded-2xl shadow-soft hover:shadow-lg transition-shadow overflow-hidden"
                 >
                   {course.coverImage ? (
                     <div className="h-44 overflow-hidden">
