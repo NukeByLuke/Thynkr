@@ -79,6 +79,7 @@ export function AppleSignInButton({ onClick, isLoading, disabled, label = 'Sign 
       type="button"
       onClick={handleClick}
       disabled={isLoading || disabled}
+      aria-label={label}
       className="w-full h-11 flex items-center justify-center gap-3 px-4 text-sm font-medium border rounded-xl transition-all duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-slate-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-slate-700"
     >
       {isLoading ? (
