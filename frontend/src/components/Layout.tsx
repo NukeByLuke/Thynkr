@@ -2,6 +2,9 @@
  * Layout Component
  * Main authenticated app layout with responsive sidebar navigation and content area.
  * Designed for calm, welcoming student-first experience.
+ * 
+ * Container layout: Pages should use PageContainer for consistent spacing.
+ * This layout provides: header, main, footer structure with sidebar.
  */
 
 import { Outlet } from 'react-router-dom';
@@ -37,16 +40,15 @@ export default function Layout() {
         className="flex flex-col flex-1 overflow-hidden"
       >
         <div className="flex-1 overflow-y-auto">
-          <main className="min-h-full flex flex-col pb-28 lg:pb-0 px-5 sm:px-6 lg:px-8 pt-6">
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-              className="flex-1"
-            >
+          {/* Main content with consistent vertical padding */}
+          <main className="min-h-full flex flex-col pb-28 lg:pb-8 pt-6 lg:pt-8">
+            <div className="flex-1">
               <Outlet />
-            </motion.div>
-            <Footer />
+            </div>
+            {/* Footer with consistent container spacing */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 w-full mt-8">
+              <Footer />
+            </div>
           </main>
         </div>
       </motion.div>

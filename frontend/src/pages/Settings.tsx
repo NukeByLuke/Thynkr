@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTTS, TTS_VOICES, TTS_SPEEDS, TTSVoice } from '@/contexts/TTSContext';
+import PageContainer from '@/components/PageContainer';
 import {
   User,
   Lock,
@@ -18,10 +19,8 @@ import {
   Volume2,
   Play,
   Loader2,
-  Settings as SettingsIcon,
 } from 'lucide-react';
 import api from '../lib/api';
-import PageHeader from '../components/PageHeader';
 
 const SUPPORTED_LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -357,15 +356,12 @@ export default function Settings() {
       </Helmet>
 
       <div key={user.id} className="h-full flex flex-col">
-        <PageHeader
-          icon={<SettingsIcon className="h-5 w-5" />}
-          title="Settings"
-          description="Manage your account and preferences"
-        />
+        <PageContainer>
+          <PageContainer.Header subtitle="Manage your account and preferences">
+            Settings
+          </PageContainer.Header>
 
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="space-y-6">
+          <div className="space-y-6">
               {/* Profile Settings */}
               <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] border border-slate-700/20 p-6">
                 <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2 tracking-wide">
@@ -690,8 +686,7 @@ export default function Settings() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+        </PageContainer>
       </div>
     </>
   );

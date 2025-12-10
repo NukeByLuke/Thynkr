@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
+import PageContainer from '@/components/PageContainer';
 import {
   BookOpen,
   Sparkles,
@@ -194,23 +195,20 @@ export default function SavedPacks() {
         />
       </Helmet>
 
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-gradient-to-br from-brand-600 to-accent-600 rounded-xl">
-                <BookOpen className="h-6 w-6 text-white" />
-              </div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Saved Packs</h1>
+      <PageContainer>
+        <PageContainer.Header
+          subtitle="Your combined study packs from multiple files"
+          actions={
+            <div className="p-2 bg-gradient-to-br from-brand-600 to-accent-600 rounded-xl">
+              <BookOpen className="h-6 w-6 text-white" />
             </div>
-            <p className="text-gray-600 dark:text-gray-400">
-              Your combined study packs from multiple files
-            </p>
-          </div>
+          }
+        >
+          Saved Packs
+        </PageContainer.Header>
 
-          {/* Filters & Search */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6">
+        {/* Filters & Search */}
+        <PageContainer.Card>
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
               {/* Filter Tabs */}
               <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
@@ -260,7 +258,7 @@ export default function SavedPacks() {
                 />
               </div>
             </div>
-          </div>
+          </PageContainer.Card>
 
           {/* Packs Grid */}
           {filteredPacks.length === 0 ? (
@@ -402,16 +400,15 @@ export default function SavedPacks() {
               ))}
             </div>
           )}
-        </div>
-      </div>
+        </PageContainer>
 
-      {/* Study Pack Viewer */}
-      {activeStudyPackId && (
-        <StudyPackViewer
-          studyPackId={activeStudyPackId}
-          onClose={() => setActiveStudyPackId(null)}
-        />
-      )}
-    </>
-  );
-}
+        {/* Study Pack Viewer */}
+        {activeStudyPackId && (
+          <StudyPackViewer
+            studyPackId={activeStudyPackId}
+            onClose={() => setActiveStudyPackId(null)}
+          />
+        )}
+      </>
+    );
+  }

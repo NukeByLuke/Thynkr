@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
+import PageContainer from '@/components/PageContainer';
 import {
   User,
   Mail,
@@ -100,13 +101,13 @@ export default function Account() {
 
   if (!profile) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center">
+      <PageContainer>
+        <div className="text-center py-12">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Profile</h2>
-          <p className="text-gray-600">Please try refreshing the page</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Error Loading Profile</h2>
+          <p className="text-gray-600 dark:text-gray-400">Please try refreshing the page</p>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -168,13 +169,19 @@ export default function Account() {
         <meta name="description" content="Manage your Thynkr account and subscription" />
       </Helmet>
 
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
-            Account Settings
-          </h1>
+      <PageContainer>
+        <PageContainer.Header
+          subtitle="Manage your profile and subscription"
+          actions={
+            <div className="p-2 bg-gradient-to-br from-brand-600 to-accent-600 rounded-xl">
+              <User className="h-6 w-6 text-white" />
+            </div>
+          }
+        >
+          Account Settings
+        </PageContainer.Header>
 
-          <div className="space-y-6">
+        <div className="space-y-6">
             {/* Profile Information */}
             <Card>
               <div className="flex items-center gap-3 mb-6">
@@ -391,8 +398,7 @@ export default function Account() {
               </div>
             </Card>
           </div>
-        </div>
-      </div>
-    </>
-  );
-}
+        </PageContainer>
+      </>
+    );
+  }

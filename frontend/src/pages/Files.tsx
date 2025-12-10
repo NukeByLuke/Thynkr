@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import PageContainer from '@/components/PageContainer';
 import {
   Folder as FolderIcon,
   FolderPlus,
@@ -511,18 +512,18 @@ export default function Files() {
         />
       </Helmet>
 
-      <div
-        className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8"
-        onClick={() => setContextMenu(null)}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Files</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Manage your study files and folders
-            </p>
-          </div>
+      <div onClick={() => setContextMenu(null)}>
+      <PageContainer>
+        <PageContainer.Header
+          subtitle="Manage your study files and folders"
+          actions={
+            <div className="p-2 bg-gradient-to-br from-brand-600 to-accent-600 rounded-xl">
+              <FileText className="h-6 w-6 text-white" />
+            </div>
+          }
+        >
+          Files
+        </PageContainer.Header>
 
           {/* Upload Area */}
           <div
@@ -769,7 +770,7 @@ export default function Files() {
               </div>
             )}
           </div>
-        </div>
+      </PageContainer>
       </div>
 
       {/* Context Menu */}

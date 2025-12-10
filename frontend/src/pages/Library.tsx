@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Search, Filter, Lock, Star, Clock, TrendingUp } from 'lucide-react';
+import PageContainer from '@/components/PageContainer';
+import { Search, Filter, Lock, Star, Clock, TrendingUp, BookOpen } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../lib/api';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -77,15 +78,20 @@ export default function Library() {
         />
       </Helmet>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Content Library</h1>
-          <p className="text-lg text-gray-600">Explore our collection of premium content</p>
-        </div>
+      <PageContainer>
+        <PageContainer.Header
+          subtitle="Explore our collection of premium content"
+          actions={
+            <div className="p-2 bg-gradient-to-br from-brand-600 to-accent-600 rounded-xl">
+              <BookOpen className="h-6 w-6 text-white" />
+            </div>
+          }
+        >
+          Content Library
+        </PageContainer.Header>
 
         {/* Filters */}
-        <div className="mb-8 space-y-4">
+        <PageContainer.Card>
           {/* Search Bar */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -130,7 +136,7 @@ export default function Library() {
               ))}
             </div>
           </div>
-        </div>
+        </PageContainer.Card>
 
         {/* Content Grid */}
         {isLoading ? (
@@ -251,7 +257,7 @@ export default function Library() {
             </Link>
           </div>
         )}
-      </div>
+      </PageContainer>
     </>
   );
 }

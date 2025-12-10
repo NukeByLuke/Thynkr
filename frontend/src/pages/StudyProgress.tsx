@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
+import PageContainer from '@/components/PageContainer';
 import {
   Flame,
   Calendar,
@@ -227,15 +228,13 @@ export default function StudyProgress() {
   };
 
   return (
-    <div className="h-full bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-6xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Study Progress</h1>
-        <p className="text-gray-600 dark:text-gray-400 mb-8">
-          Track your learning journey and maintain your study streak
-        </p>
+    <PageContainer>
+      <PageContainer.Header subtitle="Track your learning journey and maintain your study streak">
+        Study Progress
+      </PageContainer.Header>
 
-        {/* Streak Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      {/* Streak Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Current Streak */}
           <div className="bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl p-6 text-white shadow-lg">
             <div className="flex items-center justify-between mb-4">
@@ -481,7 +480,7 @@ export default function StudyProgress() {
 
         {/* Motivation Banner */}
         {progress?.streak.current && progress.streak.current >= 3 && (
-          <div className="mt-8 bg-gradient-to-r from-primary-600 to-indigo-600 rounded-xl p-6 text-white text-center">
+          <div className="bg-gradient-to-r from-primary-600 to-indigo-600 rounded-xl p-6 text-white text-center">
             <Flame className="w-12 h-12 mx-auto mb-3" />
             <h3 className="text-xl font-bold mb-2">
               🔥 You're on fire! {progress.streak.current} day streak!
@@ -491,7 +490,6 @@ export default function StudyProgress() {
             </p>
           </div>
         )}
-      </div>
-    </div>
+    </PageContainer>
   );
 }
