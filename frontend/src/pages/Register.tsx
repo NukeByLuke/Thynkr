@@ -1,6 +1,7 @@
 /**
  * Register Page - Thea-inspired clean minimal design
  * Soft inputs, primary accent button, clean layout
+ * Mirrors login page for visual symmetry
  */
 
 import { useState } from 'react';
@@ -27,6 +28,25 @@ const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
 const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
   e.target.style.borderColor = '#E5E7EB';
   e.target.style.boxShadow = 'none';
+};
+
+// Animation variants for micro-interactions
+const formVariants = {
+  hidden: { opacity: 0, scale: 0.98 },
+  visible: { 
+    opacity: 1, 
+    scale: 1,
+    transition: { duration: 0.3, ease: "easeOut" as const }
+  }
+};
+
+const fieldVariants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.05, duration: 0.25, ease: "easeOut" as const }
+  })
 };
 
 export default function Register() {
@@ -82,134 +102,147 @@ export default function Register() {
       </Helmet>
 
       <AuthLayout>
-        {/* OAuth Buttons */}
-        <div className="space-y-3 mb-4">
-          <GoogleSignInButton label="Sign up with Google" />
-          <AppleSignInButton label="Sign up with Apple" />
-        </div>
+        <motion.div
+          variants={formVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* OAuth Buttons */}
+          <div className="space-y-3 mb-4">
+            <GoogleSignInButton label="Sign up with Google" />
+            <AppleSignInButton label="Sign up with Apple" />
+          </div>
 
-        <OAuthDivider />
+          <OAuthDivider />
 
-        {/* Register Form */}
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <AnimatePresence mode="wait">
-            {error && (
-              <motion.div
-                key="error"
-                initial={{ opacity: 0, y: -10, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: 'auto' }}
-                exit={{ opacity: 0, y: -10, height: 0 }}
-                className="px-4 py-3 text-sm border"
-                style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA', color: '#DC2626', borderRadius: '8px' }}
-              >
-                {error}
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Register Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <AnimatePresence mode="wait">
+              {error && (
+                <motion.div
+                  key="error"
+                  initial={{ opacity: 0, y: -10, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: 'auto' }}
+                  exit={{ opacity: 0, y: -10, height: 0 }}
+                  className="px-4 py-3 text-sm border"
+                  style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA', color: '#DC2626', borderRadius: '8px' }}
+                >
+                  {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: '#374151' }}>
-                First Name
-              </label>
+            {/* Name fields - side by side */}
+            <motion.div 
+              className="grid grid-cols-2 gap-3"
+              variants={fieldVariants}
+              custom={0}
+              initial="hidden"
+              animate="visible"
+            >
               <input
                 id="firstName"
                 type="text"
                 value={formData.firstName}
                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                placeholder="John"
-                className="w-full px-4 py-2.5 border transition-all focus:outline-none"
+                placeholder="First name"
+                className="w-full px-4 py-3 border transition-all focus:outline-none"
                 style={inputStyle}
                 onFocus={handleInputFocus}
                 onBlur={handleInputBlur}
               />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: '#374151' }}>
-                Last Name
-              </label>
               <input
                 id="lastName"
                 type="text"
                 value={formData.lastName}
                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                placeholder="Doe"
-                className="w-full px-4 py-2.5 border transition-all focus:outline-none"
+                placeholder="Last name"
+                className="w-full px-4 py-3 border transition-all focus:outline-none"
                 style={inputStyle}
                 onFocus={handleInputFocus}
                 onBlur={handleInputBlur}
               />
-            </div>
-          </div>
+            </motion.div>
 
-          <div>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: '#374151' }}>
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="you@example.com"
-              required
-              className="w-full px-4 py-2.5 border transition-all focus:outline-none"
-              style={inputStyle}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
-            />
-          </div>
+            <motion.div
+              variants={fieldVariants}
+              custom={1}
+              initial="hidden"
+              animate="visible"
+            >
+              <input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="Email"
+                required
+                className="w-full px-4 py-3 border transition-all focus:outline-none"
+                style={inputStyle}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+              />
+            </motion.div>
 
-          <div>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: '#374151' }}>
-              Username
-            </label>
-            <input
-              id="username"
-              type="text"
-              value={formData.username}
-              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              required
-              className="w-full px-4 py-2.5 border transition-all focus:outline-none"
-              style={inputStyle}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
-            />
-            <p className="mt-1 text-xs" style={{ color: '#9CA3AF' }}>
-              3-30 characters, letters, numbers, underscores, and hyphens only
-            </p>
-          </div>
+            <motion.div
+              variants={fieldVariants}
+              custom={2}
+              initial="hidden"
+              animate="visible"
+            >
+              <input
+                id="username"
+                type="text"
+                value={formData.username}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                placeholder="Username"
+                required
+                className="w-full px-4 py-3 border transition-all focus:outline-none"
+                style={inputStyle}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+              />
+            </motion.div>
 
-          <div>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: '#374151' }}>
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              required
-              className="w-full px-4 py-2.5 border transition-all focus:outline-none"
-              style={inputStyle}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
-            />
-            <p className="mt-1 text-xs" style={{ color: '#9CA3AF' }}>
-              At least 8 characters with uppercase, lowercase, number, and special character
-            </p>
-          </div>
+            <motion.div
+              variants={fieldVariants}
+              custom={3}
+              initial="hidden"
+              animate="visible"
+            >
+              <input
+                id="password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                placeholder="Password"
+                required
+                className="w-full px-4 py-3 border transition-all focus:outline-none"
+                style={inputStyle}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+              />
+              <p className="mt-1.5 text-xs" style={{ color: '#9CA3AF' }}>
+                At least 8 characters with uppercase, lowercase, number, and special character
+              </p>
+            </motion.div>
 
-          {/* Primary CTA */}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full h-11 px-4 text-white font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-2 hover:opacity-90"
-            style={{ backgroundColor: '#06B6D4', borderRadius: '9999px' }}
-          >
-            {isLoading ? 'Creating account...' : 'Create free account'}
-          </button>
-        </form>
+            {/* Primary CTA */}
+            <motion.button
+              type="submit"
+              disabled={isLoading}
+              className="w-full h-11 px-4 text-white font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
+              style={{ backgroundColor: '#06B6D4', borderRadius: '9999px' }}
+              variants={fieldVariants}
+              custom={4}
+              initial="hidden"
+              animate="visible"
+              whileTap={{ scale: 0.98 }}
+            >
+              {isLoading ? 'Creating account...' : 'Create free account'}
+            </motion.button>
+          </form>
+        </motion.div>
       </AuthLayout>
     </>
   );
