@@ -48,10 +48,10 @@ export default function DashboardLayout() {
         initial={false}
         animate={{ width: isCollapsed ? 80 : 280 }}
         transition={{ type: 'spring', damping: 25, stiffness: 120 }}
-        className="hidden lg:flex flex-col h-screen bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-white/20 dark:border-white/10 sticky top-0 shadow-glass"
+        className="hidden lg:flex flex-col h-screen bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-700/50 sticky top-0 shadow-glass"
       >
         {/* Logo */}
-        <div className="p-6 border-b border-slate-200/50 dark:border-white/10">
+        <div className="p-6 border-b border-slate-200/50 dark:border-slate-700/50">
           {isCollapsed ? (
             <Logo variant="icon" animated={false} />
           ) : (
@@ -60,7 +60,7 @@ export default function DashboardLayout() {
         </div>
 
         {/* Clock & Toggle */}
-        <div className="px-6 py-4 border-b border-slate-200/50 dark:border-white/10">
+        <div className="px-6 py-4 border-b border-slate-200/50 dark:border-slate-700/50">
           {!isCollapsed ? (
             <motion.div
               initial={{ opacity: 0 }}

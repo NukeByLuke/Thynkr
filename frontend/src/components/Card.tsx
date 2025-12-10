@@ -29,9 +29,9 @@ export default function Card({
   };
 
   const variantClasses = {
-    default: 'bg-white dark:bg-slate-900/90 border border-slate-200/50 dark:border-white/10 shadow-soft',
-    glass: 'backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border border-white/20 dark:border-white/10 shadow-glass',
-    gradient: 'bg-gradient-to-br from-[#8B5CF6]/5 to-[#06B6D4]/5 dark:from-[#8B5CF6]/10 dark:to-[#06B6D4]/10 border border-white/20 dark:border-white/10 shadow-soft backdrop-blur-sm',
+    default: 'bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-700/50 shadow-soft',
+    glass: 'backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border border-white/20 dark:border-slate-700/30 shadow-glass',
+    gradient: 'bg-gradient-to-br from-[#7C3AED]/5 to-[#06B6D4]/5 dark:from-[#7C3AED]/10 dark:to-[#06B6D4]/10 border border-white/20 dark:border-slate-700/30 shadow-soft backdrop-blur-sm',
   };
 
   const baseClassName = clsx(

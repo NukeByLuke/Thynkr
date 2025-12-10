@@ -35,7 +35,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variants = {
       primary:
-        'relative overflow-hidden bg-gradient-to-r from-[#8B5CF6] via-[#7C3AED] to-[#06B6D4] text-white shadow-soft hover:shadow-glow-brand hover:scale-[1.02] active:scale-[0.98]',
+        'relative overflow-hidden bg-gradient-to-r from-[#7C3AED] to-[#06B6D4] text-white shadow-soft hover:shadow-glow-brand hover:scale-[1.02] active:scale-[0.98]',
       secondary:
         'relative overflow-hidden bg-gradient-to-r from-accent-500 to-accent-400 text-white shadow-soft hover:shadow-glow-accent hover:scale-[1.02] active:scale-[0.98]',
       outline:

@@ -11,12 +11,12 @@ export default {
           100: '#ede9fe',
           200: '#ddd6fe',
           300: '#c4b5fd',
-          400: '#a855f7',
-          500: '#8B5CF6',
-          600: '#7C3AED',
-          700: '#6D28D9',
-          800: '#5B21B6',
-          900: '#4C1D95',
+          400: '#a78bfa',
+          500: '#7C3AED', // Primary brand color
+          600: '#6D28D9',
+          700: '#5B21B6',
+          800: '#4C1D95',
+          900: '#3B1483',
         },
         // Accent palette (cyan for unified gradient)
         accent: {
@@ -25,7 +25,7 @@ export default {
           200: '#a5f3fc',
           300: '#67e8f9',
           400: '#22d3ee',
-          500: '#06b6d4',
+          500: '#06B6D4', // Primary accent color
           600: '#0891b2',
           700: '#0e7490',
           800: '#155e75',
@@ -69,12 +69,13 @@ export default {
         '5xl': '2.5rem',
       },
       boxShadow: {
-        'glass': '0 4px 30px rgba(0, 0, 0, 0.1)',
-        'glass-lg': '0 8px 40px rgba(0, 0, 0, 0.12)',
-        'glow-brand': '0 0 20px rgba(139, 92, 246, 0.25)',
+        'glass': '0 4px 30px rgba(0, 0, 0, 0.08)',
+        'glass-lg': '0 8px 40px rgba(0, 0, 0, 0.1)',
+        'glow-brand': '0 0 20px rgba(124, 58, 237, 0.25)',
         'glow-accent': '0 0 20px rgba(6, 182, 212, 0.25)',
-        'soft': '0 2px 15px rgba(0, 0, 0, 0.08)',
-        'soft-lg': '0 4px 25px rgba(0, 0, 0, 0.1)',
+        'soft': '0 2px 15px rgba(0, 0, 0, 0.06)',
+        'soft-lg': '0 4px 25px rgba(0, 0, 0, 0.08)',
+        'soft-xl': '0 8px 40px rgba(0, 0, 0, 0.1)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',
