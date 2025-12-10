@@ -49,8 +49,9 @@ FROM nginx:alpine AS runner
 # Copy built files from builder
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy nginx config - production config by default
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy nginx config - use local config for development (no SSL)
+ARG NGINX_CONFIG=nginx.local.conf
+COPY ${NGINX_CONFIG} /etc/nginx/conf.d/default.conf
 
 # No Basic Auth; the SPA handles a themed preview gate
 
