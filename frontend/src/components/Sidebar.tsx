@@ -50,51 +50,52 @@ const Sidebar = () => {
   const visibleLinks = navLinks.filter((link) => !link.adminOnly || user?.role === 'ADMIN');
 
   return (
-    <aside className="fixed top-0 left-0 h-screen w-20 flex flex-col justify-between bg-slate-100 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-lg">
+    <aside className="fixed top-0 left-0 h-screen w-20 flex flex-col justify-between bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
       {/* Header Section */}
-      <div className="flex flex-col items-center mt-6 gap-6">
+      <div className="flex flex-col items-center pt-6 pb-4">
         {/* Logo */}
-        <Logo variant="icon" animated={false} className="h-10 w-10 cursor-pointer" />
-
-        {/* Divider */}
-        <div className="h-[1px] w-10 bg-gradient-to-r from-brand-500/20 to-accent-400/20 my-4" />
+        <Logo variant="icon" animated={false} className="h-9 w-9 cursor-pointer" />
       </div>
 
       {/* Navigation Links */}
-      <nav className="flex flex-col items-center gap-5">
+      <nav className="flex-1 flex flex-col items-center py-4 gap-2">
         {visibleLinks.map((link) => {
           const Icon = link.icon;
           const active = isActive(link.to);
 
           return (
-            <div key={link.to} className="relative">
-              <Link
-                to={link.to}
-                tabIndex={0}
-                aria-label={link.label}
-                aria-current={active ? 'page' : undefined}
-                className={`flex items-center justify-center transition-all duration-200 ease-in-out focus:outline-none ${
-                  active
-                    ? 'text-brand-400 shadow-[0_0_10px_rgba(100,100,255,0.2)]'
-                    : 'text-slate-400 hover:text-brand-400'
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-              </Link>
-            </div>
+            <Link
+              key={link.to}
+              to={link.to}
+              tabIndex={0}
+              aria-label={link.label}
+              aria-current={active ? 'page' : undefined}
+              className={`flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 ${
+                active
+                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-500'
+                  : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800'
+              }`}
+            >
+              <Icon className="w-[18px] h-[18px]" />
+            </Link>
           );
         })}
       </nav>
 
       {/* Bottom Section */}
-      <div className="flex flex-col items-center w-full">
+      <div className="flex flex-col items-center pb-6">
         {/* Media Controls */}
         <MediaControls />
 
+        {/* Divider */}
+        <div className="w-8 h-px bg-gray-200 dark:bg-slate-700 my-3" />
+
         {/* Control Icons */}
-        <div className="flex flex-col items-center gap-4 mb-6">
+        <div className="flex flex-col items-center gap-2">
           {/* Theme Toggle */}
-          <ThemeToggle />
+          <div className="w-11 h-11 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
+            <ThemeToggle />
+          </div>
 
           {/* Settings */}
           <Link
@@ -102,13 +103,13 @@ const Sidebar = () => {
             tabIndex={0}
             aria-label="Settings"
             aria-current={isActive('/settings') ? 'page' : undefined}
-            className={`flex items-center justify-center transition-all duration-200 ease-in-out focus:outline-none ${
+            className={`flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 ${
               isActive('/settings')
-                ? 'text-brand-400 shadow-[0_0_10px_rgba(100,100,255,0.2)]'
-                : 'text-slate-400 hover:text-brand-400'
+                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-500'
+                : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800'
             }`}
           >
-            <Settings className="w-5 h-5" />
+            <Settings className="w-[18px] h-[18px]" />
           </Link>
 
           {/* Logout */}
@@ -116,9 +117,9 @@ const Sidebar = () => {
             onClick={handleLogout}
             tabIndex={0}
             aria-label="Logout"
-            className={`flex items-center justify-center transition-all duration-200 ease-in-out focus:outline-none ${'text-slate-400 hover:text-red-400'}`}
+            className="flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-red-500"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-[18px] h-[18px]" />
           </button>
         </div>
       </div>
