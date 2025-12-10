@@ -5,34 +5,37 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Primary - soft welcoming blue (Thea.study inspired)
+        // Primary - accessible blue (#3B82F6)
         primary: {
-          50: '#F0F9FF',
-          100: '#E0F2FE',
-          200: '#BAE6FD',
-          300: '#7DD3FC',
-          400: '#38BDF8',
-          500: '#60A5FA', // Softer main primary
-          600: '#3B82F6',
-          700: '#2563EB',
-          800: '#1D4ED8',
+          DEFAULT: '#3B82F6',
+          50: '#EFF6FF',
+          100: '#DBEAFE',
+          200: '#BFDBFE',
+          300: '#93C5FD',
+          400: '#60A5FA',
+          500: '#3B82F6', // Main primary
+          600: '#2563EB',
+          700: '#1D4ED8',
+          800: '#1E40AF',
           900: '#1E3A8A',
         },
-        // Secondary - gentle lavender/purple
+        // Secondary - gentle lavender (#A78BFA)
         secondary: {
+          DEFAULT: '#A78BFA',
           50: '#FAF5FF',
           100: '#F3E8FF',
           200: '#E9D5FF',
           300: '#D8B4FE',
-          400: '#C4B5FD', // Softer main secondary
-          500: '#A78BFA',
+          400: '#C4B5FD',
+          500: '#A78BFA', // Main secondary
           600: '#8B5CF6',
           700: '#7C3AED',
           800: '#6D28D9',
           900: '#4C1D95',
         },
-        // Accent - calm cyan/teal
+        // Accent - calming cyan (#06B6D4)
         accent: {
+          DEFAULT: '#06B6D4',
           50: '#ECFEFF',
           100: '#CFFAFE',
           200: '#A5F3FC',
@@ -44,25 +47,28 @@ export default {
           800: '#155E75',
           900: '#164E63',
         },
-        // Brand alias (for gradients - purple to cyan)
-        brand: {
-          50: '#F5F3FF',
-          100: '#EDE9FE',
-          200: '#DDD6FE',
-          300: '#C4B5FD',
-          400: '#A78BFA',
-          500: '#7C3AED',
-          600: '#6D28D9',
-          700: '#5B21B6',
-          800: '#4C1D95',
-          900: '#3B1483',
-        },
-        // Background colors (warmer, calmer)
+        // Background colors (Thea.study tokens)
+        'bg-light': '#F9FAFB',
+        'bg-dark': '#0F172A',
         background: {
-          light: '#FAFBFC',
-          'light-alt': '#F5F7FA',
+          light: '#F9FAFB',
+          'light-alt': '#F3F4F6',
           dark: '#0F172A',
           'dark-alt': '#1E293B',
+        },
+        // Brand alias (purple to cyan gradient - for backward compatibility)
+        brand: {
+          50: '#FAF5FF',
+          100: '#F3E8FF',
+          200: '#E9D5FF',
+          300: '#D8B4FE',
+          400: '#C4B5FD',
+          500: '#A78BFA', // Main brand (same as secondary)
+          600: '#8B5CF6',
+          700: '#7C3AED',
+          800: '#6D28D9',
+          900: '#4C1D95',
+          950: '#2E1065',
         },
       },
       fontFamily: {
@@ -92,21 +98,24 @@ export default {
         '5xl': '2.5rem',
       },
       boxShadow: {
-        // Ultra-soft ambient shadows (calm, welcoming)
+        // Ambient shadows - ultra-soft (Thea.study inspired)
         'xs': '0 1px 2px rgba(0, 0, 0, 0.02)',
         'soft': '0 2px 8px rgba(0, 0, 0, 0.03)',
         'soft-md': '0 4px 16px rgba(0, 0, 0, 0.04)',
-        'soft-lg': '0 6px 24px rgba(0, 0, 0, 0.04)',
-        'soft-xl': '0 8px 32px rgba(0, 0, 0, 0.05)',
+        'soft-lg': '0 4px 24px rgba(0, 0, 0, 0.05)',
+        'soft-xl': '0 8px 32px rgba(0, 0, 0, 0.06)',
+        // Ambient alias (matches theme.config.ts)
+        'ambient': '0 4px 24px rgba(0, 0, 0, 0.05)',
+        'ambient-lg': '0 8px 32px rgba(0, 0, 0, 0.06)',
         // Card shadows (minimal, clean)
         'card': '0 1px 8px rgba(0, 0, 0, 0.03)',
-        'card-hover': '0 4px 16px rgba(0, 0, 0, 0.05)',
+        'card-hover': '0 4px 20px rgba(0, 0, 0, 0.06)',
         // Button shadows (subtle primary glow)
-        'button': '0 2px 8px rgba(96, 165, 250, 0.12)',
-        'button-hover': '0 4px 12px rgba(96, 165, 250, 0.18)',
+        'button': '0 2px 8px rgba(59, 130, 246, 0.15)',
+        'button-hover': '0 4px 16px rgba(59, 130, 246, 0.2)',
         // Glass effect (very light)
-        'glass': '0 4px 24px rgba(0, 0, 0, 0.03)',
-        'glass-lg': '0 8px 32px rgba(0, 0, 0, 0.04)',
+        'glass': '0 4px 24px rgba(0, 0, 0, 0.04)',
+        'glass-lg': '0 8px 32px rgba(0, 0, 0, 0.05)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',

@@ -114,9 +114,9 @@ pre code.hljs {
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb {
-  @apply bg-gradient-to-br from-brand-500 to-accent-500 rounded-full;
+  @apply bg-gradient-to-br from-secondary-500 to-accent-500 rounded-full;
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-  @apply bg-gradient-to-br from-brand-600 to-accent-600 rounded-full;
+  @apply bg-gradient-to-br from-secondary-600 to-accent-600 rounded-full;
 }

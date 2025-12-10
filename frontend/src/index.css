@@ -12,16 +12,16 @@
   }
 
   :root {
-    /* Primary - accessible blue */
+    /* Primary - accessible blue (Thea.study token) */
     --color-primary: #3B82F6;
     --color-primary-light: #60A5FA;
     --color-primary-dark: #2563EB;
-    /* Secondary - gentle lavender */
-    --color-secondary: #8B5CF6;
-    --color-secondary-light: #A78BFA;
-    /* Accent - calming cyan */
+    /* Secondary - gentle lavender (Thea.study token) */
+    --color-secondary: #A78BFA;
+    --color-secondary-light: #C4B5FD;
+    /* Accent - calming cyan (Thea.study token) */
     --color-accent: #06B6D4;
-    /* Light mode backgrounds - warm and clean */
+    /* Light mode backgrounds (Thea.study tokens) */
     --color-bg-primary: #F9FAFB;
     --color-bg-secondary: #F3F4F6;
     --color-bg-tertiary: #FFFFFF;
@@ -32,10 +32,14 @@
     /* Light mode borders */
     --color-border: #E5E7EB;
     --color-border-light: #F3F4F6;
+    /* Shadows - ambient soft (Thea.study style) */
+    --shadow-ambient: 0 4px 24px rgba(0, 0, 0, 0.05);
+    --shadow-card: 0 1px 8px rgba(0, 0, 0, 0.03);
+    --shadow-card-hover: 0 4px 20px rgba(0, 0, 0, 0.06);
     /* Transitions - smooth theme changes */
     --transition-theme: 300ms ease-out;
     --transition-base: 200ms ease-out;
-    /* Spacing - more generous */
+    /* Spacing - generous */
     --spacing-section: 3rem;
     --spacing-card: 1.5rem;
     /* Radius - consistent rounded corners */
@@ -49,8 +53,8 @@
     --color-primary: #60A5FA;
     --color-primary-light: #93C5FD;
     --color-primary-dark: #3B82F6;
-    /* Dark mode backgrounds - soft, not pure black */
-    --color-bg-primary: #111827;
+    /* Dark mode backgrounds (Thea.study tokens) */
+    --color-bg-primary: #0F172A;
     --color-bg-secondary: #1E293B;
     --color-bg-tertiary: #1F2937;
     /* Dark mode text - gentler contrast (WCAG AA) */
@@ -73,7 +77,7 @@
     font-family: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     transition: background-color var(--transition-theme), color var(--transition-theme);
     letter-spacing: -0.005em;
-    line-height: 1.7;
+    line-height: 1.6;
     font-weight: 400;
     font-size: 15px;
   }
