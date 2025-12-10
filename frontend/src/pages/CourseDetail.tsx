@@ -237,7 +237,7 @@ export default function CourseDetail() {
             <button
               onClick={() => generateSummaryMutation.mutate(file.id)}
               disabled={generateSummaryMutation.isPending}
-              className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50"
+              className="px-6 py-3 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 transition-colors"
             >
               {generateSummaryMutation.isPending ? 'Generating...' : 'Generate Summary'}
             </button>
@@ -254,7 +254,7 @@ export default function CourseDetail() {
             <button
               onClick={() => generateNotesMutation.mutate(file.id)}
               disabled={generateNotesMutation.isPending}
-              className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50"
+              className="px-6 py-3 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 transition-colors"
             >
               {generateNotesMutation.isPending ? 'Generating...' : 'Generate Notes'}
             </button>
@@ -285,7 +285,7 @@ export default function CourseDetail() {
             <button
               onClick={() => generateFlashcardsMutation.mutate({ fileId: file.id, numCards })}
               disabled={generateFlashcardsMutation.isPending}
-              className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50"
+              className="px-6 py-3 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 transition-colors"
             >
               {generateFlashcardsMutation.isPending ? 'Generating...' : 'Generate Flashcards'}
             </button>
@@ -298,7 +298,7 @@ export default function CourseDetail() {
             <div>
               <button
                 onClick={() => setSelectedQuiz(null)}
-                className="mb-4 text-indigo-600 dark:text-indigo-400 text-sm"
+                className="mb-4 text-blue-600 dark:text-blue-400 text-sm hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
               >
                 ← Back
               </button>
@@ -322,7 +322,7 @@ export default function CourseDetail() {
                 <button
                   key={quiz.id}
                   onClick={() => setSelectedQuiz(quiz)}
-                  className="w-full text-left p-4 border dark:border-gray-600 rounded-lg hover:border-indigo-600 dark:hover:border-indigo-400 text-gray-900 dark:text-white"
+                  className="w-full text-left p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:border-blue-500 dark:hover:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-900 dark:text-white transition-colors"
                 >
                   {quiz.title} • {quiz.questions.length} questions
                 </button>
@@ -362,7 +362,7 @@ export default function CourseDetail() {
                     })
                   }
                   disabled={generateQuizMutation.isPending}
-                  className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50"
+                  className="px-6 py-3 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 transition-colors"
                 >
                   {generateQuizMutation.isPending ? 'Generating...' : 'Generate Quiz'}
                 </button>
@@ -407,7 +407,7 @@ export default function CourseDetail() {
                 })
               }
               disabled={generateQuizMutation.isPending}
-              className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50"
+              className="px-6 py-3 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 transition-colors"
             >
               {generateQuizMutation.isPending ? 'Generating...' : 'Generate Quiz'}
             </button>
@@ -446,15 +446,14 @@ export default function CourseDetail() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
       <div className="max-w-6xl mx-auto px-8 lg:px-16">
         {/* Course Header */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-soft overflow-hidden mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">
           {course.bannerImage && (
-            <div className="relative">
+            <div className="relative h-48">
               <img
                 src={course.bannerImage}
                 alt={course.title}
-                className="w-full h-64 object-cover"
+                className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50"></div>
             </div>
           )}
 
@@ -486,14 +485,14 @@ export default function CourseDetail() {
         {course.lessons && course.lessons.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Lessons Sidebar */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-              <div className="p-4 border-b dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 className="font-semibold text-gray-900 dark:text-white">Course Lessons</h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {course.lessons.length} lessons
                 </p>
               </div>
-              <div className="divide-y dark:divide-gray-700 max-h-[600px] overflow-y-auto">
+              <div className="divide-y divide-gray-100 dark:divide-gray-700 max-h-[600px] overflow-y-auto">
                 {course.lessons.map((lesson: CourseLesson, index: number) => (
                   <button
                     key={lesson.id}
@@ -502,17 +501,17 @@ export default function CourseDetail() {
                       setSelectedQuiz(null);
                       setSelectedFlashcardSet(null);
                     }}
-                    className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                    className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${
                       selectedLesson?.id === lesson.id
-                        ? 'bg-indigo-50 dark:bg-indigo-900/30 border-l-4 border-indigo-600'
+                        ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500'
                         : ''
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      {/* Modern gradient badge */}
-                      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md">
-                        <span className="text-white font-bold text-sm">
-                          {String(index + 1).padStart(2, '0')}
+                      {/* Minimal number badge */}
+                      <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                        <span className="text-gray-600 dark:text-gray-300 font-medium text-sm">
+                          {index + 1}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
@@ -534,7 +533,7 @@ export default function CourseDetail() {
             {/* Study Content */}
             <div className="lg:col-span-2">
               {!selectedLesson ? (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                     No lesson selected
                   </h3>
@@ -543,8 +542,8 @@ export default function CourseDetail() {
                   </p>
                 </div>
               ) : (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-                  <div className="p-6 border-b dark:border-gray-700">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                  <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                       {selectedLesson.title}
                     </h2>
@@ -554,7 +553,7 @@ export default function CourseDetail() {
                       </p>
                     )}
                   </div>
-                  <div className="border-b dark:border-gray-700">
+                  <div className="border-b border-gray-200 dark:border-gray-700">
                     <div className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 overflow-x-auto scrollbar-hide">
                       {(['summary', 'notes', 'flashcards', 'quizzes'] as TabType[]).map((tab) => (
                         <button
@@ -566,7 +565,7 @@ export default function CourseDetail() {
                           }}
                           className={`py-3 sm:py-4 border-b-2 capitalize transition-colors whitespace-nowrap text-sm sm:text-base ${
                             activeTab === tab
-                              ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 font-medium'
+                              ? 'border-blue-500 text-blue-600 dark:text-blue-400 font-medium'
                               : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                           }`}
                         >
@@ -581,7 +580,7 @@ export default function CourseDetail() {
             </div>
           </div>
         ) : (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
             <p className="text-gray-500 dark:text-gray-400">No lessons available yet.</p>
           </div>
         )}

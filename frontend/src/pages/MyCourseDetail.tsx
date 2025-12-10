@@ -109,22 +109,22 @@ function formatDate(dateString: string) {
   });
 }
 
-// Generate gradient based on course category
-function getCategoryGradient(category: string): string {
-  const gradients: Record<string, string> = {
-    MATHEMATICS: 'from-blue-500 to-indigo-600',
-    SCIENCE: 'from-green-500 to-teal-600',
-    TECHNOLOGY: 'from-brand-600 to-accent-600',
-    ENGINEERING: 'from-orange-500 to-red-600',
-    LANGUAGES: 'from-cyan-500 to-blue-600',
-    HUMANITIES: 'from-amber-500 to-orange-600',
-    BUSINESS: 'from-slate-500 to-gray-700',
-    ARTS: 'from-rose-500 to-pink-600',
-    HEALTH: 'from-emerald-500 to-green-600',
-    LAW: 'from-brand-600 to-accent-600',
-    OTHER: 'from-gray-500 to-slate-600',
+// Soft category colors for minimal UI
+function getCategoryColor(category: string): string {
+  const colors: Record<string, string> = {
+    MATHEMATICS: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    SCIENCE: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+    TECHNOLOGY: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
+    ENGINEERING: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+    LANGUAGES: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    HUMANITIES: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+    BUSINESS: 'bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-400',
+    ARTS: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
+    HEALTH: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    LAW: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+    OTHER: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400',
   };
-  return gradients[category] || gradients['OTHER'];
+  return colors[category] || colors['OTHER'];
 }
 
 export default function MyCourseDetail() {
@@ -424,86 +424,103 @@ export default function MyCourseDetail() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
     >
-      {/* Hero Banner with Overlay */}
-      <div className="relative h-64 md:h-80 overflow-hidden">
-        {course.bannerImage ? (
-          <img src={course.bannerImage} alt="" className="w-full h-full object-cover" />
-        ) : (
-          <div
-            className={`w-full h-full bg-gradient-to-br ${getCategoryGradient(course.category)}`}
-          />
-        )}
+      {/* Soft Header Section */}
+      <div className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+        {/* Back Navigation */}
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+          <Link
+            to="/courses"
+            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to Courses</span>
+          </Link>
+        </div>
 
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-
-        {/* Back Button - Floating */}
-        <Link
-          to="/courses"
-          className="absolute top-4 left-4 md:top-6 md:left-6 inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-xl hover:bg-white/20 transition-all"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">Back to Courses</span>
-        </Link>
-
-        {/* Banner Upload Button (Owner only) */}
-        {course.isOwner && (
-          <div className="absolute top-4 right-4 md:top-6 md:right-6">
-            <input
-              type="file"
-              ref={bannerInputRef}
-              onChange={handleBannerUpload}
-              accept="image/*"
-              className="hidden"
-            />
-            <button
-              onClick={() => bannerInputRef.current?.click()}
-              disabled={uploadingBanner}
-              className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-xl hover:bg-white/20 transition-all disabled:opacity-50"
-            >
-              <ImagePlus className="h-4 w-4" />
-              <span className="hidden sm:inline">
-                {uploadingBanner ? 'Uploading...' : 'Change Banner'}
-              </span>
-            </button>
-          </div>
-        )}
-
-        {/* Title Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-          <div className="max-w-5xl mx-auto">
-            <div className="flex flex-wrap items-center gap-2 mb-3">
-              <span className="px-3 py-1 text-xs font-medium text-white bg-white/20 backdrop-blur-sm rounded-full">
-                {course.category.replace('_', ' ')}
-              </span>
-              <span
-                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${
-                  course.visibility === 'PUBLIC'
-                    ? 'bg-green-500/20 text-green-100'
-                    : 'bg-gray-500/20 text-gray-100'
-                }`}
-              >
-                {course.visibility === 'PUBLIC' ? (
-                  <Globe className="h-3 w-3" />
-                ) : (
-                  <Lock className="h-3 w-3" />
+        {/* Course Header Info */}
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col md:flex-row md:items-start gap-6">
+            {/* Banner Image (optional, smaller) */}
+            {course.bannerImage && (
+              <div className="relative w-full md:w-48 h-32 md:h-28 rounded-xl overflow-hidden flex-shrink-0">
+                <img src={course.bannerImage} alt="" className="w-full h-full object-cover" />
+                {course.isOwner && (
+                  <>
+                    <input
+                      type="file"
+                      ref={bannerInputRef}
+                      onChange={handleBannerUpload}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => bannerInputRef.current?.click()}
+                      disabled={uploadingBanner}
+                      className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity"
+                    >
+                      <ImagePlus className="h-5 w-5 text-white" />
+                    </button>
+                  </>
                 )}
-                {course.visibility}
-              </span>
-            </div>
-            <h1 className="text-2xl md:text-4xl font-bold text-white drop-shadow-lg mb-3">
-              {course.title}
-            </h1>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-white/80">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span>{course.creator.name}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>{formatDate(course.createdAt)}</span>
+            )}
+
+            {/* Title and Meta */}
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className={`px-3 py-1 text-xs font-medium rounded-full ${getCategoryColor(course.category)}`}>
+                  {course.category.replace('_', ' ')}
+                </span>
+                <span
+                  className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${
+                    course.visibility === 'PUBLIC'
+                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                      : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                  }`}
+                >
+                  {course.visibility === 'PUBLIC' ? (
+                    <Globe className="h-3 w-3" />
+                  ) : (
+                    <Lock className="h-3 w-3" />
+                  )}
+                  {course.visibility}
+                </span>
+              </div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
+                {course.title}
+              </h1>
+              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  <span>{course.creator.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  <span>{formatDate(course.createdAt)}</span>
+                </div>
               </div>
             </div>
+
+            {/* Banner Upload (if no banner) */}
+            {course.isOwner && !course.bannerImage && (
+              <div>
+                <input
+                  type="file"
+                  ref={bannerInputRef}
+                  onChange={handleBannerUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <button
+                  onClick={() => bannerInputRef.current?.click()}
+                  disabled={uploadingBanner}
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <ImagePlus className="h-4 w-4" />
+                  {uploadingBanner ? 'Uploading...' : 'Add Banner'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -597,7 +614,7 @@ export default function MyCourseDetail() {
                       <button
                         type="submit"
                         disabled={updateCourseMutation.isPending}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl hover:from-primary-700 hover:to-primary-800 disabled:opacity-50 transition-all shadow-lg shadow-primary-500/25"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:opacity-50 transition-colors"
                       >
                         <Save className="h-4 w-4" />
                         {updateCourseMutation.isPending ? 'Saving...' : 'Save Changes'}
@@ -636,7 +653,7 @@ export default function MyCourseDetail() {
                   ) && (
                     <button
                       onClick={() => setShowStudyPanel(true)}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-xl hover:from-brand-700 hover:to-accent-700 transition-all shadow-lg shadow-brand-500/25"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
                     >
                       <GraduationCap className="h-4 w-4" />
                       Study
@@ -655,7 +672,7 @@ export default function MyCourseDetail() {
                       <button
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploading}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl hover:from-primary-700 hover:to-primary-800 disabled:opacity-50 transition-all shadow-lg shadow-primary-500/25"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-full hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 transition-colors"
                       >
                         <Upload className="h-4 w-4" />
                         {uploading ? `${Math.round(uploadProgress)}%` : 'Upload'}
@@ -670,7 +687,7 @@ export default function MyCourseDetail() {
                   <div className="flex items-center gap-3">
                     <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                       <div
-                        className="bg-gradient-to-r from-primary-500 to-primary-600 h-2 rounded-full transition-all duration-300"
+                        className="bg-blue-500 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${uploadProgress}%` }}
                       />
                     </div>
@@ -858,7 +875,7 @@ export default function MyCourseDetail() {
 
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 font-semibold">
                     {course.creator.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
@@ -974,8 +991,8 @@ export default function MyCourseDetail() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl">
-                  <Share2 className="h-5 w-5 text-white" />
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
+                  <Share2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">Share Course</h2>
               </div>
@@ -1082,8 +1099,8 @@ export default function MyCourseDetail() {
           <div className="absolute inset-4 md:inset-8 lg:inset-12 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-brand-600 to-accent-600 rounded-xl">
-                  <GraduationCap className="h-5 w-5 text-white" />
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
+                  <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-gray-900 dark:text-white">Study Mode</h2>
