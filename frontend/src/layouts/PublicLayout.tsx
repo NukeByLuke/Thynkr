@@ -2,6 +2,7 @@ import { Outlet, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Logo from '@/components/Logo';
 import Footer from '@/components/Footer';
+import ThemeToggle from '@/components/ThemeToggle';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function PublicLayout() {
@@ -18,7 +19,7 @@ export default function PublicLayout() {
       >
         <div className="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
           <Logo variant="full" animated={false} />
-          <nav className="flex items-center gap-8 text-sm font-medium text-slate-600 dark:text-slate-400">
+          <nav className="flex items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-400">
             <Link 
               to="/pricing" 
               className="hover:text-slate-900 dark:hover:text-white transition-colors duration-250"
@@ -26,12 +27,15 @@ export default function PublicLayout() {
               Pricing
             </Link>
             {isAuthenticated ? (
-              <Link
-                to="/study"
-                className="px-6 py-2.5 bg-gradient-to-r from-brand-500 to-accent-500 text-white rounded-2xl font-semibold shadow-soft hover:shadow-glow-brand transition-all duration-300"
-              >
-                Dashboard
-              </Link>
+              <>
+                <ThemeToggle size="sm" />
+                <Link
+                  to="/study"
+                  className="px-6 py-2.5 bg-gradient-to-r from-brand-500 to-accent-500 text-white rounded-2xl font-semibold shadow-soft hover:shadow-glow-brand transition-all duration-300"
+                >
+                  Dashboard
+                </Link>
+              </>
             ) : (
               <>
                 <Link 
@@ -40,6 +44,7 @@ export default function PublicLayout() {
                 >
                   Login
                 </Link>
+                <ThemeToggle size="sm" />
                 <Link
                   to="/register"
                   className="px-6 py-2.5 bg-gradient-to-r from-brand-500 to-accent-500 text-white rounded-2xl font-semibold shadow-soft hover:shadow-glow-brand transition-all duration-300"
