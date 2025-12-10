@@ -1,7 +1,6 @@
 /**
- * AuthLayout - Thea-inspired clean 2-column layout for login/signup pages
- * Left: Centered brand panel with logo, tagline, and footer links
- * Right: White floating form card with tabs inside
+ * AuthLayout - Thea.study-inspired clean two-column layout
+ * Exact replica of Thea's login page design
  */
 
 import { motion } from 'framer-motion';
@@ -16,130 +15,150 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   const isLogin = location.pathname === '/login';
 
   return (
-    <div className="light min-h-screen flex" style={{ backgroundColor: '#F8FAFC' }} data-theme="light">
-      {/* Left Brand Panel - Deep indigo, full height on desktop */}
+    <div 
+      className="light min-h-screen flex items-center justify-center p-4 lg:p-8"
+      style={{ backgroundColor: '#E8EEF4' }}
+      data-theme="light"
+    >
+      {/* Centered Card Container */}
       <motion.div
-        className="hidden lg:flex lg:w-[420px] xl:w-[480px] flex-col justify-between p-10 xl:p-12"
-        style={{ backgroundColor: '#1E1B4B' }}
-        initial={{ x: -20, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
+        className="w-full max-w-[1000px] flex flex-col lg:flex-row rounded-2xl overflow-hidden"
+        style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
       >
-        {/* Top - Logo with brand name */}
-        <div className="flex items-center gap-3">
-          <div 
-            className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-lg"
-            style={{ backgroundColor: '#06B6D4' }}
-          >
-            T
-          </div>
-          <span className="text-white text-xl font-medium tracking-tight">Thynkr</span>
-        </div>
-
-        {/* Center - Tagline */}
-        <div className="flex flex-col">
-          <h1 className="text-4xl xl:text-5xl font-light text-white tracking-tight leading-tight mb-4">
-            <span className="italic">Unlock your</span>
-            <br />
-            <span style={{ color: '#06B6D4' }} className="italic">learning potential</span>
-          </h1>
-          
-          <p style={{ color: 'rgba(255,255,255,0.6)' }} className="text-base font-light max-w-[280px]">
-            Smart study tools powered by AI to help you learn faster and retain more.
-          </p>
-        </div>
-
-        {/* Footer Links */}
-        <nav className="flex items-center gap-6">
-          <Link
-            to="/about"
-            style={{ color: 'rgba(255,255,255,0.5)' }}
-            className="hover:text-white text-sm transition-colors duration-200"
-          >
-            About
-          </Link>
-          <Link
-            to="/contact"
-            style={{ color: 'rgba(255,255,255,0.5)' }}
-            className="hover:text-white text-sm transition-colors duration-200"
-          >
-            Contact
-          </Link>
-          <Link
-            to="/terms"
-            style={{ color: 'rgba(255,255,255,0.5)' }}
-            className="hover:text-white text-sm transition-colors duration-200"
-          >
-            Terms
-          </Link>
-        </nav>
-      </motion.div>
-
-      {/* Right Form Panel */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
-        <motion.div
-          className="w-full max-w-[420px]"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1, ease: [0.4, 0, 0.2, 1] }}
+        {/* Left Brand Panel */}
+        <div 
+          className="lg:w-[45%] flex flex-col items-center justify-between p-8 lg:p-12 min-h-[200px] lg:min-h-[580px]"
+          style={{ backgroundColor: '#1E1B4B' }}
         >
-          {/* Mobile Logo - Only visible on mobile */}
-          <div className="flex items-center justify-center gap-2 mb-8 lg:hidden">
-            <div 
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
-              style={{ backgroundColor: '#1E1B4B' }}
-            >
-              T
+          {/* Spacer for top */}
+          <div className="hidden lg:block" />
+
+          {/* Center - Logo and Tagline */}
+          <div className="flex flex-col items-center text-center">
+            {/* Logo */}
+            <div className="mb-6">
+              <svg 
+                width="120" 
+                height="120" 
+                viewBox="0 0 120 120" 
+                fill="none" 
+                className="hidden lg:block"
+              >
+                {/* Rocket/pencil icon similar to Thea */}
+                <circle cx="60" cy="60" r="50" stroke="rgba(255,255,255,0.3)" strokeWidth="2" fill="none" />
+                <path 
+                  d="M60 25 L75 50 L60 95 L45 50 Z" 
+                  fill="white" 
+                  opacity="0.9"
+                />
+                <circle cx="60" cy="55" r="8" fill="#06B6D4" />
+              </svg>
+              {/* Mobile logo */}
+              <div className="lg:hidden flex items-center gap-2">
+                <div 
+                  className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-lg"
+                  style={{ backgroundColor: '#06B6D4' }}
+                >
+                  T
+                </div>
+                <span className="text-white text-2xl font-semibold">Thynkr</span>
+              </div>
             </div>
-            <span style={{ color: '#1E1B4B' }} className="text-lg font-semibold tracking-tight">Thynkr</span>
+
+            {/* Brand Name - Desktop */}
+            <h1 className="hidden lg:block text-5xl font-light text-white tracking-tight mb-4">
+              Thynkr
+            </h1>
+
+            {/* Tagline */}
+            <p 
+              className="text-base lg:text-lg font-light italic"
+              style={{ color: 'rgba(255,255,255,0.7)' }}
+            >
+              unlock your learning potential
+            </p>
           </div>
 
-          {/* White Form Card */}
-          <div 
-            className="rounded-2xl p-8 shadow-sm"
-            style={{ backgroundColor: '#FFFFFF', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}
-          >
-            {/* Auth Tabs - Inside card */}
-            <div className="flex mb-6 rounded-xl p-1" style={{ backgroundColor: '#F1F5F9' }}>
-              <Link
-                to="/login"
-                className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg text-center transition-all duration-200"
-                style={isLogin 
-                  ? { backgroundColor: '#FFFFFF', color: '#1E1B4B', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }
-                  : { backgroundColor: 'transparent', color: '#64748B' }
-                }
-              >
-                Sign In
-              </Link>
-              <Link
-                to="/register"
-                className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg text-center transition-all duration-200"
-                style={!isLogin 
-                  ? { backgroundColor: '#FFFFFF', color: '#1E1B4B', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }
-                  : { backgroundColor: 'transparent', color: '#64748B' }
-                }
-              >
-                Sign Up
-              </Link>
-            </div>
+          {/* Footer Links */}
+          <nav className="flex items-center justify-center gap-8 mt-8 lg:mt-0">
+            <Link
+              to="/about"
+              className="text-xs hover:underline transition-colors duration-200"
+              style={{ color: 'rgba(255,255,255,0.5)' }}
+            >
+              About
+            </Link>
+            <Link
+              to="/testimonials"
+              className="text-xs hover:underline transition-colors duration-200"
+              style={{ color: 'rgba(255,255,255,0.5)' }}
+            >
+              Testimonials
+            </Link>
+            <Link
+              to="/contact"
+              className="text-xs hover:underline transition-colors duration-200"
+              style={{ color: 'rgba(255,255,255,0.5)' }}
+            >
+              Contact
+            </Link>
+          </nav>
+        </div>
 
-            {/* Form Content */}
+        {/* Right Form Panel */}
+        <div 
+          className="lg:w-[55%] p-8 lg:p-10 flex flex-col"
+          style={{ backgroundColor: '#FFFFFF' }}
+        >
+          {/* Auth Tabs - Outside of scrollable area */}
+          <div 
+            className="flex mb-6 rounded-full p-1"
+            style={{ backgroundColor: '#E5E7EB' }}
+          >
+            <Link
+              to="/login"
+              className="flex-1 px-6 py-2.5 text-sm font-medium rounded-full text-center transition-all duration-200"
+              style={isLogin 
+                ? { backgroundColor: '#D1D5DB', color: '#1F2937' }
+                : { backgroundColor: 'transparent', color: '#6B7280' }
+              }
+            >
+              Sign in
+            </Link>
+            <Link
+              to="/register"
+              className="flex-1 px-6 py-2.5 text-sm font-medium rounded-full text-center transition-all duration-200"
+              style={!isLogin 
+                ? { backgroundColor: '#D1D5DB', color: '#1F2937' }
+                : { backgroundColor: 'transparent', color: '#6B7280' }
+              }
+            >
+              Sign up
+            </Link>
+          </div>
+
+          {/* Form Content */}
+          <div className="flex-1">
             {children}
           </div>
 
-          {/* Terms - Below card */}
-          <p className="mt-6 text-center text-xs leading-relaxed" style={{ color: '#94A3B8' }}>
-            By continuing, you agree to Thynkr's{' '}
-            <Link to="/terms" style={{ color: '#64748B' }} className="hover:underline">
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link to="/privacy" style={{ color: '#64748B' }} className="hover:underline">
-              Privacy Policy
+          {/* Terms - At bottom */}
+          <p className="mt-6 text-center text-xs leading-relaxed" style={{ color: '#9CA3AF' }}>
+            By signing in you agree to Thynkr's{' '}
+            <Link to="/terms" className="underline hover:no-underline" style={{ color: '#6B7280' }}>
+              terms of service
             </Link>
+            ,{' '}
+            <Link to="/privacy" className="underline hover:no-underline" style={{ color: '#6B7280' }}>
+              privacy policy
+            </Link>
+            , and cookie usage.
           </p>
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
     </div>
   );
 }
