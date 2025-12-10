@@ -11,13 +11,13 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { TTSProvider } from './contexts/TTSContext';
 import { NavigationProvider } from './contexts/NavigationContext';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from '@/features/auth/ProtectedRoute';
 import PublicLayout from './layouts/PublicLayout';
-import Layout from './components/Layout';
-import LoadingSpinner from './components/LoadingSpinner';
-import PreviewGate from './components/PreviewGate';
-import MiniPlayer from './components/MiniPlayer';
-import GlobalLoadingBar from './components/GlobalLoadingBar';
+import Layout from '@/components/layout/Layout';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import PreviewGate from '@/features/courses/PreviewGate';
+import MiniPlayer from '@/features/tutor/MiniPlayer';
+import GlobalLoadingBar from '@/components/ui/GlobalLoadingBar';
 
 // Code-split page components for optimal bundle size
 const Landing = lazy(() => import('./pages/Landing'));

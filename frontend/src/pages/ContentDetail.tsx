@@ -2,11 +2,11 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, Calendar, Clock, Lock, Tag, TrendingUp, AlertCircle } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import api from '../lib/api';
-import Card from '../components/Card';
-import Button from '../components/Button';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { useAuth } from '@/contexts/AuthContext';
+import api from '@/lib/api';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 interface Content {
   id: string;

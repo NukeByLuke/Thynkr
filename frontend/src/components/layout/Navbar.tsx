@@ -1,8 +1,8 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import Button from './Button';
-import Logo from './Logo';
-import ThemeToggle from './ThemeToggle';
+import Button from '@/components/ui/Button';
+import Logo from '@/components/Logo';
+import ThemeToggle from '@/components/ThemeToggle';
 import {
   Menu,
   X,

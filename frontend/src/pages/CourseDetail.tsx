@@ -3,12 +3,12 @@ import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { BookOpen, User } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../lib/api';
-import LoadingSpinner from '../components/LoadingSpinner';
-import SummaryView from '../components/study/SummaryView';
-import NotesView from '../components/study/NotesView';
-import FlashcardViewer from '../components/study/FlashcardViewer';
-import QuizPlayer from '../components/study/QuizPlayer';
+import api from '@/lib/api';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import SummaryView from '@/features/study/SummaryView';
+import NotesView from '@/features/study/NotesView';
+import FlashcardViewer from '@/features/study/FlashcardViewer';
+import QuizPlayer from '@/features/study/QuizPlayer';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 

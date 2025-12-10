@@ -21,9 +21,9 @@ import {
   ListMusic,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../lib/api';
-import { useAuth } from '../contexts/AuthContext';
-import { useTTS } from '../contexts/TTSContext';
+import api from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
+import { useTTS } from '@/contexts/TTSContext';
 
 type ViewerTab = 'book' | 'quiz' | 'flashcards';
 

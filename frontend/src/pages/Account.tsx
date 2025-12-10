@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
-import PageContainer from '@/components/PageContainer';
+import PageContainer from '@/components/layout/PageContainer';
 import {
   User,
   Mail,
@@ -13,12 +13,12 @@ import {
   ExternalLink,
   AlertCircle,
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import api from '../lib/api';
-import Card from '../components/Card';
-import Button from '../components/Button';
-import Input from '../components/Input';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { useAuth } from '@/contexts/AuthContext';
+import api from '@/lib/api';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 interface UserProfile {
   id: string;

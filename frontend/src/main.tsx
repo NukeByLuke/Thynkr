@@ -6,7 +6,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { HelmetProvider } from 'react-helmet-async';
 import App from './App';
 import './index.css';
-import PreviewGate from '@/components/PreviewGate';
+import PreviewGate from '@/features/courses/PreviewGate';
 
 const queryClient = new QueryClient({
   defaultOptions: {

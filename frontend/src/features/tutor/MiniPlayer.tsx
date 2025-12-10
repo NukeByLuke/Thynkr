@@ -12,7 +12,7 @@ import {
   ListMusic,
   Repeat,
 } from 'lucide-react';
-import { useTTS, TTS_VOICES, TTS_SPEEDS, TTSVoice } from '../contexts/TTSContext';
+import { useTTS, TTS_VOICES, TTS_SPEEDS, TTSVoice } from '@/contexts/TTSContext';
 
 function formatTime(seconds: number): string {
   if (!isFinite(seconds) || isNaN(seconds)) return '0:00';

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Play, Pause, RotateCcw, RotateCw, Settings, X, Loader2, Repeat } from 'lucide-react';
-import { useTTS, TTS_VOICES, TTS_SPEEDS, TTSVoice } from '../contexts/TTSContext';
+import { useTTS, TTS_VOICES, TTS_SPEEDS, TTSVoice } from '@/contexts/TTSContext';
 
 interface AudioPlayerProps {
   compact?: boolean;

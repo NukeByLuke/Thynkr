@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SidebarGreetingProps {
   timePeriod?: string;

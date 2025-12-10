@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import PageContainer from '@/components/PageContainer';
+import PageContainer from '@/components/layout/PageContainer';
 import { Search, Filter, Lock, Star, Clock, TrendingUp, BookOpen } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import api from '../lib/api';
-import LoadingSpinner from '../components/LoadingSpinner';
-import Card from '../components/Card';
-import Button from '../components/Button';
+import { useAuth } from '@/contexts/AuthContext';
+import api from '@/lib/api';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 
 interface Content {
   id: string;

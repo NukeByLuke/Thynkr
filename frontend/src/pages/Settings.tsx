@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTTS, TTS_VOICES, TTS_SPEEDS, TTSVoice } from '@/contexts/TTSContext';
-import PageContainer from '@/components/PageContainer';
+import PageContainer from '@/components/layout/PageContainer';
 import {
   User,
   Lock,

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
-import PageContainer from '@/components/PageContainer';
+import PageContainer from '@/components/layout/PageContainer';
 import {
   BookOpen,
   Sparkles,
@@ -16,11 +16,11 @@ import {
   Lock,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../lib/api';
-import { useAuth } from '../contexts/AuthContext';
-import { useTierAccess } from '../components/UpgradePrompt';
-import StudyPackViewer from '../components/StudyPackViewer';
-import LoadingSpinner from '../components/LoadingSpinner';
+import api from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
+import { useTierAccess } from '@/components/UpgradePrompt';
+import StudyPackViewer from '@/features/study/StudyPackViewer';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 interface StudyPack {
   id: string;

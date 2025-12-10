@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import PageContainer from '@/components/PageContainer';
+import PageContainer from '@/components/layout/PageContainer';
 import {
   Folder as FolderIcon,
   FolderPlus,
@@ -23,10 +23,10 @@ import {
   BookOpen,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useAuth } from '../contexts/AuthContext';
-import { useTierAccess } from '../components/UpgradePrompt';
-import StudyPackViewer from '../components/StudyPackViewer';
-import api from '../lib/api';
+import { useAuth } from '@/contexts/AuthContext';
+import { useTierAccess } from '@/components/UpgradePrompt';
+import StudyPackViewer from '@/features/study/StudyPackViewer';
+import api from '@/lib/api';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 

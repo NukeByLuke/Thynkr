@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { Link } from 'react-router-dom';
 import { Lock, Crown, Zap, ArrowRight } from 'lucide-react';
-import Button from './Button';
+import Button from '@/components/ui/Button';
 
 export type RequiredTier = 'STANDARD' | 'PREMIUM';
 

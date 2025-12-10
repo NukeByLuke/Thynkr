@@ -13,12 +13,12 @@ import {
   FolderOpen,
   ArrowRight,
 } from 'lucide-react';
-import api from '../lib/api';
-import LoadingSpinner from '../components/LoadingSpinner';
-import Button from '../components/Button';
-import PageHeader from '../components/PageHeader';
-import { useAuth } from '../contexts/AuthContext';
-import { canBrowsePublicCourses, canAccessCourses } from '../components/ProtectedRoute';
+import api from '@/lib/api';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import Button from '@/components/ui/Button';
+import PageHeader from '@/components/layout/PageHeader';
+import { useAuth } from '@/contexts/AuthContext';
+import { canBrowsePublicCourses, canAccessCourses } from '@/features/auth/ProtectedRoute';
 
 const CATEGORIES = [
   { value: '', label: 'All Categories' },

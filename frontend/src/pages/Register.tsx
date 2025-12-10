@@ -10,7 +10,7 @@ import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthLayout from '@/layouts/AuthLayout';
-import { GoogleSignInButton, AppleSignInButton, OAuthDivider } from '@/components/OAuthButtons';
+import { GoogleSignInButton, AppleSignInButton, OAuthDivider } from '@/features/auth/OAuthButtons';
 
 // Input field styling helper
 const inputStyle = {

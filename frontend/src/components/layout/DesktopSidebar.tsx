@@ -16,7 +16,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigation } from '@/contexts/NavigationContext';
-import Logo from './Logo';
+import Logo from '@/components/Logo';
 import SidebarHeader from './SidebarHeader';
 
 export default function DesktopSidebar() {

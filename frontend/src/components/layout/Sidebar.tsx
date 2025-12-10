@@ -10,10 +10,10 @@ import {
   Settings,
   LogOut,
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import Logo from './Logo';
-import ThemeToggle from './ThemeToggle';
-import MediaControls from './MediaControls';
+import { useAuth } from '@/contexts/AuthContext';
+import Logo from '@/components/Logo';
+import ThemeToggle from '@/components/ThemeToggle';
+import MediaControls from '@/features/tutor/MediaControls';
 
 interface NavLink {
   to: string;

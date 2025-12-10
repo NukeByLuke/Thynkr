@@ -1,3 +1,7 @@
+// Re-export all types from global definitions
+export * from './global.d';
+
+// Legacy exports for backwards compatibility
 export type Role = 'BASIC' | 'STANDARD' | 'PREMIUM' | 'ADMIN';
 export type BillingCycle = 'MONTHLY' | 'YEARLY';
 

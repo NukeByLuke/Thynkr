@@ -15,7 +15,7 @@ import {
   Copy,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../lib/api';
+import api from '@/lib/api';
 
 type AITab = 'summary' | 'notes' | 'quiz' | 'flashcards';
 

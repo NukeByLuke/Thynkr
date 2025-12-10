@@ -31,14 +31,14 @@ import {
   User,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../lib/api';
-import LoadingSpinner from '../components/LoadingSpinner';
-import SecureFileViewer from '../components/SecureFileViewer';
-import FileAIActions from '../components/FileAIActions';
-import FileAIViewer from '../components/FileAIViewer';
-import { CourseStudyPanel } from '../components/study';
-import { useAuth } from '../contexts/AuthContext';
-import { canCreatePublicCourses } from '../components/ProtectedRoute';
+import api from '@/lib/api';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import SecureFileViewer from '@/features/courses/SecureFileViewer';
+import FileAIActions from '@/features/courses/FileAIActions';
+import FileAIViewer from '@/features/courses/FileAIViewer';
+import { CourseStudyPanel } from '@/features/study';
+import { useAuth } from '@/contexts/AuthContext';
+import { canCreatePublicCourses } from '@/features/auth/ProtectedRoute';
 
 interface CourseFile {
   id: string;

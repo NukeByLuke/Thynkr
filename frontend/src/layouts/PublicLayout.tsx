@@ -1,7 +1,7 @@
 import { Outlet, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Logo from '@/components/Logo';
-import Footer from '@/components/Footer';
+import Footer from '@/components/layout/Footer';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useAuth } from '@/contexts/AuthContext';
 

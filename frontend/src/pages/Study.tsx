@@ -8,11 +8,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { GraduationCap, Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
-import SummaryView from '../components/study/SummaryView';
-import NotesView from '../components/study/NotesView';
-import FlashcardViewer from '../components/study/FlashcardViewer';
-import QuizPlayer from '../components/study/QuizPlayer';
-import EmptyState from '../components/EmptyState';
+import SummaryView from '@/features/study/SummaryView';
+import NotesView from '@/features/study/NotesView';
+import FlashcardViewer from '@/features/study/FlashcardViewer';
+import QuizPlayer from '@/features/study/QuizPlayer';
+import EmptyState from '@/components/ui/EmptyState';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 

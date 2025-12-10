@@ -18,13 +18,13 @@ import {
   X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../lib/api';
-import LoadingSpinner from '../components/LoadingSpinner';
-import PageHeader from '../components/PageHeader';
-import VisibilityChip from '../components/VisibilityChip';
-import EmptyState from '../components/EmptyState';
-import { useAuth } from '../contexts/AuthContext';
-import { canCreatePublicCourses } from '../components/ProtectedRoute';
+import api from '@/lib/api';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import PageHeader from '@/components/layout/PageHeader';
+import VisibilityChip from '@/features/courses/VisibilityChip';
+import EmptyState from '@/components/ui/EmptyState';
+import { useAuth } from '@/contexts/AuthContext';
+import { canCreatePublicCourses } from '@/features/auth/ProtectedRoute';
 
 const CATEGORIES = [
   { value: '', label: 'All Categories' },
