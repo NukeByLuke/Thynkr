@@ -63,7 +63,8 @@ export default function Login() {
                 initial={{ opacity: 0, y: -10, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: 'auto' }}
                 exit={{ opacity: 0, y: -10, height: 0 }}
-                className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm"
+                style={{ backgroundColor: '#fef2f2', borderColor: '#fecaca', color: '#dc2626' }}
+                className="px-4 py-3 rounded-lg text-sm border"
               >
                 {error}
               </motion.div>
@@ -71,26 +72,28 @@ export default function Login() {
           </AnimatePresence>
 
           <div>
+            <label style={{ color: '#374151' }} className="block text-sm font-medium mb-1.5">Email</label>
             <input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
               required
-              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition-colors"
+              style={{ backgroundColor: '#FEF9C3', color: '#1e293b', borderColor: '#e2e8f0' }}
+              className="w-full px-4 py-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all border"
             />
           </div>
 
           <div>
+            <label style={{ color: '#374151' }} className="block text-sm font-medium mb-1.5">Password</label>
             <input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
               required
-              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition-colors"
+              style={{ backgroundColor: '#FEF9C3', color: '#1e293b', borderColor: '#e2e8f0' }}
+              className="w-full px-4 py-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all border"
             />
           </div>
 
@@ -100,13 +103,14 @@ export default function Login() {
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-300 text-[#3B82F6] focus:ring-[#3B82F6]/20"
+                className="w-4 h-4 rounded border-slate-300 text-blue-500 focus:ring-blue-500/20"
               />
-              <span className="text-sm text-slate-600">Remember me</span>
+              <span style={{ color: '#64748b' }} className="text-sm">Remember me</span>
             </label>
             <Link
               to="/forgot-password"
-              className="text-sm text-[#3B82F6] hover:text-[#2563EB] font-medium"
+              style={{ color: '#3B82F6' }}
+              className="text-sm font-medium hover:underline"
             >
               Forgot password?
             </Link>
@@ -116,15 +120,17 @@ export default function Login() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 px-4 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-medium rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: '#3B82F6' }}
+            className="w-full py-3.5 px-4 text-white font-medium rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? 'Signing in...' : 'Sign in'}
           </button>
 
-          {/* Secondary CTA - Purple gradient for Register */}
+          {/* Secondary CTA - Purple for Register */}
           <Link
             to="/register"
-            className="block w-full py-3 px-4 bg-gradient-to-r from-[#C4B5FD] to-[#DDD6FE] hover:from-[#A78BFA] hover:to-[#C4B5FD] text-[#5B21B6] font-medium rounded-full text-center transition-all"
+            style={{ backgroundColor: '#C4B5FD', color: '#5B21B6' }}
+            className="block w-full py-3.5 px-4 font-medium rounded-xl text-center hover:opacity-90 transition-opacity"
           >
             Create a free account
           </Link>

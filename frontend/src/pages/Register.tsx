@@ -81,7 +81,8 @@ export default function Register() {
                 initial={{ opacity: 0, y: -10, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: 'auto' }}
                 exit={{ opacity: 0, y: -10, height: 0 }}
-                className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm"
+                style={{ backgroundColor: '#fef2f2', borderColor: '#fecaca', color: '#dc2626' }}
+                className="px-4 py-3 rounded-lg text-sm border"
               >
                 {error}
               </motion.div>
@@ -89,69 +90,81 @@ export default function Register() {
           </AnimatePresence>
 
           <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label style={{ color: '#374151' }} className="block text-sm font-medium mb-1.5">First Name</label>
+              <input
+                id="firstName"
+                type="text"
+                value={formData.firstName}
+                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                style={{ backgroundColor: '#FEF9C3', color: '#1e293b', borderColor: '#e2e8f0' }}
+                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all border"
+              />
+            </div>
+            <div>
+              <label style={{ color: '#374151' }} className="block text-sm font-medium mb-1.5">Last Name</label>
+              <input
+                id="lastName"
+                type="text"
+                value={formData.lastName}
+                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                style={{ backgroundColor: '#FEF9C3', color: '#1e293b', borderColor: '#e2e8f0' }}
+                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all border"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label style={{ color: '#374151' }} className="block text-sm font-medium mb-1.5">Email</label>
             <input
-              id="firstName"
-              type="text"
-              value={formData.firstName}
-              onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-              placeholder="First Name"
-              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition-colors"
-            />
-            <input
-              id="lastName"
-              type="text"
-              value={formData.lastName}
-              onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-              placeholder="Last Name"
-              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition-colors"
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              required
+              style={{ backgroundColor: '#FEF9C3', color: '#1e293b', borderColor: '#e2e8f0' }}
+              className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all border"
             />
           </div>
 
-          <input
-            id="email"
-            type="email"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            placeholder="Email"
-            required
-            className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition-colors"
-          />
-
           <div>
+            <label style={{ color: '#374151' }} className="block text-sm font-medium mb-1.5">Username</label>
             <input
               id="username"
               type="text"
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              placeholder="Username"
               required
-              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition-colors"
+              style={{ backgroundColor: '#FEF9C3', color: '#1e293b', borderColor: '#e2e8f0' }}
+              className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all border"
             />
-            <p className="mt-1 text-xs text-slate-400">
+            <p style={{ color: '#94a3b8' }} className="mt-1 text-xs">
               3-30 characters, letters, numbers, underscores, and hyphens only
             </p>
           </div>
 
           <div>
+            <label style={{ color: '#374151' }} className="block text-sm font-medium mb-1.5">Password</label>
             <input
               id="password"
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              placeholder="Password"
               required
-              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition-colors"
+              style={{ backgroundColor: '#FEF9C3', color: '#1e293b', borderColor: '#e2e8f0' }}
+              className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all border"
             />
-            <p className="mt-1 text-xs text-slate-400">
+            <p style={{ color: '#94a3b8' }} className="mt-1 text-xs">
               At least 8 characters with uppercase, lowercase, number, and special character
             </p>
           </div>
 
-          {/* Primary CTA - Purple gradient for Register */}
+          {/* Primary CTA - Purple for Register */}
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 px-4 bg-gradient-to-r from-[#A78BFA] to-[#C4B5FD] hover:from-[#8B5CF6] hover:to-[#A78BFA] text-white font-medium rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+            style={{ backgroundColor: '#A78BFA' }}
+            className="w-full py-3.5 px-4 text-white font-medium rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
             {isLoading ? 'Creating account...' : 'Create free account'}
           </button>
@@ -159,7 +172,8 @@ export default function Register() {
           {/* Secondary CTA - Blue for Sign In */}
           <Link
             to="/login"
-            className="block w-full py-3 px-4 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-medium rounded-full text-center transition-colors"
+            style={{ backgroundColor: '#3B82F6' }}
+            className="block w-full py-3.5 px-4 text-white font-medium rounded-xl text-center hover:opacity-90 transition-opacity"
           >
             Sign in instead
           </Link>

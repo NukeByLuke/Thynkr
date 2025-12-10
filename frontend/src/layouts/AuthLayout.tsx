@@ -16,63 +16,38 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   const isLogin = location.pathname === '/login';
 
   return (
-    <div className="min-h-screen bg-[#E8EDF3] flex items-center justify-center p-4 lg:p-8">
+    <div className="light min-h-screen bg-[#E8EDF3] flex items-center justify-center p-4 lg:p-8" data-theme="light">
       <div className="w-full max-w-[1100px] flex flex-col lg:flex-row gap-6 lg:gap-0">
         
         {/* Left Brand Panel - Deep indigo with rounded corners */}
         <motion.div
-          className="lg:w-[420px] xl:w-[460px] bg-[#1E1B4B] rounded-3xl flex flex-col items-center justify-between p-8 lg:p-12 min-h-[500px] lg:min-h-[600px]"
+          className="lg:w-[420px] xl:w-[460px] rounded-3xl flex flex-col justify-between p-8 lg:p-12 min-h-[500px] lg:min-h-[600px]"
+          style={{ backgroundColor: '#1E1B4B' }}
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
         >
-          {/* Spacer for centering */}
-          <div />
-
-          {/* Logo and Tagline - Centered */}
-          <div className="flex flex-col items-center text-center">
-            {/* Logo Icon */}
-            <div className="mb-6">
-              <div className="w-20 h-20 relative">
-                {/* Decorative sparkles */}
-                <svg className="absolute -top-2 -right-1 w-4 h-4 text-pink-300" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" />
-                </svg>
-                <svg className="absolute bottom-2 right-0 w-3 h-3 text-cyan-300" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" />
-                </svg>
-                {/* Main logo - stylized T with feather */}
-                <svg viewBox="0 0 80 80" fill="none" className="w-full h-full">
-                  <path 
-                    d="M40 10C40 10 55 25 55 45C55 55 48 65 40 70C32 65 25 55 25 45C25 25 40 10 40 10Z" 
-                    stroke="white" 
-                    strokeWidth="3" 
-                    fill="none"
-                  />
-                  <path 
-                    d="M40 20L40 55" 
-                    stroke="white" 
-                    strokeWidth="3" 
-                    strokeLinecap="round"
-                  />
-                  <path 
-                    d="M32 30L48 30" 
-                    stroke="white" 
-                    strokeWidth="3" 
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </div>
+          {/* Top - Small logo with brand name */}
+          <div className="flex items-center gap-3">
+            <div 
+              className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-lg"
+              style={{ backgroundColor: '#06B6D4' }}
+            >
+              T
             </div>
-            
-            {/* Brand Name */}
-            <h1 className="text-5xl lg:text-6xl font-light text-white tracking-tight mb-6">
-              Thynkr
+            <span className="text-white text-xl font-medium">Thynkr</span>
+          </div>
+
+          {/* Center - Tagline */}
+          <div className="flex flex-col">
+            <h1 className="text-4xl lg:text-5xl font-light text-white tracking-tight leading-tight mb-4">
+              <span className="italic">The best AI</span>
+              <br />
+              <span style={{ color: '#06B6D4' }} className="italic">study tool</span>
             </h1>
             
-            {/* Tagline */}
-            <p className="text-white/60 text-lg font-light">
-              turning study time into free time
+            <p style={{ color: 'rgba(255,255,255,0.6)' }} className="text-base font-light max-w-[280px]">
+              Smart study tools powered by AI to help you learn faster and retain more.
             </p>
           </div>
 
@@ -80,19 +55,22 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           <nav className="flex items-center gap-8">
             <Link
               to="/about"
-              className="text-white/60 hover:text-white text-sm font-medium transition-colors duration-200 underline underline-offset-2"
+              style={{ color: 'rgba(255,255,255,0.6)' }}
+              className="hover:text-white text-sm font-medium transition-colors duration-200 underline underline-offset-2"
             >
               About
             </Link>
             <Link
               to="/testimonials"
-              className="text-white/60 hover:text-white text-sm font-medium transition-colors duration-200 underline underline-offset-2"
+              style={{ color: 'rgba(255,255,255,0.6)' }}
+              className="hover:text-white text-sm font-medium transition-colors duration-200 underline underline-offset-2"
             >
               Testimonials
             </Link>
             <Link
               to="/contact"
-              className="text-white/60 hover:text-white text-sm font-medium transition-colors duration-200 underline underline-offset-2"
+              style={{ color: 'rgba(255,255,255,0.6)' }}
+              className="hover:text-white text-sm font-medium transition-colors duration-200 underline underline-offset-2"
             >
               Contact
             </Link>
@@ -107,24 +85,24 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           transition={{ duration: 0.4, delay: 0.1, ease: [0.4, 0, 0.2, 1] }}
         >
           {/* Auth Tabs - Pill style */}
-          <div className="flex mb-6 bg-[#D4DCE8] rounded-full p-1 w-fit">
+          <div className="flex mb-6 rounded-full p-1 w-fit" style={{ backgroundColor: '#D4DCE8' }}>
             <Link
               to="/login"
-              className={`px-8 py-2.5 text-sm font-medium rounded-full transition-all duration-200 ${
-                isLogin
-                  ? 'bg-[#1E1B4B] text-white'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className="px-8 py-2.5 text-sm font-medium rounded-full transition-all duration-200"
+              style={isLogin 
+                ? { backgroundColor: '#1E1B4B', color: '#ffffff' }
+                : { backgroundColor: 'transparent', color: '#475569' }
+              }
             >
               Sign in
             </Link>
             <Link
               to="/register"
-              className={`px-8 py-2.5 text-sm font-medium rounded-full transition-all duration-200 ${
-                !isLogin
-                  ? 'bg-[#1E1B4B] text-white'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className="px-8 py-2.5 text-sm font-medium rounded-full transition-all duration-200"
+              style={!isLogin 
+                ? { backgroundColor: '#1E1B4B', color: '#ffffff' }
+                : { backgroundColor: 'transparent', color: '#475569' }
+              }
             >
               Sign up
             </Link>
@@ -135,18 +113,16 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
             {children}
 
             {/* Terms */}
-            <p className="mt-6 text-center text-xs text-slate-500 leading-relaxed">
+            <p className="mt-6 text-center text-xs leading-relaxed" style={{ color: '#64748b' }}>
               By signing in you agree to Thynkr's{' '}
-              <Link to="/terms" className="text-slate-700 hover:underline">
+              <Link to="/terms" style={{ color: '#334155' }} className="hover:underline">
                 terms of service
               </Link>
               ,{' '}
-              <Link to="/privacy" className="text-slate-700 hover:underline">
+              <Link to="/privacy" style={{ color: '#334155' }} className="hover:underline">
                 privacy policy
               </Link>
-              ,
-              <br />
-              and cookie usage.
+              , and cookie usage.
             </p>
           </div>
         </motion.div>
