@@ -5,6 +5,7 @@
 
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
@@ -16,6 +17,7 @@ import Layout from './components/Layout';
 import LoadingSpinner from './components/LoadingSpinner';
 import PreviewGate from './components/PreviewGate';
 import MiniPlayer from './components/MiniPlayer';
+import GlobalLoadingBar from './components/GlobalLoadingBar';
 
 // Code-split page components for optimal bundle size
 const Landing = lazy(() => import('./pages/Landing'));
@@ -97,18 +99,22 @@ function AppContent() {
     );
   };
 
+  const location = useLocation();
+
   return (
     <>
+      <GlobalLoadingBar />
       <ThemedToaster />
       <Suspense fallback={<LoadingSpinner fullScreen />}>
-        <Routes>
-          {/* Public routes with PublicLayout */}
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/pricing" element={<Pricing />} />
-          </Route>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            {/* Public routes with PublicLayout */}
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<Landing />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/pricing" element={<Pricing />} />
+            </Route>
 
           {/* Protected routes with Layout */}
           <Route
@@ -166,6 +172,7 @@ function AppContent() {
 
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </AnimatePresence>
       </Suspense>
     </>
   );

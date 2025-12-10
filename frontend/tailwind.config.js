@@ -83,6 +83,9 @@ export default {
         'slide-up': 'slideUp 0.3s ease-out',
         'blur-in': 'blurIn 0.3s ease-out',
         'glow-pulse': 'glowPulse 2s ease-in-out infinite',
+        'shimmer': 'shimmer 1.5s ease-in-out infinite',
+        'gradient-x': 'gradientX 8s ease infinite',
+        'gradient-shift': 'gradientShift 6s ease infinite',
       },
       keyframes: {
         fadeIn: {
@@ -102,8 +105,21 @@ export default {
           '100%': { opacity: '1', filter: 'blur(0)' },
         },
         glowPulse: {
-          '0%, 100%': { boxShadow: '0 0 15px rgba(139, 92, 246, 0.3)' },
-          '50%': { boxShadow: '0 0 25px rgba(139, 92, 246, 0.5)' },
+          '0%, 100%': { boxShadow: '0 0 15px rgba(124, 58, 237, 0.3)' },
+          '50%': { boxShadow: '0 0 25px rgba(124, 58, 237, 0.5)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '200% 0' },
+          '100%': { backgroundPosition: '-200% 0' },
+        },
+        gradientX: {
+          '0%, 100%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+        },
+        gradientShift: {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
         },
       },
       transitionTimingFunction: {

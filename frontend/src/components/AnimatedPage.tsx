@@ -9,26 +9,25 @@ interface AnimatedPageProps {
 const pageVariants: Variants = {
   initial: { 
     opacity: 0, 
-    y: 20,
-    filter: 'blur(10px)'
+    y: 16,
+    scale: 1,
   },
   animate: { 
     opacity: 1, 
     y: 0,
-    filter: 'blur(0px)',
+    scale: 1,
     transition: {
-      duration: 0.4,
-      ease: 'easeOut',
-      staggerChildren: 0.1
+      duration: 0.3,
+      ease: [0.25, 0.46, 0.45, 0.94], // Smooth ease-out
+      staggerChildren: 0.08
     }
   },
   exit: { 
     opacity: 0, 
-    y: -10,
-    filter: 'blur(5px)',
+    scale: 0.98,
     transition: {
-      duration: 0.25,
-      ease: 'easeIn'
+      duration: 0.2,
+      ease: [0.55, 0.06, 0.68, 0.19] // Smooth ease-in
     }
   }
 };
