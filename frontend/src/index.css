@@ -1,5 +1,5 @@
-/* Import Plus Jakarta Sans from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+/* Import Inter and Plus Jakarta Sans from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 @import './styles/animations.css';
 
 @tailwind base;
@@ -12,19 +12,22 @@
   }
 
   :root {
-    /* Brand colors */
-    --color-brand: #7C3AED;
-    --color-accent-start: #7C3AED;
-    --color-accent-end: #06B6D4;
+    /* Primary - friendly blue */
+    --color-primary: #3B82F6;
+    /* Secondary - soft lavender */
+    --color-secondary: #A78BFA;
+    /* Accent - calm cyan */
+    --color-accent: #06B6D4;
     /* Light mode backgrounds */
     --color-bg-primary: #F9FAFB;
-    --color-bg-secondary: #F1F5F9;
+    --color-bg-secondary: #F3F4F6;
     /* Light mode text */
     --color-text-primary: #111827;
     --color-text-secondary: #4B5563;
+    --color-text-tertiary: #9CA3AF;
     /* Transitions */
-    --transition-theme: 300ms ease-in-out;
-    --transition-base: 250ms ease-in-out;
+    --transition-theme: 200ms ease-in-out;
+    --transition-base: 150ms ease-in-out;
   }
 
   .dark {
@@ -32,8 +35,9 @@
     --color-bg-primary: #0F172A;
     --color-bg-secondary: #1E293B;
     /* Dark mode text */
-    --color-text-primary: #F1F5F9;
-    --color-text-secondary: #94A3B8;
+    --color-text-primary: #F9FAFB;
+    --color-text-secondary: #D1D5DB;
+    --color-text-tertiary: #6B7280;
   }
 
   html {
@@ -43,25 +47,20 @@
   body {
     @apply antialiased;
     color: var(--color-text-primary);
-    background: 
-      radial-gradient(ellipse at top left, rgba(124, 58, 237, 0.06), transparent 50%),
-      radial-gradient(ellipse at bottom right, rgba(6, 182, 212, 0.06), transparent 50%),
-      linear-gradient(to bottom, #F9FAFB 0%, #F1F5F9 100%);
-    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--color-bg-primary);
+    font-family: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     transition: background var(--transition-theme), color var(--transition-theme);
     letter-spacing: -0.01em;
     line-height: 1.6;
+    font-weight: 400;
   }
 
   .dark body {
-    background: 
-      radial-gradient(ellipse at top left, rgba(124, 58, 237, 0.15), transparent 50%),
-      radial-gradient(ellipse at bottom right, rgba(6, 182, 212, 0.12), transparent 50%),
-      linear-gradient(to bottom, #0F172A 0%, #1E293B 100%);
+    background: linear-gradient(to bottom, #0F172A 0%, #1E293B 100%);
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     letter-spacing: -0.025em;
     line-height: 1.25;
     color: var(--color-text-primary);
@@ -79,7 +78,7 @@
 
   /* Smooth focus states */
   *:focus-visible {
-    @apply outline-none ring-2 ring-brand-500/50 ring-offset-2 transition-all duration-200;
+    @apply outline-none ring-2 ring-primary-500/50 ring-offset-2 transition-all duration-200;
     ring-offset-color: var(--color-bg-primary);
   }
 
@@ -103,19 +102,13 @@
     display: none;
   }
 
-  /* Premium gradient backgrounds */
+  /* Soft gradient backgrounds (Thea.study inspired - calm and minimal) */
   .gradient-bg-light {
-    background: 
-      radial-gradient(ellipse at top left, rgba(124, 58, 237, 0.06), transparent 50%),
-      radial-gradient(ellipse at bottom right, rgba(6, 182, 212, 0.06), transparent 50%),
-      linear-gradient(to bottom, #F9FAFB 0%, #F1F5F9 100%);
+    background: #F9FAFB;
   }
 
   .gradient-bg-dark {
-    background: 
-      radial-gradient(ellipse at top left, rgba(124, 58, 237, 0.15), transparent 50%),
-      radial-gradient(ellipse at bottom right, rgba(6, 182, 212, 0.12), transparent 50%),
-      linear-gradient(to bottom, #0F172A 0%, #1E293B 100%);
+    background: linear-gradient(to bottom, #0F172A 0%, #1E293B 100%);
   }
 
   .premium-gradient-bg {
@@ -125,14 +118,14 @@
 
   .gradient-mesh {
     background: 
-      radial-gradient(ellipse at 20% 20%, rgba(124, 58, 237, 0.08), transparent 50%),
-      radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.08), transparent 50%);
+      radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.04), transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(167, 139, 250, 0.04), transparent 50%);
   }
 
   .dark .gradient-mesh {
     background: 
-      radial-gradient(ellipse at 20% 20%, rgba(124, 58, 237, 0.15), transparent 50%),
-      radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.12), transparent 50%);
+      radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.08), transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(167, 139, 250, 0.08), transparent 50%);
   }
 
   /* Theme transition helper */
@@ -143,58 +136,48 @@
                 box-shadow var(--transition-theme);
   }
 
-  /* Soft glow hover effects */
-  .glow-hover {
-    @apply transition-all duration-300 ease-out;
+  /* Soft hover effects (no glowing, just subtle shadows) */
+  .hover-lift {
+    @apply transition-all duration-200 ease-out;
   }
   
-  .glow-hover:hover {
-    @apply shadow-[0_0_30px_rgba(124,58,237,0.2)];
+  .hover-lift:hover {
+    @apply shadow-card-hover -translate-y-0.5;
   }
 
-  .glow-hover-accent:hover {
-    @apply shadow-[0_0_30px_rgba(6,182,212,0.2)];
+  /* Clean card panels */
+  .card-panel {
+    @apply bg-white border border-gray-200/60 shadow-card rounded-2xl theme-transition;
   }
 
-  /* Glassmorphism panels */
-  .glass-panel {
-    @apply backdrop-blur-xl border shadow-glass rounded-3xl theme-transition;
-    background: rgba(255, 255, 255, 0.7);
-    border-color: rgba(255, 255, 255, 0.2);
+  .dark .card-panel {
+    @apply bg-slate-800/80 border-slate-700/60;
   }
 
-  .dark .glass-panel {
-    background: rgba(15, 23, 42, 0.7);
-    border-color: rgba(255, 255, 255, 0.1);
+  .card-panel-subtle {
+    @apply bg-gray-50 border border-gray-100 rounded-xl theme-transition;
   }
 
-  .glass-panel-subtle {
-    @apply backdrop-blur-lg border rounded-2xl theme-transition;
-    background: rgba(255, 255, 255, 0.5);
-    border-color: rgba(255, 255, 255, 0.15);
+  .dark .card-panel-subtle {
+    @apply bg-slate-800/50 border-slate-700/40;
   }
 
-  .dark .glass-panel-subtle {
-    background: rgba(15, 23, 42, 0.5);
-    border-color: rgba(255, 255, 255, 0.05);
-  }
-
-  /* Gradient text - using correct accent colors */
+  /* Gradient text - using primary blue */
   .gradient-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-[#7C3AED] to-[#06B6D4];
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-400;
   }
 
   .gradient-text-brand {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-[#7C3AED] via-brand-600 to-[#06B6D4];
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary-600 via-secondary-500 to-accent-500;
   }
 
-  /* Premium accent gradient */
+  /* Soft accent gradient */
   .accent-gradient {
-    background: linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%);
+    background: linear-gradient(135deg, #3B82F6 0%, #A78BFA 100%);
   }
 
   .accent-gradient-soft {
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(167, 139, 250, 0.08) 100%);
   }
 
   .dark .accent-gradient-soft {
@@ -217,34 +200,35 @@
 @layer components {
   /* Brand gradient text */
   .brand-gradient-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-[#7C3AED] to-[#06B6D4];
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-400;
   }
 
   /* Section divider */
   .brand-section-divider {
-    @apply h-px w-full bg-gradient-to-r from-transparent via-brand-500/40 to-transparent;
+    @apply h-px w-full bg-gradient-to-r from-transparent via-gray-200 to-transparent;
   }
 
-  /* Premium card style */
+  .dark .brand-section-divider {
+    @apply via-slate-700;
+  }
+
+  /* Clean card style (Thea.study inspired) */
   .premium-card {
-    @apply backdrop-blur-xl rounded-3xl border shadow-soft theme-transition;
-    background: rgba(255, 255, 255, 0.8);
-    border-color: rgba(255, 255, 255, 0.2);
+    @apply bg-white rounded-2xl border border-gray-200/60 shadow-card theme-transition;
   }
 
   .dark .premium-card {
-    background: rgba(15, 23, 42, 0.8);
-    border-color: rgba(255, 255, 255, 0.1);
+    @apply bg-slate-800/80 border-slate-700/60;
   }
 
   .premium-card:hover {
-    @apply shadow-soft-lg;
+    @apply shadow-card-hover;
   }
 
   /* Gradient border effect */
   .gradient-border {
     position: relative;
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(167, 139, 250, 0.05) 100%);
   }
 
   .gradient-border::before {
