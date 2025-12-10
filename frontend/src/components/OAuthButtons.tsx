@@ -1,6 +1,6 @@
 /**
  * OAuth Button Components
- * Thea-inspired OAuth buttons - dark gray for Google, black for Apple
+ * Thea-inspired OAuth buttons - white with border for Google, black for Apple
  */
 
 interface OAuthButtonProps {
@@ -14,7 +14,7 @@ const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 /**
  * Google Sign-In Button
- * Dark gray background (Thea style)
+ * White background with gray border (Thea style)
  */
 export function GoogleSignInButton({ onClick, isLoading, disabled, label = 'Sign in with Google' }: OAuthButtonProps) {
   const handleClick = () => {
@@ -30,11 +30,21 @@ export function GoogleSignInButton({ onClick, isLoading, disabled, label = 'Sign
       type="button"
       onClick={handleClick}
       disabled={isLoading || disabled}
-      style={{ backgroundColor: '#374151', color: '#ffffff' }}
-      className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full h-12 flex items-center justify-center gap-3 px-4 rounded-xl text-sm font-medium border transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      style={{ 
+        backgroundColor: '#FFFFFF', 
+        color: '#1F2937',
+        borderColor: '#D1D5DB'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = '#F9FAFB';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = '#FFFFFF';
+      }}
     >
       {isLoading ? (
-        <LoadingSpinner light />
+        <LoadingSpinner />
       ) : (
         <>
           <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -64,7 +74,7 @@ export function GoogleSignInButton({ onClick, isLoading, disabled, label = 'Sign
 
 /**
  * Apple Sign-In Button
- * Black background (Thea style)
+ * Black background, white text (Thea style)
  */
 export function AppleSignInButton({ onClick, isLoading, disabled, label = 'Sign in with Apple' }: OAuthButtonProps) {
   const handleClick = () => {
@@ -80,8 +90,14 @@ export function AppleSignInButton({ onClick, isLoading, disabled, label = 'Sign 
       type="button"
       onClick={handleClick}
       disabled={isLoading || disabled}
-      style={{ backgroundColor: '#000000', color: '#ffffff' }}
-      className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full h-12 flex items-center justify-center gap-3 px-4 rounded-xl text-sm font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      style={{ backgroundColor: '#000000', color: '#FFFFFF' }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = '#1F2937';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = '#000000';
+      }}
     >
       {isLoading ? (
         <LoadingSpinner light />
@@ -105,10 +121,10 @@ export function OAuthDivider() {
   return (
     <div className="relative my-5">
       <div className="absolute inset-0 flex items-center">
-        <div style={{ borderColor: '#cbd5e1' }} className="w-full border-t"></div>
+        <div className="w-full border-t" style={{ borderColor: '#E2E8F0' }}></div>
       </div>
       <div className="relative flex justify-center text-sm">
-        <span style={{ backgroundColor: '#E8EDF3', color: '#64748b' }} className="px-4 font-medium">or</span>
+        <span className="px-4 font-medium" style={{ backgroundColor: '#FFFFFF', color: '#94A3B8' }}>or</span>
       </div>
     </div>
   );

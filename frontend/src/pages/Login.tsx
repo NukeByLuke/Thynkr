@@ -1,6 +1,6 @@
 /**
  * Login Page - Thea-inspired clean minimal design
- * Simple, warm, and homey with clean inputs and clear CTAs
+ * Soft inputs, primary accent button, clean layout
  */
 
 import { useState } from 'react';
@@ -63,8 +63,8 @@ export default function Login() {
                 initial={{ opacity: 0, y: -10, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: 'auto' }}
                 exit={{ opacity: 0, y: -10, height: 0 }}
-                style={{ backgroundColor: '#fef2f2', borderColor: '#fecaca', color: '#dc2626' }}
-                className="px-4 py-3 rounded-lg text-sm border"
+                className="px-4 py-3 rounded-xl text-sm border"
+                style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA', color: '#DC2626' }}
               >
                 {error}
               </motion.div>
@@ -72,28 +72,56 @@ export default function Login() {
           </AnimatePresence>
 
           <div>
-            <label style={{ color: '#374151' }} className="block text-sm font-medium mb-1.5">Email</label>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>
+              Email
+            </label>
             <input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              style={{ backgroundColor: '#FEF9C3', color: '#1e293b', borderColor: '#e2e8f0' }}
-              className="w-full px-4 py-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all border"
+              className="w-full px-4 py-3 rounded-xl border transition-all focus:outline-none focus:ring-2"
+              style={{ 
+                backgroundColor: '#FFFFFF', 
+                color: '#1F2937', 
+                borderColor: '#D1D5DB'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#06B6D4';
+                e.target.style.boxShadow = '0 0 0 3px rgba(6, 182, 212, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#D1D5DB';
+                e.target.style.boxShadow = 'none';
+              }}
             />
           </div>
 
           <div>
-            <label style={{ color: '#374151' }} className="block text-sm font-medium mb-1.5">Password</label>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>
+              Password
+            </label>
             <input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              style={{ backgroundColor: '#FEF9C3', color: '#1e293b', borderColor: '#e2e8f0' }}
-              className="w-full px-4 py-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all border"
+              className="w-full px-4 py-3 rounded-xl border transition-all focus:outline-none focus:ring-2"
+              style={{ 
+                backgroundColor: '#FFFFFF', 
+                color: '#1F2937', 
+                borderColor: '#D1D5DB'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#06B6D4';
+                e.target.style.boxShadow = '0 0 0 3px rgba(6, 182, 212, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#D1D5DB';
+                e.target.style.boxShadow = 'none';
+              }}
             />
           </div>
 
@@ -103,37 +131,34 @@ export default function Login() {
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-300 text-blue-500 focus:ring-blue-500/20"
+                className="w-4 h-4 rounded border-gray-300 text-cyan-500 focus:ring-cyan-500/20"
               />
-              <span style={{ color: '#64748b' }} className="text-sm">Remember me</span>
+              <span className="text-sm" style={{ color: '#64748B' }}>Remember me</span>
             </label>
             <Link
               to="/forgot-password"
-              style={{ color: '#3B82F6' }}
               className="text-sm font-medium hover:underline"
+              style={{ color: '#06B6D4' }}
             >
               Forgot password?
             </Link>
           </div>
 
-          {/* Primary CTA - Blue */}
+          {/* Primary CTA */}
           <button
             type="submit"
             disabled={isLoading}
-            style={{ backgroundColor: '#3B82F6' }}
-            className="w-full py-3.5 px-4 text-white font-medium rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-12 px-4 text-white font-medium rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: '#06B6D4' }}
+            onMouseEnter={(e) => {
+              if (!isLoading) e.currentTarget.style.backgroundColor = '#0891B2';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#06B6D4';
+            }}
           >
             {isLoading ? 'Signing in...' : 'Sign in'}
           </button>
-
-          {/* Secondary CTA - Purple for Register */}
-          <Link
-            to="/register"
-            style={{ backgroundColor: '#C4B5FD', color: '#5B21B6' }}
-            className="block w-full py-3.5 px-4 font-medium rounded-xl text-center hover:opacity-90 transition-opacity"
-          >
-            Create a free account
-          </Link>
         </form>
       </AuthLayout>
     </>

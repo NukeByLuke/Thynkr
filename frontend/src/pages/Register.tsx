@@ -1,15 +1,32 @@
 /**
  * Register Page - Thea-inspired clean minimal design
- * Simple, warm, and homey with clean inputs and clear CTAs
+ * Soft inputs, primary accent button, clean layout
  */
 
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthLayout from '@/layouts/AuthLayout';
 import { GoogleSignInButton, AppleSignInButton, OAuthDivider } from '@/components/OAuthButtons';
+
+// Input field styling helper
+const inputStyle = {
+  backgroundColor: '#FFFFFF',
+  color: '#1F2937',
+  borderColor: '#D1D5DB'
+};
+
+const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+  e.target.style.borderColor = '#06B6D4';
+  e.target.style.boxShadow = '0 0 0 3px rgba(6, 182, 212, 0.1)';
+};
+
+const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  e.target.style.borderColor = '#D1D5DB';
+  e.target.style.boxShadow = 'none';
+};
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -81,8 +98,8 @@ export default function Register() {
                 initial={{ opacity: 0, y: -10, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: 'auto' }}
                 exit={{ opacity: 0, y: -10, height: 0 }}
-                style={{ backgroundColor: '#fef2f2', borderColor: '#fecaca', color: '#dc2626' }}
-                className="px-4 py-3 rounded-lg text-sm border"
+                className="px-4 py-3 rounded-xl text-sm border"
+                style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA', color: '#DC2626' }}
               >
                 {error}
               </motion.div>
@@ -91,92 +108,109 @@ export default function Register() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label style={{ color: '#374151' }} className="block text-sm font-medium mb-1.5">First Name</label>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>
+                First Name
+              </label>
               <input
                 id="firstName"
                 type="text"
                 value={formData.firstName}
                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                style={{ backgroundColor: '#FEF9C3', color: '#1e293b', borderColor: '#e2e8f0' }}
-                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all border"
+                className="w-full px-4 py-2.5 rounded-xl border transition-all focus:outline-none"
+                style={inputStyle}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
               />
             </div>
             <div>
-              <label style={{ color: '#374151' }} className="block text-sm font-medium mb-1.5">Last Name</label>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>
+                Last Name
+              </label>
               <input
                 id="lastName"
                 type="text"
                 value={formData.lastName}
                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                style={{ backgroundColor: '#FEF9C3', color: '#1e293b', borderColor: '#e2e8f0' }}
-                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all border"
+                className="w-full px-4 py-2.5 rounded-xl border transition-all focus:outline-none"
+                style={inputStyle}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
               />
             </div>
           </div>
 
           <div>
-            <label style={{ color: '#374151' }} className="block text-sm font-medium mb-1.5">Email</label>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>
+              Email
+            </label>
             <input
               id="email"
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
-              style={{ backgroundColor: '#FEF9C3', color: '#1e293b', borderColor: '#e2e8f0' }}
-              className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all border"
+              className="w-full px-4 py-2.5 rounded-xl border transition-all focus:outline-none"
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
             />
           </div>
 
           <div>
-            <label style={{ color: '#374151' }} className="block text-sm font-medium mb-1.5">Username</label>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>
+              Username
+            </label>
             <input
               id="username"
               type="text"
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               required
-              style={{ backgroundColor: '#FEF9C3', color: '#1e293b', borderColor: '#e2e8f0' }}
-              className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all border"
+              className="w-full px-4 py-2.5 rounded-xl border transition-all focus:outline-none"
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
             />
-            <p style={{ color: '#94a3b8' }} className="mt-1 text-xs">
+            <p className="mt-1 text-xs" style={{ color: '#94A3B8' }}>
               3-30 characters, letters, numbers, underscores, and hyphens only
             </p>
           </div>
 
           <div>
-            <label style={{ color: '#374151' }} className="block text-sm font-medium mb-1.5">Password</label>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>
+              Password
+            </label>
             <input
               id="password"
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
-              style={{ backgroundColor: '#FEF9C3', color: '#1e293b', borderColor: '#e2e8f0' }}
-              className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all border"
+              className="w-full px-4 py-2.5 rounded-xl border transition-all focus:outline-none"
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
             />
-            <p style={{ color: '#94a3b8' }} className="mt-1 text-xs">
+            <p className="mt-1 text-xs" style={{ color: '#94A3B8' }}>
               At least 8 characters with uppercase, lowercase, number, and special character
             </p>
           </div>
 
-          {/* Primary CTA - Purple for Register */}
+          {/* Primary CTA */}
           <button
             type="submit"
             disabled={isLoading}
-            style={{ backgroundColor: '#A78BFA' }}
-            className="w-full py-3.5 px-4 text-white font-medium rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+            className="w-full h-12 px-4 text-white font-medium rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+            style={{ backgroundColor: '#06B6D4' }}
+            onMouseEnter={(e) => {
+              if (!isLoading) e.currentTarget.style.backgroundColor = '#0891B2';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#06B6D4';
+            }}
           >
             {isLoading ? 'Creating account...' : 'Create free account'}
           </button>
-
-          {/* Secondary CTA - Blue for Sign In */}
-          <Link
-            to="/login"
-            style={{ backgroundColor: '#3B82F6' }}
-            className="block w-full py-3.5 px-4 text-white font-medium rounded-xl text-center hover:opacity-90 transition-opacity"
-          >
-            Sign in instead
-          </Link>
         </form>
       </AuthLayout>
     </>
