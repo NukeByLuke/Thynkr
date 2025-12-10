@@ -203,7 +203,7 @@ export default function StudyProgress() {
 
   if (isLoading) {
     return (
-      <div className="h-full bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="h-full bg-gray-50 dark:bg-[#1E293B] flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
     );
@@ -280,7 +280,7 @@ export default function StudyProgress() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Weekly Activity */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-primary-600" />
               Weekly Activity
@@ -291,7 +291,7 @@ export default function StudyProgress() {
                   <div className="w-20 text-sm text-gray-600 dark:text-gray-400">
                     {getDayName(day.date)}
                   </div>
-                  <div className="flex-1 h-6 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div className="flex-1 h-6 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-primary-500 to-primary-600 rounded-full transition-all duration-500"
                       style={{
@@ -317,7 +317,7 @@ export default function StudyProgress() {
           </div>
 
           {/* Activity Breakdown */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-primary-600" />
               Activity Breakdown
@@ -353,7 +353,7 @@ export default function StudyProgress() {
           </div>
 
           {/* Quiz Performance */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <Brain className="w-5 h-5 text-primary-600" />
               Quiz Performance
@@ -396,7 +396,7 @@ export default function StudyProgress() {
           </div>
 
           {/* Study Stats */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <FileText className="w-5 h-5 text-primary-600" />
               Materials Studied
@@ -423,7 +423,7 @@ export default function StudyProgress() {
         </div>
 
         {/* Achievement Badges Section */}
-        <div className="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+        <div className="mt-8 bg-white dark:bg-slate-800 rounded-xl shadow p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <Award className="w-5 h-5 text-primary-600" />
             Achievement Badges
@@ -440,8 +440,8 @@ export default function StudyProgress() {
                   animate={{ scale: 1, opacity: 1 }}
                   className={`relative p-4 rounded-xl border-2 ${tierColors[badge.tier]} ${
                     earned
-                      ? 'bg-white dark:bg-gray-700'
-                      : 'bg-gray-100 dark:bg-gray-800 opacity-50 grayscale'
+                      ? 'bg-white dark:bg-slate-700'
+                      : 'bg-gray-100 dark:bg-slate-800 opacity-50 grayscale'
                   } transition-all hover:scale-105`}
                 >
                   {earned && (

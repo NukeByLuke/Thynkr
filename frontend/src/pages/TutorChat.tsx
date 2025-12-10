@@ -152,7 +152,7 @@ export default function TutorChat() {
   // Show upgrade prompt if not Premium
   if (!hasPremiumAccess) {
     return (
-      <div className="h-full bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+      <div className="h-full bg-gray-50 dark:bg-[#1E293B] flex items-center justify-center p-4">
         <div className="max-w-md w-full">
           <UpgradePrompt requiredTier="PREMIUM" feature="AI Tutor Chat" />
         </div>
@@ -681,7 +681,7 @@ export default function TutorChat() {
 
   if (user.role !== 'PREMIUM' && user.role !== 'ADMIN') {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-[#1E293B]">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Premium Feature</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
@@ -699,11 +699,11 @@ export default function TutorChat() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] bg-gray-50 dark:bg-[#1E293B]">
       {/* Create Chat Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+          <div className="w-full max-w-lg bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
               Start a new Tutor Chat
             </h3>
@@ -764,7 +764,7 @@ export default function TutorChat() {
       <div
         className={`${
           showSidebar ? 'w-64 absolute md:relative z-40 h-full shadow-sm' : 'w-0'
-        } flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 overflow-hidden`}
+        } flex-shrink-0 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 overflow-hidden`}
       >
         <div className="p-4 space-y-4 h-full flex flex-col">
           {/* New Chat Button */}
@@ -928,7 +928,7 @@ export default function TutorChat() {
                     className="fixed inset-0 bg-black/30 z-40 md:hidden"
                     onClick={() => setShowManageFiles(false)}
                   />
-                  <div className="fixed md:absolute inset-x-4 md:inset-x-auto md:right-0 top-1/2 md:top-auto md:mt-2 -translate-y-1/2 md:translate-y-0 w-auto md:w-72 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 md:p-3">
+                  <div className="fixed md:absolute inset-x-4 md:inset-x-auto md:right-0 top-1/2 md:top-auto md:mt-2 -translate-y-1/2 md:translate-y-0 w-auto md:w-72 z-50 bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 md:p-3">
                     <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3 md:hidden">
                       Manage Files
                     </h4>
@@ -1012,7 +1012,7 @@ export default function TutorChat() {
                 <div
                   className={`rounded-xl px-4 md:px-5 py-3 shadow-sm ${
                     message.role === 'user'
-                      ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700'
+                      ? 'bg-white dark:bg-slate-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700'
                       : 'bg-blue-50 dark:bg-blue-900/20 text-gray-900 dark:text-white border border-blue-100 dark:border-blue-800/50'
                   }`}
                 >
@@ -1117,7 +1117,7 @@ export default function TutorChat() {
 
         {/* Input Area - pinned to bottom on mobile */}
         {currentSessionId && (
-          <div className="sticky bottom-0 p-4 md:p-6 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 pb-safe">
+          <div className="sticky bottom-0 p-4 md:p-6 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-gray-700 pb-safe">
             <div className="max-w-4xl mx-auto">
               {(!currentSession?.files || currentSession.files.length === 0) && (
                 <div className="mb-2 text-sm text-amber-700 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded p-2 flex items-start gap-2">
@@ -1134,7 +1134,7 @@ export default function TutorChat() {
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Ask me anything..."
-                  className="flex-1 resize-none rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 md:px-5 py-3 md:py-4 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 max-h-32 overflow-y-auto text-base shadow-sm transition-shadow"
+                  className="flex-1 resize-none rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-slate-700 px-4 md:px-5 py-3 md:py-4 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 max-h-32 overflow-y-auto text-base shadow-sm transition-shadow"
                   rows={1}
                   disabled={
                     isStreaming || !currentSession?.files || currentSession.files.length === 0

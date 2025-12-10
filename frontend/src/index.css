@@ -55,17 +55,17 @@
     --color-primary: #60A5FA;
     --color-primary-light: #93C5FD;
     --color-primary-dark: #3B82F6;
-    /* Dark mode backgrounds (Thea.study tokens) */
-    --color-bg-primary: #0F172A;
-    --color-bg-secondary: #1E293B;
-    --color-bg-tertiary: #1F2937;
+    /* Dark mode backgrounds - deep navy, comfortable contrast */
+    --color-bg-primary: #1E293B;
+    --color-bg-secondary: #334155;
+    --color-bg-tertiary: #475569;
     /* Dark mode text - gentler contrast (WCAG AA) */
-    --color-text-primary: #F9FAFB;
-    --color-text-secondary: #D1D5DB;
-    --color-text-tertiary: #9CA3AF;
+    --color-text-primary: #F1F5F9;
+    --color-text-secondary: #CBD5E1;
+    --color-text-tertiary: #94A3B8;
     /* Dark mode borders */
-    --color-border: #374151;
-    --color-border-light: #1F2937;
+    --color-border: #475569;
+    --color-border-light: #334155;
   }
 
   html {

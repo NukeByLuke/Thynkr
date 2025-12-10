@@ -47,7 +47,7 @@ export default function Navbar() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50 shadow-soft theme-transition">
+    <nav className="bg-white dark:bg-[#1E293B] border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 shadow-soft theme-transition">
       <div className="max-w-6xl mx-auto px-8 lg:px-16">
         <div className="flex justify-between h-16">
           {/* Logo */}
@@ -257,7 +257,7 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 animate-in slide-in-from-top duration-200">
+        <div className="md:hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 animate-in slide-in-from-top duration-200">
           <div className="px-3 pt-3 pb-4 space-y-1.5">
             <Link
               to="/courses"

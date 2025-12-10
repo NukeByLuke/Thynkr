@@ -48,10 +48,10 @@ export default function DashboardLayout() {
         initial={false}
         animate={{ width: isCollapsed ? 80 : 280 }}
         transition={{ type: 'spring', damping: 25, stiffness: 120 }}
-        className="hidden lg:flex flex-col h-screen bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-700/50 sticky top-0 shadow-glass"
+        className="hidden lg:flex flex-col h-screen bg-white dark:bg-[#1E293B] border-r border-gray-200 dark:border-gray-700 sticky top-0 shadow-soft"
       >
         {/* Logo */}
-        <div className="p-6 border-b border-slate-200/50 dark:border-slate-700/50">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           {isCollapsed ? (
             <Logo variant="icon" animated={false} />
           ) : (
@@ -60,7 +60,7 @@ export default function DashboardLayout() {
         </div>
 
         {/* Clock & Toggle */}
-        <div className="px-6 py-4 border-b border-slate-200/50 dark:border-slate-700/50">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           {!isCollapsed ? (
             <motion.div
               initial={{ opacity: 0 }}
@@ -170,7 +170,7 @@ export default function DashboardLayout() {
       {/* Mobile Hamburger */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2.5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-soft border border-white/20 dark:border-white/10 transition-all duration-300 hover:shadow-glow-brand"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2.5 bg-white dark:bg-[#1E293B] rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 transition-colors"
       >
         {isMobileMenuOpen ? (
           <X className="w-6 h-6 text-slate-600 dark:text-slate-300" />
@@ -195,7 +195,7 @@ export default function DashboardLayout() {
               animate={{ x: 0 }}
               exit={{ x: -280 }}
               transition={{ type: 'spring', damping: 25, stiffness: 120 }}
-              className="lg:hidden fixed left-0 top-0 h-screen w-72 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-r border-white/20 dark:border-white/10 z-50 flex flex-col shadow-glass-lg"
+              className="lg:hidden fixed left-0 top-0 h-screen w-72 bg-white dark:bg-[#1E293B] border-r border-gray-200 dark:border-gray-700 z-50 flex flex-col shadow-lg"
             >
               {/* Logo */}
               <div className="p-6 border-b border-slate-200 dark:border-slate-800">
