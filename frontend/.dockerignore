@@ -5,8 +5,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Build output
-dist
+# Build output (dist needed for Dockerfile.simple)
+# dist
 build
 .vite
 
