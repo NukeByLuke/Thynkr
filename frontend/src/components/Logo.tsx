@@ -1,47 +1,55 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Brain } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface LogoProps {
   variant?: 'full' | 'icon';
   className?: string;
   animated?: boolean;
+  /**
+   * Color mode for the logo text
+   * - 'auto': uses CSS classes for light/dark mode
+   * - 'light': forces light text (for dark backgrounds)
+   * - 'dark': forces dark text (for light backgrounds)
+   */
+  textColor?: 'auto' | 'light' | 'dark';
 }
 
-export default function Logo({ variant = 'full', className, animated = true }: LogoProps) {
+export default function Logo({ variant = 'full', className, animated = true, textColor = 'auto' }: LogoProps) {
   // Always navigate to home page
   const destination = '/';
+
+  // Text color classes based on mode
+  const textColorClass = textColor === 'light' 
+    ? 'text-white' 
+    : textColor === 'dark' 
+      ? 'text-gray-900' 
+      : 'text-gray-900 dark:text-white';
 
   return (
     <Link
       to={destination}
-      className={clsx('group flex items-center gap-3 select-none', className)}
+      className={clsx('group flex items-center gap-2.5 select-none', className)}
       aria-label="Thynkr Home"
     >
       <motion.div
-        whileHover={animated ? { scale: 1.05 } : {}}
-        whileTap={animated ? { scale: 0.95 } : {}}
-        className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#7c3aed] via-[#9333ea] to-[#3b82f6] shadow-[0_4px_15px_rgba(124,58,237,0.3)]"
+        whileHover={animated ? { scale: 1.02 } : {}}
+        whileTap={animated ? { scale: 0.98 } : {}}
+        className="relative flex items-center justify-center w-9 h-9 rounded-lg"
+        style={{ 
+          backgroundColor: '#A78BFA',
+          boxShadow: '0 2px 8px rgba(167, 139, 250, 0.3)'
+        }}
       >
-        {/* Inner glow/reflection */}
-        <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-        {/* Icon */}
-        <Brain className="w-6 h-6 text-white relative z-10" strokeWidth={2.5} />
-
-        {/* Pulse animation */}
-        {animated && (
-          <motion.div
-            animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.1, 1] }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute inset-0 rounded-xl bg-white/20 blur-md -z-10"
-          />
-        )}
+        {/* Simple "T" letter mark */}
+        <span className="text-white font-bold text-lg">T</span>
       </motion.div>
 
       {variant === 'full' && (
-        <span className="font-bold text-2xl tracking-tight bg-gradient-to-r from-[#7c3aed] via-[#9333ea] to-[#3b82f6] text-transparent bg-clip-text font-display">
+        <span className={clsx(
+          'font-semibold text-xl tracking-tight',
+          textColorClass
+        )}>
           Thynkr
         </span>
       )}

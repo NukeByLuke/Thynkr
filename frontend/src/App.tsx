@@ -108,11 +108,13 @@ function AppContent() {
       <Suspense fallback={<LoadingSpinner fullScreen />}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
-            {/* Public routes with PublicLayout */}
+            {/* Auth routes - no navbar */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+
+            {/* Public routes with PublicLayout (navbar) */}
             <Route element={<PublicLayout />}>
               <Route path="/" element={<Landing />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
               <Route path="/pricing" element={<Pricing />} />
             </Route>
 

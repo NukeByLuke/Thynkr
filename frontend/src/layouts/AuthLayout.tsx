@@ -1,6 +1,6 @@
 /**
  * AuthLayout - Thea.study-inspired clean two-column layout
- * Exact replica of Thea's login page design
+ * No navbar, minimal corners, clean modern aesthetic
  */
 
 import { motion } from 'framer-motion';
@@ -20,17 +20,20 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       style={{ backgroundColor: '#E8EEF4' }}
       data-theme="light"
     >
-      {/* Centered Card Container */}
+      {/* Centered Card Container - less rounded */}
       <motion.div
-        className="w-full max-w-[1000px] flex flex-col lg:flex-row rounded-2xl overflow-hidden"
-        style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}
+        className="w-full max-w-[1000px] flex flex-col lg:flex-row overflow-hidden"
+        style={{ 
+          boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+          borderRadius: '16px'
+        }}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
       >
         {/* Left Brand Panel */}
         <div 
-          className="lg:w-[45%] flex flex-col items-center justify-between p-8 lg:p-12 min-h-[200px] lg:min-h-[580px]"
+          className="lg:w-[45%] flex flex-col items-center justify-between p-8 lg:p-12 min-h-[200px] lg:min-h-[600px]"
           style={{ backgroundColor: '#1E1B4B' }}
         >
           {/* Spacer for top */}
@@ -41,14 +44,14 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
             {/* Logo */}
             <div className="mb-6">
               <svg 
-                width="120" 
-                height="120" 
+                width="100" 
+                height="100" 
                 viewBox="0 0 120 120" 
                 fill="none" 
                 className="hidden lg:block"
               >
                 {/* Rocket/pencil icon similar to Thea */}
-                <circle cx="60" cy="60" r="50" stroke="rgba(255,255,255,0.3)" strokeWidth="2" fill="none" />
+                <circle cx="60" cy="60" r="50" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" fill="none" />
                 <path 
                   d="M60 25 L75 50 L60 95 L45 50 Z" 
                   fill="white" 
@@ -59,8 +62,8 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
               {/* Mobile logo */}
               <div className="lg:hidden flex items-center gap-2">
                 <div 
-                  className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-lg"
-                  style={{ backgroundColor: '#06B6D4' }}
+                  className="w-10 h-10 flex items-center justify-center text-white font-bold text-lg"
+                  style={{ backgroundColor: '#06B6D4', borderRadius: '8px' }}
                 >
                   T
                 </div>
@@ -69,14 +72,14 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
             </div>
 
             {/* Brand Name - Desktop */}
-            <h1 className="hidden lg:block text-5xl font-light text-white tracking-tight mb-4">
+            <h1 className="hidden lg:block text-4xl font-light text-white tracking-tight mb-4">
               Thynkr
             </h1>
 
             {/* Tagline */}
             <p 
-              className="text-base lg:text-lg font-light italic"
-              style={{ color: 'rgba(255,255,255,0.7)' }}
+              className="text-base font-light italic"
+              style={{ color: 'rgba(255,255,255,0.6)' }}
             >
               unlock your learning potential
             </p>
@@ -86,21 +89,21 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           <nav className="flex items-center justify-center gap-8 mt-8 lg:mt-0">
             <Link
               to="/about"
-              className="text-xs hover:underline transition-colors duration-200"
+              className="text-xs font-medium hover:underline transition-colors duration-200"
               style={{ color: 'rgba(255,255,255,0.5)' }}
             >
               About
             </Link>
             <Link
               to="/testimonials"
-              className="text-xs hover:underline transition-colors duration-200"
+              className="text-xs font-medium hover:underline transition-colors duration-200"
               style={{ color: 'rgba(255,255,255,0.5)' }}
             >
               Testimonials
             </Link>
             <Link
               to="/contact"
-              className="text-xs hover:underline transition-colors duration-200"
+              className="text-xs font-medium hover:underline transition-colors duration-200"
               style={{ color: 'rgba(255,255,255,0.5)' }}
             >
               Contact
@@ -113,16 +116,16 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           className="lg:w-[55%] p-8 lg:p-10 flex flex-col"
           style={{ backgroundColor: '#FFFFFF' }}
         >
-          {/* Auth Tabs - Outside of scrollable area */}
+          {/* Auth Tabs */}
           <div 
-            className="flex mb-6 rounded-full p-1"
-            style={{ backgroundColor: '#E5E7EB' }}
+            className="flex mb-8 p-1"
+            style={{ backgroundColor: '#F3F4F6', borderRadius: '8px' }}
           >
             <Link
               to="/login"
-              className="flex-1 px-6 py-2.5 text-sm font-medium rounded-full text-center transition-all duration-200"
+              className="flex-1 py-2.5 text-sm font-medium text-center transition-all duration-200"
               style={isLogin 
-                ? { backgroundColor: '#D1D5DB', color: '#1F2937' }
+                ? { backgroundColor: '#1F2937', color: '#FFFFFF', borderRadius: '6px' }
                 : { backgroundColor: 'transparent', color: '#6B7280' }
               }
             >
@@ -130,9 +133,9 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
             </Link>
             <Link
               to="/register"
-              className="flex-1 px-6 py-2.5 text-sm font-medium rounded-full text-center transition-all duration-200"
+              className="flex-1 py-2.5 text-sm font-medium text-center transition-all duration-200"
               style={!isLogin 
-                ? { backgroundColor: '#D1D5DB', color: '#1F2937' }
+                ? { backgroundColor: '#1F2937', color: '#FFFFFF', borderRadius: '6px' }
                 : { backgroundColor: 'transparent', color: '#6B7280' }
               }
             >

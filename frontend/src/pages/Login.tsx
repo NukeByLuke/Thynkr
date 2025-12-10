@@ -63,8 +63,8 @@ export default function Login() {
                 initial={{ opacity: 0, y: -10, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: 'auto' }}
                 exit={{ opacity: 0, y: -10, height: 0 }}
-                className="px-4 py-3 rounded-xl text-sm border"
-                style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA', color: '#DC2626' }}
+                className="px-4 py-3 text-sm border"
+                style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA', color: '#DC2626', borderRadius: '8px' }}
               >
                 {error}
               </motion.div>
@@ -72,54 +72,52 @@ export default function Login() {
           </AnimatePresence>
 
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>
-              Email
-            </label>
             <input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
               required
-              className="w-full px-4 py-3 rounded-xl border transition-all focus:outline-none focus:ring-2"
+              className="w-full px-4 py-3 border transition-all focus:outline-none"
               style={{ 
                 backgroundColor: '#FFFFFF', 
                 color: '#1F2937', 
-                borderColor: '#D1D5DB'
+                borderColor: '#E5E7EB',
+                borderRadius: '8px'
               }}
               onFocus={(e) => {
                 e.target.style.borderColor = '#06B6D4';
-                e.target.style.boxShadow = '0 0 0 3px rgba(6, 182, 212, 0.1)';
+                e.target.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.1)';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = '#D1D5DB';
+                e.target.style.borderColor = '#E5E7EB';
                 e.target.style.boxShadow = 'none';
               }}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>
-              Password
-            </label>
             <input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
               required
-              className="w-full px-4 py-3 rounded-xl border transition-all focus:outline-none focus:ring-2"
+              className="w-full px-4 py-3 border transition-all focus:outline-none"
               style={{ 
                 backgroundColor: '#FFFFFF', 
                 color: '#1F2937', 
-                borderColor: '#D1D5DB'
+                borderColor: '#E5E7EB',
+                borderRadius: '8px'
               }}
               onFocus={(e) => {
                 e.target.style.borderColor = '#06B6D4';
-                e.target.style.boxShadow = '0 0 0 3px rgba(6, 182, 212, 0.1)';
+                e.target.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.1)';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = '#D1D5DB';
+                e.target.style.borderColor = '#E5E7EB';
                 e.target.style.boxShadow = 'none';
               }}
             />
@@ -131,9 +129,10 @@ export default function Login() {
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-cyan-500 focus:ring-cyan-500/20"
+                className="w-4 h-4 border-gray-300 text-cyan-500 focus:ring-cyan-500/20"
+                style={{ borderRadius: '4px' }}
               />
-              <span className="text-sm" style={{ color: '#64748B' }}>Remember me</span>
+              <span className="text-sm" style={{ color: '#6B7280' }}>Remember me</span>
             </label>
             <Link
               to="/forgot-password"
@@ -148,8 +147,8 @@ export default function Login() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full h-12 px-4 text-white font-medium rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ backgroundColor: '#06B6D4' }}
+            className="w-full h-11 px-4 text-white font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: '#06B6D4', borderRadius: '8px' }}
             onMouseEnter={(e) => {
               if (!isLoading) e.currentTarget.style.backgroundColor = '#0891B2';
             }}

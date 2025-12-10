@@ -56,12 +56,12 @@ export default function Landing() {
 
       {/* Hero Section */}
       <section className="relative py-24 md:py-36 overflow-hidden">
-        {/* Premium gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#8B5CF6]/5 via-transparent to-[#06B6D4]/5 dark:from-[#8B5CF6]/10 dark:via-transparent dark:to-[#06B6D4]/10" />
+        {/* Soft gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 via-transparent to-secondary-500/5 dark:from-primary-500/10 dark:via-transparent dark:to-secondary-500/10" />
         
-        {/* Floating gradient orbs */}
-        <div className="absolute top-20 -left-32 w-96 h-96 bg-gradient-to-br from-brand-400/20 to-brand-600/20 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-20 -right-32 w-96 h-96 bg-gradient-to-br from-accent-400/20 to-accent-600/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
+        {/* Floating gradient orbs - softer */}
+        <div className="absolute top-20 -left-32 w-96 h-96 bg-gradient-to-br from-secondary-400/10 to-secondary-600/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 -right-32 w-96 h-96 bg-gradient-to-br from-primary-400/10 to-primary-600/10 rounded-full blur-3xl" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <motion.div
@@ -72,7 +72,7 @@ export default function Landing() {
           >
             <motion.div
               variants={fadeInUp}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-brand-500/10 to-accent-500/10 backdrop-blur-sm text-brand-600 dark:text-brand-400 px-5 py-2.5 rounded-full text-sm font-semibold mb-10 border border-brand-500/20"
+              className="inline-flex items-center gap-2 bg-secondary-500/10 backdrop-blur-sm text-secondary-600 dark:text-secondary-400 px-5 py-2.5 rounded-full text-sm font-medium mb-10 border border-secondary-500/20"
             >
               <Sparkles className="w-4 h-4" />
               <span>AI-Powered Learning Platform</span>
@@ -123,25 +123,25 @@ export default function Landing() {
 
       {/* Discover Thynkr Features */}
       <section className="py-24 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-50/50 to-transparent dark:via-slate-900/50" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-50/30 to-transparent dark:via-slate-900/30" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <motion.div
-            className="text-center mb-20"
+            className="text-center mb-16"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">
+            <h2 className="text-3xl md:text-4xl font-semibold text-slate-900 dark:text-white mb-4">
               Discover <span className="gradient-text">Thynkr</span>
             </h2>
-            <p className="text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              Everything you need to master your studies, powered by cutting-edge AI technology
+            <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
+              Everything you need to master your studies, powered by AI
             </p>
           </motion.div>
 
           <motion.div
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -150,10 +150,10 @@ export default function Landing() {
             {/* Smart Summaries */}
             <motion.div
               variants={fadeInUp}
-              className="group relative bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-8 rounded-3xl border border-slate-200/50 dark:border-white/10 hover:shadow-glow-brand transition-all duration-300"
+              className="group relative bg-white dark:bg-slate-900/80 p-8 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300"
             >
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-brand-500 to-brand-600 text-white rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                <FileText className="w-7 h-7" />
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-500 text-white rounded-xl mb-5 group-hover:scale-105 transition-transform duration-200">
+                <FileText className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
                 Smart Summaries
@@ -167,10 +167,10 @@ export default function Landing() {
             {/* Flashcards & Quizzes */}
             <motion.div
               variants={fadeInUp}
-              className="group relative bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-8 rounded-3xl border border-slate-200/50 dark:border-white/10 hover:shadow-glow-brand transition-all duration-300"
+              className="group relative bg-white dark:bg-slate-900/80 p-8 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300"
             >
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-brand-600 to-accent-500 text-white rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Brain className="w-7 h-7" />
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-secondary-500 text-white rounded-xl mb-5 group-hover:scale-105 transition-transform duration-200">
+                <Brain className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
                 Flashcards & Quizzes
@@ -184,13 +184,13 @@ export default function Landing() {
             {/* AI Tutor */}
             <motion.div
               variants={fadeInUp}
-              className="group relative bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-8 rounded-3xl border border-slate-200/50 dark:border-white/10 hover:shadow-glow-accent transition-all duration-300"
+              className="group relative bg-white dark:bg-slate-900/80 p-8 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300"
             >
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-amber-500 to-orange-500 text-white rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                <MessageCircle className="w-7 h-7" />
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-accent-500 text-white rounded-xl mb-5 group-hover:scale-105 transition-transform duration-200">
+                <MessageCircle className="w-6 h-6" />
               </div>
               <div className="absolute top-6 right-6">
-                <span className="px-3 py-1 text-xs font-semibold bg-gradient-to-r from-brand-500 to-accent-500 text-white rounded-full">
+                <span className="px-2.5 py-1 text-xs font-medium bg-secondary-500 text-white rounded-md">
                   Premium
                 </span>
               </div>
@@ -206,10 +206,10 @@ export default function Landing() {
             {/* Organized Workspace */}
             <motion.div
               variants={fadeInUp}
-              className="group relative bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-8 rounded-3xl border border-slate-200/50 dark:border-white/10 hover:shadow-glow-brand transition-all duration-300"
+              className="group relative bg-white dark:bg-slate-900/80 p-8 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300"
             >
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-emerald-500 to-green-500 text-white rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                <FolderOpen className="w-7 h-7" />
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-emerald-500 text-white rounded-xl mb-5 group-hover:scale-105 transition-transform duration-200">
+                <FolderOpen className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
                 Organized Workspace
@@ -223,10 +223,10 @@ export default function Landing() {
             {/* Study Streaks */}
             <motion.div
               variants={fadeInUp}
-              className="group relative bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-8 rounded-3xl border border-slate-200/50 dark:border-white/10 hover:shadow-glow-accent transition-all duration-300"
+              className="group relative bg-white dark:bg-slate-900/80 p-8 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300"
             >
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Flame className="w-7 h-7" />
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-orange-500 text-white rounded-xl mb-5 group-hover:scale-105 transition-transform duration-200">
+                <Flame className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
                 Study Streaks & Progress
@@ -240,10 +240,10 @@ export default function Landing() {
             {/* Secure & Private */}
             <motion.div
               variants={fadeInUp}
-              className="group relative bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-8 rounded-3xl border border-slate-200/50 dark:border-white/10 hover:shadow-glow-brand transition-all duration-300"
+              className="group relative bg-white dark:bg-slate-900/80 p-8 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300"
             >
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-slate-600 to-slate-700 text-white rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Lock className="w-7 h-7" />
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-slate-600 text-white rounded-xl mb-5 group-hover:scale-105 transition-transform duration-200">
+                <Lock className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
                 Safe & Private
@@ -259,16 +259,16 @@ export default function Landing() {
 
       {/* How It Works */}
       <section className="py-24 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-50/80 to-white dark:from-slate-900/80 dark:to-slate-950" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-50/50 to-white dark:from-slate-900/50 dark:to-slate-950" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <motion.div
-            className="text-center mb-20"
+            className="text-center mb-16"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">How It <span className="gradient-text">Works</span></h2>
-            <p className="text-xl text-slate-600 dark:text-slate-300 leading-relaxed">
+            <h2 className="text-3xl md:text-4xl font-semibold text-slate-900 dark:text-white mb-4">How It <span className="gradient-text">Works</span></h2>
+            <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
               Three simple steps to supercharge your learning
             </p>
           </motion.div>
@@ -306,10 +306,10 @@ export default function Landing() {
                 transition={{ delay: index * 0.15, duration: 0.5 }}
               >
                 <div className="relative inline-block mb-8">
-                  <div className="w-24 h-24 bg-gradient-to-br from-brand-500/10 to-accent-500/10 dark:from-brand-500/20 dark:to-accent-500/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto border border-brand-500/20">
-                    <item.icon className="w-12 h-12 text-brand-600 dark:text-brand-400" />
+                  <div className="w-20 h-20 bg-primary-500/10 dark:bg-primary-500/20 rounded-2xl flex items-center justify-center mx-auto border border-primary-500/20">
+                    <item.icon className="w-10 h-10 text-primary-600 dark:text-primary-400" />
                   </div>
-                  <span className="absolute -top-2 -right-2 w-10 h-10 bg-gradient-to-br from-brand-500 to-accent-500 text-white text-sm font-bold rounded-xl flex items-center justify-center shadow-glow-brand">
+                  <span className="absolute -top-2 -right-2 w-8 h-8 bg-secondary-500 text-white text-sm font-semibold rounded-lg flex items-center justify-center">
                     {item.step}
                   </span>
                 </div>

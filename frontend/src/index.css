@@ -12,16 +12,18 @@
   }
 
   :root {
-    /* Primary - accessible blue (Thea.study token) */
+    /* Brand Navy - primary identity color */
+    --color-navy: #1E1B4B;
+    /* Primary - accessible blue */
     --color-primary: #3B82F6;
     --color-primary-light: #60A5FA;
     --color-primary-dark: #2563EB;
-    /* Secondary - gentle lavender (Thea.study token) */
+    /* Secondary - gentle lavender */
     --color-secondary: #A78BFA;
     --color-secondary-light: #C4B5FD;
-    /* Accent - calming cyan (Thea.study token) */
+    /* Accent - calming cyan */
     --color-accent: #06B6D4;
-    /* Light mode backgrounds (Thea.study tokens) */
+    /* Light mode backgrounds */
     --color-bg-primary: #F9FAFB;
     --color-bg-secondary: #F3F4F6;
     --color-bg-tertiary: #FFFFFF;
@@ -32,20 +34,20 @@
     /* Light mode borders */
     --color-border: #E5E7EB;
     --color-border-light: #F3F4F6;
-    /* Shadows - ambient soft (Thea.study style) */
-    --shadow-ambient: 0 4px 24px rgba(0, 0, 0, 0.05);
+    /* Shadows - ambient soft */
+    --shadow-ambient: 0 4px 20px rgba(0, 0, 0, 0.05);
     --shadow-card: 0 1px 8px rgba(0, 0, 0, 0.03);
-    --shadow-card-hover: 0 4px 20px rgba(0, 0, 0, 0.06);
-    /* Transitions - smooth theme changes */
+    --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.06);
+    /* Transitions - smooth */
     --transition-theme: 300ms ease-out;
     --transition-base: 200ms ease-out;
     /* Spacing - generous */
     --spacing-section: 3rem;
     --spacing-card: 1.5rem;
-    /* Radius - consistent rounded corners */
-    --radius-card: 1rem;
-    --radius-button: 0.75rem;
-    --radius-input: 0.625rem;
+    /* Radius - subtle, modern */
+    --radius-card: 0.75rem;
+    --radius-button: 0.5rem;
+    --radius-input: 0.5rem;
   }
 
   .dark {
@@ -214,13 +216,13 @@
     @apply bg-slate-800/40 border-slate-700/30;
   }
 
-  /* Gradient text - using primary blue */
+  /* Gradient text - calm blue to lavender */
   .gradient-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-400;
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500;
   }
 
   .gradient-text-brand {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary-600 via-secondary-500 to-accent-500;
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-500;
   }
 
   /* Soft accent gradient */
@@ -229,15 +231,15 @@
   }
 
   .accent-gradient-soft {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(167, 139, 250, 0.08) 100%);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.06) 0%, rgba(167, 139, 250, 0.06) 100%);
   }
 
   .dark .accent-gradient-soft {
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.2) 0%, rgba(6, 182, 212, 0.15) 100%);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(167, 139, 250, 0.1) 100%);
   }
 
   .accent-gradient-text {
-    background: linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%);
+    background: linear-gradient(135deg, #3B82F6 0%, #A78BFA 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -252,7 +254,7 @@
 @layer components {
   /* Brand gradient text */
   .brand-gradient-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-400;
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500;
   }
 
   /* Section divider */

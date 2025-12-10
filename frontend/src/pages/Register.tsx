@@ -15,16 +15,17 @@ import { GoogleSignInButton, AppleSignInButton, OAuthDivider } from '@/component
 const inputStyle = {
   backgroundColor: '#FFFFFF',
   color: '#1F2937',
-  borderColor: '#D1D5DB'
+  borderColor: '#E5E7EB',
+  borderRadius: '8px'
 };
 
 const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
   e.target.style.borderColor = '#06B6D4';
-  e.target.style.boxShadow = '0 0 0 3px rgba(6, 182, 212, 0.1)';
+  e.target.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.1)';
 };
 
 const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-  e.target.style.borderColor = '#D1D5DB';
+  e.target.style.borderColor = '#E5E7EB';
   e.target.style.boxShadow = 'none';
 };
 
@@ -98,8 +99,8 @@ export default function Register() {
                 initial={{ opacity: 0, y: -10, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: 'auto' }}
                 exit={{ opacity: 0, y: -10, height: 0 }}
-                className="px-4 py-3 rounded-xl text-sm border"
-                style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA', color: '#DC2626' }}
+                className="px-4 py-3 text-sm border"
+                style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA', color: '#DC2626', borderRadius: '8px' }}
               >
                 {error}
               </motion.div>
@@ -108,7 +109,7 @@ export default function Register() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: '#374151' }}>
                 First Name
               </label>
               <input
@@ -116,14 +117,15 @@ export default function Register() {
                 type="text"
                 value={formData.firstName}
                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border transition-all focus:outline-none"
+                placeholder="John"
+                className="w-full px-4 py-2.5 border transition-all focus:outline-none"
                 style={inputStyle}
                 onFocus={handleInputFocus}
                 onBlur={handleInputBlur}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: '#374151' }}>
                 Last Name
               </label>
               <input
@@ -131,7 +133,8 @@ export default function Register() {
                 type="text"
                 value={formData.lastName}
                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border transition-all focus:outline-none"
+                placeholder="Doe"
+                className="w-full px-4 py-2.5 border transition-all focus:outline-none"
                 style={inputStyle}
                 onFocus={handleInputFocus}
                 onBlur={handleInputBlur}
@@ -140,7 +143,7 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>
+            <label className="block text-xs font-medium mb-1.5" style={{ color: '#374151' }}>
               Email
             </label>
             <input
@@ -148,8 +151,9 @@ export default function Register() {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="you@example.com"
               required
-              className="w-full px-4 py-2.5 rounded-xl border transition-all focus:outline-none"
+              className="w-full px-4 py-2.5 border transition-all focus:outline-none"
               style={inputStyle}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
@@ -157,7 +161,7 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>
+            <label className="block text-xs font-medium mb-1.5" style={{ color: '#374151' }}>
               Username
             </label>
             <input
@@ -166,18 +170,18 @@ export default function Register() {
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               required
-              className="w-full px-4 py-2.5 rounded-xl border transition-all focus:outline-none"
+              className="w-full px-4 py-2.5 border transition-all focus:outline-none"
               style={inputStyle}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
             />
-            <p className="mt-1 text-xs" style={{ color: '#94A3B8' }}>
+            <p className="mt-1 text-xs" style={{ color: '#9CA3AF' }}>
               3-30 characters, letters, numbers, underscores, and hyphens only
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>
+            <label className="block text-xs font-medium mb-1.5" style={{ color: '#374151' }}>
               Password
             </label>
             <input
@@ -186,12 +190,12 @@ export default function Register() {
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
-              className="w-full px-4 py-2.5 rounded-xl border transition-all focus:outline-none"
+              className="w-full px-4 py-2.5 border transition-all focus:outline-none"
               style={inputStyle}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
             />
-            <p className="mt-1 text-xs" style={{ color: '#94A3B8' }}>
+            <p className="mt-1 text-xs" style={{ color: '#9CA3AF' }}>
               At least 8 characters with uppercase, lowercase, number, and special character
             </p>
           </div>
@@ -200,8 +204,8 @@ export default function Register() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full h-12 px-4 text-white font-medium rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
-            style={{ backgroundColor: '#06B6D4' }}
+            className="w-full h-11 px-4 text-white font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+            style={{ backgroundColor: '#06B6D4', borderRadius: '8px' }}
             onMouseEnter={(e) => {
               if (!isLoading) e.currentTarget.style.backgroundColor = '#0891B2';
             }}
