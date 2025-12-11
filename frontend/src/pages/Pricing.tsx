@@ -205,10 +205,10 @@ export default function Pricing() {
             <h1 className="text-5xl md:text-6xl font-bold text-slate-900 dark:text-white mb-6">
               Invest in Your <span className="gradient-text">Success</span>
             </h1>
-            <p className="text-xl text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
+            <p className="text-xl text-slate-600 dark:text-slate-300 mb-3 leading-relaxed">
               Choose the plan that fits your learning goals — upgrade anytime.
             </p>
-            <p className="text-base text-slate-500 dark:text-slate-500 mb-10">
+            <p className="text-base text-slate-500 dark:text-slate-400 mb-10">
               Every plan includes AI-powered study tools.
             </p>
 
@@ -300,7 +300,7 @@ export default function Pricing() {
                 }
                 if (plan.id === 'premium') {
                   return (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-brand-600 to-accent-600 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-brand-600 to-accent-600 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg whitespace-nowrap">
                       👑 Most Powerful
                     </div>
                   );
@@ -333,10 +333,10 @@ export default function Pricing() {
                     >
                       {plan.icon}
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
                       {plan.name}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                    <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                       {plan.description}
                     </p>
                   </div>
@@ -344,15 +344,15 @@ export default function Pricing() {
                   {/* Pricing with animation */}
                   <div className="text-center mb-6">
                     <div className="flex items-baseline justify-center gap-1 transition-all duration-300">
-                      <span className="text-5xl font-bold text-gray-900 dark:text-white">
+                      <span className="text-5xl font-bold text-slate-900 dark:text-white">
                         ${formatPrice(price)}
                       </span>
-                      <span className="text-gray-500 dark:text-gray-400 font-medium">/mo</span>
+                      <span className="text-slate-500 dark:text-slate-300 font-medium">/mo</span>
                     </div>
                     <div className="h-12 flex flex-col justify-center">
                       {billingCycle === 'yearly' && plan.monthlyPrice > 0 ? (
                         <div className="space-y-0.5 animate-fade-in">
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                          <p className="text-sm text-slate-600 dark:text-slate-300">
                             ${yearlyTotal.toFixed(2)} billed yearly
                           </p>
                           <p className="text-sm text-green-600 dark:text-green-400 font-semibold">
@@ -360,11 +360,11 @@ export default function Pricing() {
                           </p>
                         </div>
                       ) : plan.monthlyPrice === 0 ? (
-                        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                        <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">
                           Free forever
                         </p>
                       ) : (
-                        <p className="text-sm text-gray-400 dark:text-gray-500">Billed monthly</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Billed monthly</p>
                       )}
                     </div>
                   </div>
@@ -397,8 +397,8 @@ export default function Pricing() {
                         <span
                           className={`text-sm ${
                             feature.included
-                              ? 'text-gray-700 dark:text-gray-300'
-                              : 'text-gray-400 dark:text-gray-500'
+                              ? 'text-slate-700 dark:text-slate-200'
+                              : 'text-slate-400 dark:text-slate-500'
                           } ${feature.highlight ? 'font-medium' : ''}`}
                         >
                           {feature.text}
@@ -452,7 +452,7 @@ export default function Pricing() {
                   </Button>
 
                   {/* Microcopy */}
-                  <p className="mt-3 text-xs text-center text-gray-500 dark:text-gray-400">
+                  <p className="mt-3 text-xs text-center text-slate-500 dark:text-slate-400">
                     {plan.id === 'basic' ? 'No credit card required.' : 'Cancel anytime.'}
                   </p>
                 </div>
@@ -473,10 +473,10 @@ export default function Pricing() {
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 mb-4 group-hover:scale-110 transition-transform duration-300">
                   <TrendingUp className="w-8 h-8 text-green-600 dark:text-green-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
                   📈 Faster Learning
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                   AI-powered tools help you learn more in less time with personalized study
                   materials.
                 </p>
@@ -487,10 +487,10 @@ export default function Pricing() {
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 mb-4 group-hover:scale-110 transition-transform duration-300">
                   <Brain className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
                   🧠 Smarter Notes
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                   Transform your notes into flashcards, summaries, and quizzes automatically.
                 </p>
               </div>
@@ -500,10 +500,10 @@ export default function Pricing() {
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-100 to-accent-100 dark:from-brand-900/30 dark:to-accent-900/30 mb-4 group-hover:scale-110 transition-transform duration-300">
                   <Bolt className="w-8 h-8 text-brand-600 dark:text-brand-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
                   ⚡ More Power
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                   Unlimited uploads, AI requests, and exclusive features to supercharge your
                   studies.
                 </p>
@@ -531,10 +531,10 @@ export default function Pricing() {
 
           {/* FAQ or Additional Info */}
           <div className="mt-16 text-center">
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-slate-600 dark:text-slate-300 mb-4">
               All plans include a 7-day money-back guarantee. Cancel anytime.
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Questions? Contact us at{' '}
               <a
                 href="mailto:support@thynkr.com"
