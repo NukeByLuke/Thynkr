@@ -24,6 +24,7 @@ export const SUPPORTED_LANGUAGES: Language[] = [
   { value: 'id', label: 'Indonesian', flag: '🇮🇩' },
   { value: 'ms', label: 'Malay', flag: '🇲🇾' },
   { value: 'hi', label: 'Hindi', flag: '🇮🇳' },
+  { value: 'pa', label: 'Punjabi', flag: '🇮🇳' },
   
   // Middle Eastern Languages
   { value: 'ar', label: 'Arabic', flag: '🇸🇦' },
