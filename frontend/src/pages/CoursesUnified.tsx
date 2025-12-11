@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookOpen,
   Plus,
@@ -262,11 +261,7 @@ export default function CoursesUnified() {
         </Helmet>
         <div className="h-full flex items-center justify-center bg-slate-50 dark:bg-slate-950">
           <div className="text-center max-w-md px-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg p-8 border border-slate-700/20"
-            >
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg p-8 border border-slate-700/20">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-brand-500 to-accent-500 rounded-full mb-6">
                 <Lock className="h-8 w-8 text-white" />
               </div>
@@ -278,7 +273,7 @@ export default function CoursesUnified() {
               >
                 View Pricing
               </button>
-            </motion.div>
+            </div>
           </div>
         </div>
       </>
@@ -342,15 +337,13 @@ export default function CoursesUnified() {
 
               {/* Create Course Button - Only show if user can access courses (Pro+) */}
               {user && canAccess && (
-                <motion.button
+                <button
                   onClick={() => setShowCreateModal(true)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-brand-500 to-accent-500 text-white rounded-2xl font-semibold text-sm tracking-wide shadow-[0_8px_30px_rgba(99,102,241,0.3)] hover:shadow-[0_12px_40px_rgba(99,102,241,0.4)] transition-all duration-200"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-brand-500 to-accent-500 text-white rounded-2xl font-semibold text-sm tracking-wide shadow-[0_8px_30px_rgba(99,102,241,0.3)] hover:shadow-[0_12px_40px_rgba(99,102,241,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
                 >
                   <Plus className="h-4 w-4" />
                   Create Course
-                </motion.button>
+                </button>
               )}
             </div>{' '}
             {/* Search & Filters */}
@@ -433,42 +426,22 @@ export default function CoursesUnified() {
               </div>
             </div>
             {/* Course Content with Smooth Transitions */}
-            <AnimatePresence mode="wait">
-              {isLoading ? (
-                <motion.div
-                  key="loading"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
+            {isLoading ? (
+                <div>
                   <CourseGridSkeleton count={6} />
-                </motion.div>
+                </div>
               ) : error ? (
-                <motion.div
-                  key="error"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex items-center justify-center py-20"
-                >
+                <div className="flex items-center justify-center py-20">
                   <div className="text-center">
                     <p className="text-red-600 dark:text-red-400">Failed to load courses</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                       {error instanceof Error ? error.message : 'Unknown error'}
                     </p>
                   </div>
-                </motion.div>
+                </div>
               ) : courses.length === 0 ? (
                 /* Empty State */
-                <motion.div
-                  key={`empty-${activeTab}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3 }}
-                  className="backdrop-blur-lg bg-white/90 dark:bg-slate-900/90 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.25)] border border-white/10 pt-4"
-                >
+                <div className="backdrop-blur-lg bg-white/90 dark:bg-slate-900/90 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.25)] border border-white/10 pt-4">
                   <EmptyState
                     icon={<BookOpen className="h-8 w-8" />}
                     title={emptyState.title}
@@ -477,25 +450,14 @@ export default function CoursesUnified() {
                     onAction={emptyState.onAction}
                     illustration={hasActiveFilters ? undefined : 'courses'}
                   />
-                </motion.div>
+                </div>
               ) : (
                 /* Courses Grid */
-                <motion.div
-                  key={`grid-${activeTab}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3 }}
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-4"
-                >
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-4">
                   {courses.map((course: Course) => (
-                    <motion.div
+                    <div
                       key={course.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                      whileHover={{ scale: 1.02 }}
-                      className="group relative bg-white dark:bg-slate-900 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:shadow-[0_0_25px_rgba(59,130,246,0.25)] transition-all duration-300 overflow-hidden border border-white/10"
+                      className="group relative bg-white dark:bg-slate-900 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:shadow-[0_0_25px_rgba(59,130,246,0.25)] hover:scale-[1.02] transition-all duration-300 overflow-hidden border border-white/10"
                     >
                       {/* Cover Image with Gradient */}
                       <Link to={`/courses/${course.id}`} className="block">
@@ -611,11 +573,10 @@ export default function CoursesUnified() {
                           </div>
                         </div>
                       </Link>
-                    </motion.div>
+                    </div>
                   ))}
-                </motion.div>
+                </div>
               )}
-            </AnimatePresence>
           </div>
         </div>
       </div>
@@ -626,12 +587,9 @@ export default function CoursesUnified() {
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={() => setShowCreateModal(false)}
         >
-          <motion.div
+          <div
             className="backdrop-blur-lg bg-white/95 dark:bg-slate-900/95 rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.3)] w-full max-w-lg p-6 border border-white/20 dark:border-white/10"
             onClick={(e) => e.stopPropagation()}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.2 }}
           >
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl">
@@ -804,7 +762,7 @@ export default function CoursesUnified() {
                 </button>
               </div>
             </form>
-          </motion.div>
+          </div>
         </div>
       )}
 

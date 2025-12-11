@@ -80,7 +80,7 @@ export interface LoginCredentials {
 export interface RegisterData {
   email: string;
   password: string;
-  username: string;
+  username?: string;
   firstName?: string;
   lastName?: string;
 }

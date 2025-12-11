@@ -24,10 +24,22 @@ export class AuthService {
    * @returns Newly created user object (excluding password)
    */
   async register(data: RegisterInput) {
+    // Generate username from email if not provided
+    let username = data.username;
+    if (!username) {
+      const base = data.email.split('@')[0].replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+      username = base;
+      let counter = 1;
+      while (await prisma.user.findUnique({ where: { username } })) {
+        username = `${base}${counter}`;
+        counter++;
+      }
+    }
+
     // Check if email or username already exists
     const [existingEmail, existingUsername] = await Promise.all([
       prisma.user.findUnique({ where: { email: data.email } }),
-      prisma.user.findUnique({ where: { username: data.username } }),
+      prisma.user.findUnique({ where: { username } }),
     ]);
 
     if (existingEmail && existingUsername) {
@@ -50,7 +62,7 @@ export class AuthService {
       data: {
         email: data.email,
         password: hashedPassword,
-        username: data.username,
+        username,
         firstName: data.firstName,
         lastName: data.lastName,
         emailVerifyToken: randomBytes(32).toString('hex'),
@@ -89,6 +101,11 @@ export class AuthService {
 
     if (!user) {
       throw new Error('Invalid credentials');
+    }
+
+    // Check if user has a password (might be OAuth-only account)
+    if (!user.password) {
+      throw new Error('Please sign in with Google or your OAuth provider');
     }
 
     // Verify password
@@ -259,6 +276,11 @@ export class AuthService {
 
     if (!user) {
       throw new Error('User not found');
+    }
+
+    // Check if user has a password (might be OAuth-only account)
+    if (!user.password) {
+      throw new Error('Cannot change password for OAuth-only accounts');
     }
 
     // Verify current password

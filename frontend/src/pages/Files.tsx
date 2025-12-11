@@ -2,7 +2,6 @@ import { useState, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { motion } from 'framer-motion';
 import PageContainer from '@/components/layout/PageContainer';
 import { FileListSkeleton, Skeleton } from '@/components/ui/Skeleton';
 import {
@@ -498,11 +497,7 @@ export default function Files() {
 
   if (isLoading) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="min-h-screen p-6"
-      >
+      <div className="min-h-screen p-6">
         <PageContainer>
           <div className="space-y-6">
             {/* Header skeleton */}
@@ -525,7 +520,7 @@ export default function Files() {
             <FileListSkeleton count={5} />
           </div>
         </PageContainer>
-      </motion.div>
+      </div>
     );
   }
 

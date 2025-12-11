@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
 import PageContainer from '@/components/layout/PageContainer';
 import {
   Flame,
@@ -288,7 +287,7 @@ export default function StudyProgress() {
             <div className="space-y-3">
               {progress?.weeklyStats.dailyActivity.map((day) => (
                 <div key={day.date} className="flex items-center gap-4">
-                  <div className="w-20 text-sm text-gray-600 dark:text-gray-400">
+                  <div className="w-20 text-sm text-slate-600 dark:text-slate-300">
                     {getDayName(day.date)}
                   </div>
                   <div className="flex-1 h-6 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -307,7 +306,7 @@ export default function StudyProgress() {
             </div>
             <div className="mt-4 pt-4 border-t dark:border-gray-700">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">This week total</span>
+                <span className="text-slate-600 dark:text-slate-300">This week total</span>
                 <span className="font-semibold text-gray-900 dark:text-white">
                   {progress?.weeklyStats.sessionsCount || 0} sessions •{' '}
                   {formatMinutes(progress?.weeklyStats.totalMinutes || 0)}
@@ -343,7 +342,7 @@ export default function StudyProgress() {
               })}
               {(!progress?.weeklyStats.activityBreakdown ||
                 progress.weeklyStats.activityBreakdown.length === 0) && (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-8 text-slate-600 dark:text-slate-300">
                   <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
                   <p>No activity this week yet.</p>
                   <p className="text-sm">Start studying to see your breakdown!</p>
@@ -390,7 +389,7 @@ export default function StudyProgress() {
                 </div>
               </div>
             </div>
-            <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+            <div className="text-center text-sm text-slate-600 dark:text-slate-300">
               {progress?.quizPerformance.recentAttempts || 0} quizzes taken this week
             </div>
           </div>
@@ -434,10 +433,8 @@ export default function StudyProgress() {
               const Icon = badge.icon;
 
               return (
-                <motion.div
+                <div
                   key={badge.id}
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
                   className={`relative p-4 rounded-xl border-2 ${tierColors[badge.tier]} ${
                     earned
                       ? 'bg-white dark:bg-slate-700'
@@ -468,7 +465,7 @@ export default function StudyProgress() {
                       </span>
                     </div>
                   )}
-                </motion.div>
+                </div>
               );
             })}
           </div>

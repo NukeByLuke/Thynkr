@@ -1,5 +1,4 @@
 import { Outlet, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import Logo from '@/components/Logo';
 import Footer from '@/components/layout/Footer';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -9,20 +8,15 @@ export default function PublicLayout() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Header with glassmorphism */}
-      <motion.header 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="sticky top-0 z-50 backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border-b border-white/20 dark:border-white/10"
-      >
+    <div className="min-h-screen flex flex-col bg-white dark:bg-slate-900">
+      {/* Header */}
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800">
         <div className="flex justify-between items-center px-8 lg:px-16 py-4 max-w-6xl mx-auto">
           <Logo variant="full" animated={false} />
           <nav className="flex items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-400">
             <Link 
               to="/pricing" 
-              className="hover:text-slate-900 dark:hover:text-white transition-colors duration-250"
+              className="hover:text-slate-900 dark:hover:text-white transition-colors"
             >
               Pricing
             </Link>
@@ -31,7 +25,7 @@ export default function PublicLayout() {
                 <ThemeToggle size="sm" />
                 <Link
                   to="/study"
-                  className="px-6 py-2.5 bg-gradient-to-r from-brand-500 to-accent-500 text-white rounded-2xl font-semibold shadow-soft hover:shadow-glow-brand transition-all duration-300"
+                  className="px-6 py-2.5 bg-cyan-500 hover:bg-cyan-600 text-white rounded-full font-medium transition-colors"
                 >
                   Dashboard
                 </Link>
@@ -40,14 +34,14 @@ export default function PublicLayout() {
               <>
                 <Link 
                   to="/login" 
-                  className="hover:text-slate-900 dark:hover:text-white transition-colors duration-250"
+                  className="hover:text-slate-900 dark:hover:text-white transition-colors"
                 >
                   Login
                 </Link>
                 <ThemeToggle size="sm" />
                 <Link
                   to="/register"
-                  className="px-6 py-2.5 bg-gradient-to-r from-brand-500 to-accent-500 text-white rounded-2xl font-semibold shadow-soft hover:shadow-glow-brand transition-all duration-300"
+                  className="px-6 py-2.5 bg-cyan-500 hover:bg-cyan-600 text-white rounded-full font-medium transition-colors"
                 >
                   Get Started
                 </Link>
@@ -55,7 +49,7 @@ export default function PublicLayout() {
             )}
           </nav>
         </div>
-      </motion.header>
+      </header>
 
       {/* Main Content */}
       <main className="flex-1">

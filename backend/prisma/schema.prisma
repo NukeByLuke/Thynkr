@@ -31,7 +31,7 @@ model User {
   id                String        @id @default(cuid())
   email             String        @unique
   username          String        @unique
-  password          String
+  password          String?       // Optional for OAuth users
   firstName         String?
   lastName          String?
   avatarUrl         String?
@@ -44,6 +44,11 @@ model User {
   emailVerifyToken  String?       @unique
   passwordResetToken String?      @unique
   passwordResetExpires DateTime?
+  
+  // OAuth provider fields
+  googleId          String?       @unique
+  appleId           String?       @unique
+  oauthProvider     String?       // "google" | "apple" | null for email/password
   
   stripeCustomerId  String?       @unique
   subscription      Subscription?

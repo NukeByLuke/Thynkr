@@ -72,7 +72,7 @@ function TTSSettings() {
         <Volume2 className="w-5 h-5" />
         Voice Reader Settings
       </h2>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+      <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
         Customize how text-to-speech reads your study materials
       </p>
 

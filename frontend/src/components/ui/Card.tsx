@@ -63,7 +63,7 @@ export default function Card({
     'rounded-2xl',
     'transition-all duration-200 ease-in-out',
     variantClasses[variant],
-    hover && 'cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-gray-300 dark:hover:border-slate-600',
+    hover && 'cursor-pointer hover:shadow-xl hover:-translate-y-0.5 hover:border-thynkr-purple/50',
     className
   );
 

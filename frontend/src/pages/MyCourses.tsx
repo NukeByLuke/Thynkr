@@ -202,7 +202,7 @@ export default function MyCourses() {
             <div className="flex flex-col lg:flex-row gap-4">
               {/* Search */}
               <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
                 <input
                   type="text"
                   placeholder="Search courses by title or description..."
@@ -280,7 +280,7 @@ export default function MyCourses() {
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
-                    className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+                    className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-600 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
                   >
                     Clear
                   </button>
@@ -298,7 +298,7 @@ export default function MyCourses() {
             <div className="flex items-center justify-center py-20">
               <div className="text-center">
                 <p className="text-red-600 dark:text-red-400">Failed to load courses</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                <p className="text-sm text-slate-600 dark:text-slate-300 mt-2">
                   {error instanceof Error ? error.message : 'Unknown error'}
                 </p>
               </div>
@@ -421,7 +421,7 @@ export default function MyCourses() {
                     </h3>
 
                     {course.description ? (
-                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+                      <p className="text-slate-600 dark:text-slate-300 text-sm mb-4 line-clamp-2">
                         {course.description}
                       </p>
                     ) : (

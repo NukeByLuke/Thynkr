@@ -100,6 +100,29 @@ export default {
         },
 
         // ═══════════════════════════════════════════════════════════════════
+        // AURORA DESIGN SYSTEM - Thynkr Brand Colors
+        // ═══════════════════════════════════════════════════════════════════
+        'thynkr-blue': '#3b82f6',
+        'thynkr-purple': '#8b5cf6',
+        'thynkr-cyan': '#06b6d4',
+
+        // ═══════════════════════════════════════════════════════════════════
+        // AURORA THEME TOKENS
+        // ═══════════════════════════════════════════════════════════════════
+        surface: {
+          light: '#ffffff',
+          dark: '#0f172a',
+        },
+        'surface-highlight': {
+          light: '#f8fafc',
+          dark: '#1e293b',
+        },
+        'border-subtle': {
+          light: '#e2e8f0',
+          dark: '#334155',
+        },
+
+        // ═══════════════════════════════════════════════════════════════════
         // SEMANTIC COLORS
         // ═══════════════════════════════════════════════════════════════════
         success: '#10B981',
@@ -215,8 +238,8 @@ export default {
           '50%': { boxShadow: '0 0 25px rgba(124, 58, 237, 0.5)' },
         },
         shimmer: {
-          '0%': { backgroundPosition: '200% 0' },
-          '100%': { backgroundPosition: '-200% 0' },
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
         },
         gradientX: {
           '0%, 100%': { backgroundPosition: '0% 50%' },
@@ -238,6 +261,14 @@ export default {
       },
       backdropBlur: {
         'xs': '2px',
+      },
+      // ═══════════════════════════════════════════════════════════════════
+      // AURORA GRADIENTS
+      // ═══════════════════════════════════════════════════════════════════
+      backgroundImage: {
+        'gradient-aurora': 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+        'gradient-aurora-hover': 'linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)',
+        'gradient-glass': 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
       },
     },
   },

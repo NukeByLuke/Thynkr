@@ -70,6 +70,10 @@ services:
       STRIPE_PRICE_STANDARD_YEARLY: ${STRIPE_PRICE_STANDARD_YEARLY:-price_test_standard_yearly}
       STRIPE_PRICE_PREMIUM_MONTHLY: ${STRIPE_PRICE_PREMIUM_MONTHLY:-price_test_premium_monthly}
       STRIPE_PRICE_PREMIUM_YEARLY: ${STRIPE_PRICE_PREMIUM_YEARLY:-price_test_premium_yearly}
+      # Google OAuth
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      VITE_API_URL: http://localhost:5175
       ENABLE_EMAIL_VERIFICATION: "false"
       ENABLE_ANALYTICS: "false"
     depends_on:

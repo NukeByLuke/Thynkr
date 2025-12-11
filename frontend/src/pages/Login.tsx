@@ -1,17 +1,17 @@
 /**
  * Login Page - Thea-inspired clean minimal design
  * Zod validation, toast notifications, OAuth integration
+ * Full light/dark mode support
  */
 
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { motion } from 'framer-motion';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthLayout from '@/layouts/AuthLayout';
-import { GoogleSignInButton, AppleSignInButton, OAuthDivider } from '@/features/auth/OAuthButtons';
+import { OAuthButtons, OAuthDivider } from '@/features/auth/OAuthButtons';
 
 // Zod schema for login validation
 const loginSchema = z.object({
@@ -89,31 +89,22 @@ export default function Login() {
     try {
       await login({ email, password });
       toast.success('Welcome back!', { duration: 2000 });
-      // Fade transition to dashboard
       navigate('/home');
     } catch (err: any) {
-      toast.error('Invalid credentials. Please try again.', {
-        duration: 4000,
-        style: {
-          background: '#FEF2F2',
-          color: '#DC2626',
-          border: '1px solid #FECACA',
-        },
-      });
+      toast.error('Invalid credentials. Please try again.', { duration: 4000 });
     } finally {
       setIsLoading(false);
     }
   };
 
   const inputBaseStyles = `
-    w-full px-4 py-3 border transition-all duration-200 focus:outline-none
-    bg-white text-gray-900 rounded-xl
+    w-full px-4 py-3 border rounded-xl transition-colors
+    bg-white dark:bg-slate-700 
+    text-slate-900 dark:text-white 
+    border-slate-200 dark:border-slate-600 
+    placeholder-slate-400 dark:placeholder-slate-400
+    focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20
   `;
-
-  const getInputStyles = (hasError: boolean) => ({
-    borderColor: hasError ? '#EF4444' : '#E5E7EB',
-    boxShadow: hasError ? '0 0 0 2px rgba(239, 68, 68, 0.1)' : 'none',
-  });
 
   return (
     <>
@@ -126,11 +117,8 @@ export default function Login() {
       </Helmet>
 
       <AuthLayout>
-        {/* OAuth Buttons - appear first */}
-        <div className="space-y-3 mb-4">
-          <GoogleSignInButton />
-          <AppleSignInButton />
-        </div>
+        {/* OAuth Buttons - Grid layout */}
+        <OAuthButtons />
 
         <OAuthDivider />
 
@@ -149,25 +137,16 @@ export default function Login() {
               aria-invalid={!!errors.email}
               aria-describedby={errors.email ? 'email-error' : undefined}
               autoComplete="email"
-              className={inputBaseStyles}
-              style={getInputStyles(!!errors.email)}
-              onFocus={(e) => {
-                if (!errors.email) {
-                  e.target.style.borderColor = '#06B6D4';
-                  e.target.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.1)';
-                }
-              }}
+              className={`${inputBaseStyles} ${errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
             />
             {errors.email && (
-              <motion.p
+              <p
                 id="email-error"
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
                 className="mt-1.5 text-sm text-red-500"
                 role="alert"
               >
                 {errors.email}
-              </motion.p>
+              </p>
             )}
           </div>
 
@@ -184,25 +163,16 @@ export default function Login() {
               aria-invalid={!!errors.password}
               aria-describedby={errors.password ? 'password-error' : undefined}
               autoComplete="current-password"
-              className={inputBaseStyles}
-              style={getInputStyles(!!errors.password)}
-              onFocus={(e) => {
-                if (!errors.password) {
-                  e.target.style.borderColor = '#06B6D4';
-                  e.target.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.1)';
-                }
-              }}
+              className={`${inputBaseStyles} ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
             />
             {errors.password && (
-              <motion.p
+              <p
                 id="password-error"
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
                 className="mt-1.5 text-sm text-red-500"
                 role="alert"
               >
                 {errors.password}
-              </motion.p>
+              </p>
             )}
           </div>
 
@@ -213,28 +183,25 @@ export default function Login() {
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 border-gray-300 text-cyan-500 focus:ring-cyan-500/20 rounded"
+                className="w-4 h-4 text-cyan-500 rounded bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-500 focus:ring-cyan-500/20"
                 aria-label="Remember me"
               />
-              <span className="text-sm text-gray-500">Remember me</span>
+              <span className="text-sm text-slate-600 dark:text-slate-300">Remember me</span>
             </label>
             <Link
               to="/forgot-password"
-              className="text-sm font-medium text-gray-500 hover:text-gray-700 hover:underline transition-colors"
+              className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-cyan-500 dark:hover:text-cyan-400 transition-colors"
             >
               Forgot password?
             </Link>
           </div>
 
           {/* Primary CTA */}
-          <motion.button
+          <button
             type="submit"
             disabled={isLoading}
-            whileHover={!isLoading ? { scale: 1.01 } : undefined}
-            whileTap={!isLoading ? { scale: 0.99 } : undefined}
             aria-label={isLoading ? 'Signing in...' : 'Sign in to your account'}
-            className="w-full h-12 flex items-center justify-center gap-2 text-white font-medium rounded-full transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
-            style={{ backgroundColor: '#06B6D4' }}
+            className="w-full h-12 flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-white font-medium rounded-full transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <>
@@ -264,7 +231,7 @@ export default function Login() {
             ) : (
               'Sign in'
             )}
-          </motion.button>
+          </button>
         </form>
       </AuthLayout>
     </>

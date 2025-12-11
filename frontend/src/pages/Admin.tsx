@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Users,
   BookOpen,
@@ -370,19 +369,12 @@ const Tooltip = ({ children, content }: { children: React.ReactNode; content: st
       <div onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
         {children}
       </div>
-      <AnimatePresence>
-        {show && (
-          <motion.div
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 5 }}
-            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 text-xs font-medium text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-lg whitespace-nowrap z-50"
-          >
+      {show && (
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 text-xs font-medium text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-lg whitespace-nowrap z-50">
             {content}
             <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700" />
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
     </div>
   );
 };
@@ -406,10 +398,7 @@ const StatCard = ({
   gradient: string;
 }) => {
   return (
-    <motion.div
-      whileHover={{ y: -4, boxShadow: '0 20px 40px -12px rgba(0, 0, 0, 0.15)' }}
-      className={`relative overflow-hidden rounded-2xl p-6 ${gradient} text-white`}
-    >
+    <div className={`relative overflow-hidden rounded-2xl p-6 ${gradient} text-white hover:-translate-y-1 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)] transition-all`}>
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/20 -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-white/20 translate-y-1/2 -translate-x-1/2" />
@@ -442,7 +431,7 @@ const StatCard = ({
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -566,16 +555,10 @@ const DateFilterDropdown = ({
         />
       </button>
 
-      <AnimatePresence>
-        {open && (
+      {open && (
           <>
             <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl z-20 overflow-hidden"
-            >
+            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl z-20 overflow-hidden">
               {options.map((option) => (
                 <button
                   key={option.value}
@@ -592,10 +575,9 @@ const DateFilterDropdown = ({
                   {option.label}
                 </button>
               ))}
-            </motion.div>
+            </div>
           </>
         )}
-      </AnimatePresence>
     </div>
   );
 };
@@ -632,16 +614,10 @@ const FilterDropdown = ({
         <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
-      <AnimatePresence>
-        {open && (
+      {open && (
           <>
             <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute left-0 mt-2 w-44 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl z-20 overflow-hidden"
-            >
+            <div className="absolute left-0 mt-2 w-44 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl z-20 overflow-hidden">
               {options.map((option) => (
                 <button
                   key={option.value}
@@ -658,10 +634,9 @@ const FilterDropdown = ({
                   {option.label}
                 </button>
               ))}
-            </motion.div>
+            </div>
           </>
         )}
-      </AnimatePresence>
     </div>
   );
 };
@@ -687,16 +662,10 @@ const RowsPerPageDropdown = ({
         <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
-      <AnimatePresence>
-        {open && (
+      {open && (
           <>
             <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute right-0 bottom-full mb-2 w-24 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl z-20 overflow-hidden"
-            >
+            <div className="absolute right-0 bottom-full mb-2 w-24 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl z-20 overflow-hidden">
               {options.map((option) => (
                 <button
                   key={option}
@@ -713,10 +682,9 @@ const RowsPerPageDropdown = ({
                   {option}
                 </button>
               ))}
-            </motion.div>
+            </div>
           </>
         )}
-      </AnimatePresence>
     </div>
   );
 };
@@ -741,20 +709,14 @@ const Modal = ({
   };
 
   return (
-    <AnimatePresence>
+    <>
       {open && (
         <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <div
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
             onClick={onClose}
           />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          <div
             className="fixed inset-0 flex items-center justify-center z-50 p-4"
             onClick={(e) => e.stopPropagation()}
           >
@@ -763,10 +725,10 @@ const Modal = ({
             >
               {children}
             </div>
-          </motion.div>
+          </div>
         </>
       )}
-    </AnimatePresence>
+    </>
   );
 };
 
@@ -780,28 +742,21 @@ const SidePanel = ({
   onClose: () => void;
   children: React.ReactNode;
 }) => (
-  <AnimatePresence>
+  <>
     {open && (
       <>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+        <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
           onClick={onClose}
         />
-        <motion.div
-          initial={{ x: '100%' }}
-          animate={{ x: 0 }}
-          exit={{ x: '100%' }}
-          transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-          className="fixed right-0 top-0 h-full w-full max-w-lg bg-white dark:bg-gray-800 shadow-2xl z-50 overflow-y-auto"
+        <div
+          className="fixed right-0 top-0 h-full w-full max-w-lg bg-white dark:bg-gray-800 shadow-2xl z-50 overflow-y-auto transition-transform"
         >
           {children}
-        </motion.div>
+        </div>
       </>
     )}
-  </AnimatePresence>
+  </>
 );
 
 // User View Panel Content
@@ -2150,10 +2105,9 @@ const CourseInsightsTab = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {coursesData.courses.map((course) => (
-                <motion.div
+                <div
                   key={course.id}
-                  whileHover={{ y: -4 }}
-                  className="bg-gray-50 dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700"
+                  className="bg-gray-50 dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700 hover:-translate-y-1 transition-transform"
                 >
                   {/* Thumbnail */}
                   <div className="aspect-video bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 relative overflow-hidden">
@@ -2235,7 +2189,7 @@ const CourseInsightsTab = () => {
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
@@ -3940,14 +3894,8 @@ export default function Admin() {
 
         {/* Tab Content */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <AnimatePresence mode="wait">
             {activeTab === 'users' && (
-              <motion.div
-                key="users"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-              >
+              <div>
                 {/* Search and Filters */}
                 <div className="p-4 border-b border-gray-200 dark:border-gray-700 space-y-4">
                   <div className="flex flex-col sm:flex-row gap-4">
@@ -4231,53 +4179,32 @@ export default function Admin() {
                     </div>
                   </div>
                 )}
-              </motion.div>
+              </div>
             )}
 
             {activeTab === 'courses' && (
-              <motion.div
-                key="courses"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-              >
+              <div>
                 <CourseInsightsTab />
-              </motion.div>
+              </div>
             )}
 
             {activeTab === 'payments' && (
-              <motion.div
-                key="payments"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-              >
+              <div>
                 <PaymentAnalyticsTab />
-              </motion.div>
+              </div>
             )}
 
             {activeTab === 'logs' && (
-              <motion.div
-                key="logs"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-              >
+              <div>
                 <ActivityLogsTab />
-              </motion.div>
+              </div>
             )}
 
             {activeTab === 'system' && (
-              <motion.div
-                key="system"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-              >
+              <div>
                 <SystemHealthTab />
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
         </div>
       </div>
 

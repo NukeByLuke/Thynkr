@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
 import {
   ArrowLeft,
   Upload,
@@ -418,12 +417,7 @@ export default function MyCourseDetail() {
     : `${window.location.origin}/courses/${course.id}`;
 
   return (
-    <motion.div
-      className="h-full bg-gray-50 dark:bg-gray-900"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-    >
+    <div className="h-full bg-gray-50 dark:bg-gray-900">
       {/* Soft Header Section */}
       <div className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
         {/* Back Navigation */}
@@ -1124,6 +1118,6 @@ export default function MyCourseDetail() {
           </div>
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }

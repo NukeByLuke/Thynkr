@@ -13,7 +13,7 @@ import { TTSProvider } from './contexts/TTSContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import ProtectedRoute from '@/features/auth/ProtectedRoute';
 import PublicLayout from './layouts/PublicLayout';
-import Layout from '@/components/layout/Layout';
+import DashboardLayout from './layouts/DashboardLayout';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import PreviewGate from '@/features/courses/PreviewGate';
 import MiniPlayer from '@/features/tutor/MiniPlayer';
@@ -23,6 +23,7 @@ import GlobalLoadingBar from '@/components/ui/GlobalLoadingBar';
 const Landing = lazy(() => import('./pages/Landing'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
+const AuthCallback = lazy(() => import('./pages/AuthCallback'));
 const Pricing = lazy(() => import('./pages/Pricing'));
 const Account = lazy(() => import('./pages/Account'));
 const Admin = lazy(() => import('./pages/Admin'));
@@ -111,6 +112,7 @@ function AppContent() {
             {/* Auth routes - no navbar */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
 
             {/* Public routes with PublicLayout (navbar) */}
             <Route element={<PublicLayout />}>
@@ -118,11 +120,11 @@ function AppContent() {
               <Route path="/pricing" element={<Pricing />} />
             </Route>
 
-          {/* Protected routes with Layout */}
+          {/* Protected routes with DashboardLayout */}
           <Route
             element={
               <ProtectedRoute>
-                <Layout />
+                <DashboardLayout />
               </ProtectedRoute>
             }
           >

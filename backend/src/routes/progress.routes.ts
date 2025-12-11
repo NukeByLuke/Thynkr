@@ -3,7 +3,63 @@ import { authenticate, AuthenticatedRequest } from '../middleware/auth.middlewar
 import prisma from '../db/client';
 import Redis from 'ioredis';
 
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+// Redis client with error handling - optional caching
+let redis: Redis | null = null;
+let redisConnected = false;
+
+try {
+  redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+    maxRetriesPerRequest: 1,
+    retryStrategy: (times) => {
+      if (times > 3) {
+        console.log('[Redis] Connection failed, running without cache');
+        return null; // Stop retrying
+      }
+      return Math.min(times * 100, 1000);
+    },
+    lazyConnect: true,
+  });
+
+  redis.on('connect', () => {
+    redisConnected = true;
+    console.log('[Redis] Connected successfully');
+  });
+
+  redis.on('error', () => {
+    // Suppress repeated error logs - just mark as disconnected
+    if (redisConnected) {
+      redisConnected = false;
+      console.log('[Redis] Disconnected, cache disabled');
+    }
+  });
+
+  // Attempt connection
+  redis.connect().catch(() => {
+    redisConnected = false;
+  });
+} catch {
+  console.log('[Redis] Not available, running without cache');
+}
+
+// Helper to safely get from cache
+async function cacheGet(key: string): Promise<string | null> {
+  if (!redis || !redisConnected) return null;
+  try {
+    return await redis.get(key);
+  } catch {
+    return null;
+  }
+}
+
+// Helper to safely set cache
+async function cacheSet(key: string, ttl: number, value: string): Promise<void> {
+  if (!redis || !redisConnected) return;
+  try {
+    await redis.setex(key, ttl, value);
+  } catch {
+    // Ignore cache write failures
+  }
+}
 
 // XP System
 const XP_PER_SESSION = 10;
@@ -60,7 +116,7 @@ export default async function progressRoutes(server: FastifyInstance) {
       try {
         // Check Redis cache first (5 min TTL)
         const cacheKey = `progress:${userId}`;
-        const cached = await redis.get(cacheKey);
+        const cached = await cacheGet(cacheKey);
         if (cached) {
           return reply.send(JSON.parse(cached));
         }
@@ -192,7 +248,7 @@ export default async function progressRoutes(server: FastifyInstance) {
         };
 
         // Cache for 5 minutes
-        await redis.setex(cacheKey, 300, JSON.stringify(response));
+        await cacheSet(cacheKey, 300, JSON.stringify(response));
 
         return reply.send(response);
       } catch (error) {
@@ -438,7 +494,7 @@ export default async function progressRoutes(server: FastifyInstance) {
       try {
         // Check Redis cache (10 min TTL)
         const leaderboardKey = 'leaderboard:xp';
-        const cached = await redis.get(leaderboardKey);
+        const cached = await cacheGet(leaderboardKey);
 
         if (cached) {
           return reply.send(JSON.parse(cached));
@@ -505,7 +561,7 @@ export default async function progressRoutes(server: FastifyInstance) {
         const response = { leaderboard };
 
         // Cache for 10 minutes
-        await redis.setex(leaderboardKey, 600, JSON.stringify(response));
+        await cacheSet(leaderboardKey, 600, JSON.stringify(response));
 
         return reply.send(response);
       } catch (error) {

@@ -152,7 +152,7 @@ export default function SavedPacks() {
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
                 Study Packs Require Standard+
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
+              <p className="text-slate-600 dark:text-slate-300 mb-6">
                 Upgrade to Standard or Premium to create and save study packs from multiple files.
                 Combine your materials into unified study experiences with AI-generated summaries,
                 quizzes, and flashcards.
@@ -269,7 +269,7 @@ export default function SavedPacks() {
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                 {searchQuery || filter !== 'all' ? 'No packs found' : 'No study packs yet'}
               </h3>
-              <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+              <p className="text-slate-600 dark:text-slate-300 max-w-md mx-auto">
                 {searchQuery || filter !== 'all'
                   ? 'Try adjusting your search or filters'
                   : 'Create study packs by selecting multiple files in your Files or Course pages and clicking "Study Together"'}

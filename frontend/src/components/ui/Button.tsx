@@ -39,15 +39,15 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const baseStyles = clsx(
       'inline-flex items-center justify-center font-medium',
-      'rounded-full transition-all duration-200 ease-in-out',
+      'rounded-xl transition-all duration-200 ease-in-out',
       'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2',
       'disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none'
     );
 
     const variants = {
       primary: clsx(
-        'bg-[#1E1B4B] text-white',
-        'hover:bg-[#2D2A5B] hover:shadow-md',
+        'bg-gradient-aurora text-white shadow-lg shadow-blue-500/25',
+        'hover:bg-gradient-aurora-hover hover:shadow-xl hover:shadow-blue-500/30',
         'active:scale-[0.98]'
       ),
       secondary: clsx(

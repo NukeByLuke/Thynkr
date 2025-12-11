@@ -381,7 +381,7 @@ export default function Study() {
   const renderTabContent = () => {
     if (!selectedFile || selectedFile.status !== 'COMPLETED') {
       return (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-slate-600 dark:text-slate-300">
           <p>File processing failed or not yet complete</p>
         </div>
       );
@@ -667,7 +667,7 @@ export default function Study() {
             <p className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
               {isDragging ? '✨ Drop files here' : 'Click to upload or drag and drop'}
             </p>
-            <p className="text-base text-gray-600 dark:text-gray-400">
+            <p className="text-base text-slate-600 dark:text-slate-300">
               PDF, DOC/DOCX, TXT, or PowerPoint files
             </p>
             <input
@@ -699,7 +699,7 @@ export default function Study() {
             <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl shadow-soft-xl border border-white/20 dark:border-slate-700/30 transition-all duration-300 ease-out hover:shadow-soft-2xl">
               <div className="p-6 border-b border-white/20 dark:border-slate-700/30">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white">Your Files</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{files.length} files</p>
+                <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">{files.length} files</p>
               </div>
               <div className="divide-y divide-white/10 dark:divide-slate-700/30 max-h-[600px] overflow-y-auto">
                 {files.length === 0 ? (
@@ -727,7 +727,7 @@ export default function Study() {
                       <p className="text-sm font-medium truncate text-gray-900 dark:text-white">
                         {file.originalName}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-slate-600 dark:text-slate-400">
                         {formatFileSize(file.fileSize)}
                       </p>
                       <span
@@ -770,7 +770,7 @@ export default function Study() {
                           className={`py-4 sm:py-5 border-b-2 capitalize transition-all duration-300 ease-out whitespace-nowrap text-base sm:text-lg ${
                             activeTab === tab
                               ? 'border-brand-600 dark:border-brand-400 text-brand-600 dark:text-brand-400 font-semibold'
-                              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 hover:border-brand-300/50'
+                              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:border-brand-300/50'
                           }`}
                         >
                           {tab}

@@ -2,9 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-  <!-- Theme-aware favicons -->
-  <link rel="icon" type="image/svg+xml" href="/brand/favicon-light.svg" media="(prefers-color-scheme: light)" />
-  <link rel="icon" type="image/svg+xml" href="/brand/favicon-dark.svg" media="(prefers-color-scheme: dark)" />
+    <!-- Theme-aware favicons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon-light.svg" media="(prefers-color-scheme: light)" />
+    <link rel="icon" type="image/svg+xml" href="/favicon-dark.svg" media="(prefers-color-scheme: dark)" />
+    <!-- Fallback for browsers that don't support media queries on link -->
+    <link rel="icon" type="image/svg+xml" href="/favicon-light.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Thynkr - AI-Powered Study Platform | Transform your learning with intelligent study tools, AI tutoring, and personalized learning paths" />
     <meta name="keywords" content="AI study platform, online learning, AI tutor, flashcards, study notes, quiz generator, educational technology" />
@@ -21,15 +23,18 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Thynkr - AI-Powered Study Platform" />
     <meta name="twitter:description" content="Transform your learning with intelligent study tools and AI tutoring" />
-  <!-- Lottie web component for loading animation -->
-  <script src="https://unpkg.com/@lottiefiles/lottie-player@2.0.3/dist/lottie-player.js"></script>
+    
+    <!-- Preconnect for faster font loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Optimized font loading - only Inter with needed weights, display=swap for fast first paint -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Rubik:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <title>Thynkr - AI-Powered Study Platform</title>
+    <!-- Lottie - loaded async to not block rendering -->
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@2.0.3/dist/lottie-player.js" async></script>
   </head>
   <body>
     <script>

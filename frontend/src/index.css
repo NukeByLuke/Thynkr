@@ -1,5 +1,4 @@
-/* Import Inter and Plus Jakarta Sans from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+/* Fonts loaded via index.html for optimal performance */
 @import './styles/animations.css';
 
 @tailwind base;
@@ -9,6 +8,17 @@
 @layer base {
   * {
     @apply border-gray-200/40 dark:border-slate-700/40;
+  }
+
+  /* Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 
   :root {
@@ -118,22 +128,49 @@
     font-family: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     letter-spacing: -0.02em;
     line-height: 1.3;
-    color: var(--color-text-primary);
-    @apply font-medium;
+    @apply text-slate-900 dark:text-white font-semibold tracking-tight;
   }
 
-  h1 { @apply text-3xl md:text-4xl lg:text-5xl font-semibold; }
-  h2 { @apply text-2xl md:text-3xl font-semibold; }
-  h3 { @apply text-xl md:text-2xl font-medium; }
-  h4 { @apply text-lg md:text-xl font-medium; }
+  h1 { @apply text-3xl md:text-4xl lg:text-5xl; }
+  h2 { @apply text-2xl md:text-3xl; }
+  h3 { @apply text-xl md:text-2xl; }
+  h4 { @apply text-lg md:text-xl; }
 
   p, span, div {
-    color: var(--color-text-secondary);
+    @apply text-slate-600 dark:text-slate-300;
   }
 
   /* Smooth focus states */
   *:focus-visible {
-    @apply outline-none ring-2 ring-primary-500/50 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 transition-all duration-200;
+    @apply outline-none ring-2 ring-thynkr-purple/20 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 transition-all duration-200;
+  }
+
+  /* Input field styling - Aurora theme */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="url"],
+  input[type="tel"],
+  input[type="number"],
+  textarea,
+  select {
+    @apply bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700;
+    @apply rounded-xl px-4 py-2.5 text-slate-900 dark:text-white;
+    @apply placeholder:text-slate-400 dark:placeholder:text-slate-500;
+    @apply transition-all duration-200;
+  }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="password"]:focus,
+  input[type="search"]:focus,
+  input[type="url"]:focus,
+  input[type="tel"]:focus,
+  input[type="number"]:focus,
+  textarea:focus,
+  select:focus {
+    @apply border-thynkr-purple ring-2 ring-thynkr-purple/20 outline-none;
   }
 
   /* Icon color inheritance */

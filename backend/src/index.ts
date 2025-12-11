@@ -24,6 +24,7 @@ import courseFileAIRoutes from './routes/course-file-ai.routes';
 import studyPackRoutes from './routes/study-pack.routes';
 import ttsRoutes from './routes/tts.routes';
 import courseStudyRoutes from './routes/course-study.routes';
+import oauthRoutes from './routes/oauth.routes';
 import { errorHandler } from './middleware/error-handler';
 
 /**
@@ -112,6 +113,9 @@ async function start() {
 
     // Routes
     server.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
+
+    // OAuth routes (no /api prefix - frontend expects /auth/google, /auth/apple)
+    await server.register(oauthRoutes, { prefix: '/auth' });
 
     await server.register(authRoutes, { prefix: '/api/auth' });
     await server.register(userRoutes, { prefix: '/api/users' });

@@ -4,7 +4,6 @@
 // The TutorChat component and its associated logic have been removed.
 import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
@@ -105,7 +104,7 @@ function SourcesDisplay({ sources }: { sources: SourceReference[] }) {
                   {Math.round(source.relevance * 100)}% match
                 </span>
               </div>
-              <p className="text-xs text-gray-600 dark:text-gray-400 italic line-clamp-3">
+              <p className="text-xs text-slate-600 dark:text-slate-400 italic line-clamp-3">
                 "{source.excerpt}"
               </p>
             </div>
@@ -675,11 +674,7 @@ export default function TutorChat() {
   // Show loading or nothing while redirecting non-Premium users
   if (!user) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex h-[calc(100vh-4rem)] bg-gray-50 dark:bg-[#1E293B]"
-      >
+      <div className="flex h-[calc(100vh-4rem)] bg-gray-50 dark:bg-[#1E293B]">
         {/* Sidebar skeleton */}
         <div className="hidden md:flex w-72 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-gray-700 flex-col p-4 space-y-4">
           <Skeleton className="h-10 w-full rounded-lg" />
@@ -704,7 +699,7 @@ export default function TutorChat() {
             <Skeleton className="h-12 w-full rounded-xl" />
           </div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
@@ -713,7 +708,7 @@ export default function TutorChat() {
       <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-[#1E293B]">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Premium Feature</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-slate-600 dark:text-slate-300 mb-6">
             AI Tutor is only available to Premium members.
           </p>
           <button
@@ -736,7 +731,7 @@ export default function TutorChat() {
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
               Start a new Tutor Chat
             </h3>
-            <p className="text-base text-gray-600 dark:text-gray-400 mb-5">
+            <p className="text-base text-slate-600 dark:text-slate-300 mb-5">
               Select one or more study files to ground the AI tutor.
             </p>
             <div className="flex-1 max-h-72 overflow-y-auto space-y-2">
@@ -1011,11 +1006,8 @@ export default function TutorChat() {
           key={`messages-container-${displayedMessages.length}-${renderNudge}`}
         >
           {displayedMessages.map((message, index) => (
-            <motion.div
+            <div
               key={`${message.id || 'no-id'}-${message.createdAt || index}`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25, delay: index * 0.02 }}
               className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
             >
               {/* Avatar */}
@@ -1064,16 +1056,12 @@ export default function TutorChat() {
                   <SourcesDisplay sources={message.sources} />
                 )}
               </div>
-            </motion.div>
+            </div>
           ))}
 
           {/* Streaming message with typing indicator */}
           {isStreaming && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex gap-3 flex-row"
-            >
+            <div className="flex gap-3 flex-row">
               {/* AI Avatar */}
               <div className="flex-shrink-0">
                 <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
@@ -1089,23 +1077,11 @@ export default function TutorChat() {
                       <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>{streamingMessage}</ReactMarkdown>
                     </div>
                   ) : (
-                    /* Typing indicator - three dots animation */
+                    /* Typing indicator - simple dots */
                     <div className="flex items-center gap-1 py-1 px-1">
-                      <motion.div
-                        className="w-2 h-2 bg-blue-400 rounded-full"
-                        animate={{ y: [0, -6, 0] }}
-                        transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
-                      />
-                      <motion.div
-                        className="w-2 h-2 bg-blue-500 rounded-full"
-                        animate={{ y: [0, -6, 0] }}
-                        transition={{ duration: 0.6, repeat: Infinity, delay: 0.15 }}
-                      />
-                      <motion.div
-                        className="w-2 h-2 bg-blue-600 rounded-full"
-                        animate={{ y: [0, -6, 0] }}
-                        transition={{ duration: 0.6, repeat: Infinity, delay: 0.3 }}
-                      />
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.15s' }} />
+                      <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" style={{ animationDelay: '0.3s' }} />
                     </div>
                   )}
                 </div>
@@ -1115,23 +1091,19 @@ export default function TutorChat() {
                 {/* Show sources while streaming if available */}
                 {streamingSources.length > 0 && <SourcesDisplay sources={streamingSources} />}
               </div>
-            </motion.div>
+            </div>
           )}
 
           {/* Empty state */}
           {!currentSession && sessions.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col items-center justify-center h-full text-center"
-            >
+            <div className="flex flex-col items-center justify-center h-full text-center">
               <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center mb-4">
                 <MessageCircle className="w-8 h-8 text-blue-500" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 Welcome to AI Tutor
               </h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md leading-relaxed">
+              <p className="text-slate-600 dark:text-slate-300 mb-6 max-w-md leading-relaxed">
                 Start a new chat to get help with your studies. I can answer questions, explain
                 concepts, and help you understand your materials.
               </p>
@@ -1141,18 +1113,14 @@ export default function TutorChat() {
               >
                 Start New Chat
               </button>
-            </motion.div>
+            </div>
           )}
 
           <div ref={messagesEndRef} />
 
           {/* Jump to latest button */}
           {!isAtBottom && hasNewMessages && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="absolute bottom-4 right-4"
-            >
+            <div className="absolute bottom-4 right-4">
               <button
                 onClick={() => {
                   scrollChatToBottom(true);
@@ -1162,7 +1130,7 @@ export default function TutorChat() {
               >
                 Jump to latest
               </button>
-            </motion.div>
+            </div>
           )}
         </div>
 

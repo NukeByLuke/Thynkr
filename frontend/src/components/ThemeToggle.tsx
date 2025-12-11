@@ -1,6 +1,6 @@
 import { Moon, Sun } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useThemeStore } from '@/store/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface ThemeToggleProps {
   showLabel?: boolean;
@@ -8,8 +8,12 @@ interface ThemeToggleProps {
 }
 
 export default function ThemeToggle({ showLabel = false, size = 'md' }: ThemeToggleProps) {
-  const { theme, toggleTheme } = useThemeStore();
+  const { theme, setThemeMode } = useTheme();
   const isDark = theme === 'dark';
+  
+  const toggleTheme = () => {
+    setThemeMode(isDark ? 'light' : 'dark');
+  };
 
   const iconSize = size === 'sm' ? 'w-4 h-4' : 'w-5 h-5';
   const buttonPadding = size === 'sm' ? 'p-1.5' : 'p-2';
