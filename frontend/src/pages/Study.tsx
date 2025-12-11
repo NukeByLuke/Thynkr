@@ -13,6 +13,7 @@ import NotesView from '@/features/study/NotesView';
 import FlashcardViewer from '@/features/study/FlashcardViewer';
 import QuizPlayer from '@/features/study/QuizPlayer';
 import EmptyState from '@/components/ui/EmptyState';
+import GenerationLoader from '@/components/ui/GenerationLoader';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -400,15 +401,19 @@ export default function Study() {
           );
         }
         return (
-          <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">No summary generated yet</p>
-            <button
-              onClick={() => generateSummaryMutation.mutate({ fileId: selectedFile.id })}
-              disabled={generateSummaryMutation.isPending}
-              className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
-            >
-              {generateSummaryMutation.isPending ? 'Generating...' : 'Generate Summary'}
-            </button>
+          <div className="text-center py-12 space-y-6">
+            <GenerationLoader isVisible={generateSummaryMutation.isPending} />
+            {!generateSummaryMutation.isPending && (
+              <>
+                <p className="text-gray-600 mb-4">No summary generated yet</p>
+                <button
+                  onClick={() => generateSummaryMutation.mutate({ fileId: selectedFile.id })}
+                  className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
+                >
+                  Generate Summary
+                </button>
+              </>
+            )}
           </div>
         );
 
@@ -426,15 +431,19 @@ export default function Study() {
           );
         }
         return (
-          <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">No notes generated yet</p>
-            <button
-              onClick={() => generateNotesMutation.mutate({ fileId: selectedFile.id })}
-              disabled={generateNotesMutation.isPending}
-              className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
-            >
-              {generateNotesMutation.isPending ? 'Generating...' : 'Generate Notes'}
-            </button>
+          <div className="text-center py-12 space-y-6">
+            <GenerationLoader isVisible={generateNotesMutation.isPending} />
+            {!generateNotesMutation.isPending && (
+              <>
+                <p className="text-gray-600 mb-4">No notes generated yet</p>
+                <button
+                  onClick={() => generateNotesMutation.mutate({ fileId: selectedFile.id })}
+                  className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
+                >
+                  Generate Notes
+                </button>
+              </>
+            )}
           </div>
         );
 
@@ -447,30 +456,34 @@ export default function Study() {
           return <FlashcardViewer cards={set.cards} title={set.title} />;
         }
         return (
-          <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">No flashcards yet</p>
-            <div className="max-w-xs mx-auto mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Cards: {numCards}
-              </label>
-              <input
-                type="range"
-                min="10"
-                max="50"
-                value={numCards}
-                onChange={(e) => setNumCards(Number(e.target.value))}
-                className="w-full"
-              />
-            </div>
-            <button
-              onClick={() =>
-                generateFlashcardsMutation.mutate({ fileId: selectedFile.id, numCards })
-              }
-              disabled={generateFlashcardsMutation.isPending}
-              className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
-            >
-              {generateFlashcardsMutation.isPending ? 'Generating...' : 'Generate Flashcards'}
-            </button>
+          <div className="text-center py-12 space-y-6">
+            <GenerationLoader isVisible={generateFlashcardsMutation.isPending} />
+            {!generateFlashcardsMutation.isPending && (
+              <>
+                <p className="text-gray-600 mb-4">No flashcards yet</p>
+                <div className="max-w-xs mx-auto mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Cards: {numCards}
+                  </label>
+                  <input
+                    type="range"
+                    min="10"
+                    max="50"
+                    value={numCards}
+                    onChange={(e) => setNumCards(Number(e.target.value))}
+                    className="w-full"
+                  />
+                </div>
+                <button
+                  onClick={() =>
+                    generateFlashcardsMutation.mutate({ fileId: selectedFile.id, numCards })
+                  }
+                  className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
+                >
+                  Generate Flashcards
+                </button>
+              </>
+            )}
           </div>
         );
 
@@ -506,8 +519,58 @@ export default function Study() {
                   {quiz.title} • {quiz.questions.length} questions
                 </button>
               ))}
-              <div className="pt-4 border-t text-center">
-                <p className="mb-4">Generate new quiz</p>
+              <div className="pt-4 border-t text-center space-y-6">
+                <GenerationLoader isVisible={generateQuizMutation.isPending} />
+                {!generateQuizMutation.isPending && (
+                  <>
+                    <p className="mb-4">Generate new quiz</p>
+                    <div className="max-w-xs mx-auto space-y-4 mb-4">
+                      <div>
+                        <label className="block text-sm mb-2">Questions: {numQuestions}</label>
+                        <input
+                          type="range"
+                          min="5"
+                          max="20"
+                          value={numQuestions}
+                          onChange={(e) => setNumQuestions(Number(e.target.value))}
+                          className="w-full"
+                        />
+                      </div>
+                      <select
+                        value={quizDifficulty}
+                        onChange={(e) => setQuizDifficulty(e.target.value as any)}
+                        className="w-full px-3 py-2 border rounded-lg"
+                      >
+                        <option value="EASY">Easy</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="HARD">Hard</option>
+                      </select>
+                    </div>
+                    <button
+                      onClick={() =>
+                        generateQuizMutation.mutate({
+                          fileId: selectedFile.id,
+                          numQuestions,
+                          difficulty: quizDifficulty,
+                        })
+                      }
+                      className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
+                    >
+                      Generate Quiz
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div className="text-center py-12 space-y-6">
+            <GenerationLoader isVisible={generateQuizMutation.isPending} />
+            {!generateQuizMutation.isPending && (
+              <>
+                <p className="text-gray-600 mb-4">No quizzes yet</p>
                 <div className="max-w-xs mx-auto space-y-4 mb-4">
                   <div>
                     <label className="block text-sm mb-2">Questions: {numQuestions}</label>
@@ -538,54 +601,12 @@ export default function Study() {
                       difficulty: quizDifficulty,
                     })
                   }
-                  disabled={generateQuizMutation.isPending}
                   className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
                 >
-                  {generateQuizMutation.isPending ? 'Generating...' : 'Generate Quiz'}
+                  Generate Quiz
                 </button>
-              </div>
-            </div>
-          );
-        }
-
-        return (
-          <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">No quizzes yet</p>
-            <div className="max-w-xs mx-auto space-y-4 mb-4">
-              <div>
-                <label className="block text-sm mb-2">Questions: {numQuestions}</label>
-                <input
-                  type="range"
-                  min="5"
-                  max="20"
-                  value={numQuestions}
-                  onChange={(e) => setNumQuestions(Number(e.target.value))}
-                  className="w-full"
-                />
-              </div>
-              <select
-                value={quizDifficulty}
-                onChange={(e) => setQuizDifficulty(e.target.value as any)}
-                className="w-full px-3 py-2 border rounded-lg"
-              >
-                <option value="EASY">Easy</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="HARD">Hard</option>
-              </select>
-            </div>
-            <button
-              onClick={() =>
-                generateQuizMutation.mutate({
-                  fileId: selectedFile.id,
-                  numQuestions,
-                  difficulty: quizDifficulty,
-                })
-              }
-              disabled={generateQuizMutation.isPending}
-              className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
-            >
-              {generateQuizMutation.isPending ? 'Generating...' : 'Generate Quiz'}
-            </button>
+              </>
+            )}
           </div>
         );
     }
