@@ -92,6 +92,9 @@ services:
       retries: 3
 
   # Frontend - React SPA built with Vite, served via Nginx
+  # NOTE: No volume mounts to prevent shadowing of built assets
+  # The container serves files from its internal /usr/share/nginx/html
+  # built during docker build, not from local filesystem
   frontend:
     build:
       context: ./frontend

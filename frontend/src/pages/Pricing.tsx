@@ -205,10 +205,10 @@ export default function Pricing() {
             <h1 className="text-5xl md:text-6xl font-bold text-slate-900 dark:text-white mb-6">
               Invest in Your <span className="gradient-text">Success</span>
             </h1>
-            <p className="text-xl text-slate-600 dark:text-slate-300 mb-3 leading-relaxed">
+            <p className="text-xl text-slate-600 dark:text-slate-100 mb-3 leading-relaxed">
               Choose the plan that fits your learning goals — upgrade anytime.
             </p>
-            <p className="text-base text-slate-500 dark:text-slate-400 mb-10">
+            <p className="text-base text-slate-500 dark:text-slate-200 mb-10">
               Every plan includes AI-powered study tools.
             </p>
 
@@ -219,7 +219,7 @@ export default function Pricing() {
                 className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
                   billingCycle === 'monthly'
                     ? 'bg-gradient-to-r from-brand-500 to-accent-500 text-white shadow-glow-brand'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-700/50'
+                    : 'text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-700/50'
                 }`}
               >
                 Monthly
@@ -229,7 +229,7 @@ export default function Pricing() {
                 className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${
                   billingCycle === 'yearly'
                     ? 'bg-gradient-to-r from-brand-500 to-accent-500 text-white shadow-glow-brand'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-700/50'
+                    : 'text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-700/50'
                 }`}
               >
                 Yearly
@@ -336,7 +336,7 @@ export default function Pricing() {
                     <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
                       {plan.name}
                     </h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                    <p className="text-sm text-slate-600 dark:text-slate-100 leading-relaxed">
                       {plan.description}
                     </p>
                   </div>
@@ -347,12 +347,12 @@ export default function Pricing() {
                       <span className="text-5xl font-bold text-slate-900 dark:text-white">
                         ${formatPrice(price)}
                       </span>
-                      <span className="text-slate-500 dark:text-slate-300 font-medium">/mo</span>
+                      <span className="text-slate-500 dark:text-slate-100 font-medium">/mo</span>
                     </div>
                     <div className="h-12 flex flex-col justify-center">
                       {billingCycle === 'yearly' && plan.monthlyPrice > 0 ? (
                         <div className="space-y-0.5 animate-fade-in">
-                          <p className="text-sm text-slate-600 dark:text-slate-300">
+                          <p className="text-sm text-slate-600 dark:text-slate-100">
                             ${yearlyTotal.toFixed(2)} billed yearly
                           </p>
                           <p className="text-sm text-green-600 dark:text-green-400 font-semibold">
@@ -360,11 +360,11 @@ export default function Pricing() {
                           </p>
                         </div>
                       ) : plan.monthlyPrice === 0 ? (
-                        <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">
+                        <p className="text-sm text-slate-600 dark:text-slate-100 font-medium">
                           Free forever
                         </p>
                       ) : (
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Billed monthly</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-200">Billed monthly</p>
                       )}
                     </div>
                   </div>
@@ -397,8 +397,8 @@ export default function Pricing() {
                         <span
                           className={`text-sm ${
                             feature.included
-                              ? 'text-slate-700 dark:text-slate-200'
-                              : 'text-slate-600 dark:text-slate-400'
+                              ? 'text-slate-700 dark:text-slate-100'
+                              : 'text-slate-500 dark:text-slate-200'
                           } ${feature.highlight ? 'font-medium' : ''}`}
                         >
                           {feature.text}
@@ -414,14 +414,14 @@ export default function Pricing() {
                         ? 'primary'
                         : plan.id === 'standard'
                           ? 'primary'
-                          : 'outline'
+                          : 'secondary'
                     }
                     fullWidth
                     onClick={() => handleSelectPlan(plan)}
                     disabled={isCurrent || isLoading === plan.id}
                     className={`mt-auto py-3 text-base font-semibold transition-all duration-200 ${
-                      isCurrent ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'
-                    } ${plan.id === 'premium' ? 'bg-gradient-to-r from-brand-600 to-accent-600 hover:from-brand-700 hover:to-accent-700 border-0' : ''}`}
+                      isCurrent ? 'opacity-70 cursor-not-allowed' : 'hover:scale-[1.02]'
+                    } ${plan.id === 'premium' ? 'bg-gradient-to-r from-brand-600 to-accent-600 hover:from-brand-700 hover:to-accent-700 border-0 text-white' : ''} ${plan.id === 'basic' ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border-0' : ''}`}
                   >
                     {isLoading === plan.id ? (
                       <span className="flex items-center justify-center gap-2">
@@ -452,7 +452,7 @@ export default function Pricing() {
                   </Button>
 
                   {/* Microcopy */}
-                  <p className="mt-3 text-xs text-center text-slate-500 dark:text-slate-400">
+                  <p className="mt-3 text-xs text-center text-slate-500 dark:text-slate-100">
                     {plan.id === 'basic' ? 'No credit card required.' : 'Cancel anytime.'}
                   </p>
                 </div>
@@ -476,7 +476,7 @@ export default function Pricing() {
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
                   📈 Faster Learning
                 </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                <p className="text-sm text-slate-600 dark:text-slate-100 leading-relaxed">
                   AI-powered tools help you learn more in less time with personalized study
                   materials.
                 </p>
@@ -490,7 +490,7 @@ export default function Pricing() {
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
                   🧠 Smarter Notes
                 </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                <p className="text-sm text-slate-600 dark:text-slate-100 leading-relaxed">
                   Transform your notes into flashcards, summaries, and quizzes automatically.
                 </p>
               </div>
@@ -503,7 +503,7 @@ export default function Pricing() {
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
                   ⚡ More Power
                 </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                <p className="text-sm text-slate-600 dark:text-slate-100 leading-relaxed">
                   Unlimited uploads, AI requests, and exclusive features to supercharge your
                   studies.
                 </p>
@@ -531,10 +531,10 @@ export default function Pricing() {
 
           {/* FAQ or Additional Info */}
           <div className="mt-16 text-center">
-            <p className="text-slate-600 dark:text-slate-300 mb-4">
+            <p className="text-slate-600 dark:text-slate-100 mb-4">
               All plans include a 7-day money-back guarantee. Cancel anytime.
             </p>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-sm text-slate-500 dark:text-slate-200">
               Questions? Contact us at{' '}
               <a
                 href="mailto:support@thynkr.com"
