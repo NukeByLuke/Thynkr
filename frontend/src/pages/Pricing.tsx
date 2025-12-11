@@ -398,7 +398,7 @@ export default function Pricing() {
                           className={`text-sm ${
                             feature.included
                               ? 'text-slate-700 dark:text-slate-200'
-                              : 'text-slate-500 dark:text-slate-400'
+                              : 'text-slate-600 dark:text-slate-400'
                           } ${feature.highlight ? 'font-medium' : ''}`}
                         >
                           {feature.text}
