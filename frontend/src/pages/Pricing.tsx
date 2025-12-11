@@ -316,7 +316,7 @@ export default function Pricing() {
                 if (plan.id === 'premium') {
                   return 'bg-gradient-to-br from-brand-100 to-accent-100 dark:from-brand-900/50 dark:to-accent-900/50 text-brand-600 dark:text-brand-400';
                 }
-                return 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400';
+                return 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400';
               };
 
               return (
@@ -390,15 +390,15 @@ export default function Pricing() {
                             />
                           </div>
                         ) : (
-                          <div className="flex-shrink-0 w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                            <X className="w-3 h-3 text-gray-400 dark:text-gray-500" />
+                          <div className="flex-shrink-0 w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                            <X className="w-3 h-3 text-slate-400 dark:text-slate-500" />
                           </div>
                         )}
                         <span
                           className={`text-sm ${
                             feature.included
                               ? 'text-slate-700 dark:text-slate-200'
-                              : 'text-slate-400 dark:text-slate-500'
+                              : 'text-slate-500 dark:text-slate-400'
                           } ${feature.highlight ? 'font-medium' : ''}`}
                         >
                           {feature.text}
