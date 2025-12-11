@@ -9,6 +9,7 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'ko', label: 'Korean' },
   { code: 'zh', label: 'Chinese (Simplified)' },
   { code: 'hi', label: 'Hindi' },
+  { code: 'pa', label: 'Punjabi' },
   { code: 'ar', label: 'Arabic' },
 ];
 
