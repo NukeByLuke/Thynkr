@@ -1,28 +1,15 @@
 import { useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTTS, TTS_VOICES, TTS_SPEEDS, TTSVoice } from '@/contexts/TTSContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Moon, Sun, Monitor, Globe, Volume2, Play, Loader2 } from 'lucide-react';
-
-const SUPPORTED_LANGUAGES = [
-  { code: 'en', label: 'English' },
-  { code: 'es', label: 'Español (Spanish)' },
-  { code: 'fr', label: 'Français (French)' },
-  { code: 'de', label: 'Deutsch (German)' },
-  { code: 'it', label: 'Italiano (Italian)' },
-  { code: 'pt', label: 'Português (Portuguese)' },
-  { code: 'zh', label: '中文 (Chinese)' },
-  { code: 'ja', label: '日本語 (Japanese)' },
-  { code: 'ko', label: '한국어 (Korean)' },
-  { code: 'ar', label: 'العربية (Arabic)' },
-  { code: 'hi', label: 'हिन्दी (Hindi)' },
-  { code: 'ru', label: 'Русский (Russian)' },
-];
+import LanguageSelector from './LanguageSelector';
 
 export default function GeneralSettings() {
+  const { user } = useAuth();
   const { themeMode, setThemeMode } = useTheme();
   const { voice, speed, setVoice, setSpeed, play, isLoading } = useTTS();
   const [testPlaying, setTestPlaying] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
 
   const handleTestVoice = async () => {
     setTestPlaying(true);
@@ -146,25 +133,7 @@ export default function GeneralSettings() {
           Choose your preferred language for AI-generated content
         </p>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Content Language
-          </label>
-          <select
-            value={selectedLanguage}
-            onChange={(e) => setSelectedLanguage(e.target.value)}
-            className="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-          >
-            {SUPPORTED_LANGUAGES.map((lang) => (
-              <option key={lang.code} value={lang.code}>
-                {lang.label}
-              </option>
-            ))}
-          </select>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-            AI-generated summaries, flashcards, and quizzes will be created in this language
-          </p>
-        </div>
+        <LanguageSelector value={user?.preferredLanguage || 'en'} />
       </div>
 
       {/* TTS Settings */}
