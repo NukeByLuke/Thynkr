@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Sidebar, { NavigationSection } from '@/components/Sidebar';
+import MobileHeader from '@/components/MobileHeader';
 import {
   BookOpen,
   FolderOpen,
@@ -9,8 +10,6 @@ import {
   Settings,
   LibraryBig,
   TrendingUp,
-  Menu,
-  X,
   Home,
   DollarSign,
 } from 'lucide-react';
@@ -50,9 +49,12 @@ export default function DashboardLayout() {
 
   return (
     // Container: Full screen, no overflow
-    <div className="h-screen w-full overflow-hidden bg-slate-50 dark:bg-[#020617]">
+    <div className="h-screen w-full overflow-hidden bg-slate-50 dark:bg-[#020617] flex flex-col">
+      {/* Mobile Header - Only visible on small screens */}
+      <MobileHeader onMenuClick={() => setIsMobileMenuOpen(true)} />
+
       {/* Layout Grid with padding for floating effect */}
-      <div className="flex h-full p-3 gap-3">
+      <div className="flex flex-1 p-0 lg:p-3 gap-3 overflow-hidden">
         {/* Left Panel (Sidebar Area) - Hidden on mobile */}
         <div className="hidden lg:block w-[280px] flex-shrink-0 h-full">
           <Sidebar sections={navigationSections} />
@@ -66,18 +68,6 @@ export default function DashboardLayout() {
         </div>
       </div>
 
-      {/* Mobile Hamburger Button */}
-      <button
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-6 left-6 z-50 p-2.5 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-xl border border-slate-200/60 dark:border-slate-800/50 shadow-lg transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800/90"
-      >
-        {isMobileMenuOpen ? (
-          <X className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-        ) : (
-          <Menu className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-        )}
-      </button>
-
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
         <>
@@ -87,7 +77,7 @@ export default function DashboardLayout() {
             className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity"
           />
           {/* Floating Mobile Sidebar */}
-          <div className="lg:hidden fixed left-3 top-3 bottom-3 w-[280px] z-50">
+          <div className="lg:hidden fixed left-3 top-16 bottom-3 w-[280px] z-50">
             <Sidebar
               sections={navigationSections}
               showCloseButton
