@@ -102,16 +102,18 @@ export class AIService {
     }
 
     try {
+      const languageInstruction = this.buildLanguageInstruction(normalizedLanguage);
+      
       const completion = await this.openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: `You are an expert at creating concise, clear summaries of educational content. All responses must be written in the locale "${normalizedLanguage}".`,
+            content: `You are an expert at creating concise, clear summaries of educational content.\n\n${languageInstruction}`,
           },
           {
             role: 'user',
-            content: `Please provide a comprehensive but concise summary of the following text in the "${normalizedLanguage}" language. Focus on the main ideas, key concepts, and important conclusions:\n\n${preparedText}`,
+            content: `Please provide a comprehensive but concise summary of the following text. Focus on the main ideas, key concepts, and important conclusions:\n\n${preparedText}`,
           },
         ],
         temperature: 0.7,
@@ -144,16 +146,18 @@ export class AIService {
     }
 
     try {
+      const languageInstruction = this.buildLanguageInstruction(normalizedLanguage);
+      
       const completion = await this.openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: `You are an expert at extracting key information and creating study notes from educational content. Respond strictly in the locale "${normalizedLanguage}".`,
+            content: `You are an expert at extracting key information and creating study notes from educational content.\n\n${languageInstruction}`,
           },
           {
             role: 'user',
-            content: `Please create comprehensive study notes from the following text in the "${normalizedLanguage}" language. Include:
+            content: `Please create comprehensive study notes from the following text. Include:
 1. A list of 5-10 key points (bullet points)
 2. Detailed notes covering all important concepts
 
@@ -210,12 +214,14 @@ ${preparedText}`,
     };
 
     try {
+      const languageInstruction = this.buildLanguageInstruction(normalizedLanguage);
+      
       const completion = await this.openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: `You are an expert at creating educational quizzes from study materials. All content must be produced in the locale "${normalizedLanguage}".`,
+            content: `You are an expert at creating educational quizzes from study materials.\n\n${languageInstruction}`,
           },
           {
             role: 'user',
@@ -238,8 +244,6 @@ Return the response in JSON format:
     }
   ]
 }
-
-All prompts, questions, options, and explanations must be written in the "${normalizedLanguage}" language.
 
 Text:
 ${preparedText}`,
@@ -280,12 +284,14 @@ ${preparedText}`,
     }
 
     try {
+      const languageInstruction = this.buildLanguageInstruction(normalizedLanguage);
+      
       const completion = await this.openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: `You are an expert at creating effective study flashcards from educational content. Provide all output in the locale "${normalizedLanguage}".`,
+            content: `You are an expert at creating effective study flashcards from educational content.\n\n${languageInstruction}`,
           },
           {
             role: 'user',
@@ -304,8 +310,6 @@ Return the response in JSON format:
     }
   ]
 }
-
-Ensure both sides of every flashcard are written in the "${normalizedLanguage}" language.
 
 Text:
 ${preparedText}`,
@@ -362,6 +366,74 @@ ${preparedText}`,
     }
 
     return normalized;
+  }
+
+  /**
+   * Get human-readable language name from language code
+   */
+  private getLanguageName(languageCode: string): string {
+    const languageMap: Record<string, string> = {
+      'en': 'English',
+      'es': 'Spanish',
+      'fr': 'French',
+      'de': 'German',
+      'it': 'Italian',
+      'pt': 'Portuguese',
+      'pt-br': 'Brazilian Portuguese',
+      'pt-pt': 'European Portuguese',
+      'zh': 'Chinese',
+      'zh-cn': 'Simplified Chinese',
+      'zh-tw': 'Traditional Chinese',
+      'ja': 'Japanese',
+      'ko': 'Korean',
+      'vi': 'Vietnamese',
+      'th': 'Thai',
+      'id': 'Indonesian',
+      'ms': 'Malay',
+      'hi': 'Hindi',
+      'ar': 'Arabic',
+      'he': 'Hebrew',
+      'tr': 'Turkish',
+      'ru': 'Russian',
+      'pl': 'Polish',
+      'cs': 'Czech',
+      'hu': 'Hungarian',
+      'ro': 'Romanian',
+      'uk': 'Ukrainian',
+      'bg': 'Bulgarian',
+      'sv': 'Swedish',
+      'no': 'Norwegian',
+      'da': 'Danish',
+      'fi': 'Finnish',
+      'nl': 'Dutch',
+      'el': 'Greek',
+      'ca': 'Catalan',
+      'sk': 'Slovak',
+      'hr': 'Croatian',
+      'sr': 'Serbian',
+    };
+    return languageMap[languageCode.toLowerCase()] || languageCode;
+  }
+
+  /**
+   * Check if a language uses right-to-left text direction
+   * TODO: Frontend should handle RTL text alignment for these languages
+   */
+  private isRTLLanguage(languageCode: string): boolean {
+    const rtlLanguages = ['ar', 'he'];
+    return rtlLanguages.includes(languageCode.toLowerCase());
+  }
+
+  /**
+   * Build critical language instruction for system prompt
+   */
+  private buildLanguageInstruction(languageCode: string): string {
+    const languageName = this.getLanguageName(languageCode);
+    const rtlNote = this.isRTLLanguage(languageCode) 
+      ? ' Note: This is an RTL (right-to-left) language.' 
+      : '';
+    
+    return `CRITICAL OUTPUT INSTRUCTION: You must generate ALL content (summaries, questions, answers, notes, explanations) in the following language: ${languageName}.${rtlNote} Do not default to English unless the target language is English. Every single word of your response must be in ${languageName}.`;
   }
 
   /**
