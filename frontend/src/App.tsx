@@ -29,7 +29,7 @@ const Account = lazy(() => import('./pages/Account'));
 const Admin = lazy(() => import('./pages/Admin'));
 const Study = lazy(() => import('./pages/Study'));
 const Files = lazy(() => import('./pages/Files'));
-const Settings = lazy(() => import('./pages/Settings'));
+const Settings = lazy(() => import('./pages/SettingsPage'));
 const Courses = lazy(() => import('./pages/CoursesUnified'));
 const MyCourseDetail = lazy(() => import('./pages/MyCourseDetail'));
 const TutorChat = lazy(() => import('./pages/TutorChat'));

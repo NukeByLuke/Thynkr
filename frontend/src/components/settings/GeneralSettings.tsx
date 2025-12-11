@@ -1,0 +1,258 @@
+import { useState } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useTTS, TTS_VOICES, TTS_SPEEDS, TTSVoice } from '@/contexts/TTSContext';
+import { Moon, Sun, Monitor, Globe, Volume2, Play, Loader2 } from 'lucide-react';
+
+const SUPPORTED_LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'es', label: 'Español (Spanish)' },
+  { code: 'fr', label: 'Français (French)' },
+  { code: 'de', label: 'Deutsch (German)' },
+  { code: 'it', label: 'Italiano (Italian)' },
+  { code: 'pt', label: 'Português (Portuguese)' },
+  { code: 'zh', label: '中文 (Chinese)' },
+  { code: 'ja', label: '日本語 (Japanese)' },
+  { code: 'ko', label: '한국어 (Korean)' },
+  { code: 'ar', label: 'العربية (Arabic)' },
+  { code: 'hi', label: 'हिन्दी (Hindi)' },
+  { code: 'ru', label: 'Русский (Russian)' },
+];
+
+export default function GeneralSettings() {
+  const { themeMode, setThemeMode } = useTheme();
+  const { voice, speed, setVoice, setSpeed, play, isLoading } = useTTS();
+  const [testPlaying, setTestPlaying] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
+
+  const handleTestVoice = async () => {
+    setTestPlaying(true);
+    try {
+      await play({
+        id: 'tts-test',
+        title: 'Voice Test',
+        text: 'Hello! This is a preview of your selected voice and speed settings. Adjust them to find what works best for you.',
+      });
+    } finally {
+      setTestPlaying(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Theme Settings */}
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+          <Sun className="w-5 h-5" />
+          Theme Preferences
+        </h2>
+        <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
+          Choose how Thynkr looks to you
+        </p>
+
+        <div className="grid grid-cols-3 gap-3">
+          <button
+            onClick={() => setThemeMode('light')}
+            className={`p-4 rounded-lg border-2 transition-all ${
+              themeMode === 'light'
+                ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
+                : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
+            }`}
+          >
+            <Sun
+              className={`w-6 h-6 mx-auto mb-2 ${
+                themeMode === 'light'
+                  ? 'text-brand-600 dark:text-brand-400'
+                  : 'text-slate-600 dark:text-slate-400'
+              }`}
+            />
+            <p
+              className={`text-sm font-medium ${
+                themeMode === 'light'
+                  ? 'text-brand-700 dark:text-brand-300'
+                  : 'text-slate-700 dark:text-slate-300'
+              }`}
+            >
+              Light
+            </p>
+          </button>
+
+          <button
+            onClick={() => setThemeMode('dark')}
+            className={`p-4 rounded-lg border-2 transition-all ${
+              themeMode === 'dark'
+                ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
+                : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
+            }`}
+          >
+            <Moon
+              className={`w-6 h-6 mx-auto mb-2 ${
+                themeMode === 'dark'
+                  ? 'text-brand-600 dark:text-brand-400'
+                  : 'text-slate-600 dark:text-slate-400'
+              }`}
+            />
+            <p
+              className={`text-sm font-medium ${
+                themeMode === 'dark'
+                  ? 'text-brand-700 dark:text-brand-300'
+                  : 'text-slate-700 dark:text-slate-300'
+              }`}
+            >
+              Dark
+            </p>
+          </button>
+
+          <button
+            onClick={() => setThemeMode('system')}
+            className={`p-4 rounded-lg border-2 transition-all ${
+              themeMode === 'system'
+                ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
+                : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
+            }`}
+          >
+            <Monitor
+              className={`w-6 h-6 mx-auto mb-2 ${
+                themeMode === 'system'
+                  ? 'text-brand-600 dark:text-brand-400'
+                  : 'text-slate-600 dark:text-slate-400'
+              }`}
+            />
+            <p
+              className={`text-sm font-medium ${
+                themeMode === 'system'
+                  ? 'text-brand-700 dark:text-brand-300'
+                  : 'text-slate-700 dark:text-slate-300'
+              }`}
+            >
+              System
+            </p>
+          </button>
+        </div>
+
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-4">
+          {themeMode === 'system'
+            ? 'Automatically matches your operating system theme'
+            : `Theme is set to ${themeMode} mode regardless of system preference`}
+        </p>
+      </div>
+
+      {/* Language Settings */}
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+          <Globe className="w-5 h-5" />
+          Language Preferences
+        </h2>
+        <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
+          Choose your preferred language for AI-generated content
+        </p>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            Content Language
+          </label>
+          <select
+            value={selectedLanguage}
+            onChange={(e) => setSelectedLanguage(e.target.value)}
+            className="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+          >
+            {SUPPORTED_LANGUAGES.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.label}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+            AI-generated summaries, flashcards, and quizzes will be created in this language
+          </p>
+        </div>
+      </div>
+
+      {/* TTS Settings */}
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+          <Volume2 className="w-5 h-5" />
+          Voice Reader Settings
+        </h2>
+        <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
+          Customize how text-to-speech reads your study materials
+        </p>
+
+        <div className="space-y-6">
+          {/* Voice Selection */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+              Voice
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {TTS_VOICES.map((v) => (
+                <button
+                  key={v.id}
+                  onClick={() => setVoice(v.id as TTSVoice)}
+                  className={`p-3 rounded-lg border-2 text-left transition-all ${
+                    voice === v.id
+                      ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
+                      : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
+                  }`}
+                >
+                  <p
+                    className={`font-medium ${
+                      voice === v.id
+                        ? 'text-brand-700 dark:text-brand-300'
+                        : 'text-slate-900 dark:text-white'
+                    }`}
+                  >
+                    {v.name}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    {v.description}
+                  </p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Speed Selection */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+              Playback Speed
+            </label>
+            <div className="flex gap-2">
+              {TTS_SPEEDS.map((s) => (
+                <button
+                  key={s.value}
+                  onClick={() => setSpeed(s.value)}
+                  className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
+                    speed === s.value
+                      ? 'bg-brand-600 text-white'
+                      : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Test Voice Button */}
+          <div className="pt-2">
+            <button
+              onClick={handleTestVoice}
+              disabled={isLoading || testPlaying}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-lg hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all"
+            >
+              {isLoading || testPlaying ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Play className="w-4 h-4" />
+              )}
+              Test Voice
+            </button>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+              Hear a sample with your current voice and speed settings
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
