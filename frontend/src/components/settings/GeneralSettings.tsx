@@ -2,14 +2,17 @@ import { useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTTS, TTS_VOICES, TTS_SPEEDS, TTSVoice } from '@/contexts/TTSContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Moon, Sun, Monitor, Globe, Volume2, Play, Loader2 } from 'lucide-react';
+import { Moon, Sun, Monitor, Play, Loader2 } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
+import Switch from '@/components/Switch';
 
 export default function GeneralSettings() {
   const { user } = useAuth();
   const { themeMode, setThemeMode } = useTheme();
   const { voice, speed, setVoice, setSpeed, play, isLoading } = useTTS();
   const [testPlaying, setTestPlaying] = useState(false);
+  const [autoPlayAudio, setAutoPlayAudio] = useState(false);
+  const [darkModeSync, setDarkModeSync] = useState(themeMode === 'system');
 
   const handleTestVoice = async () => {
     setTestPlaying(true);
@@ -26,15 +29,37 @@ export default function GeneralSettings() {
 
   return (
     <div className="space-y-6">
+      {/* Preferences */}
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+        <h3 className="text-lg font-medium text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2 mb-6">
+          Preferences
+        </h3>
+
+        <div className="space-y-4">
+          <Switch
+            checked={darkModeSync}
+            onCheckedChange={(checked) => {
+              setDarkModeSync(checked);
+              setThemeMode(checked ? 'system' : 'light');
+            }}
+            label="Dark Mode System Sync"
+            description="Automatically match your system's theme preference"
+          />
+          
+          <Switch
+            checked={autoPlayAudio}
+            onCheckedChange={setAutoPlayAudio}
+            label="Auto-play Audio"
+            description="Automatically play text-to-speech when opening study materials"
+          />
+        </div>
+      </div>
+
       {/* Theme Settings */}
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-          <Sun className="w-5 h-5" />
+        <h3 className="text-lg font-medium text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2 mb-6">
           Theme Preferences
-        </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
-          Choose how Thynkr looks to you
-        </p>
+        </h3>
 
         <div className="grid grid-cols-3 gap-3">
           <button
@@ -125,26 +150,18 @@ export default function GeneralSettings() {
 
       {/* Language Settings */}
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-          <Globe className="w-5 h-5" />
+        <h3 className="text-lg font-medium text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2 mb-6">
           Language Preferences
-        </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
-          Choose your preferred language for AI-generated content
-        </p>
+        </h3>
 
         <LanguageSelector value={user?.preferredLanguage || 'en'} />
       </div>
 
       {/* TTS Settings */}
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-          <Volume2 className="w-5 h-5" />
+        <h3 className="text-lg font-medium text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2 mb-6">
           Voice Reader Settings
-        </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
-          Customize how text-to-speech reads your study materials
-        </p>
+        </h3>
 
         <div className="space-y-6">
           {/* Voice Selection */}

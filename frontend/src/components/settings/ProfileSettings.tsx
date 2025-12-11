@@ -1,9 +1,11 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { User, Image, Lock, Save, Trash2 } from 'lucide-react';
+import { User, Image, Lock, Save, Target } from 'lucide-react';
 import api from '@/lib/api';
+import SmartInput from '@/components/SmartInput';
+import SaveChangesBar from '@/components/SaveChangesBar';
 
 // Helper to build absolute URLs for files served by backend (/uploads/...)
 const API_BASE = (import.meta.env.VITE_API_URL as string) || '/api';
@@ -21,9 +23,23 @@ export default function ProfileSettings() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [username, setUsername] = useState(user?.username || '');
+  const [displayName, setDisplayName] = useState('');
+  const [studyGoal, setStudyGoal] = useState('5');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  // Track if form is dirty
+  const [isDirty, setIsDirty] = useState(false);
+
+  // Update isDirty when fields change
+  useEffect(() => {
+    const hasChanges = 
+      username !== (user?.username || '') ||
+      displayName !== '' ||
+      studyGoal !== '5';
+    setIsDirty(hasChanges);
+  }, [username, displayName, studyGoal, user?.username]);
 
   // Update profile mutation
   const updateProfileMutation = useMutation({
@@ -113,6 +129,17 @@ export default function ProfileSettings() {
     updateProfileMutation.mutate({ username });
   };
 
+  const handleSaveChanges = () => {
+    handleProfileUpdate();
+  };
+
+  const handleDiscardChanges = () => {
+    setUsername(user?.username || '');
+    setDisplayName('');
+    setStudyGoal('5');
+    setIsDirty(false);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -154,13 +181,9 @@ export default function ProfileSettings() {
     <div className="space-y-6">
       {/* Profile Information */}
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-          <User className="w-5 h-5" />
+        <h3 className="text-lg font-medium text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2 mb-6">
           Profile Information
-        </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
-          Update your personal details and how others see you
-        </p>
+        </h3>
 
         <div className="space-y-6">
           {/* Avatar Upload */}
@@ -219,13 +242,48 @@ export default function ProfileSettings() {
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Username
             </label>
-            <input
+            <SmartInput
+              icon={<User className="w-5 h-5" />}
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               placeholder="Enter your username"
             />
+          </div>
+
+          {/* Display Name */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Display Name
+            </label>
+            <SmartInput
+              type="text"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="Your display name (optional)"
+            />
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+              This is how other users will see your name
+            </p>
+          </div>
+
+          {/* Study Goal */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Study Goal (Hours/Week)
+            </label>
+            <SmartInput
+              icon={<Target className="w-5 h-5" />}
+              type="number"
+              min="1"
+              max="168"
+              value={studyGoal}
+              onChange={(e) => setStudyGoal(e.target.value)}
+              placeholder="e.g., 10"
+            />
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+              Set your weekly study hour target
+            </p>
           </div>
 
           {/* Save Button */}
@@ -244,10 +302,9 @@ export default function ProfileSettings() {
 
       {/* Change Password */}
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-          <Lock className="w-5 h-5" />
+        <h3 className="text-lg font-medium text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2 mb-6">
           Change Password
-        </h2>
+        </h3>
         <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
           Update your password to keep your account secure
         </p>
@@ -257,11 +314,11 @@ export default function ProfileSettings() {
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Current Password
             </label>
-            <input
+            <SmartInput
+              icon={<Lock className="w-5 h-5" />}
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               placeholder="Enter current password"
             />
           </div>
@@ -270,11 +327,11 @@ export default function ProfileSettings() {
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               New Password
             </label>
-            <input
+            <SmartInput
+              icon={<Lock className="w-5 h-5" />}
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               placeholder="Enter new password"
             />
           </div>
@@ -283,11 +340,11 @@ export default function ProfileSettings() {
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Confirm New Password
             </label>
-            <input
+            <SmartInput
+              icon={<Lock className="w-5 h-5" />}
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               placeholder="Confirm new password"
             />
           </div>
@@ -306,10 +363,9 @@ export default function ProfileSettings() {
 
       {/* Danger Zone */}
       <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-red-900 dark:text-red-400 mb-4 flex items-center gap-2">
-          <Trash2 className="w-5 h-5" />
+        <h3 className="text-lg font-medium text-red-900 dark:text-red-400 border-b border-red-200 dark:border-red-800 pb-2 mb-6">
           Danger Zone
-        </h2>
+        </h3>
 
         <div className="flex items-center justify-between">
           <div>
@@ -327,6 +383,14 @@ export default function ProfileSettings() {
           </button>
         </div>
       </div>
+
+      {/* Floating Save Changes Bar */}
+      <SaveChangesBar
+        isDirty={isDirty}
+        onSave={handleSaveChanges}
+        onDiscard={handleDiscardChanges}
+        isSaving={updateProfileMutation.isPending}
+      />
     </div>
   );
 }
