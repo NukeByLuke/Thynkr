@@ -5,7 +5,8 @@
 
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { LucideIcon, LogOut, ChevronRight } from 'lucide-react';
+import { LucideIcon, LogOut, ChevronRight, Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 // ============================================================================
 // NavItem Component
@@ -91,6 +92,39 @@ export function SectionHeader({ title }: SectionHeaderProps) {
 }
 
 // ============================================================================
+// CommandMenuTrigger Component
+// ============================================================================
+
+interface CommandMenuTriggerProps {
+  onClick?: () => void;
+}
+
+export function CommandMenuTrigger({ onClick }: CommandMenuTriggerProps) {
+  const [isMac, setIsMac] = useState(false);
+
+  useEffect(() => {
+    setIsMac(navigator.platform.toUpperCase().indexOf('MAC') >= 0);
+  }, []);
+
+  return (
+    <button
+      onClick={onClick}
+      className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm text-slate-500 hover:border-blue-300 dark:hover:border-blue-500/50 transition-colors group"
+    >
+      <div className="flex items-center gap-2">
+        <Search className="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition-colors" />
+        <span className="text-slate-400 group-hover:text-slate-500 dark:group-hover:text-slate-300 transition-colors">
+          Search...
+        </span>
+      </div>
+      <kbd className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium text-slate-400 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-sm">
+        {isMac ? '⌘' : 'Ctrl'} K
+      </kbd>
+    </button>
+  );
+}
+
+// ============================================================================
 // Sidebar Component
 // ============================================================================
 
@@ -161,6 +195,11 @@ export default function Sidebar({
             </button>
           )}
         </div>
+      </div>
+
+      {/* Command Menu Trigger */}
+      <div className="px-3 pt-3">
+        <CommandMenuTrigger />
       </div>
 
       {/* Navigation - Scrollable */}
