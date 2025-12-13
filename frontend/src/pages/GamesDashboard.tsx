@@ -6,6 +6,7 @@
 
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Gamepad2,
@@ -23,9 +24,14 @@ import {
 import { clsx } from 'clsx';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGameAccess } from '@/hooks/useGameAccess';
+import { UploadedFile } from '@/types/global';
 import Button from '@/components/ui/Button';
 import AnimatedPage from '@/components/AnimatedPage';
 import UpgradeModal from '@/components/UpgradeModal';
+import GameSetupModal, { GameConfig } from '@/components/GameSetupModal';
+
+// Local API URL definition
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 // =============================================================================
 // Types
@@ -386,6 +392,10 @@ export default function GamesDashboard() {
   useAuth(); // Ensure auth context is available
   const [activeTab, setActiveTab] = useState<TabValue>('solo');
 
+  // Setup modal state
+  const [showSetupModal, setShowSetupModal] = useState(false);
+  const [selectedGame, setSelectedGame] = useState<{ title: string; route: string } | null>(null);
+
   // Game access control
   const {
     tier,
@@ -403,6 +413,24 @@ export default function GamesDashboard() {
   // Determine if user is Pro
   const isPro = tier === 'PRO';
 
+  // Fetch user files for game setup
+  const getToken = () => localStorage.getItem('accessToken');
+  const { data: filesData } = useQuery({
+    queryKey: ['study-files'],
+    queryFn: async () => {
+      const response = await fetch(`${API_URL}/study/files`, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch files');
+      return response.json();
+    },
+    enabled: !!getToken(),
+  });
+
+  const userFiles: UploadedFile[] = filesData?.files || [];
+
   const handleJoinGame = useCallback(
     (pin: string) => {
       navigate(`/arcade/play/${pin}`);
@@ -410,31 +438,64 @@ export default function GamesDashboard() {
     [navigate]
   );
 
+  // Handle setup modal close
+  const handleSetupModalClose = useCallback(() => {
+    setShowSetupModal(false);
+    setSelectedGame(null);
+  }, []);
+
+  // Handle game start after setup
+  const handleGameStart = useCallback(
+    (config: GameConfig) => {
+      if (!selectedGame) return;
+      
+      // Consume credit for solo games
+      if (activeTab === 'solo') {
+        consumeCredit();
+      }
+      
+      // TODO: Pass game config to the route (via state or query params)
+      // For now, we'll navigate with the config in the location state
+      navigate(selectedGame.route, { 
+        state: { 
+          gameConfig: config 
+        } 
+      });
+      
+      // Close the setup modal
+      handleSetupModalClose();
+    },
+    [selectedGame, activeTab, consumeCredit, navigate, handleSetupModalClose]
+  );
+
   // Handle solo game play with access check
   const handleSoloPlay = useCallback(
-    (route: string) => {
+    (route: string, title: string) => {
       const result = checkSoloAccess();
       if (!result.allowed) {
         openUpgradeModal(result.reason);
         return;
       }
-      consumeCredit();
-      navigate(route);
+      // Open setup modal instead of directly navigating
+      setSelectedGame({ title, route });
+      setShowSetupModal(true);
     },
-    [checkSoloAccess, consumeCredit, navigate, openUpgradeModal]
+    [checkSoloAccess, openUpgradeModal]
   );
 
   // Handle multiplayer host with access check
   const handleHostPlay = useCallback(
-    (route: string) => {
+    (route: string, title: string) => {
       const result = checkHostAccess();
       if (!result.allowed) {
         openUpgradeModal(result.reason);
         return;
       }
-      navigate(route);
+      // Open setup modal instead of directly navigating
+      setSelectedGame({ title, route });
+      setShowSetupModal(true);
     },
-    [checkHostAccess, navigate, openUpgradeModal]
+    [checkHostAccess, openUpgradeModal]
   );
 
   return (
@@ -444,6 +505,15 @@ export default function GamesDashboard() {
         isOpen={showUpgradeModal}
         onClose={closeUpgradeModal}
         reason={upgradeReason}
+      />
+
+      {/* Game Setup Modal */}
+      <GameSetupModal
+        isOpen={showSetupModal}
+        onClose={handleSetupModalClose}
+        gameTitle={selectedGame?.title || ''}
+        onStartGame={handleGameStart}
+        userFiles={userFiles}
       />
 
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -504,7 +574,7 @@ export default function GamesDashboard() {
                       game={game}
                       isPro={isPro}
                       onAccessDenied={openUpgradeModal}
-                      onPlay={() => handleSoloPlay(game.route)}
+                      onPlay={() => handleSoloPlay(game.route, game.title)}
                     />
                   ))}
                 </div>
@@ -540,7 +610,7 @@ export default function GamesDashboard() {
                       isPro={isPro}
                       isMultiplayer
                       onAccessDenied={openUpgradeModal}
-                      onPlay={() => handleHostPlay(game.route)}
+                      onPlay={() => handleHostPlay(game.route, game.title)}
                     />
                   ))}
                 </div>
