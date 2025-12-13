@@ -482,6 +482,64 @@ ${preparedText}`,
   }
 
   /**
+   * Generate custom content based on a provided prompt
+   * Used for game generation and other flexible AI tasks
+   */
+  async generateCustomContent(prompt: string): Promise<string> {
+    const cacheKey = `custom_${this.hashString(prompt)}`;
+    const cached = cache.get<string>(cacheKey);
+
+    if (cached) {
+      logger.info('Returning cached custom content');
+      return cached;
+    }
+
+    try {
+      const sanitizedPrompt = this.sanitizeInput(prompt);
+      
+      if (sanitizedPrompt.length < 10) {
+        throw new Error('Prompt too short for meaningful generation');
+      }
+
+      const completion = await this.openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an AI assistant that generates educational content. Always respond with valid JSON in the exact format requested. Do not include any explanations outside the JSON.',
+          },
+          {
+            role: 'user',
+            content: sanitizedPrompt,
+          },
+        ],
+        max_tokens: MAX_OUTPUT_TOKENS,
+        temperature: 0.7,
+        top_p: 0.9,
+      });
+
+      const content = completion.choices[0]?.message?.content?.trim() || '';
+      
+      if (!content) {
+        throw new Error('Empty response from OpenAI');
+      }
+
+      // Cache the result
+      cache.set(cacheKey, content);
+      
+      logger.info('Custom content generated successfully', {
+        promptLength: sanitizedPrompt.length,
+        responseLength: content.length,
+      });
+
+      return content;
+    } catch (error) {
+      logger.error('Error generating custom content:', error);
+      throw new Error('Failed to generate custom content');
+    }
+  }
+
+  /**
    * Prepare text for AI processing with sanitization and truncation
    */
   private prepareText(text: string, maxChars: number = MAX_INPUT_CHARS): string {

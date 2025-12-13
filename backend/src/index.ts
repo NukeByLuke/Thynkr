@@ -26,6 +26,7 @@ import studyPackRoutes from './routes/study-pack.routes';
 import ttsRoutes from './routes/tts.routes';
 import courseStudyRoutes from './routes/course-study.routes';
 import oauthRoutes from './routes/oauth.routes';
+import gamesRoutes from './routes/games.routes';
 import { errorHandler } from './middleware/error-handler';
 
 /**
@@ -131,6 +132,7 @@ async function start() {
     await server.register(studyPackRoutes, { prefix: '/api' });
     await server.register(ttsRoutes, { prefix: '/api' });
     await server.register(courseStudyRoutes, { prefix: '/api' });
+    await server.register(gamesRoutes, { prefix: '/api' });
 
     // Error handler
     server.setErrorHandler(errorHandler);
