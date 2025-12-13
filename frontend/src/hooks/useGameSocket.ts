@@ -92,8 +92,13 @@ export function useGameSocket(options: UseGameSocketOptions = {}) {
     error: null,
   });
 
-  // Get socket URL from environment
+  // Get socket URL - use current origin for WebSocket (nginx will proxy to backend)
   const getSocketUrl = () => {
+    // In production/Docker, use current origin (nginx proxies /arcade to backend)
+    // In dev with Vite, use the API URL without /api
+    if (import.meta.env.PROD) {
+      return window.location.origin;
+    }
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
     return apiUrl.replace('/api', '');
   };
