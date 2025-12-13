@@ -22,8 +22,10 @@ import {
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useAuth } from '@/contexts/AuthContext';
+import { useGameAccess } from '@/hooks/useGameAccess';
 import Button from '@/components/ui/Button';
 import AnimatedPage from '@/components/AnimatedPage';
+import UpgradeModal from '@/components/UpgradeModal';
 
 // =============================================================================
 // Types
@@ -202,32 +204,40 @@ function TabSwitcher({ activeTab, onTabChange }: TabSwitcherProps) {
 interface GameCardProps {
   game: GameMode;
   isPro: boolean;
+  isMultiplayer?: boolean;
+  onAccessDenied: (reason: 'no_credits' | 'hosting_restricted') => void;
+  onPlay: () => void;
 }
 
-function GameCard({ game, isPro }: GameCardProps) {
-  const navigate = useNavigate();
+function GameCard({ game, isPro, isMultiplayer, onAccessDenied, onPlay }: GameCardProps) {
   const Icon = game.icon;
   const isLocked = game.tier === 'PRO' && !isPro;
-  const isDisabled = game.comingSoon || isLocked;
 
   const handleClick = () => {
-    if (!isDisabled) {
-      navigate(game.route);
+    if (game.comingSoon) return;
+    
+    // For locked PRO games, show upgrade modal
+    if (isLocked) {
+      onAccessDenied(isMultiplayer ? 'hosting_restricted' : 'no_credits');
+      return;
     }
+
+    // Call the access check callback first
+    onPlay();
   };
 
   return (
     <motion.button
       onClick={handleClick}
-      disabled={isDisabled}
-      whileHover={!isDisabled ? { scale: 1.02, y: -2 } : undefined}
-      whileTap={!isDisabled ? { scale: 0.98 } : undefined}
+      disabled={game.comingSoon}
+      whileHover={!game.comingSoon ? { scale: 1.02, y: -2 } : undefined}
+      whileTap={!game.comingSoon ? { scale: 0.98 } : undefined}
       className={clsx(
         'relative w-full p-6 rounded-2xl text-left',
         'bg-white dark:bg-slate-800',
         'border border-slate-200 dark:border-slate-700',
         'transition-shadow duration-200',
-        isDisabled
+        game.comingSoon
           ? 'opacity-60 cursor-not-allowed'
           : 'hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 cursor-pointer'
       )}
@@ -276,7 +286,7 @@ function GameCard({ game, isPro }: GameCardProps) {
       <p className="text-sm text-slate-500 dark:text-slate-400">{game.description}</p>
 
       {/* Play indicator */}
-      {!isDisabled && (
+      {!game.comingSoon && !isLocked && (
         <div className="mt-4 flex items-center gap-1 text-sm font-medium text-blue-600 dark:text-blue-400">
           <Play className="w-4 h-4" />
           <span>Play Now</span>
@@ -373,11 +383,25 @@ function JoinSessionCard({ onJoin }: JoinSessionCardProps) {
 
 export default function GamesDashboard() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  useAuth(); // Ensure auth context is available
   const [activeTab, setActiveTab] = useState<TabValue>('solo');
 
+  // Game access control
+  const {
+    tier,
+    creditsRemaining,
+    creditsTotal,
+    checkSoloAccess,
+    checkHostAccess,
+    consumeCredit,
+    showUpgradeModal,
+    upgradeReason,
+    openUpgradeModal,
+    closeUpgradeModal,
+  } = useGameAccess();
+
   // Determine if user is Pro
-  const isPro = user?.role && ['STANDARD', 'PREMIUM', 'ADMIN'].includes(user.role);
+  const isPro = tier === 'PRO';
 
   const handleJoinGame = useCallback(
     (pin: string) => {
@@ -386,18 +410,66 @@ export default function GamesDashboard() {
     [navigate]
   );
 
+  // Handle solo game play with access check
+  const handleSoloPlay = useCallback(
+    (route: string) => {
+      const result = checkSoloAccess();
+      if (!result.allowed) {
+        openUpgradeModal(result.reason);
+        return;
+      }
+      consumeCredit();
+      navigate(route);
+    },
+    [checkSoloAccess, consumeCredit, navigate, openUpgradeModal]
+  );
+
+  // Handle multiplayer host with access check
+  const handleHostPlay = useCallback(
+    (route: string) => {
+      const result = checkHostAccess();
+      if (!result.allowed) {
+        openUpgradeModal(result.reason);
+        return;
+      }
+      navigate(route);
+    },
+    [checkHostAccess, navigate, openUpgradeModal]
+  );
+
   return (
     <AnimatedPage>
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={closeUpgradeModal}
+        reason={upgradeReason}
+      />
+
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
         <div className="max-w-6xl mx-auto px-4 py-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-              Study Games
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400">
-              Active learning to boost retention.
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                  Study Games
+                </h1>
+                <p className="text-slate-500 dark:text-slate-400">
+                  Active learning to boost retention.
+                </p>
+              </div>
+
+              {/* Credits Badge (Free users only) */}
+              {tier === 'FREE' && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <Zap className="w-4 h-4 text-amber-500" />
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    {creditsRemaining}/{creditsTotal} plays left today
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Tab Switcher */}
@@ -427,7 +499,13 @@ export default function GamesDashboard() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {SOLO_GAMES.map((game) => (
-                    <GameCard key={game.id} game={game} isPro={!!isPro} />
+                    <GameCard
+                      key={game.id}
+                      game={game}
+                      isPro={isPro}
+                      onAccessDenied={openUpgradeModal}
+                      onPlay={() => handleSoloPlay(game.route)}
+                    />
                   ))}
                 </div>
               </motion.div>
@@ -456,7 +534,14 @@ export default function GamesDashboard() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {MULTIPLAYER_GAMES.map((game) => (
-                    <GameCard key={game.id} game={game} isPro={!!isPro} />
+                    <GameCard
+                      key={game.id}
+                      game={game}
+                      isPro={isPro}
+                      isMultiplayer
+                      onAccessDenied={openUpgradeModal}
+                      onPlay={() => handleHostPlay(game.route)}
+                    />
                   ))}
                 </div>
               </motion.div>
