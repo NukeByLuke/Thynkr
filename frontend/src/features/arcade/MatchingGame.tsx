@@ -1,25 +1,21 @@
 /**
  * MatchingGame Component
- * Single-player "Matching Rush" game - match terms with definitions
+ * Single-player "Matching Rush" game with clean, minimalist UI
+ * Features note-taking aesthetic with subtle interactions
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   Trophy,
   Clock,
-  Zap,
-  Crown,
   Check,
-  Play,
   Home,
   RefreshCw,
-  Lock,
+  ArrowLeft,
   Sparkles,
-  ArrowRight,
-  Timer,
-  Target,
+  Lock,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useAuth } from '@/contexts/AuthContext';
@@ -27,7 +23,9 @@ import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import AnimatedPage from '@/components/AnimatedPage';
 
-// ============ TYPES ============
+// =============================================================================
+// Types
+// =============================================================================
 
 interface MatchPair {
   id: string;
@@ -45,10 +43,12 @@ interface Card {
   isWrong: boolean;
 }
 
-type GameStatus = 'idle' | 'countdown' | 'playing' | 'paused' | 'won' | 'lost';
+type GameStatus = 'idle' | 'countdown' | 'playing' | 'won' | 'lost';
 type Difficulty = 'normal' | 'hard';
 
-// ============ SAMPLE DATA ============
+// =============================================================================
+// Sample Data
+// =============================================================================
 
 const SAMPLE_PAIRS: MatchPair[] = [
   { id: '1', term: 'Mitochondria', definition: 'Powerhouse of the cell' },
@@ -72,14 +72,20 @@ const HARD_MODE_PAIRS: MatchPair[] = [
   { id: '8', term: 'Nucleolus', definition: 'Produces ribosomal RNA' },
 ];
 
-// ============ CONSTANTS ============
+// =============================================================================
+// Constants
+// =============================================================================
 
 const FREE_DAILY_LIMIT = 3;
-const GAME_TIME_SECONDS = 60;
+const GAME_TIME_SECONDS = 45;
 const PAIRS_PER_GAME = 6;
 const STORAGE_KEY = 'thynkr_matching_games';
+const POINTS_PER_MATCH = 100;
+const TIME_BONUS_MULTIPLIER = 5;
 
-// ============ UTILITIES ============
+// =============================================================================
+// Utilities
+// =============================================================================
 
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
@@ -99,8 +105,7 @@ function getDailyGamesPlayed(): number {
     const data = localStorage.getItem(STORAGE_KEY);
     if (!data) return 0;
     const parsed = JSON.parse(data);
-    const today = getTodayKey();
-    return parsed[today] || 0;
+    return parsed[getTodayKey()] || 0;
   } catch {
     return 0;
   }
@@ -112,7 +117,6 @@ function incrementDailyGames(): void {
     const parsed = data ? JSON.parse(data) : {};
     const today = getTodayKey();
     parsed[today] = (parsed[today] || 0) + 1;
-    // Clean up old entries (keep only last 7 days)
     const keys = Object.keys(parsed).sort().slice(-7);
     const cleaned: Record<string, number> = {};
     keys.forEach((key) => (cleaned[key] = parsed[key]));
@@ -122,7 +126,9 @@ function incrementDailyGames(): void {
   }
 }
 
-// ============ COUNTDOWN OVERLAY ============
+// =============================================================================
+// Countdown Overlay
+// =============================================================================
 
 interface CountdownOverlayProps {
   count: number;
@@ -137,11 +143,7 @@ function CountdownOverlay({ count, onComplete }: CountdownOverlayProps) {
       onComplete();
       return;
     }
-
-    const timer = setTimeout(() => {
-      setCurrent(current - 1);
-    }, 1000);
-
+    const timer = setTimeout(() => setCurrent(current - 1), 1000);
     return () => clearTimeout(timer);
   }, [current, onComplete]);
 
@@ -149,7 +151,7 @@ function CountdownOverlay({ count, onComplete }: CountdownOverlayProps) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/95"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-white/95 dark:bg-slate-900/95"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -160,69 +162,24 @@ function CountdownOverlay({ count, onComplete }: CountdownOverlayProps) {
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 1.5, opacity: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
+          transition={{ duration: 0.5 }}
           className="text-center"
         >
-          <motion.span
-            className="text-[200px] font-bold bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 bg-clip-text text-transparent"
-            animate={{
-              textShadow: [
-                '0 0 20px rgba(59, 130, 246, 0.5)',
-                '0 0 60px rgba(59, 130, 246, 0.8)',
-                '0 0 20px rgba(59, 130, 246, 0.5)',
-              ],
-            }}
-            transition={{ duration: 0.5, repeat: Infinity }}
-          >
+          <span className="text-[150px] font-bold text-slate-900 dark:text-white">
             {current}
-          </motion.span>
-          <motion.p
-            className="text-2xl text-slate-400 mt-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            Match the pairs!
-          </motion.p>
+          </span>
+          <p className="text-xl text-slate-500 dark:text-slate-400 mt-2">
+            Get ready to match!
+          </p>
         </motion.div>
       </AnimatePresence>
     </motion.div>
   );
 }
 
-// ============ MATCH LINE ANIMATION ============
-
-interface MatchLineProps {
-  from: { x: number; y: number };
-  to: { x: number; y: number };
-}
-
-function MatchLine({ from, to }: MatchLineProps) {
-  return (
-    <svg className="absolute inset-0 pointer-events-none z-30" style={{ overflow: 'visible' }}>
-      <motion.line
-        x1={from.x}
-        y1={from.y}
-        x2={from.x}
-        y2={from.y}
-        stroke="url(#matchGradient)"
-        strokeWidth={4}
-        strokeLinecap="round"
-        initial={{ x2: from.x, y2: from.y }}
-        animate={{ x2: to.x, y2: to.y }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
-      />
-      <defs>
-        <linearGradient id="matchGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#22c55e" />
-          <stop offset="100%" stopColor="#10b981" />
-        </linearGradient>
-      </defs>
-    </svg>
-  );
-}
-
-// ============ GAME CARD COMPONENT ============
+// =============================================================================
+// Game Card (Note-Taking Aesthetic)
+// =============================================================================
 
 interface GameCardProps {
   card: Card;
@@ -237,67 +194,74 @@ function GameCard({ card, onSelect, disabled }: GameCardProps) {
     }
   };
 
+  // Determine card state classes
+  const getCardClasses = () => {
+    if (card.isMatched) {
+      return 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-500 text-emerald-700 dark:text-emerald-400';
+    }
+    if (card.isWrong) {
+      return 'bg-red-50 dark:bg-red-500/10 border-red-500 text-red-700 dark:text-red-400';
+    }
+    if (card.isSelected) {
+      return 'bg-blue-50 dark:bg-blue-500/10 border-blue-500 text-blue-700 dark:text-blue-400';
+    }
+    return 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md';
+  };
+
   return (
     <motion.button
       onClick={handleClick}
       disabled={disabled || card.isMatched}
       className={clsx(
-        'relative w-full h-28 sm:h-32 rounded-xl font-medium text-sm sm:text-base',
-        'transition-all duration-200',
-        'focus:outline-none focus:ring-2 focus:ring-purple-500',
-        card.isMatched && 'opacity-0 pointer-events-none',
-        card.isSelected && !card.isWrong && 'ring-4 ring-purple-500 scale-105',
-        card.isWrong && 'ring-4 ring-red-500',
-        !card.isMatched &&
-          !card.isSelected &&
-          !card.isWrong &&
-          'hover:scale-102 hover:shadow-lg',
-        card.type === 'term'
-          ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white'
-          : 'bg-gradient-to-br from-purple-500 to-pink-600 text-white'
+        'relative w-full h-24 sm:h-28 rounded-xl border shadow-sm',
+        'font-medium text-sm sm:text-base',
+        'transition-colors duration-150',
+        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900',
+        'cursor-pointer',
+        getCardClasses()
       )}
-      initial={{ opacity: 0, scale: 0.8 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{
         opacity: card.isMatched ? 0 : 1,
-        scale: card.isMatched ? 0.5 : card.isSelected ? 1.05 : 1,
-        x: card.isWrong ? [0, -10, 10, -10, 10, 0] : 0,
+        scale: card.isMatched ? 0.8 : 1,
+        x: card.isWrong ? [0, -8, 8, -8, 8, 0] : 0,
       }}
       transition={{
-        duration: card.isWrong ? 0.4 : 0.3,
+        duration: card.isWrong ? 0.4 : 0.2,
         x: { duration: 0.4 },
+        opacity: { duration: 0.3, delay: card.isMatched ? 0.5 : 0 },
       }}
-      whileTap={{ scale: 0.95 }}
+      whileTap={!disabled && !card.isMatched ? { scale: 0.98 } : undefined}
     >
-      {/* Card label */}
+      {/* Type label - subtle */}
       <div className="absolute top-2 left-2">
         <span
           className={clsx(
-            'text-xs font-bold px-2 py-0.5 rounded-full',
-            card.type === 'term'
-              ? 'bg-cyan-700/50 text-cyan-100'
-              : 'bg-purple-700/50 text-purple-100'
+            'text-[10px] font-medium uppercase tracking-wider',
+            card.isSelected || card.isWrong || card.isMatched
+              ? 'opacity-60'
+              : 'text-slate-400 dark:text-slate-500'
           )}
         >
-          {card.type === 'term' ? 'TERM' : 'DEF'}
+          {card.type === 'term' ? 'Term' : 'Definition'}
         </span>
       </div>
 
-      {/* Card content */}
-      <div className="flex items-center justify-center h-full p-3 pt-6">
-        <p className="text-center leading-tight line-clamp-3">{card.content}</p>
+      {/* Content */}
+      <div className="flex items-center justify-center h-full px-3 pt-4">
+        <p className="text-center leading-snug line-clamp-3">{card.content}</p>
       </div>
 
-      {/* Match success indicator */}
+      {/* Match checkmark */}
       <AnimatePresence>
         {card.isMatched && (
           <motion.div
-            className="absolute inset-0 flex items-center justify-center bg-green-500 rounded-xl"
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.5 }}
-            transition={{ duration: 0.3 }}
+            className="absolute top-2 right-2"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', damping: 10 }}
           >
-            <Check className="w-12 h-12 text-white" />
+            <Check className="w-5 h-5 text-emerald-500" />
           </motion.div>
         )}
       </AnimatePresence>
@@ -305,40 +269,61 @@ function GameCard({ card, onSelect, disabled }: GameCardProps) {
   );
 }
 
-// ============ TIMER DISPLAY ============
+// =============================================================================
+// HUD (Heads Up Display)
+// =============================================================================
 
-interface TimerDisplayProps {
-  seconds: number;
-  total: number;
+interface HUDProps {
+  timeRemaining: number;
+  score: number;
+  pairsLeft: number;
 }
 
-function TimerDisplay({ seconds, total }: TimerDisplayProps) {
-  const percentage = (seconds / total) * 100;
-  const isLow = seconds <= 10;
+function HUD({ timeRemaining, score, pairsLeft }: HUDProps) {
+  const isLowTime = timeRemaining <= 10;
 
   return (
-    <div className="flex items-center gap-3">
-      <Timer className={clsx('w-6 h-6', isLow ? 'text-red-500' : 'text-slate-400')} />
-      <div className="w-32 h-3 bg-slate-700 rounded-full overflow-hidden">
-        <motion.div
-          className={clsx('h-full rounded-full', isLow ? 'bg-red-500' : 'bg-cyan-500')}
-          initial={false}
-          animate={{ width: `${percentage}%` }}
-          transition={{ duration: 0.5 }}
+    <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+      {/* Time */}
+      <div className="flex items-center gap-2">
+        <Clock
+          className={clsx(
+            'w-5 h-5',
+            isLowTime ? 'text-red-500' : 'text-slate-400 dark:text-slate-500'
+          )}
         />
+        <motion.span
+          className={clsx(
+            'font-mono text-lg font-semibold',
+            isLowTime ? 'text-red-500' : 'text-slate-900 dark:text-white'
+          )}
+          animate={isLowTime ? { scale: [1, 1.05, 1] } : {}}
+          transition={{ duration: 0.5, repeat: isLowTime ? Infinity : 0 }}
+        >
+          {timeRemaining}s
+        </motion.span>
       </div>
-      <motion.span
-        className={clsx('text-xl font-bold min-w-[3ch]', isLow ? 'text-red-500' : 'text-white')}
-        animate={isLow ? { scale: [1, 1.1, 1] } : {}}
-        transition={{ duration: 0.5, repeat: isLow ? Infinity : 0 }}
-      >
-        {seconds}s
-      </motion.span>
+
+      {/* Pairs Left */}
+      <div className="text-center">
+        <span className="text-sm text-slate-500 dark:text-slate-400">Pairs Left</span>
+        <p className="text-xl font-bold text-slate-900 dark:text-white">{pairsLeft}</p>
+      </div>
+
+      {/* Score */}
+      <div className="text-right">
+        <span className="text-sm text-slate-500 dark:text-slate-400">Score</span>
+        <p className="font-mono text-lg font-semibold text-slate-900 dark:text-white">
+          {score.toLocaleString()}
+        </p>
+      </div>
     </div>
   );
 }
 
-// ============ RESULTS MODAL ============
+// =============================================================================
+// Results Modal
+// =============================================================================
 
 interface ResultsModalProps {
   isOpen: boolean;
@@ -357,86 +342,73 @@ function ResultsModal({
   onPlayAgain,
   won,
   matchesFound,
+  totalPairs,
   timeRemaining,
   score,
 }: ResultsModalProps) {
   const navigate = useNavigate();
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="md">
+    <Modal isOpen={isOpen} onClose={onClose} size="sm">
       <div className="text-center p-6">
         {/* Icon */}
         <motion.div
           className={clsx(
-            'inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6',
-            won
-              ? 'bg-gradient-to-br from-green-400 to-emerald-500'
-              : 'bg-gradient-to-br from-orange-400 to-red-500'
+            'inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6',
+            won ? 'bg-emerald-100 dark:bg-emerald-500/20' : 'bg-orange-100 dark:bg-orange-500/20'
           )}
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: 'spring', damping: 10 }}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', damping: 12 }}
         >
           {won ? (
-            <Trophy className="w-10 h-10 text-white" />
+            <Trophy className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
           ) : (
-            <Clock className="w-10 h-10 text-white" />
+            <Clock className="w-8 h-8 text-orange-600 dark:text-orange-400" />
           )}
         </motion.div>
 
         {/* Title */}
-        <motion.h2
-          className="text-3xl font-bold text-gray-900 dark:text-white mb-2"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          {won ? 'Amazing!' : "Time's Up!"}
-        </motion.h2>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+          {won ? 'Well Done!' : "Time's Up"}
+        </h2>
+        <p className="text-slate-500 dark:text-slate-400 mb-6">
+          {won
+            ? `You matched all pairs with ${timeRemaining}s to spare!`
+            : `You found ${matchesFound} of ${totalPairs} pairs.`}
+        </p>
 
         {/* Stats */}
-        <motion.div
-          className="bg-slate-100 dark:bg-slate-800/50 rounded-xl p-4 mb-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-        >
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <p className="text-2xl font-bold text-purple-500">{matchesFound}</p>
-              <p className="text-xs text-slate-500">Matches</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-cyan-500">{timeRemaining}s</p>
-              <p className="text-xs text-slate-500">Time Left</p>
-            </div>
-            <div>
-              <motion.p
-                className="text-2xl font-bold text-green-500"
-                initial={{ scale: 0 }}
-                animate={{ scale: [0, 1.2, 1] }}
-                transition={{ delay: 0.5 }}
-              >
-                {score}
-              </motion.p>
-              <p className="text-xs text-slate-500">Score</p>
-            </div>
+        <div className="grid grid-cols-3 gap-4 mb-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+          <div>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">{matchesFound}</p>
+            <p className="text-xs text-slate-500">Matches</p>
           </div>
-        </motion.div>
+          <div>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">{timeRemaining}s</p>
+            <p className="text-xs text-slate-500">Time Left</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              {score.toLocaleString()}
+            </p>
+            <p className="text-xs text-slate-500">Score</p>
+          </div>
+        </div>
 
         {/* Actions */}
-        <div className="flex gap-3">
-          <Button
-            variant="ghost"
-            className="flex-1"
-            onClick={() => navigate('/arcade')}
-          >
-            <Home className="w-4 h-4 mr-2" />
-            Lobby
-          </Button>
-          <Button variant="primary" className="flex-1" onClick={onPlayAgain}>
+        <div className="flex flex-col gap-2">
+          <Button onClick={onPlayAgain} className="w-full">
             <RefreshCw className="w-4 h-4 mr-2" />
             Play Again
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/arcade')}
+            className="w-full text-slate-500"
+          >
+            <Home className="w-4 h-4 mr-2" />
+            Back to Games
           </Button>
         </div>
       </div>
@@ -444,7 +416,9 @@ function ResultsModal({
   );
 }
 
-// ============ UPGRADE MODAL ============
+// =============================================================================
+// Upgrade Modal
+// =============================================================================
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -456,63 +430,29 @@ function UpgradeModal({ isOpen, onClose, gamesPlayed }: UpgradeModalProps) {
   const navigate = useNavigate();
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="md">
+    <Modal isOpen={isOpen} onClose={onClose} size="sm">
       <div className="text-center p-6">
-        <motion.div
-          className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6 bg-gradient-to-br from-amber-400 to-yellow-500"
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          <Lock className="w-10 h-10 text-slate-900" />
-        </motion.div>
-
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          Daily Limit Reached
-        </h2>
-
-        <p className="text-gray-600 dark:text-slate-400 mb-6">
-          You've played {gamesPlayed}/{FREE_DAILY_LIMIT} free games today. Upgrade to Pro for
-          unlimited games and Hard Mode!
-        </p>
-
-        <div className="bg-slate-100 dark:bg-slate-800/50 rounded-xl p-4 mb-6 text-left">
-          <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Pro benefits:</h4>
-          <ul className="space-y-2 text-sm text-gray-600 dark:text-slate-400">
-            <li className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
-                <span className="text-green-500 text-xs">✓</span>
-              </div>
-              Unlimited daily games
-            </li>
-            <li className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
-                <span className="text-green-500 text-xs">✓</span>
-              </div>
-              Hard Mode with advanced terms
-            </li>
-            <li className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
-                <span className="text-green-500 text-xs">✓</span>
-              </div>
-              Global leaderboards
-            </li>
-          </ul>
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 mb-6">
+          <Lock className="w-8 h-8 text-slate-400" />
         </div>
 
-        <div className="flex gap-3">
-          <Button variant="ghost" className="flex-1" onClick={onClose}>
-            Maybe Later
-          </Button>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+          Daily Limit Reached
+        </h2>
+        <p className="text-slate-500 dark:text-slate-400 mb-6">
+          You've played {gamesPlayed} games today. Upgrade to Pro for unlimited practice.
+        </p>
+
+        <div className="flex flex-col gap-2">
           <Button
-            variant="primary"
-            className="flex-1 !bg-gradient-to-r !from-amber-400 !to-yellow-500 !text-slate-900"
-            onClick={() => {
-              onClose();
-              navigate('/pricing');
-            }}
+            onClick={() => navigate('/pricing')}
+            className="w-full bg-gradient-to-r from-amber-400 to-orange-500 text-white border-0"
           >
-            Upgrade
-            <ArrowRight className="w-4 h-4 ml-1.5" />
+            <Sparkles className="w-4 h-4 mr-2" />
+            Upgrade to Pro
+          </Button>
+          <Button variant="ghost" onClick={onClose} className="w-full text-slate-500">
+            Maybe Later
           </Button>
         </div>
       </div>
@@ -520,85 +460,201 @@ function UpgradeModal({ isOpen, onClose, gamesPlayed }: UpgradeModalProps) {
   );
 }
 
-// ============ MAIN MATCHING GAME COMPONENT ============
+// =============================================================================
+// Difficulty Selector
+// =============================================================================
+
+interface DifficultySelectorProps {
+  difficulty: Difficulty;
+  onSelect: (difficulty: Difficulty) => void;
+  isPro: boolean;
+}
+
+function DifficultySelector({ difficulty, onSelect, isPro }: DifficultySelectorProps) {
+  return (
+    <div className="flex gap-2">
+      <button
+        onClick={() => onSelect('normal')}
+        className={clsx(
+          'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+          difficulty === 'normal'
+            ? 'bg-blue-500 text-white'
+            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+        )}
+      >
+        Normal
+      </button>
+      <button
+        onClick={() => isPro && onSelect('hard')}
+        disabled={!isPro}
+        className={clsx(
+          'px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1',
+          difficulty === 'hard'
+            ? 'bg-blue-500 text-white'
+            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400',
+          isPro ? 'hover:bg-slate-200 dark:hover:bg-slate-700' : 'opacity-50 cursor-not-allowed'
+        )}
+      >
+        Hard
+        {!isPro && <Lock className="w-3 h-3" />}
+      </button>
+    </div>
+  );
+}
+
+// =============================================================================
+// Main Component
+// =============================================================================
 
 export default function MatchingGame() {
-  const { user } = useAuth();
   const navigate = useNavigate();
-
-  // User tier
-  const isPro =
-    user?.role === 'STANDARD' || user?.role === 'PREMIUM' || user?.role === 'ADMIN';
+  const { user } = useAuth();
+  const isPro = user?.role && ['STANDARD', 'PREMIUM', 'ADMIN'].includes(user.role);
 
   // Game state
   const [status, setStatus] = useState<GameStatus>('idle');
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
   const [cards, setCards] = useState<Card[]>([]);
-  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
-  const [matchedPairs, setMatchedPairs] = useState<string[]>([]);
+  const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [timeRemaining, setTimeRemaining] = useState(GAME_TIME_SECONDS);
   const [score, setScore] = useState(0);
+  const [matchesFound, setMatchesFound] = useState(0);
+
+  // Modals
   const [showResults, setShowResults] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
-  const [matchLine, setMatchLine] = useState<{ from: Card; to: Card } | null>(null);
 
-  // Daily games tracking
-  const [gamesPlayed, setGamesPlayed] = useState(getDailyGamesPlayed);
+  // Track daily games
+  const gamesPlayedToday = useRef(getDailyGamesPlayed());
 
-  // Check if user can play
-  const canPlay = isPro || gamesPlayed < FREE_DAILY_LIMIT;
-
-  // Generate cards from pairs
-  const generateCards = useCallback((pairs: MatchPair[]): Card[] => {
-    const selectedPairs = shuffleArray(pairs).slice(0, PAIRS_PER_GAME);
-    
-    const termCards: Card[] = selectedPairs.map((pair) => ({
-      id: `term-${pair.id}`,
-      pairId: pair.id,
-      content: pair.term,
-      type: 'term',
-      isMatched: false,
-      isSelected: false,
-      isWrong: false,
-    }));
-
-    const defCards: Card[] = selectedPairs.map((pair) => ({
-      id: `def-${pair.id}`,
-      pairId: pair.id,
-      content: pair.definition,
-      type: 'definition',
-      isMatched: false,
-      isSelected: false,
-      isWrong: false,
-    }));
-
-    // Shuffle terms and definitions separately for better UX
-    return [...shuffleArray(termCards), ...shuffleArray(defCards)];
-  }, []);
+  // Computed values
+  const pairsLeft = PAIRS_PER_GAME - matchesFound;
+  const totalPairs = PAIRS_PER_GAME;
 
   // Initialize game
+  const initializeGame = useCallback(() => {
+    const pairSource = difficulty === 'hard' ? HARD_MODE_PAIRS : SAMPLE_PAIRS;
+    const selectedPairs = shuffleArray(pairSource).slice(0, PAIRS_PER_GAME);
+
+    const gameCards: Card[] = [];
+    selectedPairs.forEach((pair) => {
+      gameCards.push({
+        id: `${pair.id}-term`,
+        pairId: pair.id,
+        content: pair.term,
+        type: 'term',
+        isMatched: false,
+        isSelected: false,
+        isWrong: false,
+      });
+      gameCards.push({
+        id: `${pair.id}-def`,
+        pairId: pair.id,
+        content: pair.definition,
+        type: 'definition',
+        isMatched: false,
+        isSelected: false,
+        isWrong: false,
+      });
+    });
+
+    setCards(shuffleArray(gameCards));
+    setSelectedCards([]);
+    setTimeRemaining(GAME_TIME_SECONDS);
+    setScore(0);
+    setMatchesFound(0);
+    setShowResults(false);
+  }, [difficulty]);
+
+  // Start game
   const startGame = useCallback(() => {
-    if (!canPlay) {
+    // Check daily limit for free users
+    if (!isPro && gamesPlayedToday.current >= FREE_DAILY_LIMIT) {
       setShowUpgrade(true);
       return;
     }
 
-    const pairs = difficulty === 'hard' ? HARD_MODE_PAIRS : SAMPLE_PAIRS;
-    setCards(generateCards(pairs));
-    setSelectedCard(null);
-    setMatchedPairs([]);
-    setTimeRemaining(GAME_TIME_SECONDS);
-    setScore(0);
-    setMatchLine(null);
+    initializeGame();
     setStatus('countdown');
-  }, [canPlay, difficulty, generateCards]);
+  }, [isPro, initializeGame]);
 
   // Handle countdown complete
   const handleCountdownComplete = useCallback(() => {
     setStatus('playing');
     incrementDailyGames();
-    setGamesPlayed((prev) => prev + 1);
+    gamesPlayedToday.current += 1;
   }, []);
+
+  // Handle card selection
+  const handleCardSelect = useCallback(
+    (card: Card) => {
+      if (status !== 'playing' || selectedCards.length >= 2) return;
+
+      // Can't select same card twice
+      if (selectedCards.some((c) => c.id === card.id)) return;
+
+      // Can't select same type (must match term with definition)
+      if (selectedCards.length === 1 && selectedCards[0].type === card.type) {
+        // Show wrong animation briefly
+        setCards((prev) =>
+          prev.map((c) => (c.id === card.id ? { ...c, isWrong: true } : c))
+        );
+        setTimeout(() => {
+          setCards((prev) =>
+            prev.map((c) => (c.id === card.id ? { ...c, isWrong: false } : c))
+          );
+        }, 400);
+        return;
+      }
+
+      // Select the card
+      setCards((prev) =>
+        prev.map((c) => (c.id === card.id ? { ...c, isSelected: true } : c))
+      );
+      const newSelected = [...selectedCards, card];
+      setSelectedCards(newSelected);
+
+      // Check for match if two cards selected
+      if (newSelected.length === 2) {
+        const [first, second] = newSelected;
+        const isMatch = first.pairId === second.pairId;
+
+        if (isMatch) {
+          // Correct match
+          setTimeout(() => {
+            setCards((prev) =>
+              prev.map((c) =>
+                c.pairId === first.pairId
+                  ? { ...c, isMatched: true, isSelected: false }
+                  : c
+              )
+            );
+            setScore((prev) => prev + POINTS_PER_MATCH);
+            setMatchesFound((prev) => prev + 1);
+            setSelectedCards([]);
+          }, 300);
+        } else {
+          // Wrong match
+          setCards((prev) =>
+            prev.map((c) =>
+              newSelected.some((s) => s.id === c.id) ? { ...c, isWrong: true } : c
+            )
+          );
+          setTimeout(() => {
+            setCards((prev) =>
+              prev.map((c) =>
+                newSelected.some((s) => s.id === c.id)
+                  ? { ...c, isWrong: false, isSelected: false }
+                  : c
+              )
+            );
+            setSelectedCards([]);
+          }, 600);
+        }
+      }
+    },
+    [status, selectedCards]
+  );
 
   // Timer effect
   useEffect(() => {
@@ -607,6 +663,7 @@ export default function MatchingGame() {
     const timer = setInterval(() => {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
+          clearInterval(timer);
           setStatus('lost');
           setShowResults(true);
           return 0;
@@ -618,351 +675,128 @@ export default function MatchingGame() {
     return () => clearInterval(timer);
   }, [status]);
 
-  // Check win condition
+  // Win condition check
   useEffect(() => {
-    if (status === 'playing' && matchedPairs.length === PAIRS_PER_GAME) {
+    if (status === 'playing' && matchesFound === PAIRS_PER_GAME) {
+      const timeBonus = timeRemaining * TIME_BONUS_MULTIPLIER;
+      setScore((prev) => prev + timeBonus);
       setStatus('won');
       setShowResults(true);
     }
-  }, [matchedPairs.length, status]);
+  }, [matchesFound, status, timeRemaining]);
 
-  // Handle card selection
-  const handleCardSelect = useCallback(
-    (card: Card) => {
-      if (status !== 'playing' || card.isMatched) return;
-
-      // If no card selected, select this one
-      if (!selectedCard) {
-        setCards((prev) =>
-          prev.map((c) => ({
-            ...c,
-            isSelected: c.id === card.id,
-            isWrong: false,
-          }))
-        );
-        setSelectedCard(card);
-        return;
-      }
-
-      // If clicking same card, deselect
-      if (selectedCard.id === card.id) {
-        setCards((prev) =>
-          prev.map((c) => ({
-            ...c,
-            isSelected: false,
-          }))
-        );
-        setSelectedCard(null);
-        return;
-      }
-
-      // Must select different types (term + definition)
-      if (selectedCard.type === card.type) {
-        // Switch selection to new card of same type
-        setCards((prev) =>
-          prev.map((c) => ({
-            ...c,
-            isSelected: c.id === card.id,
-            isWrong: false,
-          }))
-        );
-        setSelectedCard(card);
-        return;
-      }
-
-      // Check for match
-      const isMatch = selectedCard.pairId === card.pairId;
-
-      if (isMatch) {
-        // Correct match!
-        const timeBonus = Math.floor(timeRemaining / 10);
-        const pointsEarned = 100 + timeBonus * 10;
-        setScore((prev) => prev + pointsEarned);
-
-        // Show match line animation
-        setMatchLine({ from: selectedCard, to: card });
-
-        // Mark as matched after brief delay
-        setTimeout(() => {
-          setCards((prev) =>
-            prev.map((c) => ({
-              ...c,
-              isMatched: c.pairId === card.pairId ? true : c.isMatched,
-              isSelected: false,
-            }))
-          );
-          setMatchedPairs((prev) => [...prev, card.pairId]);
-          setMatchLine(null);
-        }, 400);
-      } else {
-        // Wrong match - shake and reset
-        setCards((prev) =>
-          prev.map((c) => ({
-            ...c,
-            isWrong: c.id === selectedCard.id || c.id === card.id,
-            isSelected: false,
-          }))
-        );
-
-        // Clear wrong state after animation
-        setTimeout(() => {
-          setCards((prev) =>
-            prev.map((c) => ({
-              ...c,
-              isWrong: false,
-            }))
-          );
-        }, 500);
-      }
-
-      setSelectedCard(null);
-    },
-    [selectedCard, status, timeRemaining]
-  );
-
-  // Play again handler
+  // Handle play again
   const handlePlayAgain = useCallback(() => {
-    setShowResults(false);
-    if (canPlay) {
-      startGame();
-    } else {
-      setStatus('idle');
+    if (!isPro && gamesPlayedToday.current >= FREE_DAILY_LIMIT) {
+      setShowResults(false);
       setShowUpgrade(true);
+      return;
     }
-  }, [canPlay, startGame]);
+    startGame();
+  }, [isPro, startGame]);
 
-  // Split cards into terms and definitions for layout
-  const termCards = useMemo(() => cards.filter((c) => c.type === 'term'), [cards]);
-  const defCards = useMemo(() => cards.filter((c) => c.type === 'definition'), [cards]);
-
-  // Idle/Menu state
-  if (status === 'idle') {
-    return (
-      <AnimatedPage>
-        <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 flex flex-col items-center justify-center p-4">
-          {/* Header */}
-          <motion.div
-            className="text-center mb-8"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-600 mb-4">
-              <Zap className="w-10 h-10 text-white" />
-            </div>
-            <h1 className="text-4xl font-bold text-white mb-2">Matching Rush</h1>
-            <p className="text-slate-400">Match terms with their definitions before time runs out!</p>
-          </motion.div>
-
-          {/* Game mode selection */}
-          <motion.div
-            className="w-full max-w-md space-y-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            {/* Difficulty selection */}
-            <div className="bg-slate-800/60 rounded-2xl p-6">
-              <h3 className="text-white font-semibold mb-4">Select Difficulty</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => setDifficulty('normal')}
-                  className={clsx(
-                    'p-4 rounded-xl border-2 transition-all',
-                    difficulty === 'normal'
-                      ? 'border-cyan-500 bg-cyan-500/20'
-                      : 'border-slate-700 hover:border-slate-600'
-                  )}
-                >
-                  <Target className="w-6 h-6 text-cyan-400 mx-auto mb-2" />
-                  <p className="text-white font-medium">Normal</p>
-                  <p className="text-xs text-slate-400">Basic terms</p>
-                </button>
-
-                <button
-                  onClick={() => isPro && setDifficulty('hard')}
-                  disabled={!isPro}
-                  className={clsx(
-                    'p-4 rounded-xl border-2 transition-all relative',
-                    difficulty === 'hard'
-                      ? 'border-purple-500 bg-purple-500/20'
-                      : 'border-slate-700',
-                    !isPro && 'opacity-60 cursor-not-allowed'
-                  )}
-                >
-                  {!isPro && (
-                    <div className="absolute top-2 right-2">
-                      <Crown className="w-4 h-4 text-amber-400" />
-                    </div>
-                  )}
-                  <Sparkles className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-                  <p className="text-white font-medium">Hard</p>
-                  <p className="text-xs text-slate-400">
-                    {isPro ? 'Advanced terms' : 'Pro only'}
-                  </p>
-                </button>
-              </div>
-            </div>
-
-            {/* Daily games counter (Free users) */}
-            {!isPro && (
-              <div className="bg-slate-800/60 rounded-2xl p-4 flex items-center justify-between">
-                <div>
-                  <p className="text-slate-400 text-sm">Daily games</p>
-                  <p className="text-white font-bold">
-                    {gamesPlayed}/{FREE_DAILY_LIMIT}
-                  </p>
-                </div>
-                <div className="flex gap-1">
-                  {[...Array(FREE_DAILY_LIMIT)].map((_, i) => (
-                    <div
-                      key={i}
-                      className={clsx(
-                        'w-3 h-3 rounded-full',
-                        i < gamesPlayed ? 'bg-cyan-500' : 'bg-slate-700'
-                      )}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Start button */}
-            <Button
-              variant="primary"
-              size="lg"
-              fullWidth
-              onClick={startGame}
-              disabled={!canPlay}
-              className="!bg-gradient-to-r !from-cyan-500 !to-blue-600"
-            >
-              <Play className="w-6 h-6 mr-2" />
-              {canPlay ? 'Start Game' : 'No Games Left Today'}
-            </Button>
-
-            {/* Back to lobby */}
-            <Button variant="ghost" fullWidth onClick={() => navigate('/arcade')}>
-              <Home className="w-5 h-5 mr-2" />
-              Back to Arcade
-            </Button>
-          </motion.div>
-
-          {/* Upgrade modal */}
-          <UpgradeModal
-            isOpen={showUpgrade}
-            onClose={() => setShowUpgrade(false)}
-            gamesPlayed={gamesPlayed}
-          />
-        </div>
-      </AnimatedPage>
-    );
-  }
-
-  // Playing state
   return (
     <AnimatedPage>
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 p-4">
-        {/* Countdown overlay */}
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+        {/* Countdown Overlay */}
         <AnimatePresence>
           {status === 'countdown' && (
             <CountdownOverlay count={3} onComplete={handleCountdownComplete} />
           )}
         </AnimatePresence>
 
-        {/* Game header */}
-        <div className="max-w-4xl mx-auto mb-6">
-          <div className="flex items-center justify-between">
-            {/* Score */}
-            <div className="flex items-center gap-2">
-              <Trophy className="w-6 h-6 text-yellow-400" />
-              <motion.span
-                key={score}
-                className="text-2xl font-bold text-white"
-                initial={{ scale: 1.3 }}
-                animate={{ scale: 1 }}
-              >
-                {score}
-              </motion.span>
+        {/* Idle State - Start Screen */}
+        {status === 'idle' && (
+          <div className="max-w-md mx-auto px-4 py-12">
+            <button
+              onClick={() => navigate('/arcade')}
+              className="flex items-center gap-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 mb-8"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Games
+            </button>
+
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                Matching Rush
+              </h1>
+              <p className="text-slate-500 dark:text-slate-400">
+                Match {PAIRS_PER_GAME} pairs before time runs out
+              </p>
             </div>
 
-            {/* Timer */}
-            <TimerDisplay seconds={timeRemaining} total={GAME_TIME_SECONDS} />
-
-            {/* Matches found */}
-            <div className="flex items-center gap-2">
-              <span className="text-slate-400">Matches:</span>
-              <span className="text-xl font-bold text-white">
-                {matchedPairs.length}/{PAIRS_PER_GAME}
-              </span>
-            </div>
-          </div>
-
-          {/* Progress bar */}
-          <div className="mt-4 h-2 bg-slate-700 rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
-              initial={false}
-              animate={{ width: `${(matchedPairs.length / PAIRS_PER_GAME) * 100}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Game board */}
-        <div className="max-w-4xl mx-auto relative">
-          {/* Match line animation */}
-          {matchLine && (
-            <MatchLine
-              from={{ x: 100, y: 100 }}
-              to={{ x: 300, y: 200 }}
-            />
-          )}
-
-          <div className="grid grid-cols-2 gap-4 sm:gap-6">
-            {/* Terms column */}
-            <div className="space-y-3">
-              <div className="text-center mb-2">
-                <span className="text-xs font-bold px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300">
-                  TERMS
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Difficulty
                 </span>
-              </div>
-              {termCards.map((card) => (
-                <GameCard
-                  key={card.id}
-                  card={card}
-                  onSelect={handleCardSelect}
-                  disabled={status !== 'playing'}
+                <DifficultySelector
+                  difficulty={difficulty}
+                  onSelect={setDifficulty}
+                  isPro={!!isPro}
                 />
-              ))}
+              </div>
+
+              <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+                <span>Time Limit</span>
+                <span className="font-mono">{GAME_TIME_SECONDS}s</span>
+              </div>
             </div>
 
-            {/* Definitions column */}
-            <div className="space-y-3">
-              <div className="text-center mb-2">
-                <span className="text-xs font-bold px-3 py-1 rounded-full bg-purple-500/20 text-purple-300">
-                  DEFINITIONS
-                </span>
+            {!isPro && (
+              <div className="text-center text-sm text-slate-500 dark:text-slate-400 mb-4">
+                {FREE_DAILY_LIMIT - gamesPlayedToday.current} free games remaining today
               </div>
-              {defCards.map((card) => (
-                <GameCard
-                  key={card.id}
-                  card={card}
-                  onSelect={handleCardSelect}
-                  disabled={status !== 'playing'}
-                />
-              ))}
-            </div>
+            )}
+
+            <Button onClick={startGame} className="w-full py-3 text-lg">
+              Start Game
+            </Button>
           </div>
-        </div>
+        )}
 
-        {/* Results modal */}
+        {/* Playing State */}
+        {(status === 'playing' || status === 'won' || status === 'lost') && (
+          <>
+            {/* HUD */}
+            <HUD timeRemaining={timeRemaining} score={score} pairsLeft={pairsLeft} />
+
+            {/* Game Board */}
+            <div className="max-w-2xl mx-auto px-4 py-6">
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                {cards.map((card) => (
+                  <GameCard
+                    key={card.id}
+                    card={card}
+                    onSelect={handleCardSelect}
+                    disabled={status !== 'playing' || selectedCards.length >= 2}
+                  />
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Results Modal */}
         <ResultsModal
           isOpen={showResults}
           onClose={() => setShowResults(false)}
           onPlayAgain={handlePlayAgain}
           won={status === 'won'}
-          matchesFound={matchedPairs.length}
-          totalPairs={PAIRS_PER_GAME}
+          matchesFound={matchesFound}
+          totalPairs={totalPairs}
           timeRemaining={timeRemaining}
           score={score}
+        />
+
+        {/* Upgrade Modal */}
+        <UpgradeModal
+          isOpen={showUpgrade}
+          onClose={() => {
+            setShowUpgrade(false);
+            setStatus('idle');
+          }}
+          gamesPlayed={gamesPlayedToday.current}
         />
       </div>
     </AnimatedPage>
