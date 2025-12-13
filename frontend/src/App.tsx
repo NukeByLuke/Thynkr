@@ -35,6 +35,7 @@ const MyCourseDetail = lazy(() => import('./pages/MyCourseDetail'));
 const TutorChat = lazy(() => import('./pages/TutorChat'));
 const StudyProgress = lazy(() => import('./pages/StudyProgress'));
 const SavedPacks = lazy(() => import('./pages/SavedPacks'));
+const ArcadeLobby = lazy(() => import('./pages/ArcadeLobby'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 /**
@@ -134,6 +135,10 @@ function AppContent() {
             <Route path="/saved-packs" element={<SavedPacks />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/account" element={<Account />} />
+
+            {/* Arcade - Available to all authenticated users */}
+            <Route path="/arcade" element={<ArcadeLobby />} />
+            <Route path="/arcade/*" element={<ArcadeLobby />} />
 
             {/* Tutor - Premium/Admin only */}
             <Route
