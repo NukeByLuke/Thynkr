@@ -73,7 +73,7 @@ interface UseGameSocketOptions {
 export function useGameSocket(options: UseGameSocketOptions = {}) {
   const { autoConnect = false } = options;
   const socketRef = useRef<Socket | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [state, setState] = useState<GameState>({
     isConnected: false,
