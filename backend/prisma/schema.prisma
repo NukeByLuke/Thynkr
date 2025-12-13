@@ -620,4 +620,99 @@ model StudyCache {
   @@map("study_cache")
 }
 
+// ============ THYNKR ARCADE (Multiplayer Gamification) ============
+
+enum GameType {
+  LIVE_QUIZ
+  MATCHING_RUSH
+  BLANK_MASTER
+}
+
+enum GameTier {
+  FREE
+  PRO
+}
+
+enum GameSessionStatus {
+  WAITING
+  ACTIVE
+  FINISHED
+}
+
+model Game {
+  id          String        @id @default(uuid())
+  title       String
+  description String?       @db.Text
+  type        GameType
+  tier        GameTier      @default(FREE)
+  
+  questions   GameQuestion[]
+  sessions    GameSession[]
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([type])
+  @@index([tier])
+  @@map("games")
+}
+
+model GameQuestion {
+  id            String   @id @default(cuid())
+  gameId        String
+  game          Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  
+  content       String   @db.Text  // Question text
+  options       Json     // JSON array of choices
+  correctAnswer String
+  timeLimit     Int      @default(20)  // Time limit in seconds
+  order         Int      @default(0)
+  
+  createdAt     DateTime @default(now())
+
+  @@index([gameId])
+  @@map("game_questions")
+}
+
+model GameSession {
+  id                   String            @id @default(uuid())
+  gameId               String
+  game                 Game              @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  hostId               String            // User ID of the host
+  
+  pinCode              String            @unique  // 6-digit code for joining
+  status               GameSessionStatus @default(WAITING)
+  currentQuestionIndex Int               @default(0)
+  
+  players              GamePlayer[]
+  
+  startedAt            DateTime?
+  finishedAt           DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  @@index([gameId])
+  @@index([hostId])
+  @@index([pinCode])
+  @@index([status])
+  @@map("game_sessions")
+}
+
+model GamePlayer {
+  id          String      @id @default(cuid())
+  sessionId   String
+  session     GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  userId      String?     // Optional - can be guest
+  nickname    String
+  score       Int         @default(0)
+  streak      Int         @default(0)
+  
+  joinedAt    DateTime    @default(now())
+
+  @@index([sessionId])
+  @@index([userId])
+  @@map("game_players")
+}
+
 
