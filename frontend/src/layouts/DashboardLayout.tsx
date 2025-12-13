@@ -13,6 +13,7 @@ import {
   Home,
   DollarSign,
   Shield,
+  Gamepad2,
 } from 'lucide-react';
 
 export default function DashboardLayout() {
@@ -27,6 +28,7 @@ export default function DashboardLayout() {
         { path: '/', icon: Home, label: 'Home', end: true },
         { path: '/study', icon: BookOpen, label: 'Study' },
         { path: '/files', icon: FolderOpen, label: 'Files' },
+        { path: '/arcade', icon: Gamepad2, label: 'Arcade' },
       ],
     },
     {
