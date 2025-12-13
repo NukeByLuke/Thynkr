@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Home,
   DollarSign,
+  Shield,
 } from 'lucide-react';
 
 export default function DashboardLayout() {
@@ -43,6 +44,9 @@ export default function DashboardLayout() {
       items: [
         { path: '/settings', icon: Settings, label: 'Settings' },
         { path: '/pricing', icon: DollarSign, label: 'Pricing' },
+        ...(user?.role === 'ADMIN'
+          ? [{ path: '/admin', icon: Shield, label: 'Admin' }]
+          : []),
       ],
     },
   ];

@@ -11,6 +11,7 @@ import fastifyStatic from '@fastify/static';
 import path from 'path';
 import { config } from './config';
 import { logger } from './lib/logger';
+import { initializeGameSocket } from './services/gameSocket.service';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import contentRoutes from './routes/content.routes';
@@ -135,8 +136,12 @@ async function start() {
     server.setErrorHandler(errorHandler);
 
     // Start server
-    await server.listen({ port: config.port, host: '0.0.0.0' });
+    const address = await server.listen({ port: config.port, host: '0.0.0.0' });
     logger.info(`Server running on http://localhost:${config.port}`);
+
+    // Initialize Socket.io for Thynkr Arcade
+    const httpServer = server.server;
+    initializeGameSocket(httpServer);
   } catch (err) {
     server.log.error(err);
     process.exit(1);
