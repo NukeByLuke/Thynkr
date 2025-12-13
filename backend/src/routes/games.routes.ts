@@ -206,21 +206,28 @@ export default async function gameRoutes(fastify: FastifyInstance) {
     Body: z.infer<typeof gameGenerationRequestSchema>;
   }>('/games/generate', {
     preHandler: authenticate,
-    schema: {
-      body: gameGenerationRequestSchema,
-    },
   }, async (request, reply) => {
-    const { gameType, fileIds, config } = request.body;
-    const userId = (request as AuthenticatedRequest).user?.userId;
-    
-    if (!userId) {
-      return reply.status(401).send({
-        error: 'Unauthorized',
-        message: 'Authentication required',
-      });
-    }
-
     try {
+      // Manual validation using Zod
+      const validationResult = gameGenerationRequestSchema.safeParse(request.body);
+      if (!validationResult.success) {
+        return reply.status(400).send({
+          error: 'Validation failed',
+          message: validationResult.error.errors[0].message,
+          details: validationResult.error.errors,
+        });
+      }
+
+      const { gameType, fileIds, config } = validationResult.data;
+      const userId = (request as AuthenticatedRequest).user?.userId;
+      
+      if (!userId) {
+        return reply.status(401).send({
+          error: 'Unauthorized',
+          message: 'Authentication required',
+        });
+      }
+
       logger.info(`Generating ${gameType} game for user ${userId}`, {
         fileIds,
         config,

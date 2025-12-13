@@ -486,7 +486,7 @@ ${preparedText}`,
    * Used for game generation and other flexible AI tasks
    */
   async generateCustomContent(prompt: string): Promise<string> {
-    const cacheKey = `custom_${this.hashString(prompt)}`;
+      const cacheKey = `custom_${this.hashText(prompt)}`;
     const cached = cache.get<string>(cacheKey);
 
     if (cached) {
