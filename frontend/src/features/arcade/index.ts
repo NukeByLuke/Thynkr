@@ -4,3 +4,4 @@
  */
 
 export { default as QuizGame } from './QuizGame';
+export { default as MatchingGame } from './MatchingGame';

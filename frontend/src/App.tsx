@@ -37,6 +37,7 @@ const StudyProgress = lazy(() => import('./pages/StudyProgress'));
 const SavedPacks = lazy(() => import('./pages/SavedPacks'));
 const ArcadeLobby = lazy(() => import('./pages/ArcadeLobby'));
 const QuizGame = lazy(() => import('./features/arcade/QuizGame'));
+const MatchingGame = lazy(() => import('./features/arcade/MatchingGame'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 /**
@@ -140,6 +141,8 @@ function AppContent() {
             {/* Arcade - Available to all authenticated users */}
             <Route path="/arcade" element={<ArcadeLobby />} />
             <Route path="/arcade/play/:pinCode" element={<QuizGame />} />
+            <Route path="/arcade/solo/matching_rush" element={<MatchingGame />} />
+            <Route path="/arcade/solo/live_quiz" element={<QuizGame />} />
 
             {/* Tutor - Premium/Admin only */}
             <Route
