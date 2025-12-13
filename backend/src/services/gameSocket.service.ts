@@ -143,7 +143,6 @@ export class GameSocketServer {
       }
 
       // Find the session in database
-      // @ts-expect-error - Prisma types not generated yet; run migration first
       const session = await prisma.gameSession.findUnique({
         where: { pinCode },
         include: {
@@ -198,7 +197,6 @@ export class GameSocketServer {
       }
 
       // Create player in database
-      // @ts-expect-error - Prisma types not generated yet; run migration first
       const player = await prisma.gamePlayer.create({
         data: {
           sessionId: session.id,
@@ -300,7 +298,6 @@ export class GameSocketServer {
       }
 
       // Update session status in database
-      // @ts-expect-error - Prisma types not generated yet; run migration first
       const session = await prisma.gameSession.update({
         where: { pinCode },
         data: {
@@ -376,7 +373,6 @@ export class GameSocketServer {
       }
 
       // Get the question from database
-      // @ts-expect-error - Prisma types not generated yet; run migration first
       const session = await prisma.gameSession.findUnique({
         where: { pinCode },
         include: {
@@ -435,7 +431,6 @@ export class GameSocketServer {
       }
 
       // Update player in database
-      // @ts-expect-error - Prisma types not generated yet; run migration first
       await prisma.gamePlayer.update({
         where: { id: playerId },
         data: {
@@ -500,7 +495,6 @@ export class GameSocketServer {
       }
 
       // Get questions from database
-      // @ts-expect-error - Prisma types not generated yet; run migration first
       const session = await prisma.gameSession.findUnique({
         where: { pinCode },
         include: {
@@ -532,7 +526,6 @@ export class GameSocketServer {
       sessionData.questionStartTime = Date.now();
 
       // Update database
-      // @ts-expect-error - Prisma types not generated yet; run migration first
       await prisma.gameSession.update({
         where: { pinCode },
         data: { currentQuestionIndex: nextIndex },
@@ -589,7 +582,6 @@ export class GameSocketServer {
     if (!sessionData) return;
 
     // Update database
-    // @ts-expect-error - Prisma types not generated yet; run migration first
     await prisma.gameSession.update({
       where: { pinCode },
       data: {
@@ -601,7 +593,6 @@ export class GameSocketServer {
     sessionData.status = 'FINISHED';
 
     // Get final leaderboard
-    // @ts-expect-error - Prisma types not generated yet; run migration first
     const players = await prisma.gamePlayer.findMany({
       where: { session: { pinCode } },
       orderBy: { score: 'desc' },

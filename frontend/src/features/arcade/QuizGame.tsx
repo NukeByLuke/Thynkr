@@ -1,6 +1,7 @@
 /**
  * QuizGame Component
- * Kahoot-style live quiz interface with Host and Player views
+ * Minimalist live quiz interface with clean "Assessment" aesthetic
+ * Features stacked options for players and projector-friendly host view
  */
 
 import { useState, useEffect } from 'react';
@@ -17,6 +18,7 @@ import {
   Play,
   SkipForward,
   Home,
+  ChevronRight,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,18 +26,19 @@ import { useGameSocket, LeaderboardEntry } from '@/hooks/useGameSocket';
 import Button from '@/components/ui/Button';
 import AnimatedPage from '@/components/AnimatedPage';
 
-// ============ CONSTANTS ============
+// =============================================================================
+// Types
+// =============================================================================
 
-const OPTION_COLORS = [
-  { bg: 'bg-red-500', hover: 'hover:bg-red-400', border: 'border-red-400', text: 'text-red-500' },
-  { bg: 'bg-blue-500', hover: 'hover:bg-blue-400', border: 'border-blue-400', text: 'text-blue-500' },
-  { bg: 'bg-yellow-500', hover: 'hover:bg-yellow-400', border: 'border-yellow-400', text: 'text-yellow-500' },
-  { bg: 'bg-green-500', hover: 'hover:bg-green-400', border: 'border-green-400', text: 'text-green-500' },
-];
+interface OptionState {
+  isSelected: boolean;
+  isCorrect: boolean | null;
+  isRevealed: boolean;
+}
 
-const OPTION_SHAPES = ['▲', '◆', '●', '■'];
-
-// ============ COUNTDOWN OVERLAY ============
+// =============================================================================
+// Countdown Overlay
+// =============================================================================
 
 interface CountdownOverlayProps {
   count: number;
@@ -50,11 +53,7 @@ function CountdownOverlay({ count, onComplete }: CountdownOverlayProps) {
       onComplete();
       return;
     }
-
-    const timer = setTimeout(() => {
-      setCurrent(current - 1);
-    }, 1000);
-
+    const timer = setTimeout(() => setCurrent(current - 1), 1000);
     return () => clearTimeout(timer);
   }, [current, onComplete]);
 
@@ -62,7 +61,7 @@ function CountdownOverlay({ count, onComplete }: CountdownOverlayProps) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/95"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-white/95 dark:bg-slate-900/95"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -73,81 +72,24 @@ function CountdownOverlay({ count, onComplete }: CountdownOverlayProps) {
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 1.5, opacity: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
+          transition={{ duration: 0.5 }}
           className="text-center"
         >
-          <motion.span
-            className="text-[200px] font-bold bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent"
-            animate={{
-              textShadow: [
-                '0 0 20px rgba(168, 85, 247, 0.5)',
-                '0 0 60px rgba(168, 85, 247, 0.8)',
-                '0 0 20px rgba(168, 85, 247, 0.5)',
-              ],
-            }}
-            transition={{ duration: 0.5, repeat: Infinity }}
-          >
+          <span className="text-[150px] font-bold text-slate-900 dark:text-white">
             {current}
-          </motion.span>
-          <motion.p
-            className="text-2xl text-slate-400 mt-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            Get Ready!
-          </motion.p>
+          </span>
+          <p className="text-xl text-slate-500 dark:text-slate-400 mt-2">
+            Get ready!
+          </p>
         </motion.div>
       </AnimatePresence>
     </motion.div>
   );
 }
 
-// ============ SCORE ANIMATION (exported for future host overlay use) ============
-
-interface ScoreAnimationProps {
-  points: number;
-  isCorrect: boolean;
-}
-
-export function ScoreAnimation({ points, isCorrect }: ScoreAnimationProps) {
-  return (
-    <motion.div
-      className="fixed inset-0 z-40 pointer-events-none flex items-center justify-center"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      <motion.div
-        className={clsx(
-          'text-6xl font-bold',
-          isCorrect ? 'text-green-400' : 'text-red-400'
-        )}
-        initial={{ scale: 0, y: 50 }}
-        animate={{ scale: [0, 1.2, 1], y: [50, 0, -20] }}
-        exit={{ opacity: 0, y: -100 }}
-        transition={{ duration: 0.8 }}
-      >
-        {isCorrect ? (
-          <>
-            +{points}
-            <motion.span
-              className="inline-block ml-2"
-              animate={{ rotate: [0, 15, -15, 0] }}
-              transition={{ duration: 0.5, repeat: 2 }}
-            >
-              🎉
-            </motion.span>
-          </>
-        ) : (
-          '❌'
-        )}
-      </motion.div>
-    </motion.div>
-  );
-}
-
-// ============ FEEDBACK OVERLAY (PLAYER) ============
+// =============================================================================
+// Feedback Overlay (Player)
+// =============================================================================
 
 interface FeedbackOverlayProps {
   isCorrect: boolean;
@@ -160,84 +102,64 @@ function FeedbackOverlay({ isCorrect, points, streak }: FeedbackOverlayProps) {
     <motion.div
       className={clsx(
         'fixed inset-0 z-50 flex flex-col items-center justify-center',
-        isCorrect
-          ? 'bg-gradient-to-br from-green-600 to-emerald-700'
-          : 'bg-gradient-to-br from-red-600 to-rose-700'
+        isCorrect ? 'bg-emerald-50 dark:bg-emerald-900/50' : 'bg-red-50 dark:bg-red-900/50'
       )}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      {/* Sparkles for correct answer */}
-      {isCorrect && (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(20)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-2 h-2 bg-yellow-300 rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{
-                scale: [0, 1, 0],
-                opacity: [0, 1, 0],
-                y: [0, -100],
-              }}
-              transition={{
-                duration: 1.5,
-                delay: Math.random() * 0.5,
-                repeat: Infinity,
-              }}
-            />
-          ))}
-        </div>
-      )}
-
       <motion.div
         className="text-center"
         initial={{ scale: 0.5, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: 'spring', damping: 10 }}
+        transition={{ type: 'spring', damping: 12 }}
       >
         {isCorrect ? (
           <>
-            <motion.div
-              className="text-8xl mb-4"
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 0.5, repeat: 2 }}
+            <div
+              className={clsx(
+                'inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6',
+                'bg-emerald-100 dark:bg-emerald-800'
+              )}
             >
-              ✓
-            </motion.div>
-            <h2 className="text-4xl font-bold text-white mb-2">Correct!</h2>
+              <Check className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <h2 className="text-3xl font-bold text-emerald-700 dark:text-emerald-300 mb-2">
+              Correct!
+            </h2>
             <motion.p
-              className="text-6xl font-bold text-yellow-300"
+              className="text-5xl font-bold text-emerald-600 dark:text-emerald-400"
               initial={{ scale: 0 }}
               animate={{ scale: [0, 1.2, 1] }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.2 }}
             >
               +{points}
             </motion.p>
             {streak > 1 && (
               <motion.div
-                className="mt-4 flex items-center justify-center gap-2 text-2xl text-yellow-200"
-                initial={{ opacity: 0, y: 20 }}
+                className="mt-4 flex items-center justify-center gap-2 text-lg text-amber-600 dark:text-amber-400"
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.4 }}
               >
-                <Zap className="w-6 h-6" />
-                <span>{streak} streak!</span>
+                <Zap className="w-5 h-5" />
+                <span className="font-semibold">{streak} streak!</span>
               </motion.div>
             )}
           </>
         ) : (
-          <motion.div
-            animate={{ x: [-10, 10, -10, 10, 0] }}
-            transition={{ duration: 0.4 }}
-          >
-            <div className="text-8xl mb-4">✗</div>
-            <h2 className="text-4xl font-bold text-white">Wrong!</h2>
+          <motion.div animate={{ x: [-8, 8, -8, 8, 0] }} transition={{ duration: 0.4 }}>
+            <div
+              className={clsx(
+                'inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6',
+                'bg-red-100 dark:bg-red-800'
+              )}
+            >
+              <X className="w-10 h-10 text-red-600 dark:text-red-400" />
+            </div>
+            <h2 className="text-3xl font-bold text-red-700 dark:text-red-300">
+              Incorrect
+            </h2>
           </motion.div>
         )}
       </motion.div>
@@ -245,88 +167,135 @@ function FeedbackOverlay({ isCorrect, points, streak }: FeedbackOverlayProps) {
   );
 }
 
-// ============ TIMER DISPLAY ============
+// =============================================================================
+// Timer Display (Minimalist)
+// =============================================================================
 
 interface TimerDisplayProps {
   seconds: number;
   total: number;
-  size?: 'sm' | 'lg';
 }
 
-function TimerDisplay({ seconds, total, size = 'lg' }: TimerDisplayProps) {
+function TimerDisplay({ seconds, total }: TimerDisplayProps) {
   const percentage = (seconds / total) * 100;
   const isLow = seconds <= 5;
 
   return (
-    <div className={clsx('relative', size === 'lg' ? 'w-32 h-32' : 'w-16 h-16')}>
-      {/* Background circle */}
-      <svg className="w-full h-full transform -rotate-90">
-        <circle
-          cx="50%"
-          cy="50%"
-          r="45%"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="8"
-          className="text-slate-700"
-        />
-        <motion.circle
-          cx="50%"
-          cy="50%"
-          r="45%"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="8"
-          strokeLinecap="round"
-          className={isLow ? 'text-red-500' : 'text-purple-500'}
-          strokeDasharray={`${percentage * 2.83} 283`}
+    <div className="flex items-center gap-3">
+      <Clock
+        className={clsx('w-5 h-5', isLow ? 'text-red-500' : 'text-slate-400 dark:text-slate-500')}
+      />
+      <div className="w-32 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+        <motion.div
+          className={clsx('h-full rounded-full', isLow ? 'bg-red-500' : 'bg-blue-500')}
           initial={false}
-          animate={{ strokeDasharray: `${percentage * 2.83} 283` }}
+          animate={{ width: `${percentage}%` }}
           transition={{ duration: 0.5 }}
         />
-      </svg>
-      {/* Number */}
-      <motion.div
+      </div>
+      <motion.span
         className={clsx(
-          'absolute inset-0 flex items-center justify-center font-bold',
-          size === 'lg' ? 'text-4xl' : 'text-xl',
-          isLow ? 'text-red-500' : 'text-white'
+          'font-mono text-lg font-semibold min-w-[2.5rem]',
+          isLow ? 'text-red-500' : 'text-slate-900 dark:text-white'
         )}
         animate={isLow ? { scale: [1, 1.1, 1] } : {}}
         transition={{ duration: 0.5, repeat: isLow ? Infinity : 0 }}
       >
-        {seconds}
-      </motion.div>
+        {seconds}s
+      </motion.span>
     </div>
   );
 }
 
-// ============ ANSWER BAR CHART (HOST) ============
+// =============================================================================
+// Answer Distribution Chart (Host - Minimalist White Bars)
+// =============================================================================
 
-interface AnswerBarChartProps {
+interface AnswerChartProps {
   options: string[];
   counts: Record<string, number>;
+  correctAnswer?: string;
+  revealed?: boolean;
 }
 
-function AnswerBarChart({ options, counts }: AnswerBarChartProps) {
+function AnswerChart({ options, counts, correctAnswer, revealed }: AnswerChartProps) {
   const maxCount = Math.max(...Object.values(counts), 1);
+  const totalAnswers = Object.values(counts).reduce((a, b) => a + b, 0);
 
   return (
-    <div className="flex items-end justify-center gap-4 h-48">
+    <div className="space-y-3">
       {options.map((option, index) => {
         const count = counts[option] || 0;
-        const height = (count / maxCount) * 100;
+        const percentage = totalAnswers > 0 ? (count / totalAnswers) * 100 : 0;
+        const widthPercentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
+        const isCorrect = revealed && option === correctAnswer;
+        const isWrong = revealed && option !== correctAnswer;
 
         return (
-          <div key={option} className="flex flex-col items-center gap-2">
-            <span className="text-white font-bold text-lg">{count}</span>
-            <motion.div
-              className={clsx('w-20 rounded-t-lg', OPTION_COLORS[index]?.bg || 'bg-gray-500')}
-              initial={{ height: 0 }}
-              animate={{ height: `${Math.max(height, 10)}%` }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
-            />
-            <span className="text-2xl">{OPTION_SHAPES[index]}</span>
+          <div key={index} className="flex items-center gap-4">
+            {/* Option letter */}
+            <div
+              className={clsx(
+                'w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg',
+                isCorrect
+                  ? 'bg-emerald-500 text-white'
+                  : isWrong
+                  ? 'bg-slate-200 dark:bg-slate-700 text-slate-400'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+              )}
+            >
+              {String.fromCharCode(65 + index)}
+            </div>
+
+            {/* Bar */}
+            <div className="flex-1">
+              <div className="h-10 bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden relative">
+                <motion.div
+                  className={clsx(
+                    'h-full rounded-lg',
+                    isCorrect
+                      ? 'bg-emerald-500'
+                      : isWrong
+                      ? 'bg-slate-300 dark:bg-slate-600'
+                      : 'bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600'
+                  )}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${widthPercentage}%` }}
+                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                />
+                <div className="absolute inset-0 flex items-center px-4">
+                  <span
+                    className={clsx(
+                      'text-sm font-medium truncate',
+                      isCorrect
+                        ? 'text-white'
+                        : isWrong
+                        ? 'text-slate-400'
+                        : 'text-slate-700 dark:text-slate-300'
+                    )}
+                  >
+                    {option}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Count */}
+            <div className="w-16 text-right">
+              <span
+                className={clsx(
+                  'font-mono font-semibold',
+                  isCorrect
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-slate-600 dark:text-slate-400'
+                )}
+              >
+                {count}
+              </span>
+              <span className="text-xs text-slate-400 ml-1">
+                ({Math.round(percentage)}%)
+              </span>
+            </div>
           </div>
         );
       })}
@@ -334,7 +303,9 @@ function AnswerBarChart({ options, counts }: AnswerBarChartProps) {
   );
 }
 
-// ============ LEADERBOARD DISPLAY ============
+// =============================================================================
+// Leaderboard Display (Clean)
+// =============================================================================
 
 interface LeaderboardDisplayProps {
   entries: LeaderboardEntry[];
@@ -346,47 +317,51 @@ function LeaderboardDisplay({ entries, highlightId, showAll = false }: Leaderboa
   const displayEntries = showAll ? entries : entries.slice(0, 5);
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-xl mx-auto">
       <div className="flex items-center justify-center gap-2 mb-6">
-        <Trophy className="w-8 h-8 text-yellow-400" />
-        <h2 className="text-3xl font-bold text-white">Leaderboard</h2>
+        <Trophy className="w-6 h-6 text-amber-500" />
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Leaderboard</h2>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         {displayEntries.map((entry, index) => (
           <motion.div
             key={entry.id}
             className={clsx(
               'flex items-center gap-4 p-4 rounded-xl',
+              'bg-white dark:bg-slate-800',
+              'border',
               entry.id === highlightId
-                ? 'bg-purple-500/30 border-2 border-purple-500'
-                : 'bg-slate-800/60'
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10'
+                : 'border-slate-200 dark:border-slate-700'
             )}
-            initial={{ opacity: 0, x: -50 }}
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
+            transition={{ delay: index * 0.05 }}
           >
             {/* Rank */}
             <div
               className={clsx(
-                'w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl',
+                'w-10 h-10 rounded-full flex items-center justify-center font-bold',
                 index === 0
-                  ? 'bg-yellow-500 text-slate-900'
+                  ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400'
                   : index === 1
-                  ? 'bg-slate-400 text-slate-900'
+                  ? 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300'
                   : index === 2
-                  ? 'bg-amber-600 text-white'
-                  : 'bg-slate-700 text-slate-300'
+                  ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400'
+                  : 'bg-slate-100 dark:bg-slate-700 text-slate-500'
               )}
             >
               {entry.rank}
             </div>
 
             {/* Name */}
-            <div className="flex-1">
-              <p className="text-lg font-semibold text-white">{entry.nickname}</p>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-slate-900 dark:text-white truncate">
+                {entry.nickname}
+              </p>
               {entry.streak > 0 && (
-                <p className="text-sm text-yellow-400 flex items-center gap-1">
+                <p className="text-sm text-amber-600 dark:text-amber-400 flex items-center gap-1">
                   <Zap className="w-3 h-3" />
                   {entry.streak} streak
                 </p>
@@ -395,15 +370,10 @@ function LeaderboardDisplay({ entries, highlightId, showAll = false }: Leaderboa
 
             {/* Score */}
             <div className="text-right">
-              <motion.p
-                className="text-2xl font-bold text-white"
-                initial={{ scale: 1 }}
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 0.3 }}
-              >
+              <p className="text-xl font-bold text-slate-900 dark:text-white">
                 {entry.score.toLocaleString()}
-              </motion.p>
-              <p className="text-sm text-slate-400">points</p>
+              </p>
+              <p className="text-xs text-slate-500">points</p>
             </div>
           </motion.div>
         ))}
@@ -412,7 +382,85 @@ function LeaderboardDisplay({ entries, highlightId, showAll = false }: Leaderboa
   );
 }
 
-// ============ HOST VIEW ============
+// =============================================================================
+// Option Button (Player - Clean Assessment Style)
+// =============================================================================
+
+interface OptionButtonProps {
+  option: string;
+  index: number;
+  state: OptionState;
+  disabled: boolean;
+  onClick: () => void;
+}
+
+function OptionButton({ option, index, state, disabled, onClick }: OptionButtonProps) {
+  const letter = String.fromCharCode(65 + index);
+
+  const getStateClasses = () => {
+    if (state.isRevealed) {
+      if (state.isCorrect) {
+        return 'bg-emerald-500 border-emerald-600 text-white';
+      }
+      if (state.isSelected && !state.isCorrect) {
+        return 'bg-red-50 dark:bg-red-500/10 border-red-300 dark:border-red-500 text-red-700 dark:text-red-400';
+      }
+      return 'opacity-50 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700';
+    }
+    if (state.isSelected) {
+      return 'ring-2 ring-blue-500 border-blue-500 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300';
+    }
+    return 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white hover:border-slate-400 dark:hover:border-slate-500';
+  };
+
+  return (
+    <motion.button
+      onClick={onClick}
+      disabled={disabled}
+      className={clsx(
+        'w-full p-5 text-left rounded-2xl border-2 transition-all duration-150',
+        'flex items-center gap-4',
+        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900',
+        disabled && !state.isRevealed && 'cursor-not-allowed',
+        getStateClasses()
+      )}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }}
+      whileTap={!disabled ? { scale: 0.98 } : undefined}
+    >
+      {/* Letter badge */}
+      <div
+        className={clsx(
+          'w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg flex-shrink-0',
+          state.isRevealed && state.isCorrect
+            ? 'bg-white/20 text-white'
+            : state.isSelected
+            ? 'bg-blue-500 text-white'
+            : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+        )}
+      >
+        {letter}
+      </div>
+
+      {/* Option text */}
+      <span className="flex-1 font-medium">{option}</span>
+
+      {/* Status icon */}
+      {state.isRevealed && state.isCorrect && <Check className="w-6 h-6 flex-shrink-0" />}
+      {state.isRevealed && state.isSelected && !state.isCorrect && (
+        <X className="w-6 h-6 flex-shrink-0" />
+      )}
+      {state.isSelected && !state.isRevealed && (
+        <ChevronRight className="w-5 h-5 flex-shrink-0 text-blue-500" />
+      )}
+    </motion.button>
+  );
+}
+
+// =============================================================================
+// Host View (Projector-Friendly)
+// =============================================================================
 
 interface HostViewProps {
   gameState: ReturnType<typeof useGameSocket>;
@@ -432,68 +480,71 @@ function HostView({ gameState }: HostViewProps) {
   } = gameState;
 
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [revealAnswer, setRevealAnswer] = useState(false);
 
   // Show leaderboard when time runs out
   useEffect(() => {
     if (timeRemaining === 0 && status === 'active') {
-      setShowLeaderboard(true);
+      setRevealAnswer(true);
+      const timer = setTimeout(() => setShowLeaderboard(true), 3000);
+      return () => clearTimeout(timer);
     }
   }, [timeRemaining, status]);
 
-  // Reset leaderboard view on new question
+  // Reset on new question
   useEffect(() => {
     if (currentQuestion) {
       setShowLeaderboard(false);
+      setRevealAnswer(false);
     }
   }, [currentQuestion?.index]);
 
   // Waiting room
   if (status === 'waiting') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 flex flex-col items-center justify-center p-8">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center p-8">
         <motion.div
-          className="text-center"
+          className="text-center max-w-lg"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="mb-8">
-            <Trophy className="w-20 h-20 text-yellow-400 mx-auto mb-4" />
-            <h1 className="text-4xl font-bold text-white mb-2">Waiting for Players</h1>
-            <p className="text-slate-400 text-lg">Share the PIN code to let players join</p>
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-amber-100 dark:bg-amber-500/20 mb-6">
+            <Trophy className="w-10 h-10 text-amber-600 dark:text-amber-400" />
           </div>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+            Waiting for Players
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 mb-8">
+            Share the PIN code to let players join
+          </p>
 
           {/* Player count */}
-          <div className="bg-slate-800/60 rounded-2xl p-6 mb-8">
-            <div className="flex items-center justify-center gap-3 text-2xl text-white mb-4">
-              <Users className="w-8 h-8" />
-              <span className="font-bold">{players.length}</span>
-              <span className="text-slate-400">players joined</span>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 mb-6">
+            <div className="flex items-center justify-center gap-3 text-2xl mb-4">
+              <Users className="w-7 h-7 text-slate-400" />
+              <span className="font-bold text-slate-900 dark:text-white">{players.length}</span>
+              <span className="text-slate-500">players joined</span>
             </div>
 
             {/* Player list */}
-            <div className="flex flex-wrap justify-center gap-2">
-              {players.map((player) => (
-                <motion.div
-                  key={player.id}
-                  className="bg-purple-500/30 px-4 py-2 rounded-full text-purple-200"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                >
-                  {player.nickname}
-                </motion.div>
-              ))}
-            </div>
+            {players.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-2">
+                {players.map((player) => (
+                  <motion.div
+                    key={player.id}
+                    className="bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-full text-sm text-slate-700 dark:text-slate-300"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                  >
+                    {player.nickname}
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Start button */}
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={startGame}
-            disabled={players.length === 0}
-            className="px-12"
-          >
-            <Play className="w-6 h-6 mr-2" />
+          <Button onClick={startGame} disabled={players.length === 0} className="px-8">
+            <Play className="w-5 h-5 mr-2" />
             Start Game
           </Button>
         </motion.div>
@@ -504,23 +555,25 @@ function HostView({ gameState }: HostViewProps) {
   // Game finished
   if (status === 'finished') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 flex flex-col items-center justify-center p-8">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center p-8">
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="w-full"
+          className="w-full max-w-2xl"
         >
           {/* Winner announcement */}
           {leaderboard[0] && (
             <motion.div
-              className="text-center mb-12"
-              initial={{ y: -50, opacity: 0 }}
+              className="text-center mb-10"
+              initial={{ y: -30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
             >
-              <Crown className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
-              <h1 className="text-5xl font-bold text-white mb-2">Winner!</h1>
-              <p className="text-3xl text-yellow-400 font-bold">{leaderboard[0].nickname}</p>
-              <p className="text-xl text-slate-400 mt-2">
+              <Crown className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+              <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">Winner!</h1>
+              <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                {leaderboard[0].nickname}
+              </p>
+              <p className="text-lg text-slate-500 mt-1">
                 {leaderboard[0].score.toLocaleString()} points
               </p>
             </motion.div>
@@ -529,9 +582,9 @@ function HostView({ gameState }: HostViewProps) {
           <LeaderboardDisplay entries={leaderboard} showAll />
 
           <div className="flex justify-center mt-8">
-            <Button variant="secondary" size="lg" onClick={() => window.location.href = '/arcade'}>
+            <Button variant="outline" onClick={() => (window.location.href = '/arcade')}>
               <Home className="w-5 h-5 mr-2" />
-              Back to Lobby
+              Back to Games
             </Button>
           </div>
         </motion.div>
@@ -539,9 +592,9 @@ function HostView({ gameState }: HostViewProps) {
     );
   }
 
-  // Active game - showing question or leaderboard between rounds
+  // Active game
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 p-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-6">
       <AnimatePresence mode="wait">
         {showLeaderboard ? (
           <motion.div
@@ -567,9 +620,9 @@ function HostView({ gameState }: HostViewProps) {
               className="mt-8"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 1 }}
+              transition={{ delay: 0.5 }}
             >
-              <Button variant="primary" size="lg" onClick={nextQuestion}>
+              <Button onClick={nextQuestion}>
                 <SkipForward className="w-5 h-5 mr-2" />
                 Next Question
               </Button>
@@ -578,61 +631,44 @@ function HostView({ gameState }: HostViewProps) {
         ) : (
           <motion.div
             key="question"
+            className="max-w-4xl mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-              <div className="text-slate-400">
+            <div className="flex items-center justify-between mb-6">
+              <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
                 Question {(currentQuestion?.index || 0) + 1} of {totalQuestions}
-              </div>
-              <TimerDisplay
-                seconds={timeRemaining}
-                total={currentQuestion?.timeLimit || 20}
-              />
-              <div className="flex items-center gap-2 text-slate-400">
-                <Users className="w-5 h-5" />
+              </span>
+              <TimerDisplay seconds={timeRemaining} total={currentQuestion?.timeLimit || 20} />
+              <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                <Users className="w-4 h-4" />
                 {players.length} players
               </div>
             </div>
 
-            {/* Question */}
+            {/* Question Card */}
             <motion.div
-              className="bg-slate-800/60 rounded-3xl p-12 mb-8 text-center"
+              className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 mb-6 shadow-sm"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
             >
-              <h2 className="text-4xl font-bold text-white leading-relaxed">
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white text-center leading-relaxed">
                 {currentQuestion?.content}
               </h2>
             </motion.div>
 
-            {/* Options */}
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              {currentQuestion?.options.map((option, index) => (
-                <motion.div
-                  key={index}
-                  className={clsx(
-                    'p-6 rounded-2xl flex items-center gap-4',
-                    OPTION_COLORS[index]?.bg || 'bg-gray-500'
-                  )}
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <span className="text-4xl text-white/80">{OPTION_SHAPES[index]}</span>
-                  <span className="text-2xl font-bold text-white">{option}</span>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Answer bar chart */}
-            <div className="bg-slate-800/40 rounded-2xl p-6">
-              <h3 className="text-center text-slate-400 mb-4">Answers Received</h3>
-              <AnswerBarChart
+            {/* Answer Distribution */}
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6">
+              <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-4 text-center">
+                Answer Distribution
+              </h3>
+              <AnswerChart
                 options={currentQuestion?.options || []}
                 counts={answerCounts}
+                correctAnswer={revealAnswer ? currentQuestion?.options[0] : undefined}
+                revealed={revealAnswer}
               />
             </div>
           </motion.div>
@@ -642,63 +678,67 @@ function HostView({ gameState }: HostViewProps) {
   );
 }
 
-// ============ PLAYER VIEW ============
+// =============================================================================
+// Player View (Clean Assessment Style)
+// =============================================================================
 
 interface PlayerViewProps {
   gameState: ReturnType<typeof useGameSocket>;
 }
 
 function PlayerView({ gameState }: PlayerViewProps) {
-  const {
-    currentQuestion,
-    timeRemaining,
-    status,
-    lastResult,
-    submitAnswer,
-  } = gameState;
+  const { currentQuestion, timeRemaining, status, lastResult, submitAnswer } = gameState;
+  const navigate = useNavigate();
 
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [isRevealed, setIsRevealed] = useState(false);
 
   // Reset selection on new question
   useEffect(() => {
     setSelectedAnswer(null);
     setShowFeedback(false);
+    setIsRevealed(false);
   }, [currentQuestion?.index]);
 
   // Show feedback when result comes in
   useEffect(() => {
     if (lastResult) {
+      setIsRevealed(true);
       setShowFeedback(true);
-      const timer = setTimeout(() => setShowFeedback(false), 2000);
+      const timer = setTimeout(() => setShowFeedback(false), 2500);
       return () => clearTimeout(timer);
     }
   }, [lastResult]);
 
   // Handle answer selection
   const handleAnswer = (option: string) => {
-    if (selectedAnswer) return; // Already answered
+    if (selectedAnswer || isRevealed) return;
     setSelectedAnswer(option);
     submitAnswer(option);
   };
 
+  // Get option state
+  const getOptionState = (option: string): OptionState => ({
+    isSelected: option === selectedAnswer,
+    isCorrect: isRevealed && lastResult ? option === lastResult.correctAnswer : null,
+    isRevealed,
+  });
+
   // Waiting room
   if (status === 'waiting') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 flex flex-col items-center justify-center p-8">
-        <motion.div
-          className="text-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center p-8">
+        <motion.div className="text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <motion.div
-            animate={{ y: [0, -10, 0] }}
+            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-100 dark:bg-blue-500/20 mb-6"
+            animate={{ y: [0, -8, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            <Clock className="w-16 h-16 text-purple-400 mx-auto mb-4" />
+            <Clock className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           </motion.div>
-          <h2 className="text-2xl font-bold text-white mb-2">You're In!</h2>
-          <p className="text-slate-400">Waiting for the host to start...</p>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">You're In!</h2>
+          <p className="text-slate-500 dark:text-slate-400">Waiting for the host to start...</p>
         </motion.div>
       </div>
     );
@@ -707,21 +747,22 @@ function PlayerView({ gameState }: PlayerViewProps) {
   // Game finished
   if (status === 'finished') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 flex flex-col items-center justify-center p-8">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center p-8">
         <motion.div
           className="text-center"
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
         >
-          <Trophy className="w-20 h-20 text-yellow-400 mx-auto mb-4" />
-          <h2 className="text-3xl font-bold text-white mb-2">Game Over!</h2>
-          <p className="text-slate-400 mb-8">Check the host screen for final results</p>
-          <Button
-            variant="primary"
-            onClick={() => window.location.href = '/arcade'}
-          >
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-100 dark:bg-amber-500/20 mb-6">
+            <Trophy className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Game Over!</h2>
+          <p className="text-slate-500 dark:text-slate-400 mb-8">
+            Check the host screen for final results
+          </p>
+          <Button onClick={() => navigate('/arcade')}>
             <Home className="w-5 h-5 mr-2" />
-            Back to Lobby
+            Back to Games
           </Button>
         </motion.div>
       </div>
@@ -739,79 +780,57 @@ function PlayerView({ gameState }: PlayerViewProps) {
     );
   }
 
-  // Already answered, waiting for results
-  if (selectedAnswer) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 flex flex-col items-center justify-center p-8">
-        <motion.div
-          className="text-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
-          <motion.div
-            className="w-24 h-24 rounded-full bg-purple-500/30 flex items-center justify-center mx-auto mb-4"
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 1, repeat: Infinity }}
-          >
-            <Check className="w-12 h-12 text-purple-400" />
-          </motion.div>
-          <h2 className="text-2xl font-bold text-white mb-2">Answer Locked!</h2>
-          <p className="text-slate-400">Waiting for time to run out...</p>
-          <div className="mt-6">
-            <TimerDisplay
-              seconds={timeRemaining}
-              total={currentQuestion?.timeLimit || 20}
-              size="sm"
-            />
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
-
-  // Active game - show answer buttons (no question text for players!)
+  // Active game
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 p-4 flex flex-col">
-      {/* Timer at top */}
-      <div className="flex justify-center mb-4">
-        <TimerDisplay
-          seconds={timeRemaining}
-          total={currentQuestion?.timeLimit || 20}
-          size="sm"
-        />
-      </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4">
+      <div className="max-w-lg mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
+            Q{(currentQuestion?.index || 0) + 1}
+          </span>
+          <TimerDisplay seconds={timeRemaining} total={currentQuestion?.timeLimit || 20} />
+        </div>
 
-      {/* Answer buttons - large colored blocks */}
-      <div className="flex-1 grid grid-cols-2 gap-3">
-        {currentQuestion?.options.map((option, index) => (
-          <motion.button
-            key={index}
-            className={clsx(
-              'rounded-2xl flex items-center justify-center',
-              'transition-all duration-200 active:scale-95',
-              OPTION_COLORS[index]?.bg || 'bg-gray-500',
-              OPTION_COLORS[index]?.hover || 'hover:bg-gray-400'
-            )}
-            onClick={() => handleAnswer(option)}
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: index * 0.1 }}
-            whileTap={{ scale: 0.95 }}
+        {/* Question */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 mb-6">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white text-center">
+            {currentQuestion?.content}
+          </h2>
+        </div>
+
+        {/* Options */}
+        <div className="space-y-3">
+          {currentQuestion?.options.map((option, index) => (
+            <OptionButton
+              key={index}
+              option={option}
+              index={index}
+              state={getOptionState(option)}
+              disabled={!!selectedAnswer || isRevealed}
+              onClick={() => handleAnswer(option)}
+            />
+          ))}
+        </div>
+
+        {/* Selected indicator */}
+        {selectedAnswer && !isRevealed && (
+          <motion.p
+            className="text-center text-slate-500 dark:text-slate-400 mt-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
           >
-            <span className="text-6xl text-white/90">{OPTION_SHAPES[index]}</span>
-          </motion.button>
-        ))}
+            Answer locked! Waiting for results...
+          </motion.p>
+        )}
       </div>
-
-      {/* Hint text */}
-      <p className="text-center text-slate-500 text-sm mt-4">
-        Look at the host screen for the question!
-      </p>
     </div>
   );
 }
 
-// ============ MAIN QUIZ GAME COMPONENT ============
+// =============================================================================
+// Main QuizGame Component
+// =============================================================================
 
 export default function QuizGame() {
   const { pinCode } = useParams<{ pinCode: string }>();
@@ -819,7 +838,6 @@ export default function QuizGame() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // isHost is determined by server based on hostId match
   const nicknameParam = searchParams.get('nickname');
   const nickname = nicknameParam || user?.username || 'Player';
 
@@ -846,17 +864,19 @@ export default function QuizGame() {
   // Error state
   if (gameState.error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 flex flex-col items-center justify-center p-8">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center p-8">
         <motion.div
-          className="text-center bg-red-500/20 border border-red-500/50 rounded-2xl p-8 max-w-md"
-          initial={{ opacity: 0, scale: 0.9 }}
+          className="text-center bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/50 rounded-2xl p-8 max-w-md"
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
         >
-          <X className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Error</h2>
-          <p className="text-red-200 mb-6">{gameState.error}</p>
-          <Button variant="secondary" onClick={() => navigate('/arcade')}>
-            Back to Lobby
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-red-100 dark:bg-red-500/20 mb-6">
+            <X className="w-8 h-8 text-red-600 dark:text-red-400" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Error</h2>
+          <p className="text-red-600 dark:text-red-400 mb-6">{gameState.error}</p>
+          <Button variant="outline" onClick={() => navigate('/arcade')}>
+            Back to Games
           </Button>
         </motion.div>
       </div>
@@ -866,18 +886,14 @@ export default function QuizGame() {
   // Connecting state
   if (!gameState.isConnected || gameState.status === 'connecting' || gameState.status === 'idle') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 flex flex-col items-center justify-center p-8">
-        <motion.div
-          className="text-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center p-8">
+        <motion.div className="text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <motion.div
-            className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"
+            className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           />
-          <p className="text-slate-400">Connecting to game...</p>
+          <p className="text-slate-500 dark:text-slate-400">Connecting to game...</p>
         </motion.div>
       </div>
     );
@@ -887,17 +903,11 @@ export default function QuizGame() {
     <AnimatedPage>
       {/* Countdown overlay */}
       <AnimatePresence>
-        {showCountdown && (
-          <CountdownOverlay count={3} onComplete={() => setShowCountdown(false)} />
-        )}
+        {showCountdown && <CountdownOverlay count={3} onComplete={() => setShowCountdown(false)} />}
       </AnimatePresence>
 
       {/* Render appropriate view */}
-      {gameState.isHost ? (
-        <HostView gameState={gameState} />
-      ) : (
-        <PlayerView gameState={gameState} />
-      )}
+      {gameState.isHost ? <HostView gameState={gameState} /> : <PlayerView gameState={gameState} />}
     </AnimatedPage>
   );
 }

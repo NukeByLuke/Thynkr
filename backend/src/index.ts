@@ -136,7 +136,7 @@ async function start() {
     server.setErrorHandler(errorHandler);
 
     // Start server
-    const address = await server.listen({ port: config.port, host: '0.0.0.0' });
+    await server.listen({ port: config.port, host: '0.0.0.0' });
     logger.info(`Server running on http://localhost:${config.port}`);
 
     // Initialize Socket.io for Thynkr Arcade
