@@ -7,6 +7,7 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { LucideIcon, LogOut, ChevronRight, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import ThynkrLogo from '@/components/brand/Logo';
 
 // ============================================================================
 // NavItem Component
@@ -173,13 +174,8 @@ export default function Sidebar({
       <div className="p-4 border-b border-slate-100 dark:border-slate-800/50">
         <div className="flex items-center gap-3">
           {/* Logo */}
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-base shadow-lg shadow-blue-500/20">
-            T
-          </div>
+          <ThynkrLogo className="h-9 text-slate-900 dark:text-white" />
           <div className="flex-1 min-w-0">
-            <h1 className="text-base font-semibold text-slate-900 dark:text-white">
-              Thynkr
-            </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               AI Study Platform
             </p>

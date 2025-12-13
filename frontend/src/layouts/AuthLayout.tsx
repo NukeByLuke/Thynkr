@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { useTheme } from '@/contexts/ThemeContext';
 import ThemeToggle from '@/components/ThemeToggle';
 import ThynkrTabs from '@/components/ThynkrTabs';
+import ThynkrLogo from '@/components/brand/Logo';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -22,11 +23,9 @@ function BrandingPanel() {
     <div className="hidden md:flex flex-col items-center justify-between w-[420px] bg-slate-900 rounded-l-3xl p-10 text-white">
       {/* Logo and Brand */}
       <div className="flex-1 flex flex-col items-center justify-center">
-        {/* Thynkr Logo Icon */}
+        {/* Thynkr Logo */}
         <div className="mb-6">
-          <div className="h-24 w-24 rounded-2xl bg-cyan-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
-            <span className="text-white font-bold text-4xl">T</span>
-          </div>
+          <ThynkrLogo variant="icon" className="h-24 w-24 text-white" animated />
         </div>
         
         {/* Brand Name */}
@@ -94,11 +93,8 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           }`}
         >
           {/* Mobile Logo - Only shown on small screens */}
-          <div className="md:hidden flex items-center justify-center gap-2 mb-6">
-            <div className="h-8 w-8 rounded-lg bg-cyan-500 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">T</span>
-            </div>
-            <span className="text-lg font-semibold text-slate-900 dark:text-white">Thynkr</span>
+          <div className="md:hidden flex items-center justify-center mb-6">
+            <ThynkrLogo className="h-8 text-slate-900 dark:text-white" />
           </div>
 
           {/* Auth Tabs */}
