@@ -214,10 +214,13 @@ function GameCard({ card, onSelect, disabled }: GameCardProps) {
       onClick={handleClick}
       disabled={disabled || card.isMatched}
       className={clsx(
-        'relative w-full min-h-28 sm:min-h-32 rounded-xl border shadow-sm',
-        'font-medium text-sm sm:text-base',
+        'relative w-full rounded-xl border shadow-sm',
         'transition-colors duration-150',
         'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900',
+        // Term-specific styling
+        card.type === 'term' && 'h-16 font-bold text-base',
+        // Definition-specific styling  
+        card.type === 'definition' && 'min-h-16 font-medium text-sm',
         'cursor-pointer',
         getCardClasses()
       )}
@@ -249,8 +252,16 @@ function GameCard({ card, onSelect, disabled }: GameCardProps) {
       </div>
 
       {/* Content */}
-      <div className="flex items-center justify-center px-3 py-6">
-        <p className="text-center leading-relaxed break-words">{card.content}</p>
+      <div className={clsx(
+        'flex items-center px-3 py-4',
+        card.type === 'term' ? 'justify-center' : 'justify-start'
+      )}>
+        <p className={clsx(
+          'leading-relaxed break-words',
+          card.type === 'term' ? 'text-center' : 'text-left'
+        )}>
+          {card.content}
+        </p>
       </div>
 
       {/* Match checkmark */}
@@ -567,9 +578,12 @@ export default function MatchingGame() {
     
     const selectedPairs = shuffleArray(pairSource).slice(0, PAIRS_PER_GAME);
 
-    const gameCards: Card[] = [];
+    // Create separate arrays for terms and definitions
+    const termCards: Card[] = [];
+    const definitionCards: Card[] = [];
+    
     selectedPairs.forEach((pair) => {
-      gameCards.push({
+      termCards.push({
         id: `${pair.id}-term`,
         pairId: pair.id,
         content: pair.term,
@@ -578,7 +592,7 @@ export default function MatchingGame() {
         isSelected: false,
         isWrong: false,
       });
-      gameCards.push({
+      definitionCards.push({
         id: `${pair.id}-def`,
         pairId: pair.id,
         content: pair.definition,
@@ -589,7 +603,9 @@ export default function MatchingGame() {
       });
     });
 
-    setCards(shuffleArray(gameCards));
+    // Shuffle definitions independently from terms
+    const allCards = [...termCards, ...shuffleArray(definitionCards)];
+    setCards(allCards);
     setSelectedCards([]);
     setTimeRemaining(GAME_TIME_SECONDS);
     setScore(0);
@@ -811,17 +827,36 @@ export default function MatchingGame() {
             {/* HUD */}
             <HUD timeRemaining={timeRemaining} score={score} pairsLeft={pairsLeft} />
 
-            {/* Game Board */}
-            <div className="max-w-2xl mx-auto px-4 py-6">
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                {cards.map((card) => (
-                  <GameCard
-                    key={card.id}
-                    card={card}
-                    onSelect={handleCardSelect}
-                    disabled={status !== 'playing' || selectedCards.length >= 2}
-                  />
-                ))}
+            {/* Game Board - Split Column Layout */}
+            <div className="max-w-6xl mx-auto px-4 py-6">
+              <div className="grid grid-cols-[1fr_2fr] gap-6">
+                {/* Left Column: Terms */}
+                <div className="space-y-3">
+                  {cards
+                    .filter(card => card.type === 'term')
+                    .map((card) => (
+                      <GameCard
+                        key={card.id}
+                        card={card}
+                        onSelect={handleCardSelect}
+                        disabled={status !== 'playing' || selectedCards.length >= 2}
+                      />
+                    ))}
+                </div>
+
+                {/* Right Column: Definitions */}
+                <div className="space-y-3">
+                  {cards
+                    .filter(card => card.type === 'definition')
+                    .map((card) => (
+                      <GameCard
+                        key={card.id}
+                        card={card}
+                        onSelect={handleCardSelect}
+                        disabled={status !== 'playing' || selectedCards.length >= 2}
+                      />
+                    ))}
+                </div>
               </div>
             </div>
           </>
