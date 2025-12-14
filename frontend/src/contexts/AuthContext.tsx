@@ -148,6 +148,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryClient.clear();
     setUser(null);
     navigate('/login');
+    // Force page reload to clear all state
+    window.location.reload();
   };
 
   const refetchUser = async () => {

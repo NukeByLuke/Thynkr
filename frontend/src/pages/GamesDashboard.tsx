@@ -454,13 +454,17 @@ export default function GamesDashboard() {
         consumeCredit();
       }
       
-      // TODO: Pass game config to the route (via state or query params)
-      // For now, we'll navigate with the config in the location state
-      navigate(selectedGame.route, { 
-        state: { 
-          gameConfig: config 
-        } 
-      });
+      // For multiplayer games, navigate to the PIN-based game room
+      if (activeTab === 'multiplayer' && config.pinCode) {
+        navigate(`/arcade/play/${config.pinCode}`);
+      } else {
+        // For solo games, navigate with config in state
+        navigate(selectedGame.route, { 
+          state: { 
+            gameConfig: config 
+          } 
+        });
+      }
       
       // Close the setup modal
       handleSetupModalClose();
@@ -514,6 +518,7 @@ export default function GamesDashboard() {
         gameTitle={selectedGame?.title || ''}
         onStartGame={handleGameStart}
         userFiles={userFiles}
+        isMultiplayer={activeTab === 'multiplayer'}
       />
 
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900">

@@ -21,7 +21,7 @@ const gameGenerationRequestSchema = z.object({
     errorMap: () => ({ message: 'Game type must be MATCHING, QUIZ, or FILL_BLANKS' }),
   }),
   fileIds: z
-    .array(z.string().uuid('Invalid file ID format'))
+    .array(z.string().min(1, 'File ID cannot be empty'))
     .min(1, 'At least one file must be selected')
     .max(10, 'Cannot select more than 10 files'),
   config: z.object({
@@ -348,6 +348,154 @@ export default async function gameRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({
         error: 'Generation failed',
         message: 'An error occurred while generating the game. Please try again.',
+      });
+    }
+  });
+
+  // Create game session with generated questions
+  fastify.post<{
+    Body: z.infer<typeof gameGenerationRequestSchema>;
+  }>('/games/create-session', {
+    preHandler: authenticate,
+  }, async (request, reply) => {
+    try {
+      const validationResult = gameGenerationRequestSchema.safeParse(request.body);
+      if (!validationResult.success) {
+        return reply.status(400).send({
+          error: 'Validation failed',
+          message: validationResult.error.errors[0].message,
+        });
+      }
+
+      const { gameType, fileIds, config } = validationResult.data;
+      const userId = (request as AuthenticatedRequest).user?.userId;
+      
+      if (!userId) {
+        return reply.status(401).send({ error: 'Unauthorized' });
+      }
+
+      // Fetch files and generate questions (same as /games/generate)
+      const files = await prisma.uploadedFile.findMany({
+        where: {
+          id: { in: fileIds },
+          userId,
+        },
+        select: {
+          id: true,
+          originalName: true,
+          extractedText: true,
+        },
+      });
+
+      if (files.length !== fileIds.length) {
+        return reply.status(404).send({ error: 'Some files not found' });
+      }
+
+      const filesWithoutText = files.filter(f => !f.extractedText);
+      if (filesWithoutText.length > 0) {
+        return reply.status(400).send({
+          error: 'Some files have not been processed yet',
+        });
+      }
+
+      const combinedContent = files
+        .map(file => `=== ${file.originalName} ===\n${file.extractedText}`)
+        .join('\n\n')
+        .substring(0, 48000);
+
+      if (combinedContent.length < 100) {
+        return reply.status(400).send({
+          error: 'Insufficient content',
+        });
+      }
+
+      // Generate questions
+      let gameContent: any[];
+      switch (gameType) {
+        case 'QUIZ':
+          gameContent = await gameGenService.generateQuiz(
+            combinedContent,
+            config.count,
+            config.difficulty
+          );
+          break;
+        case 'MATCHING':
+          gameContent = await gameGenService.generateMatching(
+            combinedContent,
+            config.count,
+            config.difficulty
+          );
+          break;
+        case 'FILL_BLANKS':
+          gameContent = await gameGenService.generateFillBlanks(
+            combinedContent,
+            config.count,
+            config.difficulty
+          );
+          break;
+        default:
+          return reply.status(400).send({ error: 'Invalid game type' });
+      }
+
+      // Create game in database with proper enum mapping
+      const gameTypeMap: Record<string, string> = {
+        'QUIZ': 'LIVE_QUIZ',
+        'MATCHING': 'MATCHING_RUSH',
+        'FILL_BLANKS': 'BLANK_MASTER',
+      };
+
+      const game = await prisma.game.create({
+        data: {
+          title: `${gameType} - ${files.map(f => f.originalName).join(', ').substring(0, 100)}`,
+          type: gameTypeMap[gameType] as any,
+          tier: 'FREE',
+          questions: {
+            create: gameContent.map((q, index) => ({
+              content: gameType === 'MATCHING' ? q.term : q.question || q.sentence,
+              options: gameType === 'MATCHING' 
+                ? [q.definition] 
+                : (q.options || []),
+              correctAnswer: gameType === 'MATCHING' ? q.definition : (q.answer || ''),
+              timeLimit: 20,
+              order: index,
+            })),
+          },
+        },
+      });
+
+      // Generate unique PIN code
+      let pinCode = '';
+      let pinExists = true;
+      while (pinExists) {
+        pinCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const existing = await prisma.gameSession.findUnique({
+          where: { pinCode },
+        });
+        pinExists = !!existing;
+      }
+
+      // Create game session
+      const session = await prisma.gameSession.create({
+        data: {
+          gameId: game.id,
+          hostId: userId,
+          pinCode: pinCode,
+          status: 'WAITING',
+        },
+      });
+
+      logger.info(`Created game session ${pinCode} for user ${userId}`);
+
+      reply.send({
+        pinCode: session.pinCode,
+        gameId: game.id,
+        sessionId: session.id,
+        questionCount: gameContent.length,
+      });
+    } catch (error) {
+      logger.error('Failed to create game session:', error);
+      return reply.status(500).send({
+        error: 'Failed to create game session',
       });
     }
   });

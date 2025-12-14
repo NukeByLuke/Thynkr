@@ -3,7 +3,7 @@
  * Processes token or error from URL params and redirects accordingly
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -104,14 +104,13 @@ export default function AuthCallback() {
   const navigate = useNavigate();
   const { refetchUser } = useAuth();
   const [isProcessing, setIsProcessing] = useState(true);
+  const hasProcessedRef = useRef(false);
 
   useEffect(() => {
-    // Prevent duplicate processing (React StrictMode runs effects twice)
-    let hasProcessed = false;
-    
     const processCallback = async () => {
-      if (hasProcessed) return;
-      hasProcessed = true;
+      // Prevent duplicate processing (React StrictMode runs effects twice)
+      if (hasProcessedRef.current) return;
+      hasProcessedRef.current = true;
       
       const token = searchParams.get('accessToken');
       const refreshToken = searchParams.get('refreshToken');

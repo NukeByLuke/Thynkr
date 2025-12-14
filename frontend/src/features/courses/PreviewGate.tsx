@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import LogoIconLight from '@/assets/brand/thynkr-icon-dark.svg';
-import LogoIconDark from '@/assets/brand/thynkr-icon-light.svg';
+import ThynkrLogo from '@/components/brand/Logo';
 
 export default function PreviewGate({ onSuccess }: { onSuccess: () => void }) {
   const [password, setPassword] = useState('');
@@ -21,8 +20,7 @@ export default function PreviewGate({ onSuccess }: { onSuccess: () => void }) {
     <div className="min-h-screen w-full bg-white dark:bg-gray-900 flex items-center justify-center p-6">
       <div className="w-full max-w-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-6">
         <div className="flex items-center gap-2 mb-4">
-          <img src={LogoIconLight} alt="Thynkr" className="h-8 w-8 block dark:hidden" />
-          <img src={LogoIconDark} alt="Thynkr" className="h-8 w-8 hidden dark:block" />
+          <ThynkrLogo variant="symbol" className="h-8 w-8" />
           <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Thynkr Preview</h1>
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">

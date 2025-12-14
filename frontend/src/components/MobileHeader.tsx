@@ -32,7 +32,7 @@ export default function MobileHeader({ onMenuClick }: MobileHeaderProps) {
 
         {/* Center: Logo */}
         <div className="flex items-center">
-          <ThynkrLogo className="h-7 text-slate-900 dark:text-white" />
+          <ThynkrLogo variant="symbol" className="h-7 text-slate-900 dark:text-white" />
         </div>
 
         {/* Right: User Avatar */}

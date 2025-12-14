@@ -31,7 +31,7 @@ export function NavItem({ to, icon: Icon, label, end = false, onClick }: NavItem
         `relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
           isActive
             ? // Active State - Aurora Theme
-              'bg-gradient-to-r from-blue-50 to-purple-50 dark:bg-white/5 text-blue-600 dark:text-blue-400 font-medium'
+              'bg-gradient-to-r from-blue-50 to-purple-50 dark:from-slate-800/60 dark:to-slate-800/60 text-slate-900 dark:text-slate-300 font-medium'
             : // Inactive State
               'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
         }`
@@ -55,14 +55,20 @@ export function NavItem({ to, icon: Icon, label, end = false, onClick }: NavItem
             <Icon
               className={`w-4 h-4 ${
                 isActive
-                  ? 'text-blue-600 dark:text-blue-400'
+                  ? 'text-blue-600 dark:text-blue-300'
                   : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-300'
               }`}
             />
           </div>
 
           {/* Label */}
-          <span className="text-sm">{label}</span>
+          <span className={`text-sm ${
+            isActive 
+              ? 'text-slate-900 dark:text-slate-300' 
+              : 'text-slate-500 dark:text-slate-400'
+          }`}>
+            {label}
+          </span>
 
           {/* Hover Arrow */}
           <ChevronRight
@@ -174,7 +180,7 @@ export default function Sidebar({
       <div className="p-4 border-b border-slate-100 dark:border-slate-800/50">
         <div className="flex items-center gap-3">
           {/* Logo */}
-          <ThynkrLogo className="h-9 text-slate-900 dark:text-white" />
+          <ThynkrLogo variant="full" className="text-slate-900 dark:text-white" />
           <div className="flex-1 min-w-0">
             <p className="text-xs text-slate-500 dark:text-slate-400">
               AI Study Platform

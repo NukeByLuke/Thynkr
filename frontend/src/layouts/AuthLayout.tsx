@@ -20,40 +20,47 @@ interface AuthLayoutProps {
  */
 function BrandingPanel() {
   return (
-    <div className="hidden md:flex flex-col items-center justify-between w-[420px] bg-slate-900 rounded-l-3xl p-10 text-white">
+    <div className="hidden md:flex flex-col items-center justify-between w-[420px] bg-slate-950 relative overflow-hidden rounded-l-3xl p-10 text-white">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(124,58,237,0.15),rgba(15,23,42,0))]" />
+      <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+
       {/* Logo and Brand */}
-      <div className="flex-1 flex flex-col items-center justify-center">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center">
         {/* Thynkr Logo */}
-        <div className="mb-6">
-          <ThynkrLogo variant="icon" className="h-24 w-24 text-white" animated />
+        <div className="mb-8 transform hover:scale-105 transition-transform duration-500 w-64 h-64">
+          <ThynkrLogo variant="symbol" theme="dark" className="text-white drop-shadow-[0_0_30px_rgba(124,58,237,0.5)]" />
         </div>
         
         {/* Brand Name */}
-        <h1 className="text-4xl font-bold tracking-tight mb-4">Thynkr</h1>
+        <h1 className="text-5xl font-bold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-400">
+          Thynkr
+        </h1>
         
         {/* Tagline */}
-        <p className="text-slate-400 text-lg text-center">
-          the best ai study tool
+        <p className="text-slate-400 text-lg text-center max-w-[280px] leading-relaxed">
+          Transform your learning with intelligent AI tutoring
         </p>
       </div>
 
       {/* Footer Links */}
-      <nav className="flex items-center gap-8 text-sm">
+      <nav className="relative z-10 flex items-center gap-8 text-sm font-medium">
         <Link
           to="/about"
-          className="text-cyan-400 hover:text-cyan-300 transition-colors"
+          className="text-slate-400 hover:text-white transition-colors"
         >
           About
         </Link>
         <Link
           to="/testimonials"
-          className="text-cyan-400 hover:text-cyan-300 transition-colors"
+          className="text-slate-400 hover:text-white transition-colors"
         >
           Testimonials
         </Link>
         <Link
           to="/contact"
-          className="text-cyan-400 hover:text-cyan-300 transition-colors"
+          className="text-slate-400 hover:text-white transition-colors"
         >
           Contact
         </Link>

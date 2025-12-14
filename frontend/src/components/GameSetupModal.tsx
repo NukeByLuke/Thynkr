@@ -18,12 +18,15 @@ interface GameSetupModalProps {
   gameTitle: string;
   onStartGame: (config: GameConfig) => void;
   userFiles: UploadedFile[];
+  isMultiplayer?: boolean;
 }
 
 export interface GameConfig {
   selectedFileIds: string[];
   difficulty: 'easy' | 'normal' | 'hard';
   questionCount: 10 | 20 | 50;
+  pinCode?: string;
+  generatedContent?: any[];
 }
 
 type SetupStep = 'source' | 'settings' | 'generating';
@@ -46,6 +49,7 @@ export default function GameSetupModal({
   gameTitle,
   onStartGame,
   userFiles,
+  isMultiplayer = false,
 }: GameSetupModalProps) {
   const [currentStep, setCurrentStep] = useState<SetupStep>('source');
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
@@ -86,18 +90,103 @@ export default function GameSetupModal({
   };
 
   // Handle generate game
-  const handleGenerateGame = () => {
+  const handleGenerateGame = async () => {
     setCurrentStep('generating');
     
-    // Simulate generation process
-    setTimeout(() => {
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || '/api';
+      const token = localStorage.getItem('accessToken');
+      
+      // Determine game type based on title
+      let gameType = 'QUIZ';
+      if (gameTitle.toLowerCase().includes('matching')) {
+        gameType = 'MATCHING';
+      }
+      
+      console.log('Generating game content with:', {
+        gameType,
+        fileIds: selectedFileIds,
+        config: {
+          difficulty,
+          count: questionCount,
+        },
+      });
+      
+      // For solo games, just generate content
+      if (!isMultiplayer) {
+        const response = await fetch(`${API_URL}/games/generate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            gameType,
+            fileIds: selectedFileIds,
+            config: {
+              difficulty,
+              count: questionCount,
+            },
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('API Error:', errorData);
+          throw new Error(errorData.message || errorData.error || 'Failed to generate game');
+        }
+
+        const data = await response.json();
+        console.log('Game content generated:', data);
+        
+        const config: GameConfig = {
+          selectedFileIds,
+          difficulty,
+          questionCount,
+          generatedContent: data.content,
+        };
+        onStartGame(config);
+        return;
+      }
+      
+      // For multiplayer games, create a session with PIN
+      const response = await fetch(`${API_URL}/games/create-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          gameType: 'QUIZ',
+          fileIds: selectedFileIds,
+          config: {
+            difficulty,
+            count: questionCount,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('API Error:', errorData);
+        throw new Error(errorData.message || errorData.error || 'Failed to create game');
+      }
+
+      const data = await response.json();
+      console.log('Game session created:', data);
+      
       const config: GameConfig = {
         selectedFileIds,
         difficulty,
         questionCount,
+        pinCode: data.pinCode,
       };
       onStartGame(config);
-    }, 3000);
+    } catch (error) {
+      console.error('Failed to generate game:', error);
+      setCurrentStep('settings');
+      alert(error instanceof Error ? error.message : 'Failed to generate game. Please try again.');
+    }
   };
 
   // Check if next step is allowed

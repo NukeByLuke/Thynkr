@@ -6,7 +6,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Trophy,
   Clock,
@@ -508,8 +508,13 @@ function DifficultySelector({ difficulty, onSelect, isPro }: DifficultySelectorP
 
 export default function MatchingGame() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const isPro = user?.role && ['STANDARD', 'PREMIUM', 'ADMIN'].includes(user.role);
+
+  // Get generated content from navigation state
+  const gameConfig = location.state?.config;
+  const generatedPairs = gameConfig?.generatedContent;
 
   // Game state
   const [status, setStatus] = useState<GameStatus>('idle');
@@ -533,7 +538,22 @@ export default function MatchingGame() {
 
   // Initialize game
   const initializeGame = useCallback(() => {
-    const pairSource = difficulty === 'hard' ? HARD_MODE_PAIRS : SAMPLE_PAIRS;
+    // Use generated content from user files if available, otherwise fallback to sample data
+    let pairSource: MatchPair[];
+    
+    if (generatedPairs && generatedPairs.length > 0) {
+      // Convert generated content to MatchPair format
+      // Expected format from API: [{ term: string, definition: string }, ...]
+      pairSource = generatedPairs.map((pair: any, index: number) => ({
+        id: `${index + 1}`,
+        term: pair.term || pair.question || '',
+        definition: pair.definition || pair.answer || '',
+      }));
+    } else {
+      // Fallback to sample data
+      pairSource = difficulty === 'hard' ? HARD_MODE_PAIRS : SAMPLE_PAIRS;
+    }
+    
     const selectedPairs = shuffleArray(pairSource).slice(0, PAIRS_PER_GAME);
 
     const gameCards: Card[] = [];
@@ -564,7 +584,7 @@ export default function MatchingGame() {
     setScore(0);
     setMatchesFound(0);
     setShowResults(false);
-  }, [difficulty]);
+  }, [difficulty, generatedPairs]);
 
   // Start game
   const startGame = useCallback(() => {
