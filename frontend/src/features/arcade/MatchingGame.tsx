@@ -23,6 +23,7 @@ import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import AnimatedPage from '@/components/AnimatedPage';
 import GameLoadingWrapper from '@/components/GameLoadingWrapper';
+import ResponsiveText from '@/components/ui/ResponsiveText';
 
 // =============================================================================
 // Types
@@ -256,12 +257,13 @@ function GameCard({ card, onSelect, disabled }: GameCardProps) {
         'flex items-center px-3 py-4',
         card.type === 'term' ? 'justify-center' : 'justify-start'
       )}>
-        <p className={clsx(
-          'leading-relaxed break-words',
-          card.type === 'term' ? 'text-center' : 'text-left'
-        )}>
-          {card.content}
-        </p>
+        <ResponsiveText 
+          content={card.content}
+          className={clsx(
+            'leading-relaxed break-words',
+            card.type === 'term' ? 'text-center font-bold' : 'text-left'
+          )}
+        />
       </div>
 
       {/* Match checkmark */}
