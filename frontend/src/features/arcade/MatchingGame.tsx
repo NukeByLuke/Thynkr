@@ -597,6 +597,24 @@ export default function MatchingGame() {
     setShowResults(false);
   }, [difficulty, generatedPairs]);
 
+  // Auto-complete loading and auto-start game when content is generated
+  useEffect(() => {
+    if (isLoading && generatedPairs) {
+      // Initialize the game first
+      initializeGame();
+      
+      // Then set loading to false and auto-start game
+      const timeout = setTimeout(() => {
+        setIsLoading(false);
+        // Auto-start the game when coming from generated content
+        setStatus('countdown');
+        incrementDailyGames();
+        gamesPlayedToday.current += 1;
+      }, 2000); // Allow time for the loading animation stages
+      return () => clearTimeout(timeout);
+    }
+  }, [isLoading, generatedPairs, initializeGame]);
+
   // Start game
   const startGame = useCallback(() => {
     // Check daily limit for free users
