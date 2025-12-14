@@ -56,7 +56,15 @@ class PromptTemplates {
       hard: 'Include advanced concepts and nuanced definitions. Challenge understanding.',
     }[difficulty] || '';
 
-    return `You are an expert tutor. Create a MATCHING game based strictly on the following text content.
+    return `You are a strict exam proctor. Your goal is to create rapid-fire study materials.
+
+CRITICAL SHORTNESS RULE:
+- TERMS must be under 6 words.
+- DEFINITIONS must be under 20 words maximum. Summarize aggressively. Do not copy long sentences.
+
+CRITICAL FORMATTING RULE:
+- Never use 'Fill in the blank' style definitions for matching pairs.
+- Ensure text is plain string only (no Markdown, no LaTeX, no special formatting).
 
 ${difficultyInstructions}
 
@@ -64,14 +72,15 @@ Generate exactly ${count} pairs of terms and definitions.
 
 Output Format (JSON array):
 [
-  {"term": "concept name", "definition": "concise definition under 10 words"},
+  {"term": "concept name", "definition": "concise definition under 20 words"},
   {"term": "another concept", "definition": "brief clear definition"},
   ...
 ]
 
 Requirements:
 - Terms should be key concepts directly from the text
-- Definitions MUST be under 10 words for UI compatibility
+- Terms MUST be under 6 words
+- Definitions MUST be under 20 words for UI compatibility
 - Ensure variety in concept types (definitions, processes, examples)
 - Use clear, educational language
 - Draw ONLY from the provided text content
@@ -293,6 +302,31 @@ export class GameGeneratorService {
       
       if (!Array.isArray(parsed)) {
         throw new Error(`AI returned non-array response for ${gameType}`);
+      }
+
+      // Filter out pairs that exceed character limits to prevent UI overflow
+      if (gameType === 'MATCHING') {
+        const validPairs = parsed.filter((pair: any) => {
+          const termValid = pair.term && pair.term.length < 50;
+          const definitionValid = pair.definition && pair.definition.length < 150;
+          
+          if (!termValid || !definitionValid) {
+            logger.warn('Discarding oversized pair', {
+              term: pair.term?.substring(0, 30),
+              termLength: pair.term?.length,
+              definitionLength: pair.definition?.length,
+            });
+          }
+          
+          return termValid && definitionValid;
+        });
+
+        if (validPairs.length < parsed.length * 0.5) {
+          logger.error('Too many pairs exceeded limits, re-generation needed');
+          throw new Error('Generated content exceeded size limits. Please try again.');
+        }
+
+        return validPairs;
       }
 
       return parsed;

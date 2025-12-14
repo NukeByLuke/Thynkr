@@ -214,7 +214,7 @@ function GameCard({ card, onSelect, disabled }: GameCardProps) {
       onClick={handleClick}
       disabled={disabled || card.isMatched}
       className={clsx(
-        'relative w-full h-24 sm:h-28 rounded-xl border shadow-sm',
+        'relative w-full min-h-28 sm:min-h-32 rounded-xl border shadow-sm',
         'font-medium text-sm sm:text-base',
         'transition-colors duration-150',
         'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900',
@@ -249,8 +249,8 @@ function GameCard({ card, onSelect, disabled }: GameCardProps) {
       </div>
 
       {/* Content */}
-      <div className="flex items-center justify-center h-full px-3 pt-4">
-        <p className="text-center leading-snug line-clamp-3">{card.content}</p>
+      <div className="flex items-center justify-center px-3 py-6">
+        <p className="text-center leading-relaxed break-words">{card.content}</p>
       </div>
 
       {/* Match checkmark */}
