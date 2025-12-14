@@ -5,6 +5,30 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  /* Custom thin scrollbar for game cards */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+  
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #475569;
+  }
+  
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+  }
+}
+
 @layer base {
   * {
     @apply border-gray-200/40 dark:border-slate-700/40;

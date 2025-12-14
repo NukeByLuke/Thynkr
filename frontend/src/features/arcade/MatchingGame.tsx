@@ -220,8 +220,8 @@ function GameCard({ card, onSelect, disabled }: GameCardProps) {
         'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900',
         // Term-specific styling
         card.type === 'term' && 'h-16 font-bold text-base',
-        // Definition-specific styling  
-        card.type === 'definition' && 'min-h-16 font-medium text-sm',
+        // Definition-specific styling with overflow protection
+        card.type === 'definition' && 'min-h-16 max-h-32 font-medium text-sm overflow-y-auto scrollbar-thin',
         'cursor-pointer',
         getCardClasses()
       )}
