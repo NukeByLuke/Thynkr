@@ -22,6 +22,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import AnimatedPage from '@/components/AnimatedPage';
+import GameLoadingWrapper from '@/components/GameLoadingWrapper';
 
 // =============================================================================
 // Types
@@ -513,8 +514,13 @@ export default function MatchingGame() {
   const isPro = user?.role && ['STANDARD', 'PREMIUM', 'ADMIN'].includes(user.role);
 
   // Get generated content from navigation state
-  const gameConfig = location.state?.config;
+  const gameConfig = location.state?.gameConfig;
   const generatedPairs = gameConfig?.generatedContent;
+  
+  // Loading state - show loader if we just came from setup modal with config
+  const [isLoading, setIsLoading] = useState(() => {
+    return !!gameConfig && !!generatedPairs;
+  });
 
   // Game state
   const [status, setStatus] = useState<GameStatus>('idle');
@@ -535,6 +541,11 @@ export default function MatchingGame() {
   // Computed values
   const pairsLeft = PAIRS_PER_GAME - matchesFound;
   const totalPairs = PAIRS_PER_GAME;
+  
+  // Handle loading complete
+  const handleLoadingComplete = useCallback(() => {
+    setIsLoading(false);
+  }, []);
 
   // Initialize game
   const initializeGame = useCallback(() => {
@@ -717,16 +728,17 @@ export default function MatchingGame() {
 
   return (
     <AnimatedPage>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-        {/* Countdown Overlay */}
-        <AnimatePresence>
-          {status === 'countdown' && (
-            <CountdownOverlay count={3} onComplete={handleCountdownComplete} />
-          )}
-        </AnimatePresence>
+      <GameLoadingWrapper isLoading={isLoading} onLoadingComplete={handleLoadingComplete}>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+          {/* Countdown Overlay */}
+          <AnimatePresence>
+            {status === 'countdown' && (
+              <CountdownOverlay count={3} onComplete={handleCountdownComplete} />
+            )}
+          </AnimatePresence>
 
-        {/* Idle State - Start Screen */}
-        {status === 'idle' && (
+          {/* Idle State - Start Screen */}
+          {status === 'idle' && (
           <div className="max-w-md mx-auto px-4 py-12">
             <button
               onClick={() => navigate('/arcade')}
@@ -818,7 +830,8 @@ export default function MatchingGame() {
           }}
           gamesPlayed={gamesPlayedToday.current}
         />
-      </div>
+        </div>
+      </GameLoadingWrapper>
     </AnimatedPage>
   );
 }
