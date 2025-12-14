@@ -2,10 +2,11 @@ import { useState, useRef, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { User, Image, Lock, Save, Target } from 'lucide-react';
+import { User, Image, Lock, Save, Target, Volume2 } from 'lucide-react';
 import api from '@/lib/api';
 import SmartInput from '@/components/SmartInput';
 import SaveChangesBar from '@/components/SaveChangesBar';
+import SettingsSection from '@/components/settings/SettingsSection';
 
 // Helper to build absolute URLs for files served by backend (/uploads/...)
 const API_BASE = (import.meta.env.VITE_API_URL as string) || '/api';
@@ -180,11 +181,7 @@ export default function ProfileSettings() {
   return (
     <div className="space-y-6">
       {/* Profile Information */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-        <h3 className="text-lg font-medium text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2 mb-6">
-          Profile Information
-        </h3>
-
+      <SettingsSection title="Profile Information">
         <div className="space-y-6">
           {/* Avatar Upload */}
           <div>
@@ -298,17 +295,52 @@ export default function ProfileSettings() {
             </button>
           </div>
         </div>
-      </div>
+      </SettingsSection>
+
+      {/* Voice & Study Preferences */}
+      <SettingsSection 
+        title="Voice & Study Preferences" 
+        description="Customize your learning experience with text-to-speech and study settings"
+      >
+        <div className="space-y-6">
+          {/* TTS Voice Selection */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Preferred Voice
+            </label>
+            <div className="flex items-center gap-2">
+              <Volume2 className="w-5 h-5 text-slate-400" />
+              <select className="flex-1 px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
+                <option value="alloy">Alloy - Neutral, balanced voice</option>
+                <option value="echo">Echo - Warm, conversational voice</option>
+                <option value="fable">Fable - Expressive, narrative voice</option>
+                <option value="onyx">Onyx - Deep, authoritative voice</option>
+                <option value="nova">Nova - Friendly, energetic voice</option>
+                <option value="shimmer">Shimmer - Clear, pleasant voice</option>
+              </select>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+              Choose your default text-to-speech voice for study materials
+            </p>
+          </div>
+
+          {/* Study Settings Placeholder */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Auto-play Audio
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" className="w-4 h-4 text-brand-600 border-slate-300 rounded focus:ring-brand-500" />
+              <span className="text-sm text-slate-700 dark:text-slate-300">
+                Automatically play text-to-speech when opening study materials
+              </span>
+            </label>
+          </div>
+        </div>
+      </SettingsSection>
 
       {/* Change Password */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-        <h3 className="text-lg font-medium text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2 mb-6">
-          Change Password
-        </h3>
-        <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
-          Update your password to keep your account secure
-        </p>
-
+      <SettingsSection title="Change Password" description="Update your password to keep your account secure">
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -359,14 +391,10 @@ export default function ProfileSettings() {
             </button>
           </div>
         </div>
-      </div>
+      </SettingsSection>
 
       {/* Danger Zone */}
-      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl shadow-sm p-6">
-        <h3 className="text-lg font-medium text-red-900 dark:text-red-400 border-b border-red-200 dark:border-red-800 pb-2 mb-6">
-          Danger Zone
-        </h3>
-
+      <SettingsSection title="Danger Zone" variant="danger">
         <div className="flex items-center justify-between">
           <div>
             <p className="font-medium text-red-900 dark:text-red-400">Delete Account</p>
@@ -382,7 +410,7 @@ export default function ProfileSettings() {
             {deleteAccountMutation.isPending ? 'Deleting...' : 'Delete Account'}
           </button>
         </div>
-      </div>
+      </SettingsSection>
 
       {/* Floating Save Changes Bar */}
       <SaveChangesBar
