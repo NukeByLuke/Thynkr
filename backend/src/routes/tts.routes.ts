@@ -77,8 +77,8 @@ export default async function ttsRoutes(server: FastifyInstance) {
   await ensureCacheDir();
 
   /**
-   * POST /api/tts - Generate TTS audio
-   * Returns audio as mp3 stream
+   * POST /api/tts - Generate TTS audio (streaming, no disk cache)
+   * Returns audio as mp3 stream directly from OpenAI
    */
   server.post(
     '/tts',
@@ -94,48 +94,26 @@ export default async function ttsRoutes(server: FastifyInstance) {
         return reply.status(400).send({ error: 'Text is required' });
       }
 
+      // Validate voice
+      if (!body.voice || !VOICES.includes(body.voice as Voice)) {
+        return reply.status(400).send({ 
+          error: 'Voice is required and must be one of: alloy, echo, fable, onyx, nova, shimmer' 
+        });
+      }
+
       // Limit text length (OpenAI has a 4096 character limit per request)
       const text = body.text.slice(0, 4096);
-
-      // Get user's preferred voice/speed or use defaults
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { ttsVoice: true, ttsSpeed: true },
-      });
-
-      const voice =
-        body.voice && VOICES.includes(body.voice as Voice)
-          ? (body.voice as Voice)
-          : (user?.ttsVoice as Voice) || 'alloy';
-
-      const speed =
-        body.speed !== undefined
-          ? Math.max(MIN_SPEED, Math.min(MAX_SPEED, body.speed))
-          : user?.ttsSpeed || 1.0;
-
-      // Check cache
-      const hash = generateContentHash(text, voice, speed);
-      const cachedAudio = await getCachedAudio(hash);
-
-      if (cachedAudio) {
-        logger.info({ hash, voice, speed }, 'Serving cached TTS audio');
-        reply.header('Content-Type', 'audio/mpeg');
-        reply.header('Content-Disposition', 'inline');
-        reply.header('Cache-Control', 'public, max-age=86400');
-        reply.header('X-TTS-Cached', 'true');
-        return reply.send(cachedAudio);
-      }
+      const voice = body.voice as Voice;
 
       try {
         const startTime = Date.now();
-        logger.info({ textLength: text.length, voice, speed }, 'Generating TTS audio');
+        logger.info({ textLength: text.length, voice }, 'Generating TTS audio (streaming)');
 
         // Generate audio using OpenAI TTS
         const response = await openai.audio.speech.create({
           model: 'tts-1',
           voice: voice,
           input: text,
-          speed: speed,
           response_format: 'mp3',
         });
 
@@ -143,20 +121,14 @@ export default async function ttsRoutes(server: FastifyInstance) {
         const arrayBuffer = await response.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        // Cache the audio
-        await cacheAudio(hash, buffer);
-        logger.info({ hash, size: buffer.length }, 'Cached TTS audio');
-
         const durationMs = Date.now() - startTime;
 
         // Record AI usage for rate limiting
         await recordAIUsage(userId, 'TTS_GENERATE', { durationMs });
 
-        // Send response
+        // Send response - stream directly to client, no disk caching
         reply.header('Content-Type', 'audio/mpeg');
         reply.header('Content-Disposition', 'inline');
-        reply.header('Cache-Control', 'public, max-age=86400');
-        reply.header('X-TTS-Cached', 'false');
         return reply.send(buffer);
       } catch (error: any) {
         logger.error({ error: error.message }, 'TTS generation failed');
