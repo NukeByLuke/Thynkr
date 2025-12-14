@@ -77,10 +77,10 @@ export default function GlobalPlayerBar() {
         />
       </div>
       
-      <div className="container mx-auto px-4 py-3">
+      <div className="container mx-auto px-4 py-3 pb-safe">
         <div className="flex items-center justify-between gap-4">
-          {/* Left: Now Reading */}
-          <div className="flex-1 min-w-0">
+          {/* Left: Now Reading - Hidden on Mobile */}
+          <div className="hidden md:flex flex-1 min-w-0">
             <div className="flex items-center gap-3">
               <div className="flex flex-col min-w-0">
                 <span className={`text-xs text-slate-500 dark:text-slate-400 font-medium ${isLoading ? 'animate-pulse' : ''}`}>
@@ -97,11 +97,11 @@ export default function GlobalPlayerBar() {
           </div>
 
           {/* Center: Playback Controls */}
-          <div className="flex items-center gap-2">
-            {/* Rewind 10s */}
+          <div className="flex items-center gap-2 md:flex-none flex-1 justify-center">
+            {/* Rewind 10s - Hidden on Mobile */}
             <button
               onClick={handleRewind}
-              className="p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="hidden md:block p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
               aria-label="Rewind 10 seconds"
             >
               <RotateCcw className="w-5 h-5" />
@@ -123,10 +123,10 @@ export default function GlobalPlayerBar() {
               )}
             </button>
 
-            {/* Fast Forward */}
+            {/* Fast Forward - Hidden on Mobile */}
             <button
               onClick={handleFastForward}
-              className="p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="hidden md:block p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
               aria-label="Fast forward"
             >
               <RotateCw className="w-5 h-5" />
@@ -135,8 +135,8 @@ export default function GlobalPlayerBar() {
 
           {/* Right: Speed & Close */}
           <div className="flex items-center gap-3">
-            {/* Speed Indicator */}
-            <div className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg">
+            {/* Speed Indicator - Hidden on Mobile */}
+            <div className="hidden md:flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg">
               <span className="text-sm font-semibold text-slate-900 dark:text-white">
                 {speed.toFixed(1)}x
               </span>

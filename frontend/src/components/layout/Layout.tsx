@@ -9,6 +9,7 @@
 
 import { Outlet } from 'react-router-dom';
 import { useNavigation } from '@/contexts/NavigationContext';
+import { usePlayerStore } from '@/stores/usePlayerStore';
 import { motion } from 'framer-motion';
 import DesktopSidebar from './DesktopSidebar';
 import MobileBottomNavNew from './MobileBottomNavNew';
@@ -19,6 +20,10 @@ import Footer from './Footer';
  */
 export default function Layout() {
   const { isSidebarOpen } = useNavigation();
+  const { isPlaying, text } = usePlayerStore();
+  
+  // Check if player is active
+  const isPlayerActive = isPlaying || text;
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#FAFBFC] dark:bg-slate-900">
@@ -40,8 +45,8 @@ export default function Layout() {
         className="flex flex-col flex-1 overflow-hidden"
       >
         <div className="flex-1 overflow-y-auto">
-          {/* Main content with consistent vertical padding */}
-          <main className="min-h-full flex flex-col pb-28 lg:pb-8 pt-6 lg:pt-8">
+          {/* Main content with consistent vertical padding - Add extra padding when player is active */}
+          <main className={`min-h-full flex flex-col pb-28 lg:pb-8 pt-6 lg:pt-8 ${isPlayerActive ? 'pb-24' : ''}`}>
             <div className="flex-1">
               <Outlet />
             </div>
