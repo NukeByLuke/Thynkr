@@ -19,29 +19,6 @@ interface FlashcardViewerProps {
   title: string;
 }
 
-// Memoize markdown components to prevent recreation
-const MarkdownComponents: any = {
-  p: memo(({ node, ...props }: any) => (
-    <p className="text-lg sm:text-3xl font-bold text-gray-900 dark:text-white mb-4" {...props} />
-  )),
-  h1: memo(({ node, ...props }: any) => (
-    <h1 className="text-xl sm:text-4xl font-extrabold text-gray-900 dark:text-white mb-4" {...props} />
-  )),
-  h2: memo(({ node, ...props }: any) => (
-    <h2 className="text-lg sm:text-3xl font-bold text-gray-900 dark:text-white mb-3" {...props} />
-  )),
-  code: memo(({ node, inline, ...props }: any) => 
-    inline ? (
-      <code className="bg-brand-100/50 dark:bg-gray-700 text-brand-800 dark:text-brand-300 px-2 py-1 rounded text-base sm:text-xl font-mono" {...props} />
-    ) : (
-      <code className="block bg-gray-100 dark:bg-gray-700 p-3 sm:p-4 rounded-lg text-sm sm:text-base font-mono overflow-x-auto" {...props} />
-    )
-  ),
-  strong: memo(({ node, ...props }: any) => (
-    <strong className="text-brand-600 dark:text-brand-400" {...props} />
-  )),
-};
-
 // Memoize slide animation variants
 const slideVariants = {
   enter: (direction: number) => ({
