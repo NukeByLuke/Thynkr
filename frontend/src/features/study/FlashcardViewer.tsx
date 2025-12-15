@@ -19,10 +19,10 @@ interface FlashcardViewerProps {
   title: string;
 }
 
-// Memoize slide animation variants
+// Memoize slide animation variants - Optimized for performance
 const slideVariants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? 300 : -300,
+    x: direction > 0 ? 100 : -100,
     opacity: 0,
   }),
   center: {
@@ -30,9 +30,15 @@ const slideVariants = {
     opacity: 1,
   },
   exit: (direction: number) => ({
-    x: direction < 0 ? 300 : -300,
+    x: direction < 0 ? 100 : -100,
     opacity: 0,
   }),
+};
+
+// Optimized flip transition - smooth easing instead of spring
+const flipTransition = {
+  duration: 0.4,
+  ease: [0.4, 0.0, 0.2, 1],
 };
 
 const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: FlashcardViewerProps) {
@@ -130,8 +136,8 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
       {/* Shuffle & Reset Controls */}
       <div className="flex justify-center gap-3 mb-6">
         <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={handleShuffle}
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
         >
@@ -140,8 +146,8 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
         </motion.button>
         {shuffledCards && (
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleReset}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
           >
@@ -169,19 +175,26 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ type: 'spring', stiffness: 250, damping: 25 }}
+            transition={{ duration: 0.25, ease: [0.4, 0.0, 0.2, 1] }}
             className="absolute w-full h-full"
           >
             <motion.div
               animate={{ rotateY: isFlipped ? 180 : 0 }}
-              transition={{ duration: 0.6, type: 'spring', stiffness: 180, damping: 15 }}
-              style={{ transformStyle: 'preserve-3d' }}
+              transition={flipTransition}
+              style={{ 
+                transformStyle: 'preserve-3d',
+                willChange: 'transform',
+              }}
               className="w-full h-full"
             >
               {/* Front */}
               <div
                 className="absolute w-full h-full bg-gradient-to-br from-white to-brand-50/50 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-2xl border-2 border-brand-100/50 dark:border-gray-700 flex items-center justify-center p-6 sm:p-10 overflow-y-auto"
-                style={{ backfaceVisibility: 'hidden' }}
+                style={{ 
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden',
+                  transform: 'translateZ(0)',
+                }}
               >
                 {/* TTS Button - Top Right */}
                 <button
@@ -252,7 +265,8 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
                 className="absolute w-full h-full bg-gradient-to-br from-brand-600 to-accent-600 dark:from-brand-700 dark:to-accent-700 rounded-2xl shadow-2xl flex items-center justify-center p-6 sm:p-10 overflow-y-auto"
                 style={{
                   backfaceVisibility: 'hidden',
-                  transform: 'rotateY(180deg)',
+                  WebkitBackfaceVisibility: 'hidden',
+                  transform: 'rotateY(180deg) translateZ(0)',
                 }}
               >
                 {/* TTS Button - Top Right */}
@@ -320,8 +334,8 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
       {/* Navigation */}
       <div className="mt-6 sm:mt-10 flex items-center justify-between gap-3">
         <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={handlePrevious}
           disabled={currentIndex === 0}
           className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-brand-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-brand-50 dark:hover:bg-gray-700 hover:border-brand-300 dark:hover:border-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm sm:text-base shadow-md font-semibold"
@@ -337,8 +351,8 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
             displayCards.map((_, index) => (
               <motion.button
                 key={index}
-                whileHover={{ scale: 1.2 }}
-                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   setDirection(index > currentIndex ? 1 : -1);
                   setCurrentIndex(index);
@@ -383,8 +397,8 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
         </div>
 
         <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={handleNext}
           disabled={currentIndex === displayCards.length - 1}
           className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-brand-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-brand-50 dark:hover:bg-gray-700 hover:border-brand-300 dark:hover:border-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm sm:text-base shadow-md font-semibold"

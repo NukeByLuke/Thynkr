@@ -175,7 +175,8 @@ function TabSwitcher({ activeTab, onTabChange }: TabSwitcherProps) {
               <motion.div
                 layoutId="tab-background"
                 className="absolute inset-0 bg-white dark:bg-slate-700 rounded-lg shadow-sm"
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                style={{ willChange: 'transform' }}
               />
             )}
             <Icon

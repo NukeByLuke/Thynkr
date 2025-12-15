@@ -1,4 +1,13 @@
 /* Custom animations for Study Mode and AI Tutor */
+/* Optimized for 60fps performance with GPU acceleration */
+
+/* Force GPU acceleration for animated elements */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
 
 /* Code syntax highlighting */
 .hljs {
@@ -40,22 +49,22 @@
 @keyframes fade-in {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translate3d(0, 10px, 0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @keyframes scale-in {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale3d(0.95, 0.95, 1);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: scale3d(1, 1, 1);
   }
 }
 
@@ -69,20 +78,24 @@
 }
 
 .animate-fade-in {
-  animation: fade-in 0.4s ease-out;
+  animation: fade-in 0.3s ease-out;
+  will-change: opacity, transform;
 }
 
 .animate-scale-in {
-  animation: scale-in 0.3s ease-out;
+  animation: scale-in 0.25s ease-out;
+  will-change: opacity, transform;
 }
 
 .animate-glow-pulse {
   animation: glow-pulse 2s ease-in-out infinite;
+  will-change: box-shadow;
 }
 
-/* Smooth transitions for all interactive elements */
+/* Smooth transitions for all interactive elements - GPU accelerated */
 .transition-smooth {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
 }
 
 /* Code block styling improvements */

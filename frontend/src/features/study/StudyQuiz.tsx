@@ -308,8 +308,9 @@ const StudyQuiz = memo(function StudyQuiz({ data, onRegenerate, isRegenerating =
             {/* Explanation */}
             {showResults && (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.15 }}
                 className="mt-6"
               >
                 <button
@@ -323,9 +324,10 @@ const StudyQuiz = memo(function StudyQuiz({ data, onRegenerate, isRegenerating =
                 <AnimatePresence>
                   {showExplanation === currentQuestion && (
                     <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
                       className="mt-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800"
                     >
                       <p className="text-sm text-blue-800 dark:text-blue-200">
