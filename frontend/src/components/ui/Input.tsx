@@ -35,7 +35,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             'transition-all duration-200 ease-in-out',
             'bg-white dark:bg-slate-800',
             'border focus:outline-none',
-            'text-gray-900 dark:text-white',
+            'text-base text-gray-900 dark:text-white', // text-base (16px) prevents iOS zoom
             'placeholder:text-gray-400 dark:placeholder:text-slate-500',
             error
               ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-400/30 focus:shadow-[0_0_0_4px_rgba(248,113,113,0.1)]'

@@ -13,6 +13,7 @@ export interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'ref' | 'ch
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   fullWidth?: boolean;
+  iconOnly?: boolean; // For icon-only buttons that need 44x44px minimum
 }
 
 /**
@@ -31,6 +32,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       size = 'md',
       isLoading = false,
       fullWidth = false,
+      iconOnly = false,
       className,
       disabled,
       ...props
@@ -74,9 +76,16 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const sizes = {
-      sm: 'px-4 py-2 text-sm gap-1.5',
-      md: 'px-6 py-2.5 text-sm gap-2',
-      lg: 'px-8 py-3 text-base gap-2',
+      sm: 'px-4 py-2.5 md:py-2 text-sm gap-1.5 min-h-[44px]',
+      md: 'px-6 py-3 md:py-2.5 text-sm gap-2 min-h-[44px]',
+      lg: 'px-8 py-4 md:py-3 text-base gap-2 min-h-[48px]',
+    };
+
+    // Icon-only buttons get square 44x44px minimum for WCAG compliance
+    const iconOnlySizes = {
+      sm: 'p-2.5 min-w-[44px] min-h-[44px]',
+      md: 'p-3 min-w-[44px] min-h-[44px]',
+      lg: 'p-4 min-w-[48px] min-h-[48px]',
     };
 
     return (
@@ -88,7 +97,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={clsx(
           baseStyles,
           variants[variant],
-          sizes[size],
+          iconOnly ? iconOnlySizes[size] : sizes[size],
           fullWidth && 'w-full',
           className
         )}
