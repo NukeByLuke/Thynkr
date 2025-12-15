@@ -4,7 +4,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, RotateCcw, Shuffle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RotateCcw, Shuffle, Volume2 } from 'lucide-react';
+import { usePlayerStore } from '@/stores/usePlayerStore';
 
 interface Flashcard {
   id: string;
@@ -23,6 +24,8 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
   const [isFlipped, setIsFlipped] = useState(false);
   const [shuffledCards, setShuffledCards] = useState<Flashcard[] | null>(null);
   const [direction, setDirection] = useState(0); // -1 for left, 1 for right
+  const { play, isPlaying, text: playingText } = usePlayerStore();
+  const [isPlayingCard, setIsPlayingCard] = useState(false);
 
   const displayCards = shuffledCards || cards;
   const currentCard = displayCards[currentIndex];
@@ -59,6 +62,17 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
     setCurrentIndex(0);
     setIsFlipped(false);
   };
+
+  const handleReadCard = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const textToRead = isFlipped ? currentCard.back : currentCard.front;
+    play(textToRead);
+    setIsPlayingCard(true);
+  };
+
+  // Check if current card is playing
+  const cardText = isFlipped ? currentCard.back : currentCard.front;
+  const isCurrentCardPlaying = isPlaying && playingText.includes(cardText.substring(0, 50));
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === ' ' || e.key === 'Enter') {
@@ -160,6 +174,18 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
                 className="absolute w-full h-full bg-gradient-to-br from-white to-brand-50/50 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-2xl border-2 border-brand-100/50 dark:border-gray-700 flex items-center justify-center p-6 sm:p-10 overflow-y-auto"
                 style={{ backfaceVisibility: 'hidden' }}
               >
+                {/* TTS Button - Top Right */}
+                <button
+                  onClick={handleReadCard}
+                  className={`absolute top-4 right-4 p-2 rounded-lg transition-all ${
+                    isCurrentCardPlaying
+                      ? 'text-purple-600 dark:text-purple-400 animate-pulse bg-purple-50 dark:bg-purple-900/30'
+                      : 'text-slate-400 hover:text-purple-500 hover:bg-slate-100 dark:hover:bg-slate-700'
+                  }`}
+                  aria-label="Read card aloud"
+                >
+                  <Volume2 className="w-5 h-5" />
+                </button>
                 <div className="text-center w-full">
                   <p className="text-sm sm:text-base text-brand-600 dark:text-brand-400 mb-3 sm:mb-5 uppercase tracking-wide font-bold">
                     Question
@@ -220,6 +246,18 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
                   transform: 'rotateY(180deg)',
                 }}
               >
+                {/* TTS Button - Top Right */}
+                <button
+                  onClick={handleReadCard}
+                  className={`absolute top-4 right-4 p-2 rounded-lg transition-all ${
+                    isCurrentCardPlaying
+                      ? 'text-white animate-pulse bg-white/20'
+                      : 'text-white/60 hover:text-white hover:bg-white/20'
+                  }`}
+                  aria-label="Read card aloud"
+                >
+                  <Volume2 className="w-5 h-5" />
+                </button>
                 <div className="text-center w-full">
                   <p className="text-sm sm:text-base text-white/90 mb-3 sm:mb-5 uppercase tracking-wide font-bold">
                     Answer
