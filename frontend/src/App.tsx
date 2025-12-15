@@ -11,6 +11,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { TTSProvider } from './contexts/TTSContext';
+import { AudioProvider } from './contexts/AudioContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import ProtectedRoute from '@/features/auth/ProtectedRoute';
 import PublicLayout from './layouts/PublicLayout';
@@ -30,6 +31,7 @@ const Pricing = lazyWithPreload(() => import('./pages/Pricing'));
 const Account = lazyWithPreload(() => import('./pages/Account'));
 const Admin = lazyWithPreload(() => import('./pages/Admin'));
 const Study = lazyWithPreload(() => import('./pages/Study'));
+const ImmersiveStudy = lazyWithPreload(() => import('./pages/ImmersiveStudy'));
 const Files = lazyWithPreload(() => import('./pages/Files'));
 const Settings = lazyWithPreload(() => import('./pages/SettingsPage'));
 const Courses = lazyWithPreload(() => import('./pages/CoursesUnified'));
@@ -188,6 +190,16 @@ function AppContent() {
             />
           </Route>
 
+          {/* Immersive Study - Full-screen IDE-style layout (no DashboardLayout wrapper) */}
+          <Route
+            path="/immersive-study"
+            element={
+              <ProtectedRoute>
+                <ImmersiveStudy />
+              </ProtectedRoute>
+            }
+          />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
         </AnimatePresence>
@@ -220,16 +232,18 @@ function App() {
     <AuthProvider>
       <NavigationProvider>
         <ThemeProvider>
-          <TTSProvider>
-            {!gatePassed && previewPassword ? (
-              <PreviewGate onSuccess={() => setGatePassed(true)} />
-            ) : (
-              <>
-                <AppContent />
-                <MiniPlayer />
-              </>
-            )}
-          </TTSProvider>
+          <AudioProvider>
+            <TTSProvider>
+              {!gatePassed && previewPassword ? (
+                <PreviewGate onSuccess={() => setGatePassed(true)} />
+              ) : (
+                <>
+                  <AppContent />
+                  <MiniPlayer />
+                </>
+              )}
+            </TTSProvider>
+          </AudioProvider>
         </ThemeProvider>
       </NavigationProvider>
     </AuthProvider>
