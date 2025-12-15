@@ -626,23 +626,23 @@ export default function Study() {
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-brand-600/90 via-brand-500/90 to-accent-500/90 backdrop-blur-xl"></div>
         <div className="absolute inset-0 bg-gradient-mesh opacity-30"></div>
-        <div className="relative max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-10 py-10">
-          <div className="flex items-center gap-4 mb-3">
-            <div className="p-3 bg-white/20 backdrop-blur-xl rounded-2xl shadow-soft-lg border border-white/20">
-              <GraduationCap className="h-7 w-7 text-white" />
+        <div className="relative max-w-[1400px] mx-auto px-4 md:px-6 lg:px-10 py-6 md:py-10">
+          <div className="flex items-center gap-3 md:gap-4 mb-2 md:mb-3">
+            <div className="p-2 md:p-3 bg-white/20 backdrop-blur-xl rounded-xl md:rounded-2xl shadow-soft-lg border border-white/20">
+              <GraduationCap className="h-6 w-6 md:h-7 md:w-7 text-white" />
             </div>
-            <h1 className="text-4xl font-bold text-white tracking-tight">Study Mode</h1>
+            <h1 className="text-2xl md:text-4xl font-bold text-white tracking-tight drop-shadow-lg">Study Mode</h1>
           </div>
-          <p className="text-white/90 text-base ml-16">Upload materials and let AI help you learn smarter</p>
+          <p className="text-white/90 text-sm md:text-base ml-11 md:ml-16 drop-shadow-md">Upload materials and let AI help you learn smarter</p>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-10 py-8">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-10 py-6 md:py-8">
           {/* Upload Area */}
           <div
             onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-3xl p-12 text-center mb-10 cursor-pointer transition-all duration-300 ease-out backdrop-blur-xl ${
+            className={`border-2 border-dashed rounded-2xl md:rounded-3xl p-8 md:p-12 text-center mb-6 md:mb-10 cursor-pointer transition-all duration-300 ease-out backdrop-blur-xl ${
               isDragging
                 ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-900/20 dark:border-brand-400 shadow-glow-brand'
                 : 'border-white/30 dark:border-slate-700/50 bg-white/60 dark:bg-slate-900/60 hover:border-brand-400/50 dark:hover:border-brand-500/50 hover:bg-white/80 dark:hover:bg-slate-900/80 shadow-soft-xl hover:shadow-glow-brand/30'
@@ -652,7 +652,7 @@ export default function Study() {
             onDrop={handleDrop}
           >
             <svg
-              className={`mx-auto h-14 w-14 mb-5 transition-colors duration-300 ${isDragging ? 'text-teal-600 dark:text-teal-400' : 'text-gray-400 dark:text-gray-500'}`}
+              className={`mx-auto h-12 w-12 md:h-14 md:w-14 mb-4 md:mb-5 transition-colors duration-300 ${isDragging ? 'text-teal-600 dark:text-teal-400' : 'text-gray-400 dark:text-gray-500'}`}
               stroke="currentColor"
               fill="none"
               viewBox="0 0 48 48"
@@ -664,10 +664,10 @@ export default function Study() {
                 strokeLinejoin="round"
               />
             </svg>
-            <p className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+            <p className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-2 md:mb-3">
               {isDragging ? '✨ Drop files here' : 'Click to upload or drag and drop'}
             </p>
-            <p className="text-base text-slate-600 dark:text-slate-300">
+            <p className="text-sm md:text-base text-slate-600 dark:text-slate-300">
               PDF, DOC/DOCX, TXT, or PowerPoint files
             </p>
             <input
