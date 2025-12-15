@@ -218,11 +218,11 @@ function GameCard({ card, onSelect, disabled }: GameCardProps) {
         'relative w-full rounded-xl border shadow-sm',
         'transition-colors duration-150',
         'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900',
-        // Term-specific styling
-        card.type === 'term' && 'h-16 font-bold text-base',
-        // Definition-specific styling with overflow protection
-        card.type === 'definition' && 'min-h-16 max-h-32 font-medium text-sm overflow-y-auto scrollbar-thin',
-        'cursor-pointer',
+        // Term-specific styling - responsive sizing
+        card.type === 'term' && 'h-16 md:h-16 font-bold text-sm md:text-base',
+        // Definition-specific styling with overflow protection - responsive
+        card.type === 'definition' && 'min-h-20 md:min-h-16 max-h-32 font-medium text-xs md:text-sm overflow-y-auto scrollbar-thin',
+        'cursor-pointer touch-manipulation',
         getCardClasses()
       )}
       initial={{ opacity: 0, y: 20 }}
@@ -254,13 +254,13 @@ function GameCard({ card, onSelect, disabled }: GameCardProps) {
 
       {/* Content */}
       <div className={clsx(
-        'flex items-center px-3 py-4',
+        'flex items-center px-3 py-3 md:py-4',
         card.type === 'term' ? 'justify-center' : 'justify-start'
       )}>
         <ResponsiveText 
           content={card.content}
           className={clsx(
-            'leading-relaxed break-words',
+            'leading-relaxed break-words text-xs md:text-sm',
             card.type === 'term' ? 'text-center font-bold' : 'text-left'
           )}
         />
@@ -829,9 +829,50 @@ export default function MatchingGame() {
             {/* HUD */}
             <HUD timeRemaining={timeRemaining} score={score} pairsLeft={pairsLeft} />
 
-            {/* Game Board - Split Column Layout */}
+            {/* Game Board - Responsive Layout: Mobile Stack, Desktop Split */}
             <div className="max-w-6xl mx-auto px-4 py-6">
-              <div className="grid grid-cols-[1fr_2fr] gap-6">
+              {/* Mobile Layout: Single Column Stack (< 768px) */}
+              <div className="md:hidden space-y-6">
+                {/* Current Term Card at Top */}
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide px-2">
+                    Match This Term:
+                  </h3>
+                  {cards
+                    .filter(card => card.type === 'term' && !card.isMatched)
+                    .slice(0, 1)
+                    .map((card) => (
+                      <GameCard
+                        key={card.id}
+                        card={card}
+                        onSelect={handleCardSelect}
+                        disabled={status !== 'playing' || selectedCards.length >= 2}
+                      />
+                    ))}
+                </div>
+
+                {/* Definitions List - Scrollable */}
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide px-2">
+                    Select Definition:
+                  </h3>
+                  <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-2">
+                    {cards
+                      .filter(card => card.type === 'definition')
+                      .map((card) => (
+                        <GameCard
+                          key={card.id}
+                          card={card}
+                          onSelect={handleCardSelect}
+                          disabled={status !== 'playing' || selectedCards.length >= 2}
+                        />
+                      ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop Layout: Split View (≥ 768px) */}
+              <div className="hidden md:grid md:grid-cols-[1fr_2fr] gap-6">
                 {/* Left Column: Terms */}
                 <div className="space-y-3">
                   {cards

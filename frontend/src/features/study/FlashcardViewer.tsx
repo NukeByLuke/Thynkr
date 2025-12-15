@@ -138,7 +138,7 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
 
       {/* Flashcard with Animation */}
       <div
-        className="relative w-full h-72 sm:h-96 cursor-pointer"
+        className="relative w-full h-[60vh] md:h-96 cursor-pointer"
         style={{ perspective: '1500px' }}
         onClick={handleFlip}
         onKeyDown={handleKeyPress}
@@ -286,81 +286,115 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
         </AnimatePresence>
       </div>
 
-      {/* Navigation */}
-      <div className="mt-6 sm:mt-10 flex items-center justify-between gap-3">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handlePrevious}
-          disabled={currentIndex === 0}
-          className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-brand-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-brand-50 dark:hover:bg-gray-700 hover:border-brand-300 dark:hover:border-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm sm:text-base shadow-md font-semibold"
-        >
-          <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span className="hidden sm:inline">Previous</span>
-        </motion.button>
-
-        {/* Progress dots - show limited on mobile */}
-        <div className="flex space-x-1 sm:space-x-2 justify-center items-center">
-          {displayCards.length <= 10 ? (
-            // Show all dots if 10 or fewer cards
-            displayCards.map((_, index) => (
-              <motion.button
-                key={index}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  setDirection(index > currentIndex ? 1 : -1);
-                  setCurrentIndex(index);
-                  setIsFlipped(false);
-                }}
-                className={`w-2 h-2 rounded-full transition-all flex-shrink-0 ${
-                  index === currentIndex
-                    ? 'bg-gradient-to-r from-brand-600 to-accent-600 w-6 sm:w-8 shadow-md'
-                    : 'bg-gray-300 dark:bg-gray-600 hover:bg-brand-400 dark:hover:bg-brand-500'
-                }`}
-                aria-label={`Go to card ${index + 1}`}
-              />
-            ))
-          ) : (
-            // Show indicator with current position for many cards
-            <>
-              <button
-                onClick={() => {
-                  setDirection(-1);
-                  setCurrentIndex(Math.max(0, currentIndex - 5));
-                  setIsFlipped(false);
-                }}
-                disabled={currentIndex === 0}
-                className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 disabled:opacity-30"
-                aria-label="Jump back"
-              />
-              <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 px-2 whitespace-nowrap font-medium">
-                {currentIndex + 1} / {displayCards.length}
-              </span>
-              <button
-                onClick={() => {
-                  setDirection(1);
-                  setCurrentIndex(Math.min(displayCards.length - 1, currentIndex + 5));
-                  setIsFlipped(false);
-                }}
-                disabled={currentIndex === displayCards.length - 1}
-                className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 disabled:opacity-30"
-                aria-label="Jump forward"
-              />
-            </>
-          )}
+      {/* Navigation - Enhanced for Mobile */}
+      <div className="mt-6 sm:mt-10 space-y-4">
+        {/* Mobile: Large Thumb-Friendly Buttons */}
+        <div className="flex md:hidden gap-3">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handlePrevious}
+            disabled={currentIndex === 0}
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-2xl disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 shadow-lg font-bold text-lg touch-manipulation active:scale-95"
+          >
+            <ChevronLeft className="w-6 h-6" />
+            Previous
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleNext}
+            disabled={currentIndex === displayCards.length - 1}
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-2xl disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 shadow-lg font-bold text-lg touch-manipulation active:scale-95"
+          >
+            Next
+            <ChevronRight className="w-6 h-6" />
+          </motion.button>
         </div>
 
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleNext}
-          disabled={currentIndex === displayCards.length - 1}
-          className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-brand-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-brand-50 dark:hover:bg-gray-700 hover:border-brand-300 dark:hover:border-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm sm:text-base shadow-md font-semibold"
-        >
-          <span className="hidden sm:inline">Next</span>
-          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-        </motion.button>
+        {/* Desktop: Original Layout */}
+        <div className="hidden md:flex items-center justify-between gap-3">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handlePrevious}
+            disabled={currentIndex === 0}
+            className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-brand-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-brand-50 dark:hover:bg-gray-700 hover:border-brand-300 dark:hover:border-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm sm:text-base shadow-md font-semibold"
+          >
+            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden sm:inline">Previous</span>
+          </motion.button>
+
+          {/* Progress dots - show limited on mobile */}
+          <div className="flex space-x-1 sm:space-x-2 justify-center items-center">
+            {displayCards.length <= 10 ? (
+              // Show all dots if 10 or fewer cards
+              displayCards.map((_, index) => (
+                <motion.button
+                  key={index}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    setDirection(index > currentIndex ? 1 : -1);
+                    setCurrentIndex(index);
+                    setIsFlipped(false);
+                  }}
+                  className={`w-2 h-2 rounded-full transition-all flex-shrink-0 ${
+                    index === currentIndex
+                      ? 'bg-gradient-to-r from-brand-600 to-accent-600 w-6 sm:w-8 shadow-md'
+                      : 'bg-gray-300 dark:bg-gray-600 hover:bg-brand-400 dark:hover:bg-brand-500'
+                  }`}
+                  aria-label={`Go to card ${index + 1}`}
+                />
+              ))
+            ) : (
+              // Show indicator with current position for many cards
+              <>
+                <button
+                  onClick={() => {
+                    setDirection(-1);
+                    setCurrentIndex(Math.max(0, currentIndex - 5));
+                    setIsFlipped(false);
+                  }}
+                  disabled={currentIndex === 0}
+                  className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 disabled:opacity-30"
+                  aria-label="Jump back"
+                />
+                <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 px-2 whitespace-nowrap font-medium">
+                  {currentIndex + 1} / {displayCards.length}
+                </span>
+                <button
+                  onClick={() => {
+                    setDirection(1);
+                    setCurrentIndex(Math.min(displayCards.length - 1, currentIndex + 5));
+                    setIsFlipped(false);
+                  }}
+                  disabled={currentIndex === displayCards.length - 1}
+                  className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 disabled:opacity-30"
+                  aria-label="Jump forward"
+                />
+              </>
+            )}
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleNext}
+            disabled={currentIndex === displayCards.length - 1}
+            className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-brand-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-brand-50 dark:hover:bg-gray-700 hover:border-brand-300 dark:hover:border-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm sm:text-base shadow-md font-semibold"
+          >
+            <span className="hidden sm:inline">Next</span>
+            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+          </motion.button>
+        </div>
+
+        {/* Mobile: Progress Indicator */}
+        <div className="md:hidden text-center">
+          <span className="inline-block px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-full text-sm font-semibold text-slate-700 dark:text-slate-300">
+            {currentIndex + 1} / {displayCards.length}
+          </span>
+        </div>
       </div>
 
       {/* Keyboard shortcuts hint */}
