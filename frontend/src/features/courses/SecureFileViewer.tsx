@@ -199,7 +199,7 @@ function VideoViewer({
         disablePictureInPicture
         className="w-full max-h-[70vh]"
         onContextMenu={(e) => e.preventDefault()}
-        onError={(e) => {
+        onError={() => {
           console.error('Video loading error:', url);
         }}
       >
@@ -247,7 +247,7 @@ function AudioViewer({
           controlsList="nodownload"
           className="w-full max-w-md"
           onContextMenu={(e) => e.preventDefault()}
-          onError={(e) => {
+          onError={() => {
             console.error('Audio loading error:', url);
           }}
         >
