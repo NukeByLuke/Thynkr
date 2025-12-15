@@ -45,6 +45,9 @@ const QuizGame = lazyWithPreload(() => import('./features/arcade/QuizGame'));
 const MatchingGame = lazyWithPreload(() => import('./features/arcade/MatchingGame'));
 const NotFound = lazyWithPreload(() => import('./pages/NotFound'));
 
+// Lazy-load GlobalPlayerBar to avoid impacting LCP
+const GlobalPlayerBar = lazyWithPreload(() => import('./components/audio/GlobalPlayerBar').then(m => ({ default: m.GlobalPlayerBar })));
+
 /**
  * Custom hook to handle authentication-based redirects
  * Redirects authenticated users from login/register pages to dashboard
@@ -240,6 +243,9 @@ function App() {
                 <>
                   <AppContent />
                   <MiniPlayer />
+                  <Suspense fallback={null}>
+                    <GlobalPlayerBar />
+                  </Suspense>
                 </>
               )}
             </TTSProvider>
