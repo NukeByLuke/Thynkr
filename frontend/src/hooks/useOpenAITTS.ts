@@ -5,6 +5,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import toast from 'react-hot-toast';
 
 interface TTSCache {
   blobUrl: string;
@@ -126,6 +127,14 @@ export function useOpenAITTS() {
         });
 
         if (!response.ok) {
+          // Handle rate limiting
+          if (response.status === 429) {
+            const errorData = await response.json().catch(() => ({}));
+            const message = errorData.message || 'Voice limit reached. Please wait a moment.';
+            toast.error(message);
+            setError(message);
+            return;
+          }
           throw new Error(`TTS API error: ${response.statusText}`);
         }
 

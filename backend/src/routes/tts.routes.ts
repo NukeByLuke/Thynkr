@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyReply } from 'fastify';
 import { authenticate, AuthenticatedRequest } from '../middleware/auth.middleware';
 import { checkAIRateLimit, recordAIUsage } from '../middleware/ai-rate-limit.middleware';
+import { ttsRateLimit } from '../middleware/tts-rate-limit.middleware';
 import OpenAI from 'openai';
 import { createHash } from 'crypto';
 // NodeCache imported for potential future in-memory caching
@@ -83,7 +84,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
   server.post(
     '/tts',
     {
-      preHandler: [authenticate, checkAIRateLimit],
+      preHandler: [authenticate, ttsRateLimit, checkAIRateLimit],
     },
     async (request: AuthenticatedRequest, reply: FastifyReply) => {
       const userId = request.user!.userId;
