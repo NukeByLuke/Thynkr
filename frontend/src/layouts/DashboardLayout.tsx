@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Sidebar, { NavigationSection } from '@/components/Sidebar';
 import MobileHeader from '@/components/MobileHeader';
+import GlobalPlayerBar from '@/components/player/GlobalPlayerBar';
+import { PlayerErrorBoundary } from '@/components/player/PlayerErrorBoundary';
 import {
   BookOpen,
   FolderOpen,
@@ -93,6 +95,11 @@ export default function DashboardLayout() {
           </div>
         </>
       )}
+
+      {/* Global Player Bar - Fixed at bottom */}
+      <PlayerErrorBoundary>
+        <GlobalPlayerBar />
+      </PlayerErrorBoundary>
     </div>
   );
 }

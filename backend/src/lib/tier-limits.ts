@@ -5,6 +5,8 @@ import { normalizeRole } from '../middleware/auth.middleware';
 export interface TierLimits {
   uploadsPerMonth: number;
   aiRequestsPerMonth: number;
+  ttsMaxCharactersPerRequest: number;
+  ttsMaxRequestsPerDay: number;
   canCreatePrivateCourses: boolean;
   canCreatePublicCourses: boolean;
   canUseTutor: boolean;
@@ -16,6 +18,8 @@ export const TIER_LIMITS: Record<string, TierLimits> = {
   BASIC: {
     uploadsPerMonth: 5,
     aiRequestsPerMonth: 50,
+    ttsMaxCharactersPerRequest: 500,
+    ttsMaxRequestsPerDay: 10,
     canCreatePrivateCourses: false,
     canCreatePublicCourses: false,
     canUseTutor: false,
@@ -25,6 +29,8 @@ export const TIER_LIMITS: Record<string, TierLimits> = {
   STANDARD: {
     uploadsPerMonth: 50,
     aiRequestsPerMonth: 500,
+    ttsMaxCharactersPerRequest: 2000,
+    ttsMaxRequestsPerDay: 100,
     canCreatePrivateCourses: true,
     canCreatePublicCourses: false,
     canUseTutor: false,
@@ -34,6 +40,8 @@ export const TIER_LIMITS: Record<string, TierLimits> = {
   PREMIUM: {
     uploadsPerMonth: -1, // unlimited
     aiRequestsPerMonth: -1, // unlimited
+    ttsMaxCharactersPerRequest: -1, // unlimited
+    ttsMaxRequestsPerDay: -1, // unlimited
     canCreatePrivateCourses: true,
     canCreatePublicCourses: true,
     canUseTutor: true,
@@ -43,6 +51,8 @@ export const TIER_LIMITS: Record<string, TierLimits> = {
   ADMIN: {
     uploadsPerMonth: -1,
     aiRequestsPerMonth: -1,
+    ttsMaxCharactersPerRequest: -1,
+    ttsMaxRequestsPerDay: -1,
     canCreatePrivateCourses: true,
     canCreatePublicCourses: true,
     canUseTutor: true,
@@ -140,6 +150,64 @@ export async function canUseAI(
   }
 
   return { allowed: true, remaining };
+}
+
+/**
+ * Get TTS request count for today
+ */
+export async function getDailyTTSRequestCount(userId: string): Promise<number> {
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const count = await prisma.studySession.count({
+    where: {
+      userId,
+      activityType: 'TTS_GENERATE',
+      createdAt: {
+        gte: startOfDay,
+      },
+    },
+  });
+
+  return count;
+}
+
+/**
+ * Check if user can use TTS with text of given length
+ */
+export async function canUseTTS(
+  userId: string,
+  role: string,
+  textLength: number
+): Promise<{ allowed: boolean; reason?: string; remaining?: number }> {
+  const limits = getTierLimits(role);
+
+  // Check character limit per request
+  if (limits.ttsMaxCharactersPerRequest !== -1 && textLength > limits.ttsMaxCharactersPerRequest) {
+    return {
+      allowed: false,
+      reason: `Text too long. Maximum ${limits.ttsMaxCharactersPerRequest} characters allowed for your plan.`,
+      remaining: 0,
+    };
+  }
+
+  // Check daily request limit
+  if (limits.ttsMaxRequestsPerDay !== -1) {
+    const currentCount = await getDailyTTSRequestCount(userId);
+    const remaining = limits.ttsMaxRequestsPerDay - currentCount;
+
+    if (remaining <= 0) {
+      return {
+        allowed: false,
+        reason: `Daily TTS limit reached (${limits.ttsMaxRequestsPerDay} requests). Upgrade to get unlimited voice generation.`,
+        remaining: 0,
+      };
+    }
+
+    return { allowed: true, remaining };
+  }
+
+  return { allowed: true };
 }
 
 export interface UsageStats {

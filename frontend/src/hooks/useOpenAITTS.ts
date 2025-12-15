@@ -42,6 +42,12 @@ export function useOpenAITTS() {
   // Track current blob URL for cleanup
   const currentBlobUrlRef = useRef<string | null>(null);
 
+  // Track if using system voice fallback
+  const [isUsingSystemVoice, setIsUsingSystemVoice] = useState(false);
+
+  // System voice utterance reference
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
   /**
    * Initialize audio element
    */
@@ -82,7 +88,55 @@ export function useOpenAITTS() {
         URL.revokeObjectURL(currentBlobUrlRef.current);
         currentBlobUrlRef.current = null;
       }
+
+      // Cancel any ongoing speech synthesis
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
     };
+  }, []);
+
+  /**
+   * Fallback to browser's built-in speech synthesis
+   */
+  const playWithSystemVoice = useCallback((text: string) => {
+    if (!window.speechSynthesis) {
+      setError('System voice not available');
+      return;
+    }
+
+    try {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+
+      utterance.onstart = () => {
+        setIsPlaying(true);
+        setIsUsingSystemVoice(true);
+      };
+
+      utterance.onend = () => {
+        setIsPlaying(false);
+        setIsUsingSystemVoice(false);
+      };
+
+      utterance.onerror = (event) => {
+        console.error('System voice error:', event);
+        setIsPlaying(false);
+        setIsUsingSystemVoice(false);
+        setError('System voice playback failed');
+      };
+
+      utteranceRef.current = utterance;
+      window.speechSynthesis.speak(utterance);
+    } catch (err) {
+      console.error('System voice error:', err);
+      setError('System voice unavailable');
+    }
   }, []);
 
   /**
@@ -135,6 +189,19 @@ export function useOpenAITTS() {
             setError(message);
             return;
           }
+          
+          // Handle tier limit exceeded
+          if (response.status === 403) {
+            const errorData = await response.json().catch(() => ({}));
+            if (errorData.upgradeRequired) {
+              const message = errorData.message || 'Voice usage limit reached. Please upgrade your plan.';
+              toast.error(message, { duration: 5000 });
+              setError(message);
+              // TODO: Open upgrade modal
+              return;
+            }
+          }
+          
           throw new Error(`TTS API error: ${response.statusText}`);
         }
 
@@ -157,33 +224,55 @@ export function useOpenAITTS() {
         await audioRef.current.play();
       } catch (err: any) {
         console.error('TTS generation error:', err);
-        setError(err.message || 'Failed to generate audio');
+        
+        // Fallback to system voice on API failure
+        const isNetworkError = 
+          err.message?.includes('fetch') || 
+          err.message?.includes('network') || 
+          err.message?.includes('Failed to fetch');
+        
+        if (isNetworkError || !navigator.onLine) {
+          console.log('Falling back to system voice');
+          toast('High-quality voice unavailable. Switched to system voice.', {
+            icon: '🔊',
+            duration: 3000,
+          });
+          playWithSystemVoice(text);
+        } else {
+          setError(err.message || 'Failed to generate audio');
+        }
       } finally {
         setIsLoading(false);
       }
     },
-    [apiClient]
+    [apiClient, playWithSystemVoice]
   );
 
   /**
    * Pause audio playback
    */
   const pause = useCallback(() => {
-    if (audioRef.current) {
+    if (isUsingSystemVoice && window.speechSynthesis) {
+      window.speechSynthesis.pause();
+    } else if (audioRef.current) {
       audioRef.current.pause();
     }
-  }, []);
+  }, [isUsingSystemVoice]);
 
   /**
    * Stop audio playback and reset to beginning
    */
   const stop = useCallback(() => {
-    if (audioRef.current) {
+    if (isUsingSystemVoice && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      setIsPlaying(false);
+      setIsUsingSystemVoice(false);
+    } else if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       setIsPlaying(false);
     }
-  }, []);
+  }, [isUsingSystemVoice]);
 
   /**
    * Clear cache (useful for memory management)
@@ -205,5 +294,6 @@ export function useOpenAITTS() {
     stop,
     clearCache,
     audioElement: audioRef.current,
+    isUsingSystemVoice,
   };
 }

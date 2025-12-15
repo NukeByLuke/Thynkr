@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyReply } from 'fastify';
 import { authenticate, AuthenticatedRequest } from '../middleware/auth.middleware';
 import { checkAIRateLimit, recordAIUsage } from '../middleware/ai-rate-limit.middleware';
 import { ttsRateLimit } from '../middleware/tts-rate-limit.middleware';
+import { canUseTTS } from '../lib/tier-limits';
 import OpenAI from 'openai';
 import { createHash } from 'crypto';
 // NodeCache imported for potential future in-memory caching
@@ -88,6 +89,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
     },
     async (request: AuthenticatedRequest, reply: FastifyReply) => {
       const userId = request.user!.userId;
+      const userRole = request.user!.role;
       const body = request.body as TTSRequestBody;
 
       // Validate text
@@ -104,6 +106,17 @@ export default async function ttsRoutes(server: FastifyInstance) {
 
       // Limit text length (OpenAI has a 4096 character limit per request)
       const text = body.text.slice(0, 4096);
+
+      // Check tier-based limits
+      const ttsCheck = await canUseTTS(userId, userRole, text.length);
+      if (!ttsCheck.allowed) {
+        logger.warn({ userId, userRole, textLength: text.length }, 'TTS tier limit exceeded');
+        return reply.status(403).send({
+          error: 'Usage limit exceeded',
+          message: ttsCheck.reason,
+          upgradeRequired: true,
+        });
+      }
       const voice = body.voice as Voice;
 
       try {
