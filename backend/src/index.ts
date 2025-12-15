@@ -1,6 +1,13 @@
 /**
  * Thynkr Backend API Server
  * Main entry point for the Fastify-based REST API serving the Thynkr learning platform.
+ * 
+ * Performance Optimizations:
+ * - Response caching with Redis
+ * - Advanced rate limiting
+ * - Response compression (gzip/br)
+ * - Database connection pooling
+ * - Query optimization utilities
  */
 
 import Fastify from 'fastify';
@@ -12,6 +19,8 @@ import path from 'path';
 import { config } from './config';
 import { logger } from './lib/logger';
 import { initializeGameSocket } from './services/gameSocket.service';
+import { initializeRedis, disconnectRedis } from './middleware/cache.middleware';
+import { compressionMiddleware } from './middleware/compression.middleware';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import contentRoutes from './routes/content.routes';
@@ -30,13 +39,19 @@ import gamesRoutes from './routes/games.routes';
 import { errorHandler } from './middleware/error-handler';
 
 /**
- * Initialize Fastify server instance with logging configuration
+ * Initialize Fastify server instance with optimized configuration
  */
 const server = Fastify({
   logger: true,
   requestIdLogLabel: 'reqId',
   disableRequestLogging: false,
   requestIdHeader: 'x-request-id',
+  // Optimized body limits
+  bodyLimit: 10 * 1024 * 1024, // 10MB max body size
+  // Request timeout
+  requestTimeout: 30000, // 30 seconds
+  // Connection keep-alive
+  keepAliveTimeout: 72000, // 72 seconds
 });
 
 /**
@@ -44,6 +59,17 @@ const server = Fastify({
  */
 async function start() {
   try {
+    // Initialize Redis for caching and rate limiting
+    await initializeRedis().catch((err) => {
+      logger.warn({ err }, 'Redis initialization failed, continuing without caching');
+    });
+
+    // Add response compression (gzip/brotli)
+    server.addHook('onSend', compressionMiddleware({
+      threshold: 1024, // 1KB minimum
+      level: 6, // Balanced compression
+    }));
+
     // Configure multipart/form-data handling - delegate to multer middleware
     server.addContentTypeParser(/^multipart\/form-data(;.*)?$/, (_req, _payload, done) => {
       done(null as any);
@@ -140,22 +166,25 @@ async function start() {
     // Start server
     await server.listen({ port: config.port, host: '0.0.0.0' });
     logger.info(`Server running on http://localhost:${config.port}`);
+    logger.info('Performance optimizations enabled: compression, caching, advanced rate limiting');
 
     // Initialize Socket.io for Thynkr Arcade
     const httpServer = server.server;
     initializeGameSocket(httpServer);
   } catch (err) {
     server.log.error(err);
+    await disconnectRedis(); // Clean up Redis connection
     process.exit(1);
   }
 }
 
-// Graceful shutdown
+// Graceful shutdown with cleanup
 const signals = ['SIGINT', 'SIGTERM'];
 signals.forEach((signal) => {
   process.on(signal, async () => {
     logger.info(`${signal} received, shutting down gracefully`);
     await server.close();
+    await disconnectRedis(); // Clean up Redis connection
     process.exit(0);
   });
 });

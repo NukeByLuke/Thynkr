@@ -1,10 +1,12 @@
 /**
  * Content Routes
  * Manages educational content with role-based access control and search functionality.
+ * Optimized with response caching for faster load times.
  */
 
 import { FastifyInstance } from 'fastify';
 import { authenticate, AuthenticatedRequest } from '../middleware/auth.middleware';
+import { cache } from '../middleware/cache.middleware';
 import prisma from '../db/client';
 
 /**
@@ -12,11 +14,14 @@ import prisma from '../db/client';
  * @param server - Fastify instance
  */
 export default async function contentRoutes(server: FastifyInstance) {
-  // Get all content (with access control)
+  // Get all content (with access control and caching)
   server.get(
     '/',
     {
-      preHandler: authenticate,
+      preHandler: [
+        authenticate,
+        cache({ ttl: 300, userSpecific: true }), // Cache for 5 minutes per user
+      ],
     },
     async (request: AuthenticatedRequest, reply) => {
       const { featured, search, page = '1', limit = '12' } = request.query as any;
