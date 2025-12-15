@@ -61,7 +61,7 @@ function detectLanguage(text: string): string {
   }
   languageCache.set(text, language);
 
-  return language;
+  return language || 'en';
 }
 
 export const usePlayerStore = create<PlayerState>((set) => ({

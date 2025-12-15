@@ -20,7 +20,7 @@ interface FlashcardViewerProps {
 }
 
 // Memoize markdown components to prevent recreation
-const MarkdownComponents = {
+const MarkdownComponents: any = {
   p: memo(({ node, ...props }: any) => (
     <p className="text-lg sm:text-3xl font-bold text-gray-900 dark:text-white mb-4" {...props} />
   )),

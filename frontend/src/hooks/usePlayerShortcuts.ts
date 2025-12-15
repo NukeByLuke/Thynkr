@@ -107,7 +107,7 @@ export function usePlayerShortcuts() {
         
         if (isPlaying) {
           pause();
-          toast('Paused', { icon: '⏸️', duration: 1500 });
+          throttledToastRef.current('Paused', '⏸️');
         } else {
           play(text);
           toast('Playing', { icon: '▶️', duration: 1500 });
