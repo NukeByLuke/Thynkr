@@ -4,6 +4,7 @@ import {
   ChevronLeft,
   ChevronRight,
   RefreshCw,
+  ChevronUp,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -39,6 +40,9 @@ export default function PaginatedReader({
 }: PaginatedReaderProps) {
   const [currentPage, setCurrentPage] = useState(0);
   const [scrollPositions, setScrollPositions] = useState<Record<number, number>>({});
+  const [showHeader, setShowHeader] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [showMobileNav, setShowMobileNav] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const totalPages = pages.length;
@@ -63,6 +67,30 @@ export default function PaginatedReader({
     }
   }, [currentPage, scrollPositions]);
 
+  // Auto-hide header on scroll down (mobile only)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!contentRef.current) return;
+      
+      const currentScrollY = contentRef.current.scrollTop;
+      
+      // Show header when scrolling up or at top, hide when scrolling down
+      if (currentScrollY < lastScrollY || currentScrollY < 50) {
+        setShowHeader(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setShowHeader(false);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    const contentElement = contentRef.current;
+    if (contentElement) {
+      contentElement.addEventListener('scroll', handleScroll, { passive: true });
+      return () => contentElement.removeEventListener('scroll', handleScroll);
+    }
+  }, [lastScrollY]);
+
   const goToPage = (pageIndex: number) => {
     if (pageIndex >= 0 && pageIndex < totalPages) {
       saveScrollPosition();
@@ -79,12 +107,19 @@ export default function PaginatedReader({
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header with page info */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-        <div>
-          <h3 className="font-semibold text-gray-900 dark:text-white">{page.fileName}</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+    <div className="flex flex-col h-full relative">
+      {/* Header - Auto-hiding on mobile, fixed on desktop */}
+      <motion.div
+        initial={{ y: 0 }}
+        animate={{ y: showHeader ? 0 : -100 }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
+        className="md:relative md:translate-y-0 fixed top-0 left-0 right-0 z-30 md:z-0 flex items-center justify-between p-3 md:p-4 border-b border-gray-200 dark:border-gray-700 bg-white/95 md:bg-white dark:bg-gray-900/95 dark:md:bg-gray-900 backdrop-blur-lg md:backdrop-blur-none shadow-sm md:shadow-none"
+      >
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-sm md:text-base text-gray-900 dark:text-white truncate">
+            {page.fileName}
+          </h3>
+          <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
             Page {currentPage + 1} of {totalPages}
           </p>
         </div>
@@ -92,17 +127,20 @@ export default function PaginatedReader({
           <button
             onClick={onRegenerate}
             disabled={isRegenerating}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            className="hidden md:flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
           >
             <RefreshCw className={`h-4 w-4 ${isRegenerating ? 'animate-spin' : ''}`} />
             Regenerate
           </button>
         )}
-      </div>
+      </motion.div>
 
-      {/* Content */}
-      <div ref={contentRef} className="flex-1 overflow-y-auto p-6 bg-white dark:bg-gray-900">
-        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+      {/* Content - Optimized for mobile readability */}
+      <div 
+        ref={contentRef} 
+        className="flex-1 overflow-y-auto pt-16 md:pt-0 pb-20 md:pb-6 px-4 md:px-6 bg-white dark:bg-gray-900 scroll-smooth"
+      >
+        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 md:rounded-xl md:shadow-sm md:border border-gray-100 dark:border-gray-700 p-4 md:p-6">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentPage}
@@ -112,7 +150,7 @@ export default function PaginatedReader({
             transition={{ duration: 0.2 }}
           >
             {type === 'summary' ? (
-              <div className="prose prose-gray dark:prose-invert max-w-none">
+              <div className="prose prose-base md:prose-lg prose-gray dark:prose-invert max-w-none">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   rehypePlugins={[rehypeHighlight]}
@@ -294,8 +332,8 @@ export default function PaginatedReader({
         </div>
       </div>
 
-      {/* Navigation */}
-      <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+      {/* Desktop Navigation - Hidden on mobile */}
+      <div className="hidden md:flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <button
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 0}
@@ -316,6 +354,7 @@ export default function PaginatedReader({
                   ? 'bg-blue-500 w-4'
                   : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
               }`}
+              aria-label={`Go to page ${i + 1}`}
             />
           ))}
         </div>
@@ -329,6 +368,118 @@ export default function PaginatedReader({
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
+
+      {/* Mobile Floating Controls */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 pb-safe">
+        {/* Floating Navigation Buttons */}
+        <div className="flex items-center justify-center gap-3 px-4 pb-4">
+          {/* Previous Button */}
+          <motion.button
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 0}
+            whileTap={{ scale: 0.95 }}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg disabled:opacity-40 disabled:cursor-not-allowed transition-all touch-manipulation active:scale-95 min-h-[48px]"
+          >
+            <ChevronLeft className="w-5 h-5" />
+            Prev
+          </motion.button>
+
+          {/* Page Indicator FAB */}
+          <motion.button
+            onClick={() => setShowMobileNav(!showMobileNav)}
+            whileTap={{ scale: 0.95 }}
+            className="flex flex-col items-center justify-center px-6 py-3 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 min-w-[80px] min-h-[48px] touch-manipulation"
+          >
+            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Page</span>
+            <span className="text-lg font-bold text-gray-900 dark:text-white">
+              {currentPage + 1}/{totalPages}
+            </span>
+          </motion.button>
+
+          {/* Next Button */}
+          <motion.button
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages - 1}
+            whileTap={{ scale: 0.95 }}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg disabled:opacity-40 disabled:cursor-not-allowed transition-all touch-manipulation active:scale-95 min-h-[48px]"
+          >
+            Next
+            <ChevronRight className="w-5 h-5" />
+          </motion.button>
+        </div>
+
+        {/* Page Selection Drawer */}
+        <AnimatePresence>
+          {showMobileNav && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowMobileNav(false)}
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm -z-10"
+              />
+              
+              {/* Drawer */}
+              <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                className="bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl border-t border-gray-200 dark:border-gray-800 p-6 mb-20"
+              >
+                {/* Handle */}
+                <div className="flex justify-center mb-4">
+                  <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full" />
+                </div>
+
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                  Jump to Page
+                </h3>
+
+                {/* Page Grid */}
+                <div className="grid grid-cols-5 gap-2 max-h-64 overflow-y-auto">
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => {
+                        goToPage(i);
+                        setShowMobileNav(false);
+                      }}
+                      className={`aspect-square flex items-center justify-center rounded-xl text-sm font-semibold transition-all min-h-[48px] ${
+                        i === currentPage
+                          ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg'
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95'
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Scroll to Top FAB - Mobile Only */}
+      <AnimatePresence>
+        {!showHeader && (
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            onClick={() => {
+              contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+              setShowHeader(true);
+            }}
+            className="md:hidden fixed top-4 right-4 z-30 p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+          >
+            <ChevronUp className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
