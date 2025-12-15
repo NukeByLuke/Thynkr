@@ -227,20 +227,28 @@ export function TTSProvider({ children }: TTSProviderProps) {
   // Fetch audio from backend
   const fetchAudio = useCallback(
     async (track: TTSTrack): Promise<Blob> => {
+      if (!track.text || track.text.trim().length === 0) {
+        throw new Error('Text is required for TTS');
+      }
+
       let response;
 
       if (track.studyPackId !== undefined && track.pageNumber !== undefined) {
         // Use study pack page endpoint for better caching
         response = await api.post(
           `/tts/study-pack/${track.studyPackId}/page/${track.pageNumber}`,
-          { voice, speed },
+          { voice: voice || 'alloy', speed: speed || 1.0 },
           { responseType: 'blob' }
         );
       } else {
-        // Use generic TTS endpoint
+        // Use generic TTS endpoint - voice is REQUIRED by backend
         response = await api.post(
           '/tts',
-          { text: track.text, voice, speed },
+          { 
+            text: track.text.trim(), 
+            voice: voice || 'alloy',  // Always send voice (required by backend)
+            speed: speed || 1.0 
+          },
           { responseType: 'blob' }
         );
       }

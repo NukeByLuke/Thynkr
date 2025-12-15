@@ -179,6 +179,15 @@ function VideoViewer({
     };
   }, []);
 
+  // Validate URL before rendering
+  if (!url || url === 'undefined' || url === 'null') {
+    return (
+      <div className="relative w-full p-8 bg-gray-100 dark:bg-gray-800 rounded-lg text-center">
+        <p className="text-gray-600 dark:text-gray-400">Video URL is not available</p>
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-full bg-black rounded-lg overflow-hidden">
       <Watermark courseTitle={courseTitle} userId={userId} />
@@ -190,6 +199,9 @@ function VideoViewer({
         disablePictureInPicture
         className="w-full max-h-[70vh]"
         onContextMenu={(e) => e.preventDefault()}
+        onError={(e) => {
+          console.error('Video loading error:', url);
+        }}
       >
         Your browser does not support the video tag.
       </video>
@@ -209,6 +221,20 @@ function AudioViewer({
   courseTitle: string;
   userId: string;
 }) {
+  // Validate URL before rendering
+  if (!url || url === 'undefined' || url === 'null') {
+    return (
+      <div className="relative w-full p-8 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg">
+        <Watermark courseTitle={courseTitle} userId={userId} />
+        <div className="flex flex-col items-center gap-4">
+          <Music className="w-16 h-16 text-indigo-600 dark:text-indigo-400" />
+          <p className="text-lg font-medium text-gray-900 dark:text-white">{fileName}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Audio URL is not available</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-full p-8 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg">
       <Watermark courseTitle={courseTitle} userId={userId} />
@@ -221,6 +247,9 @@ function AudioViewer({
           controlsList="nodownload"
           className="w-full max-w-md"
           onContextMenu={(e) => e.preventDefault()}
+          onError={(e) => {
+            console.error('Audio loading error:', url);
+          }}
         >
           Your browser does not support the audio element.
         </audio>
