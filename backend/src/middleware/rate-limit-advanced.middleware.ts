@@ -84,7 +84,7 @@ function generateKey(request: FastifyRequest, config: RateLimitConfig): string {
 
   const user = (request as any).user;
   const identifier = user?.id || request.ip;
-  const route = request.routerPath || request.url;
+  const route = request.url;
 
   return `ratelimit:${route}:${identifier}`;
 }

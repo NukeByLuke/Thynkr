@@ -37,7 +37,7 @@ export async function initializeRedis() {
     redisClient = redis.createClient({
       url: redisUrl,
       socket: {
-        reconnectStrategy: (retries: number) => {
+        reconnectStrategy: (retries: number): number | Error => {
           if (retries > 10) {
             logger.error('Redis connection failed after 10 retries');
             return new Error('Redis connection failed');
@@ -47,7 +47,7 @@ export async function initializeRedis() {
       },
     });
 
-    redisClient.on('error', (err: Error) => {
+    redisClient.on('error', (err: unknown) => {
       logger.error({ err }, 'Redis client error');
     });
 
