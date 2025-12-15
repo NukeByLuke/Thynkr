@@ -44,7 +44,9 @@ const hashText = (() => {
     // Limit hash cache size
     if (hashCache.size > 1000) {
       const firstKey = hashCache.keys().next().value;
-      hashCache.delete(firstKey);
+      if (firstKey !== undefined) {
+        hashCache.delete(firstKey);
+      }
     }
     
     hashCache.set(key, result);

@@ -33,7 +33,7 @@ const languageCache = new Map<string, string>();
 function detectLanguage(text: string): string {
   // Check cache first
   const cached = languageCache.get(text);
-  if (cached) return cached;
+  if (cached !== undefined) return cached;
 
   let language = 'en-US'; // Default
 
@@ -57,7 +57,9 @@ function detectLanguage(text: string): string {
   // Cache the result (limit cache size to 100 entries)
   if (languageCache.size > 100) {
     const firstKey = languageCache.keys().next().value;
-    languageCache.delete(firstKey);
+    if (firstKey !== undefined) {
+      languageCache.delete(firstKey);
+    }
   }
   languageCache.set(text, language);
 
