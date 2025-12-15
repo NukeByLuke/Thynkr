@@ -10,15 +10,12 @@ import { AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
-import { TTSProvider } from './contexts/TTSContext';
-import { AudioProvider } from './contexts/AudioContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import ProtectedRoute from '@/features/auth/ProtectedRoute';
 import PublicLayout from './layouts/PublicLayout';
 import DashboardLayout from './layouts/DashboardLayout';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import PreviewGate from '@/features/courses/PreviewGate';
-import MiniPlayer from '@/features/tutor/MiniPlayer';
 import GlobalLoadingBar from '@/components/ui/GlobalLoadingBar';
 import { lazyWithPreload } from './utils/lazyWithPreload';
 
@@ -27,6 +24,7 @@ const Landing = lazyWithPreload(() => import('./pages/Landing'));
 const Login = lazyWithPreload(() => import('./pages/Login'));
 const Register = lazyWithPreload(() => import('./pages/Register'));
 const AuthCallback = lazyWithPreload(() => import('./pages/AuthCallback'));
+const OAuthCallback = AuthCallback; // Alias for /oauth-callback route
 const Pricing = lazyWithPreload(() => import('./pages/Pricing'));
 const Account = lazyWithPreload(() => import('./pages/Account'));
 const Admin = lazyWithPreload(() => import('./pages/Admin'));
@@ -44,12 +42,6 @@ const GamesDashboard = lazyWithPreload(() => import('./pages/GamesDashboard'));
 const QuizGame = lazyWithPreload(() => import('./features/arcade/QuizGame'));
 const MatchingGame = lazyWithPreload(() => import('./features/arcade/MatchingGame'));
 const NotFound = lazyWithPreload(() => import('./pages/NotFound'));
-
-// Lazy-load GlobalPlayerBar to avoid impacting LCP
-const GlobalPlayerBar = lazyWithPreload(() => import('./components/audio/GlobalPlayerBar').then(m => ({ default: m.GlobalPlayerBar })));
-
-// Lazy-load SelectionReader for text-to-speech accessibility
-const SelectionReader = lazyWithPreload(() => import('./components/ui/SelectionReader').then(m => ({ default: m.SelectionReader })));
 
 /**
  * Custom hook to handle authentication-based redirects
@@ -127,6 +119,7 @@ function AppContent() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/oauth-callback" element={<OAuthCallback />} />
 
             {/* Public routes with PublicLayout (navbar) */}
             <Route element={<PublicLayout />}>
@@ -238,25 +231,11 @@ function App() {
     <AuthProvider>
       <NavigationProvider>
         <ThemeProvider>
-          <AudioProvider>
-            <TTSProvider>
-              {!gatePassed && previewPassword ? (
-                <PreviewGate onSuccess={() => setGatePassed(true)} />
-              ) : (
-                <>
-                <>
-                  <AppContent />
-                  <MiniPlayer />
-                  <Suspense fallback={null}>
-                    <GlobalPlayerBar />
-                  </Suspense>
-                  <Suspense fallback={null}>
-                    <SelectionReader />
-                  </Suspense>
-                </>
-              )}
-            </TTSProvider>
-          </AudioProvider>
+          {!gatePassed && previewPassword ? (
+            <PreviewGate onSuccess={() => setGatePassed(true)} />
+          ) : (
+            <AppContent />
+          )}
         </ThemeProvider>
       </NavigationProvider>
     </AuthProvider>

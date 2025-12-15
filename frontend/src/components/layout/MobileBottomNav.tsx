@@ -1,185 +1,158 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import {
-  Home,
-  GraduationCap,
-  MessageSquare,
-  Settings,
-  Plus,
-  Clock,
-  DollarSign,
-} from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+/**
+ * MobileBottomNav Component - Mobile-First Navigation Strategy
+ * Sticky bottom tab bar for mobile devices with glassmorphism design
+ * Uses Strategy Pattern for responsive navigation
+ */
 
-export default function MobileBottomNav() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [currentTime, setCurrentTime] = useState(new Date());
+import { NavLink } from 'react-router-dom';
+import { LucideIcon, Home, BookOpen, Gamepad2, User } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
-  // Update time every minute
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 60000);
-    return () => clearInterval(timer);
-  }, []);
+// ============================================================================
+// Types & Interfaces
+// ============================================================================
 
-  const formatTime = () => {
-    return new Intl.DateTimeFormat('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    }).format(currentTime);
-  };
+export interface BottomNavItem {
+  path: string;
+  icon: LucideIcon;
+  label: string;
+  end?: boolean;
+  requiresPremium?: boolean;
+}
 
-  const navItems = [
-    { icon: Home, label: 'Home', path: '/' },
-    { icon: GraduationCap, label: 'Study', path: '/study' },
-    { icon: MessageSquare, label: 'AI Tutor', path: '/tutor' },
-    { icon: DollarSign, label: 'Pricing', path: '/pricing' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
+interface MobileBottomNavProps {
+  items?: BottomNavItem[];
+}
+
+// ============================================================================
+// BottomNavButton Component
+// ============================================================================
+
+interface BottomNavButtonProps {
+  to: string;
+  icon: LucideIcon;
+  label: string;
+  end?: boolean;
+}
+
+function BottomNavButton({ to, icon: Icon, label, end = false }: BottomNavButtonProps) {
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) =>
+        `flex flex-col items-center justify-center gap-1 py-2 px-3 min-w-0 flex-1 transition-all duration-200 relative active:scale-95 ${
+          isActive
+            ? 'text-blue-600 dark:text-blue-400'
+            : 'text-slate-500 dark:text-slate-400 active:text-slate-700 dark:active:text-slate-300'
+        }`
+      }
+    >
+      {({ isActive }) => (
+        <>
+          {/* Active Indicator - Top Border */}
+          {isActive && (
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 rounded-full bg-gradient-to-r from-blue-500 to-purple-500" />
+          )}
+
+          {/* Icon Container */}
+          <div
+            className={`relative transition-transform duration-200 ${
+              isActive ? '-translate-y-0.5' : ''
+            }`}
+          >
+            <Icon
+              className={`w-6 h-6 transition-all duration-200 ${
+                isActive
+                  ? 'stroke-[2.5]'
+                  : 'stroke-[2]'
+              }`}
+            />
+            
+            {/* Active Glow Effect */}
+            {isActive && (
+              <div className="absolute inset-0 blur-lg opacity-40 bg-blue-500 dark:bg-blue-400 rounded-full -z-10" />
+            )}
+          </div>
+
+          {/* Label */}
+          <span
+            className={`text-[10px] font-medium leading-none transition-all duration-200 ${
+              isActive
+                ? 'opacity-100 font-semibold'
+                : 'opacity-70'
+            }`}
+          >
+            {label}
+          </span>
+        </>
+      )}
+    </NavLink>
+  );
+}
+
+// ============================================================================
+// MobileBottomNav Component
+// ============================================================================
+
+export default function MobileBottomNav({ items }: MobileBottomNavProps) {
+  const { user } = useAuth();
+
+  // Default navigation items if none provided
+  const defaultItems: BottomNavItem[] = [
+    { path: '/', icon: Home, label: 'Home', end: true },
+    { path: '/study', icon: BookOpen, label: 'Study' },
+    { path: '/arcade', icon: Gamepad2, label: 'Arcade' },
+    { path: '/settings', icon: User, label: 'Profile' },
   ];
 
-  const isActive = (path: string) => {
-    if (path === '/') {
-      // Home button is never active in mobile nav (it redirects externally)
+  const navItems = items || defaultItems;
+
+  // Filter items based on user permissions
+  const visibleItems = navItems.filter((item) => {
+    if (item.requiresPremium && user?.role !== 'PREMIUM' && user?.role !== 'ADMIN') {
       return false;
     }
-    return location.pathname.startsWith(path);
-  };
-
-  const handleCreateCourse = () => {
-    navigate('/courses');
-    // The CoursesUnified component will handle showing the create modal
-    setTimeout(() => {
-      const createButton = document.querySelector(
-        '[aria-label="Create new course"]'
-      ) as HTMLButtonElement;
-      if (createButton) createButton.click();
-    }, 100);
-  };
+    return true;
+  });
 
   return (
     <>
-      {/* Top-right Mini Clock */}
-      <div className="lg:hidden fixed top-4 right-4 z-50 flex items-center gap-2 px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-full shadow-lg border border-gray-200 dark:border-gray-700">
-        <Clock className="w-3.5 h-3.5 text-brand-500" />
-        <span className="text-xs font-semibold text-gray-900 dark:text-white">{formatTime()}</span>
-      </div>
+      {/* Spacer to prevent content from being hidden behind fixed nav */}
+      <div className="h-16 md:hidden" aria-hidden="true" />
 
-      {/* Mobile Bottom Navigation Bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-t border-gray-200 dark:border-gray-700 shadow-2xl">
-        <div className="relative flex items-center justify-around h-20 px-2">
-          {navItems.map((item, index) => {
-            const Icon = item.icon;
-            const active = isActive(item.path);
-            const isHome = item.path === '/';
+      {/* Fixed Bottom Navigation */}
+      <nav
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40"
+        role="navigation"
+        aria-label="Mobile navigation"
+      >
+        {/* Glassmorphism Container */}
+        <div className="relative">
+          {/* Gradient Border Top */}
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-700 to-transparent" />
 
-            // Home button redirects to external domain
-            if (isHome) {
-              return (
-                <button
+          {/* Glass Panel */}
+          <div className="backdrop-blur-lg bg-white/90 dark:bg-slate-900/90 border-t border-slate-200/50 dark:border-slate-800/50 shadow-lg">
+            {/* Navigation Items */}
+            <div className="flex items-stretch justify-around max-w-screen-sm mx-auto">
+              {visibleItems.map((item) => (
+                <BottomNavButton
                   key={item.path}
-                  onClick={() => (window.location.href = 'https://thynkr.ca')}
-                  className={`flex flex-col items-center justify-center flex-1 h-full relative group ${
-                    index === 2 ? 'invisible' : '' // Hide middle item for FAB space
-                  }`}
-                >
-                  <motion.div
-                    whileTap={{ scale: 0.85 }}
-                    className="flex flex-col items-center justify-center gap-1"
-                  >
-                    <div
-                      className={`p-2 rounded-xl transition-all ${
-                        active
-                          ? 'bg-gradient-to-br from-brand-500 to-accent-500 shadow-lg shadow-brand-500/30'
-                          : 'bg-transparent'
-                      }`}
-                    >
-                      <Icon
-                        className={`w-5 h-5 transition-colors ${
-                          active
-                            ? 'text-white'
-                            : 'text-gray-500 dark:text-gray-400 group-active:text-gray-700 dark:group-active:text-gray-300'
-                        }`}
-                      />
-                    </div>
-                    <span
-                      className={`text-[10px] font-medium transition-colors ${
-                        active
-                          ? 'text-brand-600 dark:text-brand-400'
-                          : 'text-gray-500 dark:text-gray-400 group-active:text-gray-700 dark:group-active:text-gray-300'
-                      }`}
-                    >
-                      {item.label}
-                    </span>
-                  </motion.div>
-                </button>
-              );
-            }
-
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex flex-col items-center justify-center flex-1 h-full relative group ${
-                  index === 2 ? 'invisible' : '' // Hide middle item for FAB space
-                }`}
-              >
-                <motion.div
-                  whileTap={{ scale: 0.85 }}
-                  className="flex flex-col items-center justify-center gap-1"
-                >
-                  <div
-                    className={`p-2 rounded-xl transition-all ${
-                      active
-                        ? 'bg-gradient-to-br from-brand-500 to-accent-500 shadow-lg shadow-brand-500/30'
-                        : 'bg-transparent'
-                    }`}
-                  >
-                    <Icon
-                      className={`w-5 h-5 transition-colors ${
-                        active
-                          ? 'text-white'
-                          : 'text-gray-500 dark:text-gray-400 group-active:text-gray-700 dark:group-active:text-gray-300'
-                      }`}
-                    />
-                  </div>
-                  <span
-                    className={`text-[10px] font-medium transition-colors ${
-                      active
-                        ? 'text-brand-600 dark:text-brand-400'
-                        : 'text-gray-500 dark:text-gray-400 group-active:text-gray-700 dark:group-active:text-gray-300'
-                    }`}
-                  >
-                    {item.label}
-                  </span>
-                </motion.div>
-              </Link>
-            );
-          })}
-
-          {/* Floating "+ Course" Button (Center) */}
-          <motion.button
-            onClick={handleCreateCourse}
-            whileTap={{ scale: 0.9 }}
-            whileHover={{ scale: 1.05 }}
-            className="absolute left-1/2 -translate-x-1/2 -top-6 flex flex-col items-center justify-center"
-            aria-label="Create new course"
-          >
-            <div className="relative">
-              {/* Outer glow ring */}
-              <div className="absolute inset-0 bg-gradient-to-br from-brand-400 to-accent-400 rounded-full blur-md opacity-60 animate-pulse" />
-
-              {/* Main button */}
-              <div className="relative w-14 h-14 bg-gradient-to-br from-brand-500 to-accent-500 rounded-full shadow-2xl shadow-brand-500/50 flex items-center justify-center border-4 border-white dark:border-gray-900">
-                <Plus className="w-6 h-6 text-white" strokeWidth={3} />
-              </div>
+                  to={item.path}
+                  icon={item.icon}
+                  label={item.label}
+                  end={item.end}
+                />
+              ))}
             </div>
-            <span className="mt-1 text-[10px] font-semibold text-brand-600 dark:text-brand-400">
-              Course
-            </span>
-          </motion.button>
+
+            {/* iOS Home Indicator Safe Area - pb-safe class for iOS devices */}
+            <div className="h-safe pb-safe bg-transparent" />
+          </div>
+
+          {/* Subtle Shadow Gradient */}
+          <div className="absolute bottom-full left-0 right-0 h-4 bg-gradient-to-t from-black/5 to-transparent dark:from-black/20 pointer-events-none" />
         </div>
       </nav>
     </>

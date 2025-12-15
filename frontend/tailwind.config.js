@@ -279,6 +279,12 @@ export default {
         '.pb-safe': {
           'padding-bottom': 'env(safe-area-inset-bottom, 0)',
         },
+        '.h-safe': {
+          'height': 'env(safe-area-inset-bottom, 0)',
+        },
+        '.pt-safe': {
+          'padding-top': 'env(safe-area-inset-top, 0)',
+        },
         // Hover transition preset: background/color/box-shadow over 200ms ease-in-out
         '.hover-transition': {
           'transition-property': 'background-color, color, box-shadow, border-color',

@@ -3,9 +3,7 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Sidebar, { NavigationSection } from '@/components/Sidebar';
 import MobileHeader from '@/components/MobileHeader';
-import GlobalPlayerBar from '@/components/player/GlobalPlayerBar';
-import { PlayerErrorBoundary } from '@/components/player/PlayerErrorBoundary';
-import { usePlayerShortcuts } from '@/hooks/usePlayerShortcuts';
+import MobileBottomNav, { BottomNavItem } from '@/components/layout/MobileBottomNav';
 import {
   BookOpen,
   FolderOpen,
@@ -17,14 +15,12 @@ import {
   DollarSign,
   Shield,
   Gamepad2,
+  User,
 } from 'lucide-react';
 
 export default function DashboardLayout() {
   const { user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // Enable keyboard shortcuts for player control
-  usePlayerShortcuts();
 
   // Define navigation sections
   const navigationSections: NavigationSection[] = [
@@ -57,6 +53,14 @@ export default function DashboardLayout() {
           : []),
       ],
     },
+  ];
+
+  // Define mobile bottom navigation items (4-5 core items)
+  const mobileNavItems: BottomNavItem[] = [
+    { path: '/', icon: Home, label: 'Home', end: true },
+    { path: '/study', icon: BookOpen, label: 'Study' },
+    { path: '/arcade', icon: Gamepad2, label: 'Arcade' },
+    { path: '/settings', icon: User, label: 'Profile' },
   ];
 
   return (
@@ -100,10 +104,8 @@ export default function DashboardLayout() {
         </>
       )}
 
-      {/* Global Player Bar - Fixed at bottom */}
-      <PlayerErrorBoundary>
-        <GlobalPlayerBar />
-      </PlayerErrorBoundary>
+      {/* Mobile Bottom Navigation - Strategy Pattern for Responsive Navigation */}
+      <MobileBottomNav items={mobileNavItems} />
     </div>
   );
 }

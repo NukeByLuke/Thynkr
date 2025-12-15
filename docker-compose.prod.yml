@@ -37,7 +37,8 @@ services:
       PORT: 3001
       DATABASE_URL: postgresql://${POSTGRES_USER:-thynkr}:${POSTGRES_PASSWORD:-thynkr_dev_password}@postgres:5432/${POSTGRES_DB:-thynkr_db}
       REDIS_URL: redis://redis:6379
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      FRONTEND_URL: ${FRONTEND_URL:-https://thynkr.ca}
+      VITE_API_URL: ${VITE_API_URL:-https://thynkr.ca}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}
@@ -49,6 +50,8 @@ services:
       STRIPE_PRICE_PREMIUM_YEARLY: ${STRIPE_PRICE_PREMIUM_YEARLY:-price_test_premium_yearly}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-dummy}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       DIGITALOCEAN_API_TOKEN: ${DIGITALOCEAN_API_TOKEN:-}
       DIGITALOCEAN_DROPLET_ID: ${DIGITALOCEAN_DROPLET_ID:-}
     depends_on:

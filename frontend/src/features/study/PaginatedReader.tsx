@@ -3,20 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft,
   ChevronRight,
-  Volume2,
-  VolumeX,
-  Play,
-  Pause,
-  SkipBack,
-  SkipForward,
-  Loader2,
   RefreshCw,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
-import api from '../../lib/api';
-import toast from 'react-hot-toast';
 
 interface SummaryPage {
   pageNumber: number;
@@ -50,29 +41,8 @@ export default function PaginatedReader({
   const [scrollPositions, setScrollPositions] = useState<Record<number, number>>({});
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // TTS State
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
-  const [audioProgress, setAudioProgress] = useState(0);
-  const [audioDuration, setAudioDuration] = useState(0);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const audioUrlRef = useRef<string | null>(null);
-
   const totalPages = pages.length;
   const page = pages[currentPage];
-
-  // Get content text for TTS
-  const getPageText = useCallback(() => {
-    if (!page) return '';
-    if (type === 'summary') {
-      return (page as SummaryPage).content;
-    } else {
-      const notesPage = page as NotesPage;
-      const keyPointsText = notesPage.keyPoints.join('. ');
-      return `Key Points: ${keyPointsText}. Details: ${notesPage.detailed}`;
-    }
-  }, [page, type]);
 
   // Save scroll position when changing pages
   const saveScrollPosition = useCallback(() => {
@@ -93,143 +63,11 @@ export default function PaginatedReader({
     }
   }, [currentPage, scrollPositions]);
 
-  // Cleanup audio on unmount
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-      if (audioUrlRef.current) {
-        URL.revokeObjectURL(audioUrlRef.current);
-      }
-    };
-  }, []);
-
-  // Stop audio when page changes
-  useEffect(() => {
-    stopAudio();
-  }, [currentPage]);
-
   const goToPage = (pageIndex: number) => {
     if (pageIndex >= 0 && pageIndex < totalPages) {
       saveScrollPosition();
       setCurrentPage(pageIndex);
     }
-  };
-
-  const stopAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-    setIsPlaying(false);
-    setAudioProgress(0);
-  };
-
-  const playTTS = async () => {
-    const text = getPageText();
-    if (!text) return;
-
-    setIsLoadingAudio(true);
-    try {
-      // Get TTS preferences from localStorage (same as TTSContext)
-      const voice = localStorage.getItem('tts-voice') || 'alloy';
-      const speed = parseFloat(localStorage.getItem('tts-speed') || '1.0');
-
-      const response = await api.post(
-        '/tts',
-        { 
-          text: text.trim(), 
-          voice,  // Required by backend
-          speed 
-        },
-        { responseType: 'blob' }
-      );
-      const audioBlob = response.data;
-
-      // Revoke previous URL
-      if (audioUrlRef.current) {
-        URL.revokeObjectURL(audioUrlRef.current);
-      }
-
-      audioUrlRef.current = URL.createObjectURL(audioBlob);
-
-      if (!audioRef.current) {
-        audioRef.current = new Audio();
-        audioRef.current.addEventListener('timeupdate', () => {
-          if (audioRef.current) {
-            setAudioProgress(audioRef.current.currentTime);
-          }
-        });
-        audioRef.current.addEventListener('loadedmetadata', () => {
-          if (audioRef.current) {
-            setAudioDuration(audioRef.current.duration);
-          }
-        });
-        audioRef.current.addEventListener('ended', () => {
-          setIsPlaying(false);
-          setAudioProgress(0);
-        });
-      }
-
-      audioRef.current.src = audioUrlRef.current;
-      audioRef.current.playbackRate = playbackSpeed;
-      await audioRef.current.play();
-      setIsPlaying(true);
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to generate audio');
-    } finally {
-      setIsLoadingAudio(false);
-    }
-  };
-
-  const togglePlay = () => {
-    if (!audioRef.current?.src) {
-      playTTS();
-      return;
-    }
-
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioRef.current.play();
-      setIsPlaying(true);
-    }
-  };
-
-  const skipTime = (seconds: number) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = Math.max(
-        0,
-        Math.min(audioRef.current.currentTime + seconds, audioRef.current.duration)
-      );
-    }
-  };
-
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const time = parseFloat(e.target.value);
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
-      setAudioProgress(time);
-    }
-  };
-
-  const changeSpeed = () => {
-    const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
-    const currentIndex = speeds.indexOf(playbackSpeed);
-    const nextSpeed = speeds[(currentIndex + 1) % speeds.length];
-    setPlaybackSpeed(nextSpeed);
-    if (audioRef.current) {
-      audioRef.current.playbackRate = nextSpeed;
-    }
-  };
-
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   if (!page) {
@@ -491,81 +329,6 @@ export default function PaginatedReader({
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
-
-      {/* TTS Player - Minimal rounded design with blue accents */}
-      <motion.div
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3"
-      >
-        <div className="flex items-center gap-3">
-          {/* Skip Back */}
-          <button
-            onClick={() => skipTime(-10)}
-            disabled={!audioRef.current?.src}
-            className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-40 transition-colors"
-            title="Back 10s"
-          >
-            <SkipBack className="h-4 w-4" />
-          </button>
-
-          {/* Play/Pause */}
-          <button
-            onClick={togglePlay}
-            disabled={isLoadingAudio}
-            className="flex items-center justify-center w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-full disabled:opacity-50 transition-colors"
-          >
-            {isLoadingAudio ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : isPlaying ? (
-              <Pause className="h-5 w-5" />
-            ) : (
-              <Play className="h-5 w-5 ml-0.5" />
-            )}
-          </button>
-
-          {/* Skip Forward */}
-          <button
-            onClick={() => skipTime(10)}
-            disabled={!audioRef.current?.src}
-            className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-40 transition-colors"
-            title="Forward 10s"
-          >
-            <SkipForward className="h-4 w-4" />
-          </button>
-
-          {/* Progress Bar */}
-          <div className="flex-1 flex items-center gap-2">
-            <span className="text-xs text-gray-500 dark:text-gray-400 w-10 text-right">
-              {formatTime(audioProgress)}
-            </span>
-            <input
-              type="range"
-              min={0}
-              max={audioDuration || 100}
-              value={audioProgress}
-              onChange={handleSeek}
-              className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer accent-blue-500"
-            />
-            <span className="text-xs text-gray-500 dark:text-gray-400 w-10">
-              {formatTime(audioDuration)}
-            </span>
-          </div>
-
-          {/* Speed Control */}
-          <button
-            onClick={changeSpeed}
-            className="px-2.5 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-          >
-            {playbackSpeed}x
-          </button>
-
-          {/* Volume Icon */}
-          <button className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
-            {isPlaying ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-          </button>
-        </div>
-      </motion.div>
     </div>
   );
 }

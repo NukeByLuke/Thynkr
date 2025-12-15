@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useCallback, useMemo, memo } from 'react';
+import { useState, useCallback, memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, RotateCcw, Shuffle, Volume2 } from 'lucide-react';
-import { usePlayerStore } from '@/stores/usePlayerStore';
+import { ChevronLeft, ChevronRight, RotateCcw, Shuffle } from 'lucide-react';
 
 interface Flashcard {
   id: string;
@@ -46,11 +45,6 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
   const [isFlipped, setIsFlipped] = useState(false);
   const [shuffledCards, setShuffledCards] = useState<Flashcard[] | null>(null);
   const [direction, setDirection] = useState(0);
-  
-  // Use selective subscriptions for better performance
-  const play = usePlayerStore((state) => state.play);
-  const isPlaying = usePlayerStore((state) => state.isPlaying);
-  const playingText = usePlayerStore((state) => state.text);
 
   const displayCards = shuffledCards || cards;
   const currentCard = displayCards[currentIndex];
@@ -88,21 +82,6 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
     setCurrentIndex(0);
     setIsFlipped(false);
   }, []);
-
-  const handleReadCard = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    const textToRead = isFlipped ? currentCard.back : currentCard.front;
-    play(textToRead);
-  }, [isFlipped, currentCard, play]);
-
-  // Memoize card text check
-  const cardText = useMemo(() => 
-    isFlipped ? currentCard.back : currentCard.front
-  , [isFlipped, currentCard.back, currentCard.front]);
-
-  const isCurrentCardPlaying = useMemo(() => 
-    isPlaying && playingText.includes(cardText.substring(0, 50))
-  , [isPlaying, playingText, cardText]);
 
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === ' ' || e.key === 'Enter') {
@@ -196,18 +175,6 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
                   transform: 'translateZ(0)',
                 }}
               >
-                {/* TTS Button - Top Right */}
-                <button
-                  onClick={handleReadCard}
-                  className={`absolute top-4 right-4 p-2 rounded-lg transition-all ${
-                    isCurrentCardPlaying
-                      ? 'text-purple-600 dark:text-purple-400 animate-pulse bg-purple-50 dark:bg-purple-900/30'
-                      : 'text-slate-400 hover:text-purple-500 hover:bg-slate-100 dark:hover:bg-slate-700'
-                  }`}
-                  aria-label="Read card aloud"
-                >
-                  <Volume2 className="w-5 h-5" />
-                </button>
                 <div className="text-center w-full">
                   <p className="text-sm sm:text-base text-brand-600 dark:text-brand-400 mb-3 sm:mb-5 uppercase tracking-wide font-bold">
                     Question
@@ -269,18 +236,6 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
                   transform: 'rotateY(180deg) translateZ(0)',
                 }}
               >
-                {/* TTS Button - Top Right */}
-                <button
-                  onClick={handleReadCard}
-                  className={`absolute top-4 right-4 p-2 rounded-lg transition-all ${
-                    isCurrentCardPlaying
-                      ? 'text-white animate-pulse bg-white/20'
-                      : 'text-white/60 hover:text-white hover:bg-white/20'
-                  }`}
-                  aria-label="Read card aloud"
-                >
-                  <Volume2 className="w-5 h-5" />
-                </button>
                 <div className="text-center w-full">
                   <p className="text-sm sm:text-base text-white/90 mb-3 sm:mb-5 uppercase tracking-wide font-bold">
                     Answer

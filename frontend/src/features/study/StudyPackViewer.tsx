@@ -18,14 +18,11 @@ import {
   AlertCircle,
   Maximize2,
   Minimize2,
-  Volume2,
-  ListMusic,
   FileText,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTTS } from '@/contexts/TTSContext';
 
 type ViewerTab = 'summary' | 'notes' | 'quiz' | 'flashcards';
 
@@ -89,7 +86,6 @@ const tabContentVariants = {
 export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewerProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { play, addToQueue, currentTrack, isPlaying, isLoading: ttsLoading } = useTTS();
 
   const [activeTab, setActiveTab] = useState<ViewerTab>('summary');
   const [currentPage, setCurrentPage] = useState(0);
@@ -224,44 +220,6 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
 
     const page = studyPack.pages[currentPage];
 
-    // Check if current page is playing
-    const isCurrentPagePlaying =
-      currentTrack?.studyPackId === studyPackId && currentTrack?.pageNumber === currentPage;
-
-    // Handler for reading current page
-    const handleReadPage = () => {
-      const textToRead = page.heading ? `${page.heading}. ${page.content}` : page.content;
-
-      play({
-        id: `${studyPackId}-page-${currentPage}`,
-        title: page.heading || `Page ${currentPage + 1}`,
-        text: textToRead,
-        studyPackId,
-        pageNumber: currentPage,
-      });
-    };
-
-    // Handler for reading all pages from current
-    const handleReadAllPages = () => {
-      const tracks = studyPack.pages.slice(currentPage).map((p, idx) => ({
-        id: `${studyPackId}-page-${currentPage + idx}`,
-        title: p.heading || `Page ${currentPage + idx + 1}`,
-        text: p.heading ? `${p.heading}. ${p.content}` : p.content,
-        studyPackId,
-        pageNumber: currentPage + idx,
-      }));
-
-      // Play the first track immediately
-      if (tracks.length > 0) {
-        play(tracks[0]);
-        // Queue the rest
-        if (tracks.length > 1) {
-          addToQueue(tracks.slice(1));
-          toast.success(`Queued ${tracks.length - 1} more pages`);
-        }
-      }
-    };
-
     return (
       <div className="flex flex-col h-full">
         {/* Progress bar */}
@@ -272,35 +230,6 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
             animate={{ width: `${pageProgress}%` }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
           />
-        </div>
-
-        {/* TTS Controls */}
-        <div className="flex items-center gap-2 mb-6">
-          <button
-            onClick={handleReadPage}
-            disabled={ttsLoading}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-              isCurrentPagePlaying
-                ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/25'
-                : 'bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 text-primary-700 dark:text-primary-300 hover:from-primary-100 hover:to-primary-200 dark:hover:from-primary-900/30 dark:hover:to-primary-800/30'
-            }`}
-          >
-            <Volume2
-              className={`h-4 w-4 ${isCurrentPagePlaying && isPlaying ? 'animate-pulse' : ''}`}
-            />
-            {isCurrentPagePlaying ? 'Playing...' : 'Read This Page'}
-          </button>
-
-          {studyPack.pages.length > 1 && (
-            <button
-              onClick={handleReadAllPages}
-              disabled={ttsLoading}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl text-sm font-medium transition-colors"
-            >
-              <ListMusic className="h-4 w-4" />
-              Read All ({studyPack.pages.length - currentPage} pages)
-            </button>
-          )}
         </div>
 
         {/* Page content - Card-based academic design */}

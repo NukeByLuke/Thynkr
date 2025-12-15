@@ -13,7 +13,6 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import Logo from '@/components/Logo';
 import ThemeToggle from '@/components/ThemeToggle';
-import MediaControls from '@/features/tutor/MediaControls';
 
 interface NavLink {
   to: string;
@@ -84,12 +83,6 @@ const Sidebar = () => {
 
       {/* Bottom Section */}
       <div className="flex flex-col items-center pb-6">
-        {/* Media Controls */}
-        <MediaControls />
-
-        {/* Divider */}
-        <div className="w-8 h-px bg-gray-200 dark:bg-slate-700 my-3" />
-
         {/* Control Icons */}
         <div className="flex flex-col items-center gap-2">
           {/* Theme Toggle */}

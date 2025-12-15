@@ -12,6 +12,10 @@ Write-Host "Pushing to Docker Hub..."
 docker push nukebyluke/thynkr-frontend:latest
 
 Write-Host "Deploying to DigitalOcean..."
+# Sync production configs (nginx + compose)
+scp ./nginx.prod.conf ${server}:/root/nginx.prod.conf
+scp ./docker-compose.prod.yml ${server}:/root/docker-compose.prod.yml
+
 # SSH and run deployment commands
 $deployScript = "cd /root && docker compose -f docker-compose.prod.yml pull frontend && docker compose -f docker-compose.prod.yml up -d --force-recreate frontend && docker system prune -f && docker compose -f docker-compose.prod.yml ps"
 ssh $server $deployScript
