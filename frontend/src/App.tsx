@@ -48,6 +48,9 @@ const NotFound = lazyWithPreload(() => import('./pages/NotFound'));
 // Lazy-load GlobalPlayerBar to avoid impacting LCP
 const GlobalPlayerBar = lazyWithPreload(() => import('./components/audio/GlobalPlayerBar').then(m => ({ default: m.GlobalPlayerBar })));
 
+// Lazy-load SelectionReader for text-to-speech accessibility
+const SelectionReader = lazyWithPreload(() => import('./components/ui/SelectionReader').then(m => ({ default: m.SelectionReader })));
+
 /**
  * Custom hook to handle authentication-based redirects
  * Redirects authenticated users from login/register pages to dashboard
@@ -241,10 +244,14 @@ function App() {
                 <PreviewGate onSuccess={() => setGatePassed(true)} />
               ) : (
                 <>
+                <>
                   <AppContent />
                   <MiniPlayer />
                   <Suspense fallback={null}>
                     <GlobalPlayerBar />
+                  </Suspense>
+                  <Suspense fallback={null}>
+                    <SelectionReader />
                   </Suspense>
                 </>
               )}

@@ -1,104 +1,215 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Volume2 } from 'lucide-react';
-import { usePlayerStore } from '@/stores/usePlayerStore';
+import { useAudioActions } from '../../contexts/AudioContext';
 
-export default function SelectionReader() {
-  const [selectedText, setSelectedText] = useState('');
-  const [position, setPosition] = useState({ top: 0, left: 0, visible: false });
-  const tooltipRef = useRef<HTMLDivElement>(null);
-  const { play } = usePlayerStore();
+/**
+ * SelectionReader - Global text selection reader with audio playback
+ * 
+ * Performance optimizations:
+ * - Debounced selection detection (300ms)
+ * - Passive event listeners
+ * - RAF-based position updates
+ * - Proper cleanup on unmount
+ */
+
+interface SelectionPosition {
+  top: number;
+  left: number;
+  width: number;
+}
+
+/**
+ * Custom hook for optimized text selection detection
+ * Uses debouncing and RAF to minimize performance impact
+ */
+function useTextSelection(debounceMs: number = 300) {
+  const [selectedText, setSelectedText] = useState<string>('');
+  const [position, setPosition] = useState<SelectionPosition | null>(null);
+  const debounceTimerRef = useRef<number | null>(null);
+  const rafIdRef = useRef<number | null>(null);
+
+  const handleSelectionChange = useCallback(() => {
+    // Clear existing debounce timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Debounce the selection check
+    debounceTimerRef.current = setTimeout(() => {
+      const selection = window.getSelection();
+      const text = selection?.toString().trim() || '';
+
+      // Only process if we have actual text (minimum 3 characters)
+      if (text.length >= 3) {
+        setSelectedText(text);
+
+        // Use RAF for smooth position updates
+        if (rafIdRef.current) {
+          cancelAnimationFrame(rafIdRef.current);
+        }
+
+        rafIdRef.current = requestAnimationFrame(() => {
+          const range = selection?.getRangeAt(0);
+          if (range) {
+            const rect = range.getBoundingClientRect();
+            
+            // Position tooltip above the selection
+            setPosition({
+              top: rect.top + window.scrollY - 48, // 48px above selection
+              left: rect.left + window.scrollX + rect.width / 2, // Center horizontally
+              width: rect.width,
+            });
+          }
+        });
+      } else {
+        // Clear selection if text is too short
+        setSelectedText('');
+        setPosition(null);
+      }
+    }, debounceMs);
+  }, [debounceMs]);
 
   useEffect(() => {
-    const handleSelectionChange = () => {
-      const selection = window.getSelection();
-      
-      if (!selection || selection.isCollapsed || !selection.toString().trim()) {
-        // No selection or empty selection
-        setPosition((prev) => ({ ...prev, visible: false }));
-        setSelectedText('');
-        return;
-      }
+    // Add passive listener for better scroll performance
+    document.addEventListener('selectionchange', handleSelectionChange, { passive: true } as AddEventListenerOptions);
 
-      const text = selection.toString().trim();
-      
-      // Minimum text length to show the reader
-      if (text.length < 3) {
-        setPosition((prev) => ({ ...prev, visible: false }));
-        setSelectedText('');
-        return;
-      }
-
-      setSelectedText(text);
-
-      try {
-        const range = selection.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
-
-        // Calculate tooltip position (centered above selection)
-        const tooltipWidth = 100; // Approximate width
-        const top = rect.top + window.scrollY - 50; // 50px above selection
-        const left = rect.left + window.scrollX + (rect.width / 2) - (tooltipWidth / 2);
-
-        setPosition({
-          top,
-          left,
-          visible: true,
-        });
-      } catch (error) {
-        console.error('Error getting selection position:', error);
-        setPosition((prev) => ({ ...prev, visible: false }));
-      }
-    };
-
-    // Listen for selection changes
-    document.addEventListener('selectionchange', handleSelectionChange);
-
-    // Also listen for mouse up to catch selection on mobile
-    document.addEventListener('mouseup', handleSelectionChange);
-    document.addEventListener('touchend', handleSelectionChange);
-
+    // Cleanup function
     return () => {
       document.removeEventListener('selectionchange', handleSelectionChange);
-      document.removeEventListener('mouseup', handleSelectionChange);
-      document.removeEventListener('touchend', handleSelectionChange);
+      
+      // Clear timers and RAF
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
     };
+  }, [handleSelectionChange]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedText('');
+    setPosition(null);
+    window.getSelection()?.removeAllRanges();
   }, []);
 
-  const handleRead = () => {
-    if (selectedText) {
-      play(selectedText);
-      // Clear selection after playing
-      window.getSelection()?.removeAllRanges();
-      setPosition((prev) => ({ ...prev, visible: false }));
-    }
-  };
+  return { selectedText, position, clearSelection };
+}
 
-  if (!position.visible || !selectedText) {
+/**
+ * Tooltip component with minimalist design
+ */
+interface TooltipProps {
+  position: SelectionPosition;
+  onPlay: () => void;
+  text: string;
+}
+
+const SelectionTooltip = ({ position, onPlay, text }: TooltipProps) => {
+  return (
+    <div
+      className="fixed z-[9999] pointer-events-auto"
+      style={{
+        top: `${position.top}px`,
+        left: `${position.left}px`,
+        transform: 'translateX(-50%)', // Center the tooltip
+      }}
+    >
+      {/* Minimalist black/white tooltip */}
+      <button
+        onClick={onPlay}
+        className="flex items-center gap-2 px-3 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg shadow-lg hover:scale-105 transition-transform duration-150 border border-slate-700 dark:border-slate-300"
+        aria-label={`Read selected text: ${text.slice(0, 50)}${text.length > 50 ? '...' : ''}`}
+        title="Play selected text"
+      >
+        <Volume2 className="w-4 h-4" />
+        <span className="text-sm font-medium">Play</span>
+      </button>
+
+      {/* Arrow pointing down to selection */}
+      <div
+        className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0"
+        style={{
+          borderLeft: '6px solid transparent',
+          borderRight: '6px solid transparent',
+          borderTop: '6px solid rgb(15, 23, 42)', // slate-900
+        }}
+      />
+    </div>
+  );
+};
+
+/**
+ * Main SelectionReader component
+ */
+export const SelectionReader = () => {
+  const { selectedText, position, clearSelection } = useTextSelection(300);
+  const { addToQueue } = useAudioActions();
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handlePlay = useCallback(async () => {
+    if (!selectedText || isProcessing) return;
+
+    setIsProcessing(true);
+
+    try {
+      // Add selected text to audio queue
+      await addToQueue({
+        id: `selection-${Date.now()}`, // Generate unique ID
+        text: selectedText,
+        title: `${selectedText.slice(0, 50)}${selectedText.length > 50 ? '...' : ''}`,
+      });
+
+      // Clear selection after adding to queue
+      clearSelection();
+    } catch (error) {
+      console.error('Failed to add selection to audio queue:', error);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [selectedText, addToQueue, clearSelection, isProcessing]);
+
+  // Hide tooltip when clicking outside or pressing Escape
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      // Don't clear if clicking the tooltip itself
+      const target = e.target as HTMLElement;
+      if (target.closest('[data-selection-tooltip]')) return;
+
+      clearSelection();
+    };
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        clearSelection();
+      }
+    };
+
+    if (selectedText) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscape);
+
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('keydown', handleEscape);
+      };
+    }
+  }, [selectedText, clearSelection]);
+
+  // Don't render if no text is selected
+  if (!selectedText || !position) {
     return null;
   }
 
   return (
-    <div
-      ref={tooltipRef}
-      className="fixed z-[9999] animate-in fade-in slide-in-from-bottom-2 duration-200"
-      style={{
-        top: `${position.top}px`,
-        left: `${position.left}px`,
-        transform: 'translateX(-50%)',
-      }}
-    >
-      <button
-        onClick={handleRead}
-        className="flex items-center gap-2 px-4 py-2 bg-slate-900 dark:bg-slate-800 text-white rounded-lg shadow-lg hover:bg-slate-800 dark:hover:bg-slate-700 transition-colors border border-slate-700 dark:border-slate-600"
-      >
-        <Volume2 className="w-4 h-4" />
-        <span className="text-sm font-medium whitespace-nowrap">Read</span>
-      </button>
-      
-      {/* Arrow pointing down to selection */}
-      <div className="absolute left-1/2 -translate-x-1/2 top-full">
-        <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-slate-900 dark:border-t-slate-800"></div>
-      </div>
+    <div data-selection-tooltip>
+      <SelectionTooltip
+        position={position}
+        onPlay={handlePlay}
+        text={selectedText}
+      />
     </div>
   );
-}
+};
+
+export default SelectionReader;
