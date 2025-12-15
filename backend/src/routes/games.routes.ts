@@ -20,10 +20,12 @@ const gameGenerationRequestSchema = z.object({
   gameType: z.enum(['MATCHING', 'QUIZ', 'FILL_BLANKS'], {
     errorMap: () => ({ message: 'Game type must be MATCHING, QUIZ, or FILL_BLANKS' }),
   }),
+  // Support both fileIds and courseId - one must be provided
   fileIds: z
     .array(z.string().min(1, 'File ID cannot be empty'))
-    .min(1, 'At least one file must be selected')
-    .max(10, 'Cannot select more than 10 files'),
+    .max(10, 'Cannot select more than 10 files')
+    .optional(),
+  courseId: z.string().min(1, 'Course ID cannot be empty').optional(),
   config: z.object({
     difficulty: z.enum(['easy', 'normal', 'hard'], {
       errorMap: () => ({ message: 'Difficulty must be easy, normal, or hard' }),
@@ -34,7 +36,10 @@ const gameGenerationRequestSchema = z.object({
       .min(5, 'Minimum 5 questions/pairs required')
       .max(50, 'Maximum 50 questions/pairs allowed'),
   }),
-});
+}).refine(
+  (data) => data.fileIds || data.courseId,
+  { message: 'Either fileIds or courseId must be provided' }
+);
 
 // Game content schemas for validation
 const matchingPairSchema = z.object({
@@ -218,7 +223,7 @@ export default async function gameRoutes(fastify: FastifyInstance) {
         });
       }
 
-      const { gameType, fileIds, config } = validationResult.data;
+      const { gameType, fileIds, courseId, config } = validationResult.data;
       const userId = (request as AuthenticatedRequest).user?.userId;
       
       if (!userId) {
@@ -230,13 +235,81 @@ export default async function gameRoutes(fastify: FastifyInstance) {
 
       logger.info(`Generating ${gameType} game for user ${userId}`, {
         fileIds,
+        courseId,
         config,
       });
+
+      // Resolve resource to fileIds array
+      let resolvedFileIds: string[] = [];
+      
+      if (courseId) {
+        // Fetch course and its course files with efficient aggregation
+        const course = await prisma.course.findUnique({
+          where: {
+            id: courseId,
+            createdBy: userId, // Ensure user owns the course
+          },
+          select: {
+            id: true,
+            title: true,
+            files: {
+              select: {
+                id: true,
+                fileName: true, // The actual file reference
+              },
+            },
+          },
+        });
+
+        if (!course) {
+          return reply.status(404).send({
+            error: 'Course not found',
+            message: 'Course not found or access denied',
+          });
+        }
+
+        if (course.files.length === 0) {
+          return reply.status(400).send({
+            error: 'No files in course',
+            message: 'This course has no files. Add files before generating games.',
+          });
+        }
+
+        // Map CourseFile references to UploadedFile IDs
+        // Note: CourseFile stores references, we need to match by fileName to get actual UploadedFile IDs
+        const userFilesMatchingCourse = await prisma.uploadedFile.findMany({
+          where: {
+            userId,
+            fileName: { in: course.files.map(f => f.fileName) },
+            extractedText: { not: null }, // Only processed files
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        if (userFilesMatchingCourse.length === 0) {
+          return reply.status(400).send({
+            error: 'No processed files',
+            message: 'This course has no processed files. Process files before generating games.',
+          });
+        }
+
+        resolvedFileIds = userFilesMatchingCourse.map(f => f.id);
+        logger.info(`Resolved course ${courseId} to ${resolvedFileIds.length} files`);
+      } else if (fileIds && fileIds.length > 0) {
+        resolvedFileIds = fileIds;
+      } else {
+        return reply.status(400).send({
+          error: 'Invalid request',
+          message: 'Either fileIds or courseId must be provided',
+        });
+      }
 
       // Fetch file contents from database
       const files = await prisma.uploadedFile.findMany({
         where: {
-          id: { in: fileIds },
+          id: { in: resolvedFileIds },
           userId, // Ensure user owns the files
         },
         select: {
@@ -247,9 +320,9 @@ export default async function gameRoutes(fastify: FastifyInstance) {
       });
 
       // Validate files exist and belong to user
-      if (files.length !== fileIds.length) {
+      if (files.length !== resolvedFileIds.length) {
         const foundIds = files.map(f => f.id);
-        const missingIds = fileIds.filter(id => !foundIds.includes(id));
+        const missingIds = resolvedFileIds.filter(id => !foundIds.includes(id));
         return reply.status(404).send({
           error: 'Files not found',
           message: `Files not found or access denied: ${missingIds.join(', ')}`,
@@ -387,7 +460,8 @@ export default async function gameRoutes(fastify: FastifyInstance) {
         },
       });
 
-      if (files.length !== fileIds.length) {
+      // TypeScript-safe validation for multiplayer endpoint
+      if (fileIds && files.length !== fileIds.length) {
         return reply.status(404).send({ error: 'Some files not found' });
       }
 

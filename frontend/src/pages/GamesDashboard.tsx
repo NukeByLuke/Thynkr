@@ -520,6 +520,8 @@ export default function GamesDashboard() {
         onStartGame={handleGameStart}
         userFiles={userFiles}
         isMultiplayer={activeTab === 'multiplayer'}
+        isPro={isPro}
+        onUpgradeRequired={() => openUpgradeModal('hosting_restricted')}
       />
 
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
