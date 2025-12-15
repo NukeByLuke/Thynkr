@@ -6,7 +6,8 @@
 
 import { FastifyInstance } from 'fastify';
 import { authenticate, AuthenticatedRequest } from '../middleware/auth.middleware';
-import { cache } from '../middleware/cache.middleware';
+// Note: Caching temporarily disabled for build
+// import { cache } from '../middleware/cache.middleware';
 import prisma from '../db/client';
 
 /**
@@ -14,14 +15,12 @@ import prisma from '../db/client';
  * @param server - Fastify instance
  */
 export default async function contentRoutes(server: FastifyInstance) {
-  // Get all content (with access control and caching)
+  // Get all content (with access control)
+  // Note: Add caching back when Redis is installed - cache({ ttl: 300, userSpecific: true })
   server.get(
     '/',
     {
-      preHandler: [
-        authenticate,
-        cache({ ttl: 300, userSpecific: true }), // Cache for 5 minutes per user
-      ],
+      preHandler: [authenticate],
     },
     async (request: AuthenticatedRequest, reply) => {
       const { featured, search, page = '1', limit = '12' } = request.query as any;

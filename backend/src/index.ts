@@ -19,7 +19,8 @@ import path from 'path';
 import { config } from './config';
 import { logger } from './lib/logger';
 import { initializeGameSocket } from './services/gameSocket.service';
-import { initializeRedis, disconnectRedis } from './middleware/cache.middleware';
+// Note: Redis caching temporarily disabled for build - enable in production
+// import { initializeRedis, disconnectRedis } from './middleware/cache.middleware';
 import { compressionMiddleware } from './middleware/compression.middleware';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
@@ -59,10 +60,10 @@ const server = Fastify({
  */
 async function start() {
   try {
-    // Initialize Redis for caching and rate limiting
-    await initializeRedis().catch((err) => {
-      logger.warn({ err }, 'Redis initialization failed, continuing without caching');
-    });
+    // Initialize Redis for caching and rate limiting (optional)
+    // await initializeRedis().catch((err) => {
+    //   logger.warn({ err }, 'Redis initialization failed, continuing without caching');
+    // });
 
     // Add response compression (gzip/brotli)
     server.addHook('onSend', compressionMiddleware({
@@ -166,14 +167,14 @@ async function start() {
     // Start server
     await server.listen({ port: config.port, host: '0.0.0.0' });
     logger.info(`Server running on http://localhost:${config.port}`);
-    logger.info('Performance optimizations enabled: compression, caching, advanced rate limiting');
+    logger.info('Performance optimizations enabled: compression, query optimization');
 
     // Initialize Socket.io for Thynkr Arcade
     const httpServer = server.server;
     initializeGameSocket(httpServer);
   } catch (err) {
     server.log.error(err);
-    await disconnectRedis(); // Clean up Redis connection
+    // await disconnectRedis(); // Clean up Redis connection
     process.exit(1);
   }
 }
@@ -184,7 +185,7 @@ signals.forEach((signal) => {
   process.on(signal, async () => {
     logger.info(`${signal} received, shutting down gracefully`);
     await server.close();
-    await disconnectRedis(); // Clean up Redis connection
+    // await disconnectRedis(); // Clean up Redis connection
     process.exit(0);
   });
 });
