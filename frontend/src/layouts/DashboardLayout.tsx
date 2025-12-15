@@ -5,6 +5,7 @@ import Sidebar, { NavigationSection } from '@/components/Sidebar';
 import MobileHeader from '@/components/MobileHeader';
 import GlobalPlayerBar from '@/components/player/GlobalPlayerBar';
 import { PlayerErrorBoundary } from '@/components/player/PlayerErrorBoundary';
+import { usePlayerShortcuts } from '@/hooks/usePlayerShortcuts';
 import {
   BookOpen,
   FolderOpen,
@@ -21,6 +22,9 @@ import {
 export default function DashboardLayout() {
   const { user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Enable keyboard shortcuts for player control
+  usePlayerShortcuts();
 
   // Define navigation sections
   const navigationSections: NavigationSection[] = [
