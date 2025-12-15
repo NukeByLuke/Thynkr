@@ -1,6 +1,7 @@
 /**
  * Thynkr Application Root
  * Main routing, authentication, and theme configuration for the React SPA.
+ * Optimized with preloadable code-splitting for better performance
  */
 
 import { lazy, Suspense, useEffect, useState } from 'react';
@@ -18,28 +19,29 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import PreviewGate from '@/features/courses/PreviewGate';
 import MiniPlayer from '@/features/tutor/MiniPlayer';
 import GlobalLoadingBar from '@/components/ui/GlobalLoadingBar';
+import { lazyWithPreload } from './utils/lazyWithPreload';
 
-// Code-split page components for optimal bundle size
-const Landing = lazy(() => import('./pages/Landing'));
-const Login = lazy(() => import('./pages/Login'));
-const Register = lazy(() => import('./pages/Register'));
-const AuthCallback = lazy(() => import('./pages/AuthCallback'));
-const Pricing = lazy(() => import('./pages/Pricing'));
-const Account = lazy(() => import('./pages/Account'));
-const Admin = lazy(() => import('./pages/Admin'));
-const Study = lazy(() => import('./pages/Study'));
-const Files = lazy(() => import('./pages/Files'));
-const Settings = lazy(() => import('./pages/SettingsPage'));
-const Courses = lazy(() => import('./pages/CoursesUnified'));
-const MyCourseDetail = lazy(() => import('./pages/MyCourseDetail'));
-const TutorChat = lazy(() => import('./pages/TutorChat'));
-const StudyProgress = lazy(() => import('./pages/StudyProgress'));
-const SavedPacks = lazy(() => import('./pages/SavedPacks'));
-const ArcadeLobby = lazy(() => import('./pages/ArcadeLobby'));
-const GamesDashboard = lazy(() => import('./pages/GamesDashboard'));
-const QuizGame = lazy(() => import('./features/arcade/QuizGame'));
-const MatchingGame = lazy(() => import('./features/arcade/MatchingGame'));
-const NotFound = lazy(() => import('./pages/NotFound'));
+// Code-split page components with preloading for optimal bundle size
+const Landing = lazyWithPreload(() => import('./pages/Landing'));
+const Login = lazyWithPreload(() => import('./pages/Login'));
+const Register = lazyWithPreload(() => import('./pages/Register'));
+const AuthCallback = lazyWithPreload(() => import('./pages/AuthCallback'));
+const Pricing = lazyWithPreload(() => import('./pages/Pricing'));
+const Account = lazyWithPreload(() => import('./pages/Account'));
+const Admin = lazyWithPreload(() => import('./pages/Admin'));
+const Study = lazyWithPreload(() => import('./pages/Study'));
+const Files = lazyWithPreload(() => import('./pages/Files'));
+const Settings = lazyWithPreload(() => import('./pages/SettingsPage'));
+const Courses = lazyWithPreload(() => import('./pages/CoursesUnified'));
+const MyCourseDetail = lazyWithPreload(() => import('./pages/MyCourseDetail'));
+const TutorChat = lazyWithPreload(() => import('./pages/TutorChat'));
+const StudyProgress = lazyWithPreload(() => import('./pages/StudyProgress'));
+const SavedPacks = lazyWithPreload(() => import('./pages/SavedPacks'));
+const ArcadeLobby = lazyWithPreload(() => import('./pages/ArcadeLobby'));
+const GamesDashboard = lazyWithPreload(() => import('./pages/GamesDashboard'));
+const QuizGame = lazyWithPreload(() => import('./features/arcade/QuizGame'));
+const MatchingGame = lazyWithPreload(() => import('./features/arcade/MatchingGame'));
+const NotFound = lazyWithPreload(() => import('./pages/NotFound'));
 
 /**
  * Custom hook to handle authentication-based redirects

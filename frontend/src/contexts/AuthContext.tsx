@@ -1,6 +1,7 @@
 /**
  * Authentication Context
  * Manages user authentication state, login/logout, and token refresh across the application.
+ * Optimized with request caching to prevent duplicate auth calls.
  */
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -8,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { User, LoginCredentials, RegisterData } from '@/types';
 import api from '@/lib/api';
+import { cachedRequest, clearCache } from '@/lib/apiCache';
 
 interface AuthContextType {
   user: User | null;
@@ -42,65 +44,68 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const response = await fetch(`${API_URL}/users/me`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      if (response.status === 401) {
-        // Try to refresh token once
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) {
-          setUser(null);
-          setIsLoading(false);
-          return;
-        }
-
-        const refreshResponse = await fetch(`${API_URL}/auth/refresh`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ refreshToken }),
-        });
-
-        if (refreshResponse.ok) {
-          const refreshData = await refreshResponse.json();
-          localStorage.setItem('accessToken', refreshData.accessToken);
-
-          // Retry fetching user after successful refresh
-          const retryResponse = await fetch(`${API_URL}/users/me`, {
+      // Use cached request to prevent duplicate user fetches
+      const userData = await cachedRequest(
+        'current-user',
+        async () => {
+          const response = await fetch(`${API_URL}/users/me`, {
             credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${refreshData.accessToken}`,
+              Authorization: `Bearer ${accessToken}`,
             },
           });
 
-          if (retryResponse.ok) {
-            const userData = await retryResponse.json();
-            setUser(userData);
-            return;
+          if (response.status === 401) {
+            // Try to refresh token once
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (!refreshToken) {
+              throw new Error('No refresh token available');
+            }
+
+            const refreshResponse = await fetch(`${API_URL}/auth/refresh`, {
+              method: 'POST',
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ refreshToken }),
+            });
+
+            if (refreshResponse.ok) {
+              const refreshData = await refreshResponse.json();
+              localStorage.setItem('accessToken', refreshData.accessToken);
+
+              // Retry fetching user after successful refresh
+              const retryResponse = await fetch(`${API_URL}/users/me`, {
+                credentials: 'include',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${refreshData.accessToken}`,
+                },
+              });
+
+              if (retryResponse.ok) {
+                return retryResponse.json();
+              }
+            }
+
+            // Refresh failed
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            throw new Error('Token refresh failed');
           }
-        }
 
-        // Refresh failed, clear tokens and user is not authenticated
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        setUser(null);
-        return;
-      }
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error('Failed to fetch user');
+          }
+        },
+        { ttl: 60000 } // Cache for 1 minute
+      );
 
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-      } else {
-        setUser(null);
-      }
+      setUser(userData);
     } catch (error) {
       console.error('Failed to fetch user:', error);
       setUser(null);
@@ -124,6 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Clear any cached data from previous session to avoid stale cross-user info
     await queryClient.clear();
+    clearCache(); // Clear API request cache
     setUser(userData);
   };
 
@@ -147,6 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Clear all cached queries to prevent leaking prior user's data
     queryClient.clear();
+    clearCache(); // Clear API request cache
     setUser(null);
     navigate('/login');
     // Force page reload to clear all state
