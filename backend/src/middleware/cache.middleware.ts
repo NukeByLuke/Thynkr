@@ -1,12 +1,13 @@
 /**
  * Response Caching Middleware
- * Redis-backed caching for expensive API responses
+ * Redis-backed caching for expensive API responses (optional dependency)
  * 
  * Features:
  * - Automatic cache key generation
  * - Configurable TTL per route
  * - User-specific cache invalidation
  * - ETags for conditional requests
+ * - Graceful fallback if Redis unavailable
  * 
  * Performance Impact:
  * - 70-90% faster response times for cached data
@@ -15,44 +16,51 @@
  */
 
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { createClient } from 'redis';
 import { logger } from '../lib/logger';
 import crypto from 'crypto';
 
-// Redis client singleton
-let redisClient: ReturnType<typeof createClient> | null = null;
+// Redis client singleton (type as any to avoid build errors when redis not installed)
+let redisClient: any = null;
 
 /**
  * Initialize Redis client with connection pooling
+ * Note: Redis is optional - if not installed, caching is gracefully disabled
  */
 export async function initializeRedis() {
   if (redisClient) return redisClient;
 
-  const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-  
-  redisClient = createClient({
-    url: redisUrl,
-    socket: {
-      reconnectStrategy: (retries) => {
-        if (retries > 10) {
-          logger.error('Redis connection failed after 10 retries');
-          return new Error('Redis connection failed');
-        }
-        return Math.min(retries * 100, 3000);
+  // Lazy load redis module to avoid build errors if not installed
+  try {
+    const redis = await import('redis');
+    const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+    
+    redisClient = redis.createClient({
+      url: redisUrl,
+      socket: {
+        reconnectStrategy: (retries: number) => {
+          if (retries > 10) {
+            logger.error('Redis connection failed after 10 retries');
+            return new Error('Redis connection failed');
+          }
+          return Math.min(retries * 100, 3000);
+        },
       },
-    },
-  });
+    });
 
-  redisClient.on('error', (err) => {
-    logger.error({ err }, 'Redis client error');
-  });
+    redisClient.on('error', (err: Error) => {
+      logger.error({ err }, 'Redis client error');
+    });
 
-  redisClient.on('connect', () => {
-    logger.info('Redis client connected');
-  });
+    redisClient.on('connect', () => {
+      logger.info('Redis client connected');
+    });
 
-  await redisClient.connect();
-  return redisClient;
+    await redisClient.connect();
+    return redisClient;
+  } catch (err) {
+    logger.warn({ err }, 'Redis module not available, caching disabled');
+    return null;
+  }
 }
 
 /**
@@ -79,7 +87,7 @@ function generateCacheKey(
   const { userSpecific = false, keyPrefix = 'api' } = options;
   
   const userId = userSpecific && (request as any).user?.id ? (request as any).user.id : 'public';
-  const path = request.url;
+  const path = (request as any).routerPath || request.url;
   const method = request.method;
   
   // Create hash of query params and body for uniqueness
@@ -162,7 +170,7 @@ export function cache(options: CacheOptions = {}) {
           const etag = generateETag(serialized);
           
           // Cache asynchronously (don't block response)
-          redisClient!.setEx(cacheKey, ttl, serialized).catch((err) => {
+          redisClient!.setEx(cacheKey, ttl, serialized).catch((err: Error) => {
             logger.error({ err, cacheKey }, 'Failed to cache response');
           });
           
