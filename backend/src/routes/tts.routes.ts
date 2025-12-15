@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply } from 'fastify';
-import { authenticate, AuthenticatedRequest } from '../middleware/auth.middleware';
+import { authenticate, AuthenticatedRequest, isPro } from '../middleware/auth.middleware';
 import { checkAIRateLimit, recordAIUsage } from '../middleware/ai-rate-limit.middleware';
 import { ttsRateLimit } from '../middleware/tts-rate-limit.middleware';
 import { canUseTTS } from '../lib/tier-limits';
@@ -79,8 +79,9 @@ export default async function ttsRoutes(server: FastifyInstance) {
   await ensureCacheDir();
 
   /**
-   * POST /api/tts - Generate TTS audio (streaming, no disk cache)
-   * Returns audio as mp3 stream directly from OpenAI
+   * POST /api/tts - Generate TTS audio with streaming and tier-based quality
+   * Pro users get tts-1-hd, free users get tts-1
+   * Implements edge caching for common phrases to reduce API costs
    */
   server.post(
     '/tts',
@@ -117,36 +118,95 @@ export default async function ttsRoutes(server: FastifyInstance) {
           upgradeRequired: true,
         });
       }
+
       const voice = body.voice as Voice;
+      const speed = body.speed 
+        ? Math.max(MIN_SPEED, Math.min(MAX_SPEED, body.speed)) 
+        : 1.0;
+
+      // Determine model quality based on user tier using reusable helper
+      const isProUser = isPro(userRole);
+      const model = isProUser ? 'tts-1-hd' : 'tts-1';
+
+      // Check cache for common phrases (helps reduce API costs)
+      const cacheHash = generateContentHash(text, voice, speed);
+      const cachedAudio = await getCachedAudio(cacheHash);
+
+      if (cachedAudio) {
+        logger.info({ 
+          hash: cacheHash, 
+          userId, 
+          model, 
+          fromCache: true 
+        }, 'Serving cached TTS audio');
+
+        // Send cached audio with edge caching headers
+        reply.header('Content-Type', 'audio/mpeg');
+        reply.header('Content-Disposition', 'inline');
+        reply.header('Cache-Control', 'public, max-age=86400, s-maxage=604800'); // 1 day browser, 7 days edge
+        reply.header('X-TTS-Cached', 'true');
+        reply.header('X-TTS-Quality', model);
+        return reply.send(cachedAudio);
+      }
 
       try {
         const startTime = Date.now();
-        logger.info({ textLength: text.length, voice }, 'Generating TTS audio (streaming)');
+        logger.info({ 
+          textLength: text.length, 
+          voice, 
+          speed,
+          model,
+          isProUser,
+          userId 
+        }, 'Generating TTS audio with streaming');
 
-        // Generate audio using OpenAI TTS
+        // Generate audio using OpenAI TTS with tier-based quality
         const response = await openai.audio.speech.create({
-          model: 'tts-1',
+          model: model, // tts-1-hd for Pro, tts-1 for Free
           voice: voice,
           input: text,
+          speed: speed,
           response_format: 'mp3',
         });
 
-        // Convert response to buffer
+        // Stream response: convert to buffer (OpenAI SDK doesn't support true streaming yet)
         const arrayBuffer = await response.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
         const durationMs = Date.now() - startTime;
 
-        // Record AI usage for rate limiting
+        // Cache audio for future requests (especially common phrases)
+        // Only cache for common phrases (< 500 chars) to avoid filling disk
+        if (text.length < 500) {
+          await cacheAudio(cacheHash, buffer).catch((err) => {
+            logger.warn({ error: err.message }, 'Failed to cache audio');
+          });
+        }
+
+        // Record AI usage for rate limiting (only durationMs is supported in metadata)
         await recordAIUsage(userId, 'TTS_GENERATE', { durationMs });
 
-        // Send response - stream directly to client, no disk caching
+        // Send response with edge caching headers for browser/CDN
         reply.header('Content-Type', 'audio/mpeg');
         reply.header('Content-Disposition', 'inline');
+        reply.header('Cache-Control', 'public, max-age=3600, s-maxage=86400'); // 1 hour browser, 1 day edge
+        reply.header('X-TTS-Cached', 'false');
+        reply.header('X-TTS-Quality', model);
+        reply.header('X-TTS-Duration-Ms', durationMs.toString());
+        
         return reply.send(buffer);
       } catch (error: any) {
-        logger.error({ error: error.message }, 'TTS generation failed');
-        return reply.status(500).send({ error: 'Failed to generate audio' });
+        logger.error({ 
+          error: error.message, 
+          userId, 
+          model,
+          textLength: text.length 
+        }, 'TTS generation failed');
+        
+        return reply.status(500).send({ 
+          error: 'Failed to generate audio',
+          message: error.message 
+        });
       }
     }
   );
@@ -293,22 +353,38 @@ export default async function ttsRoutes(server: FastifyInstance) {
       const cachedAudio = await getCachedAudio(hash);
 
       if (cachedAudio) {
+        // Determine quality model for cache hit response header
+        const userWithRole = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { role: true }
+        });
+        const isProUser = isPro(userWithRole?.role || 'BASIC');
+        
         logger.info({ hash, packId: id, pageNum }, 'Serving cached study pack page TTS');
         reply.header('Content-Type', 'audio/mpeg');
         reply.header('Content-Disposition', 'inline');
         reply.header('Cache-Control', 'public, max-age=86400');
         reply.header('X-TTS-Cached', 'true');
+        reply.header('X-TTS-Quality', isProUser ? 'tts-1-hd' : 'tts-1');
         return reply.send(cachedAudio);
       }
 
       try {
+        // Determine model quality based on user tier using reusable helper
+        const userWithRole = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { role: true }
+        });
+        const isProUser = isPro(userWithRole?.role || 'BASIC');
+        const model = isProUser ? 'tts-1-hd' : 'tts-1';
+
         logger.info(
-          { packId: id, pageNum, textLength: textToRead.length, voice, speed },
+          { packId: id, pageNum, textLength: textToRead.length, voice, speed, model, isProUser },
           'Generating study pack page TTS'
         );
 
         const response = await openai.audio.speech.create({
-          model: 'tts-1',
+          model: model, // Tier-based quality selection
           voice: voice,
           input: textToRead.slice(0, 4096),
           speed: speed,
@@ -324,6 +400,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
         reply.header('Content-Disposition', 'inline');
         reply.header('Cache-Control', 'public, max-age=86400');
         reply.header('X-TTS-Cached', 'false');
+        reply.header('X-TTS-Quality', model);
         return reply.send(buffer);
       } catch (error: any) {
         logger.error(

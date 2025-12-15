@@ -116,3 +116,12 @@ export function requireMinRole(minRole: string) {
     }
   };
 }
+
+/**
+ * Check if user has Pro-level access (PREMIUM or ADMIN)
+ * Useful for feature gating premium features like HD quality TTS
+ */
+export function isPro(role: string): boolean {
+  const normalizedRole = normalizeRole(role);
+  return normalizedRole === 'PREMIUM' || normalizedRole === 'ADMIN';
+}
