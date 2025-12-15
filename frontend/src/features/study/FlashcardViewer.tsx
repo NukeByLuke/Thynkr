@@ -38,7 +38,7 @@ const slideVariants = {
 // Optimized flip transition - smooth easing instead of spring
 const flipTransition = {
   duration: 0.4,
-  ease: [0.4, 0.0, 0.2, 1],
+  ease: 'easeInOut' as const,
 };
 
 const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: FlashcardViewerProps) {
@@ -175,7 +175,7 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.25, ease: [0.4, 0.0, 0.2, 1] }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
             className="absolute w-full h-full"
           >
             <motion.div
