@@ -624,9 +624,9 @@ export default function Study() {
     <div className="h-full flex flex-col overflow-hidden premium-gradient-bg">
       {/* Study Header with Premium Gradient */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-600/90 via-brand-500/90 to-accent-500/90 backdrop-blur-xl"></div>
-        <div className="absolute inset-0 bg-gradient-mesh opacity-30"></div>
-        <div className="relative max-w-[1400px] mx-auto px-4 md:px-6 lg:px-10 py-6 md:py-10">
+        <div className="absolute inset-0 z-0 bg-gradient-to-r from-brand-600/90 via-brand-500/90 to-accent-500/90 backdrop-blur-xl"></div>
+        <div className="absolute inset-0 z-0 bg-gradient-mesh opacity-30 pointer-events-none"></div>
+        <div className="relative z-10 max-w-[1400px] mx-auto px-4 md:px-6 lg:px-10 py-6 md:py-10">
           <div className="flex items-center gap-3 md:gap-4 mb-2 md:mb-3">
             <div className="p-2 md:p-3 bg-white/20 backdrop-blur-xl rounded-xl md:rounded-2xl shadow-soft-lg border border-white/20">
               <GraduationCap className="h-6 w-6 md:h-7 md:w-7 text-white" />
