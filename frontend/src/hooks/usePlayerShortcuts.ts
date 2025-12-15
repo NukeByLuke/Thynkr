@@ -13,7 +13,6 @@ import { useEffect } from 'react';
 import { usePlayerStore } from '@/stores/usePlayerStore';
 import toast from 'react-hot-toast';
 
-const SPEED_INCREMENT = 0.25;
 const SPEED_OPTIONS = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
 
 /**

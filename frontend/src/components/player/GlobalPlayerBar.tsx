@@ -1,10 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { X, Play, Pause, RotateCcw, RotateCw, Loader2 } from 'lucide-react';
 import { usePlayerStore } from '@/stores/usePlayerStore';
 import { useOpenAITTS } from '@/hooks/useOpenAITTS';
 
-export default function GlobalPlayerBar() {
-  const { isPlaying: storeIsPlaying, text, speed, stop, pause, play } = usePlayerStore();
+const GlobalPlayerBar = memo(function GlobalPlayerBar() {
+  // Use selectors to subscribe only to needed state
+  const text = usePlayerStore((state) => state.text);
+  const speed = usePlayerStore((state) => state.speed);
+  const storeIsPlaying = usePlayerStore((state) => state.isPlaying);
+  const stop = usePlayerStore((state) => state.stop);
+  const pause = usePlayerStore((state) => state.pause);
+  const play = usePlayerStore((state) => state.play);
+  
   const { isPlaying: audioIsPlaying, isLoading, play: playAudio, pause: pauseAudio, audioElement } = useOpenAITTS();
   
   const [progress, setProgress] = useState(0);
@@ -34,38 +41,41 @@ export default function GlobalPlayerBar() {
     };
   }, [audioElement]);
 
-  // Only show if there's text to play or audio is currently playing
-  if (!text && !audioIsPlaying && !storeIsPlaying) {
-    return null;
-  }
-
-  const handlePlayPause = () => {
+  // Memoize handlers to prevent recreation
+  const handlePlayPause = useCallback(() => {
     if (audioIsPlaying) {
       pauseAudio();
       pause();
     } else {
-      playAudio(text, 'alloy'); // TODO: Use selected voice from settings
+      playAudio(text, 'alloy');
       play(text);
     }
-  };
+  }, [audioIsPlaying, pauseAudio, pause, playAudio, play, text]);
 
-  const handleRewind = () => {
+  const handleRewind = useCallback(() => {
     // TODO: Implement rewind 10s functionality
     console.log('Rewind 10s');
-  };
+  }, []);
 
-  const handleFastForward = () => {
+  const handleFastForward = useCallback(() => {
     // TODO: Implement fast forward functionality
     console.log('Fast forward');
-  };
+  }, []);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     pauseAudio();
     stop();
-  };
+  }, [pauseAudio, stop]);
 
-  // Truncate text for display
-  const displayText = text.length > 80 ? `${text.substring(0, 80)}...` : text;
+  // Memoize truncated text
+  const displayText = useMemo(() => {
+    return text.length > 80 ? `${text.substring(0, 80)}...` : text;
+  }, [text]);
+
+  // Only show if there's text to play or audio is currently playing
+  if (!text && !audioIsPlaying && !storeIsPlaying) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 dark:border-slate-700 backdrop-blur-xl bg-white/80 dark:bg-slate-900/90">
@@ -155,4 +165,6 @@ export default function GlobalPlayerBar() {
       </div>
     </div>
   );
-}
+});
+
+export default GlobalPlayerBar;

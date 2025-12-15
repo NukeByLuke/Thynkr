@@ -1,9 +1,11 @@
 /**
  * Global TTS Player Store
  * Manages text-to-speech player state across the application
+ * Optimized with selectors to prevent unnecessary re-renders
  */
 
 import { create } from 'zustand';
+import { shallow } from 'zustand/shallow';
 
 interface PlayerState {
   // State
@@ -21,32 +23,45 @@ interface PlayerState {
   toggleMinimize: () => void;
 }
 
+// Memoize language detection to avoid re-computing
+const languageCache = new Map<string, string>();
+
 /**
  * Auto-detect language from text content
  * Returns appropriate language code (e.g., 'es-ES', 'en-US')
  */
 function detectLanguage(text: string): string {
+  // Check cache first
+  const cached = languageCache.get(text);
+  if (cached) return cached;
+
+  let language = 'en-US'; // Default
+
   // Simple language detection based on common patterns
   // Spanish indicators
   const spanishPatterns = /[áéíóúñ¿¡]/i;
   if (spanishPatterns.test(text)) {
-    return 'es-ES';
+    language = 'es-ES';
   }
 
   // French indicators
-  const frenchPatterns = /[àâäæçéèêëïîôùûü]/i;
-  if (frenchPatterns.test(text)) {
-    return 'fr-FR';
+  else if (/[àâäæçéèêëïîôùûü]/i.test(text)) {
+    language = 'fr-FR';
   }
 
   // German indicators
-  const germanPatterns = /[äöüß]/i;
-  if (germanPatterns.test(text)) {
-    return 'de-DE';
+  else if (/[äöüß]/i.test(text)) {
+    language = 'de-DE';
   }
 
-  // Default to English
-  return 'en-US';
+  // Cache the result (limit cache size to 100 entries)
+  if (languageCache.size > 100) {
+    const firstKey = languageCache.keys().next().value;
+    languageCache.delete(firstKey);
+  }
+  languageCache.set(text, language);
+
+  return language;
 }
 
 export const usePlayerStore = create<PlayerState>((set) => ({
@@ -89,3 +104,17 @@ export const usePlayerStore = create<PlayerState>((set) => ({
     set((state) => ({ isMinimized: !state.isMinimized }));
   },
 }));
+
+// Export selector hooks for optimized subscriptions
+export const usePlayerText = () => usePlayerStore((state) => state.text);
+export const usePlayerSpeed = () => usePlayerStore((state) => state.speed);
+export const usePlayerIsPlaying = () => usePlayerStore((state) => state.isPlaying);
+export const usePlayerActions = () => usePlayerStore(
+  (state) => ({
+    play: state.play,
+    pause: state.pause,
+    stop: state.stop,
+    setSpeed: state.setSpeed,
+  }),
+  shallow
+);

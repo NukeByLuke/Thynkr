@@ -178,35 +178,28 @@ export function useOpenAITTS() {
         const response = await apiClient.post('/tts', {
           text,
           voice,
+        }, {
+          responseType: 'blob',
         });
 
-        if (!response.ok) {
-          // Handle rate limiting
-          if (response.status === 429) {
-            const errorData = await response.json().catch(() => ({}));
-            const message = errorData.message || 'Voice limit reached. Please wait a moment.';
-            toast.error(message);
-            setError(message);
-            return;
-          }
-          
-          // Handle tier limit exceeded
-          if (response.status === 403) {
-            const errorData = await response.json().catch(() => ({}));
-            if (errorData.upgradeRequired) {
-              const message = errorData.message || 'Voice usage limit reached. Please upgrade your plan.';
-              toast.error(message, { duration: 5000 });
-              setError(message);
-              // TODO: Open upgrade modal
-              return;
-            }
-          }
-          
-          throw new Error(`TTS API error: ${response.statusText}`);
+        // Axios response is different from fetch
+        if (response.status === 429) {
+          const message = 'Voice limit reached. Please wait a moment.';
+          toast.error(message);
+          setError(message);
+          return;
+        }
+        
+        if (response.status === 403) {
+          const message = 'Voice usage limit reached. Please upgrade your plan.';
+          toast.error(message, { duration: 5000 });
+          setError(message);
+          // TODO: Open upgrade modal
+          return;
         }
 
         // Convert response to blob
-        const blob = await response.blob();
+        const blob = response.data;
         const blobUrl = URL.createObjectURL(blob);
 
         // Store in cache

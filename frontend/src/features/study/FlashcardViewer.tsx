@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
@@ -19,62 +19,109 @@ interface FlashcardViewerProps {
   title: string;
 }
 
-export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) {
+// Memoize markdown components to prevent recreation
+const MarkdownComponents = {
+  p: memo(({ node, ...props }: any) => (
+    <p className="text-lg sm:text-3xl font-bold text-gray-900 dark:text-white mb-4" {...props} />
+  )),
+  h1: memo(({ node, ...props }: any) => (
+    <h1 className="text-xl sm:text-4xl font-extrabold text-gray-900 dark:text-white mb-4" {...props} />
+  )),
+  h2: memo(({ node, ...props }: any) => (
+    <h2 className="text-lg sm:text-3xl font-bold text-gray-900 dark:text-white mb-3" {...props} />
+  )),
+  code: memo(({ node, inline, ...props }: any) => 
+    inline ? (
+      <code className="bg-brand-100/50 dark:bg-gray-700 text-brand-800 dark:text-brand-300 px-2 py-1 rounded text-base sm:text-xl font-mono" {...props} />
+    ) : (
+      <code className="block bg-gray-100 dark:bg-gray-700 p-3 sm:p-4 rounded-lg text-sm sm:text-base font-mono overflow-x-auto" {...props} />
+    )
+  ),
+  strong: memo(({ node, ...props }: any) => (
+    <strong className="text-brand-600 dark:text-brand-400" {...props} />
+  )),
+};
+
+// Memoize slide animation variants
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 300 : -300,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction < 0 ? 300 : -300,
+    opacity: 0,
+  }),
+};
+
+const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: FlashcardViewerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [shuffledCards, setShuffledCards] = useState<Flashcard[] | null>(null);
-  const [direction, setDirection] = useState(0); // -1 for left, 1 for right
-  const { play, isPlaying, text: playingText } = usePlayerStore();
-  const [isPlayingCard, setIsPlayingCard] = useState(false);
+  const [direction, setDirection] = useState(0);
+  
+  // Use selective subscriptions for better performance
+  const play = usePlayerStore((state) => state.play);
+  const isPlaying = usePlayerStore((state) => state.isPlaying);
+  const playingText = usePlayerStore((state) => state.text);
 
   const displayCards = shuffledCards || cards;
   const currentCard = displayCards[currentIndex];
 
-  const handleNext = () => {
+  // Memoize handlers
+  const handleNext = useCallback(() => {
     if (currentIndex < displayCards.length - 1) {
       setDirection(1);
       setCurrentIndex(currentIndex + 1);
       setIsFlipped(false);
     }
-  };
+  }, [currentIndex, displayCards.length]);
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     if (currentIndex > 0) {
       setDirection(-1);
       setCurrentIndex(currentIndex - 1);
       setIsFlipped(false);
     }
-  };
+  }, [currentIndex]);
 
-  const handleFlip = () => {
-    setIsFlipped(!isFlipped);
-  };
+  const handleFlip = useCallback(() => {
+    setIsFlipped((prev) => !prev);
+  }, []);
 
-  const handleShuffle = () => {
+  const handleShuffle = useCallback(() => {
     const shuffled = [...cards].sort(() => Math.random() - 0.5);
     setShuffledCards(shuffled);
     setCurrentIndex(0);
     setIsFlipped(false);
-  };
+  }, [cards]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setShuffledCards(null);
     setCurrentIndex(0);
     setIsFlipped(false);
-  };
+  }, []);
 
-  const handleReadCard = (e: React.MouseEvent) => {
+  const handleReadCard = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     const textToRead = isFlipped ? currentCard.back : currentCard.front;
     play(textToRead);
-    setIsPlayingCard(true);
-  };
+  }, [isFlipped, currentCard, play]);
 
-  // Check if current card is playing
-  const cardText = isFlipped ? currentCard.back : currentCard.front;
-  const isCurrentCardPlaying = isPlaying && playingText.includes(cardText.substring(0, 50));
+  // Memoize card text check
+  const cardText = useMemo(() => 
+    isFlipped ? currentCard.back : currentCard.front
+  , [isFlipped, currentCard.back, currentCard.front]);
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const isCurrentCardPlaying = useMemo(() => 
+    isPlaying && playingText.includes(cardText.substring(0, 50))
+  , [isPlaying, playingText, cardText]);
+
+  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
       handleFlip();
@@ -83,7 +130,7 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
     } else if (e.key === 'ArrowRight') {
       handleNext();
     }
-  };
+  }, [handleFlip, handlePrevious, handleNext]);
 
   if (!cards || cards.length === 0) {
     return (
@@ -92,21 +139,6 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
       </div>
     );
   }
-
-  const slideVariants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? 300 : -300,
-      opacity: 0,
-    }),
-    center: {
-      x: 0,
-      opacity: 1,
-    },
-    exit: (direction: number) => ({
-      x: direction < 0 ? 300 : -300,
-      opacity: 0,
-    }),
-  };
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-0">
@@ -397,4 +429,6 @@ export default function FlashcardViewer({ cards, title }: FlashcardViewerProps) 
       </div>
     </div>
   );
-}
+});
+
+export default FlashcardViewer;

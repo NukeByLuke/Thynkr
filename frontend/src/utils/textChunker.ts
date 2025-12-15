@@ -10,7 +10,7 @@ function splitIntoSentences(text: string): string[] {
   // Match sentence endings: . ! ? or newlines
   // Keep the punctuation with the sentence
   const sentenceRegex = /[^.!?\n]+[.!?\n]+/g;
-  const sentences = text.match(sentenceRegex) || [];
+  const sentences: string[] = text.match(sentenceRegex) || [];
 
   // Handle case where text doesn't end with punctuation
   const lastMatch = sentences.join('');

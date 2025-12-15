@@ -17,6 +17,7 @@ interface AuthContextType {
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
   refetchUser: () => Promise<void>;
+  apiClient: typeof api;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -166,6 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         logout,
         refetchUser,
+        apiClient: api,
       }}
     >
       {children}
