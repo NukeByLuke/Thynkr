@@ -1,12 +1,25 @@
+import { lazy, Suspense, memo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import PageContainer from '@/components/layout/PageContainer';
 import SettingsLayout from '@/layouts/SettingsLayout';
-import GeneralSettings from '@/components/settings/GeneralSettings';
-import ProfileSettings from '@/components/settings/ProfileSettings';
-import BillingSettings from '@/components/settings/BillingSettings';
-import NotificationSettings from '@/components/settings/NotificationSettings';
+import { Loader2 } from 'lucide-react';
 
-export default function SettingsPage() {
+// Lazy load settings components for better code splitting
+const GeneralSettings = lazy(() => import('@/components/settings/GeneralSettings'));
+const ProfileSettings = lazy(() => import('@/components/settings/ProfileSettings'));
+const BillingSettings = lazy(() => import('@/components/settings/BillingSettings'));
+const NotificationSettings = lazy(() => import('@/components/settings/NotificationSettings'));
+
+// Loading fallback component
+const SettingsLoading = memo(function SettingsLoading() {
+  return (
+    <div className="flex items-center justify-center py-12">
+      <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+    </div>
+  );
+});
+
+const SettingsPage = memo(function SettingsPage() {
   return (
     <>
       <Helmet>
@@ -16,22 +29,18 @@ export default function SettingsPage() {
 
       <PageContainer>
         <SettingsLayout>
-          {(activeTab) => {
-            switch (activeTab) {
-              case 'general':
-                return <GeneralSettings />;
-              case 'profile':
-                return <ProfileSettings />;
-              case 'billing':
-                return <BillingSettings />;
-              case 'notifications':
-                return <NotificationSettings />;
-              default:
-                return <GeneralSettings />;
-            }
-          }}
+          {(activeTab) => (
+            <Suspense fallback={<SettingsLoading />}>
+              {activeTab === 'general' && <GeneralSettings />}
+              {activeTab === 'profile' && <ProfileSettings />}
+              {activeTab === 'billing' && <BillingSettings />}
+              {activeTab === 'notifications' && <NotificationSettings />}
+            </Suspense>
+          )}
         </SettingsLayout>
       </PageContainer>
     </>
   );
-}
+});
+
+export default SettingsPage;

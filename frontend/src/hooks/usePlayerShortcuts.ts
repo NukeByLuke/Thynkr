@@ -1,6 +1,7 @@
 /**
  * Player Keyboard Shortcuts Hook
  * Provides global keyboard shortcuts for audio player control
+ * Optimized with throttling and selective subscriptions
  * 
  * Shortcuts:
  * - Alt + P or Space (no input focused): Toggle play/pause
@@ -9,9 +10,26 @@
  * - Alt + Down: Decrease speed
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { usePlayerStore } from '@/stores/usePlayerStore';
 import toast from 'react-hot-toast';
+
+/**
+ * Throttle function to limit execution frequency
+ */
+function throttle<T extends (...args: any[]) => any>(
+  func: T,
+  limit: number
+): (...args: Parameters<T>) => void {
+  let inThrottle: boolean;
+  return function(this: any, ...args: Parameters<T>) {
+    if (!inThrottle) {
+      func.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
+}
 
 const SPEED_OPTIONS = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
 
@@ -57,9 +75,24 @@ function findNearestSpeed(currentSpeed: number, direction: 'up' | 'down'): numbe
 
 /**
  * Hook to enable global keyboard shortcuts for player control
+ * Optimized with throttling and selective store subscriptions
  */
 export function usePlayerShortcuts() {
-  const { isPlaying, text, speed, play, pause, stop, setSpeed } = usePlayerStore();
+  // Use selectors to subscribe only to needed state
+  const isPlaying = usePlayerStore((state) => state.isPlaying);
+  const text = usePlayerStore((state) => state.text);
+  const speed = usePlayerStore((state) => state.speed);
+  const play = usePlayerStore((state) => state.play);
+  const pause = usePlayerStore((state) => state.pause);
+  const stop = usePlayerStore((state) => state.stop);
+  const setSpeed = usePlayerStore((state) => state.setSpeed);
+  
+  // Keep refs to avoid recreating throttled functions
+  const throttledToastRef = useRef(
+    throttle((message: string, icon: string) => {
+      toast(message, { icon, duration: 1500 });
+    }, 500)
+  );
   
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {

@@ -1,9 +1,10 @@
 /**
  * OpenAI TTS Audio Streaming Hook
  * Provides audio playback with intelligent caching and state management
+ * Optimized with memoization and efficient cache management
  */
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -11,21 +12,45 @@ interface TTSCache {
   blobUrl: string;
   text: string;
   voice: string;
+  timestamp: number; // For LRU eviction
 }
 
+// Cache size limit to prevent memory leaks
+const MAX_CACHE_SIZE = 50;
+const CACHE_EXPIRY_MS = 30 * 60 * 1000; // 30 minutes
+
 /**
- * Simple hash function for cache keys
+ * Simple hash function for cache keys - memoized
  */
-function hashText(text: string, voice: string): string {
-  const content = `${text}:${voice}`;
-  let hash = 0;
-  for (let i = 0; i < content.length; i++) {
-    const char = content.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return hash.toString(36);
-}
+const hashText = (() => {
+  const hashCache = new Map<string, string>();
+  
+  return (text: string, voice: string): string => {
+    const key = `${text}:${voice}`;
+    
+    if (hashCache.has(key)) {
+      return hashCache.get(key)!;
+    }
+    
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+      const char = key.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    
+    const result = hash.toString(36);
+    
+    // Limit hash cache size
+    if (hashCache.size > 1000) {
+      const firstKey = hashCache.keys().next().value;
+      hashCache.delete(firstKey);
+    }
+    
+    hashCache.set(key, result);
+    return result;
+  };
+})();
 
 export function useOpenAITTS() {
   const { apiClient } = useAuth();
@@ -140,6 +165,34 @@ export function useOpenAITTS() {
   }, []);
 
   /**
+   * Evict old cache entries based on LRU and expiry
+   */
+  const evictOldCache = useCallback(() => {
+    const now = Date.now();
+    const entries = Array.from(cacheRef.current.entries());
+    
+    // Remove expired entries
+    entries.forEach(([key, value]) => {
+      if (now - value.timestamp > CACHE_EXPIRY_MS) {
+        URL.revokeObjectURL(value.blobUrl);
+        cacheRef.current.delete(key);
+      }
+    });
+    
+    // If still over limit, remove oldest
+    if (cacheRef.current.size > MAX_CACHE_SIZE) {
+      const sortedEntries = entries
+        .sort((a, b) => a[1].timestamp - b[1].timestamp)
+        .slice(0, cacheRef.current.size - MAX_CACHE_SIZE);
+      
+      sortedEntries.forEach(([key, value]) => {
+        URL.revokeObjectURL(value.blobUrl);
+        cacheRef.current.delete(key);
+      });
+    }
+  }, []);
+
+  /**
    * Play audio from text
    */
   const play = useCallback(
@@ -160,6 +213,8 @@ export function useOpenAITTS() {
       // Check cache first
       const cached = cacheRef.current.get(hash);
       if (cached) {
+        // Update timestamp for LRU
+        cached.timestamp = Date.now();
         console.log('Playing from cache:', hash);
         audioRef.current.src = cached.blobUrl;
         audioRef.current.currentTime = 0;
@@ -202,8 +257,16 @@ export function useOpenAITTS() {
         const blob = response.data;
         const blobUrl = URL.createObjectURL(blob);
 
-        // Store in cache
-        cacheRef.current.set(hash, { blobUrl, text, voice });
+        // Evict old entries before adding new one
+        evictOldCache();
+
+        // Store in cache with timestamp
+        cacheRef.current.set(hash, { 
+          blobUrl, 
+          text, 
+          voice,
+          timestamp: Date.now()
+        });
 
         // Revoke previous blob URL if exists
         if (currentBlobUrlRef.current) {
@@ -238,7 +301,7 @@ export function useOpenAITTS() {
         setIsLoading(false);
       }
     },
-    [apiClient, playWithSystemVoice]
+    [apiClient, playWithSystemVoice, evictOldCache]
   );
 
   /**

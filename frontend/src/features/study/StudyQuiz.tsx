@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Check,
@@ -33,17 +33,22 @@ interface StudyQuizProps {
   isRegenerating?: boolean;
 }
 
-export default function StudyQuiz({ data, onRegenerate, isRegenerating = false }: StudyQuizProps) {
+const StudyQuiz = memo(function StudyQuiz({ data, onRegenerate, isRegenerating = false }: StudyQuizProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [showResults, setShowResults] = useState(false);
   const [showExplanation, setShowExplanation] = useState<number | null>(null);
-  const { play, isPlaying, text: playingText } = usePlayerStore();
+  
+  // Use selectors for optimized subscriptions
+  const play = usePlayerStore((state) => state.play);
+  const isPlaying = usePlayerStore((state) => state.isPlaying);
+  const playingText = usePlayerStore((state) => state.text);
 
   const totalQuestions = data.questions.length;
   const answeredCount = Object.keys(answers).length;
   const question = data.questions[currentQuestion];
 
+  // Memoize score calculation
   const score = useMemo(() => {
     let correct = 0;
     data.questions.forEach((q, i) => {
@@ -52,45 +57,49 @@ export default function StudyQuiz({ data, onRegenerate, isRegenerating = false }
     return correct;
   }, [answers, data.questions]);
 
-  const selectAnswer = (answer: string) => {
+  // Memoize handlers
+  const selectAnswer = useCallback((answer: string) => {
     if (showResults) return;
     setAnswers((prev) => ({ ...prev, [currentQuestion]: answer }));
-  };
+  }, [showResults, currentQuestion]);
 
-  const nextQuestion = () => {
+  const nextQuestion = useCallback(() => {
     if (currentQuestion < totalQuestions - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setShowExplanation(null);
     }
-  };
+  }, [currentQuestion, totalQuestions]);
 
-  const prevQuestion = () => {
+  const prevQuestion = useCallback(() => {
     if (currentQuestion > 0) {
       setCurrentQuestion(currentQuestion - 1);
       setShowExplanation(null);
     }
-  };
+  }, [currentQuestion]);
 
-  const submitQuiz = () => {
+  const submitQuiz = useCallback(() => {
     setShowResults(true);
     setCurrentQuestion(0);
-  };
+  }, []);
 
-  const resetQuiz = () => {
+  const resetQuiz = useCallback(() => {
     setAnswers({});
     setShowResults(false);
     setCurrentQuestion(0);
     setShowExplanation(null);
-  };
+  }, []);
 
-  const handleReadQuestion = () => {
+  const handleReadQuestion = useCallback(() => {
     play(question.question);
-  };
+  }, [play, question.question]);
 
-  // Check if current question is playing
-  const isCurrentQuestionPlaying = isPlaying && playingText.includes(question.question.substring(0, 30));
+  // Memoize playing state check
+  const isCurrentQuestionPlaying = useMemo(() => 
+    isPlaying && playingText.includes(question.question.substring(0, 30))
+  , [isPlaying, playingText, question.question]);
 
-  const getOptionClass = (option: string) => {
+  // Memoize option class function
+  const getOptionClass = useCallback((option: string) => {
     const isSelected = answers[currentQuestion] === option;
     const isCorrect = option === question.correctAnswer;
 
@@ -107,9 +116,11 @@ export default function StudyQuiz({ data, onRegenerate, isRegenerating = false }
       return 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300';
     }
     return 'border-gray-200 dark:border-gray-700 opacity-50';
-  };
+  }, [answers, currentQuestion, question.correctAnswer, showResults]);
 
-  const scorePercentage = Math.round((score / totalQuestions) * 100);
+  const scorePercentage = useMemo(() => 
+    Math.round((score / totalQuestions) * 100)
+  , [score, totalQuestions]);
 
   return (
     <div className="flex flex-col h-full">
@@ -400,4 +411,10 @@ export default function StudyQuiz({ data, onRegenerate, isRegenerating = false }
       </div>
     </div>
   );
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison for memo - only re-render if data or regenerating changes
+  return prevProps.data === nextProps.data && 
+         prevProps.isRegenerating === nextProps.isRegenerating;
+});
+
+export default StudyQuiz;
