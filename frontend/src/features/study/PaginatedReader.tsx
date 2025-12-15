@@ -133,7 +133,19 @@ export default function PaginatedReader({
 
     setIsLoadingAudio(true);
     try {
-      const response = await api.post('/tts', { text }, { responseType: 'blob' });
+      // Get TTS preferences from localStorage (same as TTSContext)
+      const voice = localStorage.getItem('tts-voice') || 'alloy';
+      const speed = parseFloat(localStorage.getItem('tts-speed') || '1.0');
+
+      const response = await api.post(
+        '/tts',
+        { 
+          text: text.trim(), 
+          voice,  // Required by backend
+          speed 
+        },
+        { responseType: 'blob' }
+      );
       const audioBlob = response.data;
 
       // Revoke previous URL
