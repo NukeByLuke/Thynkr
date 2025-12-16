@@ -723,12 +723,12 @@ export default function TutorChat() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] bg-gray-50 dark:bg-[#1E293B]">
+    <div className="flex h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] bg-slate-50 dark:bg-slate-950">
       {/* Create Chat Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+          <div className="w-full max-w-lg bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-xl shadow-2xl p-6 max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
               Start a new Tutor Chat
             </h3>
             <p className="text-base text-slate-600 dark:text-slate-300 mb-5">
@@ -762,13 +762,13 @@ export default function TutorChat() {
             </div>
             <div className="mt-6 flex justify-end gap-3">
               <button
-                className="px-5 py-2.5 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="px-5 py-2.5 text-sm font-medium rounded-lg border border-slate-200/50 dark:border-white/10 hover:bg-white/50 dark:hover:bg-white/5 transition-colors"
                 onClick={() => setShowCreateModal(false)}
               >
                 Cancel
               </button>
               <button
-                className="px-5 py-2.5 text-sm font-semibold rounded-lg bg-blue-500 hover:bg-blue-600 text-white disabled:bg-gray-300 transition-colors"
+                className="px-5 py-2.5 text-sm font-semibold rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white disabled:opacity-50 transition-all shadow-lg shadow-blue-500/20"
                 disabled={selectedCreateFiles.length === 0 || createSessionMutation.isPending}
                 onClick={() => createSessionMutation.mutate({ fileIds: selectedCreateFiles })}
               >
@@ -788,13 +788,13 @@ export default function TutorChat() {
       <div
         className={`${
           showSidebar ? 'w-64 absolute md:relative z-40 h-full shadow-sm' : 'w-0'
-        } flex-shrink-0 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 overflow-hidden`}
+        } flex-shrink-0 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border-r border-slate-200/50 dark:border-white/10 transition-all duration-300 overflow-hidden`}
       >
         <div className="p-4 space-y-4 h-full flex flex-col">
           {/* New Chat Button */}
           <button
             onClick={() => setShowCreateModal(true)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20"
             disabled={createSessionMutation.isPending}
           >
             <Plus className="w-5 h-5" />
@@ -808,8 +808,8 @@ export default function TutorChat() {
                 key={session.id}
                 className={`group relative p-3 rounded-lg cursor-pointer transition-colors ${
                   currentSessionId === session.id
-                    ? 'bg-blue-50 dark:bg-blue-900/20 border-l-2 border-blue-500'
-                    : 'bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ? 'bg-cyan-50 dark:bg-cyan-900/20 border-l-2 border-cyan-500'
+                    : 'bg-white/50 dark:bg-slate-800/50 hover:bg-white/80 dark:hover:bg-slate-800/70 backdrop-blur-sm'
                 }`}
                 onClick={() => {
                   if (editingSessionId !== session.id) {
@@ -829,7 +829,7 @@ export default function TutorChat() {
                             if (e.key === 'Enter') handleSaveRename();
                             if (e.key === 'Escape') handleCancelRename();
                           }}
-                          className="flex-1 text-sm font-medium bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded px-2 py-1 text-gray-900 dark:text-white"
+                          className="flex-1 text-sm font-medium bg-white/80 dark:bg-slate-700/80 backdrop-blur-sm border border-slate-300/50 dark:border-white/10 rounded px-2 py-1 text-slate-900 dark:text-white"
                           autoFocus
                         />
                         <button
@@ -1002,7 +1002,7 @@ export default function TutorChat() {
         {/* Messages */}
         <div
           ref={messagesContainerRef}
-          className="relative flex-1 overflow-y-auto p-4 md:p-6 space-y-5 md:space-y-6 bg-gray-50/50 dark:bg-slate-900/50"
+          className="relative flex-1 overflow-y-auto p-4 md:p-6 space-y-5 md:space-y-6 bg-slate-50/50 dark:bg-slate-950/50"
           key={`messages-container-${displayedMessages.length}-${renderNudge}`}
         >
           {displayedMessages.map((message, index) => (
@@ -1037,8 +1037,8 @@ export default function TutorChat() {
                 <div
                   className={`rounded-2xl px-4 md:px-5 py-3.5 shadow-sm ${
                     message.role === 'user'
-                      ? 'bg-white dark:bg-slate-800 text-gray-900 dark:text-white border border-gray-100 dark:border-slate-700'
-                      : 'bg-[#EFF6FF] dark:bg-blue-900/30 text-gray-900 dark:text-white'
+                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
+                      : 'bg-slate-800/80 dark:bg-slate-800/80 text-white backdrop-blur-md'
                   }`}
                 >
                   <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 text-sm md:text-base leading-relaxed [&_p]:leading-[1.7]">
@@ -1071,7 +1071,7 @@ export default function TutorChat() {
 
               {/* Message Content */}
               <div className="flex flex-col items-start max-w-[85%] md:max-w-[75%]">
-                <div className="rounded-2xl px-4 md:px-5 py-3.5 bg-[#EFF6FF] dark:bg-blue-900/30 text-gray-900 dark:text-white shadow-sm">
+                <div className="rounded-2xl px-4 md:px-5 py-3.5 bg-slate-800/80 dark:bg-slate-800/80 text-white backdrop-blur-md shadow-sm">
                   {streamingMessage ? (
                     <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 text-sm md:text-base leading-relaxed [&_p]:leading-[1.7]">
                       <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>{streamingMessage}</ReactMarkdown>
@@ -1109,7 +1109,7 @@ export default function TutorChat() {
               </p>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors font-medium shadow-sm"
+                className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-xl transition-all font-medium shadow-lg shadow-blue-500/20"
               >
                 Start New Chat
               </button>
@@ -1136,7 +1136,7 @@ export default function TutorChat() {
 
         {/* Input Area - pinned to bottom on mobile */}
         {currentSessionId && (
-          <div className="sticky bottom-0 p-4 md:p-6 bg-white dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700 pb-safe">
+          <div className="sticky bottom-0 p-4 md:p-6 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border-t border-slate-200/50 dark:border-white/10 pb-safe">
             <div className="max-w-4xl mx-auto">
               {(!currentSession?.files || currentSession.files.length === 0) && (
                 <div className="mb-3 text-sm text-amber-700 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl p-3 flex items-start gap-2">

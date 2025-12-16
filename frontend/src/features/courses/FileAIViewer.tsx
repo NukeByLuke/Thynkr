@@ -247,8 +247,8 @@ export default function FileAIViewer({
     if (generateSummary.isPending) {
       return (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary-500 mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Generating summary...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-cyan-500 mb-4" />
+          <p className="text-slate-600 dark:text-slate-400">Generating summary...</p>
         </div>
       );
     }
@@ -256,11 +256,11 @@ export default function FileAIViewer({
     if (!aiContent?.summary) {
       return (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <FileText className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
-          <p className="text-gray-600 dark:text-gray-400 mb-4">No summary generated yet</p>
+          <FileText className="h-12 w-12 text-slate-300 dark:text-slate-600 mb-4" />
+          <p className="text-slate-600 dark:text-slate-400 mb-4">No summary generated yet</p>
           <button
             onClick={() => generateSummary.mutate(false)}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all shadow-lg shadow-blue-500/20"
           >
             Generate Summary
           </button>
@@ -270,20 +270,20 @@ export default function FileAIViewer({
 
     return (
       <div className="prose dark:prose-invert max-w-none">
-        <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-200/50 dark:border-white/10">
+          <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
             <Clock className="h-4 w-4" />
             <span>Generated {formatDate(aiContent.summaryGeneratedAt)}</span>
           </div>
           <button
             onClick={() => copyToClipboard(aiContent.summary!.content)}
-            className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+            className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
           >
             <Copy className="h-4 w-4" />
             Copy
           </button>
         </div>
-        <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+        <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
           {aiContent.summary.content}
         </p>
       </div>
@@ -294,8 +294,8 @@ export default function FileAIViewer({
     if (generateNotes.isPending) {
       return (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary-500 mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Generating notes...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-cyan-500 mb-4" />
+          <p className="text-slate-600 dark:text-slate-400">Generating notes...</p>
         </div>
       );
     }
@@ -303,11 +303,11 @@ export default function FileAIViewer({
     if (!aiContent?.notes) {
       return (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <BookOpen className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
-          <p className="text-gray-600 dark:text-gray-400 mb-4">No notes generated yet</p>
+          <BookOpen className="h-12 w-12 text-slate-300 dark:text-slate-600 mb-4" />
+          <p className="text-slate-600 dark:text-slate-400 mb-4">No notes generated yet</p>
           <button
             onClick={() => generateNotes.mutate(false)}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all shadow-lg shadow-blue-500/20"
           >
             Generate Notes
           </button>
@@ -317,8 +317,8 @@ export default function FileAIViewer({
 
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-200/50 dark:border-white/10">
+          <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
             <Clock className="h-4 w-4" />
             <span>Generated {formatDate(aiContent.notesGeneratedAt)}</span>
           </div>
@@ -326,12 +326,12 @@ export default function FileAIViewer({
 
         {/* Key Points */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Key Points</h3>
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">Key Points</h3>
           <ul className="space-y-2">
             {aiContent.notes.keyPoints.map((point, index) => (
               <li key={index} className="flex items-start gap-2">
-                <ChevronRight className="h-5 w-5 text-primary-500 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-700 dark:text-gray-300">{point}</span>
+                <ChevronRight className="h-5 w-5 text-cyan-500 flex-shrink-0 mt-0.5" />
+                <span className="text-slate-700 dark:text-slate-300">{point}</span>
               </li>
             ))}
           </ul>
@@ -339,10 +339,10 @@ export default function FileAIViewer({
 
         {/* Detailed Notes */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">
             Detailed Notes
           </h3>
-          <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+          <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
             {aiContent.notes.detailed}
           </p>
         </div>
@@ -354,8 +354,8 @@ export default function FileAIViewer({
     if (generateQuiz.isPending) {
       return (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary-500 mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Generating quiz...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-cyan-500 mb-4" />
+          <p className="text-slate-600 dark:text-slate-400">Generating quiz...</p>
         </div>
       );
     }
@@ -363,11 +363,11 @@ export default function FileAIViewer({
     if (!aiContent?.quiz) {
       return (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <HelpCircle className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
-          <p className="text-gray-600 dark:text-gray-400 mb-4">No quiz generated yet</p>
+          <HelpCircle className="h-12 w-12 text-slate-300 dark:text-slate-600 mb-4" />
+          <p className="text-slate-600 dark:text-slate-400 mb-4">No quiz generated yet</p>
           <button
             onClick={() => generateQuiz.mutate({ refresh: false })}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all shadow-lg shadow-blue-500/20"
           >
             Generate Quiz
           </button>
@@ -377,14 +377,13 @@ export default function FileAIViewer({
 
     const { correct, total } = getQuizScore();
 
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
+    return (      <div className="space-y-6">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-200/50 dark:border-white/10">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
               {aiContent.quiz.title}
             </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               {aiContent.quiz.questions.length} questions • {aiContent.quiz.difficulty || 'MEDIUM'}{' '}
               difficulty
             </p>
@@ -406,8 +405,8 @@ export default function FileAIViewer({
 
         <div className="space-y-6">
           {aiContent.quiz.questions.map((question, qIndex) => (
-            <div key={qIndex} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-              <p className="font-medium text-gray-900 dark:text-white mb-3">
+            <div key={qIndex} className="p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-slate-200/50 dark:border-white/10">
+              <p className="font-medium text-slate-900 dark:text-white mb-3">
                 {qIndex + 1}. {question.question}
               </p>
               <div className="space-y-2">
@@ -431,10 +430,10 @@ export default function FileAIViewer({
                             ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
                             : isSelected
                               ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                              : 'border-gray-200 dark:border-gray-600'
+                              : 'border-slate-200 dark:border-slate-600'
                           : isSelected
-                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                            : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                            ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20'
+                            : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -442,14 +441,14 @@ export default function FileAIViewer({
                         {showResult && isSelected && !isCorrect && (
                           <X className="h-4 w-4 text-red-500" />
                         )}
-                        <span className="text-gray-700 dark:text-gray-300">{option}</span>
+                        <span className="text-slate-700 dark:text-slate-300">{option}</span>
                       </div>
                     </button>
                   );
                 })}
               </div>
               {showQuizResults && question.explanation && (
-                <p className="mt-3 text-sm text-gray-600 dark:text-gray-400 italic">
+                <p className="mt-3 text-sm text-slate-600 dark:text-slate-400 italic">
                   💡 {question.explanation}
                 </p>
               )}
@@ -461,7 +460,7 @@ export default function FileAIViewer({
           <button
             onClick={() => setShowQuizResults(true)}
             disabled={Object.keys(quizAnswers).length !== aiContent.quiz!.questions.length}
-            className="w-full py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl hover:from-cyan-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-500/20"
           >
             Check Answers ({Object.keys(quizAnswers).length}/{aiContent.quiz.questions.length}{' '}
             answered)
@@ -472,7 +471,7 @@ export default function FileAIViewer({
               setQuizAnswers({});
               setShowQuizResults(false);
             }}
-            className="w-full py-3 border-2 border-primary-500 text-primary-600 dark:text-primary-400 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
+            className="w-full py-3 border-2 border-cyan-500 text-cyan-600 dark:text-cyan-400 rounded-xl hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors"
           >
             Try Again
           </button>
@@ -485,8 +484,8 @@ export default function FileAIViewer({
     if (generateFlashcards.isPending) {
       return (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary-500 mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Generating flashcards...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-cyan-500 mb-4" />
+          <p className="text-slate-600 dark:text-slate-400">Generating flashcards...</p>
         </div>
       );
     }
@@ -494,11 +493,11 @@ export default function FileAIViewer({
     if (!aiContent?.cards || !aiContent.cards.cards?.length) {
       return (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Layers className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
-          <p className="text-gray-600 dark:text-gray-400 mb-4">No flashcards generated yet</p>
+          <Layers className="h-12 w-12 text-slate-300 dark:text-slate-600 mb-4" />
+          <p className="text-slate-600 dark:text-slate-400 mb-4">No flashcards generated yet</p>
           <button
             onClick={() => generateFlashcards.mutate({ refresh: false })}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all shadow-lg shadow-blue-500/20"
           >
             Generate Flashcards
           </button>
@@ -511,12 +510,12 @@ export default function FileAIViewer({
 
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-200/50 dark:border-white/10">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
               {aiContent.cards.title}
             </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Card {currentFlashcard + 1} of {cards.length}
             </p>
           </div>
@@ -525,16 +524,16 @@ export default function FileAIViewer({
         {/* Flashcard */}
         <div
           onClick={() => setShowFlashcardBack(!showFlashcardBack)}
-          className="min-h-[200px] p-8 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/30 rounded-2xl cursor-pointer transition-all hover:shadow-lg flex items-center justify-center text-center"
+          className="min-h-[200px] p-8 bg-gradient-to-br from-cyan-50 to-blue-100 dark:from-cyan-900/30 dark:to-blue-800/30 rounded-2xl cursor-pointer transition-all hover:shadow-lg backdrop-blur-sm flex items-center justify-center text-center"
         >
           <div>
-            <p className="text-xs uppercase tracking-wider text-primary-600 dark:text-primary-400 mb-2">
+            <p className="text-xs uppercase tracking-wider text-cyan-600 dark:text-cyan-400 mb-2">
               {showFlashcardBack ? 'Answer' : 'Question'}
             </p>
-            <p className="text-xl text-gray-900 dark:text-white">
+            <p className="text-xl text-slate-900 dark:text-white">
               {showFlashcardBack ? currentCard.back : currentCard.front}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
               Click to {showFlashcardBack ? 'see question' : 'reveal answer'}
             </p>
           </div>
@@ -548,7 +547,7 @@ export default function FileAIViewer({
               setShowFlashcardBack(false);
             }}
             disabled={currentFlashcard === 0}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Previous
           </button>
@@ -564,13 +563,13 @@ export default function FileAIViewer({
                 }}
                 className={`w-2 h-2 rounded-full transition-colors ${
                   i === currentFlashcard
-                    ? 'bg-primary-500'
-                    : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+                    ? 'bg-cyan-500'
+                    : 'bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-500'
                 }`}
               />
             ))}
             {cards.length > 10 && (
-              <span className="text-xs text-gray-500">+{cards.length - 10}</span>
+              <span className="text-xs text-slate-500">+{cards.length - 10}</span>
             )}
           </div>
 
@@ -580,7 +579,7 @@ export default function FileAIViewer({
               setShowFlashcardBack(false);
             }}
             disabled={currentFlashcard === cards.length - 1}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Next
           </button>
@@ -590,28 +589,28 @@ export default function FileAIViewer({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md">
+      <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
+        <div className="p-4 border-b border-slate-200/50 dark:border-white/10 flex items-center justify-between flex-shrink-0">
           <div className="min-w-0">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white truncate">
               {fileName}
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{courseTitle}</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{courseTitle}</p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 ml-4">
             <button
               onClick={handleRegenerate}
               disabled={isGenerating}
-              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50"
+              className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors disabled:opacity-50"
               title="Regenerate"
             >
               <RefreshCw className={`h-5 w-5 ${isGenerating ? 'animate-spin' : ''}`} />
             </button>
             <button
               onClick={onClose}
-              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
@@ -619,15 +618,15 @@ export default function FileAIViewer({
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+        <div className="flex border-b border-slate-200/50 dark:border-white/10 flex-shrink-0">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
                 activeTab === tab.id
-                  ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-500'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  ? 'text-cyan-600 dark:text-cyan-400 border-b-2 border-cyan-500'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
               }`}
             >
               <tab.icon className="h-4 w-4" />
@@ -640,20 +639,20 @@ export default function FileAIViewer({
         <div className="flex-1 overflow-y-auto p-6">
           {loadingContent ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+              <Loader2 className="h-8 w-8 animate-spin text-cyan-500" />
             </div>
           ) : contentError ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
-              <p className="text-gray-600 dark:text-gray-400">Failed to load AI content</p>
+              <p className="text-slate-600 dark:text-slate-400">Failed to load AI content</p>
             </div>
           ) : !aiContent?.isAICompatible ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <AlertCircle className="h-12 w-12 text-yellow-500 mb-4" />
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-slate-600 dark:text-slate-400">
                 AI features are not available for this file type.
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+              <p className="text-sm text-slate-500 dark:text-slate-500 mt-2">
                 Supported: PDF, DOCX, TXT, PPTX
               </p>
             </div>
