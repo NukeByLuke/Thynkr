@@ -21,6 +21,7 @@ import { lazyWithPreload } from './utils/lazyWithPreload';
 
 // Code-split page components with preloading for optimal bundle size
 const Landing = lazyWithPreload(() => import('./pages/Landing'));
+const Dashboard = lazyWithPreload(() => import('./pages/Dashboard'));
 const Login = lazyWithPreload(() => import('./pages/Login'));
 const Register = lazyWithPreload(() => import('./pages/Register'));
 const AuthCallback = lazyWithPreload(() => import('./pages/AuthCallback'));
@@ -61,7 +62,7 @@ function useAuthRedirects() {
     const isOnAuthOnlyPage = authOnlyPages.includes(location.pathname);
 
     if (user && isOnAuthOnlyPage) {
-      navigate('/study', { replace: true });
+      navigate('/dashboard', { replace: true });
     }
   }, [user, isLoading, location.pathname, navigate]);
 }
@@ -71,6 +72,26 @@ function useAuthRedirects() {
  */
 function AppContent() {
   useAuthRedirects();
+
+  /**
+   * Home route component that redirects based on auth status
+   */
+  const HomeRoute = () => {
+    const { user, isLoading } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+      if (!isLoading && user) {
+        navigate('/dashboard', { replace: true });
+      }
+    }, [user, isLoading, navigate]);
+
+    if (isLoading) {
+      return <LoadingSpinner fullScreen />;
+    }
+
+    return <Landing />;
+  };
 
   /**
    * Theme-aware toast notification component
@@ -124,7 +145,7 @@ function AppContent() {
 
             {/* Public routes with PublicLayout (navbar) */}
             <Route element={<PublicLayout />}>
-              <Route path="/" element={<Landing />} />
+              <Route path="/" element={<HomeRoute />} />
               <Route path="/pricing" element={<Pricing />} />
             </Route>
 
@@ -135,7 +156,7 @@ function AppContent() {
                 <DashboardLayout />
               </ProtectedRoute>
             }
-          >
+          >            <Route path="/dashboard" element={<Dashboard />} />            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/study" element={<Study />} />
             <Route path="/files" element={<Files />} />
             <Route path="/progress" element={<StudyProgress />} />
