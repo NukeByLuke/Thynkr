@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Sidebar, { NavigationSection } from '@/components/Sidebar';
 import MobileHeader from '@/components/MobileHeader';
-import MobileBottomNav, { BottomNavItem } from '@/components/layout/MobileBottomNav';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import {
   BookOpen,
   FolderOpen,
@@ -15,7 +15,6 @@ import {
   DollarSign,
   Shield,
   Gamepad2,
-  User,
 } from 'lucide-react';
 
 export default function DashboardLayout() {
@@ -53,14 +52,6 @@ export default function DashboardLayout() {
           : []),
       ],
     },
-  ];
-
-  // Define mobile bottom navigation items (4-5 core items)
-  const mobileNavItems: BottomNavItem[] = [
-    { path: '/', icon: Home, label: 'Home', end: true },
-    { path: '/study', icon: BookOpen, label: 'Study' },
-    { path: '/arcade', icon: Gamepad2, label: 'Arcade' },
-    { path: '/settings', icon: User, label: 'Profile' },
   ];
 
   return (
@@ -104,8 +95,8 @@ export default function DashboardLayout() {
         </>
       )}
 
-      {/* Mobile Bottom Navigation - Strategy Pattern for Responsive Navigation */}
-      <MobileBottomNav items={mobileNavItems} />
+      {/* Mobile Bottom Navigation - Amazon/Spotify Style */}
+      <MobileBottomNav onMenuClick={() => setIsMobileMenuOpen(true)} />
     </div>
   );
 }
