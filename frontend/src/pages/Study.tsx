@@ -1,17 +1,17 @@
 /**
  * Study Page
- * Main study hub for file uploads and AI-generated study materials (summaries, notes, flashcards, quizzes).
+ * Professional digital library with AI-powered study materials.
+ * Layout: LibraryHeader → FilterBar → FileCard Grid → Selected File Content
  */
 
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Upload } from 'lucide-react';
+import { Upload, FileText } from 'lucide-react';
 import SummaryView from '@/features/study/SummaryView';
 import NotesView from '@/features/study/NotesView';
 import FlashcardViewer from '@/features/study/FlashcardViewer';
 import QuizPlayer from '@/features/study/QuizPlayer';
-import EmptyState from '@/components/ui/EmptyState';
 import GenerationLoader from '@/components/ui/GenerationLoader';
 import LibraryHeader from '@/components/study/LibraryHeader';
 import FileCard from '@/components/study/FileCard';
@@ -241,7 +241,7 @@ export default function Study() {
                 <p className="text-gray-600 mb-4">No summary generated yet</p>
                 <button
                   onClick={() => generateSummaryMutation.mutate({ fileId: selectedFile.id })}
-                  className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
+                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   Generate Summary
                 </button>
@@ -271,7 +271,7 @@ export default function Study() {
                 <p className="text-gray-600 mb-4">No notes generated yet</p>
                 <button
                   onClick={() => generateNotesMutation.mutate({ fileId: selectedFile.id })}
-                  className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
+                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   Generate Notes
                 </button>
@@ -311,7 +311,7 @@ export default function Study() {
                   onClick={() =>
                     generateFlashcardsMutation.mutate({ fileId: selectedFile.id, numCards })
                   }
-                  className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
+                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   Generate Flashcards
                 </button>
@@ -387,7 +387,7 @@ export default function Study() {
                           difficulty: quizDifficulty,
                         })
                       }
-                      className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
+                      className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
                       Generate Quiz
                     </button>
@@ -434,7 +434,7 @@ export default function Study() {
                       difficulty: quizDifficulty,
                     })
                   }
-                  className="px-6 py-3 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-2xl font-medium hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all duration-300 ease-out shadow-soft-lg hover:shadow-glow-brand"
+                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   Generate Quiz
                 </button>
@@ -454,7 +454,12 @@ export default function Study() {
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
+    <div 
+      className="h-full flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       {/* Premium Library Header */}
       <LibraryHeader
         onUploadClick={() => fileInputRef.current?.click()}
@@ -474,8 +479,10 @@ export default function Study() {
         onChange={handleFileSelect}
       />
 
+      {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-10 py-6 md:py-8">
+          
           {/* Upload Error Display */}
           {uploadError && (
             <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl shadow-sm animate-fade-in">
@@ -485,22 +492,20 @@ export default function Study() {
 
           {/* Drag & Drop Overlay */}
           {isDragging && (
-            <div
-              className="fixed inset-0 z-50 bg-blue-600/20 backdrop-blur-sm flex items-center justify-center"
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 shadow-2xl border-4 border-dashed border-blue-500">
-                <Upload className="h-16 w-16 text-blue-500 mx-auto mb-4" />
-                <p className="text-2xl font-bold text-slate-900 dark:text-white">
-                  Drop files here to upload
+            <div className="fixed inset-0 z-50 bg-indigo-600/20 backdrop-blur-md flex items-center justify-center">
+              <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-3xl p-16 shadow-2xl border-4 border-dashed border-indigo-500">
+                <Upload className="h-20 w-20 text-indigo-500 mx-auto mb-6" />
+                <p className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                  Drop files here
+                </p>
+                <p className="text-slate-600 dark:text-slate-400">
+                  Upload documents, PDFs, or audio files
                 </p>
               </div>
             </div>
           )}
 
-          {/* Filter Bar */}
+          {/* Filter Bar - Only show when files exist */}
           {files.length > 0 && (
             <FilterBar
               activeFilter={activeFilter}
@@ -510,21 +515,51 @@ export default function Study() {
             />
           )}
 
-          {/* Files Grid Section */}
-          {filteredFiles.length === 0 ? (
-            <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl shadow-soft-xl border border-white/20 dark:border-slate-700/30 p-12">
-              <EmptyState
-                icon={<Upload className="h-8 w-8" />}
-                title={searchQuery ? 'No files found' : 'No files yet'}
-                description={
-                  searchQuery
-                    ? 'Try adjusting your search query'
-                    : 'Click "Upload New File" to start learning smarter with AI'
-                }
-                illustration="study"
-              />
+          {/* File Grid or Empty State */}
+          {files.length === 0 ? (
+            /* Minimal Empty State - No files at all */
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="text-center space-y-6 max-w-md">
+                <div className="mx-auto w-20 h-20 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-2xl flex items-center justify-center">
+                  <FileText className="h-10 w-10 text-indigo-500" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                    Upload your first file
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-400">
+                    Start learning smarter with AI-generated summaries, notes, flashcards, and quizzes
+                  </p>
+                </div>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  Upload File
+                </button>
+              </div>
+            </div>
+          ) : filteredFiles.length === 0 ? (
+            /* Minimal Empty State - No filtered results */
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="text-center space-y-4">
+                <div className="mx-auto w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center">
+                  <FileText className="h-8 w-8 text-slate-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+                    No files found
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-400">
+                    {searchQuery
+                      ? `No results for "${searchQuery}"`
+                      : 'Try adjusting your filters'}
+                  </p>
+                </div>
+              </div>
             </div>
           ) : (
+            /* File Grid */
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredFiles.map((file) => (
                 <FileCard
@@ -554,14 +589,21 @@ export default function Study() {
             </div>
           )}
 
-          {/* Selected File Content */}
+          {/* Selected File Content Panel */}
           {selectedFile && (
             <div className="mt-8 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl shadow-soft-xl border border-white/20 dark:border-slate-700/30 transition-all duration-300 ease-out hover:shadow-soft-2xl">
+              
+              {/* File Header */}
               <div className="p-8 border-b border-white/20 dark:border-slate-700/30">
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
                   {selectedFile.originalName}
                 </h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                  {selectedFile.fileType.toUpperCase()} • {(selectedFile.fileSize / 1024).toFixed(1)} KB
+                </p>
               </div>
+
+              {/* Tabs Navigation */}
               <div className="border-b border-white/20 dark:border-slate-700/30">
                 <div className="flex space-x-6 sm:space-x-10 px-6 sm:px-8 overflow-x-auto scrollbar-hide">
                   {(['summary', 'notes', 'flashcards', 'quizzes'] as TabType[]).map((tab) => (
@@ -574,8 +616,8 @@ export default function Study() {
                       }}
                       className={`py-4 sm:py-5 border-b-2 capitalize transition-all duration-300 ease-out whitespace-nowrap text-base sm:text-lg ${
                         activeTab === tab
-                          ? 'border-brand-600 dark:border-brand-400 text-brand-600 dark:text-brand-400 font-semibold'
-                          : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:border-brand-300/50'
+                          ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 font-semibold'
+                          : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-300/50'
                       }`}
                     >
                       {tab}
@@ -583,7 +625,11 @@ export default function Study() {
                   ))}
                 </div>
               </div>
-              <div className="p-8">{renderTabContent()}</div>
+
+              {/* Tab Content */}
+              <div className="p-8">
+                {renderTabContent()}
+              </div>
             </div>
           )}
         </div>
