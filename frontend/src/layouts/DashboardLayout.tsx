@@ -1,78 +1,55 @@
 import { Outlet } from 'react-router-dom';
 import { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import Sidebar, { NavigationSection } from '@/components/Sidebar';
-import MobileHeader from '@/components/MobileHeader';
+import Sidebar from '@/components/layout/Sidebar';
+import ProfileMenu from '@/components/layout/ProfileMenu';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
-import {
-  BookOpen,
-  FolderOpen,
-  MessageCircle,
-  Settings,
-  LibraryBig,
-  TrendingUp,
-  Home,
-  DollarSign,
-  Shield,
-  Gamepad2,
-} from 'lucide-react';
+import { Menu } from 'lucide-react';
+import Logo from '@/components/Logo';
 
 export default function DashboardLayout() {
-  const { user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Define navigation sections
-  const navigationSections: NavigationSection[] = [
-    {
-      title: 'Workspace',
-      items: [
-        { path: '/', icon: Home, label: 'Home', end: true },
-        { path: '/study', icon: BookOpen, label: 'Study' },
-        { path: '/files', icon: FolderOpen, label: 'Files' },
-        { path: '/arcade', icon: Gamepad2, label: 'Arcade' },
-      ],
-    },
-    {
-      title: 'Library',
-      items: [
-        { path: '/courses', icon: LibraryBig, label: 'Courses' },
-        { path: '/progress', icon: TrendingUp, label: 'Progress' },
-        ...(user?.role === 'PREMIUM' || user?.role === 'ADMIN'
-          ? [{ path: '/tutor', icon: MessageCircle, label: 'AI Tutor' }]
-          : []),
-      ],
-    },
-    {
-      title: 'Account',
-      items: [
-        { path: '/settings', icon: Settings, label: 'Settings' },
-        { path: '/pricing', icon: DollarSign, label: 'Pricing' },
-        ...(user?.role === 'ADMIN'
-          ? [{ path: '/admin', icon: Shield, label: 'Admin' }]
-          : []),
-      ],
-    },
-  ];
-
   return (
-    // Container: Full screen, no overflow
-    <div className="h-screen w-full overflow-hidden bg-slate-50 dark:bg-[#020617] flex flex-col">
-      {/* Mobile Header - Only visible on small screens */}
-      <MobileHeader onMenuClick={() => setIsMobileMenuOpen(true)} />
+    <div className="h-screen w-full overflow-hidden bg-slate-950 bg-grid-pattern flex relative">
+      {/* Ambient Glow Orbs */}
+      <div className="fixed top-0 left-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="fixed bottom-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-[120px] pointer-events-none" />
+      
+      {/* Desktop Sidebar - Hidden on mobile */}
+      <div className="hidden lg:block flex-shrink-0">
+        <Sidebar />
+      </div>
 
-      {/* Layout Grid with padding for floating effect */}
-      <div className="flex flex-1 p-0 lg:p-3 gap-3 overflow-hidden">
-        {/* Left Panel (Sidebar Area) - Hidden on mobile */}
-        <div className="hidden lg:block w-[280px] flex-shrink-0 h-full">
-          <Sidebar sections={navigationSections} />
-        </div>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top Header Bar - Visible on all screens */}
+        <header className="h-16 bg-slate-900/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 lg:px-6">
+          {/* Left: Mobile menu button + Logo (mobile only) */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="lg:hidden p-2 rounded-lg hover:bg-white/5 transition-colors"
+            >
+              <Menu className="w-5 h-5 text-slate-300" />
+            </button>
+            <div className="lg:hidden flex items-center gap-2">
+              <Logo variant="icon" animated={false} className="w-7 h-7" />
+              <span className="text-base font-semibold text-white">
+                Thynkr
+              </span>
+            </div>
+          </div>
 
-        {/* Right Panel (Main Content) */}
-        <div className="flex-1 relative min-w-0">
-          <main className="h-full overflow-y-auto p-4 md:p-8 scroll-smooth">
-            <Outlet />
-          </main>
-        </div>
+          {/* Right: Profile Menu */}
+          <div className="ml-auto">
+            <ProfileMenu />
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6 bg-transparent">
+          <Outlet />
+        </main>
       </div>
 
       {/* Mobile Sidebar Overlay */}
@@ -81,22 +58,17 @@ export default function DashboardLayout() {
           {/* Backdrop */}
           <div
             onClick={() => setIsMobileMenuOpen(false)}
-            className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity"
+            className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-md z-40"
           />
-          {/* Floating Mobile Sidebar */}
-          <div className="lg:hidden fixed left-3 top-16 bottom-3 w-[280px] z-50">
-            <Sidebar
-              sections={navigationSections}
-              showCloseButton
-              onClose={() => setIsMobileMenuOpen(false)}
-              onNavigate={() => setIsMobileMenuOpen(false)}
-            />
+          {/* Slide-in Sidebar */}
+          <div className="lg:hidden fixed left-0 top-0 bottom-0 w-64 z-50 transform transition-transform">
+            <Sidebar />
           </div>
         </>
       )}
 
-      {/* Mobile Bottom Navigation - Amazon/Spotify Style */}
-      <MobileBottomNav onMenuClick={() => setIsMobileMenuOpen(true)} />
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 }

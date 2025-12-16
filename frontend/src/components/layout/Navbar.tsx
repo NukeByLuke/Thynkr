@@ -47,7 +47,7 @@ export default function Navbar() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="bg-white dark:bg-[#1E293B] border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 shadow-soft theme-transition">
+    <nav className="bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-white/5 sticky top-0 z-50 shadow-soft theme-transition">
       <div className="max-w-6xl mx-auto px-8 lg:px-16">
         <div className="flex justify-between h-16">
           {/* Logo */}
@@ -60,9 +60,9 @@ export default function Navbar() {
             {!isAuthenticated && (
               <Link
                 to="/courses"
-                className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center ${
+                className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-white/5 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center ${
                   isActive('/courses')
-                    ? 'bg-gradient-to-r from-brand-500/10 to-accent-500/10 text-brand-600 dark:text-brand-400'
+                    ? 'bg-indigo-500/20 text-indigo-300 dark:text-indigo-300 border-b-2 border-indigo-500'
                     : ''
                 }`}
               >
@@ -71,9 +71,9 @@ export default function Navbar() {
             )}
             <Link
               to="/"
-              className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center ${
+              className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-white/5 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center ${
                 isActive('/')
-                  ? 'bg-gradient-to-r from-brand-500/10 to-accent-500/10 text-brand-600 dark:text-brand-400'
+                  ? 'bg-indigo-500/20 text-indigo-300 dark:text-indigo-300 border-b-2 border-indigo-500'
                   : ''
               }`}
             >
@@ -81,9 +81,9 @@ export default function Navbar() {
             </Link>
             <Link
               to="/pricing"
-              className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center ${
+              className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-white/5 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center ${
                 isActive('/pricing')
-                  ? 'bg-gradient-to-r from-brand-500/10 to-accent-500/10 text-brand-600 dark:text-brand-400'
+                  ? 'bg-indigo-500/20 text-indigo-300 dark:text-indigo-300 border-b-2 border-indigo-500'
                   : ''
               }`}
             >
@@ -93,9 +93,9 @@ export default function Navbar() {
               <>
                 <Link
                   to="/files"
-                  className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 ${
+                  className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-white/5 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 ${
                     isActive('/files')
-                      ? 'bg-gradient-to-r from-brand-500/10 to-accent-500/10 text-brand-600 dark:text-brand-400'
+                      ? 'bg-indigo-500/20 text-indigo-300 dark:text-indigo-300 border-b-2 border-indigo-500'
                       : ''
                   }`}
                 >
@@ -103,9 +103,9 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/study"
-                  className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 ${
+                  className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-white/5 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 ${
                     isActive('/study')
-                      ? 'bg-gradient-to-r from-brand-500/10 to-accent-500/10 text-brand-600 dark:text-brand-400'
+                      ? 'bg-indigo-500/20 text-indigo-300 dark:text-indigo-300 border-b-2 border-indigo-500'
                       : ''
                   }`}
                 >
@@ -114,9 +114,9 @@ export default function Navbar() {
                 {(user?.role === 'PREMIUM' || user?.role === 'ADMIN') && (
                   <Link
                     to="/tutor"
-                    className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center gap-1.5 ${
+                    className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-white/5 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center gap-1.5 ${
                       isActive('/tutor')
-                        ? 'bg-gradient-to-r from-brand-500/10 to-accent-500/10 text-brand-600 dark:text-brand-400'
+                        ? 'bg-indigo-500/20 text-indigo-300 dark:text-indigo-300 border-b-2 border-indigo-500'
                         : ''
                     }`}
                   >
@@ -126,9 +126,9 @@ export default function Navbar() {
                 )}
                 <Link
                   to="/progress"
-                  className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center gap-1.5 ${
+                  className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-white/5 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center gap-1.5 ${
                     isActive('/progress')
-                      ? 'bg-gradient-to-r from-brand-500/10 to-accent-500/10 text-brand-600 dark:text-brand-400'
+                      ? 'bg-indigo-500/20 text-indigo-300 dark:text-indigo-300 border-b-2 border-indigo-500'
                       : ''
                   }`}
                 >
@@ -140,9 +140,9 @@ export default function Navbar() {
                   user?.role === 'ADMIN') && (
                   <Link
                     to="/courses"
-                    className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center gap-1.5 ${
+                    className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-white/5 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center gap-1.5 ${
                       isActive('/courses') || location.pathname.startsWith('/courses/')
-                        ? 'bg-gradient-to-r from-brand-500/10 to-accent-500/10 text-brand-600 dark:text-brand-400'
+                        ? 'bg-indigo-500/20 text-indigo-300 dark:text-indigo-300 border-b-2 border-indigo-500'
                         : ''
                     }`}
                   >
@@ -155,9 +155,9 @@ export default function Navbar() {
                   user?.role === 'ADMIN') && (
                   <Link
                     to="/saved-packs"
-                    className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center gap-1.5 ${
+                    className={`text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-white/5 px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center gap-1.5 ${
                       isActive('/saved-packs')
-                        ? 'bg-gradient-to-r from-brand-500/10 to-accent-500/10 text-brand-600 dark:text-brand-400'
+                        ? 'bg-indigo-500/20 text-indigo-300 dark:text-indigo-300 border-b-2 border-indigo-500'
                         : ''
                     }`}
                   >
@@ -176,7 +176,7 @@ export default function Navbar() {
                     variant="ghost"
                     size="sm"
                     onClick={() => navigate('/admin')}
-                    className="flex items-center gap-1.5 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 rounded-2xl transition-all duration-300"
+                    className="flex items-center gap-1.5 hover:bg-white/5 rounded-2xl transition-all duration-300"
                   >
                     <Shield className="w-4 h-4" />
                     <span>Admin</span>
@@ -186,7 +186,7 @@ export default function Navbar() {
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate('/settings')}
-                  className="flex items-center gap-1.5 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 rounded-2xl transition-all duration-300"
+                  className="flex items-center gap-1.5 hover:bg-white/5 rounded-2xl transition-all duration-300"
                 >
                   <Settings className="w-4 h-4" />
                   <span>Settings</span>
@@ -195,7 +195,7 @@ export default function Navbar() {
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate('/account')}
-                  className="flex items-center gap-2 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 rounded-2xl transition-all duration-300"
+                  className="flex items-center gap-2 hover:bg-white/5 rounded-2xl transition-all duration-300"
                 >
                   {user?.avatarUrl ? (
                     <img
@@ -226,7 +226,7 @@ export default function Navbar() {
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate('/login')}
-                  className="hover:bg-slate-100/80 dark:hover:bg-slate-800/50 rounded-2xl transition-all duration-300"
+                  className="hover:bg-white/5 rounded-2xl transition-all duration-300"
                 >
                   Login
                 </Button>
@@ -247,7 +247,7 @@ export default function Navbar() {
             <ThemeToggle size="sm" />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 p-2.5 rounded-2xl hover:bg-slate-100/80 dark:hover:bg-slate-800/50 transition-all duration-300"
+              className="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 p-2.5 rounded-2xl hover:bg-white/5 transition-all duration-300"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
