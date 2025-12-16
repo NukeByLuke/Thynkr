@@ -19,6 +19,7 @@ import {
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { CourseGridSkeleton } from '@/components/ui/Skeleton';
+import GlassCard from '@/components/ui/GlassCard';
 import VisibilityChip from '@/features/courses/VisibilityChip';
 import EmptyState from '@/components/ui/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
@@ -58,34 +59,19 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   OTHER: 'from-gray-500 to-slate-600',
 };
 
-// Category badge colors (distinct from gradients for clarity)
+// Category badge colors (translucent for dark glass theme)
 const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
-  MATHEMATICS: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-400' },
-  SCIENCE: {
-    bg: 'bg-emerald-100 dark:bg-emerald-900/30',
-    text: 'text-emerald-700 dark:text-emerald-400',
-  },
-  TECHNOLOGY: {
-    bg: 'bg-violet-100 dark:bg-violet-900/30',
-    text: 'text-violet-700 dark:text-violet-400',
-  },
-  ENGINEERING: {
-    bg: 'bg-orange-100 dark:bg-orange-900/30',
-    text: 'text-orange-700 dark:text-orange-400',
-  },
-  LANGUAGES: { bg: 'bg-pink-100 dark:bg-pink-900/30', text: 'text-pink-700 dark:text-pink-400' },
-  HUMANITIES: {
-    bg: 'bg-amber-100 dark:bg-amber-900/30',
-    text: 'text-amber-700 dark:text-amber-400',
-  },
-  BUSINESS: { bg: 'bg-slate-100 dark:bg-slate-900/30', text: 'text-slate-700 dark:text-slate-400' },
-  ARTS: {
-    bg: 'bg-fuchsia-100 dark:bg-fuchsia-900/30',
-    text: 'text-fuchsia-700 dark:text-fuchsia-400',
-  },
-  HEALTH: { bg: 'bg-sky-100 dark:bg-sky-900/30', text: 'text-sky-700 dark:text-sky-400' },
-  LAW: { bg: 'bg-indigo-100 dark:bg-indigo-900/30', text: 'text-indigo-700 dark:text-indigo-400' },
-  OTHER: { bg: 'bg-gray-100 dark:bg-gray-900/30', text: 'text-gray-700 dark:text-gray-400' },
+  MATHEMATICS: { bg: 'bg-blue-500/20', text: 'text-blue-200' },
+  SCIENCE: { bg: 'bg-emerald-500/20', text: 'text-emerald-200' },
+  TECHNOLOGY: { bg: 'bg-violet-500/20', text: 'text-violet-200' },
+  ENGINEERING: { bg: 'bg-orange-500/20', text: 'text-orange-200' },
+  LANGUAGES: { bg: 'bg-pink-500/20', text: 'text-pink-200' },
+  HUMANITIES: { bg: 'bg-amber-500/20', text: 'text-amber-200' },
+  BUSINESS: { bg: 'bg-slate-500/20', text: 'text-slate-200' },
+  ARTS: { bg: 'bg-fuchsia-500/20', text: 'text-fuchsia-200' },
+  HEALTH: { bg: 'bg-sky-500/20', text: 'text-sky-200' },
+  LAW: { bg: 'bg-indigo-500/20', text: 'text-indigo-200' },
+  OTHER: { bg: 'bg-gray-500/20', text: 'text-gray-200' },
 };
 
 type TabType = 'browse' | 'my-courses';
@@ -335,11 +321,11 @@ export default function CoursesUnified() {
                 </button>
               </div>
 
-              {/* Create Course Button - Only show if user can access courses (Pro+) */}
+              {/* Create Course Button - Premium gradient with glow */}
               {user && canAccess && (
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-brand-500 to-accent-500 text-white rounded-2xl font-semibold text-sm tracking-wide shadow-[0_8px_30px_rgba(99,102,241,0.3)] hover:shadow-[0_12px_40px_rgba(99,102,241,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-semibold text-sm tracking-wide shadow-[0_8px_30px_rgba(99,102,241,0.4)] hover:shadow-[0_12px_40px_rgba(124,58,237,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
                 >
                   <Plus className="h-4 w-4" />
                   Create Course
@@ -441,7 +427,7 @@ export default function CoursesUnified() {
                 </div>
               ) : courses.length === 0 ? (
                 /* Empty State */
-                <div className="backdrop-blur-lg bg-white/90 dark:bg-slate-900/90 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.25)] border border-white/10 pt-4">
+                <GlassCard className="p-8">
                   <EmptyState
                     icon={<BookOpen className="h-8 w-8" />}
                     title={emptyState.title}
@@ -450,25 +436,30 @@ export default function CoursesUnified() {
                     onAction={emptyState.onAction}
                     illustration={hasActiveFilters ? undefined : 'courses'}
                   />
-                </div>
+                </GlassCard>
               ) : (
                 /* Courses Grid */
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-4">
                   {courses.map((course: Course) => (
-                    <div
+                    <GlassCard
                       key={course.id}
-                      className="group relative bg-white dark:bg-slate-900 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:shadow-[0_0_25px_rgba(59,130,246,0.25)] hover:scale-[1.02] transition-all duration-300 overflow-hidden border border-white/10"
+                      variant="hover"
+                      className="group relative overflow-hidden"
                     >
-                      {/* Cover Image with Gradient */}
+                      {/* Cover Image with Gradient and Inner Shadow */}
                       <Link to={`/courses/${course.id}`} className="block">
                         <div className="relative h-44 overflow-hidden">
                           {course.coverImage ? (
-                            <img
-                              src={course.coverImage}
-                              alt={course.title}
-                              loading="lazy"
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            />
+                            <>
+                              <img
+                                src={course.coverImage}
+                                alt={course.title}
+                                loading="lazy"
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                              />
+                              {/* Inner shadow for blending */}
+                              <div className="absolute inset-0 shadow-[inset_0_0_60px_rgba(0,0,0,0.5)]" />
+                            </>
                           ) : (
                             <div
                               className={`w-full h-full bg-gradient-to-br ${CATEGORY_GRADIENTS[course.category] || CATEGORY_GRADIENTS.OTHER} flex items-center justify-center`}
@@ -546,21 +537,21 @@ export default function CoursesUnified() {
                           </span>
                         </div>
 
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-2">
+                        <h3 className="text-lg font-semibold text-slate-100 mb-2 group-hover:text-indigo-300 transition-colors line-clamp-2">
                           {course.title}
                         </h3>
 
                         {course.description ? (
-                          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+                          <p className="text-slate-400 text-sm mb-4 line-clamp-2">
                             {course.description}
                           </p>
                         ) : (
-                          <p className="text-gray-400 dark:text-gray-500 text-sm mb-4 italic">
+                          <p className="text-slate-500 text-sm mb-4 italic">
                             No description
                           </p>
                         )}
 
-                        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-700">
+                        <div className="flex items-center justify-between text-sm text-slate-400 pt-3 border-t border-white/10">
                           <div className="flex items-center gap-1.5">
                             <BookOpen className="h-4 w-4" />
                             <span>
@@ -573,7 +564,7 @@ export default function CoursesUnified() {
                           </div>
                         </div>
                       </Link>
-                    </div>
+                    </GlassCard>
                   ))}
                 </div>
               )}
@@ -595,7 +586,7 @@ export default function CoursesUnified() {
               <div className="p-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl">
                 <Plus className="h-5 w-5 text-white" />
               </div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Create New Course</h2>
+              <h2 className="text-xl font-bold text-slate-100">Create New Course</h2>
             </div>
 
             <form
@@ -606,8 +597,8 @@ export default function CoursesUnified() {
             >
               <div className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Course Title <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Course Title <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
@@ -620,7 +611,7 @@ export default function CoursesUnified() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
                     Description
                   </label>
                   <textarea
@@ -633,7 +624,7 @@ export default function CoursesUnified() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
                     Category
                   </label>
                   <select
@@ -650,7 +641,7 @@ export default function CoursesUnified() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  <label className="block text-sm font-medium text-slate-300 mb-3">
                     Visibility
                   </label>
                   <div className="grid grid-cols-2 gap-3">
@@ -675,8 +666,8 @@ export default function CoursesUnified() {
                         <Lock className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900 dark:text-white text-sm">Private</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        <p className="font-medium text-slate-100 text-sm">Private</p>
+                        <p className="text-xs text-slate-400">
                           Only you & shared links
                         </p>
                       </div>
@@ -706,15 +697,15 @@ export default function CoursesUnified() {
                         <Globe className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900 dark:text-white text-sm">
+                        <p className="font-medium text-slate-100 text-sm">
                           Public
                           {!isPremium && (
-                            <span className="ml-1 text-xs text-primary-600 dark:text-primary-400">
+                            <span className="ml-1 text-xs text-indigo-400">
                               (Premium)
                             </span>
                           )}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        <p className="text-xs text-slate-400">
                           Visible to all users
                         </p>
                       </div>
@@ -723,18 +714,18 @@ export default function CoursesUnified() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                  className="px-5 py-2.5 text-slate-300 hover:bg-white/5 rounded-xl transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={!newCourse.title || createCourseMutation.isPending}
-                  className="px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl hover:from-primary-700 hover:to-primary-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-primary-500/25"
+                  className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:shadow-[0_8px_30px_rgba(124,58,237,0.4)] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
                 >
                   {createCourseMutation.isPending ? (
                     <span className="flex items-center gap-2">
