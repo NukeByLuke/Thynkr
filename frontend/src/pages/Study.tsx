@@ -6,7 +6,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { GraduationCap, Upload } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import SummaryView from '@/features/study/SummaryView';
 import NotesView from '@/features/study/NotesView';
 import FlashcardViewer from '@/features/study/FlashcardViewer';
@@ -14,6 +14,7 @@ import QuizPlayer from '@/features/study/QuizPlayer';
 import EmptyState from '@/components/ui/EmptyState';
 import GenerationLoader from '@/components/ui/GenerationLoader';
 import LibraryHeader from '@/components/study/LibraryHeader';
+import FileCard from '@/components/study/FileCard';
 import { useStudySession } from '@/hooks/useStudySession';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
@@ -177,25 +178,6 @@ export default function Study() {
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       uploadMutation.mutate(e.dataTransfer.files);
-    }
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'COMPLETED':
-        return 'text-green-600 bg-green-50';
-      case 'PROCESSING':
-        return 'text-yellow-600 bg-yellow-50';
-      case 'FAILED':
-        return 'text-red-600 bg-red-50';
-      default:
-        return 'text-gray-600 bg-gray-50';
     }
   };
 
@@ -488,103 +470,82 @@ export default function Study() {
             </div>
           )}
 
-          {/* Files Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl shadow-soft-xl border border-white/20 dark:border-slate-700/30 transition-all duration-300 ease-out hover:shadow-soft-2xl">
-              <div className="p-6 border-b border-white/20 dark:border-slate-700/30">
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Your Files</h2>
-                <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
-                  {searchQuery
-                    ? `${filteredFiles.length} of ${files.length} files`
-                    : `${files.length} files`}
-                </p>
+          {/* Files Grid Section */}
+          {filteredFiles.length === 0 ? (
+            <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl shadow-soft-xl border border-white/20 dark:border-slate-700/30 p-12">
+              <EmptyState
+                icon={<Upload className="h-8 w-8" />}
+                title={searchQuery ? 'No files found' : 'No files yet'}
+                description={
+                  searchQuery
+                    ? 'Try adjusting your search query'
+                    : 'Click "Upload New File" to start learning smarter with AI'
+                }
+                illustration="study"
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredFiles.map((file) => (
+                <FileCard
+                  key={file.id}
+                  id={file.id}
+                  originalName={file.originalName}
+                  fileType={file.fileType}
+                  fileSize={file.fileSize}
+                  status={file.status}
+                  createdAt={file.createdAt}
+                  isSelected={selectedFile?.id === file.id}
+                  onClick={() => {
+                    setSelectedFile(file);
+                    setSelectedQuiz(null);
+                    setSelectedFlashcardSet(null);
+                  }}
+                  onRename={() => {
+                    // TODO: Implement rename functionality
+                    console.log('Rename file:', file.id);
+                  }}
+                  onDelete={() => {
+                    // TODO: Implement delete functionality
+                    console.log('Delete file:', file.id);
+                  }}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Selected File Content */}
+          {selectedFile && (
+            <div className="mt-8 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl shadow-soft-xl border border-white/20 dark:border-slate-700/30 transition-all duration-300 ease-out hover:shadow-soft-2xl">
+              <div className="p-8 border-b border-white/20 dark:border-slate-700/30">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                  {selectedFile.originalName}
+                </h2>
               </div>
-              <div className="divide-y divide-white/10 dark:divide-slate-700/30 max-h-[600px] overflow-y-auto">
-                {filteredFiles.length === 0 ? (
-                  <div className="p-4">
-                    <EmptyState
-                      icon={<Upload className="h-6 w-6" />}
-                      title={searchQuery ? 'No files found' : 'No files yet'}
-                      description={
-                        searchQuery
-                          ? 'Try adjusting your search query'
-                          : 'Click "Upload New File" to start learning smarter with AI'
-                      }
-                      illustration="study"
-                    />
-                  </div>
-                ) : (
-                  filteredFiles.map((file) => (
+              <div className="border-b border-white/20 dark:border-slate-700/30">
+                <div className="flex space-x-6 sm:space-x-10 px-6 sm:px-8 overflow-x-auto scrollbar-hide">
+                  {(['summary', 'notes', 'flashcards', 'quizzes'] as TabType[]).map((tab) => (
                     <button
-                      key={file.id}
+                      key={tab}
                       onClick={() => {
-                        setSelectedFile(file);
+                        setActiveTab(tab);
                         setSelectedQuiz(null);
                         setSelectedFlashcardSet(null);
                       }}
-                      className={`w-full p-5 text-left hover:bg-gradient-to-r hover:from-brand-50/30 hover:to-accent-50/30 dark:hover:from-brand-900/10 dark:hover:to-accent-900/10 transition-all duration-300 ease-out ${
-                        selectedFile?.id === file.id ? 'bg-gradient-to-r from-brand-50/50 to-accent-50/50 dark:from-brand-900/20 dark:to-accent-900/20 border-l-4 border-brand-500' : ''
+                      className={`py-4 sm:py-5 border-b-2 capitalize transition-all duration-300 ease-out whitespace-nowrap text-base sm:text-lg ${
+                        activeTab === tab
+                          ? 'border-brand-600 dark:border-brand-400 text-brand-600 dark:text-brand-400 font-semibold'
+                          : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:border-brand-300/50'
                       }`}
                     >
-                      <p className="text-sm font-medium truncate text-gray-900 dark:text-white">
-                        {file.originalName}
-                      </p>
-                      <p className="text-xs text-slate-600 dark:text-slate-400">
-                        {formatFileSize(file.fileSize)}
-                      </p>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${getStatusColor(file.status)}`}
-                      >
-                        {file.status}
-                      </span>
+                      {tab}
                     </button>
-                  ))
-                )}
+                  ))}
+                </div>
               </div>
+              <div className="p-8">{renderTabContent()}</div>
             </div>
-
-            <div className="lg:col-span-2">
-              {!selectedFile ? (
-                <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl shadow-soft-xl border border-white/20 dark:border-slate-700/30">
-                  <EmptyState
-                    icon={<GraduationCap className="h-8 w-8" />}
-                    title="Select a file to start"
-                    description="Choose a file from the sidebar to generate summaries, notes, flashcards, and quizzes"
-                  />
-                </div>
-              ) : (
-                <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl shadow-soft-xl border border-white/20 dark:border-slate-700/30 transition-all duration-300 ease-out hover:shadow-soft-2xl">
-                  <div className="p-8 border-b border-white/20 dark:border-slate-700/30">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {selectedFile.originalName}
-                    </h2>
-                  </div>
-                  <div className="border-b border-white/20 dark:border-slate-700/30">
-                    <div className="flex space-x-6 sm:space-x-10 px-6 sm:px-8 overflow-x-auto scrollbar-hide">
-                      {(['summary', 'notes', 'flashcards', 'quizzes'] as TabType[]).map((tab) => (
-                        <button
-                          key={tab}
-                          onClick={() => {
-                            setActiveTab(tab);
-                            setSelectedQuiz(null);
-                            setSelectedFlashcardSet(null);
-                          }}
-                          className={`py-4 sm:py-5 border-b-2 capitalize transition-all duration-300 ease-out whitespace-nowrap text-base sm:text-lg ${
-                            activeTab === tab
-                              ? 'border-brand-600 dark:border-brand-400 text-brand-600 dark:text-brand-400 font-semibold'
-                              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:border-brand-300/50'
-                          }`}
-                        >
-                          {tab}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="p-8">{renderTabContent()}</div>
-                </div>
-              )}
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
