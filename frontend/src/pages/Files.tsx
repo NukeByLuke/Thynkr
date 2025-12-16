@@ -553,19 +553,19 @@ export default function Files() {
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`mb-6 border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-200 ${
+            className={`mb-6 border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 backdrop-blur-xl ${
               isDragging
-                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
-                : 'border-gray-300 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                ? 'border-indigo-500 bg-indigo-500/20 shadow-[0_0_30px_rgba(99,102,241,0.3)]'
+                : 'border-white/20 dark:border-white/10 bg-slate-800/30 dark:bg-slate-900/40 hover:border-indigo-400/50 hover:bg-slate-800/40 dark:hover:bg-slate-900/50'
             }`}
           >
             <Upload
-              className={`w-12 h-12 mx-auto mb-4 ${isDragging ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500'}`}
+              className={`w-12 h-12 mx-auto mb-4 ${isDragging ? 'text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`}
             />
-            <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            <p className="text-lg font-medium text-slate-100 dark:text-white mb-2">
               {isDragging ? 'Drop files here' : 'Click to upload or drag and drop'}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-slate-300 dark:text-slate-400">
               PDF, DOC/DOCX, TXT, or PowerPoint files
             </p>
             {uploadMutation.isPending && (
@@ -585,7 +585,7 @@ export default function Files() {
           </div>
 
           {/* Toolbar */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
+          <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-2xl shadow-sm p-4 mb-6">
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
               {/* Search */}
               <div className="relative flex-1 w-full sm:max-w-md">
@@ -595,7 +595,7 @@ export default function Files() {
                   placeholder="Search files and folders..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:placeholder-gray-400"
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300/50 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400"
                 />
               </div>
 
@@ -635,7 +635,7 @@ export default function Files() {
                   )}
                 <button
                   onClick={() => setShowNewFolderModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg shadow-purple-500/20"
                 >
                   <FolderPlus className="w-5 h-5" />
                   New Folder
@@ -652,10 +652,10 @@ export default function Files() {
                   )}
                   <button
                     onClick={() => setCurrentFolderId(crumb.id)}
-                    className={`flex items-center gap-1 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors ${
+                    className={`flex items-center gap-1 hover:text-indigo-400 transition-colors ${
                       crumb.id === currentFolderId
-                        ? 'text-indigo-600 dark:text-indigo-400 font-medium'
-                        : 'text-gray-600 dark:text-gray-400'
+                        ? 'text-indigo-400 font-medium'
+                        : 'text-slate-400 dark:text-slate-500'
                     }`}
                   >
                     {index === 0 && <Home className="w-4 h-4" />}
@@ -677,20 +677,20 @@ export default function Files() {
                 onDragOver={(e) => handleFolderDragOver(e, folder.id)}
                 onDragLeave={handleFolderDragLeave}
                 onDrop={(e) => handleFolderDrop(e, folder.id)}
-                className={`bg-white dark:bg-gray-800 rounded-lg p-4 border-2 hover:shadow-md transition-all cursor-pointer group ${
+                className={`bg-white/70 dark:bg-slate-900/50 backdrop-blur-xl rounded-xl p-4 border border-slate-200/50 dark:border-white/10 transition-all cursor-pointer group ${
                   dropTarget === folder.id
-                    ? 'border-green-500 dark:border-green-400 bg-green-50 dark:bg-green-900/20'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-500'
+                    ? 'border-green-400 bg-green-500/20 shadow-[0_0_30px_rgba(34,197,94,0.3)]'
+                    : 'hover:border-indigo-500/50 hover:shadow-[0_0_20px_rgba(99,102,241,0.15)]'
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <FolderIcon className="w-10 h-10 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                    <FolderIcon className="w-10 h-10 text-indigo-400 flex-shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-medium text-gray-900 dark:text-white truncate">
+                      <h3 className="font-medium text-slate-900 dark:text-slate-100 truncate">
                         {folder.name}
                       </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
                         {folder.files.length} file{folder.files.length !== 1 ? 's' : ''}
                       </p>
                     </div>
@@ -717,12 +717,12 @@ export default function Files() {
                 onDragEnd={handleFileDragEnd}
                 onContextMenu={(e) => handleContextMenu(e, 'file', file.id, file.originalName)}
                 onDoubleClick={() => handleOpenFile(file.id)}
-                className={`bg-white dark:bg-gray-800 rounded-lg p-4 border-2 hover:shadow-md transition-all group ${
+                className={`bg-white/70 dark:bg-slate-900/50 backdrop-blur-xl rounded-xl p-4 border transition-all group ${
                   selectedFileIds.has(file.id)
-                    ? 'border-primary-500 dark:border-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                    ? 'border-primary-400 bg-primary-500/20 shadow-[0_0_20px_rgba(139,92,246,0.3)]'
                     : draggedFile === file.id
-                      ? 'opacity-50 border-blue-500 dark:border-blue-400'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-green-500 dark:hover:border-green-500'
+                      ? 'opacity-50 border-blue-400 bg-blue-500/10'
+                      : 'border-slate-200/50 dark:border-white/10 hover:border-green-400/50 hover:shadow-[0_0_20px_rgba(34,197,94,0.15)]'
                 } ${selectedFileIds.size === 0 ? 'cursor-move' : 'cursor-pointer'}`}
               >
                 <div className="flex items-start justify-between">
@@ -743,12 +743,12 @@ export default function Files() {
                         )}
                       </button>
                     )}
-                    <FileText className="w-10 h-10 text-green-600 dark:text-green-400 flex-shrink-0" />
+                    <FileText className="w-10 h-10 text-green-400 flex-shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-medium text-gray-900 dark:text-white truncate">
+                      <h3 className="font-medium text-slate-900 dark:text-slate-100 truncate">
                         {file.originalName}
                       </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
                         {formatFileSize(file.fileSize)}
                       </p>
                       <span
@@ -779,12 +779,12 @@ export default function Files() {
 
             {/* Empty State */}
             {filteredFolders.length === 0 && filteredFiles.length === 0 && (
-              <div className="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
+              <div className="col-span-full text-center py-12 text-slate-500 dark:text-slate-400">
                 {searchQuery ? (
                   <p>No files or folders found matching "{searchQuery}"</p>
                 ) : (
                   <>
-                    <FileIcon className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                    <FileIcon className="w-16 h-16 mx-auto mb-4 text-slate-400 dark:text-slate-600" />
                     <p className="text-lg mb-2">This folder is empty</p>
                     <p className="text-sm">Upload files or create folders to get started</p>
                   </>
@@ -798,12 +798,12 @@ export default function Files() {
       {/* Context Menu */}
       {contextMenu && (
         <div
-          className="fixed bg-white dark:bg-gray-800 shadow-lg rounded-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
+          className="fixed bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-xl rounded-xl border border-slate-200/50 dark:border-white/10 py-1 z-50"
           style={{ top: contextMenu.y, left: contextMenu.x }}
         >
           <button
             onClick={handleRename}
-            className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"
+            className="w-full px-4 py-2 text-left hover:bg-white/50 dark:hover:bg-white/5 flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300"
           >
             <Edit2 className="w-4 h-4" />
             Rename
@@ -811,7 +811,7 @@ export default function Files() {
           {contextMenu.type === 'file' && (
             <button
               onClick={handleMove}
-              className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"
+              className="w-full px-4 py-2 text-left hover:bg-white/50 dark:hover:bg-white/5 flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300"
             >
               <Move className="w-4 h-4" />
               Move to Folder
@@ -819,7 +819,7 @@ export default function Files() {
           )}
           <button
             onClick={handleDelete}
-            className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-sm text-red-600 dark:text-red-400"
+            className="w-full px-4 py-2 text-left hover:bg-red-500/10 flex items-center gap-2 text-sm text-red-600 dark:text-red-400"
           >
             <Trash2 className="w-4 h-4" />
             Delete
@@ -829,15 +829,15 @@ export default function Files() {
 
       {/* New Folder Modal */}
       {showNewFolderModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
                 Create New Folder
               </h3>
               <button
                 onClick={() => setShowNewFolderModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -852,13 +852,13 @@ export default function Files() {
                   createFolderMutation.mutate({ name: newFolderName, parentId: currentFolderId });
                 }
               }}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:placeholder-gray-400 mb-4"
+              className="w-full px-4 py-2 border border-slate-300/50 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 mb-4"
               autoFocus
             />
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowNewFolderModal(false)}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="px-4 py-2 text-slate-700 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors"
               >
                 Cancel
               </button>
@@ -869,7 +869,7 @@ export default function Files() {
                   }
                 }}
                 disabled={!newFolderName.trim() || createFolderMutation.isPending}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 transition-all shadow-lg shadow-purple-500/20"
               >
                 Create
               </button>
@@ -880,15 +880,15 @@ export default function Files() {
 
       {/* Rename Modal */}
       {showRenameModal && selectedItem && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
                 Rename {selectedItem.type === 'folder' ? 'Folder' : 'File'}
               </h3>
               <button
                 onClick={() => setShowRenameModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -908,13 +908,13 @@ export default function Files() {
                   }
                 }
               }}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-4"
+              className="w-full px-4 py-2 border border-slate-300/50 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-white mb-4"
               autoFocus
             />
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowRenameModal(false)}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="px-4 py-2 text-slate-700 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors"
               >
                 Cancel
               </button>
@@ -930,7 +930,7 @@ export default function Files() {
                     }
                   }
                 }}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg shadow-purple-500/20"
               >
                 Rename
               </button>
@@ -941,15 +941,15 @@ export default function Files() {
 
       {/* Move File Modal */}
       {showMoveModal && selectedItem && selectedItem.type === 'file' && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
                 Move to Folder
               </h3>
               <button
                 onClick={() => setShowMoveModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -960,9 +960,9 @@ export default function Files() {
                 onClick={() => {
                   moveFileMutation.mutate({ fileId: selectedItem.id, folderId: null });
                 }}
-                className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2 text-gray-700 dark:text-gray-300"
+                className="w-full px-4 py-2 text-left hover:bg-white/50 dark:hover:bg-white/5 rounded-lg flex items-center gap-2 text-slate-700 dark:text-slate-300"
               >
-                <Home className="w-5 h-5 text-gray-400" />
+                <Home className="w-5 h-5 text-slate-400" />
                 <span>Home (Root)</span>
               </button>
               {/* Folders */}
@@ -972,10 +972,10 @@ export default function Files() {
                   onClick={() => {
                     moveFileMutation.mutate({ fileId: selectedItem.id, folderId: folder.id });
                   }}
-                  className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2 text-gray-700 dark:text-gray-300"
+                  className="w-full px-4 py-2 text-left hover:bg-white/50 dark:hover:bg-white/5 rounded-lg flex items-center gap-2 text-slate-700 dark:text-slate-300"
                   style={{ paddingLeft: `${(folder.parentId ? 2 : 1) * 1.5}rem` }}
                 >
-                  <FolderIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                  <FolderIcon className="w-5 h-5 text-indigo-400" />
                   <span>{folder.name}</span>
                 </button>
               ))}
@@ -983,7 +983,7 @@ export default function Files() {
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowMoveModal(false)}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="px-4 py-2 text-slate-700 hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors"
               >
                 Cancel
               </button>
@@ -995,24 +995,24 @@ export default function Files() {
       {/* Study Pack Creation Modal */}
       {showStudyPackModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl">
                   <BookOpen className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                     Create Study Pack
                   </h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
                     {selectedFileIds.size} files selected
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setShowStudyPackModal(false)}
-                className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="p-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1020,7 +1020,7 @@ export default function Files() {
 
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Study Pack Title
                 </label>
                 <input
@@ -1028,19 +1028,19 @@ export default function Files() {
                   value={studyPackTitle}
                   onChange={(e) => setStudyPackTitle(e.target.value)}
                   placeholder="Enter a title for your study pack"
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-slate-300/50 dark:border-white/10 rounded-xl bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Quiz Questions
                   </label>
                   <select
                     value={studyPackQuizCount}
                     onChange={(e) => setStudyPackQuizCount(Number(e.target.value))}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-slate-300/50 dark:border-white/10 rounded-xl bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   >
                     <option value={5}>5 questions</option>
                     <option value={10}>10 questions</option>
@@ -1049,13 +1049,13 @@ export default function Files() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Flashcards
                   </label>
                   <select
                     value={studyPackCardsCount}
                     onChange={(e) => setStudyPackCardsCount(Number(e.target.value))}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-slate-300/50 dark:border-white/10 rounded-xl bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   >
                     <option value={10}>10 cards</option>
                     <option value={15}>15 cards</option>
@@ -1076,7 +1076,7 @@ export default function Files() {
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   onClick={() => setShowStudyPackModal(false)}
-                  className="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                  className="px-5 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-white/5 rounded-xl transition-colors"
                 >
                   Cancel
                 </button>
