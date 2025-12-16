@@ -23,7 +23,7 @@ export default function DashboardLayout() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header Bar - Visible on all screens */}
-        <header className="h-16 bg-slate-900/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 lg:px-6">
+        <header className="h-16 bg-slate-900/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 lg:px-6 relative z-50">
           {/* Left: Mobile menu button + Logo (mobile only) */}
           <div className="flex items-center gap-3">
             <button

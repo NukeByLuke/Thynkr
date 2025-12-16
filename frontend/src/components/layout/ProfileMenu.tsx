@@ -100,7 +100,7 @@ export default function ProfileMenu() {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-64 bg-slate-900/90 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden z-50">
+        <div className="absolute top-full right-0 mt-2 w-64 bg-slate-900/90 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden z-[100]">
           {/* User Info Header */}
           <div className="p-4 border-b border-white/10">
             <div className="flex items-center gap-3">
