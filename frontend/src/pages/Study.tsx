@@ -7,13 +7,14 @@ import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { GraduationCap, Upload } from 'lucide-react';
-import toast from 'react-hot-toast';
 import SummaryView from '@/features/study/SummaryView';
 import NotesView from '@/features/study/NotesView';
 import FlashcardViewer from '@/features/study/FlashcardViewer';
 import QuizPlayer from '@/features/study/QuizPlayer';
 import EmptyState from '@/components/ui/EmptyState';
 import GenerationLoader from '@/components/ui/GenerationLoader';
+import LibraryHeader from '@/components/study/LibraryHeader';
+import { useStudySession } from '@/hooks/useStudySession';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -47,17 +48,34 @@ export default function Study() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<TabType>('summary');
-  const [selectedQuiz, setSelectedQuiz] = useState<any | null>(null);
-  const [selectedFlashcardSet, setSelectedFlashcardSet] = useState<any | null>(null);
-  const [numQuestions, setNumQuestions] = useState(10);
-  const [quizDifficulty, setQuizDifficulty] = useState<'EASY' | 'MEDIUM' | 'HARD'>('MEDIUM');
-  const [numCards, setNumCards] = useState(20);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const getToken = () => localStorage.getItem('accessToken');
+
+  // Use the unified study session hook
+  const {
+    selectedFile,
+    activeTab,
+    selectedQuiz,
+    selectedFlashcardSet,
+    numQuestions,
+    quizDifficulty,
+    numCards,
+    setSelectedFile,
+    setActiveTab,
+    setSelectedQuiz,
+    setSelectedFlashcardSet,
+    setNumQuestions,
+    setQuizDifficulty,
+    setNumCards,
+    generateSummaryMutation,
+    generateNotesMutation,
+    generateQuizMutation,
+    generateFlashcardsMutation,
+    submitQuizMutation,
+  } = useStudySession({ queryKey: ['study-files'] });
 
   // Fetch uploaded files
   const { data: filesData, isLoading } = useQuery({
@@ -75,6 +93,11 @@ export default function Study() {
   });
 
   const files: UploadedFile[] = filesData?.files || [];
+
+  // Filter files based on search query
+  const filteredFiles = files.filter((file) =>
+    file.originalName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Auto-select file from query param
   useEffect(() => {
@@ -130,208 +153,6 @@ export default function Study() {
     onError: (error: Error) => {
       setUploadError(error.message);
       console.error('Upload error:', error);
-    },
-  });
-
-  // Generate summary mutation
-  const generateSummaryMutation = useMutation({
-    mutationFn: async ({
-      fileId,
-      regenerate = false,
-    }: {
-      fileId: string;
-      regenerate?: boolean;
-    }) => {
-      const response = await fetch(`${API_URL}/study/files/${fileId}/summary`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ regenerate }),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to generate summary');
-      }
-      return response.json();
-    },
-    onSuccess: async (data) => {
-      // Update the cache immediately with optimistic data
-      queryClient.setQueryData(['study-files'], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          files: old.files.map((f: any) =>
-            f.id === selectedFile?.id ? { ...f, summary: data.summary } : f
-          ),
-        };
-      });
-      // Refetch to ensure consistency
-      await queryClient.invalidateQueries({ queryKey: ['study-files'] });
-      // Update selected file immediately
-      if (selectedFile) {
-        setSelectedFile({ ...selectedFile, summary: data.summary });
-      }
-      toast.success('Summary generated successfully!');
-    },
-    onError: (error: Error) => {
-      console.error('Summary generation error:', error);
-      toast.error(`Failed to generate summary: ${error.message}`);
-    },
-  });
-
-  // Generate notes mutation
-  const generateNotesMutation = useMutation({
-    mutationFn: async ({
-      fileId,
-      regenerate = false,
-    }: {
-      fileId: string;
-      regenerate?: boolean;
-    }) => {
-      const response = await fetch(`${API_URL}/study/files/${fileId}/notes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ regenerate }),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to generate notes');
-      }
-      return response.json();
-    },
-    onSuccess: async (data) => {
-      // Update the cache immediately
-      queryClient.setQueryData(['study-files'], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          files: old.files.map((f: any) =>
-            f.id === selectedFile?.id ? { ...f, notes: data.notes } : f
-          ),
-        };
-      });
-      // Refetch to ensure consistency
-      await queryClient.invalidateQueries({ queryKey: ['study-files'] });
-      // Update selected file immediately
-      if (selectedFile) {
-        setSelectedFile({ ...selectedFile, notes: data.notes });
-      }
-      toast.success('Notes generated successfully!');
-    },
-    onError: (error: Error) => {
-      console.error('Notes generation error:', error);
-      toast.error(`Failed to generate notes: ${error.message}`);
-    },
-  });
-
-  // Generate quiz mutation
-  const generateQuizMutation = useMutation({
-    mutationFn: async ({
-      fileId,
-      numQuestions,
-      difficulty,
-    }: {
-      fileId: string;
-      numQuestions: number;
-      difficulty: string;
-    }) => {
-      const response = await fetch(`${API_URL}/study/files/${fileId}/quiz`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ numQuestions, difficulty }),
-      });
-      if (!response.ok) throw new Error('Failed to generate quiz');
-      return response.json();
-    },
-    onSuccess: async (data) => {
-      // Update the cache immediately
-      queryClient.setQueryData(['study-files'], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          files: old.files.map((f: any) =>
-            f.id === selectedFile?.id ? { ...f, quizzes: [...(f.quizzes || []), data.quiz] } : f
-          ),
-        };
-      });
-      await queryClient.invalidateQueries({ queryKey: ['study-files'] });
-      setSelectedQuiz(data.quiz);
-      // Update selected file
-      if (selectedFile) {
-        setSelectedFile({
-          ...selectedFile,
-          quizzes: [...(selectedFile.quizzes || []), data.quiz],
-        });
-      }
-    },
-  });
-
-  // Generate flashcards mutation
-  const generateFlashcardsMutation = useMutation({
-    mutationFn: async ({ fileId, numCards }: { fileId: string; numCards: number }) => {
-      const response = await fetch(`${API_URL}/study/files/${fileId}/flashcards`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ numCards }),
-      });
-      if (!response.ok) throw new Error('Failed to generate flashcards');
-      return response.json();
-    },
-    onSuccess: async (data) => {
-      // Update the cache immediately
-      queryClient.setQueryData(['study-files'], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          files: old.files.map((f: any) =>
-            f.id === selectedFile?.id
-              ? { ...f, flashcardSets: [...(f.flashcardSets || []), data.flashcardSet] }
-              : f
-          ),
-        };
-      });
-      await queryClient.invalidateQueries({ queryKey: ['study-files'] });
-      setSelectedFlashcardSet(data.flashcardSet);
-      // Update selected file
-      if (selectedFile) {
-        setSelectedFile({
-          ...selectedFile,
-          flashcardSets: [...(selectedFile.flashcardSets || []), data.flashcardSet],
-        });
-      }
-    },
-  });
-
-  // Submit quiz mutation
-  const submitQuizMutation = useMutation({
-    mutationFn: async ({
-      quizId,
-      answers,
-    }: {
-      quizId: string;
-      answers: Record<string, string>;
-    }) => {
-      const response = await fetch(`${API_URL}/study/quizzes/${quizId}/submit`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ answers }),
-      });
-      if (!response.ok) throw new Error('Failed to submit quiz');
-      return response.json();
     },
   });
 
@@ -510,7 +331,7 @@ export default function Study() {
           return (
             <div className="space-y-4">
               <h3 className="font-semibold">Your Quizzes</h3>
-              {selectedFile.quizzes.map((quiz) => (
+              {selectedFile.quizzes.map((quiz: { id: string; title: string; questions: any[] }) => (
                 <button
                   key={quiz.id}
                   onClick={() => setSelectedQuiz(quiz)}
@@ -621,96 +442,79 @@ export default function Study() {
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden premium-gradient-bg">
-      {/* Study Header with Premium Gradient */}
-      <div className="relative bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500">
-        <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-10 py-6 md:py-10">
-          <div className="flex items-center gap-3 md:gap-4 mb-2 md:mb-3">
-            <div className="p-2 md:p-3 bg-white/20 backdrop-blur-xl rounded-xl md:rounded-2xl shadow-lg border border-white/20">
-              <GraduationCap className="h-6 w-6 md:h-7 md:w-7 text-white" />
-            </div>
-            <h1 className="text-2xl md:text-4xl font-bold text-white tracking-tight">Study Mode</h1>
-          </div>
-          <p className="text-white/95 text-sm md:text-base ml-11 md:ml-16">Upload materials and let AI help you learn smarter</p>
-        </div>
-      </div>
+    <div className="h-full flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
+      {/* Premium Library Header */}
+      <LibraryHeader
+        onUploadClick={() => fileInputRef.current?.click()}
+        onSearch={setSearchQuery}
+        fileCount={files.length}
+        isUploading={uploadMutation.isPending}
+      />
+
+      {/* Hidden File Input */}
+      <input
+        ref={fileInputRef}
+        id="file-upload"
+        type="file"
+        className="hidden"
+        accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.pps,.ppsx"
+        multiple
+        onChange={handleFileSelect}
+      />
 
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-10 py-6 md:py-8">
-          {/* Upload Area */}
-          <div
-            onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-2xl md:rounded-3xl p-8 md:p-12 text-center mb-6 md:mb-10 cursor-pointer transition-all duration-300 ease-out backdrop-blur-xl ${
-              isDragging
-                ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-900/20 dark:border-brand-400 shadow-glow-brand'
-                : 'border-white/30 dark:border-slate-700/50 bg-white/60 dark:bg-slate-900/60 hover:border-brand-400/50 dark:hover:border-brand-500/50 hover:bg-white/80 dark:hover:bg-slate-900/80 shadow-soft-xl hover:shadow-glow-brand/30'
-            }`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            <svg
-              className={`mx-auto h-12 w-12 md:h-14 md:w-14 mb-4 md:mb-5 transition-colors duration-300 ${isDragging ? 'text-teal-600 dark:text-teal-400' : 'text-gray-400 dark:text-gray-500'}`}
-              stroke="currentColor"
-              fill="none"
-              viewBox="0 0 48 48"
+          {/* Upload Error Display */}
+          {uploadError && (
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl shadow-sm animate-fade-in">
+              <p className="text-sm text-red-700 dark:text-red-400">{uploadError}</p>
+            </div>
+          )}
+
+          {/* Drag & Drop Overlay */}
+          {isDragging && (
+            <div
+              className="fixed inset-0 z-50 bg-blue-600/20 backdrop-blur-sm flex items-center justify-center"
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
             >
-              <path
-                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <p className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-2 md:mb-3">
-              {isDragging ? '✨ Drop files here' : 'Click to upload or drag and drop'}
-            </p>
-            <p className="text-sm md:text-base text-slate-600 dark:text-slate-300">
-              PDF, DOC/DOCX, TXT, or PowerPoint files
-            </p>
-            <input
-              ref={fileInputRef}
-              id="file-upload"
-              type="file"
-              className="hidden"
-              accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.pps,.ppsx"
-              multiple
-              onChange={handleFileSelect}
-            />
-            {uploadMutation.isPending && (
-              <div className="mt-6 animate-fade-in">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 dark:border-teal-400"></div>
-                <p className="text-base text-gray-700 dark:text-gray-300 mt-3 font-medium">
-                  Uploading and processing...
+              <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 shadow-2xl border-4 border-dashed border-blue-500">
+                <Upload className="h-16 w-16 text-blue-500 mx-auto mb-4" />
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                  Drop files here to upload
                 </p>
               </div>
-            )}
-            {uploadError && (
-              <div className="mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl shadow-sm animate-fade-in">
-                <p className="text-sm text-red-700 dark:text-red-400">{uploadError}</p>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Files Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl shadow-soft-xl border border-white/20 dark:border-slate-700/30 transition-all duration-300 ease-out hover:shadow-soft-2xl">
               <div className="p-6 border-b border-white/20 dark:border-slate-700/30">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Your Files</h2>
-                <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">{files.length} files</p>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Your Files</h2>
+                <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
+                  {searchQuery
+                    ? `${filteredFiles.length} of ${files.length} files`
+                    : `${files.length} files`}
+                </p>
               </div>
               <div className="divide-y divide-white/10 dark:divide-slate-700/30 max-h-[600px] overflow-y-auto">
-                {files.length === 0 ? (
+                {filteredFiles.length === 0 ? (
                   <div className="p-4">
                     <EmptyState
                       icon={<Upload className="h-6 w-6" />}
-                      title="No files yet"
-                      description="Upload a file above to start learning smarter with AI"
+                      title={searchQuery ? 'No files found' : 'No files yet'}
+                      description={
+                        searchQuery
+                          ? 'Try adjusting your search query'
+                          : 'Click "Upload New File" to start learning smarter with AI'
+                      }
                       illustration="study"
                     />
                   </div>
                 ) : (
-                  files.map((file) => (
+                  filteredFiles.map((file) => (
                     <button
                       key={file.id}
                       onClick={() => {

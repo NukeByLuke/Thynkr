@@ -1,185 +1,122 @@
-/**
- * MobileBottomNav Component - Amazon/Spotify-style Mobile Navigation
- * Fixed bottom tab bar with framer-motion animations
- * Pattern: Configuration array with compound component structure
- */
-
-import { memo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { BookOpen, FolderOpen, MessageCircle, Award, BarChart3 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { LucideIcon, Home, BookOpen, GraduationCap, TrendingUp, Menu } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
-// ============================================================================
-// Types & Interfaces
-// ============================================================================
-
-interface NavTab {
-  id: string;
-  label: string;
-  path: string;
-  icon: LucideIcon;
-  isPrimary?: boolean;
-}
-
-interface MobileBottomNavProps {
-  onMenuClick?: () => void;
-}
-
-// ============================================================================
-// Navigation Configuration
-// ============================================================================
-
-const NAV_TABS: NavTab[] = [
-  {
-    id: 'home',
-    label: 'Home',
-    path: '/',
-    icon: Home,
-  },
-  {
-    id: 'courses',
-    label: 'Courses',
-    path: '/courses',
-    icon: BookOpen,
-  },
-  {
-    id: 'study',
-    label: 'Study',
-    path: '/study',
-    icon: GraduationCap,
-    isPrimary: true, // Highlighted as primary action
-  },
-  {
-    id: 'progress',
-    label: 'Progress',
-    path: '/progress',
-    icon: TrendingUp,
-  },
-  {
-    id: 'menu',
-    label: 'Menu',
-    path: '#menu',
-    icon: Menu,
-  },
-];
-
-// ============================================================================
-// MobileBottomNav Component (Memoized for performance)
-// ============================================================================
-
-const MobileBottomNav = memo(({ onMenuClick }: MobileBottomNavProps) => {
+export default function MobileBottomNav() {
+  const { user } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
-  const handleTabClick = (tab: NavTab) => {
-    if (tab.id === 'menu') {
-      onMenuClick?.();
-    } else {
-      navigate(tab.path);
-    }
-  };
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY < 50) {
+        // Always show at top
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY) {
+        // Scrolling down - hide
+        setIsVisible(false);
+      } else {
+        // Scrolling up - show
+        setIsVisible(true);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
+  const navItems = [
+    ...(user?.role === 'ADMIN' ? [{ icon: BarChart3, label: 'Admin', path: '/admin' }] : []),
+    { icon: BookOpen, label: 'Study', path: '/study' },
+    { icon: BookOpen, label: 'Courses', path: '/courses' },
+    { icon: Award, label: 'Achievements', path: '/achievements' },
+    { icon: FolderOpen, label: 'Files', path: '/files' },
+    { icon: MessageCircle, label: 'Tutor', path: '/tutor' },
+  ];
 
   const isActive = (path: string) => {
-    if (path === '/') {
-      return location.pathname === '/';
-    }
-    if (path === '#menu') {
-      return false; // Menu never shows as active
+    if (path === '/courses') {
+      return location.pathname === '/courses' || location.pathname.startsWith('/courses/');
     }
     return location.pathname.startsWith(path);
   };
 
   return (
-    <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 pb-safe bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"
-      role="navigation"
-      aria-label="Mobile bottom navigation"
+    <motion.nav
+      initial={{ y: 0 }}
+      animate={{ y: isVisible ? 0 : 100 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0f172a]/95 backdrop-blur-xl border-t border-white/10 shadow-[0_-2px_10px_rgba(0,0,0,0.2)]"
     >
-      <div className="flex items-center justify-around h-full px-2">
-        {NAV_TABS.map((tab) => {
-          const Icon = tab.icon;
-          const active = isActive(tab.path);
-          const isPrimary = tab.isPrimary && active;
+      <div className="flex items-center justify-around px-2 py-3 pb-safe">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.path);
 
           return (
-            <motion.button
-              key={tab.id}
-              onClick={() => handleTabClick(tab)}
-              className="flex flex-col items-center justify-center flex-1 h-full min-w-0 touch-manipulation relative"
-              whileTap={{ scale: 0.92 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-              aria-label={tab.label}
-              aria-current={active ? 'page' : undefined}
+            <Link
+              key={item.path}
+              to={item.path}
+              className="relative flex flex-col items-center justify-center group min-w-[60px]"
             >
-              {/* Icon Container with Animation */}
-              <motion.div
-                animate={{
-                  scale: active ? 1.1 : 1,
-                  y: active ? -2 : 0,
-                }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                className={`relative mb-0.5 ${
-                  isPrimary
-                    ? 'text-brand-600 dark:text-brand-400'
-                    : active
-                    ? 'text-brand-500 dark:text-brand-400'
-                    : 'text-gray-600 dark:text-gray-400'
-                }`}
-              >
-                <Icon
-                  className={`w-6 h-6 ${
-                    isPrimary ? 'stroke-[2.5]' : active ? 'stroke-[2.25]' : 'stroke-2'
-                  }`}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+              {/* Active indicator line at top */}
+              {active && (
+                <motion.div
+                  layoutId="mobileActiveIndicator"
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-gradient-to-r from-[#7c3aed] to-[#3b82f6] rounded-full transition-all duration-300 ease-in-out"
+                  style={{
+                    boxShadow: '0 0 8px rgba(124, 58, 237, 0.6)',
+                  }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                 />
-                
-                {/* Active Indicator Dot - Animated */}
+              )}
+
+              <motion.div
+                whileTap={{ scale: 0.85 }}
+                whileHover={{ scale: 1.1 }}
+                className="relative"
+              >
+                {/* Active gradient glow behind icon */}
                 {active && (
-                  <motion.div
-                    layoutId="activeIndicator"
-                    className={`absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${
-                      isPrimary
-                        ? 'bg-brand-600 dark:bg-brand-400'
-                        : 'bg-brand-500 dark:bg-brand-400'
-                    }`}
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#7c3aed] via-[#9333ea] to-[#3b82f6] rounded-2xl blur-md opacity-30" />
                 )}
 
-                {/* Primary Glow Effect */}
-                {isPrimary && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 0.3 }}
-                    className="absolute inset-0 blur-md bg-brand-500 rounded-full -z-10"
-                  />
-                )}
+                <div
+                  className={`relative flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-300 ${
+                    active
+                      ? 'bg-gradient-to-br from-[#7c3aed] via-[#9333ea] to-[#3b82f6] text-white shadow-[0_0_15px_rgba(124,58,237,0.4)]'
+                      : 'bg-transparent text-gray-400 group-active:bg-white/5 group-hover:text-white'
+                  }`}
+                >
+                  <Icon className="w-6 h-6" strokeWidth={2} />
+                </div>
               </motion.div>
 
-              {/* Label with Font Weight Animation */}
-              <motion.span
-                animate={{
-                  fontWeight: isPrimary ? 700 : active ? 600 : 500,
-                }}
-                className={`text-[10px] leading-none transition-colors duration-200 ${
-                  isPrimary
-                    ? 'text-brand-600 dark:text-brand-400'
-                    : active
-                    ? 'text-brand-500 dark:text-brand-400'
-                    : 'text-gray-600 dark:text-gray-400'
+              <span
+                className={`mt-1 text-[10px] font-medium transition-colors text-center ${
+                  active ? 'text-white' : 'text-gray-400 group-hover:text-white'
                 }`}
               >
-                {tab.label}
-              </motion.span>
-            </motion.button>
+                {item.label}
+              </span>
+
+              {/* Touch feedback ripple */}
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                whileTap={{ scale: 1.5, opacity: [0, 0.3, 0] }}
+                className="absolute inset-0 bg-[#7c3aed] rounded-full pointer-events-none"
+              />
+            </Link>
           );
         })}
       </div>
-    </nav>
+    </motion.nav>
   );
-});
-
-MobileBottomNav.displayName = 'MobileBottomNav';
-
-export default MobileBottomNav;
+}

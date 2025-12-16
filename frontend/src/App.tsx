@@ -36,6 +36,7 @@ const Courses = lazyWithPreload(() => import('./pages/CoursesUnified'));
 const MyCourseDetail = lazyWithPreload(() => import('./pages/MyCourseDetail'));
 const TutorChat = lazyWithPreload(() => import('./pages/TutorChat'));
 const StudyProgress = lazyWithPreload(() => import('./pages/StudyProgress'));
+const Achievements = lazyWithPreload(() => import('./pages/Achievements'));
 const SavedPacks = lazyWithPreload(() => import('./pages/SavedPacks'));
 const ArcadeLobby = lazyWithPreload(() => import('./pages/ArcadeLobby'));
 const GamesDashboard = lazyWithPreload(() => import('./pages/GamesDashboard'));
@@ -138,6 +139,7 @@ function AppContent() {
             <Route path="/study" element={<Study />} />
             <Route path="/files" element={<Files />} />
             <Route path="/progress" element={<StudyProgress />} />
+            <Route path="/achievements" element={<Achievements />} />
             <Route path="/saved-packs" element={<SavedPacks />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/account" element={<Account />} />

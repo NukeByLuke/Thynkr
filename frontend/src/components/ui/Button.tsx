@@ -75,13 +75,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ),
     };
 
+    // WCAG 2.1 Success Criterion 2.5.5: Target Size (Level AAA)
+    // Mobile touch targets must be at least 44x44px for accessibility
+    // Desktop can be slightly smaller for better visual density
     const sizes = {
       sm: 'px-4 py-2.5 md:py-2 text-sm gap-1.5 min-h-[44px]',
       md: 'px-6 py-3 md:py-2.5 text-sm gap-2 min-h-[44px]',
       lg: 'px-8 py-4 md:py-3 text-base gap-2 min-h-[48px]',
     };
 
-    // Icon-only buttons get square 44x44px minimum for WCAG compliance
+    // Icon-only buttons enforce minimum 44x44px on mobile, 48x48px on larger sizes
+    // This ensures WCAG Level AAA compliance for touch target accessibility
     const iconOnlySizes = {
       sm: 'p-2.5 min-w-[44px] min-h-[44px]',
       md: 'p-3 min-w-[44px] min-h-[44px]',

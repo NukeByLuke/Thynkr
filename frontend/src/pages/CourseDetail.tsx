@@ -1,16 +1,14 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { BookOpen, User } from 'lucide-react';
-import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import SummaryView from '@/features/study/SummaryView';
 import NotesView from '@/features/study/NotesView';
 import FlashcardViewer from '@/features/study/FlashcardViewer';
 import QuizPlayer from '@/features/study/QuizPlayer';
-
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+import { useStudySession } from '@/hooks/useStudySession';
 
 type TabType = 'summary' | 'notes' | 'flashcards' | 'quizzes';
 
@@ -43,16 +41,31 @@ interface CourseLesson {
 
 export default function CourseDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const queryClient = useQueryClient();
   const [selectedLesson, setSelectedLesson] = useState<CourseLesson | null>(null);
-  const [activeTab, setActiveTab] = useState<TabType>('summary');
-  const [selectedQuiz, setSelectedQuiz] = useState<any | null>(null);
-  const [selectedFlashcardSet, setSelectedFlashcardSet] = useState<any | null>(null);
-  const [numQuestions, setNumQuestions] = useState(10);
-  const [quizDifficulty, setQuizDifficulty] = useState<'EASY' | 'MEDIUM' | 'HARD'>('MEDIUM');
-  const [numCards, setNumCards] = useState(20);
 
-  const getToken = () => localStorage.getItem('accessToken');
+  // Use the unified study session hook
+  const {
+    activeTab,
+    selectedQuiz,
+    selectedFlashcardSet,
+    numQuestions,
+    quizDifficulty,
+    numCards,
+    setActiveTab,
+    setSelectedQuiz,
+    setSelectedFlashcardSet,
+    setNumQuestions,
+    setQuizDifficulty,
+    setNumCards,
+    generateSummaryMutation,
+    generateNotesMutation,
+    generateQuizMutation,
+    generateFlashcardsMutation,
+    submitQuizMutation,
+  } = useStudySession({ 
+    queryKey: ['course', slug as string],
+    fileSource: 'course'
+  });
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['course', slug],
@@ -61,152 +74,6 @@ export default function CourseDetail() {
       return response.data;
     },
     enabled: !!slug,
-  });
-
-  // Generate summary mutation
-  const generateSummaryMutation = useMutation({
-    mutationFn: async (fileId: string) => {
-      const response = await fetch(`${API_URL}/study/files/${fileId}/summary`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to generate summary');
-      }
-      return response.json();
-    },
-    onSuccess: async (data) => {
-      await queryClient.invalidateQueries({ queryKey: ['course', slug] });
-      if (selectedLesson) {
-        setSelectedLesson({
-          ...selectedLesson,
-          file: { ...selectedLesson.file, summary: data.summary },
-        });
-      }
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to generate summary: ${error.message}`);
-    },
-  });
-
-  // Generate notes mutation
-  const generateNotesMutation = useMutation({
-    mutationFn: async (fileId: string) => {
-      const response = await fetch(`${API_URL}/study/files/${fileId}/notes`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to generate notes');
-      }
-      return response.json();
-    },
-    onSuccess: async (data) => {
-      await queryClient.invalidateQueries({ queryKey: ['course', slug] });
-      if (selectedLesson) {
-        setSelectedLesson({
-          ...selectedLesson,
-          file: { ...selectedLesson.file, notes: data.notes },
-        });
-      }
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to generate notes: ${error.message}`);
-    },
-  });
-
-  // Generate quiz mutation
-  const generateQuizMutation = useMutation({
-    mutationFn: async ({
-      fileId,
-      numQuestions,
-      difficulty,
-    }: {
-      fileId: string;
-      numQuestions: number;
-      difficulty: string;
-    }) => {
-      const response = await fetch(`${API_URL}/study/files/${fileId}/quiz`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ numQuestions, difficulty }),
-      });
-      if (!response.ok) throw new Error('Failed to generate quiz');
-      return response.json();
-    },
-    onSuccess: async (data) => {
-      await queryClient.invalidateQueries({ queryKey: ['course', slug] });
-      setSelectedQuiz(data.quiz);
-      if (selectedLesson) {
-        setSelectedLesson({
-          ...selectedLesson,
-          file: {
-            ...selectedLesson.file,
-            quizzes: [...(selectedLesson.file.quizzes || []), data.quiz],
-          },
-        });
-      }
-    },
-  });
-
-  // Generate flashcards mutation
-  const generateFlashcardsMutation = useMutation({
-    mutationFn: async ({ fileId, numCards }: { fileId: string; numCards: number }) => {
-      const response = await fetch(`${API_URL}/study/files/${fileId}/flashcards`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ numCards }),
-      });
-      if (!response.ok) throw new Error('Failed to generate flashcards');
-      return response.json();
-    },
-    onSuccess: async (data) => {
-      await queryClient.invalidateQueries({ queryKey: ['course', slug] });
-      setSelectedFlashcardSet(data.flashcardSet);
-      if (selectedLesson) {
-        setSelectedLesson({
-          ...selectedLesson,
-          file: {
-            ...selectedLesson.file,
-            flashcardSets: [...(selectedLesson.file.flashcardSets || []), data.flashcardSet],
-          },
-        });
-      }
-    },
-  });
-
-  // Submit quiz mutation
-  const submitQuizMutation = useMutation({
-    mutationFn: async ({
-      quizId,
-      answers,
-    }: {
-      quizId: string;
-      answers: Record<string, string>;
-    }) => {
-      const response = await fetch(`${API_URL}/study/quizzes/${quizId}/submit`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ answers }),
-      });
-      if (!response.ok) throw new Error('Failed to submit quiz');
-      return response.json();
-    },
   });
 
   const formatFileSize = (bytes: number) => {
@@ -235,7 +102,7 @@ export default function CourseDetail() {
           <div className="text-center py-12">
             <p className="text-gray-600 dark:text-gray-400 mb-4">No summary generated yet</p>
             <button
-              onClick={() => generateSummaryMutation.mutate(file.id)}
+              onClick={() => generateSummaryMutation.mutate({ fileId: file.id })}
               disabled={generateSummaryMutation.isPending}
               className="px-6 py-3 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 transition-colors"
             >
@@ -252,7 +119,7 @@ export default function CourseDetail() {
           <div className="text-center py-12">
             <p className="text-gray-600 dark:text-gray-400 mb-4">No notes generated yet</p>
             <button
-              onClick={() => generateNotesMutation.mutate(file.id)}
+              onClick={() => generateNotesMutation.mutate({ fileId: file.id })}
               disabled={generateNotesMutation.isPending}
               className="px-6 py-3 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 transition-colors"
             >

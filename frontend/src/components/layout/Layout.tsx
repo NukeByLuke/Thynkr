@@ -11,7 +11,7 @@ import { Outlet } from 'react-router-dom';
 import { useNavigation } from '@/contexts/NavigationContext';
 import { motion } from 'framer-motion';
 import DesktopSidebar from './DesktopSidebar';
-import MobileBottomNavNew from './MobileBottomNavNew';
+import MobileBottomNav from './MobileBottomNav';
 import Footer from './Footer';
 
 /**
@@ -54,7 +54,7 @@ export default function Layout() {
       </motion.div>
 
       {/* Mobile Bottom Navigation */}
-      <MobileBottomNavNew />
+      <MobileBottomNav />
     </div>
   );
 }
