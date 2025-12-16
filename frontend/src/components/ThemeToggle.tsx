@@ -23,7 +23,7 @@ export default function ThemeToggle({ showLabel = false, size = 'md' }: ThemeTog
       onClick={toggleTheme}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      className={`flex items-center justify-center gap-2 ${buttonPadding} rounded-xl bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 transition-all duration-200 shadow-sm`}
+      className={`flex items-center justify-center gap-2 ${buttonPadding} rounded-xl bg-white/70 dark:bg-slate-800/70 hover:bg-white/90 dark:hover:bg-slate-700/90 border border-slate-200/50 dark:border-white/10 backdrop-blur-xl transition-all duration-200 shadow-lg`}
       title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
     >
@@ -36,9 +36,9 @@ export default function ThemeToggle({ showLabel = false, size = 'md' }: ThemeTog
           transition={{ duration: 0.2, ease: 'easeOut' }}
         >
           {isDark ? (
-            <Sun className={`${iconSize} text-amber-500`} />
+            <Sun className={`${iconSize} text-amber-400`} />
           ) : (
-            <Moon className={`${iconSize} text-slate-600`} />
+            <Moon className={`${iconSize} text-slate-700`} />
           )}
         </motion.div>
       </AnimatePresence>

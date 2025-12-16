@@ -5,27 +5,84 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════════
+   PREMIUM GLASSMORPHISM DESIGN SYSTEM
+   ═══════════════════════════════════════════════════════════════════ */
+
 @layer utilities {
+  /* Subtle SVG Grid Pattern Background */
+  .bg-grid-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='rgba(148, 163, 184, 0.05)' stroke-width='1'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E");
+  }
+
+  /* Premium Glass Panel - Reusable card style */
+  .glass-panel {
+    @apply bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 shadow-xl rounded-2xl;
+  }
+
+  /* Glass Panel with stronger blur */
+  .glass-panel-strong {
+    @apply bg-white/90 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/50 dark:border-white/10 shadow-2xl rounded-2xl;
+  }
+
+  /* Gradient Text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400;
+  }
+
+  .text-gradient-blue {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400;
+  }
+
+  /* Mesh Gradient Backgrounds (Ambient Light) */
+  .mesh-gradient-purple {
+    background: radial-gradient(ellipse at 20% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%);
+  }
+
+  .mesh-gradient-blue {
+    background: radial-gradient(ellipse at 30% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 70%, rgba(14, 165, 233, 0.15) 0%, transparent 50%);
+  }
+
+  /* Glow Effects */
+  .glow-purple {
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.3), 0 0 80px rgba(139, 92, 246, 0.15);
+  }
+
+  .glow-blue {
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.3), 0 0 80px rgba(59, 130, 246, 0.15);
+  }
+
+  .glow-pink {
+    box-shadow: 0 0 40px rgba(236, 72, 153, 0.3), 0 0 80px rgba(236, 72, 153, 0.15);
+  }
+
+  /* Hover glow effects */
+  .hover-glow-purple {
+    @apply transition-shadow duration-300;
+  }
+  
+  .hover-glow-purple:hover {
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.4), 0 0 80px rgba(139, 92, 246, 0.2);
+  }
+
   /* Custom thin scrollbar for game cards */
   .scrollbar-thin::-webkit-scrollbar {
     width: 4px;
   }
   
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: rgba(148, 163, 184, 0.3);
     border-radius: 4px;
   }
   
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: rgba(148, 163, 184, 0.5);
   }
   
-  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #475569;
-  }
-  
-  .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: #64748b;
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.3);
   }
 }
 
@@ -46,60 +103,84 @@
   }
 
   :root {
-    /* Brand Navy - primary identity color */
-    --color-navy: #1E1B4B;
-    /* Primary - accessible blue */
+    /* Light Mode - Premium Glass Theme */
     --color-primary: #3B82F6;
     --color-primary-light: #60A5FA;
     --color-primary-dark: #2563EB;
-    /* Secondary - gentle lavender */
-    --color-secondary: #A78BFA;
-    --color-secondary-light: #C4B5FD;
-    /* Accent - calming cyan */
+    --color-secondary: #8B5CF6;
+    --color-secondary-light: #A78BFA;
     --color-accent: #06B6D4;
-    /* Light mode backgrounds */
-    --color-bg-primary: #F9FAFB;
-    --color-bg-secondary: #F3F4F6;
-    --color-bg-tertiary: #FFFFFF;
-    /* Light mode text - deep, accessible contrast (WCAG AA) */
-    --color-text-primary: #111827;
-    --color-text-secondary: #4B5563;
-    --color-text-tertiary: #6B7280;
-    /* Light mode borders */
-    --color-border: #E5E7EB;
-    --color-border-light: #F3F4F6;
-    /* Shadows - ambient soft */
-    --shadow-ambient: 0 4px 20px rgba(0, 0, 0, 0.05);
-    --shadow-card: 0 1px 8px rgba(0, 0, 0, 0.03);
-    --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.06);
-    /* Transitions - smooth */
+    
+    /* Light backgrounds - Soft slate with subtle grid */
+    --color-bg-primary: #f8fafc;
+    --color-bg-secondary: #f1f5f9;
+    --color-bg-tertiary: #e2e8f0;
+    
+    /* Glass panel colors - Light mode */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(148, 163, 184, 0.2);
+    
+    /* Text - Dark text for light mode */
+    --color-text-primary: #0f172a;
+    --color-text-secondary: #475569;
+    --color-text-tertiary: #64748b;
+    
+    /* Borders - Visible in light mode */
+    --color-border: rgba(148, 163, 184, 0.2);
+    --color-border-light: rgba(148, 163, 184, 0.1);
+    
+    /* Enhanced shadows for depth */
+    --shadow-ambient: 0 8px 32px rgba(0, 0, 0, 0.1);
+    --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.08);
+    --shadow-card-hover: 0 8px 32px rgba(0, 0, 0, 0.12);
+    --shadow-glow: 0 0 40px rgba(139, 92, 246, 0.2);
+    
+    /* Transitions */
     --transition-theme: 300ms ease-out;
     --transition-base: 200ms ease-out;
-    /* Spacing - generous */
+    
+    /* Spacing */
     --spacing-section: 3rem;
     --spacing-card: 1.5rem;
-    /* Radius - subtle, modern */
-    --radius-card: 0.75rem;
-    --radius-button: 0.5rem;
-    --radius-input: 0.5rem;
+    
+    /* Radius - Larger for modern glass look */
+    --radius-card: 1rem;
+    --radius-button: 0.75rem;
+    --radius-input: 0.75rem;
   }
 
   .dark {
-    /* Dark mode primary - brighter for visibility */
+    /* Dark Mode - Premium Dark Glassmorphism */
     --color-primary: #60A5FA;
     --color-primary-light: #93C5FD;
     --color-primary-dark: #3B82F6;
-    /* Dark mode backgrounds - deep navy, comfortable contrast */
-    --color-bg-primary: #1E293B;
-    --color-bg-secondary: #334155;
-    --color-bg-tertiary: #475569;
-    /* Dark mode text - gentler contrast (WCAG AA) */
+    --color-secondary: #A78BFA;
+    --color-secondary-light: #C4B5FD;
+    --color-accent: #06B6D4;
+    
+    /* Dark backgrounds - Deep slate with grid pattern */
+    --color-bg-primary: #0a0e1a;
+    --color-bg-secondary: #0f172a;
+    --color-bg-tertiary: #1e293b;
+    
+    /* Glass panel colors - Dark mode */
+    --glass-bg: rgba(15, 23, 42, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    
+    /* Text - High contrast for dark mode */
     --color-text-primary: #F1F5F9;
     --color-text-secondary: #CBD5E1;
     --color-text-tertiary: #94A3B8;
-    /* Dark mode borders */
-    --color-border: #475569;
-    --color-border-light: #334155;
+    
+    /* Borders - Subtle in dark mode */
+    --color-border: rgba(255, 255, 255, 0.1);
+    --color-border-light: rgba(255, 255, 255, 0.05);
+    
+    /* Enhanced shadows for depth */
+    --shadow-ambient: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.3);
+    --shadow-card-hover: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 40px rgba(139, 92, 246, 0.3);
   }
 
   html {
@@ -126,19 +207,28 @@
   }
 
   body {
-    @apply antialiased;
-    color: var(--color-text-primary);
-    background: var(--color-bg-primary);
+    @apply antialiased bg-slate-50 dark:bg-[#0a0e1a] text-slate-900 dark:text-slate-100;
     font-family: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     transition: background-color var(--transition-theme), color var(--transition-theme);
     letter-spacing: -0.005em;
     line-height: 1.6;
     font-weight: 400;
     font-size: 15px;
+    position: relative;
   }
 
-  .dark body {
-    background: var(--color-bg-primary);
+  /* Background grid pattern applied to body */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='rgba(148, 163, 184, 0.08)' stroke-width='1'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .dark body::before {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='rgba(148, 163, 184, 0.03)' stroke-width='1'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E");
   }
 
   /* Smooth theme transition for all elements */
@@ -161,7 +251,7 @@
   h4 { @apply text-lg md:text-xl; }
 
   p, span, div {
-    @apply text-slate-600 dark:text-slate-300;
+    @apply text-slate-700 dark:text-slate-300;
   }
 
   /* Smooth focus states */
@@ -169,7 +259,7 @@
     @apply outline-none ring-2 ring-thynkr-purple/20 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 transition-all duration-200;
   }
 
-  /* Input field styling - Aurora theme */
+  /* Input field styling - Premium Glass theme */
   input[type="text"],
   input[type="email"],
   input[type="password"],
@@ -179,9 +269,9 @@
   input[type="number"],
   textarea,
   select {
-    @apply bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700;
-    @apply rounded-xl px-4 py-2.5 text-slate-900 dark:text-white;
-    @apply placeholder:text-slate-400 dark:placeholder:text-slate-500;
+    @apply bg-slate-900/50 backdrop-blur-xl border border-white/10;
+    @apply rounded-xl px-4 py-2.5 text-white;
+    @apply placeholder:text-slate-500;
     @apply transition-all duration-200;
   }
 
@@ -194,7 +284,7 @@
   input[type="number"]:focus,
   textarea:focus,
   select:focus {
-    @apply border-thynkr-purple ring-2 ring-thynkr-purple/20 outline-none;
+    @apply border-blue-400/50 ring-2 ring-blue-400/20 outline-none bg-slate-900/60;
   }
 
   /* Icon color inheritance */
