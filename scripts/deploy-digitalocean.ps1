@@ -60,12 +60,12 @@ function Write-Log {
 }
 
 # Error handling
-$ErrorActionPreference = "Stop"
-trap {
-    Write-Log "Deployment failed: $_" "ERROR"
-    Write-Error "Deployment failed! Check log: $LOG_FILE"
-    exit 1
-}
+$ErrorActionPreference = "Continue"
+# trap {
+#     Write-Log "Deployment failed: $_" "ERROR"
+#     Write-Error "Deployment failed! Check log: $LOG_FILE"
+#     exit 1
+# }
 
 # Start deployment
 Write-Host "`n╔════════════════════════════════════════════════════════════╗" -ForegroundColor Magenta
@@ -90,22 +90,19 @@ if (-not (Get-Command ssh -ErrorAction SilentlyContinue)) {
 
 # Test SSH connection
 Write-Info "Testing SSH connection to $SERVER..."
-try {
-    $sshTest = ssh -o ConnectTimeout=10 $SERVER "echo 'Connected'" 2>&1
-    if ($LASTEXITCODE -ne 0) {
-        Write-Log "Cannot connect to server. Check SSH keys and server availability." "ERROR"
-        exit 1
-    }
-    Write-Success "SSH connection verified"
-} catch {
-    Write-Log "SSH connection failed: $_" "ERROR"
+$sshTest = ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no -o BatchMode=yes $SERVER "echo 'Connected'" 2>&1
+$sshExitCode = $LASTEXITCODE
+
+if ($sshExitCode -ne 0) {
+    Write-Log "Cannot connect to server. Check SSH keys and server availability." "ERROR"
     exit 1
 }
+Write-Success "SSH connection verified"
 
 # Confirm deployment
 if (-not $Force) {
     Write-Warning "You are about to deploy to PRODUCTION server: $SERVER"
-    $confirm = Read-Host "Continue? (yes/no)"
+    $confirm = Read-Host 'Continue? (yes/no)'
     if ($confirm -ne "yes") {
         Write-Info "Deployment cancelled by user"
         exit 0
@@ -124,7 +121,7 @@ if (-not $SkipTests) {
         $testResult = npm test 2>&1
         if ($LASTEXITCODE -ne 0) {
             Write-Log "Backend tests failed" "WARN"
-            $continue = Read-Host "Tests failed. Continue anyway? (yes/no)"
+            $continue = Read-Host 'Tests failed. Continue anyway? (yes/no)'
             if ($continue -ne "yes") { exit 1 }
         } else {
             Write-Success "Backend tests passed"
