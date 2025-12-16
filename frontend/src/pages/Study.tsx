@@ -15,6 +15,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import GenerationLoader from '@/components/ui/GenerationLoader';
 import LibraryHeader from '@/components/study/LibraryHeader';
 import FileCard from '@/components/study/FileCard';
+import FilterBar, { FileFilter, SortOrder } from '@/components/study/FilterBar';
 import { useStudySession } from '@/hooks/useStudySession';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
@@ -52,6 +53,8 @@ export default function Study() {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState<FileFilter>('all');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
 
   const getToken = () => localStorage.getItem('accessToken');
 
@@ -95,10 +98,37 @@ export default function Study() {
 
   const files: UploadedFile[] = filesData?.files || [];
 
-  // Filter files based on search query
-  const filteredFiles = files.filter((file) =>
-    file.originalName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter files based on search query and file type
+  const filteredFiles = files
+    .filter((file) => {
+      // Search filter
+      const matchesSearch = file.originalName.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      // Type filter
+      let matchesType = true;
+      if (activeFilter !== 'all') {
+        const fileExt = file.fileType.toLowerCase();
+        switch (activeFilter) {
+          case 'pdf':
+            matchesType = fileExt === 'pdf';
+            break;
+          case 'document':
+            matchesType = ['doc', 'docx', 'txt'].includes(fileExt);
+            break;
+          case 'audio':
+            matchesType = ['mp3', 'wav', 'm4a', 'ogg'].includes(fileExt);
+            break;
+        }
+      }
+      
+      return matchesSearch && matchesType;
+    })
+    .sort((a, b) => {
+      // Sort by date
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
 
   // Auto-select file from query param
   useEffect(() => {
@@ -468,6 +498,16 @@ export default function Study() {
                 </p>
               </div>
             </div>
+          )}
+
+          {/* Filter Bar */}
+          {files.length > 0 && (
+            <FilterBar
+              activeFilter={activeFilter}
+              onFilterChange={setActiveFilter}
+              sortOrder={sortOrder}
+              onSortChange={setSortOrder}
+            />
           )}
 
           {/* Files Grid Section */}
