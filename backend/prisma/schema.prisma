@@ -54,6 +54,12 @@ model User {
   subscription      Subscription?
   refreshTokens     RefreshToken[]
   
+  // Gamification system
+  xp                Int           @default(0)
+  level             Int           @default(1)
+  achievements      Json          @default("[]") // Array of {id: string, unlockedAt: timestamp}
+  lastXpGain        DateTime?     // Prevents XP farming/spam
+  
   // Study system relations
   uploadedFiles     UploadedFile[]
   folders           Folder[]
