@@ -47,7 +47,7 @@ export default function Navbar() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-white/5 sticky top-0 z-50 shadow-soft theme-transition">
+    <nav className="bg-slate-50/70 dark:bg-slate-900/60 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/10 sticky top-0 z-50 shadow-xl theme-transition">
       <div className="max-w-6xl mx-auto px-8 lg:px-16">
         <div className="flex justify-between h-16">
           {/* Logo */}
@@ -257,13 +257,13 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 animate-in slide-in-from-top duration-200">
+        <div className="md:hidden border-t border-slate-200/50 dark:border-white/10 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-xl animate-in slide-in-from-top duration-200">
           <div className="px-3 pt-3 pb-4 space-y-1.5">
             <Link
               to="/courses"
-              className={`flex items-center px-3 py-2 rounded-lg text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-sm hover:translate-x-1 ${
+              className={`flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10 ${
                 isActive('/courses')
-                  ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                  ? 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 shadow-lg shadow-indigo-500/20'
                   : ''
               }`}
               onClick={() => setMobileMenuOpen(false)}
@@ -273,9 +273,9 @@ export default function Navbar() {
             </Link>
             <Link
               to="/pricing"
-              className={`block px-3 py-2 rounded-lg text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-sm hover:translate-x-1 ${
+              className={`block px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10 ${
                 isActive('/pricing')
-                  ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                  ? 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 shadow-lg shadow-indigo-500/20'
                   : ''
               }`}
               onClick={() => setMobileMenuOpen(false)}
@@ -286,9 +286,9 @@ export default function Navbar() {
               <>
                 <Link
                   to="/files"
-                  className={`flex items-center px-3 py-2 rounded-lg text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-sm hover:translate-x-1 ${
+                  className={`flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10 ${
                     isActive('/files')
-                      ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                      ? 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 shadow-lg shadow-indigo-500/20'
                       : ''
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
@@ -298,9 +298,9 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/study"
-                  className={`flex items-center px-3 py-2 rounded-lg text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-sm hover:translate-x-1 ${
+                  className={`flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10 ${
                     isActive('/study')
-                      ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                      ? 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 shadow-lg shadow-indigo-500/20'
                       : ''
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
@@ -311,9 +311,9 @@ export default function Navbar() {
                 {(user?.role === 'PREMIUM' || user?.role === 'ADMIN') && (
                   <Link
                     to="/tutor"
-                    className={`flex items-center px-3 py-2 rounded-lg text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-sm hover:translate-x-1 ${
+                    className={`flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10 ${
                       isActive('/tutor')
-                        ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                        ? 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 shadow-lg shadow-indigo-500/20'
                         : ''
                     }`}
                     onClick={() => setMobileMenuOpen(false)}
@@ -324,9 +324,9 @@ export default function Navbar() {
                 )}
                 <Link
                   to="/progress"
-                  className={`flex items-center px-3 py-2 rounded-lg text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-sm hover:translate-x-1 ${
+                  className={`flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10 ${
                     isActive('/progress')
-                      ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                      ? 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 shadow-lg shadow-indigo-500/20'
                       : ''
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
@@ -339,9 +339,9 @@ export default function Navbar() {
                   user?.role === 'ADMIN') && (
                   <Link
                     to="/courses"
-                    className={`flex items-center px-3 py-2 rounded-lg text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-sm hover:translate-x-1 ${
+                    className={`flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10 ${
                       isActive('/courses') || location.pathname.startsWith('/courses/')
-                        ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                        ? 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 shadow-lg shadow-indigo-500/20'
                         : ''
                     }`}
                     onClick={() => setMobileMenuOpen(false)}
@@ -352,9 +352,9 @@ export default function Navbar() {
                 )}
                 <Link
                   to="/"
-                  className={`flex items-center px-3 py-2 rounded-lg text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-sm hover:translate-x-1 ${
+                  className={`flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10 ${
                     isActive('/')
-                      ? 'ring-2 ring-primary-500 dark:ring-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                      ? 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 shadow-lg shadow-indigo-500/20'
                       : ''
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
@@ -367,12 +367,12 @@ export default function Navbar() {
             {isAuthenticated ? (
               <>
                 {/* Separator before account section */}
-                <div className="my-3 mx-1 border-t-2 border-gray-300 dark:border-gray-600"></div>
+                <div className="my-3 mx-1 border-t border-slate-200/50 dark:border-white/10"></div>
 
                 {user?.role === 'ADMIN' && (
                   <Link
                     to="/admin"
-                    className="flex items-center px-3 py-2 rounded-lg text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-sm hover:translate-x-1"
+                    className="flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Shield className="w-4 h-4 mr-2" />
@@ -381,7 +381,7 @@ export default function Navbar() {
                 )}
                 <Link
                   to="/settings"
-                  className="flex items-center px-3 py-2 rounded-lg text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-sm hover:translate-x-1"
+                  className="flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Settings className="w-4 h-4 mr-2" />
@@ -389,7 +389,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/account"
-                  className="flex items-center px-3 py-2 rounded-lg text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-sm hover:translate-x-1"
+                  className="flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <User className="w-4 h-4 mr-2" />
@@ -397,7 +397,7 @@ export default function Navbar() {
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center w-full text-left px-3 py-2 rounded-lg text-base font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 hover:shadow-sm hover:translate-x-1"
+                  className="flex items-center w-full text-left px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/20 transition-all duration-300 hover:shadow-lg hover:shadow-red-500/10"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
                   Logout
@@ -407,14 +407,14 @@ export default function Navbar() {
               <>
                 <Link
                   to="/login"
-                  className="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-sm hover:translate-x-1"
+                  className="block px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="block px-3 py-2 rounded-lg text-base font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-gray-700 font-semibold transition-all duration-200 hover:shadow-sm hover:translate-x-1"
+                  className="block px-3 py-2 rounded-xl text-base font-medium bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 font-semibold transition-all duration-300 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Get Started
