@@ -70,7 +70,7 @@ export default function ProfileMenu() {
   };
 
   return (
-    <div className="relative z-50" ref={dropdownRef}>
+    <div className="relative z-[100]" ref={dropdownRef}>
       {/* Profile Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
