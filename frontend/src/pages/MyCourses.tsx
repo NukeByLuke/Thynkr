@@ -20,6 +20,7 @@ import {
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import GlassCard from '@/components/ui/GlassCard';
 import PageHeader from '@/components/layout/PageHeader';
 import VisibilityChip from '@/features/courses/VisibilityChip';
 import EmptyState from '@/components/ui/EmptyState';
@@ -305,7 +306,7 @@ export default function MyCourses() {
             </div>
           ) : courses.length === 0 ? (
             /* Empty State */
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700">
+            <GlassCard className="p-8">
               <EmptyState
                 icon={<BookOpen className="h-8 w-8" />}
                 title={
@@ -322,14 +323,15 @@ export default function MyCourses() {
                 onAction={hasActiveFilters ? clearFilters : () => setShowCreateModal(true)}
                 illustration={hasActiveFilters ? undefined : 'courses'}
               />
-            </div>
+            </GlassCard>
           ) : (
             /* Courses Grid */
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {courses.map((course: Course) => (
-                <div
+                <GlassCard
                   key={course.id}
-                  className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover:-translate-y-1"
+                  variant="hover"
+                  className="group relative overflow-hidden"
                 >
                   {/* Cover Image */}
                   <Link to={`/my-courses/${course.id}`} className="block">
@@ -451,7 +453,7 @@ export default function MyCourses() {
                       )}
                     </div>
                   </Link>
-                </div>
+                </GlassCard>
               ))}
             </div>
           )}

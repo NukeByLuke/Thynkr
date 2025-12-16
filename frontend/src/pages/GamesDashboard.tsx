@@ -26,6 +26,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useGameAccess } from '@/hooks/useGameAccess';
 import { UploadedFile } from '@/types/global';
 import Button from '@/components/ui/Button';
+import GlassCard from '@/components/ui/GlassCard';
 import AnimatedPage from '@/components/AnimatedPage';
 import UpgradeModal from '@/components/UpgradeModal';
 import GameSetupModal, { GameConfig } from '@/components/GameSetupModal';
@@ -239,16 +240,15 @@ function GameCard({ game, isPro, isMultiplayer, onAccessDenied, onPlay }: GameCa
       disabled={game.comingSoon}
       whileHover={!game.comingSoon ? { scale: 1.02, y: -2 } : undefined}
       whileTap={!game.comingSoon ? { scale: 0.98 } : undefined}
-      className={clsx(
-        'relative w-full p-6 rounded-2xl text-left',
-        'bg-white dark:bg-slate-800',
-        'border border-slate-200 dark:border-slate-700',
-        'transition-shadow duration-200',
-        game.comingSoon
-          ? 'opacity-60 cursor-not-allowed'
-          : 'hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 cursor-pointer'
-      )}
+      className="w-full"
     >
+      <GlassCard
+        variant={game.comingSoon ? 'default' : 'hover'}
+        className={clsx(
+          'relative p-6 text-left',
+          game.comingSoon && 'opacity-60 cursor-not-allowed'
+        )}
+      >
       {/* Pro Badge */}
       {game.tier === 'PRO' && (
         <div className="absolute top-4 right-4">
@@ -299,6 +299,7 @@ function GameCard({ game, isPro, isMultiplayer, onAccessDenied, onPlay }: GameCa
           <span>Play Now</span>
         </div>
       )}
+      </GlassCard>
     </motion.button>
   );
 }
