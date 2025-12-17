@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
   BookOpen,
@@ -8,6 +10,8 @@ import {
   FolderOpen,
   Shield,
   Crown,
+  ChevronRight,
+  User,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Logo from '@/components/Logo';
@@ -32,6 +36,7 @@ const navLinks: NavLink[] = [
 const Sidebar = () => {
   const { user } = useAuth();
   const location = useLocation();
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
@@ -41,33 +46,72 @@ const Sidebar = () => {
   const visibleLinks = navLinks.filter((link) => !link.adminOnly || user?.role === 'ADMIN');
 
   return (
-    <aside className="w-64 h-screen flex flex-col bg-slate-900/80 backdrop-blur-md border-r border-white/5">
+    <motion.aside
+      initial={false}
+      animate={{ width: isExpanded ? 256 : 80 }}
+      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+      className="h-screen flex flex-col m-4 rounded-2xl glass-panel relative"
+    >
+      {/* Toggle Button */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="absolute -right-3 top-8 z-50 w-6 h-6 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center hover:bg-slate-700 transition-colors shadow-lg"
+        aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+      >
+        <motion.div
+          animate={{ rotate: isExpanded ? 180 : 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <ChevronRight className="w-3 h-3 text-slate-400" />
+        </motion.div>
+      </button>
+
       {/* Logo Section */}
-      <div className="h-16 flex items-center px-6 border-b border-white/5">
-        <Link to="/dashboard" className="flex items-center gap-2">
-          <Logo variant="icon" animated={false} className="w-8 h-8" />
-          <div className="flex flex-col">
-            <span className="text-base font-semibold text-slate-900 dark:text-white leading-tight">
-              Thynkr
-            </span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
-              AI Study Platform
-            </span>
-          </div>
+      <div className="h-16 flex items-center px-4 border-b border-white/5">
+        <Link to="/dashboard" className="flex items-center gap-2 overflow-hidden">
+          <Logo variant="icon" animated={false} className="w-8 h-8 flex-shrink-0" />
+          <AnimatePresence mode="wait">
+            {isExpanded && (
+              <motion.div
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col overflow-hidden"
+              >
+                <span className="text-base font-semibold text-slate-900 dark:text-white leading-tight whitespace-nowrap">
+                  Thynkr
+                </span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight whitespace-nowrap">
+                  AI Study Platform
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </Link>
       </div>
 
       {/* Premium Badge (if user has premium) */}
-      {(user?.role === 'PREMIUM' || user?.role === 'ADMIN') && (
-        <div className="mx-4 mt-4 p-3 rounded-lg bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 shadow-lg shadow-indigo-500/10">
-          <div className="flex items-center gap-2">
-            <Crown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-              Premium Member
-            </span>
-          </div>
-        </div>
-      )}
+      <AnimatePresence mode="wait">
+        {isExpanded && (user?.role === 'PREMIUM' || user?.role === 'ADMIN') && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="mx-3 mt-3 overflow-hidden"
+          >
+            <div className="p-2.5 rounded-lg bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30">
+              <div className="flex items-center gap-2">
+                <Crown className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                <span className="text-xs font-medium text-blue-900 dark:text-blue-100 whitespace-nowrap">
+                  Premium Member
+                </span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Navigation Links */}
       <nav className="flex-1 overflow-y-auto py-4 px-3">
@@ -81,20 +125,40 @@ const Sidebar = () => {
                 <Link
                   to={link.to}
                   className={`
-                    flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 relative
+                    flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 relative group
                     ${
                       active
-                        ? 'bg-indigo-500/20 text-indigo-300 font-medium border-l-2 border-indigo-500 shadow-lg shadow-indigo-500/20'
-                        : 'text-slate-300 hover:bg-white/5'
+                        ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400 border-l-2 border-primary-500'
+                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100/50 dark:hover:bg-white/5 border-l-2 border-transparent'
                     }
                   `}
+                  title={!isExpanded ? link.label : undefined}
                 >
                   <Icon
-                    className={`w-5 h-5 ${
-                      active ? 'text-indigo-300' : 'text-slate-400'
+                    className={`w-5 h-5 flex-shrink-0 ${
+                      active ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400'
                     }`}
                   />
-                  <span className="text-sm">{link.label}</span>
+                  <AnimatePresence mode="wait">
+                    {isExpanded && (
+                      <motion.span
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: 'auto' }}
+                        exit={{ opacity: 0, width: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="text-sm whitespace-nowrap overflow-hidden"
+                      >
+                        {link.label}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                  
+                  {/* Tooltip for collapsed state */}
+                  {!isExpanded && (
+                    <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 text-slate-100 text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                      {link.label}
+                    </div>
+                  )}
                 </Link>
               </li>
             );
@@ -102,13 +166,38 @@ const Sidebar = () => {
         </ul>
       </nav>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-white/5">
-        <p className="text-xs text-slate-500 text-center">
-          © 2024 Thynkr. All rights reserved.
-        </p>
+      {/* User Profile Pill */}
+      <div className="p-3 border-t border-white/5">
+        <div
+          className={`
+            flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-800/50 hover:bg-slate-800/80 transition-all cursor-pointer
+            ${!isExpanded && 'justify-center'}
+          `}
+        >
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+            <User className="w-4 h-4 text-white" />
+          </div>
+          <AnimatePresence mode="wait">
+            {isExpanded && (
+              <motion.div
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col overflow-hidden min-w-0"
+              >
+                <span className="text-sm font-medium text-slate-900 dark:text-white truncate">
+                  {user?.username || 'User'}
+                </span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                  {user?.email || ''}
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
-    </aside>
+    </motion.aside>
   );
 };
 
