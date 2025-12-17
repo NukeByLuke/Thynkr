@@ -309,95 +309,86 @@ export default function Files() {
             </div>
           </div>
 
-          {/* Folders Section */}
-          {filteredFolders.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2">
-                <Folder className="w-4 h-4" />
-                Folders
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                {filteredFolders.map((folder) => (
+          {/* File Tree - Google Drive Style */}
+          <div className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+            {/* Folders */}
+            {filteredFolders.map((folder) => (
+              <div key={folder.id}>
+                <button
+                  onClick={() => setCurrentFolderId(folder.id)}
+                  onContextMenu={(e) => handleContextMenu(e, 'folder', folder.id, folder.name)}
+                  className="group w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-200 dark:border-slate-800"
+                >
+                  <Folder className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                  <span className="flex-1 text-left text-sm font-medium text-slate-900 dark:text-white truncate">
+                    {folder.name}
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    {folder.files?.length || 0} files
+                  </span>
                   <button
-                    key={folder.id}
-                    onClick={() => setCurrentFolderId(folder.id)}
-                    onContextMenu={(e) => handleContextMenu(e, 'folder', folder.id, folder.name)}
-                    className="group bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-xl p-4 text-left transition-all hover:border-amber-500 dark:hover:border-amber-500 hover:shadow-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleContextMenu(e, 'folder', folder.id, folder.name);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded"
                   >
-                    <Folder className="w-10 h-10 text-amber-500 mb-2" />
-                    <p className="text-slate-900 dark:text-white font-medium truncate text-sm">{folder.name}</p>
-                    <p className="text-slate-500 text-xs mt-1">
-                      {folder.files?.length || 0} files
-                    </p>
+                    <MoreVertical className="w-4 h-4 text-slate-400" />
                   </button>
-                ))}
+                </button>
               </div>
-            </div>
-          )}
+            ))}
 
-          {/* Files Section - Clean Grid */}
-          {filteredFiles.length > 0 && (
-            <div>
-              <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2">
-                <FileText className="w-4 h-4" />
-                Files
-              </h2>
+            {/* Files - Indented */}
+            {filteredFiles.map((file) => {
+              const { icon: IconComponent } = getFileIcon(file.fileType);
+              return (
+                <div
+                  key={file.id}
+                  onDoubleClick={() => handleFileDoubleClick(file.id)}
+                  onContextMenu={(e) =>
+                    handleContextMenu(e, 'file', file.id, file.originalName)
+                  }
+                  className="group flex items-center gap-3 px-4 py-3 pl-12 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer border-b border-slate-200 dark:border-slate-800 last:border-b-0"
+                >
+                  {/* Icon */}
+                  <div className={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center ${
+                    file.fileType === 'pdf' ? 'text-red-500' :
+                    ['doc', 'docx'].includes(file.fileType) ? 'text-blue-500' :
+                    ['ppt', 'pptx'].includes(file.fileType) ? 'text-orange-500' :
+                    'text-slate-400'
+                  }`}>
+                    <IconComponent className="w-5 h-5" />
+                  </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {filteredFiles.map((file) => {
-                  const { icon: IconComponent, color } = getFileIcon(file.fileType);
-                  return (
-                    <div
-                      key={file.id}
-                      onDoubleClick={() => handleFileDoubleClick(file.id)}
-                      onContextMenu={(e) =>
-                        handleContextMenu(e, 'file', file.id, file.originalName)
-                      }
-                      className="group bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-xl p-4 hover:border-slate-900 dark:hover:border-white transition-all cursor-pointer hover:shadow-sm"
-                    >
-                      <div className="flex items-start gap-3">
-                        {/* Icon */}
-                        <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
-                          file.fileType === 'pdf' ? 'bg-red-100 dark:bg-red-900/20' :
-                          ['doc', 'docx'].includes(file.fileType) ? 'bg-blue-100 dark:bg-blue-900/20' :
-                          ['ppt', 'pptx'].includes(file.fileType) ? 'bg-orange-100 dark:bg-orange-900/20' :
-                          'bg-slate-100 dark:bg-slate-800'
-                        }`}>
-                          <IconComponent className={`w-5 h-5 ${color}`} />
-                        </div>
+                  {/* File Name */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-slate-900 dark:text-white truncate">
+                      {file.originalName}
+                    </p>
+                  </div>
 
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-slate-900 dark:text-white font-medium truncate text-sm mb-1">
-                            {file.originalName}
-                          </p>
-                          <div className="flex items-center gap-2 text-xs text-slate-500">
-                            <span className="uppercase font-medium">{file.fileType}</span>
-                            <span>•</span>
-                            <span>{formatFileSize(file.fileSize)}</span>
-                          </div>
-                          <p className="text-xs text-slate-400 mt-1">
-                            {formatDate(file.createdAt)}
-                          </p>
-                        </div>
+                  {/* Metadata */}
+                  <div className="flex items-center gap-4 text-xs text-slate-500">
+                    <span className="uppercase font-medium">{file.fileType}</span>
+                    <span>{formatFileSize(file.fileSize)}</span>
+                    <span className="hidden sm:inline">{formatDate(file.createdAt)}</span>
+                  </div>
 
-                        {/* Actions */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleContextMenu(e, 'file', file.id, file.originalName);
-                          }}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"
-                        >
-                          <MoreVertical className="w-4 h-4 text-slate-400" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+                  {/* Actions */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleContextMenu(e, 'file', file.id, file.originalName);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded flex-shrink-0"
+                  >
+                    <MoreVertical className="w-4 h-4 text-slate-400" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
 
           {/* Empty State */}
           {filteredFolders.length === 0 && filteredFiles.length === 0 && (

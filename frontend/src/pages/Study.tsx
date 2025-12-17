@@ -549,60 +549,50 @@ export default function Study() {
             </div>
           )}
 
-          {/* Split Action Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          {/* Action Cards - Minimal */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
             {/* Card 1: Browse Library */}
-            <motion.button
+            <button
               onClick={() => navigate('/files')}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="group relative overflow-hidden bg-white/5 dark:bg-white/5 backdrop-blur-sm border border-white/10 dark:border-white/10 rounded-3xl p-8 text-left transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/10 hover:border-indigo-500/50"
+              className="group bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-xl p-6 text-left transition-all hover:border-slate-900 dark:hover:border-white hover:shadow-sm"
             >
-              <div className="flex flex-col items-start space-y-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                  <FolderOpen className="w-8 h-8 text-white" />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <FolderOpen className="w-6 h-6 text-slate-700 dark:text-slate-300" />
                 </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-1">
                     Browse Files
                   </h3>
-                  <p className="text-slate-600 dark:text-slate-400">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
                     View and manage your entire library
                   </p>
                 </div>
-                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors flex-shrink-0" />
               </div>
-            </motion.button>
+            </button>
 
             {/* Card 2: Quick Upload */}
-            <motion.button
+            <button
               onClick={handleQuickUpload}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               disabled={uploadMutation.isPending}
-              className="group relative overflow-hidden bg-white/5 dark:bg-white/5 backdrop-blur-sm rounded-3xl p-8 text-left transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{
-                border: '2px solid transparent',
-                backgroundImage: 'linear-gradient(rgb(15 23 42 / 0.05), rgb(15 23 42 / 0.05)), linear-gradient(135deg, rgb(99 102 241), rgb(168 85 247))',
-                backgroundOrigin: 'border-box',
-                backgroundClip: 'padding-box, border-box',
-              }}
+              className="group bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-xl p-6 text-left transition-all hover:border-slate-900 dark:hover:border-white hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <div className="flex flex-col items-start space-y-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/30">
-                  <UploadCloud className="w-8 h-8 text-white" />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <UploadCloud className="w-6 h-6 text-slate-700 dark:text-slate-300" />
                 </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-1">
                     {uploadMutation.isPending ? 'Uploading...' : 'Upload Material'}
                   </h3>
-                  <p className="text-slate-600 dark:text-slate-400">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
                     Add new documents, PDFs, or files
                   </p>
                 </div>
-                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors flex-shrink-0" />
               </div>
-            </motion.button>
+            </button>
           </div>
 
           {/* Recent Files Section */}
