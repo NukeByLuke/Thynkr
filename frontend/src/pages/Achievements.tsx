@@ -172,6 +172,35 @@ const getXPForLevel = (level: number): number => {
   return Math.floor(100 * Math.pow(level, 1.5));
 };
 
+// Default achievement definitions to show when backend doesn't have data yet
+const DEFAULT_ACHIEVEMENTS: AchievementDefinition[] = [
+  { id: 'scholar', name: 'Scholar', description: 'Total hours spent studying', icon: '📚', category: 'study', thresholds: { BRONZE: 10, SILVER: 50, GOLD: 100, PLATINUM: 500, RUBY: 1000 }, xpRewards: { BRONZE: 50, SILVER: 200, GOLD: 500, PLATINUM: 2000, RUBY: 5000 } },
+  { id: 'streak_master', name: 'Streak Master', description: 'Consecutive days of studying', icon: '🔥', category: 'streak', thresholds: { BRONZE: 3, SILVER: 7, GOLD: 14, PLATINUM: 30, RUBY: 100 }, xpRewards: { BRONZE: 50, SILVER: 150, GOLD: 400, PLATINUM: 1500, RUBY: 4000 } },
+  { id: 'quiz_whiz', name: 'Quiz Whiz', description: 'Perfect quiz scores achieved', icon: '🎯', category: 'skill', thresholds: { BRONZE: 1, SILVER: 5, GOLD: 10, PLATINUM: 25, RUBY: 50 }, xpRewards: { BRONZE: 50, SILVER: 200, GOLD: 450, PLATINUM: 1800, RUBY: 4500 } },
+  { id: 'librarian', name: 'Librarian', description: 'Study materials uploaded', icon: '📂', category: 'content', thresholds: { BRONZE: 5, SILVER: 20, GOLD: 50, PLATINUM: 150, RUBY: 500 }, xpRewards: { BRONZE: 50, SILVER: 180, GOLD: 420, PLATINUM: 1600, RUBY: 4200 } },
+  { id: 'socialite', name: 'Socialite', description: 'Study sessions shared with others', icon: '💬', category: 'social', thresholds: { BRONZE: 3, SILVER: 10, GOLD: 25, PLATINUM: 75, RUBY: 200 }, xpRewards: { BRONZE: 50, SILVER: 170, GOLD: 400, PLATINUM: 1500, RUBY: 4000 } },
+  { id: 'speed_demon', name: 'Speed Demon', description: 'Quiz questions answered in under 5 seconds', icon: '⚡', category: 'skill', thresholds: { BRONZE: 10, SILVER: 50, GOLD: 150, PLATINUM: 500, RUBY: 1500 }, xpRewards: { BRONZE: 50, SILVER: 190, GOLD: 470, PLATINUM: 1900, RUBY: 4700 } },
+  { id: 'note_taker', name: 'Note Taker', description: 'AI-generated notes created', icon: '📝', category: 'content', thresholds: { BRONZE: 5, SILVER: 25, GOLD: 75, PLATINUM: 200, RUBY: 600 }, xpRewards: { BRONZE: 50, SILVER: 180, GOLD: 440, PLATINUM: 1700, RUBY: 4400 } },
+  { id: 'flashcard_master', name: 'Flashcard Master', description: 'Flashcard sets completed', icon: '🎴', category: 'study', thresholds: { BRONZE: 3, SILVER: 15, GOLD: 40, PLATINUM: 120, RUBY: 350 }, xpRewards: { BRONZE: 50, SILVER: 175, GOLD: 430, PLATINUM: 1650, RUBY: 4300 } },
+  { id: 'tutor_enthusiast', name: 'Tutor Enthusiast', description: 'AI tutor conversations started', icon: '🤖', category: 'study', thresholds: { BRONZE: 5, SILVER: 20, GOLD: 60, PLATINUM: 180, RUBY: 500 }, xpRewards: { BRONZE: 50, SILVER: 185, GOLD: 450, PLATINUM: 1750, RUBY: 4500 } },
+  { id: 'early_bird', name: 'Early Bird', description: 'Study sessions started before 8 AM', icon: '🌅', category: 'streak', thresholds: { BRONZE: 5, SILVER: 15, GOLD: 35, PLATINUM: 100, RUBY: 300 }, xpRewards: { BRONZE: 50, SILVER: 165, GOLD: 410, PLATINUM: 1550, RUBY: 4100 } },
+  { id: 'night_owl', name: 'Night Owl', description: 'Study sessions after 10 PM', icon: '🦉', category: 'streak', thresholds: { BRONZE: 5, SILVER: 15, GOLD: 35, PLATINUM: 100, RUBY: 300 }, xpRewards: { BRONZE: 50, SILVER: 165, GOLD: 410, PLATINUM: 1550, RUBY: 4100 } },
+  { id: 'perfectionist', name: 'Perfectionist', description: 'Hard difficulty quizzes completed with 100% score', icon: '💎', category: 'skill', thresholds: { BRONZE: 1, SILVER: 3, GOLD: 8, PLATINUM: 20, RUBY: 50 }, xpRewards: { BRONZE: 50, SILVER: 220, GOLD: 520, PLATINUM: 2100, RUBY: 5200 } },
+  { id: 'course_creator', name: 'Course Creator', description: 'Study courses created', icon: '🎓', category: 'content', thresholds: { BRONZE: 1, SILVER: 3, GOLD: 8, PLATINUM: 20, RUBY: 50 }, xpRewards: { BRONZE: 50, SILVER: 210, GOLD: 500, PLATINUM: 2000, RUBY: 5000 } },
+  { id: 'marathon_runner', name: 'Marathon Runner', description: 'Single study sessions over 2 hours', icon: '🏃', category: 'study', thresholds: { BRONZE: 1, SILVER: 5, GOLD: 15, PLATINUM: 40, RUBY: 100 }, xpRewards: { BRONZE: 50, SILVER: 195, GOLD: 480, PLATINUM: 1850, RUBY: 4800 } },
+  { id: 'consistent_learner', name: 'Consistent Learner', description: 'Weeks with at least 5 study days', icon: '📅', category: 'streak', thresholds: { BRONZE: 2, SILVER: 6, GOLD: 15, PLATINUM: 35, RUBY: 80 }, xpRewards: { BRONZE: 50, SILVER: 175, GOLD: 440, PLATINUM: 1700, RUBY: 4400 } },
+  { id: 'game_champion', name: 'Game Champion', description: 'Arcade game sessions won', icon: '🏆', category: 'skill', thresholds: { BRONZE: 3, SILVER: 10, GOLD: 30, PLATINUM: 80, RUBY: 200 }, xpRewards: { BRONZE: 50, SILVER: 190, GOLD: 460, PLATINUM: 1800, RUBY: 4600 } },
+  { id: 'knowledge_seeker', name: 'Knowledge Seeker', description: 'Unique topics studied', icon: '🔍', category: 'study', thresholds: { BRONZE: 5, SILVER: 15, GOLD: 40, PLATINUM: 100, RUBY: 250 }, xpRewards: { BRONZE: 50, SILVER: 175, GOLD: 435, PLATINUM: 1700, RUBY: 4350 } },
+  { id: 'summary_specialist', name: 'Summary Specialist', description: 'AI summaries generated', icon: '📋', category: 'content', thresholds: { BRONZE: 10, SILVER: 40, GOLD: 100, PLATINUM: 300, RUBY: 800 }, xpRewards: { BRONZE: 50, SILVER: 185, GOLD: 455, PLATINUM: 1800, RUBY: 4550 } },
+  { id: 'community_helper', name: 'Community Helper', description: 'Study packs shared publicly', icon: '🤝', category: 'social', thresholds: { BRONZE: 2, SILVER: 8, GOLD: 20, PLATINUM: 50, RUBY: 150 }, xpRewards: { BRONZE: 50, SILVER: 195, GOLD: 470, PLATINUM: 1850, RUBY: 4700 } },
+  { id: 'multilingual', name: 'Multilingual', description: 'Different languages used for study materials', icon: '🌍', category: 'skill', thresholds: { BRONZE: 2, SILVER: 3, GOLD: 5, PLATINUM: 8, RUBY: 12 }, xpRewards: { BRONZE: 50, SILVER: 250, GOLD: 600, PLATINUM: 2400, RUBY: 6000 } },
+  { id: 'mastery_scholar', name: 'Scholar Mastery', description: 'Achieve ultimate study dedication - 5000 total study hours', icon: '👑', category: 'mastery', thresholds: { BRONZE: 5000, SILVER: 5000, GOLD: 5000, PLATINUM: 5000, RUBY: 5000 }, xpRewards: { BRONZE: 10000, SILVER: 10000, GOLD: 10000, PLATINUM: 10000, RUBY: 10000 }, isMastery: true },
+  { id: 'mastery_perfectionist', name: 'Perfect Mastery', description: 'The ultimate perfectionist - 500 perfect hard quiz scores', icon: '⭐', category: 'mastery', thresholds: { BRONZE: 500, SILVER: 500, GOLD: 500, PLATINUM: 500, RUBY: 500 }, xpRewards: { BRONZE: 15000, SILVER: 15000, GOLD: 15000, PLATINUM: 15000, RUBY: 15000 }, isMastery: true },
+  { id: 'mastery_streak', name: 'Eternal Flame', description: 'Never let the flame die - 365 day study streak', icon: '🔥', category: 'mastery', thresholds: { BRONZE: 365, SILVER: 365, GOLD: 365, PLATINUM: 365, RUBY: 365 }, xpRewards: { BRONZE: 20000, SILVER: 20000, GOLD: 20000, PLATINUM: 20000, RUBY: 20000 }, isMastery: true },
+  { id: 'mastery_content', name: 'Content King', description: 'Master of creation - 1000 study materials created', icon: '📚', category: 'mastery', thresholds: { BRONZE: 1000, SILVER: 1000, GOLD: 1000, PLATINUM: 1000, RUBY: 1000 }, xpRewards: { BRONZE: 12000, SILVER: 12000, GOLD: 12000, PLATINUM: 12000, RUBY: 12000 }, isMastery: true },
+  { id: 'mastery_social', name: 'Community Legend', description: 'Inspire the world - 500 materials shared publicly', icon: '🌟', category: 'mastery', thresholds: { BRONZE: 500, SILVER: 500, GOLD: 500, PLATINUM: 500, RUBY: 500 }, xpRewards: { BRONZE: 10000, SILVER: 10000, GOLD: 10000, PLATINUM: 10000, RUBY: 10000 }, isMastery: true },
+];
+
 export default function Achievements() {
   const [filter, setFilter] = useState<FilterOption>('all');
 
@@ -185,11 +214,39 @@ export default function Achievements() {
       });
       if (!response.ok) throw new Error('Failed to fetch achievements');
       const data = await response.json();
-      // Transform data to match expected format
+      
+      // Create achievements by merging backend data with default definitions
+      const userAchievementsMap = new Map(
+        (data.achievements || []).map((a: any) => [a.achievementId, a])
+      );
+      
+      const allAchievements: UserAchievement[] = DEFAULT_ACHIEVEMENTS.map((def) => {
+        const userAch = userAchievementsMap.get(def.id);
+        if (userAch) {
+          return { ...userAch, definition: def } as UserAchievement;
+        }
+        // Create locked achievement
+        return {
+          id: `locked-${def.id}`,
+          userId: data.userId || '',
+          achievementId: def.id,
+          currentTier: 'BRONZE' as AchievementTier,
+          currentValue: 0,
+          unlockedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          definition: def,
+          progress: {
+            current: 0,
+            required: def.thresholds.BRONZE,
+            percentage: 0,
+          },
+        } as UserAchievement;
+      });
+      
       return {
         xp: data.xp || 0,
         level: data.level || 1,
-        achievements: data.achievements || [],
+        achievements: allAchievements,
       };
     },
   });
@@ -297,19 +354,18 @@ export default function Achievements() {
       </motion.div>
 
       {/* Filters */}
-      {achievements.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6">
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              filter === 'all'
-                ? 'bg-primary-500 text-white shadow-lg'
-                : 'glass-panel text-body hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            <Filter className="w-4 h-4 inline mr-2" />
-            All
-          </button>
+      <div className="flex flex-wrap gap-2 mb-6">
+        <button
+          onClick={() => setFilter('all')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            filter === 'all'
+              ? 'bg-primary-500 text-white shadow-lg'
+              : 'glass-panel text-body hover:bg-slate-100 dark:hover:bg-slate-800'
+          }`}
+        >
+          <Filter className="w-4 h-4 inline mr-2" />
+          All
+        </button>
           <button
             onClick={() => setFilter('unlocked')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
@@ -364,52 +420,9 @@ export default function Achievements() {
             );
           })}
         </div>
-      )}
 
       {/* Achievement Grid */}
-      {achievements.length === 0 ? (
-        <div className="text-center py-16 glass-panel rounded-xl">
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center">
-              <Trophy className="w-12 h-12 text-white" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-              Achievement System Coming Soon!
-            </h3>
-            <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-md mx-auto">
-              The 5-tier achievement system is currently being set up. Keep studying and your progress will be tracked automatically once it's live!
-            </p>
-            <div className="flex items-center justify-center gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                <span className="text-slate-600 dark:text-slate-400">Bronze</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-slate-400"></div>
-                <span className="text-slate-600 dark:text-slate-400">Silver</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                <span className="text-slate-600 dark:text-slate-400">Gold</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-cyan-400"></div>
-                <span className="text-slate-600 dark:text-slate-400">Platinum</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-gradient-to-br from-red-600 via-rose-500 to-pink-600"></div>
-                <span className="text-slate-600 dark:text-slate-400">Ruby</span>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      ) : (
-        <>
-          <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait">
             <motion.div
               key={filter}
               initial={{ opacity: 0, y: 20 }}
@@ -433,8 +446,6 @@ export default function Achievements() {
               <p className="text-muted">No achievements found for this filter</p>
             </div>
           )}
-        </>
-      )}
     </PageContainer>
   );
 }
