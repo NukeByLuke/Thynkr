@@ -11,8 +11,6 @@ import {
   Trash2,
   Search,
   File,
-  Calendar,
-  HardDrive,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -268,65 +266,66 @@ export default function Files() {
 
       <div
         onClick={() => setContextMenu(null)}
-        className="min-h-screen bg-slate-950 relative overflow-hidden"
-        style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(255 255 255 / 0.02) 1px, transparent 0)',
-          backgroundSize: '40px 40px',
-        }}
+        className="min-h-screen bg-slate-50 dark:bg-slate-950"
       >
         {/* Main Container */}
         <div className="max-w-7xl mx-auto p-6">
-          {/* Header with Search */}
+          {/* Header */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-white mb-6">Your Library</h1>
+            <div className="flex items-center justify-between mb-6">
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Your Library</h1>
+              
+              {/* Action Buttons - Small & Minimal */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadMutation.isPending}
+                  className="px-3 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+                >
+                  <Upload className="w-4 h-4" />
+                  {uploadMutation.isPending ? 'Uploading...' : 'Upload'}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.pps,.ppsx"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+              </div>
+            </div>
             
-            {/* Search Bar */}
-            <div className="relative max-w-2xl">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            {/* Search Bar - Minimal */}
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search files and folders..."
+                placeholder="Search files..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-slate-900 border border-white/10 rounded-full text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white transition-all"
               />
             </div>
-
-            {/* Upload Button */}
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploadMutation.isPending}
-              className="mt-4 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
-            >
-              <Upload className="w-5 h-5" />
-              {uploadMutation.isPending ? 'Uploading...' : 'Upload Files'}
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.pps,.ppsx"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
           </div>
 
           {/* Folders Section */}
           {filteredFolders.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-sm uppercase text-slate-500 font-semibold mb-4 tracking-wider">
+              <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2">
+                <Folder className="w-4 h-4" />
                 Folders
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                 {filteredFolders.map((folder) => (
                   <button
                     key={folder.id}
                     onClick={() => setCurrentFolderId(folder.id)}
                     onContextMenu={(e) => handleContextMenu(e, 'folder', folder.id, folder.name)}
-                    className="group bg-slate-800/40 hover:bg-slate-700/60 backdrop-blur-sm border border-white/5 rounded-xl p-4 text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    className="group bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-xl p-4 text-left transition-all hover:border-amber-500 dark:hover:border-amber-500 hover:shadow-sm"
                   >
-                    <Folder className="w-12 h-12 text-amber-500 mb-2" fill="currentColor" />
-                    <p className="text-white font-medium truncate text-sm">{folder.name}</p>
+                    <Folder className="w-10 h-10 text-amber-500 mb-2" />
+                    <p className="text-slate-900 dark:text-white font-medium truncate text-sm">{folder.name}</p>
                     <p className="text-slate-500 text-xs mt-1">
                       {folder.files?.length || 0} files
                     </p>
@@ -336,24 +335,15 @@ export default function Files() {
             </div>
           )}
 
-          {/* Files Section - Spotify Style */}
+          {/* Files Section - Clean Grid */}
           {filteredFiles.length > 0 && (
             <div>
-              <h2 className="text-sm uppercase text-slate-500 font-semibold mb-4 tracking-wider">
+              <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2">
+                <FileText className="w-4 h-4" />
                 Files
               </h2>
 
-              {/* Header Row */}
-              <div className="grid grid-cols-[40px_1fr_140px_100px_50px] gap-4 px-4 pb-3 border-b border-white/5 text-xs uppercase text-slate-500 font-medium tracking-wider sticky top-0 bg-slate-950 z-10">
-                <div className="text-center">#</div>
-                <div>Title</div>
-                <div>Date Added</div>
-                <div className="text-right">Size</div>
-                <div></div>
-              </div>
-
-              {/* File List */}
-              <div className="mt-2 space-y-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {filteredFiles.map((file) => {
                   const { icon: IconComponent, color } = getFileIcon(file.fileType);
                   return (
@@ -363,45 +353,43 @@ export default function Files() {
                       onContextMenu={(e) =>
                         handleContextMenu(e, 'file', file.id, file.originalName)
                       }
-                      className="group grid grid-cols-[40px_1fr_140px_100px_50px] gap-4 items-center p-3 rounded-lg hover:bg-white/5 transition-colors border-b border-white/5 cursor-pointer"
+                      className="group bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-xl p-4 hover:border-slate-900 dark:hover:border-white transition-all cursor-pointer hover:shadow-sm"
                     >
-                      {/* Index/Icon */}
-                      <div className="flex items-center justify-center">
-                        <IconComponent className={`w-5 h-5 ${color}`} />
-                      </div>
+                      <div className="flex items-start gap-3">
+                        {/* Icon */}
+                        <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
+                          file.fileType === 'pdf' ? 'bg-red-100 dark:bg-red-900/20' :
+                          ['doc', 'docx'].includes(file.fileType) ? 'bg-blue-100 dark:bg-blue-900/20' :
+                          ['ppt', 'pptx'].includes(file.fileType) ? 'bg-orange-100 dark:bg-orange-900/20' :
+                          'bg-slate-100 dark:bg-slate-800'
+                        }`}>
+                          <IconComponent className={`w-5 h-5 ${color}`} />
+                        </div>
 
-                      {/* Title */}
-                      <div className="overflow-hidden">
-                        <p className="text-slate-200 font-medium truncate">
-                          {file.originalName}
-                        </p>
-                        <p className="text-slate-500 text-xs truncate uppercase">
-                          {file.fileType}
-                        </p>
-                      </div>
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-slate-900 dark:text-white font-medium truncate text-sm mb-1">
+                            {file.originalName}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <span className="uppercase font-medium">{file.fileType}</span>
+                            <span>•</span>
+                            <span>{formatFileSize(file.fileSize)}</span>
+                          </div>
+                          <p className="text-xs text-slate-400 mt-1">
+                            {formatDate(file.createdAt)}
+                          </p>
+                        </div>
 
-                      {/* Date */}
-                      <div className="text-slate-500 text-sm flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
-                        {formatDate(file.createdAt)}
-                      </div>
-
-                      {/* Size */}
-                      <div className="text-slate-500 text-sm text-right font-mono flex items-center justify-end gap-2">
-                        <HardDrive className="w-4 h-4" />
-                        {formatFileSize(file.fileSize)}
-                      </div>
-
-                      {/* Actions (visible on hover) */}
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        {/* Actions */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleContextMenu(e, 'file', file.id, file.originalName);
                           }}
-                          className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"
                         >
-                          <MoreVertical className="w-5 h-5 text-slate-400" />
+                          <MoreVertical className="w-4 h-4 text-slate-400" />
                         </button>
                       </div>
                     </div>
@@ -414,11 +402,13 @@ export default function Files() {
           {/* Empty State */}
           {filteredFolders.length === 0 && filteredFiles.length === 0 && (
             <div className="text-center py-20">
-              <FileText className="w-16 h-16 text-slate-700 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-slate-400 mb-2">
+              <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <FileText className="w-8 h-8 text-slate-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 {searchQuery ? 'No results found' : 'No files yet'}
               </h3>
-              <p className="text-slate-500">
+              <p className="text-slate-500 dark:text-slate-400">
                 {searchQuery
                   ? 'Try adjusting your search'
                   : 'Upload your first file to get started'}
@@ -430,19 +420,19 @@ export default function Files() {
         {/* Context Menu */}
         {contextMenu && (
           <div
-            className="fixed bg-slate-900 border border-white/10 rounded-lg shadow-2xl py-2 z-50 min-w-[180px]"
+            className="fixed bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-xl shadow-xl py-1 z-50 min-w-[160px]"
             style={{ left: contextMenu.x, top: contextMenu.y }}
           >
             <button
               onClick={handleRename}
-              className="w-full px-4 py-2 text-left text-white hover:bg-white/5 transition-colors flex items-center gap-3"
+              className="w-full px-4 py-2 text-left text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-2 text-sm"
             >
               <Edit2 className="w-4 h-4" />
               Rename
             </button>
             <button
               onClick={handleDelete}
-              className="w-full px-4 py-2 text-left text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-3"
+              className="w-full px-4 py-2 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center gap-2 text-sm"
             >
               <Trash2 className="w-4 h-4" />
               Delete
@@ -452,16 +442,16 @@ export default function Files() {
 
         {/* Rename Modal */}
         {showRenameModal && selectedItem && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 max-w-md w-full mx-4">
-              <h3 className="text-xl font-semibold text-white mb-4">
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-md w-full mx-4">
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">
                 Rename {selectedItem.type === 'folder' ? 'Folder' : 'File'}
               </h3>
               <input
                 type="text"
                 value={renameValue}
                 onChange={(e) => setRenameValue(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-800 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4"
+                className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white mb-4"
                 autoFocus
               />
               <div className="flex gap-3 justify-end">
@@ -470,7 +460,7 @@ export default function Files() {
                     setShowRenameModal(false);
                     setSelectedItem(null);
                   }}
-                  className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
+                  className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-sm"
                 >
                   Cancel
                 </button>
@@ -485,7 +475,7 @@ export default function Files() {
                     }
                   }}
                   disabled={!renameValue.trim() || renameMutation.isPending}
-                  className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
                 >
                   {renameMutation.isPending ? 'Saving...' : 'Save'}
                 </button>
