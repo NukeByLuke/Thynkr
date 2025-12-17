@@ -17,6 +17,7 @@ import DashboardLayout from './layouts/DashboardLayout';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import PreviewGate from '@/features/courses/PreviewGate';
 import GlobalLoadingBar from '@/components/ui/GlobalLoadingBar';
+import BackgroundShapes from '@/components/ui/BackgroundShapes';
 import { lazyWithPreload } from './utils/lazyWithPreload';
 
 // Code-split page components with preloading for optimal bundle size
@@ -132,6 +133,9 @@ function AppContent() {
 
   return (
     <>
+      {/* Global ambient background shapes */}
+      <BackgroundShapes />
+      
       <GlobalLoadingBar />
       <ThemedToaster />
       <Suspense fallback={<LoadingSpinner fullScreen />}>

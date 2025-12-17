@@ -1,6 +1,6 @@
 /**
  * Theme Context
- * Manages application theme (light/dark/system) with persistence and system preference detection.
+ * Manages application theme (light/dark/system) with instant dark mode to prevent white flash
  */
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -23,6 +23,25 @@ function getSystemTheme(): Theme {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
+// Apply theme immediately to prevent flash - runs BEFORE React hydration
+function applyThemeImmediately() {
+  const saved = localStorage.getItem('themeMode') as ThemeMode | null;
+  const mode = saved || 'system';
+  const theme = mode === 'system' ? getSystemTheme() : (mode as Theme);
+  
+  const root = document.documentElement;
+  if (theme === 'dark') {
+    root.classList.add('dark');
+  } else {
+    root.classList.remove('dark');
+  }
+}
+
+// Run immediately on module load
+if (typeof window !== 'undefined') {
+  applyThemeImmediately();
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated, user } = useAuth();
 
@@ -43,21 +62,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return mode as Theme;
   });
 
-  // Apply theme to document (html and body) so no stale 'dark' class lingers anywhere
+  // Apply theme to document immediately on mount and changes
   useEffect(() => {
     const root = document.documentElement;
-    const body = document.body;
 
-    // Normalize: remove both then re-apply only what we need
+    // Remove both classes first
     root.classList.remove('light', 'dark');
-    body.classList.remove('light', 'dark');
 
+    // Apply current theme
     if (theme === 'dark') {
       root.classList.add('dark');
-      body.classList.add('dark');
     } else {
       root.classList.add('light');
-      body.classList.add('light');
     }
   }, [theme]);
 
@@ -92,23 +108,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     // Calculate actual theme to apply
     const newTheme = mode === 'system' ? getSystemTheme() : (mode as Theme);
 
-    // IMMEDIATELY apply to DOM (both html and body) without waiting for state
+    // Apply immediately to DOM
     const root = document.documentElement;
-    const body = document.body;
-
-    // Force a reflow by removing and re-adding classes with a tiny delay
     root.classList.remove('light', 'dark');
-    body.classList.remove('light', 'dark');
-
-    // Force browser repaint
-    void root.offsetHeight;
-
+    
     if (newTheme === 'dark') {
       root.classList.add('dark');
-      body.classList.add('dark');
     } else {
       root.classList.add('light');
-      body.classList.add('light');
     }
 
     // Update state
