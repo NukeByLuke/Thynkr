@@ -102,7 +102,7 @@ Write-Success "SSH connection verified"
 # Confirm deployment
 if (-not $Force) {
     Write-Warning "You are about to deploy to PRODUCTION server: $SERVER"
-    $confirm = Read-Host 'Continue? (yes/no)'
+    $confirm = Read-Host "Continue? (yes/no)"
     if ($confirm -ne "yes") {
         Write-Info "Deployment cancelled by user"
         exit 0
@@ -121,7 +121,7 @@ if (-not $SkipTests) {
         $testResult = npm test 2>&1
         if ($LASTEXITCODE -ne 0) {
             Write-Log "Backend tests failed" "WARN"
-            $continue = Read-Host 'Tests failed. Continue anyway? (yes/no)'
+            $continue = Read-Host "Tests failed. Continue anyway? (yes/no)"
             if ($continue -ne "yes") { exit 1 }
         } else {
             Write-Success "Backend tests passed"

@@ -194,7 +194,7 @@ export default function StudyProgress() {
           <div className="inline-flex gap-1">
             {weeksData.map((week, weekIdx) => (
               <div key={weekIdx} className="flex flex-col gap-1">
-                {week.map((day, dayIdx) => (
+                {week.map((day) => (
                   <div
                     key={day.date}
                     className={`w-3 h-3 rounded-sm ${getHeatmapColor(day.count)} transition-all hover:scale-125 cursor-pointer`}
