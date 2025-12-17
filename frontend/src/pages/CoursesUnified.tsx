@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookOpen,
   Plus,
@@ -12,14 +13,11 @@ import {
   Trash2,
   Edit,
   Share2,
-  Filter,
-  User,
   X,
+  Play,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
-import { CourseGridSkeleton } from '@/components/ui/Skeleton';
-import GlassCard from '@/components/ui/GlassCard';
 import VisibilityChip from '@/features/courses/VisibilityChip';
 import EmptyState from '@/components/ui/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
@@ -59,21 +57,6 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   OTHER: 'from-gray-500 to-slate-600',
 };
 
-// Category badge colors (translucent for dark glass theme)
-const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
-  MATHEMATICS: { bg: 'bg-blue-500/20', text: 'text-blue-200' },
-  SCIENCE: { bg: 'bg-emerald-500/20', text: 'text-emerald-200' },
-  TECHNOLOGY: { bg: 'bg-violet-500/20', text: 'text-violet-200' },
-  ENGINEERING: { bg: 'bg-orange-500/20', text: 'text-orange-200' },
-  LANGUAGES: { bg: 'bg-pink-500/20', text: 'text-pink-200' },
-  HUMANITIES: { bg: 'bg-amber-500/20', text: 'text-amber-200' },
-  BUSINESS: { bg: 'bg-slate-500/20', text: 'text-slate-200' },
-  ARTS: { bg: 'bg-fuchsia-500/20', text: 'text-fuchsia-200' },
-  HEALTH: { bg: 'bg-sky-500/20', text: 'text-sky-200' },
-  LAW: { bg: 'bg-indigo-500/20', text: 'text-indigo-200' },
-  OTHER: { bg: 'bg-gray-500/20', text: 'text-gray-200' },
-};
-
 type TabType = 'browse' | 'my-courses';
 
 interface Course {
@@ -108,6 +91,9 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
+// Skeleton Loader for Course Gallery
+
+
 export default function CoursesUnified() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -124,7 +110,7 @@ export default function CoursesUnified() {
   const [visibility, setVisibility] = useState('');
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
+
   const [newCourse, setNewCourse] = useState({
     title: '',
     description: '',
@@ -273,17 +259,15 @@ export default function CoursesUnified() {
         <meta name="description" content="Explore, create, and study smarter with Thynkr courses" />
       </Helmet>
 
-      <div className="h-full flex flex-col bg-slate-50 dark:bg-slate-950">
-        {/* Courses Header with Blue-Violet Gradient */}
-        <div className="bg-gradient-to-r from-[#3b82f6] to-[#7c3aed] shadow-lg">
-          <div className="max-w-[1400px] mx-auto px-8 py-8">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl">
-                <BookOpen className="h-6 w-6 text-white" />
-              </div>
-              <h1 className="text-3xl font-bold text-white">Courses</h1>
-            </div>
-            <p className="text-white/90 text-sm ml-14">
+      <div className="h-full flex flex-col bg-slate-950">
+        {/* Hero Header with Gradient */}
+        <div className="relative overflow-hidden">
+          {/* Gradient Background */}
+          <div className="absolute inset-0 bg-gradient-to-b from-indigo-900/40 via-slate-950/60 to-slate-950" />
+          
+          <div className="relative max-w-[1400px] mx-auto px-8 py-12">
+            <h1 className="text-4xl font-bold text-white mb-2">Courses</h1>
+            <p className="text-slate-400 text-lg">
               Explore, create, and organize your learning materials
             </p>
           </div>
@@ -291,18 +275,18 @@ export default function CoursesUnified() {
 
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-[1400px] mx-auto px-8 pt-6 pb-10">
-            {/* Tab Switcher & Create Button */}
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-              <div className="flex gap-3">
+            {/* Tab Switcher & Controls */}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+              <div className="flex gap-2">
                 <button
                   onClick={() => canBrowse && setActiveTab('browse')}
                   disabled={!canBrowse}
-                  className={`px-5 py-2.5 rounded-lg font-medium transition ${
+                  className={`px-4 py-2 rounded-lg font-medium transition ${
                     activeTab === 'browse'
-                      ? 'bg-gradient-to-r from-brand-500 to-accent-400 text-white shadow-md'
+                      ? 'bg-white text-slate-950'
                       : canBrowse
-                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-50'
+                        ? 'text-slate-400 hover:text-white'
+                        : 'text-slate-600 cursor-not-allowed opacity-50'
                   }`}
                 >
                   Browse
@@ -311,93 +295,76 @@ export default function CoursesUnified() {
 
                 <button
                   onClick={() => setActiveTab('my-courses')}
-                  className={`px-5 py-2.5 rounded-lg font-medium transition ${
+                  className={`px-4 py-2 rounded-lg font-medium transition ${
                     activeTab === 'my-courses'
-                      ? 'bg-gradient-to-r from-brand-500 to-accent-400 text-white shadow-md'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      ? 'bg-white text-slate-950'
+                      : 'text-slate-400 hover:text-white'
                   }`}
                 >
                   My Courses
                 </button>
               </div>
 
-              {/* Create Course Button - Premium gradient with glow */}
+              {/* Create Button */}
               {user && canAccess && (
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-semibold text-sm tracking-wide shadow-[0_8px_30px_rgba(99,102,241,0.4)] hover:shadow-[0_12px_40px_rgba(124,58,237,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                  className="flex items-center gap-2 px-4 py-2 bg-white text-slate-950 rounded-full font-medium hover:bg-white/90 transition"
                 >
                   <Plus className="h-4 w-4" />
                   Create Course
                 </button>
               )}
-            </div>{' '}
+            </div>
             {/* Search & Filters */}
-            <div className="backdrop-blur-lg bg-white/90 dark:bg-slate-900/90 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.25)] border border-white/10 p-4 mb-8">
-              <div className="flex flex-col lg:flex-row gap-4">
-                {/* Search */}
-                <div className="flex-1 relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search courses by title or description..."
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                  />
-                  {searchInput && (
-                    <button
-                      onClick={() => setSearchInput('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-
-                {/* Filter Toggle (Mobile) */}
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="lg:hidden flex items-center justify-center gap-2 px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                >
-                  <Filter className="h-5 w-5" />
-                  Filters
-                  {hasActiveFilters && (
-                    <span className="px-1.5 py-0.5 text-xs bg-primary-500 text-white rounded-full">
-                      {[category, visibility].filter(Boolean).length}
-                    </span>
-                  )}
-                </button>
-
-                {/* Filters (Desktop always visible, Mobile toggleable) */}
-                <div
-                  className={`${showFilters ? 'flex' : 'hidden'} lg:flex flex-col lg:flex-row gap-3`}
-                >
-                  {/* Category */}
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent cursor-pointer min-w-[160px]"
+            <div className="flex flex-col lg:flex-row gap-4 mb-8">
+              {/* Search */}
+              <div className="flex-1 relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
+                <input
+                  type="text"
+                  placeholder="Search courses..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 bg-slate-900 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-slate-700 transition"
+                />
+                {searchInput && (
+                  <button
+                    onClick={() => setSearchInput('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-slate-300"
                   >
-                    {CATEGORIES.map((cat) => (
-                      <option key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </option>
-                    ))}
-                  </select>
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
 
-                  {/* Visibility (Premium only) */}
-                  {isPremium && (
-                    <select
-                      value={visibility}
-                      onChange={(e) => setVisibility(e.target.value)}
-                      className="px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent cursor-pointer min-w-[140px]"
-                    >
-                      <option value="">All Visibility</option>
-                      <option value="PRIVATE">Private</option>
-                      <option value="PUBLIC">Public</option>
-                    </select>
-                  )}
+              {/* Filters */}
+              <div className="flex gap-3">
+                {/* Category */}
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="px-4 py-3 bg-slate-900 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-slate-700 cursor-pointer min-w-[160px]"
+                >
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Visibility (Premium only) */}
+                {isPremium && (
+                  <select
+                    value={visibility}
+                    onChange={(e) => setVisibility(e.target.value)}
+                    className="px-4 py-3 bg-slate-900 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-slate-700 cursor-pointer min-w-[140px]"
+                  >
+                    <option value="">All Visibility</option>
+                    <option value="PRIVATE">Private</option>
+                    <option value="PUBLIC">Public</option>
+                  </select>
+                )}
 
                   {/* Clear Filters */}
                   {hasActiveFilters && (
@@ -410,11 +377,18 @@ export default function CoursesUnified() {
                   )}
                 </div>
               </div>
-            </div>
-            {/* Course Content with Smooth Transitions */}
+            {/* Course Gallery */}
             {isLoading ? (
-                <div>
-                  <CourseGridSkeleton count={6} />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="space-y-4 animate-pulse">
+                      <div className="aspect-video bg-slate-800 rounded-xl" />
+                      <div className="space-y-2">
+                        <div className="h-4 bg-slate-800 rounded w-3/4" />
+                        <div className="h-3 bg-slate-800 rounded w-1/2" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : error ? (
                 <div className="flex items-center justify-center py-20">
@@ -427,7 +401,7 @@ export default function CoursesUnified() {
                 </div>
               ) : courses.length === 0 ? (
                 /* Empty State */
-                <GlassCard className="p-8">
+                <div className="flex items-center justify-center py-20">
                   <EmptyState
                     icon={<BookOpen className="h-8 w-8" />}
                     title={emptyState.title}
@@ -436,136 +410,122 @@ export default function CoursesUnified() {
                     onAction={emptyState.onAction}
                     illustration={hasActiveFilters ? undefined : 'courses'}
                   />
-                </GlassCard>
+                </div>
               ) : (
-                /* Courses Grid */
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-4">
-                  {courses.map((course: Course) => (
-                    <GlassCard
-                      key={course.id}
-                      variant="hover"
-                      className="group relative overflow-hidden"
-                    >
-                      {/* Cover Image with Gradient and Inner Shadow */}
-                      <Link to={`/courses/${course.id}`} className="block">
-                        <div className="relative h-44 overflow-hidden">
-                          {course.coverImage ? (
-                            <>
+                /* Streaming-Style Course Gallery */
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6">
+                  <AnimatePresence>
+                    {courses.map((course: Course, index: number) => (
+                      <motion.div
+                        key={course.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="group cursor-pointer"
+                      >
+                        {/* Cover Image with Hover Play Button */}
+                        <div className="relative aspect-video rounded-xl overflow-hidden mb-4">
+                          <Link to={`/courses/${course.id}`} className="block h-full">
+                            {course.coverImage ? (
                               <img
                                 src={course.coverImage}
                                 alt={course.title}
                                 loading="lazy"
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               />
-                              {/* Inner shadow for blending */}
-                              <div className="absolute inset-0 shadow-[inset_0_0_60px_rgba(0,0,0,0.5)]" />
-                            </>
-                          ) : (
-                            <div
-                              className={`w-full h-full bg-gradient-to-br ${CATEGORY_GRADIENTS[course.category] || CATEGORY_GRADIENTS.OTHER} flex items-center justify-center`}
-                            >
-                              <BookOpen className="h-14 w-14 text-white/80 group-hover:scale-110 transition-transform duration-300" />
-                            </div>
-                          )}
-                          {/* Gradient Overlay */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        </div>
-                      </Link>
-
-                      {/* Visibility Badge */}
-                      <div className="absolute top-3 left-3">
-                        <div className="backdrop-blur-sm">
-                          <VisibilityChip visibility={course.visibility} size="sm" />
-                        </div>
-                      </div>
-
-                      {/* Menu Button (only for owner) */}
-                      {course.isOwner && (
-                        <div className="absolute top-3 right-3">
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setOpenMenu(openMenu === course.id ? null : course.id);
-                            }}
-                            className="p-1.5 rounded-full bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-700 transition-colors shadow-sm"
-                          >
-                            <MoreVertical className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-                          </button>
-
-                          {openMenu === course.id && (
-                            <div className="absolute right-0 mt-1 w-48 bg-white dark:bg-slate-900 rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] py-1 z-10 border border-slate-700/20 animate-in fade-in slide-in-from-top-2 duration-200">
-                              <Link
-                                to={`/courses/${course.id}`}
-                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            ) : (
+                              <div
+                                className={`w-full h-full bg-gradient-to-br ${CATEGORY_GRADIENTS[course.category] || CATEGORY_GRADIENTS.OTHER} flex items-center justify-center`}
                               >
-                                <Edit className="h-4 w-4" />
-                                Edit
-                              </Link>
+                                <BookOpen className="h-16 w-16 text-white/60" />
+                              </div>
+                            )}
+                            
+                            {/* Play/Resume Overlay */}
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                              <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center transform group-hover:scale-110 transition-transform">
+                                <Play className="w-8 h-8 text-slate-950 ml-1" fill="currentColor" />
+                              </div>
+                            </div>
+                          </Link>
+                          
+                          {/* Visibility Badge */}
+                          <div className="absolute top-3 left-3">
+                            <VisibilityChip visibility={course.visibility} size="sm" />
+                          </div>
+
+                          {/* Menu Button */}
+                          {course.isOwner && (
+                            <div className="absolute top-3 right-3">
                               <button
-                                onClick={() => {
-                                  const shareUrl = `${window.location.origin}/courses/${course.id}`;
-                                  navigator.clipboard.writeText(shareUrl);
-                                  toast.success('Link copied!');
-                                  setOpenMenu(null);
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setOpenMenu(openMenu === course.id ? null : course.id);
                                 }}
-                                className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                className="p-1.5 rounded-full bg-black/60 hover:bg-black/80 transition-colors"
                               >
-                                <Share2 className="h-4 w-4" />
-                                Copy Link
+                                <MoreVertical className="h-4 w-4 text-white" />
                               </button>
-                              <hr className="my-1 border-gray-200 dark:border-gray-700" />
-                              <button
-                                onClick={() => handleDelete(course.id)}
-                                className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                                Delete
-                              </button>
+
+                              {openMenu === course.id && (
+                                <div className="absolute right-0 mt-1 w-48 bg-slate-900 rounded-lg shadow-xl py-1 z-10 border border-slate-800">
+                                  <Link
+                                    to={`/courses/${course.id}`}
+                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-white hover:bg-slate-800"
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                    Edit
+                                  </Link>
+                                  <button
+                                    onClick={() => {
+                                      const shareUrl = `${window.location.origin}/courses/${course.id}`;
+                                      navigator.clipboard.writeText(shareUrl);
+                                      toast.success('Link copied!');
+                                      setOpenMenu(null);
+                                    }}
+                                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-white hover:bg-slate-800"
+                                  >
+                                    <Share2 className="h-4 w-4" />
+                                    Copy Link
+                                  </button>
+                                  <hr className="my-1 border-slate-800" />
+                                  <button
+                                    onClick={() => handleDelete(course.id)}
+                                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-400 hover:bg-red-900/20"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    Delete
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
-                      )}
 
-                      {/* Content */}
-                      <Link to={`/courses/${course.id}`} className="block p-5">
-                        <div className="flex items-center gap-2 mb-3">
-                          <span
-                            className={`text-xs font-medium px-2.5 py-1 rounded-lg ${CATEGORY_COLORS[course.category]?.bg || CATEGORY_COLORS.OTHER.bg} ${CATEGORY_COLORS[course.category]?.text || CATEGORY_COLORS.OTHER.text}`}
-                          >
-                            {CATEGORIES.find((c) => c.value === course.category)?.label ||
-                              course.category.replace('_', ' ')}
-                          </span>
-                        </div>
-
-                        <h3 className="text-lg font-semibold text-slate-100 mb-2 group-hover:text-indigo-300 transition-colors line-clamp-2">
-                          {course.title}
-                        </h3>
-
-                        {course.description ? (
-                          <p className="text-slate-400 text-sm mb-4 line-clamp-2">
-                            {course.description}
-                          </p>
-                        ) : (
-                          <p className="text-slate-500 text-sm mb-4 italic">
-                            No description
-                          </p>
-                        )}
-
-                        <div className="flex items-center justify-between text-sm text-slate-400 pt-3 border-t border-white/10">
-                          <div className="flex items-center gap-1.5">
-                            <BookOpen className="h-4 w-4" />
-                            <span>
+                        {/* Content Below Image */}
+                        <Link to={`/courses/${course.id}`} className="block">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xs text-slate-500 uppercase tracking-wide">
+                              {CATEGORIES.find((c) => c.value === course.category)?.label ||
+                                course.category.replace('_', ' ')}
+                            </span>
+                            <span className="text-xs text-slate-600">•</span>
+                            <span className="text-xs text-slate-500">
                               {course.filesCount} {course.filesCount === 1 ? 'file' : 'files'}
                             </span>
                           </div>
-                          <div className="flex items-center gap-1.5">
-                            <User className="h-4 w-4" />
-                            <span className="truncate max-w-[100px]">{course.creator.name}</span>
-                          </div>
-                        </div>
-                      </Link>
-                    </GlassCard>
-                  ))}
+
+                          <h3 className="text-base font-semibold text-white mb-1 line-clamp-2 group-hover:text-slate-300 transition-colors">
+                            {course.title}
+                          </h3>
+
+                          <p className="text-sm text-slate-500 truncate">
+                            {course.creator.name}
+                          </p>
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 </div>
               )}
           </div>
