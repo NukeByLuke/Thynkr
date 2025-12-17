@@ -32,7 +32,7 @@ enum AchievementTier {
   SILVER
   GOLD
   PLATINUM
-  DIAMOND
+  RUBY
 }
 
 model User {
