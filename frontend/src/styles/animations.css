@@ -142,3 +142,20 @@ pre code.hljs {
 .scrollbar-custom::-webkit-scrollbar-thumb:hover {
   @apply bg-gradient-to-br from-secondary-600 to-accent-600 rounded-full;
 }
+
+/* Achievement badge glow animation for Diamond tier */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.2),
+                0 4px 6px -4px rgba(79, 70, 229, 0.1);
+  }
+  50% {
+    box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.3),
+                0 8px 10px -6px rgba(79, 70, 229, 0.2),
+                0 0 40px rgba(139, 92, 246, 0.3);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
