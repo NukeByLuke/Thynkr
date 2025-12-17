@@ -1,6 +1,6 @@
 /**
  * Skeleton Loading Components
- * Thea-inspired shimmer loading placeholders with gray gradient animation.
+ * Performance-optimized shimmer loading with GPU acceleration for flicker-free transitions
  */
 
 import { clsx } from 'clsx';
@@ -11,22 +11,58 @@ interface SkeletonProps {
 
 /**
  * Base shimmer skeleton element
- * Gray gradient with smooth shimmer animation
+ * Optimized gradient shimmer with GPU acceleration
  */
 export function Skeleton({ className }: SkeletonProps) {
   return (
     <div
       className={clsx(
-        'animate-pulse rounded-lg',
-        'bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200',
-        'dark:from-slate-700 dark:via-slate-600 dark:to-slate-700',
-        'bg-[length:200%_100%]',
+        'rounded-lg relative overflow-hidden',
+        'bg-slate-800',
         className
       )}
-      style={{
-        animation: 'shimmer 1.5s ease-in-out infinite',
-      }}
-    />
+    >
+      <div
+        className="absolute inset-0 -translate-x-full animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800"
+        style={{ willChange: 'transform' }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Generic grid skeleton for courses, cards, and grid layouts
+ * Maintains aspect ratios to prevent layout shifts
+ */
+export function GridSkeleton({ 
+  count = 6,
+  columns = { sm: 1, md: 2, lg: 3 },
+  aspectRatio = 'video' // 'video' (16:9), 'square', 'portrait'
+}: { 
+  count?: number;
+  columns?: { sm: number; md: number; lg: number };
+  aspectRatio?: 'video' | 'square' | 'portrait';
+}) {
+  const aspectClass = {
+    video: 'aspect-video',
+    square: 'aspect-square',
+    portrait: 'aspect-[3/4]'
+  }[aspectRatio];
+
+  return (
+    <div className={`grid grid-cols-${columns.sm} md:grid-cols-${columns.md} lg:grid-cols-${columns.lg} gap-6`}>
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="space-y-4">
+          {/* Card image */}
+          <Skeleton className={`w-full ${aspectClass} rounded-xl`} />
+          {/* Card content */}
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-3/4 rounded-md" />
+            <Skeleton className="h-3 w-1/2 rounded-md" />
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -35,7 +71,7 @@ export function Skeleton({ className }: SkeletonProps) {
  */
 export function CourseCardSkeleton() {
   return (
-    <div className="rounded-2xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-6 space-y-4">
+    <div className="rounded-2xl bg-slate-900 border border-white/5 p-6 space-y-4">
       {/* Image placeholder */}
       <Skeleton className="h-40 w-full rounded-xl" />
       {/* Title */}
@@ -59,7 +95,7 @@ export function CourseCardSkeleton() {
  */
 export function SummarySkeleton() {
   return (
-    <div className="rounded-2xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-8 space-y-6">
+    <div className="rounded-2xl bg-slate-900 border border-white/5 p-8 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Skeleton className="h-12 w-12 rounded-xl" />
@@ -90,11 +126,61 @@ export function SummarySkeleton() {
 }
 
 /**
+ * Generic table skeleton for file lists and data tables
+ * Maintains exact layout dimensions to prevent shifts
+ */
+export function TableSkeleton({ 
+  rows = 5, 
+  columns = 4,
+  showHeader = true 
+}: { 
+  rows?: number; 
+  columns?: number;
+  showHeader?: boolean;
+}) {
+  return (
+    <div className="space-y-3">
+      {/* Table header */}
+      {showHeader && (
+        <div className="flex items-center gap-4 px-4 py-3">
+          {Array.from({ length: columns }).map((_, i) => (
+            <Skeleton 
+              key={i} 
+              className={clsx(
+                'h-4',
+                i === 0 ? 'w-12' : i === columns - 1 ? 'w-20' : 'flex-1'
+              )} 
+            />
+          ))}
+        </div>
+      )}
+      {/* Table rows */}
+      {Array.from({ length: rows }).map((_, rowIndex) => (
+        <div 
+          key={rowIndex} 
+          className="flex items-center gap-4 p-4 rounded-xl bg-slate-900 border border-white/5"
+        >
+          {Array.from({ length: columns }).map((_, colIndex) => (
+            <Skeleton 
+              key={colIndex}
+              className={clsx(
+                'h-5',
+                colIndex === 0 ? 'w-10' : colIndex === columns - 1 ? 'w-16' : 'flex-1'
+              )} 
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
  * Skeleton for file list items
  */
 export function FileItemSkeleton() {
   return (
-    <div className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
+    <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-900 border border-white/5">
       {/* File icon */}
       <Skeleton className="h-10 w-10 rounded-lg flex-shrink-0" />
       {/* File info */}
@@ -122,7 +208,7 @@ export function FileListSkeleton({ count = 5 }: { count?: number }) {
 }
 
 /**
- * Skeleton for course grid
+ * Skeleton for course grid (legacy - use GridSkeleton instead)
  */
 export function CourseGridSkeleton({ count = 6 }: { count?: number }) {
   return (
@@ -139,7 +225,7 @@ export function CourseGridSkeleton({ count = 6 }: { count?: number }) {
  */
 export function StatCardSkeleton() {
   return (
-    <div className="rounded-2xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-6">
+    <div className="rounded-2xl bg-slate-900 border border-white/5 p-6">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
           <Skeleton className="h-4 w-20 rounded-md" />
