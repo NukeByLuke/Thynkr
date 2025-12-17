@@ -161,13 +161,19 @@ export default function Achievements() {
   const { data: stats, isLoading } = useQuery<UserStats>({
     queryKey: ['achievements'],
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/gamification/achievements`, {
+      const response = await fetch(`${API_URL}/progress`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
       if (!response.ok) throw new Error('Failed to fetch achievements');
-      return response.json();
+      const data = await response.json();
+      // Transform data to match expected format
+      return {
+        xp: data.xp || 0,
+        level: data.level || 1,
+        achievements: data.achievements || [],
+      };
     },
   });
 
@@ -230,37 +236,43 @@ export default function Achievements() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-panel rounded-2xl p-6 md:p-8 mb-8 relative overflow-hidden bg-gradient-to-br from-primary-500/10 via-purple-500/10 to-pink-500/10"
+        className="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl p-8 mb-8 text-white relative overflow-hidden"
       >
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-24 -mb-24" />
+        
         <div className="relative z-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center shadow-lg">
-                <Crown className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold text-heading">Level {currentLevel}</h2>
-                <p className="text-muted">Keep up the great work!</p>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
+                  <Crown className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold">Level {currentLevel}</h2>
+                  <p className="text-white/80">Keep up the amazing work!</p>
+                </div>
               </div>
             </div>
-            <div className="text-left md:text-right">
-              <div className="text-3xl md:text-4xl font-bold text-heading">{currentXP.toLocaleString()}</div>
-              <div className="text-muted text-sm">Total XP</div>
+            <div className="text-right">
+              <div className="text-4xl font-bold">{currentXP.toLocaleString()}</div>
+              <div className="text-white/80 text-sm">Total XP</div>
             </div>
           </div>
 
           {/* Progress Bar */}
           <div className="space-y-2">
-            <div className="flex justify-between text-sm text-body">
+            <div className="flex justify-between text-sm text-white/90">
               <span>{xpInCurrentLevel.toLocaleString()} XP</span>
               <span>{xpForNextLevel.toLocaleString()} XP to Level {currentLevel + 1}</span>
             </div>
-            <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+            <div className="h-3 bg-white/20 rounded-full overflow-hidden backdrop-blur">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${xpProgress}%` }}
                 transition={{ duration: 1, ease: 'easeOut' }}
-                className="h-full bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500 rounded-full shadow-lg"
+                className="h-full bg-white rounded-full shadow-lg"
               />
             </div>
           </div>
@@ -268,97 +280,143 @@ export default function Achievements() {
       </motion.div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        <button
-          onClick={() => setFilter('all')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            filter === 'all'
-              ? 'bg-primary-500 text-white shadow-lg'
-              : 'glass-panel text-body hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <Filter className="w-4 h-4 inline mr-2" />
-          All
-        </button>
-        <button
-          onClick={() => setFilter('unlocked')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            filter === 'unlocked'
-              ? 'bg-green-500 text-white shadow-lg'
-              : 'glass-panel text-body hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <CheckCircle2 className="w-4 h-4 inline mr-2" />
-          Unlocked ({unlocked.length})
-        </button>
-        <button
-          onClick={() => setFilter('in-progress')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            filter === 'in-progress'
-              ? 'bg-blue-500 text-white shadow-lg'
-              : 'glass-panel text-body hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <TrendingUp className="w-4 h-4 inline mr-2" />
-          In Progress ({inProgress.length})
-        </button>
-        <button
-          onClick={() => setFilter('locked')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            filter === 'locked'
-              ? 'bg-slate-500 text-white shadow-lg'
-              : 'glass-panel text-body hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <Lock className="w-4 h-4 inline mr-2" />
-          Locked ({locked.length})
-        </button>
-        
-        <div className="w-px bg-slate-300 dark:bg-slate-700 mx-2" />
-        
-        {(['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND'] as AchievementTier[]).map((tier) => {
-          const config = tierConfig[tier];
-          const count = achievements.filter((a) => a.currentTier === tier).length;
-          return (
-            <button
-              key={tier}
-              onClick={() => setFilter(tier)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                filter === tier
-                  ? `${config.icon} text-white shadow-lg`
-                  : `glass-panel ${config.text} hover:bg-slate-100 dark:hover:bg-slate-800`
-              }`}
-            >
-              {tier} ({count})
-            </button>
-          );
-        })}
-      </div>
+      {achievements.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-6">
+          <button
+            onClick={() => setFilter('all')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              filter === 'all'
+                ? 'bg-primary-500 text-white shadow-lg'
+                : 'glass-panel text-body hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <Filter className="w-4 h-4 inline mr-2" />
+            All
+          </button>
+          <button
+            onClick={() => setFilter('unlocked')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              filter === 'unlocked'
+                ? 'bg-green-500 text-white shadow-lg'
+                : 'glass-panel text-body hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <CheckCircle2 className="w-4 h-4 inline mr-2" />
+            Unlocked ({unlocked.length})
+          </button>
+          <button
+            onClick={() => setFilter('in-progress')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              filter === 'in-progress'
+                ? 'bg-blue-500 text-white shadow-lg'
+                : 'glass-panel text-body hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <TrendingUp className="w-4 h-4 inline mr-2" />
+            In Progress ({inProgress.length})
+          </button>
+          <button
+            onClick={() => setFilter('locked')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              filter === 'locked'
+                ? 'bg-slate-500 text-white shadow-lg'
+                : 'glass-panel text-body hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <Lock className="w-4 h-4 inline mr-2" />
+            Locked ({locked.length})
+          </button>
+          
+          <div className="w-px bg-slate-300 dark:bg-slate-700 mx-2" />
+          
+          {(['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND'] as AchievementTier[]).map((tier) => {
+            const config = tierConfig[tier];
+            const count = achievements.filter((a) => a.currentTier === tier).length;
+            return (
+              <button
+                key={tier}
+                onClick={() => setFilter(tier)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  filter === tier
+                    ? `${config.icon} text-white shadow-lg`
+                    : `glass-panel ${config.text} hover:bg-slate-100 dark:hover:bg-slate-800`
+                }`}
+              >
+                {tier} ({count})
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Achievement Grid */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={filter}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4"
-        >
-          {filteredAchievements.map((achievement, index) => (
-            <AchievementCard
-              key={achievement.id}
-              achievement={achievement}
-              index={index}
-            />
-          ))}
-        </motion.div>
-      </AnimatePresence>
-
-      {filteredAchievements.length === 0 && (
-        <div className="text-center py-12 glass-panel rounded-xl">
-          <Trophy className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-          <p className="text-muted">No achievements found for this filter</p>
+      {achievements.length === 0 ? (
+        <div className="text-center py-16 glass-panel rounded-xl">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center">
+              <Trophy className="w-12 h-12 text-white" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+              Achievement System Coming Soon!
+            </h3>
+            <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-md mx-auto">
+              The 5-tier achievement system is currently being set up. Keep studying and your progress will be tracked automatically once it's live!
+            </p>
+            <div className="flex items-center justify-center gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                <span className="text-slate-600 dark:text-slate-400">Bronze</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-slate-400"></div>
+                <span className="text-slate-600 dark:text-slate-400">Silver</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <span className="text-slate-600 dark:text-slate-400">Gold</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-cyan-400"></div>
+                <span className="text-slate-600 dark:text-slate-400">Platinum</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
+                <span className="text-slate-600 dark:text-slate-400">Diamond</span>
+              </div>
+            </div>
+          </motion.div>
         </div>
+      ) : (
+        <>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={filter}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4"
+            >
+              {filteredAchievements.map((achievement, index) => (
+                <AchievementCard
+                  key={achievement.id}
+                  achievement={achievement}
+                  index={index}
+                />
+              ))}
+            </motion.div>
+          </AnimatePresence>
+
+          {filteredAchievements.length === 0 && (
+            <div className="text-center py-12 glass-panel rounded-xl">
+              <Trophy className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+              <p className="text-muted">No achievements found for this filter</p>
+            </div>
+          )}
+        </>
       )}
     </PageContainer>
   );
