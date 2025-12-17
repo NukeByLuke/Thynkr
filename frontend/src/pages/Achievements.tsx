@@ -25,7 +25,7 @@ import {
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
-type AchievementTier = 'BRONZE' | 'SILVER' | 'GOLD' | 'PLATINUM' | 'DIAMOND';
+type AchievementTier = 'BRONZE' | 'SILVER' | 'GOLD' | 'PLATINUM' | 'RUBY';
 type FilterOption = 'all' | 'unlocked' | 'in-progress' | 'locked' | AchievementTier;
 
 interface AchievementDefinition {
@@ -33,21 +33,22 @@ interface AchievementDefinition {
   name: string;
   description: string;
   icon: string;
-  category: 'study' | 'social' | 'skill' | 'streak' | 'content';
+  category: 'study' | 'social' | 'skill' | 'streak' | 'content' | 'mastery';
   thresholds: {
     BRONZE: number;
     SILVER: number;
     GOLD: number;
     PLATINUM: number;
-    DIAMOND: number;
+    RUBY: number;
   };
   xpRewards: {
     BRONZE: number;
     SILVER: number;
     GOLD: number;
     PLATINUM: number;
-    DIAMOND: number;
+    RUBY: number;
   };
+  isMastery?: boolean;
 }
 
 interface UserAchievement {
@@ -114,16 +115,29 @@ const tierConfig = {
     icon: 'bg-gradient-to-br from-cyan-400 to-blue-500',
     badgeText: 'text-cyan-100',
   },
-  DIAMOND: {
-    border: 'border-indigo-400/50',
-    shadow: 'shadow-xl shadow-indigo-500/20',
-    glow: 'hover:shadow-2xl hover:shadow-indigo-500/30 animate-pulse-glow',
-    gradient: 'from-indigo-500 via-purple-500 to-pink-500',
-    bg: 'bg-gradient-to-br from-indigo-50/50 via-purple-50/50 to-pink-50/50 dark:from-indigo-950/20 dark:via-purple-950/20 dark:to-pink-950/20',
-    text: 'text-indigo-700 dark:text-indigo-300',
-    icon: 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500',
-    badgeText: 'text-indigo-100',
+  RUBY: {
+    border: 'border-red-500/50',
+    shadow: 'shadow-xl shadow-red-600/20',
+    glow: 'hover:shadow-2xl hover:shadow-red-600/30 animate-pulse-glow',
+    gradient: 'from-red-600 via-rose-500 to-pink-600',
+    bg: 'bg-gradient-to-br from-red-50/50 via-rose-50/50 to-pink-50/50 dark:from-red-950/20 dark:via-rose-950/20 dark:to-pink-950/20',
+    text: 'text-red-700 dark:text-red-300',
+    icon: 'bg-gradient-to-br from-red-600 via-rose-500 to-pink-600',
+    badgeText: 'text-red-100',
   },
+};
+
+// Special styling for Mastery achievements
+const masteryConfig = {
+  border: 'border-amber-500/60 border-2',
+  shadow: 'shadow-2xl shadow-amber-600/30',
+  glow: 'hover:shadow-3xl hover:shadow-amber-600/40 animate-pulse-glow',
+  gradient: 'from-amber-500 via-yellow-400 to-amber-600',
+  bg: 'bg-gradient-to-br from-amber-50/80 via-yellow-50/80 to-amber-50/80 dark:from-amber-950/30 dark:via-yellow-950/30 dark:to-amber-950/30',
+  text: 'text-amber-700 dark:text-amber-300',
+  icon: 'bg-gradient-to-br from-amber-500 via-yellow-400 to-amber-600',
+  badgeText: 'text-amber-900',
+  ring: 'ring-2 ring-amber-400/50 ring-offset-2 ring-offset-slate-900',
 };
 
 // Icon mapping
@@ -148,6 +162,9 @@ const iconMap: Record<string, any> = {
   '📋': FileText,
   '🤝': Star,
   '🌍': Crown,
+  '👑': Crown,
+  '⭐': Star,
+  '🌟': Sparkles,
 };
 
 // XP calculation for levels
@@ -208,7 +225,7 @@ export default function Achievements() {
     filteredAchievements = inProgress;
   } else if (filter === 'locked') {
     filteredAchievements = locked;
-  } else if (['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND'].includes(filter)) {
+  } else if (['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'RUBY'].includes(filter)) {
     filteredAchievements = achievements.filter((a) => a.currentTier === filter);
   }
 
@@ -329,7 +346,7 @@ export default function Achievements() {
           
           <div className="w-px bg-slate-300 dark:bg-slate-700 mx-2" />
           
-          {(['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND'] as AchievementTier[]).map((tier) => {
+          {(['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'RUBY'] as AchievementTier[]).map((tier) => {
             const config = tierConfig[tier];
             const count = achievements.filter((a) => a.currentTier === tier).length;
             return (
@@ -384,8 +401,8 @@ export default function Achievements() {
                 <span className="text-slate-600 dark:text-slate-400">Platinum</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
-                <span className="text-slate-600 dark:text-slate-400">Diamond</span>
+                <div className="w-3 h-3 rounded-full bg-gradient-to-br from-red-600 via-rose-500 to-pink-600"></div>
+                <span className="text-slate-600 dark:text-slate-400">Ruby</span>
               </div>
             </div>
           </motion.div>
@@ -424,7 +441,7 @@ export default function Achievements() {
 
 // Helper function to get next tier
 function getNextTier(currentTier: AchievementTier): AchievementTier | null {
-  const tiers: AchievementTier[] = ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND'];
+  const tiers: AchievementTier[] = ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'RUBY'];
   const currentIndex = tiers.indexOf(currentTier);
   if (currentIndex === -1 || currentIndex === tiers.length - 1) return null;
   return tiers[currentIndex + 1];
@@ -432,10 +449,11 @@ function getNextTier(currentTier: AchievementTier): AchievementTier | null {
 
 // Achievement Card Component
 function AchievementCard({ achievement, index }: { achievement: UserAchievement; index: number }) {
-  const tier = tierConfig[achievement.currentTier];
+  const isMastery = achievement.definition.isMastery || achievement.definition.category === 'mastery';
+  const tier = isMastery ? masteryConfig : tierConfig[achievement.currentTier];
   const Icon = iconMap[achievement.definition.icon] || Trophy;
   const isLocked = achievement.currentValue === 0;
-  const nextTier = getNextTier(achievement.currentTier);
+  const nextTier = isMastery ? null : getNextTier(achievement.currentTier);
   const progress = achievement.progress;
 
   return (
@@ -447,8 +465,8 @@ function AchievementCard({ achievement, index }: { achievement: UserAchievement;
         isLocked ? 'opacity-60 grayscale' : ''
       } ${tier.border} ${tier.shadow} ${tier.glow}`}
     >
-      {/* Shimmer effect for Diamond tier */}
-      {achievement.currentTier === 'DIAMOND' && !isLocked && (
+      {/* Shimmer effect for Ruby tier and Mastery */}
+      {((achievement.currentTier === 'RUBY' && !isMastery) || (isMastery && !isLocked)) && (
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
       )}
 
@@ -464,7 +482,7 @@ function AchievementCard({ achievement, index }: { achievement: UserAchievement;
           </div>
           <div className="flex flex-col items-end gap-1">
             <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${tier.icon} ${tier.badgeText}`}>
-              {achievement.currentTier}
+              {isMastery ? 'MASTERY' : achievement.currentTier}
             </span>
             {!isLocked && (
               <span className="text-xs text-muted">
@@ -482,11 +500,31 @@ function AchievementCard({ achievement, index }: { achievement: UserAchievement;
           {achievement.definition.description}
         </p>
 
-        {/* Progress Bar */}
-        {progress && nextTier && (
+        {/* Progress Bar - only for non-mastery achievements */}
+        {progress && nextTier && !isMastery && (
           <div className="space-y-1">
             <div className="flex justify-between text-xs text-body">
               <span>Progress to {nextTier}</span>
+              <span className="font-medium">
+                {progress.current.toLocaleString()} / {progress.required.toLocaleString()}
+              </span>
+            </div>
+            <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(100, progress.percentage)}%` }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+                className={`h-full ${tier.icon} rounded-full`}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Progress for Mastery achievements */}
+        {isMastery && progress && (
+          <div className="space-y-1">
+            <div className="flex justify-between text-xs text-body">
+              <span>Progress</span>
               <span className="font-medium">
                 {progress.current.toLocaleString()} / {progress.required.toLocaleString()}
               </span>
@@ -514,7 +552,7 @@ function AchievementCard({ achievement, index }: { achievement: UserAchievement;
         {isLocked && (
           <div className="flex items-center gap-1 text-xs text-muted mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
             <Gift className="w-3 h-3" />
-            <span>Unlock to earn {achievement.definition.xpRewards.BRONZE} XP</span>
+            <span>Unlock to earn {isMastery ? achievement.definition.xpRewards.BRONZE : achievement.definition.xpRewards.BRONZE} XP</span>
           </div>
         )}
       </div>
