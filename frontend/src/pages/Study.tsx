@@ -424,7 +424,7 @@ export default function Study() {
 
   if (isLoading) {
     return (
-      <div className="h-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+      <div className="h-full flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 dark:border-indigo-400"></div>
       </div>
     );
@@ -433,9 +433,9 @@ export default function Study() {
   // Show full study interface if a file is selected
   if (selectedFile) {
     return (
-      <div className="h-full flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
+      <div className="h-full flex flex-col overflow-hidden">
         {/* Back Button */}
-        <div className="bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/10">
+        <div className="glass-panel-strong border-b border-slate-200/50 dark:border-white/10">
           <div className="max-w-6xl mx-auto px-6 py-4">
             <button
               onClick={() => setSelectedFile(null)}
@@ -449,14 +449,14 @@ export default function Study() {
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-6xl mx-auto px-6 py-8">
-            <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl shadow-xl border border-slate-200/50 dark:border-white/10">
+            <div className="glass-panel-strong rounded-3xl shadow-xl">
               
               {/* File Header */}
               <div className="p-8 border-b border-slate-200/50 dark:border-white/10">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                <h2 className="text-2xl font-bold text-heading">
                   {selectedFile.originalName}
                 </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                <p className="text-sm text-muted mt-1">
                   {selectedFile.fileType.toUpperCase()} • {formatFileSize(selectedFile.fileSize)}
                 </p>
               </div>
@@ -497,7 +497,7 @@ export default function Study() {
 
   // Main Study Center View (No file selected)
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* Hidden File Input */}
       <input
         ref={fileInputRef}
@@ -509,7 +509,7 @@ export default function Study() {
       />
 
       {/* Abstract Header */}
-      <div className="relative overflow-hidden bg-slate-950 h-56">
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 dark:from-slate-950 dark:via-indigo-950 dark:to-slate-950 h-56">
         {/* Floating Abstract Shapes */}
         <motion.div
           animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
@@ -532,7 +532,7 @@ export default function Study() {
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
             Study Center
           </h1>
-          <p className="text-lg text-slate-300 max-w-2xl">
+          <p className="text-lg text-slate-200 dark:text-slate-300 max-w-2xl">
             Resume where you left off or start something new
           </p>
         </div>
@@ -554,21 +554,21 @@ export default function Study() {
             {/* Card 1: Browse Library */}
             <button
               onClick={() => navigate('/files')}
-              className="group bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-xl p-6 text-left transition-all hover:border-slate-900 dark:hover:border-white hover:shadow-sm"
+              className="group card-hover p-6 text-left transition-all hover:border-slate-400 dark:hover:border-white/30"
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center flex-shrink-0">
                   <FolderOpen className="w-6 h-6 text-slate-700 dark:text-slate-300" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-1">
+                  <h3 className="text-lg font-semibold text-heading mb-1">
                     Browse Files
                   </h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <p className="text-sm text-body">
                     View and manage your entire library
                   </p>
                 </div>
-                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors flex-shrink-0" />
+                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-slate-700 dark:group-hover:text-white transition-colors flex-shrink-0" />
               </div>
             </button>
 
@@ -576,21 +576,21 @@ export default function Study() {
             <button
               onClick={handleQuickUpload}
               disabled={uploadMutation.isPending}
-              className="group bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-xl p-6 text-left transition-all hover:border-slate-900 dark:hover:border-white hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group card-hover p-6 text-left transition-all hover:border-slate-400 dark:hover:border-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center flex-shrink-0">
                   <UploadCloud className="w-6 h-6 text-slate-700 dark:text-slate-300" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-1">
+                  <h3 className="text-lg font-semibold text-heading mb-1">
                     {uploadMutation.isPending ? 'Uploading...' : 'Upload Material'}
                   </h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <p className="text-sm text-body">
                     Add new documents, PDFs, or files
                   </p>
                 </div>
-                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors flex-shrink-0" />
+                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-slate-700 dark:group-hover:text-white transition-colors flex-shrink-0" />
               </div>
             </button>
           </div>
@@ -599,7 +599,7 @@ export default function Study() {
           {recentFiles.length > 0 && (
             <div>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <h2 className="text-2xl font-bold text-heading flex items-center gap-2">
                   <Clock className="w-6 h-6" />
                   Jump Back In
                 </h2>
@@ -610,16 +610,16 @@ export default function Study() {
                     key={file.id}
                     onClick={() => setSelectedFile(file)}
                     whileHover={{ x: 4 }}
-                    className="w-full flex items-center gap-4 p-4 bg-slate-900/50 dark:bg-slate-900/50 border border-white/5 dark:border-white/5 rounded-xl hover:bg-white/5 dark:hover:bg-white/5 hover:border-indigo-500/50 transition-all duration-300 group"
+                    className="w-full flex items-center gap-4 p-4 card-hover transition-all duration-300 group hover:border-indigo-500/50"
                   >
                     <div className="w-12 h-12 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl flex items-center justify-center">
                       <FileText className="w-6 h-6 text-indigo-500" />
                     </div>
                     <div className="flex-1 text-left">
-                      <h3 className="font-semibold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      <h3 className="font-semibold text-heading group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                         {file.originalName}
                       </h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                      <p className="text-sm text-muted">
                         {file.fileType.toUpperCase()} • {formatFileSize(file.fileSize)} • {formatDate(file.createdAt)}
                       </p>
                     </div>
@@ -636,10 +636,10 @@ export default function Study() {
               <div className="mx-auto w-20 h-20 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-2xl flex items-center justify-center mb-6">
                 <FileText className="h-10 w-10 text-indigo-500" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+              <h3 className="text-2xl font-bold text-heading mb-2">
                 No files yet
               </h3>
-              <p className="text-slate-600 dark:text-slate-400 mb-6">
+              <p className="text-body mb-6">
                 Upload your first file to get started with AI-powered study tools
               </p>
             </div>

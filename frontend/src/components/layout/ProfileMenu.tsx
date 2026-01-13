@@ -138,28 +138,33 @@ export default function ProfileMenu() {
               <span className="text-sm font-medium">Achievements</span>
             </button>
 
-            {/* Dark Mode Toggle */}
+            {/* Theme Toggle */}
             <button
               onClick={toggleDarkMode}
               className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 transition-colors text-left"
             >
               <div className="flex items-center gap-3">
                 {isDark ? (
-                  <Moon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                  <Moon className="w-4 h-4 text-blue-500" />
                 ) : (
-                  <Sun className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                  <Sun className="w-4 h-4 text-amber-500" />
                 )}
-                <span className="text-sm font-medium">Dark mode</span>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">Appearance</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    {isDark ? 'Dark' : 'Light'} mode
+                  </span>
+                </div>
               </div>
               {/* Toggle Switch */}
               <div
-                className={`w-9 h-5 rounded-full transition-colors ${
-                  isDark ? 'bg-blue-500' : 'bg-slate-200'
+                className={`w-11 h-6 rounded-full transition-all duration-200 ${
+                  isDark ? 'bg-blue-500' : 'bg-slate-300'
                 }`}
               >
                 <div
-                  className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${
-                    isDark ? 'translate-x-4' : 'translate-x-0.5'
+                  className={`w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-200 ${
+                    isDark ? 'translate-x-5' : 'translate-x-0.5'
                   } mt-0.5`}
                 />
               </div>

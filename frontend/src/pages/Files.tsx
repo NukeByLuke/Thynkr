@@ -279,9 +279,9 @@ export default function Files() {
 
       <div
         onClick={() => setContextMenu(null)}
-        className="min-h-screen bg-slate-950 relative overflow-hidden"
+        className="min-h-screen relative overflow-hidden"
         style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(255 255 255 / 0.02) 1px, transparent 0)',
+          backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(100 116 139 / 0.05) 1px, transparent 0)',
           backgroundSize: '40px 40px',
         }}
       >
@@ -289,7 +289,7 @@ export default function Files() {
         <div className="max-w-7xl mx-auto p-6 space-y-8">
           {/* Header */}
           <div className="flex items-center justify-between">
-            <h1 className="text-4xl font-bold text-white">Library</h1>
+            <h1 className="text-4xl font-bold text-heading">Library</h1>
             
             <div className="flex items-center gap-3">
               {/* Search Bar */}
@@ -300,7 +300,7 @@ export default function Files() {
                   placeholder="Search files and folders..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-80 pl-12 pr-4 py-2.5 bg-slate-900 border border-white/10 rounded-full text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
+                  className="w-80 pl-12 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-full text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 dark:focus:ring-white/20 transition-all"
                 />
               </div>
 
@@ -308,7 +308,7 @@ export default function Files() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadMutation.isPending}
-                className="px-4 py-2.5 bg-white text-slate-950 rounded-full font-medium hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+                className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
               >
                 <Upload className="w-4 h-4" />
                 {uploadMutation.isPending ? 'Uploading...' : 'Upload'}
@@ -362,7 +362,7 @@ export default function Files() {
               </h2>
 
               {/* Table Header - Sticky */}
-              <div className="grid grid-cols-[40px_1fr_140px_120px_100px_50px] gap-4 px-4 pb-3 border-b border-white/5 text-xs uppercase text-slate-500 font-medium tracking-wider sticky top-0 bg-slate-950 z-10">
+              <div className="grid grid-cols-[40px_1fr_140px_120px_100px_50px] gap-4 px-4 pb-3 border-b border-slate-200 dark:border-white/5 text-xs uppercase text-muted font-medium tracking-wider sticky top-0 bg-slate-50 dark:bg-slate-950 z-10">
                 <div className="text-center">#</div>
                 <div>Name</div>
                 <div>Type</div>
@@ -390,7 +390,7 @@ export default function Files() {
                           onContextMenu={(e) =>
                             handleContextMenu(e, 'file', file.id, file.originalName)
                           }
-                          className="group grid grid-cols-[40px_1fr_140px_120px_100px_50px] gap-4 items-center p-3 rounded-lg hover:bg-white/5 transition-colors border-b border-white/5 cursor-pointer"
+                          className="group grid grid-cols-[40px_1fr_140px_120px_100px_50px] gap-4 items-center p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors border-b border-slate-200/50 dark:border-white/5 cursor-pointer"
                         >
                           {/* Icon */}
                           <div className="flex items-center justify-center">
@@ -462,19 +462,19 @@ export default function Files() {
         {/* Context Menu */}
         {contextMenu && (
           <div
-            className="fixed bg-slate-900 border border-white/10 rounded-lg shadow-2xl py-2 z-50 min-w-[180px]"
+            className="fixed card shadow-2xl py-2 z-50 min-w-[180px]"
             style={{ left: contextMenu.x, top: contextMenu.y }}
           >
             <button
               onClick={handleRename}
-              className="w-full px-4 py-2 text-left text-white hover:bg-white/5 transition-colors flex items-center gap-3"
+              className="w-full px-4 py-2 text-left text-heading hover:bg-slate-100 dark:hover:bg-white/5 transition-colors flex items-center gap-3"
             >
               <Edit2 className="w-4 h-4" />
               Rename
             </button>
             <button
               onClick={handleDelete}
-              className="w-full px-4 py-2 text-left text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-3"
+              className="w-full px-4 py-2 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors flex items-center gap-3"
             >
               <Trash2 className="w-4 h-4" />
               Delete
@@ -488,16 +488,16 @@ export default function Files() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-slate-900 border border-white/10 rounded-2xl p-6 max-w-md w-full mx-4"
+              className="card p-6 max-w-md w-full mx-4"
             >
-              <h3 className="text-xl font-semibold text-white mb-4">
+              <h3 className="text-xl font-semibold text-heading mb-4">
                 Rename {selectedItem.type === 'folder' ? 'Folder' : 'File'}
               </h3>
               <input
                 type="text"
                 value={renameValue}
                 onChange={(e) => setRenameValue(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-800 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-white/20 mb-4"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg text-heading placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 dark:focus:ring-white/20 mb-4"
                 autoFocus
               />
               <div className="flex gap-3 justify-end">
