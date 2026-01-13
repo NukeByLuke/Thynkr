@@ -69,7 +69,7 @@ export default function StudyProgress() {
 
   if (isLoading) {
     return (
-      <div className="h-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+      <div className="h-full flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
     );
@@ -120,7 +120,7 @@ export default function StudyProgress() {
   };
 
   const getHeatmapColor = (count: number) => {
-    if (count === 0) return 'bg-slate-800/40 border border-slate-700/50';
+    if (count === 0) return 'bg-slate-200 dark:bg-slate-800/40 border border-slate-300 dark:border-slate-700/50';
     if (count <= 2) return 'bg-green-900/60 border border-green-800/50';
     if (count <= 4) return 'bg-green-700/70 border border-green-600/50';
     if (count <= 6) return 'bg-green-500/80 border border-green-400/50';
@@ -185,8 +185,8 @@ export default function StudyProgress() {
       </div>
 
       {/* GitHub-Style Activity Heatmap */}
-      <div className="bg-slate-900/50 dark:bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-lg p-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+      <div className="card backdrop-blur-xl shadow-lg p-6">
+        <h2 className="text-lg font-semibold text-heading mb-6 flex items-center gap-2">
           <Calendar className="w-5 h-5 text-indigo-500" />
           Study Activity (Last 12 Weeks)
         </h2>
@@ -207,7 +207,7 @@ export default function StudyProgress() {
           <div className="flex items-center gap-2 mt-4 text-xs text-slate-500">
             <span>Less</span>
             <div className="flex gap-1">
-              <div className="w-3 h-3 rounded-sm bg-slate-800/40 border border-slate-700/50" />
+              <div className="w-3 h-3 rounded-sm bg-slate-200 dark:bg-slate-800/40 border border-slate-300 dark:border-slate-700/50" />
               <div className="w-3 h-3 rounded-sm bg-green-900/60 border border-green-800/50" />
               <div className="w-3 h-3 rounded-sm bg-green-700/70 border border-green-600/50" />
               <div className="w-3 h-3 rounded-sm bg-green-500/80 border border-green-400/50" />
@@ -219,19 +219,18 @@ export default function StudyProgress() {
       </div>
 
       {/* Full-Width Weekly Activity Chart */}
-      <div className="bg-slate-900/50 dark:bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-lg p-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+      <div className="card backdrop-blur-xl shadow-lg p-6">
+        <h2 className="text-lg font-semibold text-heading mb-4 flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-indigo-500" />
           Weekly Activity
         </h2>
         <div className="space-y-3">
           {progress?.weeklyStats.dailyActivity.map((day) => (
             <div key={day.date} className="flex items-center gap-4">
-              <div className="w-20 text-sm text-slate-600 dark:text-slate-300">
+              <div className="w-20 text-sm text-body">
                 {getDayName(day.date)}
               </div>
-              <div className="flex-1 h-8 bg-slate-800/60 dark:bg-slate-800/60 rounded-full overflow-hidden">
-                <div
+              <div className="flex-1 h-8 bg-slate-200 dark:bg-slate-800/60 rounded-full overflow-hidden">\n                <div
                   className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-500"
                   style={{
                     width: `${Math.min((day.count / 10) * 100, 100)}%`,
@@ -241,7 +240,7 @@ export default function StudyProgress() {
               <div className="w-28 text-right text-sm text-slate-600 dark:text-slate-400">
                 {day.count} {day.count === 1 ? 'session' : 'sessions'}
               </div>
-              <div className="w-16 text-right text-sm font-medium text-slate-900 dark:text-white">
+              <div className="w-16 text-right text-sm font-medium text-heading">
                 {formatMinutes(day.minutes)}
               </div>
             </div>
@@ -250,7 +249,7 @@ export default function StudyProgress() {
         <div className="mt-6 pt-4 border-t border-white/10">
           <div className="flex justify-between text-sm">
             <span className="text-slate-600 dark:text-slate-300">This week total</span>
-            <span className="font-semibold text-slate-900 dark:text-white">
+            <span className="font-semibold text-heading">
               {progress?.weeklyStats.sessionsCount || 0} sessions •{' '}
               {formatMinutes(progress?.weeklyStats.totalMinutes || 0)}
             </span>
@@ -260,8 +259,8 @@ export default function StudyProgress() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Activity Breakdown */}
-        <div className="bg-slate-900/50 dark:bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-lg p-6">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+        <div className="card backdrop-blur-xl shadow-lg p-6">
+          <h2 className="text-lg font-semibold text-heading mb-4 flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-indigo-500" />
             Activity Breakdown
           </h2>
@@ -274,7 +273,7 @@ export default function StudyProgress() {
                     <Icon className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-slate-900 dark:text-white">
+                    <div className="text-sm font-medium text-heading">
                       {activityLabels[activity.type] || activity.type}
                     </div>
                     <div className="text-xs text-slate-500 dark:text-slate-400">
@@ -296,8 +295,8 @@ export default function StudyProgress() {
         </div>
 
         {/* Quiz Performance */}
-        <div className="bg-slate-900/50 dark:bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-lg p-6">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+        <div className="card backdrop-blur-xl shadow-lg p-6">
+          <h2 className="text-lg font-semibold text-heading mb-4 flex items-center gap-2">
             <Brain className="w-5 h-5 text-indigo-500" />
             Quiz Performance
           </h2>
@@ -326,7 +325,7 @@ export default function StudyProgress() {
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl font-bold text-slate-900 dark:text-white">
+                <span className="text-3xl font-bold text-heading">
                   {progress?.quizPerformance.averageScore || 0}%
                 </span>
                 <span className="text-xs text-slate-500 dark:text-slate-400">avg score</span>
@@ -339,8 +338,8 @@ export default function StudyProgress() {
         </div>
 
         {/* Study Stats */}
-        <div className="bg-slate-900/50 dark:bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-lg p-6">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+        <div className="card backdrop-blur-xl shadow-lg p-6">
+          <h2 className="text-lg font-semibold text-heading mb-4 flex items-center gap-2">
             <FileText className="w-5 h-5 text-indigo-500" />
             Materials Studied
           </h2>

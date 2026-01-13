@@ -231,14 +231,14 @@ export default function CoursesUnified() {
         <Helmet>
           <title>Courses - Thynkr</title>
         </Helmet>
-        <div className="h-full flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="h-full flex items-center justify-center">
           <div className="text-center max-w-md px-6">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg p-8 border border-slate-700/20">
+            <div className="card p-8">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-brand-500 to-accent-500 rounded-full mb-6">
                 <Lock className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-100 mb-3">Courses Locked</h2>
-              <p className="text-slate-400 mb-6">Upgrade to explore courses and create your own.</p>
+              <h2 className="text-2xl font-bold text-heading mb-3">Courses Locked</h2>
+              <p className="text-body mb-6">Upgrade to explore courses and create your own.</p>
               <button
                 onClick={() => navigate('/pricing')}
                 className="w-full px-6 py-3 bg-gradient-to-r from-brand-500 to-accent-500 text-white rounded-xl font-semibold text-sm tracking-wide shadow-[0_8px_30px_rgba(99,102,241,0.3)] hover:shadow-[0_12px_40px_rgba(99,102,241,0.4)] transition-all duration-200"
@@ -259,15 +259,15 @@ export default function CoursesUnified() {
         <meta name="description" content="Explore, create, and study smarter with Thynkr courses" />
       </Helmet>
 
-      <div className="h-full flex flex-col bg-slate-950">
+      <div className="h-full flex flex-col">
         {/* Hero Header with Gradient */}
         <div className="relative overflow-hidden">
           {/* Gradient Background */}
-          <div className="absolute inset-0 bg-gradient-to-b from-indigo-900/40 via-slate-950/60 to-slate-950" />
+          <div className="absolute inset-0 bg-gradient-to-b from-indigo-900/40 via-indigo-900/20 to-transparent dark:from-indigo-900/40 dark:via-slate-950/60 dark:to-slate-950" />
           
           <div className="relative max-w-[1400px] mx-auto px-8 py-12">
-            <h1 className="text-4xl font-bold text-white mb-2">Courses</h1>
-            <p className="text-slate-400 text-lg">
+            <h1 className="text-4xl font-bold text-white dark:text-white mb-2">Courses</h1>
+            <p className="text-slate-200 dark:text-slate-400 text-lg">
               Explore, create, and organize your learning materials
             </p>
           </div>

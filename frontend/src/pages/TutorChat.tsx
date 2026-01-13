@@ -723,7 +723,7 @@ export default function TutorChat() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] bg-slate-50 dark:bg-slate-950">
+    <div className="flex h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] ">
       {/* Create Chat Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">

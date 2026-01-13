@@ -417,7 +417,7 @@ export default function MyCourseDetail() {
     : `${window.location.origin}/courses/${course.id}`;
 
   return (
-    <div className="h-full bg-slate-50 dark:bg-slate-950">
+    <div className="h-full ">
       {/* Soft Header Section */}
       <div className="relative bg-gradient-to-br from-blue-900/80 via-purple-900/80 to-indigo-900/80 dark:from-blue-950/90 dark:via-purple-950/90 dark:to-indigo-950/90 border-b border-white/10">
         {/* Back Navigation */}

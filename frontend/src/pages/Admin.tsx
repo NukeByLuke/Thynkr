@@ -132,7 +132,7 @@ export default function Admin() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+    <div className="min-h-screen ">
       {/* Header with Gradient */}
       <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
         <div className="max-w-6xl mx-auto px-8 lg:px-16 py-8">
