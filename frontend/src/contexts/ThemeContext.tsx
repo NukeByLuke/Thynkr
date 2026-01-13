@@ -30,6 +30,7 @@ function applyThemeImmediately() {
   const theme = mode === 'system' ? getSystemTheme() : (mode as Theme);
   
   const root = document.documentElement;
+  // Tailwind only uses 'dark' class
   if (theme === 'dark') {
     root.classList.add('dark');
   } else {
@@ -66,14 +67,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const root = document.documentElement;
 
-    // Remove both classes first
-    root.classList.remove('light', 'dark');
-
-    // Apply current theme
+    // Tailwind only uses 'dark' class - add it for dark mode, remove it for light mode
     if (theme === 'dark') {
       root.classList.add('dark');
     } else {
-      root.classList.add('light');
+      root.classList.remove('dark');
     }
   }, [theme]);
 
@@ -108,14 +106,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     // Calculate actual theme to apply
     const newTheme = mode === 'system' ? getSystemTheme() : (mode as Theme);
 
-    // Apply immediately to DOM
+    // Apply immediately to DOM - Tailwind only uses 'dark' class
     const root = document.documentElement;
-    root.classList.remove('light', 'dark');
     
     if (newTheme === 'dark') {
       root.classList.add('dark');
     } else {
-      root.classList.add('light');
+      root.classList.remove('dark');
     }
 
     // Update state
