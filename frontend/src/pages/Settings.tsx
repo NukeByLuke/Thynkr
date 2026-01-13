@@ -4,7 +4,6 @@ import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import { useTTS, TTS_VOICES, TTS_SPEEDS, TTSVoice } from '@/contexts/TTSContext';
 import PageContainer from '@/components/layout/PageContainer';
 import {
   User,
@@ -16,9 +15,6 @@ import {
   Save,
   PencilLine,
   Globe,
-  Volume2,
-  Play,
-  Loader2,
 } from 'lucide-react';
 import api from '../lib/api';
 
@@ -47,111 +43,6 @@ const toAbsoluteUrl = (url?: string) => {
   if (import.meta.env.DEV && url.startsWith('/')) return url;
   return `${ASSET_BASE}${url}`;
 };
-
-// TTS Settings Component
-function TTSSettings() {
-  const { voice, speed, setVoice, setSpeed, play, isLoading } = useTTS();
-  const [testPlaying, setTestPlaying] = useState(false);
-
-  const handleTestVoice = async () => {
-    setTestPlaying(true);
-    try {
-      await play({
-        id: 'tts-test',
-        title: 'Voice Test',
-        text: 'Hello! This is a preview of your selected voice and speed settings. Adjust them to find what works best for you.',
-      });
-    } finally {
-      setTestPlaying(false);
-    }
-  };
-
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-        <Volume2 className="w-5 h-5" />
-        Voice Reader Settings
-      </h2>
-      <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
-        Customize how text-to-speech reads your study materials
-      </p>
-
-      <div className="space-y-6">
-        {/* Voice Selection */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-            Voice
-          </label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {TTS_VOICES.map((v) => (
-              <button
-                key={v.id}
-                onClick={() => setVoice(v.id as TTSVoice)}
-                className={`p-3 rounded-lg border-2 text-left transition-all ${
-                  voice === v.id
-                    ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
-                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-                }`}
-              >
-                <p
-                  className={`font-medium ${
-                    voice === v.id
-                      ? 'text-brand-700 dark:text-brand-300'
-                      : 'text-gray-900 dark:text-white'
-                  }`}
-                >
-                  {v.name}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{v.description}</p>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Speed Selection */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-            Playback Speed
-          </label>
-          <div className="flex gap-2">
-            {TTS_SPEEDS.map((s) => (
-              <button
-                key={s.value}
-                onClick={() => setSpeed(s.value)}
-                className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
-                  speed === s.value
-                    ? 'bg-brand-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Test Voice Button */}
-        <div className="pt-2">
-          <button
-            onClick={handleTestVoice}
-            disabled={isLoading || testPlaying}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-lg hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition-all"
-          >
-            {isLoading || testPlaying ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Play className="w-4 h-4" />
-            )}
-            Test Voice
-          </button>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            Hear a sample with your current voice and speed settings
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function Settings() {
   const { user, logout, refetchUser } = useAuth();
@@ -363,16 +254,16 @@ export default function Settings() {
 
           <div className="space-y-6">
               {/* Profile Settings */}
-              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] border border-slate-700/20 p-6">
-                <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2 tracking-wide">
-                  <User className="w-5 h-5" />
+              <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl shadow-xl border border-slate-200/50 dark:border-white/10 p-6">
+                <h2 className="text-xl font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4 flex items-center gap-2 tracking-wide">
+                  <User className="w-5 h-5 text-indigo-500" />
                   Profile Information
                 </h2>
 
                 <form onSubmit={handleProfileSubmit} className="space-y-4">
                   {/* Avatar Upload */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Profile Picture
                     </label>
                     <div className="flex items-center gap-4">
@@ -383,8 +274,8 @@ export default function Settings() {
                             alt="Avatar"
                             className={`w-20 h-20 rounded-full object-cover border-2 ${
                               avatarFile
-                                ? 'border-brand-500 ring-2 ring-brand-300'
-                                : 'border-gray-200 dark:border-gray-600'
+                                ? 'border-indigo-500 ring-2 ring-indigo-300 shadow-lg shadow-indigo-500/30'
+                                : 'border-slate-200 dark:border-slate-600'
                             }`}
                             onError={() => {
                               console.error('Failed to load avatar:', avatarPreview);
@@ -392,8 +283,8 @@ export default function Settings() {
                             }}
                           />
                         ) : (
-                          <div className="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center border-2 border-gray-300 dark:border-gray-600">
-                            <User className="w-10 h-10 text-gray-400 dark:text-gray-500" />
+                          <div className="w-20 h-20 rounded-full bg-slate-200 dark:bg-slate-700/50 flex items-center justify-center border-2 border-slate-300 dark:border-slate-600">
+                            <User className="w-10 h-10 text-slate-400 dark:text-slate-500" />
                           </div>
                         )}
                         {avatarFile && (
@@ -406,15 +297,15 @@ export default function Settings() {
                         <button
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
-                          className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
+                          className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-500 hover:to-purple-500 transition-all duration-300 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40"
                         >
                           <Image className="w-4 h-4 inline mr-2" />
                           Change Picture
                         </button>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                           PNG, JPG up to 2MB
                           {avatarFile && (
-                            <span className="text-brand-600 dark:text-brand-400 font-medium">
+                            <span className="text-indigo-600 dark:text-indigo-400 font-medium">
                               {' '}
                               • New image selected
                             </span>
@@ -433,7 +324,7 @@ export default function Settings() {
 
                   {/* Username */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Username
                     </label>
                     {user?.username && !isEditingUsername ? (
@@ -442,12 +333,12 @@ export default function Settings() {
                           type="text"
                           value={username}
                           disabled
-                          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                          className="flex-1 px-4 py-2 border border-slate-200/50 dark:border-white/10 rounded-xl bg-slate-100/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 cursor-not-allowed backdrop-blur-sm"
                         />
                         <button
                           type="button"
                           onClick={() => setIsEditingUsername(true)}
-                          className="inline-flex items-center gap-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          className="inline-flex items-center gap-1 px-3 py-2 border border-slate-200/50 dark:border-white/10 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300"
                           aria-label="Edit username"
                         >
                           <PencilLine className="w-4 h-4" />
@@ -461,17 +352,17 @@ export default function Settings() {
                         onChange={(e) => setUsername(e.target.value)}
                         placeholder="Choose a unique username"
                         required
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-slate-200/50 dark:border-white/10 dark:bg-slate-800/50 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent backdrop-blur-sm"
                       />
                     )}
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                       This is your unique identifier across the platform
                     </p>
                   </div>
 
                   {/* Email (Read-only) */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Email
                     </label>
                     <div className="flex items-center gap-2">
@@ -479,10 +370,10 @@ export default function Settings() {
                         type="email"
                         value={user?.email || ''}
                         disabled
-                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                        className="flex-1 px-4 py-2 border border-slate-200/50 dark:border-white/10 rounded-xl bg-slate-100/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 cursor-not-allowed backdrop-blur-sm"
                       />
                       {user?.emailVerified && (
-                        <span className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">
+                        <span className="text-xs bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">
                           Verified
                         </span>
                       )}
@@ -491,14 +382,14 @@ export default function Settings() {
 
                   {/* Language Preference */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
                       <Globe className="w-4 h-4" />
                       Preferred Language
                     </label>
                     <select
                       value={preferredLanguage}
                       onChange={(e) => setPreferredLanguage(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-slate-200/50 dark:border-white/10 dark:bg-slate-800/50 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent backdrop-blur-sm"
                     >
                       {SUPPORTED_LANGUAGES.map((lang) => (
                         <option key={lang.code} value={lang.code}>
@@ -506,7 +397,7 @@ export default function Settings() {
                         </option>
                       ))}
                     </select>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                       Generated summaries, notes, quizzes, and flashcards will be in this language
                     </p>
                   </div>
@@ -514,7 +405,7 @@ export default function Settings() {
                   <button
                     type="submit"
                     disabled={updateProfileMutation.isPending}
-                    className="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 dark:bg-brand-500 dark:hover:bg-brand-600 disabled:opacity-50 transition-colors flex items-center gap-2"
+                    className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 transition-all duration-300 flex items-center gap-2 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40"
                   >
                     <Save className="w-4 h-4" />
                     {updateProfileMutation.isPending
@@ -527,48 +418,48 @@ export default function Settings() {
               </div>
 
               {/* Password Change */}
-              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] border border-slate-700/20 p-6">
-                <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2 tracking-wide">
-                  <Lock className="w-5 h-5" />
+              <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl shadow-xl border border-slate-200/50 dark:border-white/10 p-6">
+                <h2 className="text-xl font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4 flex items-center gap-2 tracking-wide">
+                  <Lock className="w-5 h-5 text-indigo-500" />
                   Change Password
                 </h2>
 
                 <form onSubmit={handlePasswordSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Current Password
                     </label>
                     <input
                       type="password"
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-slate-200/50 dark:border-white/10 dark:bg-slate-800/50 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent backdrop-blur-sm"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       New Password
                     </label>
                     <input
                       type="password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-slate-200/50 dark:border-white/10 dark:bg-slate-800/50 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent backdrop-blur-sm"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Confirm New Password
                     </label>
                     <input
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-slate-200/50 dark:border-white/10 dark:bg-slate-800/50 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent backdrop-blur-sm"
                       required
                     />
                   </div>
@@ -576,7 +467,7 @@ export default function Settings() {
                   <button
                     type="submit"
                     disabled={changePasswordMutation.isPending}
-                    className="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 dark:bg-brand-500 dark:hover:bg-brand-600 disabled:opacity-50 transition-colors"
+                    className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 transition-all duration-300 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40"
                   >
                     {changePasswordMutation.isPending ? 'Changing...' : 'Change Password'}
                   </button>
@@ -584,15 +475,15 @@ export default function Settings() {
               </div>
 
               {/* Appearance */}
-              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] border border-slate-700/20 p-6">
-                <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2 tracking-wide">
-                  {theme === 'light' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl shadow-xl border border-slate-200/50 dark:border-white/10 p-6">
+                <h2 className="text-xl font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4 flex items-center gap-2 tracking-wide">
+                  {theme === 'light' ? <Sun className="w-5 h-5 text-indigo-500" /> : <Moon className="w-5 h-5 text-indigo-500" />}
                   Appearance
                 </h2>
 
                 <div className="space-y-4">
                   <div>
-                    <p className="font-medium text-gray-900 dark:text-white mb-3">Theme Mode</p>
+                    <p className="font-medium text-slate-900 dark:text-white mb-3">Theme Mode</p>
                     <div className="space-y-3">
                       {/* Light Mode Option */}
                       <label className="flex items-center gap-3 cursor-pointer group">
@@ -602,11 +493,11 @@ export default function Settings() {
                           value="light"
                           checked={themeMode === 'light'}
                           onChange={() => handleThemeChange('light')}
-                          className="w-4 h-4 text-brand-600 focus:ring-brand-500 focus:ring-2"
+                          className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 focus:ring-2"
                         />
                         <div className="flex items-center gap-2">
-                          <Sun className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                          <span className="text-gray-900 dark:text-white">Light</span>
+                          <Sun className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                          <span className="text-slate-900 dark:text-white">Light</span>
                         </div>
                       </label>
 
@@ -618,11 +509,11 @@ export default function Settings() {
                           value="dark"
                           checked={themeMode === 'dark'}
                           onChange={() => handleThemeChange('dark')}
-                          className="w-4 h-4 text-brand-600 focus:ring-brand-500 focus:ring-2"
+                          className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 focus:ring-2"
                         />
                         <div className="flex items-center gap-2">
-                          <Moon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                          <span className="text-gray-900 dark:text-white">Dark</span>
+                          <Moon className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                          <span className="text-slate-900 dark:text-white">Dark</span>
                         </div>
                       </label>
 
@@ -634,16 +525,16 @@ export default function Settings() {
                           value="system"
                           checked={themeMode === 'system'}
                           onChange={() => handleThemeChange('system')}
-                          className="w-4 h-4 text-brand-600 focus:ring-brand-500 focus:ring-2"
+                          className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 focus:ring-2"
                         />
                         <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded-full border-2 border-gray-600 dark:border-gray-400 relative">
+                          <div className="w-4 h-4 rounded-full border-2 border-slate-600 dark:border-slate-400 relative">
                             <div className="absolute inset-0 flex">
-                              <div className="w-1/2 bg-gray-300 dark:bg-gray-600 rounded-l-full"></div>
-                              <div className="w-1/2 bg-gray-700 dark:bg-gray-300 rounded-r-full"></div>
+                              <div className="w-1/2 bg-slate-300 dark:bg-slate-600 rounded-l-full"></div>
+                              <div className="w-1/2 bg-slate-700 dark:bg-slate-300 rounded-r-full"></div>
                             </div>
                           </div>
-                          <span className="text-gray-900 dark:text-white">
+                          <span className="text-slate-900 dark:text-white">
                             System{' '}
                             {themeMode === 'system' && `(${theme === 'light' ? 'Light' : 'Dark'})`}
                           </span>
@@ -651,7 +542,7 @@ export default function Settings() {
                       </label>
                     </div>
 
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-3">
                       {themeMode === 'system'
                         ? 'Automatically matches your operating system theme'
                         : `Theme is set to ${themeMode} mode regardless of system preference`}
@@ -661,9 +552,7 @@ export default function Settings() {
               </div>
 
               {/* Danger Zone */}
-              <TTSSettings />
-
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg shadow-sm p-6">
+              <div className="bg-red-50/70 dark:bg-red-900/20 backdrop-blur-xl border border-red-200/50 dark:border-red-800/50 rounded-2xl shadow-xl p-6">
                 <h2 className="text-xl font-semibold text-red-900 dark:text-red-400 mb-4 flex items-center gap-2">
                   <Trash2 className="w-5 h-5" />
                   Danger Zone
@@ -679,7 +568,7 @@ export default function Settings() {
                   <button
                     onClick={handleDeleteAccount}
                     disabled={deleteAccountMutation.isPending}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                    className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 disabled:opacity-50 transition-all duration-300 shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40"
                   >
                     {deleteAccountMutation.isPending ? 'Deleting...' : 'Delete Account'}
                   </button>

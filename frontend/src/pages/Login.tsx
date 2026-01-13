@@ -89,7 +89,7 @@ export default function Login() {
     try {
       await login({ email, password });
       toast.success('Welcome back!', { duration: 2000 });
-      navigate('/home');
+      navigate('/study');
     } catch (err: any) {
       toast.error('Invalid credentials. Please try again.', { duration: 4000 });
     } finally {

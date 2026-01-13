@@ -3,20 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft,
   ChevronRight,
-  Volume2,
-  VolumeX,
-  Play,
-  Pause,
-  SkipBack,
-  SkipForward,
-  Loader2,
   RefreshCw,
+  ChevronUp,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
-import api from '../../lib/api';
-import toast from 'react-hot-toast';
 
 interface SummaryPage {
   pageNumber: number;
@@ -48,31 +40,13 @@ export default function PaginatedReader({
 }: PaginatedReaderProps) {
   const [currentPage, setCurrentPage] = useState(0);
   const [scrollPositions, setScrollPositions] = useState<Record<number, number>>({});
+  const [showHeader, setShowHeader] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [showMobileNav, setShowMobileNav] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
-
-  // TTS State
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
-  const [audioProgress, setAudioProgress] = useState(0);
-  const [audioDuration, setAudioDuration] = useState(0);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const audioUrlRef = useRef<string | null>(null);
 
   const totalPages = pages.length;
   const page = pages[currentPage];
-
-  // Get content text for TTS
-  const getPageText = useCallback(() => {
-    if (!page) return '';
-    if (type === 'summary') {
-      return (page as SummaryPage).content;
-    } else {
-      const notesPage = page as NotesPage;
-      const keyPointsText = notesPage.keyPoints.join('. ');
-      return `Key Points: ${keyPointsText}. Details: ${notesPage.detailed}`;
-    }
-  }, [page, type]);
 
   // Save scroll position when changing pages
   const saveScrollPosition = useCallback(() => {
@@ -93,143 +67,35 @@ export default function PaginatedReader({
     }
   }, [currentPage, scrollPositions]);
 
-  // Cleanup audio on unmount
+  // Auto-hide header on scroll down (mobile only)
   useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
+    const handleScroll = () => {
+      if (!contentRef.current) return;
+      
+      const currentScrollY = contentRef.current.scrollTop;
+      
+      // Show header when scrolling up or at top, hide when scrolling down
+      if (currentScrollY < lastScrollY || currentScrollY < 50) {
+        setShowHeader(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setShowHeader(false);
       }
-      if (audioUrlRef.current) {
-        URL.revokeObjectURL(audioUrlRef.current);
-      }
+      
+      setLastScrollY(currentScrollY);
     };
-  }, []);
 
-  // Stop audio when page changes
-  useEffect(() => {
-    stopAudio();
-  }, [currentPage]);
+    const contentElement = contentRef.current;
+    if (contentElement) {
+      contentElement.addEventListener('scroll', handleScroll, { passive: true });
+      return () => contentElement.removeEventListener('scroll', handleScroll);
+    }
+  }, [lastScrollY]);
 
   const goToPage = (pageIndex: number) => {
     if (pageIndex >= 0 && pageIndex < totalPages) {
       saveScrollPosition();
       setCurrentPage(pageIndex);
     }
-  };
-
-  const stopAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-    setIsPlaying(false);
-    setAudioProgress(0);
-  };
-
-  const playTTS = async () => {
-    const text = getPageText();
-    if (!text) return;
-
-    setIsLoadingAudio(true);
-    try {
-      // Get TTS preferences from localStorage (same as TTSContext)
-      const voice = localStorage.getItem('tts-voice') || 'alloy';
-      const speed = parseFloat(localStorage.getItem('tts-speed') || '1.0');
-
-      const response = await api.post(
-        '/tts',
-        { 
-          text: text.trim(), 
-          voice,  // Required by backend
-          speed 
-        },
-        { responseType: 'blob' }
-      );
-      const audioBlob = response.data;
-
-      // Revoke previous URL
-      if (audioUrlRef.current) {
-        URL.revokeObjectURL(audioUrlRef.current);
-      }
-
-      audioUrlRef.current = URL.createObjectURL(audioBlob);
-
-      if (!audioRef.current) {
-        audioRef.current = new Audio();
-        audioRef.current.addEventListener('timeupdate', () => {
-          if (audioRef.current) {
-            setAudioProgress(audioRef.current.currentTime);
-          }
-        });
-        audioRef.current.addEventListener('loadedmetadata', () => {
-          if (audioRef.current) {
-            setAudioDuration(audioRef.current.duration);
-          }
-        });
-        audioRef.current.addEventListener('ended', () => {
-          setIsPlaying(false);
-          setAudioProgress(0);
-        });
-      }
-
-      audioRef.current.src = audioUrlRef.current;
-      audioRef.current.playbackRate = playbackSpeed;
-      await audioRef.current.play();
-      setIsPlaying(true);
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to generate audio');
-    } finally {
-      setIsLoadingAudio(false);
-    }
-  };
-
-  const togglePlay = () => {
-    if (!audioRef.current?.src) {
-      playTTS();
-      return;
-    }
-
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioRef.current.play();
-      setIsPlaying(true);
-    }
-  };
-
-  const skipTime = (seconds: number) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = Math.max(
-        0,
-        Math.min(audioRef.current.currentTime + seconds, audioRef.current.duration)
-      );
-    }
-  };
-
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const time = parseFloat(e.target.value);
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
-      setAudioProgress(time);
-    }
-  };
-
-  const changeSpeed = () => {
-    const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
-    const currentIndex = speeds.indexOf(playbackSpeed);
-    const nextSpeed = speeds[(currentIndex + 1) % speeds.length];
-    setPlaybackSpeed(nextSpeed);
-    if (audioRef.current) {
-      audioRef.current.playbackRate = nextSpeed;
-    }
-  };
-
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   if (!page) {
@@ -241,12 +107,19 @@ export default function PaginatedReader({
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header with page info */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-        <div>
-          <h3 className="font-semibold text-gray-900 dark:text-white">{page.fileName}</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+    <div className="flex flex-col h-full relative">
+      {/* Header - Auto-hiding on mobile, fixed on desktop */}
+      <motion.div
+        initial={{ y: 0 }}
+        animate={{ y: showHeader ? 0 : -100 }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
+        className="md:relative md:translate-y-0 fixed top-0 left-0 right-0 z-30 md:z-0 flex items-center justify-between p-3 md:p-4 border-b border-gray-200 dark:border-gray-700 bg-white/95 md:bg-white dark:bg-gray-900/95 dark:md:bg-gray-900 backdrop-blur-lg md:backdrop-blur-none shadow-sm md:shadow-none"
+      >
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-sm md:text-base text-gray-900 dark:text-white truncate">
+            {page.fileName}
+          </h3>
+          <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
             Page {currentPage + 1} of {totalPages}
           </p>
         </div>
@@ -254,17 +127,20 @@ export default function PaginatedReader({
           <button
             onClick={onRegenerate}
             disabled={isRegenerating}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            className="hidden md:flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
           >
             <RefreshCw className={`h-4 w-4 ${isRegenerating ? 'animate-spin' : ''}`} />
             Regenerate
           </button>
         )}
-      </div>
+      </motion.div>
 
-      {/* Content */}
-      <div ref={contentRef} className="flex-1 overflow-y-auto p-6 bg-white dark:bg-gray-900">
-        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+      {/* Content - Optimized for mobile readability */}
+      <div 
+        ref={contentRef} 
+        className="flex-1 overflow-y-auto pt-16 md:pt-0 pb-20 md:pb-6 px-4 md:px-6 bg-white dark:bg-gray-900 scroll-smooth"
+      >
+        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 md:rounded-xl md:shadow-sm md:border border-gray-100 dark:border-gray-700 p-4 md:p-6">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentPage}
@@ -274,7 +150,7 @@ export default function PaginatedReader({
             transition={{ duration: 0.2 }}
           >
             {type === 'summary' ? (
-              <div className="prose prose-gray dark:prose-invert max-w-none">
+              <div className="prose prose-base md:prose-lg prose-gray dark:prose-invert max-w-none">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   rehypePlugins={[rehypeHighlight]}
@@ -456,8 +332,8 @@ export default function PaginatedReader({
         </div>
       </div>
 
-      {/* Navigation */}
-      <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+      {/* Desktop Navigation - Hidden on mobile */}
+      <div className="hidden md:flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <button
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 0}
@@ -478,6 +354,7 @@ export default function PaginatedReader({
                   ? 'bg-blue-500 w-4'
                   : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
               }`}
+              aria-label={`Go to page ${i + 1}`}
             />
           ))}
         </div>
@@ -492,80 +369,117 @@ export default function PaginatedReader({
         </button>
       </div>
 
-      {/* TTS Player - Minimal rounded design with blue accents */}
-      <motion.div
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3"
-      >
-        <div className="flex items-center gap-3">
-          {/* Skip Back */}
-          <button
-            onClick={() => skipTime(-10)}
-            disabled={!audioRef.current?.src}
-            className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-40 transition-colors"
-            title="Back 10s"
+      {/* Mobile Floating Controls */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 pb-safe">
+        {/* Floating Navigation Buttons */}
+        <div className="flex items-center justify-center gap-3 px-4 pb-4">
+          {/* Previous Button */}
+          <motion.button
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 0}
+            whileTap={{ scale: 0.95 }}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg disabled:opacity-40 disabled:cursor-not-allowed transition-all touch-manipulation active:scale-95 min-h-[48px]"
           >
-            <SkipBack className="h-4 w-4" />
-          </button>
+            <ChevronLeft className="w-5 h-5" />
+            Prev
+          </motion.button>
 
-          {/* Play/Pause */}
-          <button
-            onClick={togglePlay}
-            disabled={isLoadingAudio}
-            className="flex items-center justify-center w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-full disabled:opacity-50 transition-colors"
+          {/* Page Indicator FAB */}
+          <motion.button
+            onClick={() => setShowMobileNav(!showMobileNav)}
+            whileTap={{ scale: 0.95 }}
+            className="flex flex-col items-center justify-center px-6 py-3 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 min-w-[80px] min-h-[48px] touch-manipulation"
           >
-            {isLoadingAudio ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : isPlaying ? (
-              <Pause className="h-5 w-5" />
-            ) : (
-              <Play className="h-5 w-5 ml-0.5" />
-            )}
-          </button>
-
-          {/* Skip Forward */}
-          <button
-            onClick={() => skipTime(10)}
-            disabled={!audioRef.current?.src}
-            className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-40 transition-colors"
-            title="Forward 10s"
-          >
-            <SkipForward className="h-4 w-4" />
-          </button>
-
-          {/* Progress Bar */}
-          <div className="flex-1 flex items-center gap-2">
-            <span className="text-xs text-gray-500 dark:text-gray-400 w-10 text-right">
-              {formatTime(audioProgress)}
+            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Page</span>
+            <span className="text-lg font-bold text-gray-900 dark:text-white">
+              {currentPage + 1}/{totalPages}
             </span>
-            <input
-              type="range"
-              min={0}
-              max={audioDuration || 100}
-              value={audioProgress}
-              onChange={handleSeek}
-              className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer accent-blue-500"
-            />
-            <span className="text-xs text-gray-500 dark:text-gray-400 w-10">
-              {formatTime(audioDuration)}
-            </span>
-          </div>
+          </motion.button>
 
-          {/* Speed Control */}
-          <button
-            onClick={changeSpeed}
-            className="px-2.5 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+          {/* Next Button */}
+          <motion.button
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages - 1}
+            whileTap={{ scale: 0.95 }}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg disabled:opacity-40 disabled:cursor-not-allowed transition-all touch-manipulation active:scale-95 min-h-[48px]"
           >
-            {playbackSpeed}x
-          </button>
-
-          {/* Volume Icon */}
-          <button className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
-            {isPlaying ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-          </button>
+            Next
+            <ChevronRight className="w-5 h-5" />
+          </motion.button>
         </div>
-      </motion.div>
+
+        {/* Page Selection Drawer */}
+        <AnimatePresence>
+          {showMobileNav && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowMobileNav(false)}
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm -z-10"
+              />
+              
+              {/* Drawer */}
+              <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                className="bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl border-t border-gray-200 dark:border-gray-800 p-6 mb-20"
+              >
+                {/* Handle */}
+                <div className="flex justify-center mb-4">
+                  <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full" />
+                </div>
+
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                  Jump to Page
+                </h3>
+
+                {/* Page Grid */}
+                <div className="grid grid-cols-5 gap-2 max-h-64 overflow-y-auto">
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => {
+                        goToPage(i);
+                        setShowMobileNav(false);
+                      }}
+                      className={`aspect-square flex items-center justify-center rounded-xl text-sm font-semibold transition-all min-h-[48px] ${
+                        i === currentPage
+                          ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg'
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95'
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Scroll to Top FAB - Mobile Only */}
+      <AnimatePresence>
+        {!showHeader && (
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            onClick={() => {
+              contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+              setShowHeader(true);
+            }}
+            className="md:hidden fixed top-4 right-4 z-30 p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+          >
+            <ChevronUp className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

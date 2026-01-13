@@ -77,7 +77,7 @@ async function createSessionAndRedirect(
   });
   
   // Redirect to frontend callback with tokens
-  const callbackUrl = new URL('/auth/callback', FRONTEND_URL);
+  const callbackUrl = new URL('/oauth-callback', FRONTEND_URL);
   callbackUrl.searchParams.set('accessToken', accessToken);
   callbackUrl.searchParams.set('refreshToken', refreshToken);
   

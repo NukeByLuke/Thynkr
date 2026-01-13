@@ -27,7 +27,7 @@ export default function PublicLayout() {
                   to="/study"
                   className="px-6 py-2.5 bg-cyan-500 hover:bg-cyan-600 text-white rounded-full font-medium transition-colors"
                 >
-                  Dashboard
+                  Go to Study
                 </Link>
               </>
             ) : (

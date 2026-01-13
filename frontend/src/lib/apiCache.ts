@@ -37,7 +37,7 @@ interface CacheOptions {
 class ApiCache {
   private cache = new Map<string, CacheEntry<any>>();
   private pendingRequests = new Map<string, Promise<any>>();
-  private cleanupInterval: number | null = null;
+  private cleanupInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     // Clean up expired cache entries every minute

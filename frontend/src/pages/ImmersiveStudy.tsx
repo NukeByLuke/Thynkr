@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import { useSearchParams } from 'react-router-dom';
 import { StudySidebar } from '../components/study/StudySidebar';
 import { StudyContentStage } from '../components/study/StudyContentStage';
+import { useStudySession } from '@/hooks/useStudySession';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3003/api';
 
@@ -42,16 +43,38 @@ export default function ImmersiveStudy() {
   const tab = searchParams.get('tab') || 'summary';
 
   // Local state
-  const [selectedFile, setSelectedFile] = useState<StudyFile | null>(null);
-  const [selectedQuiz, setSelectedQuiz] = useState<any | null>(null);
-  const [selectedFlashcardSet, setSelectedFlashcardSet] = useState<any | null>(null);
-  const [numCards, setNumCards] = useState(20);
-  const [numQuestions, setNumQuestions] = useState(10);
-  const [quizDifficulty, setQuizDifficulty] = useState<'EASY' | 'MEDIUM' | 'HARD'>('MEDIUM');
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const getToken = () => localStorage.getItem('token') || '';
+
+  // Use the unified study session hook
+  const {
+    selectedFile,
+    activeTab: _activeTab,
+    selectedQuiz,
+    selectedFlashcardSet,
+    numQuestions,
+    quizDifficulty,
+    numCards,
+    setSelectedFile,
+    setActiveTab,
+    setSelectedQuiz,
+    setSelectedFlashcardSet: _setSelectedFlashcardSet,
+    setNumQuestions,
+    setQuizDifficulty,
+    setNumCards,
+    generateSummaryMutation,
+    generateNotesMutation,
+    generateQuizMutation,
+    generateFlashcardsMutation,
+    submitQuizMutation,
+  } = useStudySession({ 
+    queryKey: ['study-files'],
+    onFileSelect: (file) => {
+      setSearchParams({ file: file.id, tab });
+    }
+  });
 
   // Fetch files
   const {
@@ -129,187 +152,6 @@ export default function ImmersiveStudy() {
       toast.error(`Upload failed: ${error.message}`);
     },
   });
-
-  // Generate summary mutation
-  const generateSummaryMutation = useMutation({
-    mutationFn: async ({ fileId, regenerate = false }: { fileId: string; regenerate?: boolean }) => {
-      const response = await fetch(`${API_URL}/study/files/${fileId}/summary`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ regenerate }),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to generate summary');
-      }
-      return response.json();
-    },
-    onSuccess: async (data) => {
-      queryClient.setQueryData(['study-files'], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          files: old.files.map((f: any) =>
-            f.id === selectedFile?.id ? { ...f, summary: data.summary } : f
-          ),
-        };
-      });
-      await queryClient.invalidateQueries({ queryKey: ['study-files'] });
-      if (selectedFile) {
-        setSelectedFile({ ...selectedFile, summary: data.summary });
-      }
-      toast.success('Summary generated successfully!');
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to generate summary: ${error.message}`);
-    },
-  });
-
-  // Generate notes mutation
-  const generateNotesMutation = useMutation({
-    mutationFn: async ({ fileId, regenerate = false }: { fileId: string; regenerate?: boolean }) => {
-      const response = await fetch(`${API_URL}/study/files/${fileId}/notes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ regenerate }),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to generate notes');
-      }
-      return response.json();
-    },
-    onSuccess: async (data) => {
-      queryClient.setQueryData(['study-files'], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          files: old.files.map((f: any) =>
-            f.id === selectedFile?.id ? { ...f, notes: data.notes } : f
-          ),
-        };
-      });
-      await queryClient.invalidateQueries({ queryKey: ['study-files'] });
-      if (selectedFile) {
-        setSelectedFile({ ...selectedFile, notes: data.notes });
-      }
-      toast.success('Notes generated successfully!');
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to generate notes: ${error.message}`);
-    },
-  });
-
-  // Generate quiz mutation
-  const generateQuizMutation = useMutation({
-    mutationFn: async ({
-      fileId,
-      numQuestions,
-      difficulty,
-    }: {
-      fileId: string;
-      numQuestions: number;
-      difficulty: string;
-    }) => {
-      const response = await fetch(`${API_URL}/study/files/${fileId}/quiz`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ numQuestions, difficulty }),
-      });
-      if (!response.ok) throw new Error('Failed to generate quiz');
-      return response.json();
-    },
-    onSuccess: async (data) => {
-      queryClient.setQueryData(['study-files'], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          files: old.files.map((f: any) =>
-            f.id === selectedFile?.id ? { ...f, quizzes: [...(f.quizzes || []), data.quiz] } : f
-          ),
-        };
-      });
-      await queryClient.invalidateQueries({ queryKey: ['study-files'] });
-      setSelectedQuiz(data.quiz);
-      if (selectedFile) {
-        setSelectedFile({
-          ...selectedFile,
-          quizzes: [...(selectedFile.quizzes || []), data.quiz],
-        });
-      }
-      toast.success('Quiz generated successfully!');
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to generate quiz: ${error.message}`);
-    },
-  });
-
-  // Generate flashcards mutation
-  const generateFlashcardsMutation = useMutation({
-    mutationFn: async ({ fileId, numCards }: { fileId: string; numCards: number }) => {
-      const response = await fetch(`${API_URL}/study/files/${fileId}/flashcards`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ numCards }),
-      });
-      if (!response.ok) throw new Error('Failed to generate flashcards');
-      return response.json();
-    },
-    onSuccess: async (data) => {
-      queryClient.setQueryData(['study-files'], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          files: old.files.map((f: any) =>
-            f.id === selectedFile?.id
-              ? { ...f, flashcardSets: [...(f.flashcardSets || []), data.flashcardSet] }
-              : f
-          ),
-        };
-      });
-      await queryClient.invalidateQueries({ queryKey: ['study-files'] });
-      setSelectedFlashcardSet(data.flashcardSet);
-      if (selectedFile) {
-        setSelectedFile({
-          ...selectedFile,
-          flashcardSets: [...(selectedFile.flashcardSets || []), data.flashcardSet],
-        });
-      }
-      toast.success('Flashcards generated successfully!');
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to generate flashcards: ${error.message}`);
-    },
-  });
-
-  // Submit quiz mutation
-  const submitQuizMutation = useMutation({
-    mutationFn: async ({ quizId, answers }: { quizId: string; answers: Record<string, string> }) => {
-      const response = await fetch(`${API_URL}/study/quizzes/${quizId}/submit`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ answers }),
-      });
-      if (!response.ok) throw new Error('Failed to submit quiz');
-      return response.json();
-    },
-  });
-
   // Event handlers
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -319,15 +161,12 @@ export default function ImmersiveStudy() {
 
   const handleFileChange = (file: StudyFile) => {
     setSelectedFile(file);
-    setSelectedQuiz(null);
-    setSelectedFlashcardSet(null);
     setSearchParams({ file: file.id, tab });
   };
 
   const handleTabChange = (newTab: string) => {
     setSearchParams({ file: fileId || '', tab: newTab });
-    setSelectedQuiz(null);
-    setSelectedFlashcardSet(null);
+    setActiveTab(newTab as any);
   };
 
   if (filesLoading) {

@@ -27,47 +27,60 @@ enum SubscriptionStatus {
   TRIALING
 }
 
+enum AchievementTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+  RUBY
+}
+
 model User {
-  id                String        @id @default(cuid())
-  email             String        @unique
-  username          String        @unique
-  password          String?       // Optional for OAuth users
-  firstName         String?
-  lastName          String?
-  avatarUrl         String?
-  theme             String        @default("light") // "light" or "dark"
-  preferredLanguage String        @default("en")
-  ttsVoice          String        @default("alloy") // TTS voice preference
-  ttsSpeed          Float         @default(1.0) // TTS speed preference (0.25-4.0)
-  role              Role          @default(BASIC)
-  emailVerified     Boolean       @default(false)
-  emailVerifyToken  String?       @unique
-  passwordResetToken String?      @unique
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  username             String    @unique
+  password             String? // Optional for OAuth users
+  firstName            String?
+  lastName             String?
+  avatarUrl            String?
+  theme                String    @default("light") // "light" or "dark"
+  preferredLanguage    String    @default("en")
+  ttsVoice             String    @default("alloy") // TTS voice preference
+  ttsSpeed             Float     @default(1.0) // TTS speed preference (0.25-4.0)
+  role                 Role      @default(BASIC)
+  emailVerified        Boolean   @default(false)
+  emailVerifyToken     String?   @unique
+  passwordResetToken   String?   @unique
   passwordResetExpires DateTime?
-  
+
   // OAuth provider fields
-  googleId          String?       @unique
-  appleId           String?       @unique
-  oauthProvider     String?       // "google" | "apple" | null for email/password
-  
-  stripeCustomerId  String?       @unique
-  subscription      Subscription?
-  refreshTokens     RefreshToken[]
-  
+  googleId      String? @unique
+  appleId       String? @unique
+  oauthProvider String? // "google" | "apple" | null for email/password
+
+  stripeCustomerId String?        @unique
+  subscription     Subscription?
+  refreshTokens    RefreshToken[]
+
+  // Gamification system
+  xp               Int               @default(0)
+  level            Int               @default(1)
+  userAchievements UserAchievement[]
+  lastXpGain       DateTime? // Prevents XP farming/spam
+
   // Study system relations
-  uploadedFiles     UploadedFile[]
-  folders           Folder[]
-  quizAttempts      QuizAttempt[]
-  coursesCreated    Course[]
-  tutorSessions     TutorSession[]
-  studySessions     StudySession[]
-  studyStreak       StudyStreak?
-  studyPacks        StudyPack[]
-  
-  
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  lastLoginAt       DateTime?
+  uploadedFiles  UploadedFile[]
+  folders        Folder[]
+  quizAttempts   QuizAttempt[]
+  coursesCreated Course[]
+  tutorSessions  TutorSession[]
+  studySessions  StudySession[]
+  studyStreak    StudyStreak?
+  studyPacks     StudyPack[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  lastLoginAt DateTime?
 
   @@index([email])
   @@index([username])
@@ -90,22 +103,22 @@ model RefreshToken {
 }
 
 model Subscription {
-  id                    String             @id @default(cuid())
-  userId                String             @unique
-  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  stripeSubscriptionId  String             @unique
-  stripePriceId         String
-  status                SubscriptionStatus @default(INACTIVE)
-  planType              Role               @default(BASIC)
-  billingCycle          BillingCycle       @default(MONTHLY)
-  
-  currentPeriodStart    DateTime?
-  currentPeriodEnd      DateTime?
-  cancelAtPeriodEnd     Boolean            @default(false)
-  
-  createdAt             DateTime           @default(now())
-  updatedAt             DateTime           @updatedAt
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  stripeSubscriptionId String             @unique
+  stripePriceId        String
+  status               SubscriptionStatus @default(INACTIVE)
+  planType             Role               @default(BASIC)
+  billingCycle         BillingCycle       @default(MONTHLY)
+
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean   @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([stripeSubscriptionId])
@@ -113,22 +126,22 @@ model Subscription {
 }
 
 model Content {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   title       String
   description String?
-  content     String   @db.Text
-  slug        String   @unique
-  
+  content     String  @db.Text
+  slug        String  @unique
+
   // Access control
   requiredRole Role    @default(BASIC)
-  featured    Boolean  @default(false)
-  published   Boolean  @default(true)
-  
-  thumbnail   String?
-  tags        String[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  featured     Boolean @default(false)
+  published    Boolean @default(true)
+
+  thumbnail String?
+  tags      String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([slug])
   @@index([requiredRole])
@@ -162,20 +175,20 @@ enum PaymentStatus {
 }
 
 model Payment {
-  id                  String        @id @default(cuid())
-  userId              String
-  userEmail           String
-  stripePaymentId     String        @unique
-  stripeInvoiceId     String?
-  amount              Int           // Amount in cents
-  currency            String        @default("usd")
-  status              PaymentStatus @default(PENDING)
-  planType            Role          @default(STANDARD)
-  billingCycle        BillingCycle  @default(MONTHLY)
-  description         String?
-  
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
+  id              String        @id @default(cuid())
+  userId          String
+  userEmail       String
+  stripePaymentId String        @unique
+  stripeInvoiceId String?
+  amount          Int // Amount in cents
+  currency        String        @default("usd")
+  status          PaymentStatus @default(PENDING)
+  planType        Role          @default(STANDARD)
+  billingCycle    BillingCycle  @default(MONTHLY)
+  description     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([status])
@@ -223,19 +236,19 @@ enum FileAccessType {
 }
 
 model Folder {
-  id          String        @id @default(cuid())
-  userId      String
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  name        String
-  parentId    String?
-  parent      Folder?       @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  children    Folder[]      @relation("FolderHierarchy")
-  
-  files       UploadedFile[]
-  
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name     String
+  parentId String?
+  parent   Folder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children Folder[] @relation("FolderHierarchy")
+
+  files UploadedFile[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([parentId])
@@ -243,30 +256,30 @@ model Folder {
 }
 
 model UploadedFile {
-  id            String       @id @default(cuid())
-  userId        String
-  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  folderId      String?
-  folder        Folder?      @relation(fields: [folderId], references: [id], onDelete: SetNull)
-  
-  fileName      String
-  originalName  String
-  fileType      String
-  fileSize      Int
-  filePath      String
-  
-  status        FileStatus   @default(UPLOADED)
-  extractedText String?      @db.Text
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  folderId String?
+  folder   Folder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+
+  fileName     String
+  originalName String
+  fileType     String
+  fileSize     Int
+  filePath     String
+
+  status        FileStatus @default(UPLOADED)
+  extractedText String?    @db.Text
+
   summaries     FileSummary[]
   notes         FileNotes[]
   quizzes       Quiz[]
   flashcardSets FlashcardSet[]
   tutorSessions TutorSessionFile[]
-  
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([folderId])
@@ -275,83 +288,83 @@ model UploadedFile {
 }
 
 model FileSummary {
-  id          String       @id @default(cuid())
-  fileId      String
-  file        UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  
-  content     String       @db.Text
-  language    String       @default("en")
-  
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id     String       @id @default(cuid())
+  fileId String
+  file   UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  content  String @db.Text
+  language String @default("en")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([fileId, language])
   @@map("file_summaries")
 }
 
 model FileNotes {
-  id          String       @id @default(cuid())
-  fileId      String
-  file        UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  
-  keyPoints   String[]
-  detailed    String       @db.Text
-  language    String       @default("en")
-  
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id     String       @id @default(cuid())
+  fileId String
+  file   UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  keyPoints String[]
+  detailed  String   @db.Text
+  language  String   @default("en")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([fileId, language])
   @@map("file_notes")
 }
 
 model Quiz {
-  id          String         @id @default(cuid())
-  fileId      String
-  file        UploadedFile   @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  
-  title       String
-  difficulty  QuizDifficulty
-  questions   QuizQuestion[]
-  attempts    QuizAttempt[]
-  language    String         @default("en")
-  
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id     String       @id @default(cuid())
+  fileId String
+  file   UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  title      String
+  difficulty QuizDifficulty
+  questions  QuizQuestion[]
+  attempts   QuizAttempt[]
+  language   String         @default("en")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([fileId])
   @@map("quizzes")
 }
 
 model QuizQuestion {
-  id          String   @id @default(cuid())
-  quizId      String
-  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  
-  question    String   @db.Text
-  options     String[]
+  id     String @id @default(cuid())
+  quizId String
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  question      String   @db.Text
+  options       String[]
   correctAnswer String
-  explanation String?  @db.Text
-  order       Int
-  
-  createdAt   DateTime @default(now())
+  explanation   String?  @db.Text
+  order         Int
+
+  createdAt DateTime @default(now())
 
   @@index([quizId])
   @@map("quiz_questions")
 }
 
 model QuizAttempt {
-  id          String   @id @default(cuid())
-  quizId      String
-  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  answers     Json
-  score       Int
+  id     String @id @default(cuid())
+  quizId String
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  answers        Json
+  score          Int
   totalQuestions Int
-  
-  createdAt   DateTime @default(now())
+
+  createdAt DateTime @default(now())
 
   @@index([quizId])
   @@index([userId])
@@ -359,31 +372,31 @@ model QuizAttempt {
 }
 
 model FlashcardSet {
-  id          String       @id @default(cuid())
-  fileId      String
-  file        UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  
-  title       String
-  cards       Flashcard[]
-  language    String       @default("en")
-  
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id     String       @id @default(cuid())
+  fileId String
+  file   UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  title    String
+  cards    Flashcard[]
+  language String      @default("en")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([fileId])
   @@map("flashcard_sets")
 }
 
 model Flashcard {
-  id          String       @id @default(cuid())
-  setId       String
-  set         FlashcardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
-  
-  front       String       @db.Text
-  back        String       @db.Text
-  order       Int
-  
-  createdAt   DateTime     @default(now())
+  id    String       @id @default(cuid())
+  setId String
+  set   FlashcardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  front String @db.Text
+  back  String @db.Text
+  order Int
+
+  createdAt DateTime @default(now())
 
   @@index([setId])
   @@map("flashcards")
@@ -399,16 +412,16 @@ model Course {
   category    CourseCategory   @default(OTHER)
   visibility  CourseVisibility @default(PRIVATE)
   published   Boolean          @default(false)
-  shareToken  String?          @unique  // For private course sharing
-  
-  createdBy   String
-  creator     User             @relation(fields: [createdBy], references: [id], onDelete: Cascade)
-  
-  files       CourseFile[]
-  studyPacks  StudyPack[]
+  shareToken  String?          @unique // For private course sharing
 
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdBy String
+  creator   User   @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  files      CourseFile[]
+  studyPacks StudyPack[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([slug])
   @@index([visibility])
@@ -420,24 +433,24 @@ model Course {
 }
 
 model CourseFile {
-  id          String         @id @default(cuid())
-  courseId    String
-  course      Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  
-  name        String
+  id       String @id @default(cuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  name         String
   originalName String
-  fileName    String
-  filePath    String
-  fileType    String
-  fileSize    Int
-  order       Int            @default(0)
-  accessType  FileAccessType @default(INTERNAL)
-  
+  fileName     String
+  filePath     String
+  fileType     String
+  fileSize     Int
+  order        Int            @default(0)
+  accessType   FileAccessType @default(INTERNAL)
+
   // AI content relation
-  aiContent   CourseFileAI?
-  
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  aiContent CourseFileAI?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([courseId])
   @@index([accessType])
@@ -447,43 +460,43 @@ model CourseFile {
 // ============ AI TUTOR SYSTEM ============
 
 model TutorSession {
-  id          String              @id @default(cuid())
-  userId      String
-  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  title       String              @default("New Chat")
-  messages    TutorMessage[]
-  files       TutorSessionFile[]
-  
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title    String             @default("New Chat")
+  messages TutorMessage[]
+  files    TutorSessionFile[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@map("tutor_sessions")
 }
 
 model TutorMessage {
-  id          String        @id @default(cuid())
-  sessionId   String
-  session     TutorSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  
-  role        String        // 'user' or 'assistant'
-  content     String        @db.Text
-  
-  createdAt   DateTime      @default(now())
+  id        String       @id @default(cuid())
+  sessionId String
+  session   TutorSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  role    String // 'user' or 'assistant'
+  content String @db.Text
+
+  createdAt DateTime @default(now())
 
   @@index([sessionId])
   @@map("tutor_messages")
 }
 
 model TutorSessionFile {
-  id          String        @id @default(cuid())
-  sessionId   String
-  session     TutorSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  fileId      String
-  file        UploadedFile  @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime      @default(now())
+  id        String       @id @default(cuid())
+  sessionId String
+  session   TutorSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  fileId    String
+  file      UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 
   @@unique([sessionId, fileId])
   @@index([sessionId])
@@ -505,15 +518,15 @@ enum StudyActivityType {
 }
 
 model StudySession {
-  id              String            @id @default(cuid())
-  userId          String
-  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   activityType    StudyActivityType
   fileId          String?
   durationMinutes Int               @default(0)
-  
-  createdAt       DateTime          @default(now())
+
+  createdAt DateTime @default(now())
 
   @@index([userId])
   @@index([userId, createdAt])
@@ -521,19 +534,19 @@ model StudySession {
 }
 
 model StudyStreak {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  currentStreak   Int      @default(0)
-  longestStreak   Int      @default(0)
-  lastStudyDate   DateTime?
-  
-  totalStudyDays  Int      @default(0)
-  totalMinutes    Int      @default(0)
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  currentStreak Int       @default(0)
+  longestStreak Int       @default(0)
+  lastStudyDate DateTime?
+
+  totalStudyDays Int @default(0)
+  totalMinutes   Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("study_streaks")
 }
@@ -541,25 +554,25 @@ model StudyStreak {
 // ============ COURSE FILE AI ============
 
 model CourseFileAI {
-  id        String   @id @default(cuid())
-  fileId    String   @unique
-  file      CourseFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  
+  id     String     @id @default(cuid())
+  fileId String     @unique
+  file   CourseFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
   // Extracted text from the file (cached for AI processing)
   extractedText String? @db.Text
-  
+
   // AI-generated content (stored as JSON)
-  summary   Json?    // { content: string, sections?: { title: string, content: string }[] }
-  notes     Json?    // { keyPoints: string[], detailed: string }
-  quiz      Json?    // { title: string, questions: [{ question, options, correctAnswer, explanation }] }
-  cards     Json?    // { title: string, cards: [{ front, back }] }
-  
+  summary Json? // { content: string, sections?: { title: string, content: string }[] }
+  notes   Json? // { keyPoints: string[], detailed: string }
+  quiz    Json? // { title: string, questions: [{ question, options, correctAnswer, explanation }] }
+  cards   Json? // { title: string, cards: [{ front, back }] }
+
   // Generation metadata
-  summaryGeneratedAt   DateTime?
-  notesGeneratedAt     DateTime?
-  quizGeneratedAt      DateTime?
-  cardsGeneratedAt     DateTime?
-  
+  summaryGeneratedAt DateTime?
+  notesGeneratedAt   DateTime?
+  quizGeneratedAt    DateTime?
+  cardsGeneratedAt   DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -570,27 +583,27 @@ model CourseFileAI {
 // ============ STUDY PACKS (Combined Multi-File Study) ============
 
 model StudyPack {
-  id          String   @id @default(cuid())
-  ownerId     String
-  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  
-  courseId    String?
-  course      Course?  @relation(fields: [courseId], references: [id], onDelete: SetNull)
-  
-  fileIds     String[] // IDs of selected files
-  fileHash    String   // Hash of sorted fileIds for idempotency lookup
-  title       String
-  
+  id      String @id @default(cuid())
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  courseId String?
+  course   Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+
+  fileIds  String[] // IDs of selected files
+  fileHash String // Hash of sorted fileIds for idempotency lookup
+  title    String
+
   // AI-generated content
-  pages       Json?    // [{ pageNumber: number, heading: string, content: string }]
-  quiz        Json?    // { title: string, questions: [...], difficulty: string }
-  cards       Json?    // { title: string, cards: [{ front, back }] }
-  
+  pages Json? // [{ pageNumber: number, heading: string, content: string }]
+  quiz  Json? // { title: string, questions: [...], difficulty: string }
+  cards Json? // { title: string, cards: [{ front, back }] }
+
   // Share token for private sharing
-  shareToken  String?  @unique
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  shareToken String? @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([ownerId, fileHash])
   @@index([ownerId])
@@ -602,16 +615,16 @@ model StudyPack {
 // ============ STUDY CACHE (Multi-file combined AI content) ============
 
 model StudyCache {
-  id          String   @id @default(cuid())
-  userId      String
-  courseId    String
-  fileIds     String[] // Sorted array of file IDs
-  fileHash    String   // Hash of sorted fileIds for quick lookup
-  type        String   // "summary" | "notes" | "quiz" | "flashcards"
-  result      Json     // The cached AI-generated content
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id       String   @id @default(cuid())
+  userId   String
+  courseId String
+  fileIds  String[] // Sorted array of file IDs
+  fileHash String // Hash of sorted fileIds for quick lookup
+  type     String // "summary" | "notes" | "quiz" | "flashcards"
+  result   Json // The cached AI-generated content
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, courseId, fileHash, type])
   @@index([userId])
@@ -640,17 +653,17 @@ enum GameSessionStatus {
 }
 
 model Game {
-  id          String        @id @default(uuid())
+  id          String   @id @default(uuid())
   title       String
-  description String?       @db.Text
+  description String?  @db.Text
   type        GameType
-  tier        GameTier      @default(FREE)
-  
-  questions   GameQuestion[]
-  sessions    GameSession[]
-  
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  tier        GameTier @default(FREE)
+
+  questions GameQuestion[]
+  sessions  GameSession[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([type])
   @@index([tier])
@@ -658,38 +671,38 @@ model Game {
 }
 
 model GameQuestion {
-  id            String   @id @default(cuid())
-  gameId        String
-  game          Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  
-  content       String   @db.Text  // Question text
-  options       Json     // JSON array of choices
+  id     String @id @default(cuid())
+  gameId String
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  content       String @db.Text // Question text
+  options       Json // JSON array of choices
   correctAnswer String
-  timeLimit     Int      @default(20)  // Time limit in seconds
-  order         Int      @default(0)
-  
-  createdAt     DateTime @default(now())
+  timeLimit     Int    @default(20) // Time limit in seconds
+  order         Int    @default(0)
+
+  createdAt DateTime @default(now())
 
   @@index([gameId])
   @@map("game_questions")
 }
 
 model GameSession {
-  id                   String            @id @default(uuid())
-  gameId               String
-  game                 Game              @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  hostId               String            // User ID of the host
-  
-  pinCode              String            @unique  // 6-digit code for joining
+  id     String @id @default(uuid())
+  gameId String
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  hostId String // User ID of the host
+
+  pinCode              String            @unique // 6-digit code for joining
   status               GameSessionStatus @default(WAITING)
   currentQuestionIndex Int               @default(0)
-  
-  players              GamePlayer[]
-  
-  startedAt            DateTime?
-  finishedAt           DateTime?
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
+
+  players GamePlayer[]
+
+  startedAt  DateTime?
+  finishedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   @@index([gameId])
   @@index([hostId])
@@ -699,20 +712,38 @@ model GameSession {
 }
 
 model GamePlayer {
-  id          String      @id @default(cuid())
-  sessionId   String
-  session     GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  
-  userId      String?     // Optional - can be guest
-  nickname    String
-  score       Int         @default(0)
-  streak      Int         @default(0)
-  
-  joinedAt    DateTime    @default(now())
+  id        String      @id @default(cuid())
+  sessionId String
+  session   GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  userId   String? // Optional - can be guest
+  nickname String
+  score    Int     @default(0)
+  streak   Int     @default(0)
+
+  joinedAt DateTime @default(now())
 
   @@index([sessionId])
   @@index([userId])
   @@map("game_players")
 }
 
+// ============ GAMIFICATION (Multi-tier Achievement System) ============
 
+model UserAchievement {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  achievementId String // Achievement identifier (e.g., "scholar", "streak_master")
+  currentTier   AchievementTier @default(BRONZE)
+  currentValue  Int             @default(0) // Current progress value
+
+  unlockedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+  @@index([achievementId])
+  @@map("user_achievements")
+}

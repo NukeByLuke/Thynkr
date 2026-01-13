@@ -1,19 +1,20 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
   BookOpen,
   GraduationCap,
   MessageSquare,
-  TrendingUp,
+  Award,
   FolderOpen,
   Shield,
-  Settings,
-  LogOut,
+  Crown,
+  ChevronRight,
+  User,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Logo from '@/components/Logo';
-import ThemeToggle from '@/components/ThemeToggle';
-import MediaControls from '@/features/tutor/MediaControls';
 
 interface NavLink {
   to: string;
@@ -27,103 +28,176 @@ const navLinks: NavLink[] = [
   { to: '/courses', icon: BookOpen, label: 'Courses' },
   { to: '/study', icon: GraduationCap, label: 'Study' },
   { to: '/tutor', icon: MessageSquare, label: 'AI Tutor' },
-  { to: '/progress', icon: TrendingUp, label: 'Progress' },
+  { to: '/achievements', icon: Award, label: 'Achievements' },
   { to: '/library', icon: FolderOpen, label: 'Files' },
   { to: '/admin', icon: Shield, label: 'Admin', adminOnly: true },
 ];
 
 const Sidebar = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const location = useLocation();
+  const [isExpanded, setIsExpanded] = useState(true);
 
-  const isActive = (path: string) => location.pathname === path;
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
+  const isActive = (path: string) => {
+    return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
   // Filter links based on user role
   const visibleLinks = navLinks.filter((link) => !link.adminOnly || user?.role === 'ADMIN');
 
   return (
-    <aside className="fixed top-0 left-0 h-screen w-20 flex flex-col justify-between bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
-      {/* Header Section */}
-      <div className="flex flex-col items-center pt-6 pb-4">
-        {/* Logo */}
-        <Logo variant="icon" animated={false} className="h-9 w-9 cursor-pointer" />
+    <motion.aside
+      initial={false}
+      animate={{ width: isExpanded ? 256 : 80 }}
+      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+      className="h-screen flex flex-col m-4 rounded-2xl glass-panel relative"
+    >
+      {/* Toggle Button */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="absolute -right-3 top-8 z-50 w-6 h-6 rounded-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-white/10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-lg"
+        aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+      >
+        <motion.div
+          animate={{ rotate: isExpanded ? 180 : 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <ChevronRight className="w-3 h-3 text-slate-600 dark:text-slate-400" />
+        </motion.div>
+      </button>
+
+      {/* Logo Section */}
+      <div className="h-16 flex items-center px-4 border-b border-slate-200 dark:border-white/5">
+        <Link to="/study" className="flex items-center gap-2 overflow-hidden">
+          <Logo variant="icon" animated={false} className="w-8 h-8 flex-shrink-0" />
+          <AnimatePresence mode="wait">
+            {isExpanded && (
+              <motion.div
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col overflow-hidden"
+              >
+                <span className="text-base font-semibold text-slate-900 dark:text-white leading-tight whitespace-nowrap">
+                  Thynkr
+                </span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight whitespace-nowrap">
+                  AI Study Platform
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Link>
       </div>
+
+      {/* Premium Badge (if user has premium) */}
+      <AnimatePresence mode="wait">
+        {isExpanded && (user?.role === 'PREMIUM' || user?.role === 'ADMIN') && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="mx-3 mt-3 overflow-hidden"
+          >
+            <div className="p-2.5 rounded-lg bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30">
+              <div className="flex items-center gap-2">
+                <Crown className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                <span className="text-xs font-medium text-blue-900 dark:text-blue-100 whitespace-nowrap">
+                  Premium Member
+                </span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Navigation Links */}
-      <nav className="flex-1 flex flex-col items-center py-4 gap-2">
-        {visibleLinks.map((link) => {
-          const Icon = link.icon;
-          const active = isActive(link.to);
+      <nav className="flex-1 overflow-y-auto py-4 px-3">
+        <ul className="space-y-1">
+          {visibleLinks.map((link) => {
+            const Icon = link.icon;
+            const active = isActive(link.to);
 
-          return (
-            <Link
-              key={link.to}
-              to={link.to}
-              tabIndex={0}
-              aria-label={link.label}
-              aria-current={active ? 'page' : undefined}
-              className={`flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 ${
-                active
-                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-500'
-                  : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              <Icon className="w-[18px] h-[18px]" />
-            </Link>
-          );
-        })}
+            return (
+              <li key={link.to}>
+                <Link
+                  to={link.to}
+                  className={`
+                    flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 relative group
+                    ${
+                      active
+                        ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400 border-l-2 border-primary-500'
+                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100/50 dark:hover:bg-white/5 border-l-2 border-transparent'
+                    }
+                  `}
+                  title={!isExpanded ? link.label : undefined}
+                >
+                  <Icon
+                    className={`w-5 h-5 flex-shrink-0 ${
+                      active ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400'
+                    }`}
+                  />
+                  <AnimatePresence mode="wait">
+                    {isExpanded && (
+                      <motion.span
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: 'auto' }}
+                        exit={{ opacity: 0, width: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="text-sm whitespace-nowrap overflow-hidden"
+                      >
+                        {link.label}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                  
+                  {/* Tooltip for collapsed state */}
+                  {!isExpanded && (
+                    <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 dark:bg-slate-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                      {link.label}
+                    </div>
+                  )}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </nav>
 
-      {/* Bottom Section */}
-      <div className="flex flex-col items-center pb-6">
-        {/* Media Controls */}
-        <MediaControls />
-
-        {/* Divider */}
-        <div className="w-8 h-px bg-gray-200 dark:bg-slate-700 my-3" />
-
-        {/* Control Icons */}
-        <div className="flex flex-col items-center gap-2">
-          {/* Theme Toggle */}
-          <div className="w-11 h-11 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
-            <ThemeToggle />
+      {/* User Profile Pill */}
+      <div className="p-3 border-t border-slate-200 dark:border-white/5">
+        <div
+          className={`
+            flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-100 dark:bg-slate-800/50 hover:bg-slate-200 dark:hover:bg-slate-800/80 transition-all cursor-pointer
+            ${!isExpanded && 'justify-center'}
+          `}
+        >
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+            <User className="w-4 h-4 text-white" />
           </div>
-
-          {/* Settings */}
-          <Link
-            to="/settings"
-            tabIndex={0}
-            aria-label="Settings"
-            aria-current={isActive('/settings') ? 'page' : undefined}
-            className={`flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 ${
-              isActive('/settings')
-                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-500'
-                : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            <Settings className="w-[18px] h-[18px]" />
-          </Link>
-
-          {/* Logout */}
-          <button
-            onClick={handleLogout}
-            tabIndex={0}
-            aria-label="Logout"
-            className="flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-red-500"
-          >
-            <LogOut className="w-[18px] h-[18px]" />
-          </button>
+          <AnimatePresence mode="wait">
+            {isExpanded && (
+              <motion.div
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col overflow-hidden min-w-0"
+              >
+                <span className="text-sm font-medium text-slate-900 dark:text-white truncate">
+                  {user?.username || 'User'}
+                </span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                  {user?.email || ''}
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
-    </aside>
+    </motion.aside>
   );
 };
 

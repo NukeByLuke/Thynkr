@@ -10,23 +10,21 @@ import { AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
-import { TTSProvider } from './contexts/TTSContext';
-import { AudioProvider } from './contexts/AudioContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import ProtectedRoute from '@/features/auth/ProtectedRoute';
 import PublicLayout from './layouts/PublicLayout';
 import DashboardLayout from './layouts/DashboardLayout';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import PreviewGate from '@/features/courses/PreviewGate';
-import MiniPlayer from '@/features/tutor/MiniPlayer';
 import GlobalLoadingBar from '@/components/ui/GlobalLoadingBar';
+import BackgroundShapes from '@/components/ui/BackgroundShapes';
 import { lazyWithPreload } from './utils/lazyWithPreload';
 
 // Code-split page components with preloading for optimal bundle size
-const Landing = lazyWithPreload(() => import('./pages/Landing'));
 const Login = lazyWithPreload(() => import('./pages/Login'));
 const Register = lazyWithPreload(() => import('./pages/Register'));
 const AuthCallback = lazyWithPreload(() => import('./pages/AuthCallback'));
+const OAuthCallback = AuthCallback; // Alias for /oauth-callback route
 const Pricing = lazyWithPreload(() => import('./pages/Pricing'));
 const Account = lazyWithPreload(() => import('./pages/Account'));
 const Admin = lazyWithPreload(() => import('./pages/Admin'));
@@ -38,6 +36,7 @@ const Courses = lazyWithPreload(() => import('./pages/CoursesUnified'));
 const MyCourseDetail = lazyWithPreload(() => import('./pages/MyCourseDetail'));
 const TutorChat = lazyWithPreload(() => import('./pages/TutorChat'));
 const StudyProgress = lazyWithPreload(() => import('./pages/StudyProgress'));
+const Achievements = lazyWithPreload(() => import('./pages/Achievements'));
 const SavedPacks = lazyWithPreload(() => import('./pages/SavedPacks'));
 const ArcadeLobby = lazyWithPreload(() => import('./pages/ArcadeLobby'));
 const GamesDashboard = lazyWithPreload(() => import('./pages/GamesDashboard'));
@@ -45,15 +44,9 @@ const QuizGame = lazyWithPreload(() => import('./features/arcade/QuizGame'));
 const MatchingGame = lazyWithPreload(() => import('./features/arcade/MatchingGame'));
 const NotFound = lazyWithPreload(() => import('./pages/NotFound'));
 
-// Lazy-load GlobalPlayerBar to avoid impacting LCP
-const GlobalPlayerBar = lazyWithPreload(() => import('./components/audio/GlobalPlayerBar').then(m => ({ default: m.GlobalPlayerBar })));
-
-// Lazy-load SelectionReader for text-to-speech accessibility
-const SelectionReader = lazyWithPreload(() => import('./components/ui/SelectionReader').then(m => ({ default: m.SelectionReader })));
-
 /**
  * Custom hook to handle authentication-based redirects
- * Redirects authenticated users from login/register pages to dashboard
+ * Redirects authenticated users from login/register pages to study page
  */
 function useAuthRedirects() {
   const { user, isLoading } = useAuth();
@@ -63,7 +56,7 @@ function useAuthRedirects() {
   useEffect(() => {
     if (isLoading) return;
 
-    // Only redirect from login/register pages, allow access to homepage (/)
+    // Redirect authenticated users from login/register pages to study page
     const authOnlyPages = ['/login', '/register'];
     const isOnAuthOnlyPage = authOnlyPages.includes(location.pathname);
 
@@ -78,6 +71,31 @@ function useAuthRedirects() {
  */
 function AppContent() {
   useAuthRedirects();
+
+  /**
+   * Home route component that redirects based on auth status
+   * - If not authenticated: show login page
+   * - If authenticated: redirect to study page
+   */
+  const HomeRoute = () => {
+    const { user, isLoading } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+      if (isLoading) return;
+      
+      if (user) {
+        // Authenticated users go to study page
+        navigate('/study', { replace: true });
+      } else {
+        // Unauthenticated users go to login page
+        navigate('/login', { replace: true });
+      }
+    }, [user, isLoading, navigate]);
+
+    // Show loading while checking auth status
+    return <LoadingSpinner fullScreen />;
+  };
 
   /**
    * Theme-aware toast notification component
@@ -118,19 +136,25 @@ function AppContent() {
 
   return (
     <>
+      {/* Global ambient background shapes */}
+      <BackgroundShapes />
+      
       <GlobalLoadingBar />
       <ThemedToaster />
       <Suspense fallback={<LoadingSpinner fullScreen />}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
-            {/* Auth routes - no navbar */}
+            {/* Home route - redirects to login or study based on auth */}
+            <Route path="/" element={<HomeRoute />} />
+            
+            {/* Auth routes - no layout */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/oauth-callback" element={<OAuthCallback />} />
 
             {/* Public routes with PublicLayout (navbar) */}
             <Route element={<PublicLayout />}>
-              <Route path="/" element={<Landing />} />
               <Route path="/pricing" element={<Pricing />} />
             </Route>
 
@@ -145,6 +169,7 @@ function AppContent() {
             <Route path="/study" element={<Study />} />
             <Route path="/files" element={<Files />} />
             <Route path="/progress" element={<StudyProgress />} />
+            <Route path="/achievements" element={<Achievements />} />
             <Route path="/saved-packs" element={<SavedPacks />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/account" element={<Account />} />
@@ -238,25 +263,11 @@ function App() {
     <AuthProvider>
       <NavigationProvider>
         <ThemeProvider>
-          <AudioProvider>
-            <TTSProvider>
-              {!gatePassed && previewPassword ? (
-                <PreviewGate onSuccess={() => setGatePassed(true)} />
-              ) : (
-                <>
-                <>
-                  <AppContent />
-                  <MiniPlayer />
-                  <Suspense fallback={null}>
-                    <GlobalPlayerBar />
-                  </Suspense>
-                  <Suspense fallback={null}>
-                    <SelectionReader />
-                  </Suspense>
-                </>
-              )}
-            </TTSProvider>
-          </AudioProvider>
+          {!gatePassed && previewPassword ? (
+            <PreviewGate onSuccess={() => setGatePassed(true)} />
+          ) : (
+            <AppContent />
+          )}
         </ThemeProvider>
       </NavigationProvider>
     </AuthProvider>

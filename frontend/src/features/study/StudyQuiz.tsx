@@ -9,9 +9,7 @@ import {
   AlertCircle,
   RefreshCw,
   HelpCircle,
-  Volume2,
 } from 'lucide-react';
-import { usePlayerStore } from '@/stores/usePlayerStore';
 
 interface QuizQuestion {
   question: string;
@@ -38,11 +36,6 @@ const StudyQuiz = memo(function StudyQuiz({ data, onRegenerate, isRegenerating =
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [showResults, setShowResults] = useState(false);
   const [showExplanation, setShowExplanation] = useState<number | null>(null);
-  
-  // Use selectors for optimized subscriptions
-  const play = usePlayerStore((state) => state.play);
-  const isPlaying = usePlayerStore((state) => state.isPlaying);
-  const playingText = usePlayerStore((state) => state.text);
 
   const totalQuestions = data.questions.length;
   const answeredCount = Object.keys(answers).length;
@@ -88,15 +81,6 @@ const StudyQuiz = memo(function StudyQuiz({ data, onRegenerate, isRegenerating =
     setCurrentQuestion(0);
     setShowExplanation(null);
   }, []);
-
-  const handleReadQuestion = useCallback(() => {
-    play(question.question);
-  }, [play, question.question]);
-
-  // Memoize playing state check
-  const isCurrentQuestionPlaying = useMemo(() => 
-    isPlaying && playingText.includes(question.question.substring(0, 30))
-  , [isPlaying, playingText, question.question]);
 
   // Memoize option class function
   const getOptionClass = useCallback((option: string) => {
@@ -249,23 +233,9 @@ const StudyQuiz = memo(function StudyQuiz({ data, onRegenerate, isRegenerating =
             </p>
 
             {/* Question Text */}
-            <div className="flex items-start justify-between gap-4 mb-6">
-              <h4 className="text-lg font-medium text-gray-900 dark:text-white flex-1">
-                {question.question}
-              </h4>
-              {/* TTS Button */}
-              <button
-                onClick={handleReadQuestion}
-                className={`flex-shrink-0 p-2 rounded-lg transition-all ${
-                  isCurrentQuestionPlaying
-                    ? 'text-purple-600 dark:text-purple-400 animate-pulse bg-purple-50 dark:bg-purple-900/30'
-                    : 'text-slate-400 hover:text-purple-500 hover:bg-slate-100 dark:hover:bg-slate-700'
-                }`}
-                aria-label="Read question aloud"
-              >
-                <Volume2 className="w-5 h-5" />
-              </button>
-            </div>
+            <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-6">
+              {question.question}
+            </h4>
 
             {/* Options */}
             <div className="space-y-3">

@@ -4,7 +4,7 @@
  * Features note-taking aesthetic with subtle interactions
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -24,109 +24,13 @@ import Modal from '@/components/ui/Modal';
 import AnimatedPage from '@/components/AnimatedPage';
 import GameLoadingWrapper from '@/components/GameLoadingWrapper';
 import ResponsiveText from '@/components/ui/ResponsiveText';
-
-// =============================================================================
-// Types
-// =============================================================================
-
-interface MatchPair {
-  id: string;
-  term: string;
-  definition: string;
-}
-
-interface Card {
-  id: string;
-  pairId: string;
-  content: string;
-  type: 'term' | 'definition';
-  isMatched: boolean;
-  isSelected: boolean;
-  isWrong: boolean;
-}
-
-type GameStatus = 'idle' | 'countdown' | 'playing' | 'won' | 'lost';
-type Difficulty = 'normal' | 'hard';
-
-// =============================================================================
-// Sample Data
-// =============================================================================
-
-const SAMPLE_PAIRS: MatchPair[] = [
-  { id: '1', term: 'Mitochondria', definition: 'Powerhouse of the cell' },
-  { id: '2', term: 'Photosynthesis', definition: 'Process plants use to convert sunlight to energy' },
-  { id: '3', term: 'DNA', definition: 'Molecule carrying genetic instructions' },
-  { id: '4', term: 'Osmosis', definition: 'Movement of water across a membrane' },
-  { id: '5', term: 'Nucleus', definition: 'Control center of the cell' },
-  { id: '6', term: 'Cytoplasm', definition: 'Gel-like fluid inside the cell' },
-  { id: '7', term: 'Ribosome', definition: 'Organelle that synthesizes proteins' },
-  { id: '8', term: 'Chloroplast', definition: 'Contains chlorophyll for photosynthesis' },
-];
-
-const HARD_MODE_PAIRS: MatchPair[] = [
-  { id: '1', term: 'Endoplasmic Reticulum', definition: 'Network of membranes for protein transport' },
-  { id: '2', term: 'Golgi Apparatus', definition: 'Packages and modifies proteins' },
-  { id: '3', term: 'Lysosome', definition: 'Contains digestive enzymes' },
-  { id: '4', term: 'Vacuole', definition: 'Storage organelle for water and nutrients' },
-  { id: '5', term: 'Cell Membrane', definition: 'Selectively permeable barrier' },
-  { id: '6', term: 'Centriole', definition: 'Organizes spindle fibers during division' },
-  { id: '7', term: 'Chromatin', definition: 'Loosely coiled DNA and proteins' },
-  { id: '8', term: 'Nucleolus', definition: 'Produces ribosomal RNA' },
-];
-
-// =============================================================================
-// Constants
-// =============================================================================
-
-const FREE_DAILY_LIMIT = 3;
-const GAME_TIME_SECONDS = 45;
-const PAIRS_PER_GAME = 6;
-const STORAGE_KEY = 'thynkr_matching_games';
-const POINTS_PER_MATCH = 100;
-const TIME_BONUS_MULTIPLIER = 5;
-
-// =============================================================================
-// Utilities
-// =============================================================================
-
-function shuffleArray<T>(array: T[]): T[] {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-}
-
-function getTodayKey(): string {
-  return new Date().toISOString().split('T')[0];
-}
-
-function getDailyGamesPlayed(): number {
-  try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    if (!data) return 0;
-    const parsed = JSON.parse(data);
-    return parsed[getTodayKey()] || 0;
-  } catch {
-    return 0;
-  }
-}
-
-function incrementDailyGames(): void {
-  try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    const parsed = data ? JSON.parse(data) : {};
-    const today = getTodayKey();
-    parsed[today] = (parsed[today] || 0) + 1;
-    const keys = Object.keys(parsed).sort().slice(-7);
-    const cleaned: Record<string, number> = {};
-    keys.forEach((key) => (cleaned[key] = parsed[key]));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
-  } catch {
-    // Storage error, ignore
-  }
-}
+import {
+  useMatchingGame,
+  FREE_DAILY_LIMIT,
+  GAME_TIME_SECONDS,
+  type Card,
+  type Difficulty,
+} from './hooks/useMatchingGame';
 
 // =============================================================================
 // Countdown Overlay
@@ -218,11 +122,11 @@ function GameCard({ card, onSelect, disabled }: GameCardProps) {
         'relative w-full rounded-xl border shadow-sm',
         'transition-colors duration-150',
         'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900',
-        // Term-specific styling
-        card.type === 'term' && 'h-16 font-bold text-base',
-        // Definition-specific styling with overflow protection
-        card.type === 'definition' && 'min-h-16 max-h-32 font-medium text-sm overflow-y-auto scrollbar-thin',
-        'cursor-pointer',
+        // Term-specific styling - responsive sizing
+        card.type === 'term' && 'h-16 md:h-16 font-bold text-sm md:text-base',
+        // Definition-specific styling with overflow protection - responsive
+        card.type === 'definition' && 'min-h-20 md:min-h-16 max-h-32 font-medium text-xs md:text-sm overflow-y-auto scrollbar-thin',
+        'cursor-pointer touch-manipulation',
         getCardClasses()
       )}
       initial={{ opacity: 0, y: 20 }}
@@ -254,13 +158,13 @@ function GameCard({ card, onSelect, disabled }: GameCardProps) {
 
       {/* Content */}
       <div className={clsx(
-        'flex items-center px-3 py-4',
+        'flex items-center px-3 py-3 md:py-4',
         card.type === 'term' ? 'justify-center' : 'justify-start'
       )}>
         <ResponsiveText 
           content={card.content}
           className={clsx(
-            'leading-relaxed break-words',
+            'leading-relaxed break-words text-xs md:text-sm',
             card.type === 'term' ? 'text-center font-bold' : 'text-left'
           )}
         />
@@ -524,243 +428,44 @@ export default function MatchingGame() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const isPro = user?.role && ['STANDARD', 'PREMIUM', 'ADMIN'].includes(user.role);
+  const isPro = user?.role !== 'BASIC';
 
   // Get generated content from navigation state
-  const gameConfig = location.state?.gameConfig;
-  const generatedPairs = gameConfig?.generatedContent;
+  const generatedPairs = location.state?.generatedPairs;
+  const shouldAutoLoad = !!generatedPairs;
   
-  // Loading state - show loader if we just came from setup modal with config
-  const [isLoading, setIsLoading] = useState(() => {
-    return !!gameConfig && !!generatedPairs;
+  // Loading state - show loader if we just came from generator
+  const [isLoading, setIsLoading] = useState(shouldAutoLoad);
+
+  // Use the game hook
+  const {
+    status,
+    difficulty,
+    cards,
+    selectedCards,
+    timeRemaining,
+    score,
+    matchesFound,
+    showDailyLimitModal,
+    gamesPlayedToday,
+    pairsLeft,
+    setDifficulty,
+    setShowDailyLimitModal,
+    startGame,
+    handleCountdownComplete,
+    handleCardSelect,
+    handlePlayAgain,
+    handleBackToMenu,
+  } = useMatchingGame({
+    generatedPairs,
+    isPro,
+    onLoadingComplete: () => setIsLoading(false),
   });
 
-  // Game state
-  const [status, setStatus] = useState<GameStatus>('idle');
-  const [difficulty, setDifficulty] = useState<Difficulty>('normal');
-  const [cards, setCards] = useState<Card[]>([]);
-  const [selectedCards, setSelectedCards] = useState<Card[]>([]);
-  const [timeRemaining, setTimeRemaining] = useState(GAME_TIME_SECONDS);
-  const [score, setScore] = useState(0);
-  const [matchesFound, setMatchesFound] = useState(0);
-
-  // Modals
-  const [showResults, setShowResults] = useState(false);
-  const [showUpgrade, setShowUpgrade] = useState(false);
-
-  // Track daily games
-  const gamesPlayedToday = useRef(getDailyGamesPlayed());
-
-  // Computed values
-  const pairsLeft = PAIRS_PER_GAME - matchesFound;
-  const totalPairs = PAIRS_PER_GAME;
-  
   // Handle loading complete
-  const handleLoadingComplete = useCallback(() => {
+  const handleLoadingComplete = () => {
     setIsLoading(false);
-  }, []);
-
-  // Initialize game
-  const initializeGame = useCallback(() => {
-    // Use generated content from user files if available, otherwise fallback to sample data
-    let pairSource: MatchPair[];
-    
-    if (generatedPairs && generatedPairs.length > 0) {
-      // Convert generated content to MatchPair format
-      // Expected format from API: [{ term: string, definition: string }, ...]
-      pairSource = generatedPairs.map((pair: any, index: number) => ({
-        id: `${index + 1}`,
-        term: pair.term || pair.question || '',
-        definition: pair.definition || pair.answer || '',
-      }));
-    } else {
-      // Fallback to sample data
-      pairSource = difficulty === 'hard' ? HARD_MODE_PAIRS : SAMPLE_PAIRS;
-    }
-    
-    const selectedPairs = shuffleArray(pairSource).slice(0, PAIRS_PER_GAME);
-
-    // Create separate arrays for terms and definitions
-    const termCards: Card[] = [];
-    const definitionCards: Card[] = [];
-    
-    selectedPairs.forEach((pair) => {
-      termCards.push({
-        id: `${pair.id}-term`,
-        pairId: pair.id,
-        content: pair.term,
-        type: 'term',
-        isMatched: false,
-        isSelected: false,
-        isWrong: false,
-      });
-      definitionCards.push({
-        id: `${pair.id}-def`,
-        pairId: pair.id,
-        content: pair.definition,
-        type: 'definition',
-        isMatched: false,
-        isSelected: false,
-        isWrong: false,
-      });
-    });
-
-    // Shuffle definitions independently from terms
-    const allCards = [...termCards, ...shuffleArray(definitionCards)];
-    setCards(allCards);
-    setSelectedCards([]);
-    setTimeRemaining(GAME_TIME_SECONDS);
-    setScore(0);
-    setMatchesFound(0);
-    setShowResults(false);
-  }, [difficulty, generatedPairs]);
-
-  // Auto-complete loading and auto-start game when content is generated
-  useEffect(() => {
-    if (isLoading && generatedPairs) {
-      // Initialize the game first
-      initializeGame();
-      
-      // Then set loading to false and auto-start game
-      const timeout = setTimeout(() => {
-        setIsLoading(false);
-        // Auto-start the game when coming from generated content
-        setStatus('countdown');
-        incrementDailyGames();
-        gamesPlayedToday.current += 1;
-      }, 2000); // Allow time for the loading animation stages
-      return () => clearTimeout(timeout);
-    }
-  }, [isLoading, generatedPairs, initializeGame]);
-
-  // Start game
-  const startGame = useCallback(() => {
-    // Check daily limit for free users
-    if (!isPro && gamesPlayedToday.current >= FREE_DAILY_LIMIT) {
-      setShowUpgrade(true);
-      return;
-    }
-
-    initializeGame();
-    setStatus('countdown');
-  }, [isPro, initializeGame]);
-
-  // Handle countdown complete
-  const handleCountdownComplete = useCallback(() => {
-    setStatus('playing');
-    incrementDailyGames();
-    gamesPlayedToday.current += 1;
-  }, []);
-
-  // Handle card selection
-  const handleCardSelect = useCallback(
-    (card: Card) => {
-      if (status !== 'playing' || selectedCards.length >= 2) return;
-
-      // Can't select same card twice
-      if (selectedCards.some((c) => c.id === card.id)) return;
-
-      // Can't select same type (must match term with definition)
-      if (selectedCards.length === 1 && selectedCards[0].type === card.type) {
-        // Show wrong animation briefly
-        setCards((prev) =>
-          prev.map((c) => (c.id === card.id ? { ...c, isWrong: true } : c))
-        );
-        setTimeout(() => {
-          setCards((prev) =>
-            prev.map((c) => (c.id === card.id ? { ...c, isWrong: false } : c))
-          );
-        }, 400);
-        return;
-      }
-
-      // Select the card
-      setCards((prev) =>
-        prev.map((c) => (c.id === card.id ? { ...c, isSelected: true } : c))
-      );
-      const newSelected = [...selectedCards, card];
-      setSelectedCards(newSelected);
-
-      // Check for match if two cards selected
-      if (newSelected.length === 2) {
-        const [first, second] = newSelected;
-        const isMatch = first.pairId === second.pairId;
-
-        if (isMatch) {
-          // Correct match
-          setTimeout(() => {
-            setCards((prev) =>
-              prev.map((c) =>
-                c.pairId === first.pairId
-                  ? { ...c, isMatched: true, isSelected: false }
-                  : c
-              )
-            );
-            setScore((prev) => prev + POINTS_PER_MATCH);
-            setMatchesFound((prev) => prev + 1);
-            setSelectedCards([]);
-          }, 300);
-        } else {
-          // Wrong match
-          setCards((prev) =>
-            prev.map((c) =>
-              newSelected.some((s) => s.id === c.id) ? { ...c, isWrong: true } : c
-            )
-          );
-          setTimeout(() => {
-            setCards((prev) =>
-              prev.map((c) =>
-                newSelected.some((s) => s.id === c.id)
-                  ? { ...c, isWrong: false, isSelected: false }
-                  : c
-              )
-            );
-            setSelectedCards([]);
-          }, 600);
-        }
-      }
-    },
-    [status, selectedCards]
-  );
-
-  // Timer effect
-  useEffect(() => {
-    if (status !== 'playing') return;
-
-    const timer = setInterval(() => {
-      setTimeRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          setStatus('lost');
-          setShowResults(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [status]);
-
-  // Win condition check
-  useEffect(() => {
-    if (status === 'playing' && matchesFound === PAIRS_PER_GAME) {
-      const timeBonus = timeRemaining * TIME_BONUS_MULTIPLIER;
-      setScore((prev) => prev + timeBonus);
-      setStatus('won');
-      setShowResults(true);
-    }
-  }, [matchesFound, status, timeRemaining]);
-
-  // Handle play again
-  const handlePlayAgain = useCallback(() => {
-    if (!isPro && gamesPlayedToday.current >= FREE_DAILY_LIMIT) {
-      setShowResults(false);
-      setShowUpgrade(true);
-      return;
-    }
-    startGame();
-  }, [isPro, startGame]);
+  };
 
   return (
     <AnimatedPage>
@@ -789,7 +494,7 @@ export default function MatchingGame() {
                 Matching Rush
               </h1>
               <p className="text-slate-500 dark:text-slate-400">
-                Match {PAIRS_PER_GAME} pairs before time runs out
+                Match 6 pairs before time runs out
               </p>
             </div>
 
@@ -813,7 +518,7 @@ export default function MatchingGame() {
 
             {!isPro && (
               <div className="text-center text-sm text-slate-500 dark:text-slate-400 mb-4">
-                {FREE_DAILY_LIMIT - gamesPlayedToday.current} free games remaining today
+                {FREE_DAILY_LIMIT - gamesPlayedToday} free games remaining today
               </div>
             )}
 
@@ -829,9 +534,50 @@ export default function MatchingGame() {
             {/* HUD */}
             <HUD timeRemaining={timeRemaining} score={score} pairsLeft={pairsLeft} />
 
-            {/* Game Board - Split Column Layout */}
+            {/* Game Board - Responsive Layout: Mobile Stack, Desktop Split */}
             <div className="max-w-6xl mx-auto px-4 py-6">
-              <div className="grid grid-cols-[1fr_2fr] gap-6">
+              {/* Mobile Layout: Single Column Stack (< 768px) */}
+              <div className="md:hidden space-y-6">
+                {/* Current Term Card at Top */}
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide px-2">
+                    Match This Term:
+                  </h3>
+                  {cards
+                    .filter(card => card.type === 'term' && !card.isMatched)
+                    .slice(0, 1)
+                    .map((card) => (
+                      <GameCard
+                        key={card.id}
+                        card={card}
+                        onSelect={handleCardSelect}
+                        disabled={status !== 'playing' || selectedCards.length >= 2}
+                      />
+                    ))}
+                </div>
+
+                {/* Definitions List - Scrollable */}
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide px-2">
+                    Select Definition:
+                  </h3>
+                  <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-2">
+                    {cards
+                      .filter(card => card.type === 'definition')
+                      .map((card) => (
+                        <GameCard
+                          key={card.id}
+                          card={card}
+                          onSelect={handleCardSelect}
+                          disabled={status !== 'playing' || selectedCards.length >= 2}
+                        />
+                      ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop Layout: Split View (≥ 768px) */}
+              <div className="hidden md:grid md:grid-cols-[1fr_2fr] gap-6">
                 {/* Left Column: Terms */}
                 <div className="space-y-3">
                   {cards
@@ -866,24 +612,21 @@ export default function MatchingGame() {
 
         {/* Results Modal */}
         <ResultsModal
-          isOpen={showResults}
-          onClose={() => setShowResults(false)}
+          isOpen={status === 'won' || status === 'lost'}
+          onClose={handleBackToMenu}
           onPlayAgain={handlePlayAgain}
           won={status === 'won'}
           matchesFound={matchesFound}
-          totalPairs={totalPairs}
+          totalPairs={6}
           timeRemaining={timeRemaining}
           score={score}
         />
 
-        {/* Upgrade Modal */}
+        {/* Daily Limit/Upgrade Modal */}
         <UpgradeModal
-          isOpen={showUpgrade}
-          onClose={() => {
-            setShowUpgrade(false);
-            setStatus('idle');
-          }}
-          gamesPlayed={gamesPlayedToday.current}
+          isOpen={showDailyLimitModal}
+          onClose={() => setShowDailyLimitModal(false)}
+          gamesPlayed={gamesPlayedToday}
         />
         </div>
       </GameLoadingWrapper>

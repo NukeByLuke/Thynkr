@@ -203,18 +203,19 @@ export default {
       },
       animation: {
         // ═══════════════════════════════════════════════════════════════════
-        // MOTION PRESETS
+        // MOTION PRESETS - Premium Glassmorphism
         // ═══════════════════════════════════════════════════════════════════
-        // fade-in: 0 → opacity 1 over 300ms ease-out
         'fade-in': 'fadeIn 0.3s ease-out',
         'fade-in-up': 'fadeInUp 0.4s ease-out',
-        // slide-up: translateY 10px → 0 over 300ms
         'slide-up': 'slideUp 0.3s ease-out',
         'blur-in': 'blurIn 0.3s ease-out',
         'glow-pulse': 'glowPulse 2s ease-in-out infinite',
         'shimmer': 'shimmer 1.5s ease-in-out infinite',
         'gradient-x': 'gradientX 8s ease infinite',
         'gradient-shift': 'gradientShift 6s ease infinite',
+        'float': 'float 6s ease-in-out infinite',
+        'slow-spin': 'spin 8s linear infinite',
+        'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -250,6 +251,31 @@ export default {
           '50%': { backgroundPosition: '100% 50%' },
           '100%': { backgroundPosition: '0% 50%' },
         },
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-20px)' },
+        },
+        pulseGlow: {
+          '0%, 100%': { 
+            boxShadow: '0 0 40px rgba(139, 92, 246, 0.3), 0 0 80px rgba(139, 92, 246, 0.15)' 
+          },
+          '50%': { 
+            boxShadow: '0 0 60px rgba(139, 92, 246, 0.4), 0 0 120px rgba(139, 92, 246, 0.2)' 
+          },
+        },
+      },
+      animation: {
+        fadeIn: 'fadeIn 0.5s ease-in forwards',
+        fadeInUp: 'fadeInUp 0.8s ease-out forwards',
+        slideUp: 'slideUp 0.6s ease-out forwards',
+        blurIn: 'blurIn 0.6s ease-out forwards',
+        glowPulse: 'glowPulse 2s ease-in-out infinite',
+        shimmer: 'shimmer 2s linear infinite',
+        gradientX: 'gradientX 5s ease infinite',
+        gradientShift: 'gradientShift 8s ease infinite',
+        float: 'float 6s ease-in-out infinite',
+        'slow-spin': 'spin 8s linear infinite',
+        'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
       },
       // hover-transition: background/color/box-shadow transition over 200ms ease-in-out
       transitionTimingFunction: {
@@ -278,6 +304,12 @@ export default {
       addUtilities({
         '.pb-safe': {
           'padding-bottom': 'env(safe-area-inset-bottom, 0)',
+        },
+        '.h-safe': {
+          'height': 'env(safe-area-inset-bottom, 0)',
+        },
+        '.pt-safe': {
+          'padding-top': 'env(safe-area-inset-top, 0)',
         },
         // Hover transition preset: background/color/box-shadow over 200ms ease-in-out
         '.hover-transition': {

@@ -417,14 +417,14 @@ export default function MyCourseDetail() {
     : `${window.location.origin}/courses/${course.id}`;
 
   return (
-    <div className="h-full bg-gray-50 dark:bg-gray-900">
+    <div className="h-full bg-slate-50 dark:bg-slate-950">
       {/* Soft Header Section */}
-      <div className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+      <div className="relative bg-gradient-to-br from-blue-900/80 via-purple-900/80 to-indigo-900/80 dark:from-blue-950/90 dark:via-purple-950/90 dark:to-indigo-950/90 border-b border-white/10">
         {/* Back Navigation */}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
           <Link
             to="/courses"
-            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Courses</span>
@@ -480,10 +480,10 @@ export default function MyCourseDetail() {
                   {course.visibility}
                 </span>
               </div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
+              <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">
                 {course.title}
               </h1>
-              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex flex-wrap items-center gap-4 text-sm text-white/70">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   <span>{course.creator.name}</span>
@@ -508,7 +508,7 @@ export default function MyCourseDetail() {
                 <button
                   onClick={() => bannerInputRef.current?.click()}
                   disabled={uploadingBanner}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-white/90 border border-white/20 rounded-lg hover:bg-white/10 transition-colors backdrop-blur-sm"
                 >
                   <ImagePlus className="h-4 w-4" />
                   {uploadingBanner ? 'Uploading...' : 'Add Banner'}
@@ -526,7 +526,7 @@ export default function MyCourseDetail() {
           <div className="lg:col-span-2 space-y-6">
             {/* Description Card */}
             {(course.description || isEditing) && (
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-2xl shadow-sm p-6">
                 {isEditing ? (
                   <form
                     onSubmit={(e) => {
@@ -536,18 +536,18 @@ export default function MyCourseDetail() {
                     className="space-y-5"
                   >
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                         Title
                       </label>
                       <input
                         type="text"
                         value={editForm.title}
                         onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 border border-slate-300/50 dark:border-white/10 rounded-xl bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                         Description
                       </label>
                       <textarea
@@ -555,18 +555,18 @@ export default function MyCourseDetail() {
                         onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                         rows={4}
                         placeholder="Describe what students will learn..."
-                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
+                        className="w-full px-4 py-3 border border-slate-300/50 dark:border-white/10 rounded-xl bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                           Category
                         </label>
                         <select
                           value={editForm.category}
                           onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                          className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent cursor-pointer"
+                          className="w-full px-4 py-3 border border-slate-300/50 dark:border-white/10 rounded-xl bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent cursor-pointer"
                         >
                           {CATEGORIES.map((cat) => (
                             <option key={cat.value} value={cat.value}>
@@ -576,7 +576,7 @@ export default function MyCourseDetail() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                           Visibility
                         </label>
                         <select
@@ -588,7 +588,7 @@ export default function MyCourseDetail() {
                             })
                           }
                           disabled={!isPremium && editForm.visibility !== 'PRIVATE'}
-                          className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50 cursor-pointer"
+                          className="w-full px-4 py-3 border border-slate-300/50 dark:border-white/10 rounded-xl bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50 cursor-pointer"
                         >
                           <option value="PRIVATE">Private</option>
                           <option value="PUBLIC" disabled={!isPremium}>
@@ -597,18 +597,18 @@ export default function MyCourseDetail() {
                         </select>
                       </div>
                     </div>
-                    <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-200/50 dark:border-white/10">
                       <button
                         type="button"
                         onClick={() => setIsEditing(false)}
-                        className="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                        className="px-5 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-white/5 rounded-xl transition-colors"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         disabled={updateCourseMutation.isPending}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:opacity-50 transition-colors"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full hover:from-cyan-600 hover:to-blue-600 disabled:opacity-50 transition-all shadow-lg shadow-blue-500/20"
                       >
                         <Save className="h-4 w-4" />
                         {updateCourseMutation.isPending ? 'Saving...' : 'Save Changes'}
@@ -617,10 +617,10 @@ export default function MyCourseDetail() {
                   </form>
                 ) : (
                   <>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">
                       About this course
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
                       {course.description || 'No description provided.'}
                     </p>
                   </>
@@ -629,13 +629,13 @@ export default function MyCourseDetail() {
             )}
 
             {/* Files Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden">
+              <div className="p-5 border-b border-slate-200/50 dark:border-white/10 flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
                     Course Files
                   </h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                     {course.files.length} file{course.files.length !== 1 ? 's' : ''} in this course
                   </p>
                 </div>
@@ -647,7 +647,7 @@ export default function MyCourseDetail() {
                   ) && (
                     <button
                       onClick={() => setShowStudyPanel(true)}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full hover:from-cyan-600 hover:to-blue-600 transition-all shadow-lg shadow-blue-500/20"
                     >
                       <GraduationCap className="h-4 w-4" />
                       Study
@@ -666,7 +666,7 @@ export default function MyCourseDetail() {
                       <button
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploading}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-full hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-slate-900 to-slate-800 dark:from-white dark:to-slate-100 text-white dark:text-slate-900 rounded-full hover:from-slate-800 hover:to-slate-700 dark:hover:from-slate-100 dark:hover:to-white disabled:opacity-50 transition-all shadow-lg"
                       >
                         <Upload className="h-4 w-4" />
                         {uploading ? `${Math.round(uploadProgress)}%` : 'Upload'}
@@ -679,9 +679,9 @@ export default function MyCourseDetail() {
               {uploading && (
                 <div className="px-5 py-3 bg-primary-50 dark:bg-primary-900/20 border-b border-primary-100 dark:border-primary-800">
                   <div className="flex items-center gap-3">
-                    <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                    <div className="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
                       <div
-                        className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                        className="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${uploadProgress}%` }}
                       />
                     </div>
@@ -694,13 +694,13 @@ export default function MyCourseDetail() {
 
               {course.files.length === 0 ? (
                 <div className="p-12 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                    <FileText className="h-8 w-8 text-gray-400" />
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                    <FileText className="h-8 w-8 text-slate-400" />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                  <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">
                     No files yet
                   </h3>
-                  <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto">
+                  <p className="text-slate-500 dark:text-slate-400 mb-6 max-w-sm mx-auto">
                     {course.isOwner
                       ? 'Upload PDFs, images, videos, or other learning materials to your course'
                       : 'No files have been added to this course yet'}
@@ -708,7 +708,7 @@ export default function MyCourseDetail() {
                   {course.isOwner && (
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg shadow-purple-500/20"
                     >
                       <Upload className="h-4 w-4" />
                       Upload your first file
@@ -716,7 +716,7 @@ export default function MyCourseDetail() {
                   )}
                 </div>
               ) : (
-                <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                <div className="divide-y divide-slate-200/50 dark:divide-white/10">
                   {course.files.map((file, index) => (
                     <div
                       key={file.id}
@@ -728,34 +728,34 @@ export default function MyCourseDetail() {
                       className={`p-4 flex items-center gap-4 transition-all ${
                         course.isOwner ? 'cursor-grab active:cursor-grabbing' : ''
                       } ${
-                        draggedFileId === file.id ? 'opacity-50 bg-gray-100 dark:bg-gray-700' : ''
+                        draggedFileId === file.id ? 'opacity-50 bg-white/50 dark:bg-white/5' : ''
                       } ${
                         dragOverFileId === file.id
                           ? 'bg-primary-50 dark:bg-primary-900/20 border-t-2 border-primary-500'
                           : ''
-                      } hover:bg-gray-50 dark:hover:bg-gray-700/50`}
+                      } hover:bg-white/30 dark:hover:bg-white/5`}
                     >
                       {course.isOwner && (
                         <div className="flex flex-col items-center gap-0.5">
                           <button
                             onClick={() => moveFileUp(file.id)}
                             disabled={index === 0}
-                            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed"
                           >
                             <ChevronUp className="h-4 w-4" />
                           </button>
-                          <GripVertical className="h-4 w-4 text-gray-400" />
+                          <GripVertical className="h-4 w-4 text-slate-400" />
                           <button
                             onClick={() => moveFileDown(file.id)}
                             disabled={index === course.files.length - 1}
-                            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed"
                           >
                             <ChevronDown className="h-4 w-4" />
                           </button>
                         </div>
                       )}
 
-                      <div className="p-2 rounded-xl bg-gray-100 dark:bg-gray-700">
+                      <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800">
                         {getFileIcon(file.fileType)}
                       </div>
 
@@ -766,7 +766,7 @@ export default function MyCourseDetail() {
                               type="text"
                               value={editingFileName}
                               onChange={(e) => setEditingFileName(e.target.value)}
-                              className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                              className="flex-1 px-3 py-2 text-sm border border-slate-300/50 dark:border-white/10 rounded-lg bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                               autoFocus
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
@@ -792,17 +792,17 @@ export default function MyCourseDetail() {
                             </button>
                             <button
                               onClick={() => setEditingFileId(null)}
-                              className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                              className="p-2 text-slate-500 hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors"
                             >
                               <X className="h-4 w-4" />
                             </button>
                           </div>
                         ) : (
                           <>
-                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
                               {file.name}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                               {formatFileSize(file.fileSize)}
                             </p>
                           </>
@@ -862,33 +862,33 @@ export default function MyCourseDetail() {
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
             {/* Author Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-              <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+            <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-2xl shadow-sm p-6">
+              <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
                 Course Info
               </h3>
 
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 font-semibold">
+                  <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 font-semibold">
                     {course.creator.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">
                       {course.creator.name}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       @{course.creator.username}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                  <Calendar className="h-4 w-4 text-gray-400" />
+                <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
+                  <Calendar className="h-4 w-4 text-slate-400" />
                   <span>Created {formatDate(course.createdAt)}</span>
                 </div>
 
-                <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                  <FileText className="h-4 w-4 text-gray-400" />
+                <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
+                  <FileText className="h-4 w-4 text-slate-400" />
                   <span>
                     {course.files.length} file{course.files.length !== 1 ? 's' : ''}
                   </span>
@@ -898,8 +898,8 @@ export default function MyCourseDetail() {
 
             {/* Actions Card (Owner only) */}
             {course.isOwner && (
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+              <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-2xl shadow-sm p-6">
+                <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
                   Actions
                 </h3>
 
@@ -916,15 +916,15 @@ export default function MyCourseDetail() {
                       );
                     }}
                     disabled={toggleVisibilityMutation.isPending}
-                    className="w-full flex items-center justify-between p-3 rounded-xl border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200/50 dark:border-white/10 hover:bg-white/50 dark:hover:bg-white/5 transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       {course.visibility === 'PUBLIC' ? (
-                        <Eye className="h-5 w-5 text-green-500" />
+                        <Eye className="h-5 w-5 text-green-400" />
                       ) : (
-                        <EyeOff className="h-5 w-5 text-gray-400" />
+                        <EyeOff className="h-5 w-5 text-slate-400" />
                       )}
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                         {course.visibility === 'PUBLIC' ? 'Public' : 'Private'}
                       </span>
                     </div>
@@ -954,10 +954,10 @@ export default function MyCourseDetail() {
                       });
                       setIsEditing(true);
                     }}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200/50 dark:border-white/10 hover:bg-white/50 dark:hover:bg-white/5 transition-colors"
                   >
-                    <Edit2 className="h-5 w-5 text-gray-400" />
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <Edit2 className="h-5 w-5 text-slate-400" />
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                       Edit Details
                     </span>
                   </button>
@@ -965,10 +965,10 @@ export default function MyCourseDetail() {
                   {/* Share Button */}
                   <button
                     onClick={() => setShowShareModal(true)}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200/50 dark:border-white/10 hover:bg-white/50 dark:hover:bg-white/5 transition-colors"
                   >
-                    <Share2 className="h-5 w-5 text-gray-400" />
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <Share2 className="h-5 w-5 text-slate-400" />
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                       Share Course
                     </span>
                   </button>
@@ -982,23 +982,23 @@ export default function MyCourseDetail() {
       {/* Share Modal */}
       {showShareModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
                   <Share2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Share Course</h2>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Share Course</h2>
               </div>
               <button
                 onClick={() => setShowShareModal(false)}
-                className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="p-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
               {course.visibility === 'PUBLIC'
                 ? 'This course is public and visible to all Premium users in the course browser.'
                 : 'Share this private link to give others access to your course.'}
@@ -1009,14 +1009,14 @@ export default function MyCourseDetail() {
                 type="text"
                 value={shareUrl}
                 readOnly
-                className="flex-1 px-4 py-3 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white font-mono"
+                className="flex-1 px-4 py-3 text-sm border border-slate-300/50 dark:border-white/10 rounded-xl bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-white font-mono"
               />
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(shareUrl);
                   toast.success('Link copied!');
                 }}
-                className="p-3 bg-primary-600 text-white hover:bg-primary-700 rounded-xl transition-colors"
+                className="p-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 rounded-xl transition-all shadow-lg shadow-purple-500/20"
               >
                 <Copy className="h-5 w-5" />
               </button>
@@ -1026,7 +1026,7 @@ export default function MyCourseDetail() {
               <button
                 onClick={() => regenerateTokenMutation.mutate()}
                 disabled={regenerateTokenMutation.isPending}
-                className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
               >
                 <RefreshCw
                   className={`h-4 w-4 ${regenerateTokenMutation.isPending ? 'animate-spin' : ''}`}
@@ -1041,21 +1041,21 @@ export default function MyCourseDetail() {
       {/* File Viewer Modal */}
       {viewingFile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="relative w-full max-w-5xl max-h-[90vh] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+          <div className="relative w-full max-w-5xl max-h-[90vh] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200/50 dark:border-white/10">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
+                <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800">
                   {getFileIcon(viewingFile.fileType)}
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900 dark:text-white">{viewingFile.name}</h3>
-                  <p className="text-xs text-gray-500">{formatFileSize(viewingFile.fileSize)}</p>
+                  <h3 className="font-medium text-slate-900 dark:text-white">{viewingFile.name}</h3>
+                  <p className="text-xs text-slate-500">{formatFileSize(viewingFile.fileSize)}</p>
                 </div>
               </div>
               <button
                 onClick={() => setViewingFile(null)}
-                className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1090,14 +1090,14 @@ export default function MyCourseDetail() {
       {/* Course Study Panel */}
       {showStudyPanel && course && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
-          <div className="absolute inset-4 md:inset-8 lg:inset-12 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="absolute inset-4 md:inset-8 lg:inset-12 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200/50 dark:border-white/10">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
                   <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">Study Mode</h2>
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Study Mode</h2>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{course.title}</p>
                 </div>
               </div>

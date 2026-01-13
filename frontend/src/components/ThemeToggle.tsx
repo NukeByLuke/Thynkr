@@ -16,34 +16,60 @@ export default function ThemeToggle({ showLabel = false, size = 'md' }: ThemeTog
   };
 
   const iconSize = size === 'sm' ? 'w-4 h-4' : 'w-5 h-5';
-  const buttonPadding = size === 'sm' ? 'p-1.5' : 'p-2';
+  const buttonPadding = size === 'sm' ? 'p-2' : 'p-2.5';
 
   return (
     <motion.button
       onClick={toggleTheme}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      className={`flex items-center justify-center gap-2 ${buttonPadding} rounded-xl bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 transition-all duration-200 shadow-sm`}
+      className={`relative flex items-center justify-center gap-2 ${buttonPadding} rounded-full overflow-hidden transition-all duration-300 shadow-lg ${
+        isDark 
+          ? 'bg-slate-800 hover:bg-slate-700' 
+          : 'bg-white hover:bg-slate-50'
+      } border ${
+        isDark 
+          ? 'border-slate-700' 
+          : 'border-slate-200'
+      }`}
       title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
     >
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
-          key={theme}
-          initial={{ y: -10, opacity: 0, rotate: -90 }}
-          animate={{ y: 0, opacity: 1, rotate: 0 }}
-          exit={{ y: 10, opacity: 0, rotate: 90 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-        >
-          {isDark ? (
-            <Sun className={`${iconSize} text-amber-500`} />
-          ) : (
-            <Moon className={`${iconSize} text-slate-600`} />
-          )}
-        </motion.div>
-      </AnimatePresence>
+      {/* Animated background */}
+      <motion.div
+        className={`absolute inset-0 ${
+          isDark 
+            ? 'bg-gradient-to-r from-slate-700 to-slate-800' 
+            : 'bg-gradient-to-r from-amber-100 to-orange-100'
+        }`}
+        initial={false}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      />
+
+      {/* Icon */}
+      <div className="relative z-10">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={theme}
+            initial={{ y: -20, opacity: 0, rotate: -180 }}
+            animate={{ y: 0, opacity: 1, rotate: 0 }}
+            exit={{ y: 20, opacity: 0, rotate: 180 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+          >
+            {isDark ? (
+              <Sun className={`${iconSize} text-amber-300`} />
+            ) : (
+              <Moon className={`${iconSize} text-slate-700`} />
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
       {showLabel && (
-        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+        <span className={`relative z-10 text-sm font-medium ${
+          isDark ? 'text-slate-300' : 'text-slate-700'
+        }`}>
           {isDark ? 'Light' : 'Dark'}
         </span>
       )}
