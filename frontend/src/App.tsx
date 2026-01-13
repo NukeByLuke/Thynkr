@@ -21,8 +21,6 @@ import BackgroundShapes from '@/components/ui/BackgroundShapes';
 import { lazyWithPreload } from './utils/lazyWithPreload';
 
 // Code-split page components with preloading for optimal bundle size
-const Landing = lazyWithPreload(() => import('./pages/Landing'));
-const Dashboard = lazyWithPreload(() => import('./pages/Dashboard'));
 const Login = lazyWithPreload(() => import('./pages/Login'));
 const Register = lazyWithPreload(() => import('./pages/Register'));
 const AuthCallback = lazyWithPreload(() => import('./pages/AuthCallback'));
@@ -48,7 +46,7 @@ const NotFound = lazyWithPreload(() => import('./pages/NotFound'));
 
 /**
  * Custom hook to handle authentication-based redirects
- * Redirects authenticated users from login/register pages to dashboard
+ * Redirects authenticated users from login/register pages to study page
  */
 function useAuthRedirects() {
   const { user, isLoading } = useAuth();
@@ -58,12 +56,12 @@ function useAuthRedirects() {
   useEffect(() => {
     if (isLoading) return;
 
-    // Only redirect from login/register pages, allow access to homepage (/)
+    // Redirect authenticated users from login/register pages to study page
     const authOnlyPages = ['/login', '/register'];
     const isOnAuthOnlyPage = authOnlyPages.includes(location.pathname);
 
     if (user && isOnAuthOnlyPage) {
-      navigate('/dashboard', { replace: true });
+      navigate('/study', { replace: true });
     }
   }, [user, isLoading, location.pathname, navigate]);
 }
@@ -76,22 +74,27 @@ function AppContent() {
 
   /**
    * Home route component that redirects based on auth status
+   * - If not authenticated: show login page
+   * - If authenticated: redirect to study page
    */
   const HomeRoute = () => {
     const { user, isLoading } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
-      if (!isLoading && user) {
-        navigate('/dashboard', { replace: true });
+      if (isLoading) return;
+      
+      if (user) {
+        // Authenticated users go to study page
+        navigate('/study', { replace: true });
+      } else {
+        // Unauthenticated users go to login page
+        navigate('/login', { replace: true });
       }
     }, [user, isLoading, navigate]);
 
-    if (isLoading) {
-      return <LoadingSpinner fullScreen />;
-    }
-
-    return <Landing />;
+    // Show loading while checking auth status
+    return <LoadingSpinner fullScreen />;
   };
 
   /**
@@ -141,7 +144,10 @@ function AppContent() {
       <Suspense fallback={<LoadingSpinner fullScreen />}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
-            {/* Auth routes - no navbar */}
+            {/* Home route - redirects to login or study based on auth */}
+            <Route path="/" element={<HomeRoute />} />
+            
+            {/* Auth routes - no layout */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
@@ -149,7 +155,6 @@ function AppContent() {
 
             {/* Public routes with PublicLayout (navbar) */}
             <Route element={<PublicLayout />}>
-              <Route path="/" element={<HomeRoute />} />
               <Route path="/pricing" element={<Pricing />} />
             </Route>
 
@@ -160,7 +165,7 @@ function AppContent() {
                 <DashboardLayout />
               </ProtectedRoute>
             }
-          >            <Route path="/dashboard" element={<Dashboard />} />            <Route path="/dashboard" element={<Dashboard />} />
+          >
             <Route path="/study" element={<Study />} />
             <Route path="/files" element={<Files />} />
             <Route path="/progress" element={<StudyProgress />} />

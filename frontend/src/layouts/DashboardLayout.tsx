@@ -10,10 +10,10 @@ export default function DashboardLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className="h-screen w-full overflow-hidden bg-slate-950 bg-grid-pattern flex relative">
+    <div className="h-screen w-full overflow-hidden bg-slate-50 dark:bg-slate-950 bg-grid-pattern flex relative">
       {/* Ambient Glow Orbs */}
-      <div className="fixed top-0 left-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="fixed bottom-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="fixed top-0 left-0 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="fixed bottom-0 right-0 w-96 h-96 bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-[120px] pointer-events-none" />
       
       {/* Desktop Sidebar - Hidden on mobile */}
       <div className="hidden lg:block flex-shrink-0">
@@ -23,18 +23,18 @@ export default function DashboardLayout() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header Bar - Visible on all screens */}
-        <header className="h-16 bg-slate-900/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 lg:px-6 relative z-50">
+        <header className="h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-white/5 flex items-center justify-between px-4 lg:px-6 relative z-50">
           {/* Left: Mobile menu button + Logo (mobile only) */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-white/5 transition-colors"
+              className="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
             >
-              <Menu className="w-5 h-5 text-slate-300" />
+              <Menu className="w-5 h-5 text-slate-700 dark:text-slate-300" />
             </button>
             <div className="lg:hidden flex items-center gap-2">
               <Logo variant="icon" animated={false} className="w-7 h-7" />
-              <span className="text-base font-semibold text-white">
+              <span className="text-base font-semibold text-slate-900 dark:text-white">
                 Thynkr
               </span>
             </div>

@@ -194,10 +194,10 @@ export default function Register() {
             </p>
             
             <button
-              onClick={() => navigate('/home')}
+              onClick={() => navigate('/study')}
               className="w-full h-12 bg-cyan-500 hover:bg-cyan-600 text-white font-medium rounded-full transition-colors"
             >
-              Go to Dashboard
+              Go to Study
             </button>
           </div>
         ) : (

@@ -55,20 +55,20 @@ const Sidebar = () => {
       {/* Toggle Button */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="absolute -right-3 top-8 z-50 w-6 h-6 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center hover:bg-slate-700 transition-colors shadow-lg"
+        className="absolute -right-3 top-8 z-50 w-6 h-6 rounded-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-white/10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-lg"
         aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
       >
         <motion.div
           animate={{ rotate: isExpanded ? 180 : 0 }}
           transition={{ duration: 0.3 }}
         >
-          <ChevronRight className="w-3 h-3 text-slate-400" />
+          <ChevronRight className="w-3 h-3 text-slate-600 dark:text-slate-400" />
         </motion.div>
       </button>
 
       {/* Logo Section */}
-      <div className="h-16 flex items-center px-4 border-b border-white/5">
-        <Link to="/dashboard" className="flex items-center gap-2 overflow-hidden">
+      <div className="h-16 flex items-center px-4 border-b border-slate-200 dark:border-white/5">
+        <Link to="/study" className="flex items-center gap-2 overflow-hidden">
           <Logo variant="icon" animated={false} className="w-8 h-8 flex-shrink-0" />
           <AnimatePresence mode="wait">
             {isExpanded && (
@@ -155,7 +155,7 @@ const Sidebar = () => {
                   
                   {/* Tooltip for collapsed state */}
                   {!isExpanded && (
-                    <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 text-slate-100 text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                    <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 dark:bg-slate-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
                       {link.label}
                     </div>
                   )}
@@ -167,10 +167,10 @@ const Sidebar = () => {
       </nav>
 
       {/* User Profile Pill */}
-      <div className="p-3 border-t border-white/5">
+      <div className="p-3 border-t border-slate-200 dark:border-white/5">
         <div
           className={`
-            flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-800/50 hover:bg-slate-800/80 transition-all cursor-pointer
+            flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-100 dark:bg-slate-800/50 hover:bg-slate-200 dark:hover:bg-slate-800/80 transition-all cursor-pointer
             ${!isExpanded && 'justify-center'}
           `}
         >
