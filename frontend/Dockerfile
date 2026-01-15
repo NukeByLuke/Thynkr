@@ -53,13 +53,8 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 ARG NGINX_CONFIG=nginx.local.conf
 COPY ${NGINX_CONFIG} /etc/nginx/conf.d/default.conf
 
-# Add gzip compression and caching headers for performance
-RUN echo 'gzip on;' >> /etc/nginx/nginx.conf && \
-    echo 'gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;' >> /etc/nginx/nginx.conf && \
-    echo 'gzip_min_length 1000;' >> /etc/nginx/nginx.conf
-
 # Remove default nginx files to reduce image size
-RUN rm -rf /etc/nginx/conf.d/default.conf.dpkg-dist
+RUN rm -rf /etc/nginx/conf.d/default.conf.dpkg-dist 2>/dev/null || true
 
 # No Basic Auth; the SPA handles a themed preview gate
 
