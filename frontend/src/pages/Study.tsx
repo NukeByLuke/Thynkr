@@ -14,6 +14,7 @@ import NotesView from '@/features/study/NotesView';
 import FlashcardViewer from '@/features/study/FlashcardViewer';
 import QuizPlayer from '@/features/study/QuizPlayer';
 import { useStudySession } from '@/hooks/useStudySession';
+import { FileTypeBadge } from '@/lib/fileTypeUtils';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -212,7 +213,7 @@ export default function Study() {
                 <p className="text-slate-600 dark:text-slate-400 mb-4">No summary generated yet</p>
                 <button
                   onClick={() => generateSummaryMutation.mutate({ fileId: selectedFile.id })}
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-[background-image,box-shadow,transform] duration-200 active:scale-95 shadow-lg hover:shadow-xl"
                   disabled={generateSummaryMutation.isPending}
                 >
                   {generateSummaryMutation.isPending ? 'Generating...' : 'Generate Summary'}
@@ -242,7 +243,7 @@ export default function Study() {
                 <p className="text-slate-600 dark:text-slate-400 mb-4">No notes generated yet</p>
                 <button
                   onClick={() => generateNotesMutation.mutate({ fileId: selectedFile.id })}
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-[background-image,box-shadow,transform] duration-200 active:scale-95 shadow-lg hover:shadow-xl"
                   disabled={generateNotesMutation.isPending}
                 >
                   {generateNotesMutation.isPending ? 'Generating...' : 'Generate Notes'}
@@ -282,7 +283,7 @@ export default function Study() {
                   onClick={() =>
                     generateFlashcardsMutation.mutate({ fileId: selectedFile.id, numCards })
                   }
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-[background-image,box-shadow,transform] duration-200 active:scale-95 shadow-lg hover:shadow-xl"
                   disabled={generateFlashcardsMutation.isPending}
                 >
                   {generateFlashcardsMutation.isPending ? 'Generating...' : 'Generate Flashcards'}
@@ -325,34 +326,61 @@ export default function Study() {
                   <span className="text-slate-500 dark:text-slate-400"> • {quiz.questions.length} questions</span>
                 </button>
               ))}
-              <div className="pt-4 border-t border-slate-200 dark:border-slate-700 text-center space-y-6">
-                {!generateQuizMutation.isPending && (
-                  <>
-                    <p className="mb-4 text-slate-600 dark:text-slate-400">Generate new quiz</p>
-                    <div className="max-w-xs mx-auto space-y-4 mb-4">
-                      <div>
-                        <label className="block text-sm text-slate-700 dark:text-slate-300 mb-2">
-                          Questions: {numQuestions}
-                        </label>
-                        <input
-                          type="range"
-                          min="5"
-                          max="20"
-                          value={numQuestions}
-                          onChange={(e) => setNumQuestions(Number(e.target.value))}
-                          className="w-full"
-                        />
-                      </div>
-                      <select
-                        value={quizDifficulty}
-                        onChange={(e) => setQuizDifficulty(e.target.value as any)}
-                        className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                      >
-                        <option value="EASY">Easy</option>
-                        <option value="MEDIUM">Medium</option>
-                        <option value="HARD">Hard</option>
-                      </select>
+              
+              {/* Quiz Settings - Soft Square Design */}
+              <div className="pt-8 mt-8 border-t border-slate-200 dark:border-slate-700">
+                <div className="max-w-2xl mx-auto">
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 text-center">Quiz Settings</h3>
+                  <p className="text-slate-600 dark:text-slate-400 text-center mb-8">Configure your quiz preferences</p>
+
+                  {/* Difficulty Setting */}
+                  <div className="mb-8">
+                    <label className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-white mb-4">
+                      <span className="text-indigo-500">⚡</span>
+                      Difficulty Level
+                    </label>
+                    <div className="grid grid-cols-3 gap-4">
+                      {(['EASY', 'MEDIUM', 'HARD'] as const).map((level) => (
+                        <button
+                          key={level}
+                          onClick={() => setQuizDifficulty(level)}
+                          className={`relative py-4 px-5 rounded-2xl font-semibold text-base transition-all duration-200 border-2 ${
+                            quizDifficulty === level
+                              ? 'bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-500/30 scale-105'
+                              : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-indigo-300 dark:hover:border-indigo-700 hover:scale-[1.02]'
+                          }`}
+                        >
+                          {level.charAt(0) + level.slice(1).toLowerCase()}
+                        </button>
+                      ))}
                     </div>
+                  </div>
+
+                  {/* Question Count */}
+                  <div className="mb-8">
+                    <label className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-white mb-4">
+                      <span className="text-purple-500">📝</span>
+                      Number of Questions: {numQuestions}
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="range"
+                        min="5"
+                        max="20"
+                        step="1"
+                        value={numQuestions}
+                        onChange={(e) => setNumQuestions(Number(e.target.value))}
+                        className="w-full h-3 bg-slate-200 dark:bg-slate-700 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-indigo-500 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
+                      />
+                      <div className="flex justify-between mt-2 text-sm text-slate-500 dark:text-slate-400">
+                        <span>5</span>
+                        <span>20</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Generate Button */}
+                  {!generateQuizMutation.isPending && (
                     <button
                       onClick={() =>
                         generateQuizMutation.mutate({
@@ -361,47 +389,78 @@ export default function Study() {
                           difficulty: quizDifficulty,
                         })
                       }
-                      className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl"
-                      disabled={generateQuizMutation.isPending}
+                      className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-2xl font-bold text-lg transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
                     >
-                      {generateQuizMutation.isPending ? 'Generating...' : 'Generate Quiz'}
+                      Generate Quiz
                     </button>
-                  </>
-                )}
+                  )}
+                </div>
               </div>
+
+              {generateQuizMutation.isPending && (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                  <span className="ml-3 text-slate-600 dark:text-slate-400">Generating quiz...</span>
+                </div>
+              )}
             </div>
           );
         }
 
         return (
-          <div className="text-center py-12 space-y-6">
+          <div className="text-center py-12">
             {!generateQuizMutation.isPending && (
-              <>
-                <p className="text-slate-600 dark:text-slate-400 mb-4">No quizzes yet</p>
-                <div className="max-w-xs mx-auto space-y-4 mb-4">
-                  <div>
-                    <label className="block text-sm text-slate-700 dark:text-slate-300 mb-2">
-                      Questions: {numQuestions}
-                    </label>
+              <div className="max-w-2xl mx-auto">
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Quiz Settings</h3>
+                <p className="text-slate-600 dark:text-slate-400 mb-8">Configure and generate your first quiz</p>
+
+                {/* Difficulty Setting */}
+                <div className="mb-8">
+                  <label className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-white mb-4 justify-center">
+                    <span className="text-indigo-500">⚡</span>
+                    Difficulty Level
+                  </label>
+                  <div className="grid grid-cols-3 gap-4">
+                    {(['EASY', 'MEDIUM', 'HARD'] as const).map((level) => (
+                      <button
+                        key={level}
+                        onClick={() => setQuizDifficulty(level)}
+                        className={`relative py-4 px-5 rounded-2xl font-semibold text-base transition-all duration-200 border-2 ${
+                          quizDifficulty === level
+                            ? 'bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-500/30 scale-105'
+                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-indigo-300 dark:hover:border-indigo-700 hover:scale-[1.02]'
+                        }`}
+                      >
+                        {level.charAt(0) + level.slice(1).toLowerCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Question Count */}
+                <div className="mb-8">
+                  <label className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-white mb-4 justify-center">
+                    <span className="text-purple-500">📝</span>
+                    Number of Questions: {numQuestions}
+                  </label>
+                  <div className="relative">
                     <input
                       type="range"
                       min="5"
                       max="20"
+                      step="1"
                       value={numQuestions}
                       onChange={(e) => setNumQuestions(Number(e.target.value))}
-                      className="w-full"
+                      className="w-full h-3 bg-slate-200 dark:bg-slate-700 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-indigo-500 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
                     />
+                    <div className="flex justify-between mt-2 text-sm text-slate-500 dark:text-slate-400">
+                      <span>5</span>
+                      <span>20</span>
+                    </div>
                   </div>
-                  <select
-                    value={quizDifficulty}
-                    onChange={(e) => setQuizDifficulty(e.target.value as any)}
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                  >
-                    <option value="EASY">Easy</option>
-                    <option value="MEDIUM">Medium</option>
-                    <option value="HARD">Hard</option>
-                  </select>
                 </div>
+
+                {/* Generate Button */}
                 <button
                   onClick={() =>
                     generateQuizMutation.mutate({
@@ -410,12 +469,18 @@ export default function Study() {
                       difficulty: quizDifficulty,
                     })
                   }
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl"
-                  disabled={generateQuizMutation.isPending}
+                  className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-2xl font-bold text-lg transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  {generateQuizMutation.isPending ? 'Generating...' : 'Generate Quiz'}
+                  Generate Your First Quiz
                 </button>
-              </>
+              </div>
+            )}
+
+            {generateQuizMutation.isPending && (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                <span className="ml-3 text-slate-600 dark:text-slate-400">Generating quiz...</span>
+              </div>
             )}
           </div>
         );
@@ -453,12 +518,17 @@ export default function Study() {
               
               {/* File Header */}
               <div className="p-8 border-b border-slate-200/50 dark:border-white/10">
-                <h2 className="text-2xl font-bold text-heading">
-                  {selectedFile.originalName}
-                </h2>
-                <p className="text-sm text-muted mt-1">
-                  {selectedFile.fileType.toUpperCase()} • {formatFileSize(selectedFile.fileSize)}
-                </p>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-heading">
+                      {selectedFile.originalName}
+                    </h2>
+                    <div className="flex items-center gap-3 mt-2">
+                      <FileTypeBadge mimeType={selectedFile.fileType} />
+                      <span className="text-sm text-muted">{formatFileSize(selectedFile.fileSize)}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Tabs Navigation */}
@@ -472,7 +542,7 @@ export default function Study() {
                         setSelectedQuiz(null);
                         setSelectedFlashcardSet(null);
                       }}
-                      className={`py-4 sm:py-5 border-b-2 capitalize transition-all duration-300 whitespace-nowrap text-base sm:text-lg ${
+                      className={`py-4 sm:py-5 border-b-2 capitalize transition-[border-color,color,transform] duration-200 active:scale-95 whitespace-nowrap text-base sm:text-lg ${
                         activeTab === tab
                           ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 font-semibold'
                           : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-300/50'
@@ -509,7 +579,7 @@ export default function Study() {
       />
 
       {/* Abstract Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 dark:from-slate-950 dark:via-indigo-950 dark:to-slate-950 h-56">
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-100 via-purple-100 to-slate-100 dark:from-slate-950 dark:via-indigo-950 dark:to-slate-950 h-56">
         {/* Floating Abstract Shapes */}
         <motion.div
           animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
@@ -529,10 +599,10 @@ export default function Study() {
 
         {/* Content */}
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3">
             Study Center
           </h1>
-          <p className="text-lg text-slate-200 dark:text-slate-300 max-w-2xl">
+          <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl">
             Resume where you left off or start something new
           </p>
         </div>
@@ -554,7 +624,7 @@ export default function Study() {
             {/* Card 1: Browse Library */}
             <button
               onClick={() => navigate('/files')}
-              className="group card-hover p-6 text-left transition-all hover:border-slate-400 dark:hover:border-white/30"
+              className="group card-hover p-6 text-left transition-[border-color,transform] duration-200 active:scale-95 hover:border-slate-400 dark:hover:border-white/30"
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -576,7 +646,7 @@ export default function Study() {
             <button
               onClick={handleQuickUpload}
               disabled={uploadMutation.isPending}
-              className="group card-hover p-6 text-left transition-all hover:border-slate-400 dark:hover:border-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group card-hover p-6 text-left transition-[border-color,transform] duration-200 active:scale-95 hover:border-slate-400 dark:hover:border-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -610,7 +680,8 @@ export default function Study() {
                     key={file.id}
                     onClick={() => setSelectedFile(file)}
                     whileHover={{ x: 4 }}
-                    className="w-full flex items-center gap-4 p-4 card-hover transition-all duration-300 group hover:border-indigo-500/50"
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full flex items-center gap-4 p-4 card-hover transition-[border-color,transform] duration-200 group hover:border-indigo-500/50"
                   >
                     <div className="w-12 h-12 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl flex items-center justify-center">
                       <FileText className="w-6 h-6 text-indigo-500" />
@@ -619,9 +690,12 @@ export default function Study() {
                       <h3 className="font-semibold text-heading group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                         {file.originalName}
                       </h3>
-                      <p className="text-sm text-muted">
-                        {file.fileType.toUpperCase()} • {formatFileSize(file.fileSize)} • {formatDate(file.createdAt)}
-                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <FileTypeBadge mimeType={file.fileType} />
+                        <span className="text-sm text-muted">
+                          {formatFileSize(file.fileSize)} • {formatDate(file.createdAt)}
+                        </span>
+                      </div>
                     </div>
                     <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-indigo-500 transition-colors" />
                   </motion.button>

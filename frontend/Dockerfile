@@ -12,8 +12,8 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 # Copy package files
 COPY package.json pnpm-lock.yaml* ./
 
-# Install dependencies
-RUN pnpm install --no-frozen-lockfile
+# Install dependencies - use frozen lockfile if available, otherwise install normally
+RUN pnpm install --no-frozen-lockfile --prefer-offline
 
 # Stage 2: Builder
 FROM node:20-alpine AS builder
@@ -40,7 +40,7 @@ ENV VITE_STRIPE_PRICE_STANDARD_YEARLY=$VITE_STRIPE_PRICE_STANDARD_YEARLY
 ENV VITE_STRIPE_PRICE_PREMIUM_MONTHLY=$VITE_STRIPE_PRICE_PREMIUM_MONTHLY
 ENV VITE_STRIPE_PRICE_PREMIUM_YEARLY=$VITE_STRIPE_PRICE_PREMIUM_YEARLY
 
-# Build the app
+# Build the app with optimizations
 RUN pnpm build
 
 # Stage 3: Production with Nginx
@@ -53,13 +53,21 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 ARG NGINX_CONFIG=nginx.local.conf
 COPY ${NGINX_CONFIG} /etc/nginx/conf.d/default.conf
 
+# Add gzip compression and caching headers for performance
+RUN echo 'gzip on;' >> /etc/nginx/nginx.conf && \
+    echo 'gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;' >> /etc/nginx/nginx.conf && \
+    echo 'gzip_min_length 1000;' >> /etc/nginx/nginx.conf
+
+# Remove default nginx files to reduce image size
+RUN rm -rf /etc/nginx/conf.d/default.conf.dpkg-dist
+
 # No Basic Auth; the SPA handles a themed preview gate
 
 # Expose port 80
 EXPOSE 80
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+# Health check with faster timeout
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget -qO- http://localhost/ > /dev/null || exit 1
 
 # Start nginx

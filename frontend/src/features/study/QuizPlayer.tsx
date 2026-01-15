@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
@@ -81,7 +81,8 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
   const userAnswer = answers[currentQuestion.id];
   const previousAnswer = currentIndex > 0 ? answerHistory[currentIndex - 1] : null;
 
-  const handleStartQuiz = () => {
+  // Memoize handlers to prevent unnecessary re-renders
+  const handleStartQuiz = useCallback(() => {
     setShowSettings(false);
     // Initialize timer based on selected time limit
     if (settings.timeLimit !== 'endless') {
@@ -89,19 +90,19 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
       setTimeRemaining(minutes * 60);
       setTimerActive(true);
     }
-  };
+  }, [settings.timeLimit]);
 
-  const handleAnswerSelect = (option: string) => {
+  const handleAnswerSelect = useCallback((option: string) => {
     if (!isSubmitted && !isRevealed) {
       setSelectedOption(option);
-      setAnswers({
-        ...answers,
+      setAnswers(prev => ({
+        ...prev,
         [currentQuestion.id]: option,
-      });
+      }));
     }
-  };
+  }, [isSubmitted, isRevealed, currentQuestion.id]);
 
-  const handleRevealAndNext = () => {
+  const handleRevealAndNext = useCallback(() => {
     if (!isRevealed) {
       // First click: Reveal the answer
       setIsRevealed(true);
@@ -111,8 +112,8 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
         // Record answer history when moving to next question
         if (userAnswer) {
           const wasCorrect = userAnswer === currentQuestion.correctAnswer;
-          setAnswerHistory([
-            ...answerHistory,
+          setAnswerHistory(prev => [
+            ...prev,
             {
               questionId: currentQuestion.id,
               userAnswer,
@@ -126,30 +127,30 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
         setSelectedOption(null);
       }
     }
-  };
+  }, [isRevealed, currentIndex, questions.length, userAnswer, currentQuestion]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(currentIndex + 1);
       setIsRevealed(false);
       setSelectedOption(null);
     }
-  };
+  }, [currentIndex, questions.length]);
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
     }
-  };
+  }, [currentIndex]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     setTimerActive(false);
     const result = await onSubmit(answers);
     setResults(result);
     setIsSubmitted(true);
-  };
+  }, [answers, onSubmit]);
 
-  const handleRestart = () => {
+  const handleRestart = useCallback(() => {
     setCurrentIndex(0);
     setAnswers({});
     setAnswerHistory([]);
@@ -160,19 +161,23 @@ export default function QuizPlayer({ title, questions, onSubmit }: QuizPlayerPro
     setTimerActive(false);
     setIsRevealed(false);
     setSelectedOption(null);
-  };
+  }, []);
 
-  const isQuestionAnswered = (questionId: string) => {
+  // Memoize computed values
+  const isQuestionAnswered = useCallback((questionId: string) => {
     return !!answers[questionId];
-  };
+  }, [answers]);
 
-  const allQuestionsAnswered = questions.every((q) => isQuestionAnswered(q.id));
+  const allQuestionsAnswered = useMemo(() => 
+    questions.every((q) => isQuestionAnswered(q.id)),
+    [questions, isQuestionAnswered]
+  );
 
-  const formatTime = (seconds: number) => {
+  const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  }, []);
 
   // Pre-test Settings Screen
   if (showSettings) {
