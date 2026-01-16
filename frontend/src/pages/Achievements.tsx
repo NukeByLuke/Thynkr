@@ -58,10 +58,10 @@ const TIER_ORDER: AchievementTier[] = ['DIAMOND', 'RUBY', 'PLATINUM', 'GOLD', 'S
 
 const TIER_CONFIG = {
   BRONZE: {
-    border: 'border-amber-300',
-    bg: 'bg-amber-50/80 dark:bg-amber-900/20',
-    text: 'text-amber-700 dark:text-amber-300',
-    gradient: 'from-amber-300 to-orange-300',
+    border: 'border-stone-400',
+    bg: 'bg-stone-100/80 dark:bg-stone-900/20',
+    text: 'text-stone-700 dark:text-stone-300',
+    gradient: 'from-stone-400 to-amber-500',
     label: 'Bronze',
   },
   SILVER: {
