@@ -82,6 +82,20 @@ export class AIService {
   }
 
   /**
+   * Fisher-Yates shuffle algorithm for randomizing quiz options
+   * @param array - Array to shuffle
+   * @returns Shuffled array
+   */
+  private shuffleArray<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }
+
+  /**
    * Generate a concise summary of educational text content
    * @param text - Raw text content to summarize
    * @param language - Target language for the summary (default: EN_US)
@@ -267,6 +281,19 @@ ${preparedText}`,
 
       const content = completion.choices[0]?.message?.content || '{}';
       const result = JSON.parse(content) as GeneratedQuiz;
+
+      // Randomize options using Fisher-Yates shuffle to prevent predictable answer patterns
+      if (result.questions) {
+        result.questions = result.questions.map((question) => {
+          if (question.options && question.options.length > 0) {
+            // Shuffle the options array
+            question.options = this.shuffleArray(question.options);
+            // Ensure correctAnswer is still valid (it should match one of the shuffled options)
+            // No need to update correctAnswer as it's the actual text, not an index
+          }
+          return question;
+        });
+      }
 
       cache.set(cacheKey, result);
       return result;

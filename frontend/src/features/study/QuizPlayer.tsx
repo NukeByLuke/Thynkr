@@ -22,7 +22,7 @@ interface QuizPlayerProps {
   fileId?: string;
   onGenerateQuiz?: (difficulty: string, numQuestions: number) => void;
   isGenerating?: boolean;
-  onSubmit: (answers: Record<string, string>) => Promise<any>;
+  onSubmit: (answers: Record<string, string>, timeSpentSeconds?: number) => Promise<any>;
 }
 
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -54,6 +54,9 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   // Timer state
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [timerActive, setTimerActive] = useState(false);
+  
+  // Track actual time spent (in seconds)
+  const [quizStartTime, setQuizStartTime] = useState<number | null>(null);
 
   // When quiz generation completes, hide settings and start quiz
   useEffect(() => {
@@ -65,6 +68,8 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
         setTimeRemaining(minutes * 60);
         setTimerActive(true);
       }
+      // Start tracking time
+      setQuizStartTime(Date.now());
     }
   }, [questions.length, showSettings, settings.timeLimit]);
 
@@ -131,10 +136,17 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
 
   const handleSubmit = useCallback(async () => {
     setTimerActive(false);
-    const result = await onSubmit(answers);
+    
+    // Calculate total time spent
+    const timeSpentSeconds = quizStartTime 
+      ? Math.floor((Date.now() - quizStartTime) / 1000)
+      : 0;
+    
+    // Pass time spent to backend
+    const result = await onSubmit(answers, timeSpentSeconds);
     setResults(result);
     setIsSubmitted(true);
-  }, [answers, onSubmit]);
+  }, [answers, onSubmit, quizStartTime]);
 
   const handleRestart = useCallback(() => {
     setCurrentIndex(0);
@@ -146,6 +158,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
     setTimerActive(false);
     setIsRevealed(false);
     setSelectedOption(null);
+    setQuizStartTime(null);
   }, []);
 
   const formatTime = useCallback((seconds: number) => {

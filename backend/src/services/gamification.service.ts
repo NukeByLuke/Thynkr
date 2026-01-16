@@ -333,103 +333,102 @@ export async function checkAchievements(
   const achievement = ACHIEVEMENTS[achievementId];
 
   try {
-    // Get or create user achievement record
-    let userAchievement = await prisma.userAchievement.findUnique({
-      where: {
-        userId_achievementId: {
-          userId,
-          achievementId,
-        },
-      },
-    });
-
-    // Create if doesn't exist
-    if (!userAchievement) {
-      userAchievement = await prisma.userAchievement.create({
-        data: {
-          userId,
-          achievementId,
-          currentTier: 'BRONZE',
-          currentValue: value,
-        },
-      });
-    } else {
-      // Update current value
-      userAchievement = await prisma.userAchievement.update({
+    // Use transaction to ensure data integrity between achievement and XP updates
+    const result = await prisma.$transaction(async (tx) => {
+      // Get or create user achievement record
+      let userAchievement = await tx.userAchievement.findUnique({
         where: {
           userId_achievementId: {
             userId,
             achievementId,
           },
         },
-        data: {
-          currentValue: userAchievement.currentValue + value,
-        },
       });
-    }
 
-    // Check if user has reached next tier threshold
-    const nextTier = getNextTier(userAchievement.currentTier);
-    
-    if (!nextTier) {
-      // Already at max tier
-      return { tierUnlocked: false };
-    }
-
-    const nextThreshold = achievement.thresholds[nextTier];
-    
-    if (userAchievement.currentValue >= nextThreshold) {
-      // Unlock next tier!
-      await prisma.userAchievement.update({
-        where: {
-          userId_achievementId: {
+      // Create if doesn't exist
+      if (!userAchievement) {
+        userAchievement = await tx.userAchievement.create({
+          data: {
             userId,
             achievementId,
+            currentTier: 'BRONZE',
+            currentValue: value,
           },
-        },
-        data: {
-          currentTier: nextTier,
-        },
-      });
-
-      // Award XP
-      const xpAwarded = achievement.xpRewards[nextTier];
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          xp: {
-            increment: xpAwarded,
+        });
+      } else {
+        // Update current value
+        userAchievement = await tx.userAchievement.update({
+          where: {
+            userId_achievementId: {
+              userId,
+              achievementId,
+            },
           },
-          lastXpGain: new Date(),
-        },
-      });
+          data: {
+            currentValue: userAchievement.currentValue + value,
+          },
+        });
+      }
 
-      // Calculate new level based on XP
-      const updatedUser = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { xp: true, level: true },
-      });
+      // Check if user has reached next tier threshold
+      const nextTier = getNextTier(userAchievement.currentTier);
+      
+      if (!nextTier) {
+        // Already at max tier
+        return { tierUnlocked: false };
+      }
 
-      if (updatedUser) {
+      const nextThreshold = achievement.thresholds[nextTier];
+      
+      if (userAchievement.currentValue >= nextThreshold) {
+        // Unlock next tier!
+        await tx.userAchievement.update({
+          where: {
+            userId_achievementId: {
+              userId,
+              achievementId,
+            },
+          },
+          data: {
+            currentTier: nextTier,
+          },
+        });
+
+        // Award XP
+        const xpAwarded = achievement.xpRewards[nextTier];
+        const updatedUser = await tx.user.update({
+          where: { id: userId },
+          data: {
+            xp: {
+              increment: xpAwarded,
+            },
+            lastXpGain: new Date(),
+          },
+          select: { xp: true, level: true },
+        });
+
+        // Calculate new level based on XP
         const newLevel = calculateLevel(updatedUser.xp);
         if (newLevel > updatedUser.level) {
-          await prisma.user.update({
+          await tx.user.update({
             where: { id: userId },
             data: { level: newLevel },
           });
         }
+
+        return {
+          tierUnlocked: true,
+          achievementId,
+          newTier: nextTier,
+          xpAwarded,
+          achievementName: achievement.name,
+        };
       }
 
-      return {
-        tierUnlocked: true,
-        achievementId,
-        newTier: nextTier,
-        xpAwarded,
-        achievementName: achievement.name,
-      };
-    }
+      return { tierUnlocked: false };
+    });
 
-    return { tierUnlocked: false };
+    return result;
   } catch (error) {
     console.error('Error checking achievements:', error);
     return { tierUnlocked: false };

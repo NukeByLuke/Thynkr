@@ -351,7 +351,7 @@ export default function Study() {
         return (
           <div>
             <QuizPlayer
-              quizId="temp-quiz"
+              quizId={selectedQuiz?.id || "temp-quiz"}
               title={selectedFile.originalName}
               questions={selectedQuiz?.questions || []} // Use generated quiz questions
               fileId={selectedFile.id}
@@ -364,18 +364,47 @@ export default function Study() {
                 });
               }}
               isGenerating={generateQuizMutation.isPending}
-              onSubmit={async (answers) => {
-                // Calculate score based on answers
-                const questions = selectedQuiz?.questions || [];
-                let score = 0;
-                questions.forEach((question: any) => {
-                  if (answers[question.id] === question.correctAnswer) {
-                    score++;
+              onSubmit={async (answers, timeSpentSeconds) => {
+                // Submit to backend if we have a real quiz ID
+                if (selectedQuiz?.id) {
+                  try {
+                    const response = await api.post(`/study/quizzes/${selectedQuiz.id}/submit`, {
+                      answers,
+                      timeSpentSeconds,
+                    });
+                    
+                    // Show achievement notifications if any were unlocked
+                    if (response.data.achievements && response.data.achievements.length > 0) {
+                      response.data.achievements.forEach((ach: any) => {
+                        toast.success(
+                          `🎉 Achievement Unlocked: ${ach.achievementName} (${ach.newTier})! +${ach.xpAwarded} XP`,
+                          { duration: 5000 }
+                        );
+                      });
+                    }
+                    
+                    if (response.data.xpGained > 0) {
+                      toast.success(`+${response.data.xpGained} XP earned!`);
+                    }
+                    
+                    return response.data;
+                  } catch (error: any) {
+                    toast.error(error.response?.data?.error || 'Failed to submit quiz');
+                    throw error;
                   }
-                });
-                const total = questions.length;
-                const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
-                return { score, total, percentage };
+                } else {
+                  // Fallback: Calculate score locally if no quiz ID (shouldn't happen normally)
+                  const questions = selectedQuiz?.questions || [];
+                  let score = 0;
+                  questions.forEach((question: any) => {
+                    if (answers[question.id] === question.correctAnswer) {
+                      score++;
+                    }
+                  });
+                  const total = questions.length;
+                  const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
+                  return { score, total, percentage };
+                }
               }}
             />
           </div>

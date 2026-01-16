@@ -262,6 +262,14 @@ export default async function studyRoutes(server: FastifyInstance) {
           await trackStudyActivity(request.user!.userId, 'FILE_UPLOAD', file.id);
         }
 
+        // Trigger Librarian achievement for file uploads
+        try {
+          const { checkAchievements } = await import('../services/gamification.service');
+          await checkAchievements(request.user!.userId, 'file_upload', uploadedFiles.length);
+        } catch (error) {
+          server.log.error({ error }, 'Failed to check achievements for file upload');
+        }
+
         return reply.code(201).send({ files: uploadedFiles });
       } catch (error: any) {
         server.log.error({ error }, 'File upload error');
@@ -924,7 +932,10 @@ export default async function studyRoutes(server: FastifyInstance) {
     },
     async (request: AuthenticatedRequest, reply) => {
       const { id } = request.params as { id: string };
-      const { answers } = request.body as { answers: Record<string, string> };
+      const { answers, timeSpentSeconds } = request.body as { 
+        answers: Record<string, string>;
+        timeSpentSeconds?: number;
+      };
 
       const quiz = await prisma.quiz.findFirst({
         where: { id },
@@ -949,7 +960,41 @@ export default async function studyRoutes(server: FastifyInstance) {
         return reply.code(404).send({ error: 'Quiz not found' });
       }
 
-      // Calculate score
+      // Anti-cheat: Check if time spent is suspiciously low
+      if (timeSpentSeconds !== undefined && timeSpentSeconds < quiz.questions.length * 2) {
+        server.log.warn({ 
+          userId: request.user!.userId, 
+          quizId: id, 
+          timeSpent: timeSpentSeconds,
+          questions: quiz.questions.length 
+        }, 'Suspicious quiz submission - time too low');
+        return reply.code(400).send({ 
+          error: 'Quiz submission too fast. Please take time to read each question carefully.' 
+        });
+      }
+
+      // Anti-cheat: Check for recent duplicate submissions (within last 10 seconds)
+      const recentAttempt = await prisma.quizAttempt.findFirst({
+        where: {
+          quizId: quiz.id,
+          userId: request.user!.userId,
+          createdAt: {
+            gte: new Date(Date.now() - 10000), // Last 10 seconds
+          },
+        },
+      });
+
+      if (recentAttempt) {
+        server.log.warn({ 
+          userId: request.user!.userId, 
+          quizId: id 
+        }, 'Duplicate quiz submission attempt');
+        return reply.code(429).send({ 
+          error: 'Please wait before submitting another attempt.' 
+        });
+      }
+
+      // Calculate score server-side
       let correctCount = 0;
       const results: Record<string, { correct: boolean; correctAnswer: string }> = {};
 
@@ -967,6 +1012,10 @@ export default async function studyRoutes(server: FastifyInstance) {
         };
       });
 
+      const scorePercentage = Math.round((correctCount / quiz.questions.length) * 100);
+      const isPerfectScore = scorePercentage === 100;
+      const isHardDifficulty = quiz.difficulty === 'HARD';
+
       // Save attempt
       const attempt = await prisma.quizAttempt.create({
         data: {
@@ -978,12 +1027,65 @@ export default async function studyRoutes(server: FastifyInstance) {
         },
       });
 
+      // Track achievements and award XP
+      const unlockedAchievements: any[] = [];
+
+      try {
+        // Import gamification service dynamically
+        const { checkAchievements } = await import('../services/gamification.service');
+
+        // 1. Quiz Whiz achievement (for perfect scores)
+        if (isPerfectScore) {
+          const quizWhizResult = await checkAchievements(request.user!.userId, 'quiz_perfect', 1);
+          if (quizWhizResult.tierUnlocked) {
+            unlockedAchievements.push(quizWhizResult);
+          }
+        }
+
+        // 2. Perfectionist achievement (hard difficulty + perfect score)
+        if (isHardDifficulty && isPerfectScore) {
+          const perfectionistResult = await checkAchievements(request.user!.userId, 'hard_quiz_perfect', 1);
+          if (perfectionistResult.tierUnlocked) {
+            unlockedAchievements.push(perfectionistResult);
+          }
+        }
+
+        // 3. Speed Demon achievement (fast answers with good score)
+        if (timeSpentSeconds && scorePercentage > 80) {
+          const avgTimePerQuestion = timeSpentSeconds / quiz.questions.length;
+          if (avgTimePerQuestion < 5) {
+            const speedDemonResult = await checkAchievements(request.user!.userId, 'quick_answer', quiz.questions.length);
+            if (speedDemonResult.tierUnlocked) {
+              unlockedAchievements.push(speedDemonResult);
+            }
+          }
+        }
+
+        // 4. Scholar achievement (add study time in hours)
+        if (timeSpentSeconds) {
+          const hoursSpent = timeSpentSeconds / 3600;
+          if (hoursSpent > 0.01) { // Only count if > ~36 seconds
+            const scholarResult = await checkAchievements(request.user!.userId, 'study_hours', hoursSpent);
+            if (scholarResult.tierUnlocked) {
+              unlockedAchievements.push(scholarResult);
+            }
+          }
+        }
+      } catch (error) {
+        server.log.error({ error }, 'Failed to check achievements for quiz submission');
+      }
+
+      // Track study activity
+      await trackStudyActivity(request.user!.userId, 'QUIZ_ATTEMPT', file.id);
+
       return reply.send({
         attempt,
         results,
         score: correctCount,
         total: quiz.questions.length,
-        percentage: Math.round((correctCount / quiz.questions.length) * 100),
+        percentage: scorePercentage,
+        achievements: unlockedAchievements,
+        xpGained: unlockedAchievements.reduce((sum, ach) => sum + (ach.xpAwarded || 0), 0),
       });
     }
   );
