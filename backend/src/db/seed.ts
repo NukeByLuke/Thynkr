@@ -7,40 +7,57 @@ import seedCoursesWithInternalFiles from './seed-courses-internal';
  * Thynkr Database Seed Script
  * 
  * Seeds the database with clean sample data:
- * - 3 Users: admin, instructor (premium), student (basic)
- * - 5 Courses with realistic academic content
+ * - 4 Users: basic, standard, premium, admin (all @thynkr.ca)
+ * - 5+ Courses with realistic academic content
  * - Sample content articles
+ * - User achievements with varied progress
  */
 
 async function clearDatabase() {
-  logger.info('🗑️  Clearing existing data...');
+  logger.info('🗑️  Wiping database completely...');
 
   // Clear in order respecting foreign key constraints
   // Most dependent tables first
-  await prisma.studyCache.deleteMany({});
-  await prisma.studyPack.deleteMany({});
-  await prisma.studySession.deleteMany({});
-  await prisma.studyStreak.deleteMany({});
-  await prisma.courseFileAI.deleteMany({});
-  await prisma.courseFile.deleteMany({});
-  await prisma.course.deleteMany({});
-  await prisma.flashcard.deleteMany({});
-  await prisma.flashcardSet.deleteMany({});
-  await prisma.quizAttempt.deleteMany({});
-  await prisma.quizQuestion.deleteMany({});
-  await prisma.quiz.deleteMany({});
-  await prisma.fileNotes.deleteMany({});
-  await prisma.fileSummary.deleteMany({});
-  await prisma.uploadedFile.deleteMany({});
-  await prisma.folder.deleteMany({});
-  await prisma.payment.deleteMany({});
-  await prisma.subscription.deleteMany({});
-  await prisma.refreshToken.deleteMany({});
-  await prisma.adminLog.deleteMany({});
-  await prisma.content.deleteMany({});
-  await prisma.user.deleteMany({});
+  // Wrap in try-catch to handle tables that might not exist
+  const deletions = [
+    { name: 'userAchievement', fn: () => prisma.userAchievement.deleteMany({}) },
+    { name: 'studyCache', fn: () => prisma.studyCache.deleteMany({}) },
+    { name: 'studyPack', fn: () => prisma.studyPack.deleteMany({}) },
+    { name: 'studySession', fn: () => prisma.studySession.deleteMany({}) },
+    { name: 'studyStreak', fn: () => prisma.studyStreak.deleteMany({}) },
+    { name: 'courseFileAI', fn: () => prisma.courseFileAI.deleteMany({}) },
+    { name: 'courseFile', fn: () => prisma.courseFile.deleteMany({}) },
+    { name: 'course', fn: () => prisma.course.deleteMany({}) },
+    { name: 'flashcard', fn: () => prisma.flashcard.deleteMany({}) },
+    { name: 'flashcardSet', fn: () => prisma.flashcardSet.deleteMany({}) },
+    { name: 'quizAttempt', fn: () => prisma.quizAttempt.deleteMany({}) },
+    { name: 'quizQuestion', fn: () => prisma.quizQuestion.deleteMany({}) },
+    { name: 'quiz', fn: () => prisma.quiz.deleteMany({}) },
+    { name: 'fileNotes', fn: () => prisma.fileNotes.deleteMany({}) },
+    { name: 'fileSummary', fn: () => prisma.fileSummary.deleteMany({}) },
+    { name: 'uploadedFile', fn: () => prisma.uploadedFile.deleteMany({}) },
+    { name: 'folder', fn: () => prisma.folder.deleteMany({}) },
+    { name: 'payment', fn: () => prisma.payment.deleteMany({}) },
+    { name: 'subscription', fn: () => prisma.subscription.deleteMany({}) },
+    { name: 'refreshToken', fn: () => prisma.refreshToken.deleteMany({}) },
+    { name: 'adminLog', fn: () => prisma.adminLog.deleteMany({}) },
+    { name: 'content', fn: () => prisma.content.deleteMany({}) },
+    { name: 'user', fn: () => prisma.user.deleteMany({}) },
+  ];
 
-  logger.info('   ✓ All tables cleared');
+  for (const deletion of deletions) {
+    try {
+      await deletion.fn();
+    } catch (error: any) {
+      // Table might not exist - skip silently
+      if (error?.code !== 'P2021') {
+        // Re-throw if it's not a "table doesn't exist" error
+        throw error;
+      }
+    }
+  }
+
+  logger.info('   ✓ Database wiped completely');
 }
 
 async function seedUsers() {
@@ -48,30 +65,39 @@ async function seedUsers() {
 
   const users = [
     {
-      email: 'admin@thynkr.app',
-      username: 'admin',
-      password: 'AdminPass123!',
-      firstName: 'Admin',
+      email: 'basic@thynkr.ca',
+      username: 'basic_user',
+      password: 'Password123!',
+      firstName: 'Basic',
       lastName: 'User',
-      role: 'ADMIN' as const,
+      role: 'BASIC' as const,
       emailVerified: true,
     },
     {
-      email: 'instructor@thynkr.app',
-      username: 'instructor',
-      password: 'Instructor123!',
-      firstName: 'Sarah',
-      lastName: 'Johnson',
+      email: 'standard@thynkr.ca',
+      username: 'standard_user',
+      password: 'Password123!',
+      firstName: 'Standard',
+      lastName: 'User',
+      role: 'STANDARD' as const,
+      emailVerified: true,
+    },
+    {
+      email: 'premium@thynkr.ca',
+      username: 'premium_user',
+      password: 'Password123!',
+      firstName: 'Premium',
+      lastName: 'User',
       role: 'PREMIUM' as const,
       emailVerified: true,
     },
     {
-      email: 'student@thynkr.app',
-      username: 'student',
-      password: 'Student123!',
-      firstName: 'Alex',
-      lastName: 'Chen',
-      role: 'BASIC' as const,
+      email: 'admin@thynkr.ca',
+      username: 'admin',
+      password: 'Password123!',
+      firstName: 'Admin',
+      lastName: 'User',
+      role: 'ADMIN' as const,
       emailVerified: true,
     },
   ];
@@ -233,6 +259,143 @@ Upgrade to Premium to unlock Thynkr's most powerful features.
   logger.info(`📝 Created ${sampleContent.length} content articles`);
 }
 
+async function seedAchievements(users: { [key: string]: string }) {
+  logger.info('🏆 Seeding user achievements...');
+
+  const achievementIds = [
+    'first_steps',
+    'scholar',
+    'speed_reader',
+    'quiz_master',
+    'flash_genius',
+    'night_owl',
+    'early_bird',
+    'streak_master',
+    'consistent',
+    'social_learner',
+    'course_creator',
+    'tutor_enthusiast',
+    'knowledge_sharer',
+    'perfectionist',
+    'explorer',
+  ];
+
+  // Basic user - some locked (null unlockedAt), mostly bronze
+  const basicAchievements = [
+    { id: 'first_steps', tier: 'BRONZE', value: 100, unlocked: true },
+    { id: 'scholar', tier: 'BRONZE', value: 100, unlocked: true },
+    { id: 'speed_reader', tier: 'BRONZE', value: 45, unlocked: false },
+    { id: 'quiz_master', tier: 'BRONZE', value: 30, unlocked: false },
+    { id: 'flash_genius', tier: 'BRONZE', value: 20, unlocked: false },
+    { id: 'night_owl', tier: 'BRONZE', value: 10, unlocked: false },
+    { id: 'early_bird', tier: 'BRONZE', value: 5, unlocked: false },
+    { id: 'streak_master', tier: 'BRONZE', value: 0, unlocked: false },
+  ];
+
+  for (const ach of basicAchievements) {
+    await prisma.userAchievement.create({
+      data: {
+        userId: users['basic_user'],
+        achievementId: ach.id,
+        currentTier: ach.tier as any,
+        currentValue: ach.value,
+        unlockedAt: ach.unlocked ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000) : null,
+      },
+    });
+  }
+
+  // Standard user - mix of bronze, silver, gold
+  const standardAchievements = [
+    { id: 'first_steps', tier: 'GOLD', value: 100, unlocked: true },
+    { id: 'scholar', tier: 'GOLD', value: 100, unlocked: true },
+    { id: 'speed_reader', tier: 'SILVER', value: 100, unlocked: true },
+    { id: 'quiz_master', tier: 'SILVER', value: 100, unlocked: true },
+    { id: 'flash_genius', tier: 'SILVER', value: 100, unlocked: true },
+    { id: 'night_owl', tier: 'BRONZE', value: 100, unlocked: true },
+    { id: 'early_bird', tier: 'BRONZE', value: 100, unlocked: true },
+    { id: 'streak_master', tier: 'BRONZE', value: 75, unlocked: false },
+    { id: 'consistent', tier: 'BRONZE', value: 60, unlocked: false },
+    { id: 'social_learner', tier: 'BRONZE', value: 40, unlocked: false },
+  ];
+
+  for (const ach of standardAchievements) {
+    await prisma.userAchievement.create({
+      data: {
+        userId: users['standard_user'],
+        achievementId: ach.id,
+        currentTier: ach.tier as any,
+        currentValue: ach.value,
+        unlockedAt: ach.unlocked ? new Date(Date.now() - Math.random() * 14 * 24 * 60 * 60 * 1000) : null,
+      },
+    });
+  }
+
+  // Premium user - varied with some high tiers (DIAMOND, PLATINUM, RUBY)
+  const premiumAchievements = [
+    { id: 'first_steps', tier: 'DIAMOND', value: 100, unlocked: true },
+    { id: 'scholar', tier: 'PLATINUM', value: 100, unlocked: true },
+    { id: 'speed_reader', tier: 'PLATINUM', value: 100, unlocked: true },
+    { id: 'quiz_master', tier: 'GOLD', value: 100, unlocked: true },
+    { id: 'flash_genius', tier: 'GOLD', value: 100, unlocked: true },
+    { id: 'night_owl', tier: 'SILVER', value: 100, unlocked: true },
+    { id: 'early_bird', tier: 'SILVER', value: 100, unlocked: true },
+    { id: 'streak_master', tier: 'SILVER', value: 100, unlocked: true },
+    { id: 'consistent', tier: 'BRONZE', value: 100, unlocked: true },
+    { id: 'social_learner', tier: 'BRONZE', value: 100, unlocked: true },
+    { id: 'course_creator', tier: 'BRONZE', value: 85, unlocked: false },
+    { id: 'tutor_enthusiast', tier: 'BRONZE', value: 70, unlocked: false },
+  ];
+
+  for (const ach of premiumAchievements) {
+    await prisma.userAchievement.create({
+      data: {
+        userId: users['premium_user'],
+        achievementId: ach.id,
+        currentTier: ach.tier as any,
+        currentValue: ach.value,
+        unlockedAt: ach.unlocked ? new Date(Date.now() - Math.random() * 21 * 24 * 60 * 60 * 1000) : null,
+      },
+    });
+  }
+
+  // Admin user - all achievements, varied tiers with many high-tier
+  const adminAchievements = [
+    { id: 'first_steps', tier: 'DIAMOND', value: 100, unlocked: true },
+    { id: 'scholar', tier: 'DIAMOND', value: 100, unlocked: true },
+    { id: 'speed_reader', tier: 'RUBY', value: 100, unlocked: true },
+    { id: 'quiz_master', tier: 'RUBY', value: 100, unlocked: true },
+    { id: 'flash_genius', tier: 'PLATINUM', value: 100, unlocked: true },
+    { id: 'night_owl', tier: 'PLATINUM', value: 100, unlocked: true },
+    { id: 'early_bird', tier: 'PLATINUM', value: 100, unlocked: true },
+    { id: 'streak_master', tier: 'GOLD', value: 100, unlocked: true },
+    { id: 'consistent', tier: 'GOLD', value: 100, unlocked: true },
+    { id: 'social_learner', tier: 'GOLD', value: 100, unlocked: true },
+    { id: 'course_creator', tier: 'SILVER', value: 100, unlocked: true },
+    { id: 'tutor_enthusiast', tier: 'SILVER', value: 100, unlocked: true },
+    { id: 'knowledge_sharer', tier: 'SILVER', value: 100, unlocked: true },
+    { id: 'perfectionist', tier: 'BRONZE', value: 100, unlocked: true },
+    { id: 'explorer', tier: 'BRONZE', value: 100, unlocked: true },
+  ];
+
+  for (const ach of adminAchievements) {
+    await prisma.userAchievement.create({
+      data: {
+        userId: users['admin'],
+        achievementId: ach.id,
+        currentTier: ach.tier as any,
+        currentValue: ach.value,
+        unlockedAt: ach.unlocked ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000) : null,
+      },
+    });
+  }
+
+  logger.info('   ✓ Basic: 2 unlocked (bronze), 6 locked with varied progress');
+  logger.info('   ✓ Standard: 7 unlocked (bronze/silver/gold), 3 locked');
+  logger.info('   ✓ Premium: 10 unlocked (bronze-diamond), 2 locked');
+  logger.info('   ✓ Admin: All 15 unlocked with high tiers');
+  logger.info(`🏆 Created achievements with varied progress`);
+}
+
 async function seed() {
   const startTime = Date.now();
   
@@ -252,8 +415,11 @@ async function seed() {
     // Seed content articles
     await seedContent();
 
-    // Seed courses with the instructor (premium user)
-    await seedCoursesWithInternalFiles(users['instructor']);
+    // Seed courses with premium user (5 courses with varied content)
+    await seedCoursesWithInternalFiles(users['premium_user']);
+
+    // Seed achievements
+    await seedAchievements(users);
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
@@ -263,14 +429,16 @@ async function seed() {
     logger.info('═══════════════════════════════════════════════════════════');
     console.log('\n');
     logger.info('📋 Summary:');
-    logger.info('   • 3 Users (admin, instructor, student)');
-    logger.info('   • 5 Courses with 15 total files');
+    logger.info('   • 4 Users (basic, standard, premium, admin)');
+    logger.info('   • 10+ Courses with files');
     logger.info('   • 3 Content articles');
+    logger.info('   • User achievements with varied progress');
     console.log('\n');
-    logger.info('🔑 Test Accounts:');
-    logger.info('   • admin@thynkr.app / AdminPass123!');
-    logger.info('   • instructor@thynkr.app / Instructor123!');
-    logger.info('   • student@thynkr.app / Student123!');
+    logger.info('🔑 Test Accounts (password: Password123!):');
+    logger.info('   • basic@thynkr.ca');
+    logger.info('   • standard@thynkr.ca');
+    logger.info('   • premium@thynkr.ca');
+    logger.info('   • admin@thynkr.ca');
     console.log('\n');
 
   } catch (error) {

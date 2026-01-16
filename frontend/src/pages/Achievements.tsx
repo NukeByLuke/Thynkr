@@ -152,6 +152,102 @@ const getIcon = (iconName: string) => {
 
 // --- Components ---
 
+interface LevelBannerProps {
+  level: number;
+  currentXp: number;
+  xpForNextLevel: number;
+  totalXp: number;
+}
+
+const LevelBanner = ({ level, currentXp, xpForNextLevel, totalXp }: LevelBannerProps) => {
+  const progress = (currentXp / xpForNextLevel) * 100;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-zinc-900/40 dark:bg-zinc-950/40 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-lg mb-8"
+    >
+      <div className="flex flex-col md:flex-row md:items-center gap-6">
+        {/* Level Badge */}
+        <div className="flex-shrink-0">
+          <div className="relative">
+            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 p-1 shadow-lg shadow-blue-500/50">
+              <div className="w-full h-full rounded-xl bg-zinc-900 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-xs text-slate-400 uppercase tracking-wide">Level</div>
+                  <div className="text-3xl font-bold text-white">{level}</div>
+                </div>
+              </div>
+            </div>
+            {/* Animated ring */}
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+              className="absolute inset-0 rounded-2xl"
+              style={{
+                background: 'conic-gradient(from 0deg, transparent, rgba(59, 130, 246, 0.5), transparent)',
+                mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                maskComposite: 'exclude',
+                padding: '2px',
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Progress Info */}
+        <div className="flex-1 space-y-3">
+          <div className="flex items-baseline justify-between">
+            <div>
+              <h3 className="text-2xl font-bold text-white">Level {level}</h3>
+              <p className="text-slate-400 text-sm">
+                {currentXp.toLocaleString()} / {xpForNextLevel.toLocaleString()} XP
+              </p>
+            </div>
+            <div className="text-right">
+              <div className="text-sm text-slate-400">Total XP Earned</div>
+              <div className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
+                {totalXp.toLocaleString()}
+              </div>
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="relative h-4 bg-zinc-800/50 rounded-full overflow-hidden border border-white/10">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 1, ease: 'easeOut' }}
+              className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-600 relative overflow-hidden shadow-lg shadow-blue-500/30"
+            >
+              {/* Animated shine effect */}
+              <motion.div
+                animate={{ x: ['-100%', '200%'] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'linear', repeatDelay: 1 }}
+                className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-12"
+              />
+            </motion.div>
+            {/* Progress text overlay */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-xs font-bold text-white drop-shadow-lg">
+                {progress.toFixed(1)}%
+              </span>
+            </div>
+          </div>
+
+          {/* Next level indicator */}
+          <div className="flex items-center gap-2 text-xs text-slate-400">
+            <Zap className="w-3 h-3 text-yellow-400" />
+            <span>
+              {(xpForNextLevel - currentXp).toLocaleString()} XP until Level {level + 1}
+            </span>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 interface AchievementCardProps {
   achievement: UserAchievement;
 }
@@ -428,6 +524,29 @@ export default function Achievements() {
     enabled: !!user?.id,
   });
 
+  // Fetch user progress stats for level banner
+  const { data: progressStats } = useQuery<{
+    level: number;
+    currentXp: number;
+    xpForNextLevel: number;
+    totalXp: number;
+    streak: number;
+  }>({
+    queryKey: ['progress-stats', user?.id],
+    queryFn: async () => {
+      const res = await api.get('/progress/stats');
+      // Map API response to component props
+      return {
+        level: res.data.xp.level,
+        currentXp: res.data.xp.currentLevelXp,
+        xpForNextLevel: res.data.xp.nextLevelXp,
+        totalXp: res.data.xp.total,
+        streak: res.data.streak.current,
+      };
+    },
+    enabled: !!user?.id,
+  });
+
   // Add unlocked property based on unlockedAt field
   const enrichedAchievements = achievements?.map(achievement => ({
     ...achievement,
@@ -507,6 +626,16 @@ export default function Achievements() {
 
       <PageContainer.Section>
         <div className="space-y-8">
+          {/* Level Banner */}
+          {progressStats && (
+            <LevelBanner
+              level={progressStats.level}
+              currentXp={progressStats.currentXp}
+              xpForNextLevel={progressStats.xpForNextLevel}
+              totalXp={progressStats.totalXp}
+            />
+          )}
+
           {/* Achievement Grid */}
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-6">
             {enrichedAchievements.map((achievement) => (

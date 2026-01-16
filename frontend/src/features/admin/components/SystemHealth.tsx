@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   CheckCircle2,
@@ -187,8 +187,47 @@ export const SystemHealth = () => {
   const [metricsView, setMetricsView] = useState<'overview' | 'cpu' | 'memory' | 'network'>(
     'overview'
   );
+  const [liveMetrics, setLiveMetrics] = useState<DropletMetrics | null>(null);
+  const [connectionState, setConnectionState] = useState<'connecting' | 'connected' | 'error'>('connecting');
+  const eventSourceRef = useRef<EventSource | null>(null);
 
-  // Fetch basic system health
+  // Setup EventSource for live metrics
+  useEffect(() => {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const token = localStorage.getItem('token');
+    
+    // Construct URL with token in query param (EventSource doesn't support headers)
+    const url = `${apiUrl}/api/admin/metrics/live?token=${encodeURIComponent(token || '')}`;
+    
+    const eventSource = new EventSource(url);
+    eventSourceRef.current = eventSource;
+
+    eventSource.onopen = () => {
+      console.log('Live metrics connection established');
+      setConnectionState('connected');
+    };
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        setLiveMetrics(data);
+      } catch (error) {
+        console.error('Failed to parse live metrics:', error);
+      }
+    };
+
+    eventSource.onerror = (error) => {
+      console.error('Live metrics connection error:', error);
+      setConnectionState('error');
+      eventSource.close();
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, []);
+
+  // Fetch basic system health (initial load only)
   const {
     data: health,
     isLoading: healthLoading,
@@ -200,10 +239,11 @@ export const SystemHealth = () => {
       const res = await api.get('/admin/system-health');
       return res.data;
     },
-    refetchInterval: 30000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 
-  // Fetch DigitalOcean droplet metrics
+  // Fetch DigitalOcean droplet info (static, less frequent)
   const {
     data: dropletHealth,
     isLoading: dropletLoading,
@@ -214,7 +254,8 @@ export const SystemHealth = () => {
       const res = await api.get('/admin/system/droplet');
       return res.data;
     },
-    refetchInterval: 30000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 
   // Fetch app log statistics
@@ -276,6 +317,11 @@ export const SystemHealth = () => {
   const handleRefresh = () => {
     refetchHealth();
     refetchDroplet();
+    // Reconnect EventSource
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      setConnectionState('connecting');
+    }
   };
 
   if (healthLoading && dropletLoading) {
@@ -289,7 +335,7 @@ export const SystemHealth = () => {
     );
   }
 
-  const metrics = dropletHealth?.metrics;
+  const metrics = liveMetrics || dropletHealth?.metrics;
   const droplet = dropletHealth?.droplet;
   const memoryPercent = health
     ? Math.round((health.memory.heapUsed / health.memory.heapTotal) * 100)
