@@ -486,28 +486,52 @@ export function getLevelProgress(xp: number): {
 export async function getUserAchievements(userId: string) {
   const userAchievements = await prisma.userAchievement.findMany({
     where: { userId },
-    orderBy: { updatedAt: 'desc' },
   });
 
-  return userAchievements.map((ua) => {
-    const achievement = ACHIEVEMENTS[ua.achievementId];
-    if (!achievement) return null;
+  // Create a map of user's current progress
+  const progressMap = new Map(
+    userAchievements.map((ua) => [ua.achievementId, ua])
+  );
 
-    const nextTier = getNextTier(ua.currentTier);
-    const nextThreshold = nextTier ? achievement.thresholds[nextTier] : null;
+  // Return all achievements with user's progress data
+  return Object.values(ACHIEVEMENTS).map((achievement) => {
+    const userProgress = progressMap.get(achievement.id);
 
-    return {
-      ...ua,
-      definition: achievement,
-      progress: nextThreshold
-        ? {
-            current: ua.currentValue,
-            required: nextThreshold,
-            percentage: Math.min(100, (ua.currentValue / nextThreshold) * 100),
-          }
-        : null,
-    };
-  }).filter(Boolean);
+    if (userProgress) {
+      // User has progress on this achievement
+      const nextTier = getNextTier(userProgress.currentTier);
+      const nextThreshold = nextTier ? achievement.thresholds[nextTier] : null;
+
+      return {
+        ...userProgress,
+        definition: achievement,
+        progress: nextThreshold
+          ? {
+              current: userProgress.currentValue,
+              required: nextThreshold,
+              percentage: Math.min(100, (userProgress.currentValue / nextThreshold) * 100),
+            }
+          : null,
+      };
+    } else {
+      // User hasn't started this achievement yet
+      return {
+        id: `temp-${achievement.id}`, // Temporary ID for frontend
+        achievementId: achievement.id,
+        userId,
+        currentTier: null,
+        currentValue: 0,
+        unlockedAt: null,
+        updatedAt: new Date(),
+        definition: achievement,
+        progress: {
+          current: 0,
+          required: achievement.thresholds.BRONZE,
+          percentage: 0,
+        },
+      };
+    }
+  });
 }
 
 /**
