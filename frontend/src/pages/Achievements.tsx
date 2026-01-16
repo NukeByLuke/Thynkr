@@ -71,25 +71,25 @@ const TIER_CONFIG = {
   BRONZE: {
     // Soft brownish-orange for Bronze
     border: 'border-orange-200 dark:border-orange-800/30',
-    bg: 'bg-orange-50/50 dark:bg-orange-900/10',
-    text: 'text-orange-800 dark:text-orange-200',
-    gradient: 'from-orange-400 to-stone-600', 
+    bg: 'bg-orange-100/50 dark:bg-orange-900/10',
+    text: 'text-orange-900 dark:text-orange-200',
+    gradient: 'from-orange-700 to-stone-600', 
     label: 'Bronze',
   },
   SILVER: {
     // Clean, soft gray for Silver
-    border: 'border-slate-200 dark:border-slate-700/50',
-    bg: 'bg-slate-50/50 dark:bg-slate-800/30',
+    border: 'border-slate-300 dark:border-slate-600/50',
+    bg: 'bg-slate-100/50 dark:bg-slate-800/30',
     text: 'text-slate-700 dark:text-slate-200',
-    gradient: 'from-slate-300 to-slate-500', 
+    gradient: 'from-slate-400 to-slate-600', 
     label: 'Silver',
   },
   GOLD: {
     // Warm, not-too-yellow Gold
-    border: 'border-yellow-200 dark:border-yellow-800/30',
-    bg: 'bg-yellow-50/50 dark:bg-yellow-900/10',
+    border: 'border-amber-200 dark:border-yellow-700/30',
+    bg: 'bg-amber-100/50 dark:bg-yellow-900/10',
     text: 'text-yellow-800 dark:text-yellow-200',
-    gradient: 'from-yellow-300 to-amber-500',
+    gradient: 'from-amber-300 to-yellow-500',
     label: 'Gold',
   },
   PLATINUM: {
@@ -103,7 +103,7 @@ const TIER_CONFIG = {
   RUBY: {
     // Soft but deep red
     border: 'border-rose-200 dark:border-rose-800/30',
-    bg: 'bg-rose-50/50 dark:bg-rose-900/10',
+    bg: 'bg-rose-100/50 dark:bg-rose-900/10',
     text: 'text-rose-800 dark:text-rose-200',
     gradient: 'from-rose-400 to-red-600',
     label: 'Ruby',
@@ -111,7 +111,7 @@ const TIER_CONFIG = {
   DIAMOND: {
     // Premium deep purple/indigo
     border: 'border-indigo-200 dark:border-indigo-800/30',
-    bg: 'bg-indigo-50/50 dark:bg-indigo-900/10',
+    bg: 'bg-indigo-100/50 dark:bg-indigo-900/10',
     text: 'text-indigo-800 dark:text-indigo-200',
     gradient: 'from-indigo-400 to-violet-600',
     label: 'Diamond',
@@ -194,7 +194,7 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
         className={`aspect-square rounded-xl border-2 flex items-center justify-center relative overflow-hidden transition-all duration-300 ${
           isLocked
             ? 'border-slate-300/50 dark:border-slate-700/50 bg-slate-100/50 dark:bg-slate-900/30 shadow-sm'
-            : `${tier.border} ${tier.bg} dark:bg-opacity-30 shadow-lg hover:shadow-2xl ring-2 ring-transparent hover:ring-white/20`
+            : `${tier.border} ${tier.bg} dark:bg-opacity-30 shadow-lg hover:shadow-2xl ring-1 ring-black/5 dark:ring-white/10 hover:ring-white/20`
         } ${isLocked ? 'grayscale opacity-60' : ''}`}
       >
         {/* Enhanced Shimmer effect for unlocked cards on hover */}
@@ -204,13 +204,13 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
               initial={{ x: '-150%' }}
               animate={{ x: '250%' }}
               transition={{ duration: 0.6, ease: 'easeInOut' }}
-              className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/50 to-transparent transform -skew-x-12 blur-sm"
+              className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/80 dark:via-white/20 to-transparent transform -skew-x-12 blur-sm"
             />
             <motion.div
               initial={{ x: '-150%' }}
               animate={{ x: '250%' }}
               transition={{ duration: 0.6, ease: 'easeInOut', delay: 0.1 }}
-              className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-white/70 to-transparent transform -skew-x-12"
+              className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-white/80 dark:via-white/30 to-transparent transform -skew-x-12"
             />
           </>
         )}
