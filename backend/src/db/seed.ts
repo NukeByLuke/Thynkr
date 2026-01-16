@@ -100,7 +100,7 @@ async function seedUsers() {
   const users = [
     {
       email: 'basic@thynkr.ca',
-      username: 'basic_user',
+      username: 'basic',
       password: 'Password123!',
       firstName: 'Basic',
       lastName: 'User',
@@ -109,7 +109,7 @@ async function seedUsers() {
     },
     {
       email: 'standard@thynkr.ca',
-      username: 'standard_user',
+      username: 'standard',
       password: 'Password123!',
       firstName: 'Standard',
       lastName: 'User',
@@ -118,7 +118,7 @@ async function seedUsers() {
     },
     {
       email: 'premium@thynkr.ca',
-      username: 'premium_user',
+      username: 'premium',
       password: 'Password123!',
       firstName: 'Premium',
       lastName: 'User',
@@ -299,18 +299,18 @@ async function seedAchievements(users: { [key: string]: string }) {
   // Define user personas with their achievement value generation strategies
   const userPersonas = [
     {
-      username: 'basic_user',
-      userId: users['basic_user'],
+      username: 'basic',
+      userId: users['basic'],
       name: 'Basic',
-      // Basic: Random value between 0 and Bronze threshold (mostly locked)
+      // Basic: Random value between 0 and Bronze threshold (most achievements locked)
       getValueRange: (achievement: AchievementDefinition) => ({
         min: 0,
-        max: achievement.thresholds.BRONZE - 1,
+        max: Math.max(0, achievement.thresholds.BRONZE - 1),
       }),
     },
     {
-      username: 'standard_user',
-      userId: users['standard_user'],
+      username: 'standard',
+      userId: users['standard'],
       name: 'Standard',
       // Standard: Random value between Bronze and Gold thresholds
       getValueRange: (achievement: AchievementDefinition) => ({
@@ -319,8 +319,8 @@ async function seedAchievements(users: { [key: string]: string }) {
       }),
     },
     {
-      username: 'premium_user',
-      userId: users['premium_user'],
+      username: 'premium',
+      userId: users['premium'],
       name: 'Premium',
       // Premium: Random value between Gold and Platinum
       getValueRange: (achievement: AchievementDefinition) => ({
@@ -433,7 +433,7 @@ async function seed() {
     await seedContent();
 
     // Seed courses with premium user (5 courses with varied content)
-    await seedCoursesWithInternalFiles(users['premium_user']);
+    await seedCoursesWithInternalFiles(users['premium']);
 
     // Seed achievements
     await seedAchievements(users);
