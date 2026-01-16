@@ -8,9 +8,10 @@ import api from '@/lib/api';
 interface LanguageSelectorProps {
   value: string;
   onChange?: (languageCode: string) => void;
+  onUpdate?: () => Promise<void>;
 }
 
-export default function LanguageSelector({ value, onChange }: LanguageSelectorProps) {
+export default function LanguageSelector({ value, onChange, onUpdate }: LanguageSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -34,10 +35,14 @@ export default function LanguageSelector({ value, onChange }: LanguageSelectorPr
       });
       return response.data;
     },
-    onSuccess: (_, languageCode) => {
+    onSuccess: async (_, languageCode) => {
       const language = SUPPORTED_LANGUAGES.find((lang) => lang.value === languageCode);
       toast.success(`Study language updated to ${language?.label || languageCode}.`);
       queryClient.invalidateQueries({ queryKey: ['user'] });
+      // Refetch user to update AuthContext state
+      if (onUpdate) {
+        await onUpdate();
+      }
       setIsOpen(false);
       setSearchQuery('');
     },

@@ -5,7 +5,7 @@ import LanguageSelector from './LanguageSelector';
 
 export default function GeneralSettings() {
   const { themeMode, setThemeMode } = useTheme();
-  const { user } = useAuth();
+  const { user, refetchUser } = useAuth();
   
   // Default to English if no language set
   const currentLanguage = user?.preferredLanguage || 'en';
@@ -66,7 +66,7 @@ export default function GeneralSettings() {
         </p>
         
         <div className="max-w-md">
-            <LanguageSelector value={currentLanguage} />
+            <LanguageSelector value={currentLanguage} onUpdate={refetchUser} />
         </div>
       </section>
     </div>
