@@ -456,7 +456,7 @@ export default function Achievements() {
       <PageContainer.Section>
         <div className="space-y-8">
           {/* Achievement Grid */}
-          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-6">
             {enrichedAchievements.map((achievement) => (
               <AchievementCard key={achievement.id} achievement={achievement} />
             ))}
