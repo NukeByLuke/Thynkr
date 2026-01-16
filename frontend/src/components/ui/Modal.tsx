@@ -1,6 +1,6 @@
 /**
  * Modal Component
- * Thea-inspired modal with centered overlay, backdrop blur, and smooth animations.
+ * Soft-Square design with centered overlay, backdrop blur, and smooth animations.
  */
 
 import { ReactNode, useEffect, useCallback } from 'react';
@@ -22,7 +22,7 @@ interface ModalProps {
 }
 
 /**
- * Modal - Centered overlay with backdrop blur and scale-in animation
+ * Modal - Centered overlay with soft-square design and glassmorphism
  */
 export default function Modal({
   isOpen,
@@ -76,7 +76,7 @@ export default function Modal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={closeOnOverlayClick ? onClose : undefined}
             aria-hidden="true"
           />
@@ -90,9 +90,10 @@ export default function Modal({
             className={clsx(
               'relative w-full',
               sizeClasses[size],
-              'bg-white dark:bg-slate-800',
-              'rounded-2xl shadow-lg',
-              'border border-gray-200 dark:border-slate-700',
+              'bg-white/95 dark:bg-zinc-950/95',
+              'backdrop-blur-md',
+              'rounded-xl shadow-2xl',
+              'border border-slate-200 dark:border-slate-800/50',
               'overflow-hidden',
               className
             )}
@@ -103,12 +104,12 @@ export default function Modal({
           >
             {/* Header */}
             {(title || showCloseButton) && (
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700">
+              <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
                 <div>
                   {title && (
                     <h2
                       id="modal-title"
-                      className="text-lg font-semibold text-gray-900 dark:text-white"
+                      className="text-lg font-semibold text-slate-900 dark:text-slate-100"
                     >
                       {title}
                     </h2>
@@ -116,7 +117,7 @@ export default function Modal({
                   {description && (
                     <p
                       id="modal-description"
-                      className="mt-1 text-sm text-gray-500 dark:text-slate-400"
+                      className="mt-1 text-sm text-slate-600 dark:text-slate-400"
                     >
                       {description}
                     </p>
@@ -126,12 +127,12 @@ export default function Modal({
                   <button
                     onClick={onClose}
                     className={clsx(
-                      'p-2 rounded-full',
-                      'text-gray-400 hover:text-gray-600',
+                      'p-2 rounded-lg',
+                      'text-slate-400 hover:text-slate-600',
                       'dark:text-slate-500 dark:hover:text-slate-300',
-                      'hover:bg-gray-100 dark:hover:bg-slate-700',
+                      'hover:bg-slate-100 dark:hover:bg-slate-800',
                       'transition-colors duration-200',
-                      'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400'
+                      'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
                     )}
                     aria-label="Close modal"
                   >

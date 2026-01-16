@@ -35,10 +35,13 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'react-vendor': ['react', 'react-dom', 'react-router-dom', 'react-helmet-async'],
+          'viz-vendor': ['recharts'],
+          'anim-vendor': ['framer-motion', 'lottie-react', 'canvas-confetti'],
           'query-vendor': ['@tanstack/react-query'],
-          'animation-vendor': ['framer-motion'],
-          'ui-vendor': ['lucide-react'],
+          'ui-utils': ['clsx', 'date-fns', 'react-hot-toast'],
+          'markdown': ['react-markdown', 'remark-gfm', 'rehype-highlight', 'rehype-raw'],
+          'icons': ['lucide-react']
         },
       },
     },

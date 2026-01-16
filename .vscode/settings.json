@@ -1,0 +1,66 @@
+{
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "less.lint.unknownAtRules": "ignore",
+  
+  // Performance: Exclude heavy directories from file watcher
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/.next/**": true,
+    "**/out/**": true,
+    "**/coverage/**": true,
+    "**/.turbo/**": true,
+    "**/.nx/**": true,
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/logs/**": true,
+    "**/*.log": true,
+    "**/storybook-static/**": true,
+    "**/.cache/**": true
+  },
+  
+  // Performance: Exclude from search indexing
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/coverage": true,
+    "**/.next": true,
+    "**/out": true,
+    "**/.turbo": true,
+    "**/storybook-static": true,
+    "**/package-lock.json": true,
+    "**/yarn.lock": true,
+    "**/pnpm-lock.yaml": true
+  },
+  
+  // Performance: Hide clutter from explorer
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/*.tsbuildinfo": true,
+    "**/.eslintcache": true,
+    "**/.stylelintcache": true
+  },
+  
+  // TypeScript: Increase memory limit for large projects
+  "typescript.tsserver.maxTsServerMemory": 4096,
+  "typescript.disableAutomaticTypeAcquisition": false,
+  "typescript.preferences.includePackageJsonAutoImports": "off",
+  "javascript.suggestionActions.enabled": false,
+  
+  // Editor: Performance tweaks
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": false
+  },
+  "search.followSymlinks": false,
+  "files.associations": {
+    "*.css": "tailwindcss",
+    "*.json": "jsonc"
+  }
+}

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -11,11 +11,11 @@ import {
   Edit2,
   Trash2,
   Search,
-  File,
   Calendar,
-  HardDrive,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { FileTypeBadge, getFileIcon } from '@/lib/fileTypeUtils';
+import UploadModal from '@/components/UploadModal';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -43,7 +43,7 @@ interface UploadedFile {
 export default function Files() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [contextMenu, setContextMenu] = useState<{
@@ -197,18 +197,28 @@ export default function Files() {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  const getFileIcon = (fileType: string) => {
-    const type = fileType.toLowerCase();
-    if (type === 'pdf') return { icon: FileText, color: 'text-red-500' };
-    if (['doc', 'docx'].includes(type)) return { icon: FileText, color: 'text-blue-500' };
-    if (['ppt', 'pptx'].includes(type)) return { icon: FileText, color: 'text-orange-500' };
-    return { icon: File, color: 'text-slate-400' };
+  // Handlers
+  const handleUploadFiles = (files: FileList) => {
+    uploadMutation.mutate(files);
+    setShowUploadModal(false);
   };
 
-  // Handlers
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      uploadMutation.mutate(e.target.files);
+  const handleUploadYouTube = async (url: string) => {
+    setShowUploadModal(false);
+    try {
+      const response = await fetch(`${API_URL}/study/upload-youtube`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ url, folderId: currentFolderId }),
+      });
+      if (!response.ok) throw new Error('Failed to upload YouTube link');
+      queryClient.invalidateQueries({ queryKey: ['study-files'] });
+      toast.success('YouTube video added successfully');
+    } catch (error) {
+      toast.error('Failed to add YouTube video');
     }
   };
 
@@ -252,24 +262,6 @@ export default function Files() {
 
   const isLoading = loadingFolders || loadingFiles;
 
-  // Skeleton component for loading state
-  const FileListSkeleton = () => (
-    <div className="space-y-1">
-      {[...Array(8)].map((_, i) => (
-        <div
-          key={i}
-          className="flex items-center gap-4 p-3 rounded-lg border-b border-white/5"
-        >
-          <div className="w-5 h-5 bg-slate-800 rounded animate-pulse" />
-          <div className="flex-1 h-4 bg-slate-800 rounded animate-pulse" />
-          <div className="w-16 h-4 bg-slate-800 rounded animate-pulse" />
-          <div className="w-24 h-4 bg-slate-800 rounded animate-pulse" />
-          <div className="w-16 h-4 bg-slate-800 rounded animate-pulse" />
-        </div>
-      ))}
-    </div>
-  );
-
   return (
     <>
       <Helmet>
@@ -279,54 +271,54 @@ export default function Files() {
 
       <div
         onClick={() => setContextMenu(null)}
-        className="min-h-screen relative overflow-hidden"
+        className="min-h-screen bg-slate-50 dark:bg-slate-950 relative overflow-hidden"
         style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(100 116 139 / 0.05) 1px, transparent 0)',
+          backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(148 163 184 / 0.15) 1px, transparent 0)',
           backgroundSize: '40px 40px',
         }}
       >
         {/* Main Container */}
         <div className="max-w-7xl mx-auto p-6 space-y-8">
           {/* Header */}
-          <div className="flex items-center justify-between">
-            <h1 className="text-4xl font-bold text-heading">Library</h1>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-8">
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+                Library
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400 mt-2">
+                {filteredFiles.length + filteredFolders.length} items • Organized and ready to study
+              </p>
+            </div>
             
-            <div className="flex items-center gap-3">
-              {/* Search Bar */}
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              {/* Search Bar - Integrated Design */}
+              <div className="relative flex-1 sm:w-80">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
                   placeholder="Search files and folders..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-80 pl-12 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-full text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 dark:focus:ring-white/20 transition-all"
+                  className="w-full pl-11 pr-4 py-3 rounded-full bg-white dark:bg-slate-900/80 backdrop-blur-md border-2 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-md hover:shadow-lg"
                 />
               </div>
 
-              {/* Upload Button */}
+              {/* Upload Button - Premium Design */}
               <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadMutation.isPending}
-                className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+                onClick={() => setShowUploadModal(true)}
+                className="group relative px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 active:scale-95 will-change-transform"
               >
-                <Upload className="w-4 h-4" />
-                {uploadMutation.isPending ? 'Uploading...' : 'Upload'}
+                <div className="flex items-center gap-2">
+                  <Upload className="w-5 h-5" />
+                  <span className="hidden sm:inline whitespace-nowrap">Upload</span>
+                </div>
               </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.pps,.ppsx"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
             </div>
           </div>
 
           {/* Folders Grid */}
           {filteredFolders.length > 0 && (
-            <div>
+            <div className="min-h-[200px]">
               <h2 className="text-sm uppercase text-slate-500 font-semibold mb-4 tracking-wider">
                 Folders
               </h2>
@@ -337,14 +329,14 @@ export default function Files() {
                       key={folder.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
+                      transition={{ delay: index * 0.03, duration: 0.2 }}
                       onClick={() => setCurrentFolderId(folder.id)}
                       onContextMenu={(e) => handleContextMenu(e, 'folder', folder.id, folder.name)}
-                      className="group bg-slate-800/40 hover:bg-slate-700/60 backdrop-blur-sm border border-white/5 rounded-xl p-4 text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
+                      className="group bg-white dark:bg-slate-800/40 hover:bg-slate-50 dark:hover:bg-slate-700/60 backdrop-blur-sm border-2 border-slate-200 dark:border-white/5 rounded-xl p-4 text-left transition-all duration-150 hover:scale-[1.02] active:scale-95 will-change-transform shadow-md hover:shadow-lg"
                     >
-                      <Folder className="w-12 h-12 text-amber-400 mb-2" fill="currentColor" />
-                      <p className="text-white font-medium truncate text-sm">{folder.name}</p>
-                      <p className="text-slate-500 text-xs mt-1">
+                      <Folder className="w-12 h-12 text-amber-500 dark:text-amber-400 mb-2" fill="currentColor" />
+                      <p className="text-slate-900 dark:text-white font-medium truncate text-sm">{folder.name}</p>
+                      <p className="text-slate-500 dark:text-slate-500 text-xs mt-1">
                         {folder.files?.length || 0} files
                       </p>
                     </motion.button>
@@ -354,83 +346,88 @@ export default function Files() {
             </div>
           )}
 
-          {/* Files List - Spotify Style */}
+          {/* Files List - Modern Table Design */}
           {(isLoading || filteredFiles.length > 0) && (
-            <div>
-              <h2 className="text-sm uppercase text-slate-500 font-semibold mb-4 tracking-wider">
-                Files
-              </h2>
-
+            <div className="bg-white dark:bg-slate-900/60 backdrop-blur-md border-2 border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden min-h-[400px] shadow-lg">
               {/* Table Header - Sticky */}
-              <div className="grid grid-cols-[40px_1fr_140px_120px_100px_50px] gap-4 px-4 pb-3 border-b border-slate-200 dark:border-white/5 text-xs uppercase text-muted font-medium tracking-wider sticky top-0 bg-slate-50 dark:bg-slate-950 z-10">
-                <div className="text-center">#</div>
+              <div className="grid grid-cols-[auto_1fr_auto_auto_auto_auto] gap-6 px-6 py-4 border-b-2 border-slate-200 dark:border-white/10 text-xs uppercase tracking-wider font-semibold text-slate-700 dark:text-slate-400 sticky top-0 bg-slate-50 dark:bg-slate-900/95 backdrop-blur-md z-10">
+                <div className="w-5"></div>
                 <div>Name</div>
                 <div>Type</div>
-                <div>Date Added</div>
+                <div>Date</div>
                 <div className="text-right">Size</div>
-                <div></div>
+                <div className="w-8"></div>
               </div>
 
-              {/* File List */}
+              {/* File Rows */}
               {isLoading ? (
-                <FileListSkeleton />
+                <div className="p-6">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-6 py-4 animate-pulse min-h-[64px]">
+                      <div className="w-5 h-5 bg-slate-200 dark:bg-slate-800 rounded" />
+                      <div className="flex-1 h-4 bg-slate-200 dark:bg-slate-800 rounded" />
+                      <div className="w-24 h-6 bg-slate-200 dark:bg-slate-800 rounded-full" />
+                      <div className="w-20 h-4 bg-slate-200 dark:bg-slate-800 rounded" />
+                      <div className="w-16 h-4 bg-slate-200 dark:bg-slate-800 rounded" />
+                      <div className="w-8 h-8 bg-slate-200 dark:bg-slate-800 rounded" />
+                    </div>
+                  ))}
+                </div>
               ) : (
-                <div className="mt-2 space-y-1">
+                <div className="divide-y divide-slate-200/50 dark:divide-white/5">
                   <AnimatePresence>
                     {filteredFiles.map((file, index) => {
-                      const { icon: IconComponent, color } = getFileIcon(file.fileType);
+                      const { icon: FileIcon, color: iconColor } = getFileIcon(file.fileType, file.originalName);
+                      
                       return (
                         <motion.div
                           key={file.id}
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
-                          transition={{ delay: index * 0.02 }}
+                          transition={{ delay: index * 0.02, duration: 0.15 }}
                           onDoubleClick={() => handleFileDoubleClick(file.id)}
-                          onContextMenu={(e) =>
-                            handleContextMenu(e, 'file', file.id, file.originalName)
-                          }
-                          className="group grid grid-cols-[40px_1fr_140px_120px_100px_50px] gap-4 items-center p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors border-b border-slate-200/50 dark:border-white/5 cursor-pointer"
+                          onContextMenu={(e) => handleContextMenu(e, 'file', file.id, file.originalName)}
+                          className="group grid grid-cols-[auto_1fr_auto_auto_auto_auto] gap-6 items-center px-6 py-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-all duration-150 cursor-pointer min-h-[64px] will-change-transform active:scale-[0.99] border-b border-slate-100 dark:border-white/5 last:border-0"
                         >
                           {/* Icon */}
                           <div className="flex items-center justify-center">
-                            <IconComponent className={`w-5 h-5 ${color}`} />
+                            <FileIcon className={`w-5 h-5 ${iconColor}`} />
                           </div>
 
                           {/* Name */}
-                          <div className="overflow-hidden">
-                            <p className="text-slate-200 font-medium truncate">
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
                               {file.originalName}
                             </p>
                           </div>
 
-                          {/* Type */}
-                          <div className="text-slate-500 text-sm uppercase font-mono">
-                            {file.fileType}
+                          {/* Type Badge */}
+                          <div>
+                            <FileTypeBadge mimeType={file.fileType} fileName={file.originalName} />
                           </div>
 
                           {/* Date */}
-                          <div className="text-slate-500 text-sm flex items-center gap-2">
-                            <Calendar className="w-4 h-4" />
-                            {formatDate(file.createdAt)}
+                          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                            <Calendar className="w-3.5 h-3.5" />
+                            <span>{formatDate(file.createdAt)}</span>
                           </div>
 
                           {/* Size */}
-                          <div className="text-slate-500 text-sm text-right font-mono flex items-center justify-end gap-2">
-                            <HardDrive className="w-4 h-4" />
+                          <div className="text-right text-sm font-mono text-slate-600 dark:text-slate-400">
                             {formatFileSize(file.fileSize)}
                           </div>
 
                           {/* Actions */}
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-150">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleContextMenu(e, 'file', file.id, file.originalName);
                               }}
-                              className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+                              className="p-1.5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg transition-colors duration-150 active:scale-95 will-change-transform"
                             >
-                              <MoreVertical className="w-5 h-5 text-slate-400" />
+                              <MoreVertical className="w-4 h-4 text-slate-600 dark:text-slate-400" />
                             </button>
                           </div>
                         </motion.div>
@@ -443,18 +440,18 @@ export default function Files() {
           )}
           {/* Empty State */}
           {!isLoading && filteredFolders.length === 0 && filteredFiles.length === 0 && (
-            <div className="text-center py-20">
-              <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <FileText className="w-10 h-10 text-slate-700" />
+            <div className="bg-white dark:bg-slate-900/60 backdrop-blur-md border-2 border-slate-200 dark:border-white/10 rounded-2xl p-16 text-center min-h-[400px] flex items-center justify-center shadow-lg">
+              <div>
+              <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <FileText className="w-10 h-10 text-slate-400" />
               </div>
-              <h3 className="text-xl font-semibold text-slate-400 mb-2">
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
                 {searchQuery ? 'No results found' : 'No files yet'}
               </h3>
-              <p className="text-slate-500">
-                {searchQuery
-                  ? 'Try adjusting your search'
-                  : 'Upload your first file to get started'}
+              <p className="text-slate-600 dark:text-slate-400">
+                {searchQuery ? 'Try adjusting your search' : 'Upload your first file to get started'}
               </p>
+              </div>
             </div>
           )}
         </div>
@@ -462,19 +459,19 @@ export default function Files() {
         {/* Context Menu */}
         {contextMenu && (
           <div
-            className="fixed card shadow-2xl py-2 z-50 min-w-[180px]"
+            className="fixed bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10 rounded-xl shadow-2xl py-2 z-50 min-w-[180px]"
             style={{ left: contextMenu.x, top: contextMenu.y }}
           >
             <button
               onClick={handleRename}
-              className="w-full px-4 py-2 text-left text-heading hover:bg-slate-100 dark:hover:bg-white/5 transition-colors flex items-center gap-3"
+              className="w-full px-4 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors duration-150 flex items-center gap-3 active:scale-95"
             >
               <Edit2 className="w-4 h-4" />
               Rename
             </button>
             <button
               onClick={handleDelete}
-              className="w-full px-4 py-2 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors flex items-center gap-3"
+              className="w-full px-4 py-2 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors duration-150 flex items-center gap-3 active:scale-95"
             >
               <Trash2 className="w-4 h-4" />
               Delete
@@ -488,16 +485,17 @@ export default function Files() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="card p-6 max-w-md w-full mx-4"
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4"
             >
-              <h3 className="text-xl font-semibold text-heading mb-4">
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">
                 Rename {selectedItem.type === 'folder' ? 'Folder' : 'File'}
               </h3>
               <input
                 type="text"
                 value={renameValue}
                 onChange={(e) => setRenameValue(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg text-heading placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 dark:focus:ring-white/20 mb-4"
+                className="w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-4"
                 autoFocus
               />
               <div className="flex gap-3 justify-end">
@@ -506,7 +504,7 @@ export default function Files() {
                     setShowRenameModal(false);
                     setSelectedItem(null);
                   }}
-                  className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
+                  className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors duration-150 active:scale-95"
                 >
                   Cancel
                 </button>
@@ -521,7 +519,7 @@ export default function Files() {
                     }
                   }}
                   disabled={!renameValue.trim() || renameMutation.isPending}
-                  className="px-6 py-2 bg-white text-slate-950 rounded-lg transition-opacity disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed font-medium active:scale-95 shadow-sm"
                 >
                   {renameMutation.isPending ? 'Saving...' : 'Save'}
                 </button>
@@ -529,6 +527,16 @@ export default function Files() {
             </motion.div>
           </div>
         )}
+
+        {/* Upload Modal */}
+        <UploadModal
+          isOpen={showUploadModal}
+          onClose={() => setShowUploadModal(false)}
+          onUploadFiles={handleUploadFiles}
+          onUploadYouTube={handleUploadYouTube}
+          isUploading={uploadMutation.isPending}
+          currentFolderId={currentFolderId}
+        />
       </div>
     </>
   );

@@ -4,9 +4,10 @@
  */
 
 import { useState } from 'react';
-import { FileText, File, FileType, Presentation, MoreVertical, Trash2, Edit2, Calendar, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { MoreVertical, Trash2, Edit2, Calendar, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
+import { FileTypeBadge, getCleanFileType } from '@/lib/fileTypeUtils';
 
 interface FileCardProps {
   id: string;
@@ -34,29 +35,15 @@ export default function FileCard({
 }: FileCardProps) {
   const [showMenu, setShowMenu] = useState(false);
 
-  // Get file type icon
-  const getFileIcon = () => {
-    const iconClass = "h-16 w-16";
-    const ext = fileType.toLowerCase();
-    
-    if (ext === 'pdf') {
-      return <FileText className={`${iconClass} text-red-400`} />;
-    } else if (ext === 'doc' || ext === 'docx') {
-      return <File className={`${iconClass} text-blue-400`} />;
-    } else if (ext === 'txt') {
-      return <FileType className={`${iconClass} text-slate-400`} />;
-    } else if (ext === 'ppt' || ext === 'pptx' || ext === 'pps' || ext === 'ppsx') {
-      return <Presentation className={`${iconClass} text-orange-400`} />;
-    }
-    return <File className={`${iconClass} text-slate-400`} />;
-  };
+  // Get file type info with proper PPTX detection
+  const fileTypeInfo = getCleanFileType(fileType, originalName);
+  const FileIcon = fileTypeInfo.icon;
 
   // Get icon color for glow effect
   const getIconGlowColor = () => {
-    const ext = fileType.toLowerCase();
-    if (ext === 'pdf') return 'rgba(248, 113, 113, 0.15)';
-    if (ext === 'doc' || ext === 'docx') return 'rgba(96, 165, 250, 0.15)';
-    if (ext === 'ppt' || ext === 'pptx' || ext === 'pps' || ext === 'ppsx') return 'rgba(251, 146, 60, 0.15)';
+    if (fileTypeInfo.label === 'PDF') return 'rgba(248, 113, 113, 0.15)';
+    if (fileTypeInfo.label === 'Word Doc') return 'rgba(96, 165, 250, 0.15)';
+    if (fileTypeInfo.label === 'PowerPoint') return 'rgba(251, 146, 60, 0.15)';
     return 'rgba(148, 163, 184, 0.15)';
   };
 
@@ -65,28 +52,28 @@ export default function FileCard({
     switch (status) {
       case 'COMPLETED':
         return (
-          <div className="flex items-center gap-1 px-2 py-1 bg-green-500/10 border border-green-500/20 rounded-lg text-xs text-green-400">
+          <div className="flex items-center gap-1 px-2 py-1 bg-green-500/10 border border-green-500/20 rounded-xl text-xs text-green-400">
             <CheckCircle2 className="h-3 w-3" />
             <span>Ready</span>
           </div>
         );
       case 'PROCESSING':
         return (
-          <div className="flex items-center gap-1 px-2 py-1 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-xs text-yellow-400">
+          <div className="flex items-center gap-1 px-2 py-1 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-xs text-yellow-400">
             <Clock className="h-3 w-3 animate-spin" />
             <span>Processing</span>
           </div>
         );
       case 'FAILED':
         return (
-          <div className="flex items-center gap-1 px-2 py-1 bg-red-500/10 border border-red-500/20 rounded-lg text-xs text-red-400">
+          <div className="flex items-center gap-1 px-2 py-1 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-400">
             <AlertCircle className="h-3 w-3" />
             <span>Failed</span>
           </div>
         );
       default:
         return (
-          <div className="flex items-center gap-1 px-2 py-1 bg-slate-500/10 border border-slate-500/20 rounded-lg text-xs text-slate-400">
+          <div className="flex items-center gap-1 px-2 py-1 bg-slate-500/10 border border-slate-500/20 rounded-xl text-xs text-slate-400">
             <Clock className="h-3 w-3" />
             <span>Uploaded</span>
           </div>
@@ -104,10 +91,11 @@ export default function FileCard({
     <motion.div
       whileHover={{ y: -4 }}
       whileTap={{ scale: 0.98 }}
-      className={`relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer group transition-all duration-300 ${
+      transition={{ duration: 0.15, ease: 'easeOut' }}
+      className={`relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer group transition-all duration-200 will-change-transform ${
         isSelected
-          ? 'bg-slate-800/60 dark:bg-slate-800/60 backdrop-blur-md border-2 border-indigo-500/50 shadow-lg shadow-indigo-500/20'
-          : 'bg-white/70 dark:bg-slate-900/40 backdrop-blur-md border border-slate-200/50 dark:border-white/5 hover:border-indigo-500/30 dark:hover:border-indigo-500/30 shadow-lg hover:shadow-xl'
+          ? 'bg-white dark:bg-zinc-900/80 backdrop-blur-md border-2 border-blue-500/50 shadow-lg shadow-blue-500/20'
+          : 'bg-white dark:bg-zinc-900/60 backdrop-blur-md border-2 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 shadow-lg hover:shadow-xl'
       }`}
       onClick={onClick}
     >
@@ -118,9 +106,9 @@ export default function FileCard({
             e.stopPropagation();
             setShowMenu(!showMenu);
           }}
-          className="p-1.5 rounded-lg bg-slate-900/60 dark:bg-slate-900/80 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all opacity-0 group-hover:opacity-100"
+          className="p-1.5 rounded-xl bg-white/90 dark:bg-zinc-900/80 backdrop-blur-sm border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-all duration-150 opacity-0 group-hover:opacity-100 active:scale-95 will-change-transform"
         >
-          <MoreVertical className="h-4 w-4 text-white" />
+          <MoreVertical className="h-4 w-4 text-slate-700 dark:text-white" />
         </button>
 
         {/* Dropdown Menu */}
@@ -131,7 +119,7 @@ export default function FileCard({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -10 }}
               transition={{ duration: 0.15 }}
-              className="absolute top-10 right-0 w-40 bg-white dark:bg-slate-900 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-xl shadow-xl overflow-hidden z-20"
+              className="absolute top-10 right-0 w-40 bg-white dark:bg-zinc-900 backdrop-blur-xl border-2 border-slate-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden z-20"
               onMouseLeave={() => setShowMenu(false)}
             >
               {onRename && (
@@ -141,7 +129,7 @@ export default function FileCard({
                     setShowMenu(false);
                     onRename();
                   }}
-                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-150 active:scale-95"
                 >
                   <Edit2 className="h-4 w-4" />
                   <span>Rename</span>
@@ -154,7 +142,7 @@ export default function FileCard({
                     setShowMenu(false);
                     onDelete();
                   }}
-                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-150 active:scale-95"
                 >
                   <Trash2 className="h-4 w-4" />
                   <span>Delete</span>
@@ -178,7 +166,7 @@ export default function FileCard({
           />
           {/* Icon */}
           <div className="relative z-10">
-            {getFileIcon()}
+            <FileIcon className="h-16 w-16" />
           </div>
         </div>
 
@@ -191,9 +179,12 @@ export default function FileCard({
 
           {/* Metadata Row */}
           <div className="flex items-center justify-between gap-2 text-xs">
-            <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
-              <Calendar className="h-3 w-3" />
-              <span>{formatDistanceToNow(new Date(createdAt), { addSuffix: true })}</span>
+            <div className="flex items-center gap-2">
+              <FileTypeBadge mimeType={fileType} fileName={originalName} className="text-[10px] px-2 py-0.5" />
+              <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
+                <Calendar className="h-3 w-3" />
+                <span>{formatDistanceToNow(new Date(createdAt), { addSuffix: true })}</span>
+              </div>
             </div>
             <span className="text-slate-500 dark:text-slate-400">{formatFileSize(fileSize)}</span>
           </div>

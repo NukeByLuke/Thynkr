@@ -219,7 +219,7 @@ export const shadows = {
 export const motion = {
   // Duration presets
   duration: {
-    fast: '150ms',
+    fast: '100ms',
     base: '200ms',
     slow: '300ms',
     theme: '300ms',
@@ -254,9 +254,9 @@ export const motion = {
 
     // Hover transition: background/color/box-shadow over 200ms ease-in-out
     hoverTransition: {
-      properties: ['background-color', 'color', 'box-shadow', 'border-color'],
-      duration: '200ms',
-      easing: 'ease-in-out',
+      properties: ['background-color', 'color', 'box-shadow', 'border-color', 'transform'],
+      duration: '100ms',
+      easing: 'ease-out',
     },
   },
 } as const;

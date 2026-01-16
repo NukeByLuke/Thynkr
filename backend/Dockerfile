@@ -40,8 +40,14 @@ RUN pnpm build
 FROM node:20-slim AS runner
 WORKDIR /app
 
-# Install wget for healthcheck
-RUN apt-get update && apt-get install -y --no-install-recommends wget openssl \
+# Install system dependencies: wget for healthcheck, openssl, ffmpeg for audio, yt-dlp for YouTube
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  wget \
+  openssl \
+  ffmpeg \
+  python3 \
+  python3-pip \
+  && pip3 install --break-system-packages --no-cache-dir yt-dlp \
   && rm -rf /var/lib/apt/lists/*
 
 # Copy minimal metadata

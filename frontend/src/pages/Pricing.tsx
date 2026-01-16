@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import Button from '@/components/ui/Button';
 import { Check, X, Sparkles, Zap, Crown, ArrowRight, TrendingUp, Brain, Bolt } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -132,6 +133,7 @@ export default function Pricing() {
 
     if (!priceId) {
       console.error('No price ID configured for plan:', plan.id, billingCycle);
+      toast.error('Configuration error: Price ID not found. Please contact support.');
       return;
     }
 
@@ -146,9 +148,12 @@ export default function Pricing() {
 
       if (response.data.url) {
         window.location.href = response.data.url;
+      } else {
+        throw new Error('No checkout URL received');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create checkout session:', error);
+      toast.error(error.response?.data?.message || error.message || 'Failed to start checkout');
     } finally {
       setIsLoading(null);
     }
@@ -198,7 +203,7 @@ export default function Pricing() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-50/50 to-transparent dark:via-slate-900/50 pointer-events-none" />
         <div className="absolute top-20 left-20 w-80 h-80 bg-gradient-to-br from-brand-400/15 to-brand-600/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-accent-400/15 to-accent-600/15 rounded-full blur-3xl pointer-events-none" />
-        
+
         <div className="max-w-6xl mx-auto px-8 lg:px-16 relative">
           {/* Header */}
           <div className="text-center mb-16">
@@ -216,7 +221,7 @@ export default function Pricing() {
             <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-2 rounded-2xl shadow-soft border border-white/20 dark:border-white/10">
               <button
                 onClick={() => setBillingCycle('monthly')}
-                className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                className={`px-6 py-3 rounded-xl text-sm font-semibold transition-[background-color,box-shadow,transform] duration-200 active:scale-95 ${
                   billingCycle === 'monthly'
                     ? 'bg-gradient-to-r from-brand-500 to-accent-500 text-white shadow-glow-brand'
                     : 'text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-700/50'
@@ -226,7 +231,7 @@ export default function Pricing() {
               </button>
               <button
                 onClick={() => setBillingCycle('yearly')}
-                className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${
+                className={`px-6 py-3 rounded-xl text-sm font-semibold transition-[background-color,box-shadow,transform] duration-200 active:scale-95 flex items-center gap-2 ${
                   billingCycle === 'yearly'
                     ? 'bg-gradient-to-r from-brand-500 to-accent-500 text-white shadow-glow-brand'
                     : 'text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-700/50'
@@ -322,7 +327,7 @@ export default function Pricing() {
               return (
                 <div
                   key={plan.id}
-                  className={`relative flex flex-col p-8 lg:p-10 rounded-3xl border border-white/20 dark:border-slate-700/30 transition-all duration-300 ease-out hover:-translate-y-2 ${getCardStyles()}`}
+                  className={`relative flex flex-col p-8 lg:p-10 rounded-3xl border border-white/20 dark:border-slate-700/30 transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-2 ${getCardStyles()}`}
                 >
                   {getBadge()}
 

@@ -265,11 +265,12 @@ export default {
         },
       },
       animation: {
-        fadeIn: 'fadeIn 0.5s ease-in forwards',
-        fadeInUp: 'fadeInUp 0.8s ease-out forwards',
-        slideUp: 'slideUp 0.6s ease-out forwards',
-        blurIn: 'blurIn 0.6s ease-out forwards',
-        glowPulse: 'glowPulse 2s ease-in-out infinite',
+        'fade-in': 'fadeIn 0.2s ease-out forwards',
+        'fade-in-up': 'fadeInUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+        'slide-up': 'slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+        'blur-in': 'blurIn 0.25s ease-out forwards',
+        // Keep decorative ambient animations slow
+        glowPulse: 'glowPulse 3s ease-in-out infinite',
         shimmer: 'shimmer 2s linear infinite',
         gradientX: 'gradientX 5s ease infinite',
         gradientShift: 'gradientShift 8s ease infinite',
@@ -311,11 +312,11 @@ export default {
         '.pt-safe': {
           'padding-top': 'env(safe-area-inset-top, 0)',
         },
-        // Hover transition preset: background/color/box-shadow over 200ms ease-in-out
+        // Hover transition preset: background/color/box-shadow/transform over 100ms ease-out
         '.hover-transition': {
-          'transition-property': 'background-color, color, box-shadow, border-color',
-          'transition-duration': '200ms',
-          'transition-timing-function': 'ease-in-out',
+          'transition-property': 'background-color, color, box-shadow, border-color, transform',
+          'transition-duration': '100ms',
+          'transition-timing-function': 'ease-out',
         },
         // Theme transition preset
         '.theme-transition': {

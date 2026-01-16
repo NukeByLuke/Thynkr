@@ -1,6 +1,6 @@
 /**
  * Button Component
- * Thea-inspired button with rounded-full design, consistent padding, and hover shadows.
+ * Soft-Square design with rounded-lg edges and high-contrast primary colors
  */
 
 import { forwardRef, ReactNode } from 'react';
@@ -17,11 +17,11 @@ export interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'ref' | 'ch
 }
 
 /**
- * Button - Thea-style button with variants
- * - primary: Solid indigo background
- * - secondary: Soft gray background
- * - outline: Border only
- * - ghost: No background, hover reveals
+ * Button - Soft-Square design with high-contrast variants
+ * - primary: Vibrant blue/purple gradient
+ * - secondary: Subtle gray/slate background
+ * - outline: Border with rounded-lg
+ * - ghost: Minimal hover reveal
  * - danger: Red for destructive actions
  */
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -40,38 +40,42 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles = clsx(
-      'inline-flex items-center justify-center font-medium',
-      'rounded-xl transition-all duration-200 ease-in-out',
-      'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2',
+      'inline-flex items-center justify-center font-semibold',
+      'rounded-lg transition-[transform,opacity] duration-200 ease-out will-change-transform',
+      'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
       'disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none'
     );
 
     const variants = {
       primary: clsx(
-        'bg-gradient-aurora text-white shadow-lg shadow-blue-500/25',
-        'hover:bg-gradient-aurora-hover hover:shadow-xl hover:shadow-blue-500/30',
-        'active:scale-[0.98]'
+        'bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-lg shadow-blue-500/30',
+        'hover:from-blue-700 hover:to-violet-700 hover:shadow-xl hover:shadow-blue-500/40',
+        'dark:from-blue-500 dark:to-violet-500 dark:hover:from-blue-600 dark:hover:to-violet-600',
+        'active:scale-95'
       ),
       secondary: clsx(
-        'bg-gray-100 text-gray-700',
-        'hover:bg-gray-200 hover:shadow-sm',
-        'dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600',
-        'active:scale-[0.98]'
+        'bg-slate-100 text-slate-800 border border-slate-200',
+        'hover:bg-slate-200 hover:border-slate-300 hover:shadow-sm',
+        'dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700 dark:hover:border-slate-600',
+        'active:scale-95'
       ),
       outline: clsx(
-        'border-2 border-gray-200 text-gray-700 bg-transparent',
-        'hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm',
-        'dark:border-slate-600 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:bg-slate-800'
+        'border border-slate-300 text-slate-700 bg-transparent',
+        'hover:border-slate-400 hover:bg-slate-50 hover:shadow-sm',
+        'dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/50',
+        'active:scale-95'
       ),
       ghost: clsx(
-        'text-gray-600 bg-transparent',
-        'hover:bg-gray-100 hover:text-gray-900',
-        'dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'
+        'text-slate-600 bg-transparent',
+        'hover:bg-slate-100 hover:text-slate-900',
+        'dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100',
+        'active:scale-95'
       ),
       danger: clsx(
-        'bg-red-500 text-white',
-        'hover:bg-red-600 hover:shadow-md',
-        'active:scale-[0.98]'
+        'bg-red-600 text-white border border-red-700',
+        'hover:bg-red-700 hover:shadow-md',
+        'dark:bg-red-500 dark:border-red-600 dark:hover:bg-red-600',
+        'active:scale-95'
       ),
     };
 

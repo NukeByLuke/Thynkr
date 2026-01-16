@@ -26,12 +26,21 @@ const LazyLegend = lazy(() => import('recharts').then(m => ({ default: m.Legend 
 
 /**
  * Wrapper function to create Suspense-wrapped chart components
+ * Adds strict height constraints to prevent CLS (Cumulative Layout Shift) during lazy loading
  */
 function withSuspense(Component: any, displayName: string): any {
   const WrappedComponent = (props: any) => (
-    <Suspense fallback={<ContentLoader />}>
-      <Component {...props} />
-    </Suspense>
+    // FIX CLS: Container enforces minimum dimensions while chunk loads
+    // Checks props.height first, falls back to style height, then default 300px
+    <div style={{ 
+      minHeight: props.height || props.style?.height || 300, 
+      width: props.width || props.style?.width || '100%',
+      position: 'relative'
+    }}>
+      <Suspense fallback={<ContentLoader />}>
+        <Component {...props} />
+      </Suspense>
+    </div>
   );
   WrappedComponent.displayName = displayName;
   return WrappedComponent;

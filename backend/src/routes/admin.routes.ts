@@ -559,20 +559,27 @@ export default async function adminRoutes(server: FastifyInstance) {
       }
 
       // Get database stats
-      const [totalUsers, totalCourses, totalFiles, totalSessions, totalLogs] = await Promise.all([
+      const [
+        totalUsers,
+        totalCourses,
+        totalFiles,
+        totalSessions,
+        totalLogs,
+        memUsage,
+        uptimeSeconds
+      ] = await Promise.all([
         prisma.user.count(),
         prisma.course.count(),
         prisma.uploadedFile.count(),
         prisma.studySession.count(),
         prisma.adminLog.count(),
+        Promise.resolve(process.memoryUsage()),
+        Promise.resolve(process.uptime())
       ]);
 
-      // Memory usage (Node.js process)
-      const memUsage = process.memoryUsage();
       const formatBytes = (bytes: number) => Math.round((bytes / 1024 / 1024) * 100) / 100;
 
       // Uptime
-      const uptimeSeconds = process.uptime();
       const uptimeDays = Math.floor(uptimeSeconds / 86400);
       const uptimeHours = Math.floor((uptimeSeconds % 86400) / 3600);
       const uptimeMinutes = Math.floor((uptimeSeconds % 3600) / 60);

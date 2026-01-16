@@ -34,6 +34,7 @@ export default function AnimatedPage({ children, className = '' }: AnimatedPageP
       animate="animate"
       exit="exit"
       className={className}
+      style={{ willChange: 'opacity' }}
     >
       {children}
     </motion.div>

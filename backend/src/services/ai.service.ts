@@ -109,15 +109,15 @@ export class AIService {
         messages: [
           {
             role: 'system',
-            content: `You are an expert at creating concise, clear summaries of educational content.\n\n${languageInstruction}`,
+            content: `You are a Senior Academic Researcher with expertise in analyzing and summarizing complex educational materials. Your summaries are thorough, detailed, and capture all significant information.\n\n${languageInstruction}\n\nIMPORTANT: Use Chain-of-Thought reasoning in your analysis.`,
           },
           {
             role: 'user',
-            content: `Please provide a comprehensive but concise summary of the following text. Focus on the main ideas, key concepts, and important conclusions:\n\n${preparedText}`,
+            content: `Please create a COMPREHENSIVE and DETAILED summary of the following content using this approach:\n\n1. FIRST: Extract and list ALL key concepts, main ideas, specific facts, numbers, statistics, examples, and critical points from the text. Be thorough and specific.\n\n2. THEN: Synthesize these elements into a detailed summary that:\n   - Captures ALL important information, not just high-level concepts\n   - Includes specific details, numbers, and examples when mentioned\n   - Maintains the depth and nuance of the original content\n   - Is proportional to the content length (longer content = longer, more detailed summary)\n   - Preserves key arguments, explanations, and reasoning\n\nYour summary should be as detailed as necessary to fully capture the content. For long-form content (lectures, videos, etc.), aim for 500-1000+ words. Do NOT oversimplify or omit important details.\n\nIMPORTANT: Verify all facts against the provided source material. Include specific examples, quotes, or data points when they appear in the text.\n\nText:\n${preparedText}`,
           },
         ],
         temperature: 0.7,
-        max_tokens: 1000,
+        max_tokens: 2500,
       });
 
       const content = completion.choices[0]?.message?.content || '';
@@ -153,13 +153,15 @@ export class AIService {
         messages: [
           {
             role: 'system',
-            content: `You are an expert at extracting key information and creating study notes from educational content.\n\n${languageInstruction}`,
+            content: `You are a Senior Academic Researcher specializing in extracting key information and creating comprehensive study notes from educational content.\n\n${languageInstruction}`,
           },
           {
             role: 'user',
             content: `Please create comprehensive study notes from the following text. Include:
-1. A list of 5-10 key points (bullet points)
-2. Detailed notes covering all important concepts
+1. A list of 5-10 key points (bullet points) - extract the most critical concepts
+2. Detailed notes covering all important concepts with all essential information needed
+
+IMPORTANT: Verify all facts against the provided source material before outputting.
 
 Return the response in JSON format:
 {
@@ -221,7 +223,7 @@ ${preparedText}`,
         messages: [
           {
             role: 'system',
-            content: `You are an expert at creating educational quizzes from study materials.\n\n${languageInstruction}`,
+            content: `You are a Senior Academic Content Specialist with expertise in creating highly accurate, context-aware educational assessments.\n\n${languageInstruction}`,
           },
           {
             role: 'user',
@@ -230,7 +232,16 @@ ${preparedText}`,
 Difficulty level: ${difficulty}
 ${difficultyInstructions[difficulty]}
 
-Each question should have 4 options (A, B, C, D) with only one correct answer.
+CRITICAL REQUIREMENTS:
+- Generate highly accurate, context-aware questions that test genuine understanding
+- Each question must have exactly 4 options with ONE clear correct answer
+- The three incorrect options must be PLAUSIBLE DISTRACTORS that:
+  * Sound reasonable but are factually wrong based on the text
+  * Test common misconceptions or similar concepts
+  * Are not obviously wrong at first glance
+  * Are carefully crafted to challenge understanding
+
+IMPORTANT: Verify every question and answer against the source text for 100% factual accuracy. The correct answer must be definitively supported by the provided text with no ambiguity.
 
 Return the response in JSON format:
 {
@@ -240,7 +251,7 @@ Return the response in JSON format:
       "question": "The question text",
       "options": ["Option A", "Option B", "Option C", "Option D"],
       "correctAnswer": "Option A",
-      "explanation": "Brief explanation of why this is correct"
+      "explanation": "Brief explanation of why this is correct and why the distractors are incorrect"
     }
   ]
 }
@@ -291,7 +302,7 @@ ${preparedText}`,
         messages: [
           {
             role: 'system',
-            content: `You are an expert at creating effective study flashcards from educational content.\n\n${languageInstruction}`,
+            content: `You are a Senior Academic Researcher specializing in creating effective study flashcards from educational content.\n\n${languageInstruction}`,
           },
           {
             role: 'user',
@@ -299,6 +310,8 @@ ${preparedText}`,
 - Have a clear question or concept on the front
 - Have a concise, accurate answer on the back
 - Focus on key concepts, definitions, and important facts
+
+IMPORTANT: Verify all facts against the provided source material before outputting.
 
 Return the response in JSON format:
 {

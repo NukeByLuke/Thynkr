@@ -2,39 +2,43 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard,
   BookOpen,
   GraduationCap,
-  MessageSquare,
-  Award,
   FolderOpen,
   Shield,
-  Crown,
   ChevronRight,
-  User,
+  ChevronLeft,
+  Sparkles,
+  Settings,
+  CreditCard,
+  LogOut,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Logo from '@/components/Logo';
+import { Admin, Courses, Study, Files } from '@/routes';
 
 interface NavLink {
   to: string;
   icon: React.ElementType;
   label: string;
   adminOnly?: boolean;
+  component?: { preload: () => Promise<any> };
 }
 
 const navLinks: NavLink[] = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/courses', icon: BookOpen, label: 'Courses' },
-  { to: '/study', icon: GraduationCap, label: 'Study' },
-  { to: '/tutor', icon: MessageSquare, label: 'AI Tutor' },
-  { to: '/achievements', icon: Award, label: 'Achievements' },
-  { to: '/library', icon: FolderOpen, label: 'Files' },
-  { to: '/admin', icon: Shield, label: 'Admin', adminOnly: true },
+  { to: '/courses', icon: BookOpen, label: 'Courses', component: Courses },
+  { to: '/study', icon: GraduationCap, label: 'Study', component: Study },
+  { to: '/files', icon: FolderOpen, label: 'Files', component: Files },
+  { to: '/admin', icon: Shield, label: 'Admin', adminOnly: true, component: Admin },
+];
+
+const bottomLinks: NavLink[] = [
+  { to: '/subscription', icon: CreditCard, label: 'Subscription' },
+  { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
 const Sidebar = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -44,31 +48,18 @@ const Sidebar = () => {
 
   // Filter links based on user role
   const visibleLinks = navLinks.filter((link) => !link.adminOnly || user?.role === 'ADMIN');
+  const isPremium = user?.role === 'PREMIUM' || user?.role === 'ADMIN';
 
   return (
     <motion.aside
       initial={false}
-      animate={{ width: isExpanded ? 256 : 80 }}
+      animate={{ width: isExpanded ? 280 : 80 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      className="h-screen flex flex-col m-4 rounded-2xl glass-panel relative"
+      className="relative h-screen bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-white/10 flex flex-col"
     >
-      {/* Toggle Button */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="absolute -right-3 top-8 z-50 w-6 h-6 rounded-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-white/10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-lg"
-        aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
-      >
-        <motion.div
-          animate={{ rotate: isExpanded ? 180 : 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <ChevronRight className="w-3 h-3 text-slate-600 dark:text-slate-400" />
-        </motion.div>
-      </button>
-
-      {/* Logo Section */}
-      <div className="h-16 flex items-center px-4 border-b border-slate-200 dark:border-white/5">
-        <Link to="/study" className="flex items-center gap-2 overflow-hidden">
+      {/* Header */}
+      <div className="h-16 px-4 flex items-center justify-between border-b border-slate-200 dark:border-white/10">
+        <Link to="/study" className="flex items-center gap-3 overflow-hidden">
           <Logo variant="icon" animated={false} className="w-8 h-8 flex-shrink-0" />
           <AnimatePresence mode="wait">
             {isExpanded && (
@@ -91,112 +82,133 @@ const Sidebar = () => {
         </Link>
       </div>
 
-      {/* Premium Badge (if user has premium) */}
-      <AnimatePresence mode="wait">
-        {isExpanded && (user?.role === 'PREMIUM' || user?.role === 'ADMIN') && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="mx-3 mt-3 overflow-hidden"
-          >
-            <div className="p-2.5 rounded-lg bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30">
-              <div className="flex items-center gap-2">
-                <Crown className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                <span className="text-xs font-medium text-blue-900 dark:text-blue-100 whitespace-nowrap">
-                  Premium Member
+      {/* Premium Badge */}
+      {isPremium && (
+        <div className={`mx-4 mt-4 ${isExpanded ? 'px-3 py-2' : 'px-2 py-2'} rounded-xl bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/20`}>
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-violet-500 dark:text-violet-400 flex-shrink-0" />
+            {isExpanded && (
+              <span className="text-xs font-medium text-violet-600 dark:text-violet-300">Premium</span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Main Navigation */}
+      <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto scrollbar-hide">
+        {visibleLinks.map((link) => {
+          const isLinkActive = isActive(link.to);
+          const Icon = link.icon;
+
+          return (
+            <Link
+              key={link.to}
+              to={link.to}
+              onMouseEnter={() => link.component?.preload()}
+              className={`
+                relative flex items-center gap-3 px-3 py-2.5 rounded-xl
+                transition-all duration-200 group
+                ${isLinkActive
+                  ? 'text-slate-900 dark:text-white bg-slate-100 dark:bg-white/10'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5'
+                }
+              `}
+            >
+              {/* Active Indicator */}
+              {isLinkActive && (
+                <motion.div
+                  layoutId="sidebar-active"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-blue-500 to-violet-500 rounded-r-full"
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                />
+              )}
+
+              <Icon className="w-5 h-5 flex-shrink-0" />
+
+              {isExpanded && (
+                <span className="text-sm font-medium whitespace-nowrap">
+                  {link.label}
                 </span>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              )}
 
-      {/* Navigation Links */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3">
-        <ul className="space-y-1">
-          {visibleLinks.map((link) => {
-            const Icon = link.icon;
-            const active = isActive(link.to);
-
-            return (
-              <li key={link.to}>
-                <Link
-                  to={link.to}
-                  className={`
-                    flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 relative group
-                    ${
-                      active
-                        ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400 border-l-2 border-primary-500'
-                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100/50 dark:hover:bg-white/5 border-l-2 border-transparent'
-                    }
-                  `}
-                  title={!isExpanded ? link.label : undefined}
-                >
-                  <Icon
-                    className={`w-5 h-5 flex-shrink-0 ${
-                      active ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400'
-                    }`}
-                  />
-                  <AnimatePresence mode="wait">
-                    {isExpanded && (
-                      <motion.span
-                        initial={{ opacity: 0, width: 0 }}
-                        animate={{ opacity: 1, width: 'auto' }}
-                        exit={{ opacity: 0, width: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="text-sm whitespace-nowrap overflow-hidden"
-                      >
-                        {link.label}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                  
-                  {/* Tooltip for collapsed state */}
-                  {!isExpanded && (
-                    <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 dark:bg-slate-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-                      {link.label}
-                    </div>
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+              {/* Tooltip for collapsed state */}
+              {!isExpanded && (
+                <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                  {link.label}
+                </div>
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
-      {/* User Profile Pill */}
-      <div className="p-3 border-t border-slate-200 dark:border-white/5">
-        <div
-          className={`
-            flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-100 dark:bg-slate-800/50 hover:bg-slate-200 dark:hover:bg-slate-800/80 transition-all cursor-pointer
-            ${!isExpanded && 'justify-center'}
-          `}
+      {/* Bottom Section */}
+      <div className="px-3 pb-4 space-y-1 border-t border-slate-200 dark:border-white/10 pt-4">
+        {bottomLinks.map((link) => {
+          const isLinkActive = isActive(link.to);
+          const Icon = link.icon;
+
+          return (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`
+                flex items-center gap-3 px-3 py-2.5 rounded-xl
+                transition-all duration-200 group
+                ${isLinkActive
+                  ? 'text-slate-900 dark:text-white bg-slate-100 dark:bg-white/10'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5'
+                }
+              `}
+            >
+              <Icon className="w-5 h-5 flex-shrink-0" />
+              {isExpanded && (
+                <span className="text-sm font-medium whitespace-nowrap">
+                  {link.label}
+                </span>
+              )}
+
+              {/* Tooltip for collapsed state */}
+              {!isExpanded && (
+                <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                  {link.label}
+                </div>
+              )}
+            </Link>
+          );
+        })}
+
+        {/* Logout Button */}
+        <button
+          onClick={logout}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-200 group"
         >
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center flex-shrink-0">
-            <User className="w-4 h-4 text-white" />
-          </div>
-          <AnimatePresence mode="wait">
-            {isExpanded && (
-              <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.2 }}
-                className="flex flex-col overflow-hidden min-w-0"
-              >
-                <span className="text-sm font-medium text-slate-900 dark:text-white truncate">
-                  {user?.username || 'User'}
-                </span>
-                <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                  {user?.email || ''}
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+          <LogOut className="w-5 h-5 flex-shrink-0" />
+          {isExpanded && (
+            <span className="text-sm font-medium whitespace-nowrap">Log out</span>
+          )}
+
+          {/* Tooltip for collapsed state */}
+          {!isExpanded && (
+            <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 dark:bg-slate-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
+              Log out
+            </div>
+          )}
+        </button>
       </div>
+
+      {/* Collapse Toggle */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="absolute -right-3 top-20 w-6 h-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors z-50 shadow-md"
+        aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+      >
+        {isExpanded ? (
+          <ChevronLeft className="w-3.5 h-3.5" />
+        ) : (
+          <ChevronRight className="w-3.5 h-3.5" />
+        )}
+      </button>
     </motion.aside>
   );
 };

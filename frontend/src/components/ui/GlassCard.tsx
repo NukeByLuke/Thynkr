@@ -10,10 +10,10 @@ export interface GlassCardProps {
 }
 
 /**
- * GlassCard - Reusable glassmorphic card component
+ * GlassCard - Soft-Square glassmorphic card component
  * 
- * A premium glass-style container that provides consistent styling across the application.
- * Features backdrop blur, subtle borders, and optional hover effects.
+ * A premium glass-style container with soft-square (rounded-xl) design,
+ * backdrop-blur-md for glassmorphism, and high-clarity borders.
  * 
  * @param children - Content to render inside the card
  * @param className - Additional Tailwind classes to apply
@@ -28,22 +28,22 @@ export default function GlassCard({
   gradientBorder = false,
   onClick,
 }: GlassCardProps) {
-  // Base glass card styles
+  // Base glass card styles with soft-square aesthetic
   const baseStyles =
-    'rounded-2xl border border-white/10 bg-slate-900/50 backdrop-blur-sm shadow-xl';
+    'rounded-xl border border-slate-200 dark:border-slate-800/50 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md shadow-lg';
 
   // Variant-specific styles
   const variantStyles = {
     default: '',
     hover:
-      'hover:bg-slate-800/60 hover:border-white/20 hover:shadow-2xl transition-all duration-300',
+      'hover:bg-white/95 dark:hover:bg-zinc-950/95 hover:border-slate-300 dark:hover:border-slate-700/60 hover:shadow-xl transition-all duration-300',
     interactive:
-      'hover:bg-slate-800/60 hover:border-white/20 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer',
+      'hover:bg-white/95 dark:hover:bg-zinc-950/95 hover:border-slate-300 dark:hover:border-slate-700/60 hover:shadow-xl hover:scale-[1.01] transition-all duration-300 cursor-pointer',
   };
 
-  // Gradient border effect
+  // Gradient border effect with soft-square design
   const gradientBorderStyles = gradientBorder
-    ? 'relative before:absolute before:inset-0 before:rounded-2xl before:p-[1px] before:bg-gradient-to-br before:from-indigo-500/50 before:via-purple-500/50 before:to-pink-500/50 before:-z-10'
+    ? 'relative before:absolute before:inset-0 before:rounded-xl before:p-[1px] before:bg-gradient-to-br before:from-blue-500/50 before:via-violet-500/50 before:to-purple-500/50 before:-z-10'
     : '';
 
   return (

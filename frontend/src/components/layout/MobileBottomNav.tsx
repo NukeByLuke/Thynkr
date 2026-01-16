@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Home, GraduationCap, TrendingUp, Menu as MenuIcon, Trophy, Settings, User, LogOut } from 'lucide-react';
+import { GraduationCap, Menu as MenuIcon, Settings, User, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, memo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -36,10 +36,8 @@ const MobileBottomNav = memo(() => {
   };
 
   const navItems = [
-    { icon: Home, label: 'Home', path: '/' },
     { icon: GraduationCap, label: 'Study', path: '/study' },
     { icon: GraduationCap, label: 'Courses', path: '/courses' },
-    { icon: TrendingUp, label: 'Progress', path: '/progress' },
     { icon: MenuIcon, label: 'Menu', path: '#menu', action: () => setIsMenuOpen(!isMenuOpen) },
   ];
 
@@ -101,14 +99,6 @@ const MobileBottomNav = memo(() => {
                 >
                   <User className="w-5 h-5" />
                   <span className="font-medium">My Profile</span>
-                </Link>
-                <Link
-                  to="/achievements"
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-indigo-50/50 dark:hover:bg-white/5 transition-all duration-300"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <Trophy className="w-5 h-5" />
-                  <span className="font-medium">Achievements</span>
                 </Link>
                 <Link
                   to="/settings"

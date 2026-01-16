@@ -12,7 +12,9 @@ export default function ThemeToggle({ showLabel = false, size = 'md' }: ThemeTog
   const isDark = theme === 'dark';
   
   const toggleTheme = () => {
-    setThemeMode(isDark ? 'light' : 'dark');
+    // Always set to explicit mode, never back to 'system' when user clicks toggle
+    const newMode = isDark ? 'light' : 'dark';
+    setThemeMode(newMode);
   };
 
   const iconSize = size === 'sm' ? 'w-4 h-4' : 'w-5 h-5';

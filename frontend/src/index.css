@@ -20,23 +20,23 @@
     background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='rgba(255, 255, 255, 0.02)' stroke-width='1'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E");
   }
 
-  /* Premium Glass Panel - Standard */
+  /* Premium Glass Panel - Soft-Square Design */
   .glass-panel {
-    @apply backdrop-blur-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-white/10 shadow-sm rounded-2xl;
+    @apply backdrop-blur-md bg-white/90 dark:bg-zinc-950/90 border border-slate-200 dark:border-slate-800/50 shadow-lg rounded-xl;
   }
 
   /* Glass Panel with stronger blur */
   .glass-panel-strong {
-    @apply backdrop-blur-2xl bg-white/90 dark:bg-slate-900/80 border border-slate-200/50 dark:border-white/10 shadow-lg rounded-2xl;
+    @apply backdrop-blur-md bg-white/95 dark:bg-zinc-950/95 border border-slate-300 dark:border-slate-800/60 shadow-xl rounded-2xl;
   }
 
-  /* Card - Theme-aware glass card */
+  /* Card - Theme-aware glass card with soft-square aesthetic */
   .card {
-    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-slate-200/50 dark:border-white/10 rounded-xl shadow-sm;
+    @apply bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border border-slate-200 dark:border-slate-800/50 rounded-xl shadow-md;
   }
 
   .card-hover {
-    @apply card hover:border-slate-300 dark:hover:border-white/20 hover:shadow-md transition-all;
+    @apply card hover:border-slate-300 dark:hover:border-slate-700/50 hover:shadow-lg transition-all;
   }
 
   /* Typography - Softer reading experience */
@@ -218,7 +218,7 @@
   }
 
   .dark {
-    /* Dark Mode - Premium Dark Glassmorphism */
+    /* Dark Mode - Soft-Square Glassmorphism with Zinc-950 */
     --color-primary: #60A5FA;
     --color-primary-light: #93C5FD;
     --color-primary-dark: #3B82F6;
@@ -226,28 +226,28 @@
     --color-secondary-light: #C4B5FD;
     --color-accent: #06B6D4;
     
-    /* Dark backgrounds - Deep slate with grid pattern */
-    --color-bg-primary: #0a0e1a;
-    --color-bg-secondary: #0f172a;
-    --color-bg-tertiary: #1e293b;
+    /* Dark backgrounds - Deep Zinc-950 (#09090b) */
+    --color-bg-primary: #09090b;
+    --color-bg-secondary: #18181b;
+    --color-bg-tertiary: #27272a;
     
-    /* Glass panel colors - Dark mode */
-    --glass-bg: rgba(15, 23, 42, 0.6);
-    --glass-border: rgba(255, 255, 255, 0.1);
+    /* Glass panel colors - Dark mode with enhanced clarity */
+    --glass-bg: rgba(9, 9, 11, 0.9);
+    --glass-border: rgba(226, 232, 240, 0.1);
     
     /* Text - High contrast for dark mode */
     --color-text-primary: #F1F5F9;
     --color-text-secondary: #CBD5E1;
     --color-text-tertiary: #94A3B8;
     
-    /* Borders - Subtle in dark mode */
-    --color-border: rgba(255, 255, 255, 0.1);
-    --color-border-light: rgba(255, 255, 255, 0.05);
+    /* Borders - High-clarity Slate-800/White-10 */
+    --color-border: rgba(30, 41, 59, 0.5);
+    --color-border-light: rgba(255, 255, 255, 0.1);
     
     /* Enhanced shadows for depth */
-    --shadow-ambient: 0 8px 32px rgba(0, 0, 0, 0.4);
-    --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.3);
-    --shadow-card-hover: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --shadow-ambient: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-card-hover: 0 8px 32px rgba(0, 0, 0, 0.6);
     --shadow-glow: 0 0 40px rgba(139, 92, 246, 0.3);
   }
 
@@ -275,7 +275,7 @@
   }
 
   body {
-    @apply antialiased bg-slate-50 dark:bg-[#0a0e1a] text-slate-900 dark:text-slate-100;
+    @apply antialiased bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-slate-100;
     font-family: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     transition: background-color var(--transition-theme), color var(--transition-theme);
     letter-spacing: -0.005em;

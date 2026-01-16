@@ -11,6 +11,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { NavigationProvider } from './contexts/NavigationContext';
+import { LayoutProvider } from './contexts/LayoutContext';
 import ProtectedRoute from '@/features/auth/ProtectedRoute';
 import PublicLayout from './layouts/PublicLayout';
 import DashboardLayout from './layouts/DashboardLayout';
@@ -18,31 +19,11 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import PreviewGate from '@/features/courses/PreviewGate';
 import GlobalLoadingBar from '@/components/ui/GlobalLoadingBar';
 import BackgroundShapes from '@/components/ui/BackgroundShapes';
-import { lazyWithPreload } from './utils/lazyWithPreload';
-
-// Code-split page components with preloading for optimal bundle size
-const Login = lazyWithPreload(() => import('./pages/Login'));
-const Register = lazyWithPreload(() => import('./pages/Register'));
-const AuthCallback = lazyWithPreload(() => import('./pages/AuthCallback'));
-const OAuthCallback = AuthCallback; // Alias for /oauth-callback route
-const Pricing = lazyWithPreload(() => import('./pages/Pricing'));
-const Account = lazyWithPreload(() => import('./pages/Account'));
-const Admin = lazyWithPreload(() => import('./pages/Admin'));
-const Study = lazyWithPreload(() => import('./pages/Study'));
-const ImmersiveStudy = lazyWithPreload(() => import('./pages/ImmersiveStudy'));
-const Files = lazyWithPreload(() => import('./pages/Files'));
-const Settings = lazyWithPreload(() => import('./pages/SettingsPage'));
-const Courses = lazyWithPreload(() => import('./pages/CoursesUnified'));
-const MyCourseDetail = lazyWithPreload(() => import('./pages/MyCourseDetail'));
-const TutorChat = lazyWithPreload(() => import('./pages/TutorChat'));
-const StudyProgress = lazyWithPreload(() => import('./pages/StudyProgress'));
-const Achievements = lazyWithPreload(() => import('./pages/Achievements'));
-const SavedPacks = lazyWithPreload(() => import('./pages/SavedPacks'));
-const ArcadeLobby = lazyWithPreload(() => import('./pages/ArcadeLobby'));
-const GamesDashboard = lazyWithPreload(() => import('./pages/GamesDashboard'));
-const QuizGame = lazyWithPreload(() => import('./features/arcade/QuizGame'));
-const MatchingGame = lazyWithPreload(() => import('./features/arcade/MatchingGame'));
-const NotFound = lazyWithPreload(() => import('./pages/NotFound'));
+import {
+  Login, Register, AuthCallback, OAuthCallback, Pricing, Account, Admin,
+  Study, ImmersiveStudy, Files, Settings, Courses, MyCourseDetail,
+  NotFound
+} from './routes';
 
 /**
  * Custom hook to handle authentication-based redirects
@@ -158,7 +139,6 @@ function AppContent() {
               <Route path="/pricing" element={<Pricing />} />
             </Route>
 
-          {/* Protected routes with DashboardLayout */}
           <Route
             element={
               <ProtectedRoute>
@@ -168,29 +148,8 @@ function AppContent() {
           >
             <Route path="/study" element={<Study />} />
             <Route path="/files" element={<Files />} />
-            <Route path="/progress" element={<StudyProgress />} />
-            <Route path="/achievements" element={<Achievements />} />
-            <Route path="/saved-packs" element={<SavedPacks />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/account" element={<Account />} />
-
-            {/* Arcade - Available to all authenticated users */}
-            <Route path="/arcade" element={<GamesDashboard />} />
-            <Route path="/arcade/lobby" element={<ArcadeLobby />} />
-            <Route path="/arcade/play/:pinCode" element={<QuizGame />} />
-            <Route path="/arcade/solo/matching_rush" element={<MatchingGame />} />
-            <Route path="/arcade/solo/live_quiz" element={<QuizGame />} />
-            <Route path="/arcade/host/live_quiz" element={<QuizGame />} />
-
-            {/* Tutor - Premium/Admin only */}
-            <Route
-              path="/tutor"
-              element={
-                <ProtectedRoute requiredRole="PREMIUM">
-                  <TutorChat />
-                </ProtectedRoute>
-              }
-            />
 
             {/* Courses - Standard+ */}
             <Route
@@ -263,11 +222,13 @@ function App() {
     <AuthProvider>
       <NavigationProvider>
         <ThemeProvider>
-          {!gatePassed && previewPassword ? (
-            <PreviewGate onSuccess={() => setGatePassed(true)} />
-          ) : (
-            <AppContent />
-          )}
+          <LayoutProvider>
+            {!gatePassed && previewPassword ? (
+              <PreviewGate onSuccess={() => setGatePassed(true)} />
+            ) : (
+              <AppContent />
+            )}
+          </LayoutProvider>
         </ThemeProvider>
       </NavigationProvider>
     </AuthProvider>

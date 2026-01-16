@@ -8,6 +8,7 @@ import { useState, useMemo } from 'react';
 import { Search, Check, FileText, File, Image, Video, Music, Archive, BookOpen, Clock, FolderOpen } from 'lucide-react';
 import { UploadedFile } from '../types/global';
 import { clsx } from 'clsx';
+import { FileTypeBadge } from '@/lib/fileTypeUtils';
 
 // =============================================================================
 // Types
@@ -91,9 +92,12 @@ function FileItem({ file, isSelected, onToggle }: FileItemProps) {
         <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
           {file.originalName}
         </p>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          {formatDate(file.createdAt)}
-        </p>
+        <div className="flex items-center gap-2 mt-1">
+          <FileTypeBadge mimeType={file.fileType || 'text/plain'} className="text-[10px] px-1.5 py-0.5" />
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            {formatDate(file.createdAt)}
+          </span>
+        </div>
       </div>
 
       {/* Checkbox */}

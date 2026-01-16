@@ -18,7 +18,6 @@ import fastifyStatic from '@fastify/static';
 import path from 'path';
 import { config } from './config';
 import { logger } from './lib/logger';
-import { initializeGameSocket } from './services/gameSocket.service';
 // Note: Redis caching temporarily disabled for build - enable in production
 // import { initializeRedis, disconnectRedis } from './middleware/cache.middleware';
 import { compressionMiddleware } from './middleware/compression.middleware';
@@ -29,14 +28,12 @@ import adminRoutes from './routes/admin.routes';
 import stripeRoutes from './routes/stripe.routes';
 import studyRoutes from './routes/study.routes';
 import userCoursesRoutes from './routes/user-courses.routes';
-import tutorRoutes from './routes/tutor.routes';
 import progressRoutes from './routes/progress.routes';
 import courseFileAIRoutes from './routes/course-file-ai.routes';
 import studyPackRoutes from './routes/study-pack.routes';
 import ttsRoutes from './routes/tts.routes';
 import courseStudyRoutes from './routes/course-study.routes';
 import oauthRoutes from './routes/oauth.routes';
-import gamesRoutes from './routes/games.routes';
 import { errorHandler } from './middleware/error-handler';
 
 /**
@@ -153,13 +150,11 @@ async function start() {
     await server.register(stripeRoutes, { prefix: '/api/stripe' });
     await server.register(studyRoutes, { prefix: '/api/study' });
     await server.register(userCoursesRoutes, { prefix: '/api' });
-    await server.register(tutorRoutes, { prefix: '/api/tutor' });
     await server.register(progressRoutes, { prefix: '/api/progress' });
     await server.register(courseFileAIRoutes, { prefix: '/api' });
     await server.register(studyPackRoutes, { prefix: '/api' });
     await server.register(ttsRoutes, { prefix: '/api' });
     await server.register(courseStudyRoutes, { prefix: '/api' });
-    await server.register(gamesRoutes, { prefix: '/api' });
 
     // Error handler
     server.setErrorHandler(errorHandler);
@@ -168,10 +163,6 @@ async function start() {
     await server.listen({ port: config.port, host: '0.0.0.0' });
     logger.info(`Server running on http://localhost:${config.port}`);
     logger.info('Performance optimizations enabled: compression, query optimization');
-
-    // Initialize Socket.io for Thynkr Arcade
-    const httpServer = server.server;
-    initializeGameSocket(httpServer);
   } catch (err) {
     server.log.error(err);
     // await disconnectRedis(); // Clean up Redis connection

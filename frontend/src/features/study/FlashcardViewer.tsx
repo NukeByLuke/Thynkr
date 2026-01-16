@@ -21,22 +21,27 @@ interface FlashcardViewerProps {
 // Memoize slide animation variants - Optimized for performance
 const slideVariants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? 100 : -100,
+    x: direction > 0 ? '50%' : '-50%',
     opacity: 0,
+    scale: 0.95,
   }),
   center: {
+    zIndex: 1,
     x: 0,
     opacity: 1,
+    scale: 1,
   },
   exit: (direction: number) => ({
-    x: direction < 0 ? 100 : -100,
+    zIndex: 0,
+    x: direction < 0 ? '20%' : '-20%',
     opacity: 0,
+    scale: 0.95,
   }),
 };
 
 // Optimized flip transition - smooth easing instead of spring
 const flipTransition = {
-  duration: 0.4,
+  duration: 0.3, // Faster flip
   ease: 'easeInOut' as const,
 };
 

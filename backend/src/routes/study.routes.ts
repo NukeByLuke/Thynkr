@@ -10,11 +10,20 @@ import { FileProcessorService } from '../services/file-processor.service';
 import { AIService } from '../services/ai.service';
 import prisma from '../db/client';
 import fs from 'fs/promises';
+import fsSync from 'fs';
+import path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import OpenAI from 'openai';
+import { YoutubeTranscript } from 'youtube-transcript';
 import { normalizeFileForLanguage, resolveUserLanguage } from '../utils/language.utils';
 import { canUploadFile, getUserUsageStats } from '../lib/tier-limits';
 
+const execPromise = promisify(exec);
+
 const fileProcessor = new FileProcessorService();
 const aiService = new AIService();
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 /**
  * Track user study activity and update streaks
@@ -258,6 +267,250 @@ export default async function studyRoutes(server: FastifyInstance) {
       } catch (error: any) {
         server.log.error({ error }, 'File upload error');
         return reply.code(500).send({ error: 'Failed to upload files' });
+      }
+    }
+  );
+
+  // Upload YouTube link
+  server.post(
+    '/upload-youtube',
+    {
+      preHandler: [authenticate],
+    },
+    async (request: AuthenticatedRequest, reply) => {
+      try {
+        const { url, folderId } = request.body as { url: string; folderId?: string };
+        const userId = request.user!.userId;
+
+        // Validate YouTube URL
+        const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}(&[\w=]*)?$/;
+        if (!youtubeRegex.test(url)) {
+          return reply.code(400).send({ error: 'Invalid YouTube URL' });
+        }
+
+        // Check user existence
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user) {
+          return reply.code(404).send({ error: 'User not found' });
+        }
+
+        // Check upload limits (temporarily disabled for development)
+        // const uploadCheck = await canUploadFile(userId, user.role);
+        // if (!uploadCheck.allowed) {
+        //   return reply.code(403).send({
+        //     error: uploadCheck.reason,
+        //     remaining: uploadCheck.remaining,
+        //   });
+        // }
+
+        // Validate folder if provided
+        if (folderId) {
+          const folder = await prisma.folder.findFirst({
+            where: { id: folderId, userId },
+          });
+          if (!folder) {
+            return reply.code(404).send({ error: 'Folder not found' });
+          }
+        }
+
+        // Extract video ID from URL
+        let videoId = '';
+        if (url.includes('youtube.com')) {
+          const match = url.match(/[?&]v=([^&]+)/);
+          videoId = match ? match[1] : '';
+        } else if (url.includes('youtu.be')) {
+          const match = url.match(/youtu\.be\/([^?]+)/);
+          videoId = match ? match[1] : '';
+        }
+
+        // Fetch video metadata using yt-dlp (more reliable than ytdl-core)
+        let videoTitle = `YouTube Video ${videoId}`;
+        let videoDescription = '';
+        
+        try {
+          server.log.info({ videoId }, 'Fetching YouTube video metadata with yt-dlp...');
+          
+          // Use yt-dlp to extract metadata as JSON
+          const { stdout } = await execPromise(
+            `yt-dlp --dump-json --no-download "${url}"`,
+            { timeout: 30000 }
+          );
+          
+          const metadata = JSON.parse(stdout);
+          videoTitle = metadata.title || videoTitle;
+          videoDescription = metadata.description || '';
+          
+          server.log.info({ 
+            videoId, 
+            title: videoTitle,
+            descLength: videoDescription.length 
+          }, 'Video metadata fetched successfully');
+        } catch (error: any) {
+          server.log.warn({ 
+            error: error.message,
+            videoId 
+          }, 'Failed to fetch video metadata with yt-dlp, trying oEmbed fallback');
+          
+          // Fallback to oEmbed API for title only
+          try {
+            const oembedResponse = await fetch(
+              `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`
+            );
+            if (oembedResponse.ok) {
+              const oembedData = (await oembedResponse.json()) as { title?: string };
+              videoTitle = oembedData.title || videoTitle;
+            }
+          } catch (oembedError) {
+            server.log.warn({ error: oembedError, videoId }, 'oEmbed fallback also failed');
+          }
+        }
+
+        // Build content with title and description as baseline
+        let contentParts = [`Title: ${videoTitle}`];
+        
+        if (videoDescription && videoDescription.trim().length > 0) {
+          // Limit description to first 2000 characters to avoid overly long text
+          const truncatedDescription = videoDescription.length > 2000 
+            ? videoDescription.substring(0, 2000) + '...' 
+            : videoDescription;
+          contentParts.push(`\nDescription:\n${truncatedDescription}`);
+        }
+
+        // Attempt to fetch transcript
+        let hasTranscript = false;
+        let transcriptText = '';
+        
+        try {
+          server.log.info({ videoId }, 'Attempting to fetch YouTube captions...');
+          const transcriptItems = await YoutubeTranscript.fetchTranscript(videoId);
+          transcriptText = transcriptItems.map((item: any) => item.text).join(' ');
+          
+          if (transcriptText && transcriptText.trim().length > 0) {
+            hasTranscript = true;
+            server.log.info({ videoId, length: transcriptText.length }, 'Captions fetched successfully');
+          }
+        } catch (error) {
+          server.log.warn({ error, videoId }, 'No captions available, will try Whisper transcription');
+        }
+
+        // Fallback to Whisper transcription if no captions
+        if (!hasTranscript) {
+          try {
+            server.log.info({ videoId }, 'Starting Whisper transcription fallback...');
+            
+            // Create temp directory if it doesn't exist
+            const tempDir = path.join(process.cwd(), 'uploads', 'temp');
+            await fs.mkdir(tempDir, { recursive: true });
+            
+            const tempAudioPath = path.join(tempDir, `${videoId}.mp3`);
+            
+            // Download audio using yt-dlp (more reliable than ytdl-core)
+            server.log.info({ videoId, path: tempAudioPath }, 'Downloading audio with yt-dlp...');
+            
+            try {
+              // yt-dlp command: extract audio, convert to mp3, limit file size
+              const ytdlpCmd = `yt-dlp -f "bestaudio[filesize<25M]/worst" --extract-audio --audio-format mp3 --audio-quality 96K -o "${tempAudioPath}" "${url}"`;
+              
+              const { stdout, stderr } = await execPromise(ytdlpCmd, {
+                timeout: 120000 // 2 minute timeout
+              });
+              
+              server.log.info({ videoId, stdout, stderr }, 'yt-dlp download completed');
+            } catch (downloadError: any) {
+              server.log.error({ 
+                error: downloadError.message,
+                stderr: downloadError.stderr,
+                stdout: downloadError.stdout,
+                videoId 
+              }, 'yt-dlp download failed');
+              throw new Error(`Failed to download audio: ${downloadError.message}`);
+            }
+
+            // Check if file exists and get size
+            const stats = await fs.stat(tempAudioPath);
+            const fileSizeMB = stats.size / (1024 * 1024);
+            server.log.info({ videoId, fileSizeMB: fileSizeMB.toFixed(2) }, 'Audio file size');
+
+            if (fileSizeMB > 24) {
+              server.log.warn({ videoId, fileSizeMB }, 'Audio file too large for Whisper (25MB limit)');
+              throw new Error(`Audio file too large: ${fileSizeMB.toFixed(2)}MB (max 25MB)`);
+            }
+
+            if (fileSizeMB < 0.01) {
+              server.log.warn({ videoId, fileSizeMB }, 'Audio file too small, likely failed');
+              throw new Error('Audio download produced invalid file');
+            }
+
+            // Transcribe with Whisper
+            server.log.info({ videoId }, 'Transcribing with Whisper...');
+            const transcription = await openai.audio.transcriptions.create({
+              file: fsSync.createReadStream(tempAudioPath),
+              model: 'whisper-1',
+              response_format: 'text'
+            });
+
+            transcriptText = transcription as string;
+            hasTranscript = true;
+            
+            server.log.info({ 
+              videoId, 
+              transcriptLength: transcriptText.length 
+            }, 'Whisper transcription completed successfully');
+
+            // Clean up temp file
+            try {
+              await fs.unlink(tempAudioPath);
+              server.log.info({ videoId }, 'Temp audio file deleted');
+            } catch (cleanupError) {
+              server.log.warn({ 
+                error: cleanupError instanceof Error ? cleanupError.message : String(cleanupError),
+                videoId 
+              }, 'Failed to delete temp audio file');
+            }
+
+          } catch (whisperError) {
+            const errorMessage = whisperError instanceof Error ? whisperError.message : String(whisperError);
+            const errorStack = whisperError instanceof Error ? whisperError.stack : undefined;
+            server.log.error({ 
+              error: errorMessage,
+              stack: errorStack,
+              videoId 
+            }, 'Whisper transcription failed');
+            // Continue with metadata only
+          }
+        }
+
+        // Add transcript or note if unavailable
+        if (hasTranscript && transcriptText) {
+          contentParts.push(`\nTranscript:\n${transcriptText}`);
+        } else {
+          contentParts.push('\n(Transcript unavailable. Summary based on video metadata.)');
+        }
+
+        const extractedText = contentParts.join('\n');
+
+        // Create file record for YouTube link
+        const uploadedFile = await prisma.uploadedFile.create({
+          data: {
+            userId,
+            folderId: folderId || null,
+            fileName: `youtube_${videoId}.url`,
+            originalName: videoTitle,
+            fileType: 'video/youtube',
+            fileSize: 0,
+            filePath: url,
+            status: 'COMPLETED',
+            extractedText: extractedText,
+          },
+        });
+
+        // Track activity
+        await trackStudyActivity(userId, 'FILE_UPLOAD', uploadedFile.id);
+
+        return reply.code(201).send({ file: uploadedFile });
+      } catch (error: any) {
+        server.log.error({ error }, 'YouTube upload error');
+        return reply.code(500).send({ error: 'Failed to add YouTube link' });
       }
     }
   );

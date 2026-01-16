@@ -59,7 +59,7 @@ export default function PageContainer({
 }: PageContainerProps) {
   const containerClasses = `
     ${fluid ? 'w-full' : 'max-w-6xl mx-auto'}
-    ${noPadding ? '' : 'px-8 lg:px-16 py-8'}
+    ${noPadding ? '' : 'px-8 lg:px-16 py-6'}
     ${className}
   `.trim();
 
@@ -71,7 +71,7 @@ export default function PageContainer({
         transition={{ duration: 0.3, ease: 'easeOut' }}
         className={containerClasses}
       >
-        <div className="space-y-12">
+        <div className="space-y-10">
           {children}
         </div>
       </motion.div>
@@ -80,7 +80,7 @@ export default function PageContainer({
 
   return (
     <div className={containerClasses}>
-      <div className="space-y-12">
+      <div className="space-y-10">
         {children}
       </div>
     </div>

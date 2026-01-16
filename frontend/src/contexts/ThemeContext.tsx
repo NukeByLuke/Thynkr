@@ -66,12 +66,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // Apply theme to document immediately on mount and changes
   useEffect(() => {
     const root = document.documentElement;
+    const body = document.body;
 
-    // Tailwind only uses 'dark' class - add it for dark mode, remove it for light mode
+    // Remove potential conflicting classes
+    root.classList.remove('light', 'dark');
+    body.classList.remove('light', 'dark');
+
+    // Add correct class to both html and body to ensure all selectors work
     if (theme === 'dark') {
       root.classList.add('dark');
+      body.classList.add('dark');
     } else {
+      root.classList.add('light');
+      body.classList.add('light');
       root.classList.remove('dark');
+      body.classList.remove('dark');
     }
   }, [theme]);
 
@@ -94,8 +103,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const savedMode = localStorage.getItem('themeMode') as ThemeMode | null;
       if (!savedMode) {
         // First login - use user's saved preference from DB
+        // User's theme in DB is always 'light' or 'dark' (explicit preference, never 'system')
         const userTheme = user.theme as Theme;
-        setThemeModeState(userTheme);
+        setThemeModeState(userTheme as ThemeMode);
         setThemeState(userTheme);
         localStorage.setItem('themeMode', userTheme);
       }
@@ -106,13 +116,22 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     // Calculate actual theme to apply
     const newTheme = mode === 'system' ? getSystemTheme() : (mode as Theme);
 
-    // Apply immediately to DOM - Tailwind only uses 'dark' class
+    // Apply immediately to DOM to prevent flicker
     const root = document.documentElement;
+    const body = document.body;
+    
+    // Clean up
+    root.classList.remove('light', 'dark');
+    body.classList.remove('light', 'dark');
     
     if (newTheme === 'dark') {
       root.classList.add('dark');
+      body.classList.add('dark');
     } else {
+      root.classList.add('light');
+      body.classList.add('light');
       root.classList.remove('dark');
+      body.classList.remove('dark');
     }
 
     // Update state
@@ -120,8 +139,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setThemeState(newTheme);
     localStorage.setItem('themeMode', mode);
 
-    // Save to backend if authenticated
-    if (isAuthenticated) {
+    // Save to backend ONLY if explicit preference (not 'system')
+    // Backend should only store 'light' or 'dark', never 'system'
+    if (isAuthenticated && mode !== 'system') {
       api.patch('/auth/profile', { theme: newTheme }).catch(console.error);
     }
   };

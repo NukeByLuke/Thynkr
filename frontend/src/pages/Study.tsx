@@ -7,16 +7,19 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { UploadCloud, FolderOpen, FileText, Clock, ArrowRight } from 'lucide-react';
+import { UploadCloud, FolderOpen, FileText, Clock, ArrowRight, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import SummaryView from '@/features/study/SummaryView';
 import NotesView from '@/features/study/NotesView';
 import FlashcardViewer from '@/features/study/FlashcardViewer';
 import QuizPlayer from '@/features/study/QuizPlayer';
 import { useStudySession } from '@/hooks/useStudySession';
 import { FileTypeBadge } from '@/lib/fileTypeUtils';
-
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+import UploadModal from '@/components/UploadModal';
+import GenerationModal from '@/components/modals/GenerationModal';
+import api from '@/lib/api';
+import { useLayout } from '@/contexts/LayoutContext';
 
 interface UploadedFile {
   id: string;
@@ -49,6 +52,8 @@ export default function Study() {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const { setHideSidebar, setCustomHeaderContent } = useLayout();
 
   const getToken = () => localStorage.getItem('accessToken');
 
@@ -56,36 +61,25 @@ export default function Study() {
   const {
     selectedFile,
     activeTab,
-    selectedQuiz,
     selectedFlashcardSet,
-    numQuestions,
-    quizDifficulty,
     numCards,
     setSelectedFile,
     setActiveTab,
-    setSelectedQuiz,
     setSelectedFlashcardSet,
-    setNumQuestions,
-    setQuizDifficulty,
     setNumCards,
     generateSummaryMutation,
     generateNotesMutation,
-    generateQuizMutation,
     generateFlashcardsMutation,
-    submitQuizMutation,
+    generateQuizMutation,
+    selectedQuiz,
   } = useStudySession({ queryKey: ['study-files'] });
 
   // Fetch uploaded files
   const { data: filesData, isLoading } = useQuery({
     queryKey: ['study-files'],
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/study/files`, {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch files');
-      return response.json();
+      const response = await api.get('/study/files');
+      return response.data;
     },
     enabled: !!getToken(),
   });
@@ -112,6 +106,61 @@ export default function Study() {
     }
   }, [location.search, files, navigate]);
 
+  // Manage sidebar and header content based on selected file
+  useEffect(() => {
+    if (selectedFile) {
+      // Hide sidebar and show custom header with tabs
+      setHideSidebar(true);
+      setCustomHeaderContent(
+        <>
+          {/* Back Button + File Info */}
+          <button
+            onClick={() => setSelectedFile(null)}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex-shrink-0"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Back</span>
+          </button>
+          <div className="min-w-0 hidden sm:block">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+              {selectedFile.originalName}
+            </h2>
+          </div>
+          
+          {/* Tab Switcher Pills */}
+          <div className="flex items-center gap-2 ml-auto flex-shrink-0">
+            {(['summary', 'notes', 'flashcards', 'quizzes'] as TabType[]).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => {
+                  setActiveTab(tab);
+                  setSelectedFlashcardSet(null);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium capitalize transition-all duration-200 whitespace-nowrap ${
+                  activeTab === tab
+                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                {tab === 'flashcards' ? 'Cards' : tab}
+              </button>
+            ))}
+          </div>
+        </>
+      );
+    } else {
+      // Show sidebar and clear custom header
+      setHideSidebar(false);
+      setCustomHeaderContent(null);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      setHideSidebar(false);
+      setCustomHeaderContent(null);
+    };
+  }, [selectedFile, activeTab, setHideSidebar, setCustomHeaderContent, setActiveTab, setSelectedFlashcardSet]);
+
   // Upload mutation
   const uploadMutation = useMutation({
     mutationFn: async (files: FileList) => {
@@ -120,20 +169,8 @@ export default function Study() {
         formData.append('files', file);
       });
 
-      const response = await fetch(`${API_URL}/study/upload`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Upload failed');
-      }
-
-      return response.json();
+      const response = await api.post('/study/upload', formData);
+      return response.data;
     },
     onSuccess: async (data) => {
       setUploadError(null);
@@ -161,7 +198,23 @@ export default function Study() {
   };
 
   const handleQuickUpload = () => {
-    fileInputRef.current?.click();
+    setShowUploadModal(true);
+  };
+
+  const handleUploadFiles = (files: FileList) => {
+    uploadMutation.mutate(files);
+    setShowUploadModal(false);
+  };
+
+  const handleUploadYouTube = async (url: string) => {
+    setShowUploadModal(false);
+    try {
+      await api.post('/study/upload-youtube', { url });
+      await queryClient.invalidateQueries({ queryKey: ['study-files'] });
+      toast.success('YouTube video added successfully');
+    } catch (error) {
+      toast.error('Failed to add YouTube video');
+    }
   };
 
   const formatFileSize = (bytes: number) => {
@@ -294,194 +347,37 @@ export default function Study() {
         );
 
       case 'quizzes':
-        if (selectedQuiz) {
-          return (
-            <div>
-              <button onClick={() => setSelectedQuiz(null)} className="mb-4 text-indigo-600 dark:text-indigo-400 text-sm hover:underline">
-                ← Back
-              </button>
-              <QuizPlayer
-                quizId={selectedQuiz.id}
-                title={selectedQuiz.title}
-                questions={selectedQuiz.questions}
-                onSubmit={(answers) =>
-                  submitQuizMutation.mutateAsync({ quizId: selectedQuiz.id, answers })
-                }
-              />
-            </div>
-          );
-        }
-
-        if (selectedFile.quizzes && selectedFile.quizzes.length > 0) {
-          return (
-            <div className="space-y-4">
-              <h3 className="font-semibold text-slate-900 dark:text-white">Your Quizzes</h3>
-              {selectedFile.quizzes.map((quiz: { id: string; title: string; questions: any[] }) => (
-                <button
-                  key={quiz.id}
-                  onClick={() => setSelectedQuiz(quiz)}
-                  className="w-full text-left p-4 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-indigo-500 dark:hover:border-indigo-400 transition-colors"
-                >
-                  <span className="text-slate-900 dark:text-white">{quiz.title}</span>
-                  <span className="text-slate-500 dark:text-slate-400"> • {quiz.questions.length} questions</span>
-                </button>
-              ))}
-              
-              {/* Quiz Settings - Soft Square Design */}
-              <div className="pt-8 mt-8 border-t border-slate-200 dark:border-slate-700">
-                <div className="max-w-2xl mx-auto">
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 text-center">Quiz Settings</h3>
-                  <p className="text-slate-600 dark:text-slate-400 text-center mb-8">Configure your quiz preferences</p>
-
-                  {/* Difficulty Setting */}
-                  <div className="mb-8">
-                    <label className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-white mb-4">
-                      <span className="text-indigo-500">⚡</span>
-                      Difficulty Level
-                    </label>
-                    <div className="grid grid-cols-3 gap-4">
-                      {(['EASY', 'MEDIUM', 'HARD'] as const).map((level) => (
-                        <button
-                          key={level}
-                          onClick={() => setQuizDifficulty(level)}
-                          className={`relative py-4 px-5 rounded-2xl font-semibold text-base transition-all duration-200 border-2 ${
-                            quizDifficulty === level
-                              ? 'bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-500/30 scale-105'
-                              : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-indigo-300 dark:hover:border-indigo-700 hover:scale-[1.02]'
-                          }`}
-                        >
-                          {level.charAt(0) + level.slice(1).toLowerCase()}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Question Count */}
-                  <div className="mb-8">
-                    <label className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-white mb-4">
-                      <span className="text-purple-500">📝</span>
-                      Number of Questions: {numQuestions}
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="range"
-                        min="5"
-                        max="20"
-                        step="1"
-                        value={numQuestions}
-                        onChange={(e) => setNumQuestions(Number(e.target.value))}
-                        className="w-full h-3 bg-slate-200 dark:bg-slate-700 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-indigo-500 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
-                      />
-                      <div className="flex justify-between mt-2 text-sm text-slate-500 dark:text-slate-400">
-                        <span>5</span>
-                        <span>20</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Generate Button */}
-                  {!generateQuizMutation.isPending && (
-                    <button
-                      onClick={() =>
-                        generateQuizMutation.mutate({
-                          fileId: selectedFile.id,
-                          numQuestions,
-                          difficulty: quizDifficulty,
-                        })
-                      }
-                      className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-2xl font-bold text-lg transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
-                    >
-                      Generate Quiz
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {generateQuizMutation.isPending && (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                  <span className="ml-3 text-slate-600 dark:text-slate-400">Generating quiz...</span>
-                </div>
-              )}
-            </div>
-          );
-        }
-
+        // Always show QuizPlayer directly - no lists, no saving
         return (
-          <div className="text-center py-12">
-            {!generateQuizMutation.isPending && (
-              <div className="max-w-2xl mx-auto">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Quiz Settings</h3>
-                <p className="text-slate-600 dark:text-slate-400 mb-8">Configure and generate your first quiz</p>
-
-                {/* Difficulty Setting */}
-                <div className="mb-8">
-                  <label className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-white mb-4 justify-center">
-                    <span className="text-indigo-500">⚡</span>
-                    Difficulty Level
-                  </label>
-                  <div className="grid grid-cols-3 gap-4">
-                    {(['EASY', 'MEDIUM', 'HARD'] as const).map((level) => (
-                      <button
-                        key={level}
-                        onClick={() => setQuizDifficulty(level)}
-                        className={`relative py-4 px-5 rounded-2xl font-semibold text-base transition-all duration-200 border-2 ${
-                          quizDifficulty === level
-                            ? 'bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-500/30 scale-105'
-                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-indigo-300 dark:hover:border-indigo-700 hover:scale-[1.02]'
-                        }`}
-                      >
-                        {level.charAt(0) + level.slice(1).toLowerCase()}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Question Count */}
-                <div className="mb-8">
-                  <label className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-white mb-4 justify-center">
-                    <span className="text-purple-500">📝</span>
-                    Number of Questions: {numQuestions}
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="range"
-                      min="5"
-                      max="20"
-                      step="1"
-                      value={numQuestions}
-                      onChange={(e) => setNumQuestions(Number(e.target.value))}
-                      className="w-full h-3 bg-slate-200 dark:bg-slate-700 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-indigo-500 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
-                    />
-                    <div className="flex justify-between mt-2 text-sm text-slate-500 dark:text-slate-400">
-                      <span>5</span>
-                      <span>20</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Generate Button */}
-                <button
-                  onClick={() =>
-                    generateQuizMutation.mutate({
-                      fileId: selectedFile.id,
-                      numQuestions,
-                      difficulty: quizDifficulty,
-                    })
+          <div>
+            <QuizPlayer
+              quizId="temp-quiz"
+              title={selectedFile.originalName}
+              questions={selectedQuiz?.questions || []} // Use generated quiz questions
+              fileId={selectedFile.id}
+              onGenerateQuiz={(difficulty: string, numQuestions: number) => {
+                // Convert difficulty to uppercase for backend API
+                generateQuizMutation.mutate({ 
+                  fileId: selectedFile.id, 
+                  difficulty: difficulty.toUpperCase(), 
+                  numQuestions 
+                });
+              }}
+              isGenerating={generateQuizMutation.isPending}
+              onSubmit={async (answers) => {
+                // Calculate score based on answers
+                const questions = selectedQuiz?.questions || [];
+                let score = 0;
+                questions.forEach((question: any) => {
+                  if (answers[question.id] === question.correctAnswer) {
+                    score++;
                   }
-                  className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-2xl font-bold text-lg transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  Generate Your First Quiz
-                </button>
-              </div>
-            )}
-
-            {generateQuizMutation.isPending && (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                <span className="ml-3 text-slate-600 dark:text-slate-400">Generating quiz...</span>
-              </div>
-            )}
+                });
+                const total = questions.length;
+                const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
+                return { score, total, percentage };
+              }}
+            />
           </div>
         );
     }
@@ -497,71 +393,30 @@ export default function Study() {
 
   // Show full study interface if a file is selected
   if (selectedFile) {
+    // Determine which generation modal to show
+    const getActiveGenerationType = (): 'summary' | 'notes' | 'flashcards' | 'quiz' | null => {
+      if (generateSummaryMutation.isPending) return 'summary';
+      if (generateNotesMutation.isPending) return 'notes';
+      if (generateFlashcardsMutation.isPending) return 'flashcards';
+      if (generateQuizMutation.isPending) return 'quiz';
+      return null;
+    };
+
+    const activeGenerationType = getActiveGenerationType();
+
     return (
-      <div className="h-full flex flex-col overflow-hidden">
-        {/* Back Button */}
-        <div className="glass-panel-strong border-b border-slate-200/50 dark:border-white/10">
-          <div className="max-w-6xl mx-auto px-6 py-4">
-            <button
-              onClick={() => setSelectedFile(null)}
-              className="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-2"
-            >
-              ← Back to Study Center
-            </button>
-          </div>
+      <>
+        {/* Generation Modal */}
+        <GenerationModal 
+          isOpen={activeGenerationType !== null} 
+          type={activeGenerationType || 'summary'} 
+        />
+
+        {/* Main Content Area - Full Height */}
+        <div className="h-full overflow-y-auto">
+          {renderTabContent()}
         </div>
-
-        {/* Main Content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-6xl mx-auto px-6 py-8">
-            <div className="glass-panel-strong rounded-3xl shadow-xl">
-              
-              {/* File Header */}
-              <div className="p-8 border-b border-slate-200/50 dark:border-white/10">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-heading">
-                      {selectedFile.originalName}
-                    </h2>
-                    <div className="flex items-center gap-3 mt-2">
-                      <FileTypeBadge mimeType={selectedFile.fileType} />
-                      <span className="text-sm text-muted">{formatFileSize(selectedFile.fileSize)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tabs Navigation */}
-              <div className="border-b border-slate-200/50 dark:border-white/10">
-                <div className="flex space-x-6 sm:space-x-10 px-6 sm:px-8 overflow-x-auto scrollbar-hide">
-                  {(['summary', 'notes', 'flashcards', 'quizzes'] as TabType[]).map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => {
-                        setActiveTab(tab);
-                        setSelectedQuiz(null);
-                        setSelectedFlashcardSet(null);
-                      }}
-                      className={`py-4 sm:py-5 border-b-2 capitalize transition-[border-color,color,transform] duration-200 active:scale-95 whitespace-nowrap text-base sm:text-lg ${
-                        activeTab === tab
-                          ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 font-semibold'
-                          : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-300/50'
-                      }`}
-                    >
-                      {tab}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tab Content */}
-              <div className="p-8">
-                {renderTabContent()}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      </>
     );
   }
 
@@ -579,7 +434,7 @@ export default function Study() {
       />
 
       {/* Abstract Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-100 via-purple-100 to-slate-100 dark:from-slate-950 dark:via-indigo-950 dark:to-slate-950 h-56">
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-100 via-purple-100 to-slate-100 dark:from-slate-950 dark:via-indigo-950 dark:to-slate-950 h-44">
         {/* Floating Abstract Shapes */}
         <motion.div
           animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
@@ -599,10 +454,10 @@ export default function Study() {
 
         {/* Content */}
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3">
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2">
             Study Center
           </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl">
+          <p className="text-base text-slate-600 dark:text-slate-300 max-w-2xl">
             Resume where you left off or start something new
           </p>
         </div>
@@ -610,7 +465,7 @@ export default function Study() {
 
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-6xl mx-auto px-6 py-12">
+        <div className="max-w-6xl mx-auto px-6 py-8">
           
           {/* Upload Error Display */}
           {uploadError && (
@@ -620,11 +475,11 @@ export default function Study() {
           )}
 
           {/* Action Cards - Minimal */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
             {/* Card 1: Browse Library */}
             <button
               onClick={() => navigate('/files')}
-              className="group card-hover p-6 text-left transition-[border-color,transform] duration-200 active:scale-95 hover:border-slate-400 dark:hover:border-white/30"
+              className="group card-hover p-5 text-left transition-[border-color,transform] duration-200 active:scale-95 hover:border-slate-400 dark:hover:border-white/30"
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -646,7 +501,7 @@ export default function Study() {
             <button
               onClick={handleQuickUpload}
               disabled={uploadMutation.isPending}
-              className="group card-hover p-6 text-left transition-[border-color,transform] duration-200 active:scale-95 hover:border-slate-400 dark:hover:border-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group card-hover p-5 text-left transition-[border-color,transform] duration-200 active:scale-95 hover:border-slate-400 dark:hover:border-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -657,7 +512,7 @@ export default function Study() {
                     {uploadMutation.isPending ? 'Uploading...' : 'Upload Material'}
                   </h3>
                   <p className="text-sm text-body">
-                    Add new documents, PDFs, or files
+                    Upload files or add YouTube videos
                   </p>
                 </div>
                 <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-slate-700 dark:group-hover:text-white transition-colors flex-shrink-0" />
@@ -668,9 +523,9 @@ export default function Study() {
           {/* Recent Files Section */}
           {recentFiles.length > 0 && (
             <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-heading flex items-center gap-2">
-                  <Clock className="w-6 h-6" />
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-xl font-bold text-heading flex items-center gap-2">
+                  <Clock className="w-5 h-5" />
                   Jump Back In
                 </h2>
               </div>
@@ -720,6 +575,15 @@ export default function Study() {
           )}
         </div>
       </div>
+
+      {/* Upload Modal */}
+      <UploadModal
+        isOpen={showUploadModal}
+        onClose={() => setShowUploadModal(false)}
+        onUploadFiles={handleUploadFiles}
+        onUploadYouTube={handleUploadYouTube}
+        isUploading={uploadMutation.isPending}
+      />
     </div>
   );
 }

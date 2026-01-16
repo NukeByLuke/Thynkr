@@ -4,7 +4,6 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import {
   User,
-  Award,
   Moon,
   Sun,
   Globe,
@@ -81,16 +80,6 @@ export default function ProfileMenu() {
           {getUserInitial()}
         </div>
 
-        {/* Hidden on mobile, visible on desktop */}
-        <div className="hidden md:block text-left">
-          <p className="text-sm font-medium text-slate-900 dark:text-white leading-tight">
-            {getUserDisplayName()}
-          </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">
-            {getUserRole()}
-          </p>
-        </div>
-
         <ChevronDown
           className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
             isOpen ? 'rotate-180' : ''
@@ -127,15 +116,6 @@ export default function ProfileMenu() {
             >
               <User className="w-4 h-4 text-slate-500 dark:text-slate-400" />
               <span className="text-sm font-medium">My profile</span>
-            </button>
-
-            {/* Achievements */}
-            <button
-              onClick={() => handleNavigation('/achievements')}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 transition-colors text-left"
-            >
-              <Award className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-              <span className="text-sm font-medium">Achievements</span>
             </button>
 
             {/* Theme Toggle */}

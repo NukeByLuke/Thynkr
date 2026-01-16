@@ -1,0 +1,32 @@
+# Thynkr Project Instructions
+
+You are an expert full-stack developer working on "Thynkr", an AI-powered study platform.
+Always adhere to the following rules, styles, and workflows.
+
+## 1. Project Architecture & Deployment
+- **Stack**: React (Vite) + Tailwind CSS (Frontend) | Node.js + Fastify (Backend).
+- **Database**: PostgreSQL (Prisma ORM).
+- **Deployment**: We deploy to **DigitalOcean** using Docker containers.
+- **CI/CD**: Refer to `.github/workflows/deploy.yml`. When modifying build scripts or Dockerfiles, ensure compatibility with the DigitalOcean App Platform/Droplet environment defined there.
+
+## 2. Design Philosophy: "Simple & Elegant"
+- **Layout**: Minimize vertical space usage. Headers, navbars, and banners should be compact (`h-14` or `h-12` preferred over `h-16`).
+- **Whitespace**: Use whitespace effectively but do not waste screen real estate.
+- **Theme**: Use the "Aurora" theme (Slate/Zinc backgrounds, blur effects, subtle gradients).
+- **Simplicity**: Avoid cluttered UIs. Prefer clean lines and distinct actions.
+
+## 3. Component Patterns
+- **Uploads**: ALWAYS use the `UploadModal` component for file inputs. Never use a raw `<input type="file" />` directly in the page.
+    - Users must always have the choice between **"Upload File"** and **"YouTube Link"**.
+- **Buttons**: Use the shared `Button` or `IconButton` components found in `frontend/src/components/ui/`.
+- **API**: Use the configured `api` instance from `@/lib/api` which handles JWT refresh automatically.
+
+## 4. Coding Standards
+- **Package Manager**: Always use `pnpm`.
+- **Types**: Strict TypeScript. Avoid `any`.
+- **Async**: Use `async/await` and proper error handling with `try/catch`.
+- **State**: Use `TanStack Query` for server state and React Context for global UI state.
+
+## 5. Mobile Responsiveness
+- Ensure all layouts work on mobile.
+- Use `hidden md:flex` patterns to simplify views on smaller screens rather than just shrinking everything.

@@ -1,6 +1,8 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
+import { throttle } from '@/utils/throttle';
+
 interface PageHeaderProps {
   icon?: ReactNode;
   title: string;
@@ -12,9 +14,10 @@ export default function PageHeader({ icon, title, description, actions }: PageHe
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
+    const handleScroll = throttle(() => {
+      const shouldBeScrolled = window.scrollY > 10;
+      setIsScrolled((prev) => (prev !== shouldBeScrolled ? shouldBeScrolled : prev));
+    }, 50);
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -29,7 +32,7 @@ export default function PageHeader({ icon, title, description, actions }: PageHe
         isScrolled ? 'shadow-soft-md' : ''
       }`}
     >
-      <div className="flex items-center justify-between py-5 px-6 lg:px-8 border-b border-gray-100/80 dark:border-slate-700/30">
+      <div className="flex items-center justify-between py-3 px-6 lg:px-8 border-b border-gray-100/80 dark:border-slate-700/30">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           {icon && (
             <motion.div

@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Loader2,
 } from 'lucide-react';
+import { FileTypeBadge } from '@/lib/fileTypeUtils';
 
 interface CourseFile {
   id: string;
@@ -191,9 +192,12 @@ export default function FileSelectionPane({
                   >
                     {file.name}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {formatFileSize(file.fileSize)}
-                  </p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <FileTypeBadge mimeType={file.fileType} className="text-[10px] px-1.5 py-0.5" />
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {formatFileSize(file.fileSize)}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Status Badge */}
