@@ -1,7 +1,7 @@
-// import { useState } from 'react'; // Removed unused import
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import PageContainer from '@/components/layout/PageContainer';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import html2canvas from 'html2canvas';
 import {
   Trophy,
@@ -13,24 +13,25 @@ import {
   Award,
   Crown,
   Share2,
+  Lock,
   Users,
   Brain,
-  Rocket
+  Rocket,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import Button from '@/components/ui/Button'; 
+import Button from '@/components/ui/Button';
 import toast from 'react-hot-toast';
 
 // --- Types ---
-type AchievementTier = 'BRONZE' | 'SILVER' | 'GOLD' | 'PLATINUM' | 'RUBY';
+type AchievementTier = 'BRONZE' | 'SILVER' | 'GOLD' | 'PLATINUM' | 'RUBY' | 'DIAMOND';
 
 interface AchievementDefinition {
   id: string;
   name: string;
   description: string;
-  icon: string; // We'll map string names to Lucide icons
+  icon: string;
   category: 'study' | 'social' | 'skill' | 'streak' | 'content' | 'mastery';
-  xpRewards?: Record<AchievementTier, number>;
 }
 
 interface UserAchievement {
@@ -43,57 +44,56 @@ interface UserAchievement {
     required: number;
     percentage: number;
   } | null;
+  unlocked: boolean;
 }
 
 // --- Config ---
 
-const TIER_ORDER: AchievementTier[] = ['RUBY', 'PLATINUM', 'GOLD', 'SILVER', 'BRONZE'];
+const TIER_ORDER: AchievementTier[] = ['DIAMOND', 'RUBY', 'PLATINUM', 'GOLD', 'SILVER', 'BRONZE'];
 
 const TIER_CONFIG = {
   BRONZE: {
-    color: 'text-orange-700 dark:text-orange-400',
-    bg: 'bg-orange-100 dark:bg-orange-950/40',
-    border: 'border-orange-200 dark:border-orange-900',
+    border: 'border-orange-600',
+    bg: 'bg-orange-50/50',
+    text: 'text-orange-700',
     gradient: 'from-orange-400 to-amber-600',
     label: 'Bronze',
   },
   SILVER: {
-    color: 'text-slate-600 dark:text-slate-300',
-    bg: 'bg-slate-100 dark:bg-slate-800/60',
-    border: 'border-slate-200 dark:border-slate-700',
+    border: 'border-slate-400',
+    bg: 'bg-slate-50/50',
+    text: 'text-slate-600',
     gradient: 'from-slate-300 to-slate-500',
     label: 'Silver',
   },
   GOLD: {
-    color: 'text-yellow-700 dark:text-yellow-400',
-    bg: 'bg-yellow-100 dark:bg-yellow-950/40',
-    border: 'border-yellow-200 dark:border-yellow-900',
+    border: 'border-yellow-500',
+    bg: 'bg-yellow-50/50',
+    text: 'text-yellow-700',
     gradient: 'from-yellow-400 to-amber-500',
     label: 'Gold',
   },
   PLATINUM: {
-    color: 'text-cyan-700 dark:text-cyan-400',
-    bg: 'bg-cyan-100 dark:bg-cyan-950/40',
-    border: 'border-cyan-200 dark:border-cyan-900',
+    border: 'border-cyan-500',
+    bg: 'bg-cyan-50/50',
+    text: 'text-cyan-700',
     gradient: 'from-cyan-400 to-blue-500',
     label: 'Platinum',
   },
   RUBY: {
-    color: 'text-rose-700 dark:text-rose-400',
-    bg: 'bg-rose-100 dark:bg-rose-950/40',
-    border: 'border-rose-200 dark:border-rose-900',
+    border: 'border-rose-600',
+    bg: 'bg-rose-50/50',
+    text: 'text-rose-700',
     gradient: 'from-rose-500 to-red-600',
     label: 'Ruby',
   },
-};
-
-const CATEGORY_MAP: Record<string, { label: string; icon: any }> = {
-  study: { label: 'General Study', icon: BookOpen },
-  social: { label: 'Community', icon: Users },
-  skill: { label: 'Skills', icon: Brain },
-  streak: { label: 'Study Streak', icon: Flame },
-  content: { label: 'Content', icon: Zap },
-  mastery: { label: 'Mastery', icon: Crown },
+  DIAMOND: {
+    border: 'border-indigo-500',
+    bg: 'bg-indigo-50/50',
+    text: 'text-indigo-700',
+    gradient: 'from-indigo-400 to-purple-600',
+    label: 'Diamond',
+  },
 };
 
 // --- Helper Functions ---
@@ -111,6 +111,7 @@ const getIcon = (iconName: string) => {
     rocket: Rocket,
     users: Users,
     brain: Brain,
+    sparkles: Sparkles,
     'message-circle': Users,
     'file-text': BookOpen,
   };
@@ -119,118 +120,197 @@ const getIcon = (iconName: string) => {
 
 // --- Components ---
 
-const AchievementCard = ({ achievement }: { achievement: UserAchievement }) => {
+interface AchievementCardProps {
+  achievement: UserAchievement;
+}
+
+const AchievementCard = ({ achievement }: AchievementCardProps) => {
+  const [hoveredCard, setHoveredCard] = useState(false);
   const Icon = getIcon(achievement.definition.icon);
   const tier = TIER_CONFIG[achievement.currentTier];
-  const progress = achievement.progress?.percentage || 0;
+  const isLocked = !achievement.unlocked;
 
   return (
-    <div className={`flex items-center gap-4 p-4 rounded-xl border ${tier.bg} ${tier.border} transition-transform hover:scale-[1.02] duration-200`}>
-      {/* Icon with Gradient Background */}
-      <div className={`shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br ${tier.gradient} flex items-center justify-center text-white shadow-sm`}>
-        <Icon className="w-6 h-6" />
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-start mb-1">
-          <h4 className={`font-semibold text-sm truncate pr-2 ${tier.color}`}>
-            {achievement.definition.name}
-          </h4>
-          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/50 dark:bg-black/20 ${tier.color} uppercase tracking-wider`}>
-            {tier.label}
-          </span>
-        </div>
-        
-        <p className="text-xs text-slate-600 dark:text-slate-400 truncate mb-2">
-          {achievement.definition.description}
-        </p>
-
-        {/* Compact Progress Bar */}
-        <div className="w-full h-1.5 bg-white/40 dark:bg-black/10 rounded-full overflow-hidden">
-          <div 
-            className={`h-full bg-gradient-to-r ${tier.gradient}`} 
-            style={{ width: `${progress}%` }}
+    <motion.div
+      className="relative"
+      onHoverStart={() => setHoveredCard(true)}
+      onHoverEnd={() => setHoveredCard(false)}
+      whileHover={!isLocked ? { scale: 1.05 } : {}}
+      transition={{ duration: 0.2 }}
+    >
+      {/* Main Card */}
+      <div
+        className={`aspect-square rounded-xl border-2 ${
+          isLocked
+            ? 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50'
+            : `${tier.border} ${tier.bg} dark:bg-opacity-20`
+        } flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 ${
+          isLocked ? 'grayscale' : ''
+        }`}
+      >
+        {/* Shimmer effect for unlocked cards on hover */}
+        {!isLocked && hoveredCard && (
+          <motion.div
+            initial={{ x: '-100%' }}
+            animate={{ x: '200%' }}
+            transition={{ duration: 0.8, ease: 'easeInOut' }}
+            className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-12"
           />
+        )}
+
+        {/* Diamond pulse animation */}
+        {!isLocked && achievement.currentTier === 'DIAMOND' && (
+          <motion.div
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10"
+          />
+        )}
+
+        {/* Lock Icon for locked achievements */}
+        {isLocked && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Lock className="w-12 h-12 text-slate-300 dark:text-slate-600" />
+          </div>
+        )}
+
+        {/* Achievement Icon */}
+        <div
+          className={`w-16 h-16 rounded-lg bg-gradient-to-br ${tier.gradient} flex items-center justify-center text-white shadow-lg ${
+            isLocked ? 'opacity-20' : ''
+          }`}
+        >
+          <Icon className="w-8 h-8" />
         </div>
+
+        {/* Tier Badge */}
+        {!isLocked && (
+          <div className="mt-3">
+            <span
+              className={`text-[10px] font-bold px-2 py-1 rounded-full ${tier.text} bg-white/80 dark:bg-black/20 uppercase tracking-wider`}
+            >
+              {tier.label}
+            </span>
+          </div>
+        )}
       </div>
-    </div>
+
+      {/* Tooltip on Hover (Unlocked only) */}
+      <AnimatePresence>
+        {hoveredCard && !isLocked && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.2 }}
+            className="absolute z-50 bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-4 pointer-events-none"
+          >
+            <h4 className="font-semibold text-sm text-slate-900 dark:text-white mb-1">
+              {achievement.definition.name}
+            </h4>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mb-3">
+              {achievement.definition.description}
+            </p>
+            {achievement.progress && (
+              <div>
+                <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
+                  <span>Progress</span>
+                  <span>{Math.round(achievement.progress.percentage)}%</span>
+                </div>
+                <div className="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full bg-gradient-to-r ${tier.gradient} transition-all duration-300`}
+                    style={{ width: `${achievement.progress.percentage}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 
-// Hidden Component for Export
-const PlayerCardExport = ({ 
-  user, 
-  achievements 
-}: { 
-  user: any, 
-  achievements: UserAchievement[] 
-}) => {
-  // Sort by Tier (Ruby -> Bronze)
-  const sortedAchievements = [...achievements].sort((a, b) => {
-    return TIER_ORDER.indexOf(a.currentTier) - TIER_ORDER.indexOf(b.currentTier);
-  });
+// --- Hidden Export Component ---
+
+interface PlayerCardExportProps {
+  user: any;
+  achievements: UserAchievement[];
+}
+
+const PlayerCardExport = ({ user, achievements }: PlayerCardExportProps) => {
+  // Filter only unlocked achievements and sort by tier
+  const unlockedAchievements = achievements
+    .filter((a) => a.unlocked)
+    .sort((a, b) => TIER_ORDER.indexOf(a.currentTier) - TIER_ORDER.indexOf(b.currentTier));
 
   return (
-    <div 
-      id="player-card-export" 
-      className="fixed left-[-9999px] top-0 w-[800px] bg-slate-900 text-white p-8 rounded-3xl overflow-hidden font-sans"
+    <div
+      id="player-card-export"
+      className="fixed left-[-9999px] top-0 w-[900px] bg-slate-900 text-white p-10 rounded-3xl overflow-hidden font-sans"
     >
       {/* Background Ambience */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-500/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-accent-500/10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-500/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" />
 
       {/* Header */}
-      <div className="relative z-10 flex items-center gap-6 mb-8 border-b border-white/10 pb-6">
-        <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-brand-400 to-accent-600 p-[2px]">
-          <img 
-            src={user?.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.username}`} 
-            alt="Avatar" 
+      <div className="relative z-10 flex items-center gap-6 mb-10 border-b border-white/10 pb-8">
+        <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-600 p-[3px]">
+          <img
+            src={user?.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.username}`}
+            alt="Avatar"
             className="w-full h-full rounded-2xl bg-slate-800 object-cover"
           />
         </div>
-        <div>
-          <h2 className="text-3xl font-bold">{user?.username || 'Thynkr Student'}</h2>
-          <div className="flex items-center gap-3 mt-2">
-             <span className="px-3 py-1 rounded-full bg-white/10 text-sm font-medium border border-white/5">
-                Level {Math.floor((user?.xp || 0) / 1000) + 1}
-             </span>
-             <span className="text-slate-400 text-sm">
-                {achievements.length} Achievements Unlocked
-             </span>
+        <div className="flex-1">
+          <h2 className="text-4xl font-bold mb-2">{user?.username || 'Thynkr Student'}</h2>
+          <div className="flex items-center gap-4">
+            <span className="px-4 py-1.5 rounded-full bg-white/10 text-sm font-medium border border-white/5">
+              Level {Math.floor((user?.xp || 0) / 1000) + 1}
+            </span>
+            <span className="text-slate-300 text-sm">
+              {unlockedAchievements.length} Achievement{unlockedAchievements.length !== 1 ? 's' : ''} Unlocked
+            </span>
           </div>
         </div>
-        <div className="ml-auto">
-            <Trophy className="w-12 h-12 text-yellow-500" />
-        </div>
+        <Trophy className="w-16 h-16 text-yellow-400" />
       </div>
 
-      {/* Checkerboard Grid */}
+      {/* Achievement Checkerboard Grid */}
       <div className="relative z-10">
-        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Achievement Showcase</h3>
-        <div className="grid grid-cols-8 gap-3">
-          {sortedAchievements.map((achievement) => {
-             const Icon = getIcon(achievement.definition.icon);
-             const tier = TIER_CONFIG[achievement.currentTier];
-             return (
-               <div 
-                 key={achievement.id} 
-                 className={`aspect-square rounded-xl bg-gradient-to-br ${tier.gradient} flex items-center justify-center shadow-lg relative group border border-white/10`}
-               >
-                 <Icon className="w-6 h-6 text-white drop-shadow-md" />
-                 {/* Tier Indicator Dot */}
-                 <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-white/80 ring-1 ring-black/20 shadow-sm" />
-               </div>
-             );
+        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-5">
+          Achievement Showcase
+        </h3>
+        <div className="grid grid-cols-10 gap-3">
+          {unlockedAchievements.map((achievement) => {
+            const Icon = getIcon(achievement.definition.icon);
+            const tier = TIER_CONFIG[achievement.currentTier];
+            return (
+              <div
+                key={achievement.id}
+                className={`aspect-square rounded-lg bg-gradient-to-br ${tier.gradient} flex items-center justify-center shadow-xl relative group`}
+              >
+                <Icon className="w-7 h-7 text-white drop-shadow-lg" />
+                {/* Tier indicator dot */}
+                <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-white/60 ring-1 ring-black/10 shadow-sm" />
+              </div>
+            );
           })}
-          {/* Fill empty spots for visual balance if needed (minimum of 8 slots to look like a row) */}
-          {Array.from({ length: Math.max(0, 8 - (sortedAchievements.length % 8 === 0 && sortedAchievements.length > 0 ? 0 : sortedAchievements.length % 8)) }).map((_, i) => (
-             <div key={`empty-${i}`} className="aspect-square rounded-xl bg-white/5 border border-white/5" />
+          {/* Fill empty spots for visual balance */}
+          {Array.from({
+            length: Math.max(0, 10 - (unlockedAchievements.length % 10 === 0 && unlockedAchievements.length > 0 ? 0 : unlockedAchievements.length % 10)),
+          }).map((_, i) => (
+            <div
+              key={`empty-${i}`}
+              className="aspect-square rounded-lg bg-white/5 border border-white/5"
+            />
           ))}
         </div>
       </div>
 
       {/* Footer */}
-      <div className="relative z-10 mt-8 pt-4 flex justify-between items-center text-xs text-slate-500 border-t border-white/5">
+      <div className="relative z-10 mt-10 pt-6 flex justify-between items-center text-xs text-slate-500 border-t border-white/5">
         <span>Generated by Thynkr.ai</span>
         <span>{new Date().toLocaleDateString()}</span>
       </div>
@@ -242,45 +322,131 @@ const PlayerCardExport = ({
 
 export default function Achievements() {
   const { user } = useAuth();
-  
-  // Mock Data (Replace with API call)
+
+  // Fetch achievements (Replace with real API call)
   const { data: stats } = useQuery({
     queryKey: ['achievements', user?.id],
     queryFn: async () => {
-      // Keep existing mock structure for now until API is live
+      // Mock data - replace with actual API call
       return {
         xp: 12500,
-        level: 12,
         achievements: [
           {
-             id: '1', currentTier: 'GOLD', currentValue: 100, 
-             definition: { id: 'def1', name: 'Study Master', description: 'Study for 100 hours', icon: 'book', category: 'study' },
-             progress: { current: 100, required: 100, percentage: 100 }
+            id: '1',
+            currentTier: 'GOLD' as AchievementTier,
+            currentValue: 100,
+            definition: {
+              id: 'def1',
+              name: 'Study Master',
+              description: 'Study for 100 hours',
+              icon: 'book',
+              category: 'study' as const,
+            },
+            progress: { current: 100, required: 100, percentage: 100 },
+            unlocked: true,
           },
           {
-             id: '2', currentTier: 'PLATINUM', currentValue: 50, 
-             definition: { id: 'def2', name: 'Streak King', description: '30 day streak', icon: 'flame', category: 'streak' },
-             progress: { current: 30, required: 30, percentage: 100 }
+            id: '2',
+            currentTier: 'PLATINUM' as AchievementTier,
+            currentValue: 50,
+            definition: {
+              id: 'def2',
+              name: 'Streak King',
+              description: '30 day study streak',
+              icon: 'flame',
+              category: 'streak' as const,
+            },
+            progress: { current: 30, required: 30, percentage: 100 },
+            unlocked: true,
           },
           {
-             id: '3', currentTier: 'BRONZE', currentValue: 5, 
-             definition: { id: 'def3', name: 'Commenter', description: 'Post 10 comments', icon: 'message-circle', category: 'social' },
-             progress: { current: 5, required: 10, percentage: 50 }
+            id: '3',
+            currentTier: 'BRONZE' as AchievementTier,
+            currentValue: 5,
+            definition: {
+              id: 'def3',
+              name: 'Commenter',
+              description: 'Post 10 comments',
+              icon: 'message-circle',
+              category: 'social' as const,
+            },
+            progress: { current: 5, required: 10, percentage: 50 },
+            unlocked: false,
           },
           {
-            id: '4', currentTier: 'RUBY', currentValue: 1000, 
-            definition: { id: 'def4', name: 'Quiz Wizard', description: 'Score 100% on 50 quizzes', icon: 'target', category: 'mastery' },
-            progress: { current: 50, required: 50, percentage: 100 }
-         },
-         {
-          id: '5', currentTier: 'SILVER', currentValue: 1000, 
-          definition: { id: 'def5', name: 'Note Taker', description: 'Create 20 notes', icon: 'file-text', category: 'study' },
-          progress: { current: 20, required: 50, percentage: 40 }
-       },
-        ]
-      } as unknown as { xp: number; achievements: UserAchievement[] };
+            id: '4',
+            currentTier: 'DIAMOND' as AchievementTier,
+            currentValue: 1000,
+            definition: {
+              id: 'def4',
+              name: 'Quiz Wizard',
+              description: 'Score 100% on 50 quizzes',
+              icon: 'target',
+              category: 'mastery' as const,
+            },
+            progress: { current: 50, required: 50, percentage: 100 },
+            unlocked: true,
+          },
+          {
+            id: '5',
+            currentTier: 'RUBY' as AchievementTier,
+            currentValue: 1000,
+            definition: {
+              id: 'def5',
+              name: 'Knowledge Seeker',
+              description: 'Complete 25 courses',
+              icon: 'sparkles',
+              category: 'mastery' as const,
+            },
+            progress: { current: 25, required: 25, percentage: 100 },
+            unlocked: true,
+          },
+          {
+            id: '6',
+            currentTier: 'SILVER' as AchievementTier,
+            currentValue: 20,
+            definition: {
+              id: 'def6',
+              name: 'Note Taker',
+              description: 'Create 50 notes',
+              icon: 'file-text',
+              category: 'study' as const,
+            },
+            progress: { current: 20, required: 50, percentage: 40 },
+            unlocked: false,
+          },
+          {
+            id: '7',
+            currentTier: 'GOLD' as AchievementTier,
+            currentValue: 100,
+            definition: {
+              id: 'def7',
+              name: 'Social Butterfly',
+              description: 'Help 20 students',
+              icon: 'users',
+              category: 'social' as const,
+            },
+            progress: { current: 20, required: 20, percentage: 100 },
+            unlocked: true,
+          },
+          {
+            id: '8',
+            currentTier: 'PLATINUM' as AchievementTier,
+            currentValue: 500,
+            definition: {
+              id: 'def8',
+              name: 'Brain Power',
+              description: 'Earn 10,000 XP',
+              icon: 'brain',
+              category: 'skill' as const,
+            },
+            progress: { current: 10000, required: 10000, percentage: 100 },
+            unlocked: true,
+          },
+        ] as UserAchievement[],
+      };
     },
-    initialData: { xp: 0, achievements: [] } 
+    initialData: { xp: 0, achievements: [] },
   });
 
   const handleExport = async () => {
@@ -288,51 +454,36 @@ export default function Achievements() {
     if (!element) return;
 
     try {
-      toast.loading('Generating player card...', { id: 'export' });
+      toast.loading('Generating your player card...', { id: 'export' });
       const canvas = await html2canvas(element, {
         backgroundColor: '#0f172a', // Match slate-900
         scale: 2, // Retina quality
-        useCORS: true, // Allow cross-origin images (important for avatar)
+        useCORS: true,
         allowTaint: true,
       });
-      
+
       const link = document.createElement('a');
-      link.download = `thynkr-stats-${user?.username || 'user'}.png`;
+      link.download = `thynkr-achievements-${user?.username || 'user'}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
-      toast.success('Card downloaded!', { id: 'export' });
+      toast.success('Player card downloaded!', { id: 'export' });
     } catch (err) {
       console.error(err);
-      toast.error('Failed to generate card', { id: 'export' });
+      toast.error('Failed to generate player card', { id: 'export' });
     }
   };
 
-  // Group achievements
-  const groupedAchievements = stats.achievements.reduce((acc, ach) => {
-    const cat = ach.definition.category;
-    // Map to our display categories
-    let displayCat = 'General';
-    if (cat === 'streak') displayCat = 'Study Streak';
-    else if (cat === 'mastery') displayCat = 'Mastery';
-    else if (cat === 'social') displayCat = 'Community';
-    else if (CATEGORY_MAP[cat]) displayCat = CATEGORY_MAP[cat].label; // Fallback to map label
-
-    if (!acc[displayCat]) acc[displayCat] = [];
-    acc[displayCat].push(ach);
-    return acc;
-  }, {} as Record<string, UserAchievement[]>);
-
-  // Group Order
-  const groupOrder = ['Study Streak', 'Mastery', 'Community', 'General Study', 'Skills', 'Content'];
+  const unlockedCount = stats.achievements.filter((a) => a.unlocked).length;
+  const totalCount = stats.achievements.length;
 
   return (
     <PageContainer>
       <PageContainer.Header
-        subtitle="Track your progress and showcase your milestones."
+        subtitle={`${unlockedCount} of ${totalCount} achievements unlocked`}
         actions={
-          <Button onClick={handleExport} className="gap-2" variant="outline">
+          <Button onClick={handleExport} className="gap-2" variant="primary">
             <Share2 className="w-4 h-4" />
-            Share Progress
+            Share Profile
           </Button>
         }
       >
@@ -340,45 +491,24 @@ export default function Achievements() {
       </PageContainer.Header>
 
       <PageContainer.Section>
-        <div className="space-y-10">
-          {Object.entries(groupedAchievements)
-            .sort(([a], [b]) => {
-                const idxA = groupOrder.indexOf(a);
-                const idxB = groupOrder.indexOf(b);
-                return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
-            })
-            .map(([category, achievements]) => (
-            achievements.length > 0 && (
-              <motion.div 
-                key={category}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                   {/* Try to find icon for category label */}
-                   {(() => {
-                      const Entry = Object.values(CATEGORY_MAP).find(c => c.label === category);
-                      const Icon = Entry?.icon || Star;
-                      return <Icon className="w-5 h-5 text-brand-500" />;
-                   })()}
-                   {category}
-                </h3>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {achievements.map((achievement) => (
-                    <AchievementCard key={achievement.id} achievement={achievement} />
-                  ))}
-                </div>
-              </motion.div>
-            )
-          ))}
+        <div className="space-y-8">
+          {/* Achievement Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            {stats.achievements.map((achievement) => (
+              <AchievementCard key={achievement.id} achievement={achievement} />
+            ))}
+          </div>
 
+          {/* Empty State */}
           {stats.achievements.length === 0 && (
             <div className="text-center py-20 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
               <Trophy className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-slate-900 dark:text-white">No achievements yet</h3>
-              <p className="text-slate-500 dark:text-slate-400">Start studying to unlock your first achievement!</p>
+              <h3 className="text-lg font-medium text-slate-900 dark:text-white">
+                No achievements yet
+              </h3>
+              <p className="text-slate-500 dark:text-slate-400">
+                Start studying to unlock your first achievement!
+              </p>
             </div>
           )}
         </div>
