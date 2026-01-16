@@ -312,9 +312,9 @@ async function seedAchievements(users: { [key: string]: string }) {
     });
   }
 
-  // Premium user - varied with some high tiers (DIAMOND, PLATINUM, RUBY)
+  // Premium user - varied with some high tiers (RUBY, PLATINUM, GOLD)
   const premiumAchievements = [
-    { id: 'first_steps', tier: 'DIAMOND', value: 100, unlocked: true },
+    { id: 'first_steps', tier: 'RUBY', value: 100, unlocked: true },
     { id: 'scholar', tier: 'PLATINUM', value: 100, unlocked: true },
     { id: 'speed_reader', tier: 'PLATINUM', value: 100, unlocked: true },
     { id: 'quiz_master', tier: 'GOLD', value: 100, unlocked: true },
@@ -342,8 +342,8 @@ async function seedAchievements(users: { [key: string]: string }) {
 
   // Admin user - all achievements, varied tiers with many high-tier
   const adminAchievements = [
-    { id: 'first_steps', tier: 'DIAMOND', value: 100, unlocked: true },
-    { id: 'scholar', tier: 'DIAMOND', value: 100, unlocked: true },
+    { id: 'first_steps', tier: 'RUBY', value: 100, unlocked: true },
+    { id: 'scholar', tier: 'RUBY', value: 100, unlocked: true },
     { id: 'speed_reader', tier: 'RUBY', value: 100, unlocked: true },
     { id: 'quiz_master', tier: 'RUBY', value: 100, unlocked: true },
     { id: 'flash_genius', tier: 'PLATINUM', value: 100, unlocked: true },
@@ -373,7 +373,7 @@ async function seedAchievements(users: { [key: string]: string }) {
 
   logger.info('   ✓ Basic: 2 unlocked (bronze), 6 locked with varied progress');
   logger.info('   ✓ Standard: 7 unlocked (bronze/silver/gold), 3 locked');
-  logger.info('   ✓ Premium: 10 unlocked (bronze-diamond), 2 locked');
+  logger.info('   ✓ Premium: 10 unlocked (bronze-ruby), 2 locked');
   logger.info('   ✓ Admin: All 15 unlocked with high tiers');
   logger.info(`🏆 Created achievements with varied progress`);
 }
