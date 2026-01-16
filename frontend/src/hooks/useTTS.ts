@@ -205,11 +205,17 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
   };
 }
 
+export interface TTSVoiceInfo {
+  id: string;
+  name: string;
+  description: string;
+}
+
 /**
  * Hook to fetch available TTS voices
  */
 export function useTTSVoices() {
-  const [voices, setVoices] = useState<string[]>([]);
+  const [voices, setVoices] = useState<TTSVoiceInfo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -220,8 +226,15 @@ export function useTTSVoices() {
         setVoices(response.data.voices || []);
       } catch (error) {
         console.error('Failed to fetch TTS voices:', error);
-        // Fallback to default voices
-        setVoices(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']);
+        // Fallback to default voice objects
+        setVoices([
+          { id: 'alloy', name: 'Alloy', description: 'Neutral, balanced voice' },
+          { id: 'echo', name: 'Echo', description: 'Warm, conversational voice' },
+          { id: 'fable', name: 'Fable', description: 'Expressive, narrative voice' },
+          { id: 'onyx', name: 'Onyx', description: 'Deep, authoritative voice' },
+          { id: 'nova', name: 'Nova', description: 'Friendly, energetic voice' },
+          { id: 'shimmer', name: 'Shimmer', description: 'Clear, pleasant voice' },
+        ]);
       } finally {
         setIsLoading(false);
       }

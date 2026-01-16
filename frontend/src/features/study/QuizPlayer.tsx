@@ -35,8 +35,12 @@ interface QuizSettings {
 }
 
 export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, isGenerating, onSubmit }: QuizPlayerProps) {
-  // TTS hook for audio playback
-  const { isLoading: isTTSLoading, toggle: toggleTTS } = useTTS();
+  // TTS hook for audio playback - tracks which item is currently playing
+  const [playingItem, setPlayingItem] = useState<string | null>(null);
+  const { isPlaying, isLoading: isTTSLoading, toggle: toggleTTS, stop: stopTTS } = useTTS({
+    onPlayStart: () => {},
+    onPlayEnd: () => setPlayingItem(null),
+  });
   
   // Pre-test config state
   const [showSettings, setShowSettings] = useState(true);
@@ -445,20 +449,27 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                 </div>
                 {/* TTS Button for Question */}
                 <button
-            onClick={() => {
-              const cleanText = currentQuestion.question
-                .replace(/#{1,6}\s/g, '')
-                .replace(/\*\*/g, '')
-                .replace(/\*/g, '')
-                .replace(/`/g, '')
-                .trim();
-              toggleTTS(cleanText);
-            }}
+                  onClick={() => {
+                    const itemId = `question-${currentQuestion.id}`;
+                    if (playingItem === itemId && isPlaying) {
+                      stopTTS();
+                      setPlayingItem(null);
+                    } else {
+                      const cleanText = currentQuestion.question
+                        .replace(/#{1,6}\s/g, '')
+                        .replace(/\*\*/g, '')
+                        .replace(/\*/g, '')
+                        .replace(/`/g, '')
+                        .trim();
+                      setPlayingItem(itemId);
+                      toggleTTS(cleanText);
+                    }
+                  }}
                   disabled={isTTSLoading}
                   className="flex-shrink-0 p-2 text-purple-400 hover:bg-purple-500/20 rounded-lg transition-colors disabled:opacity-50"
                   title="Read question aloud"
                 >
-                  {isTTSLoading ? (
+                  {isTTSLoading && playingItem === `question-${currentQuestion.id}` ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
                     <Volume2 className="w-5 h-5" />
@@ -500,8 +511,8 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                         : 'border-zinc-700 hover:border-zinc-600 bg-zinc-900/50 text-slate-200 hover:bg-zinc-800/60 hover:shadow-lg hover:shadow-zinc-700/20'
                 } ${isSubmitted || isRevealed ? 'cursor-not-allowed' : 'cursor-pointer'}`}
               >
-                <div className="flex items-center justify-between gap-3 pointer-events-none">
-                  <div className="flex items-center gap-3 flex-1">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 flex-1 pointer-events-none">
                     {/* Keyboard Shortcut Keycap */}
                     <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-zinc-700 to-zinc-800 text-white font-bold text-sm border-2 border-zinc-600 shadow-lg group-hover:from-cyan-600 group-hover:to-blue-600 group-hover:border-cyan-500 transition-all duration-200">
                       {keyLabel}
@@ -523,6 +534,34 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                       </ReactMarkdown>
                     </div>
                   </div>
+                  {/* TTS Speaker Button for Option */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const itemId = `option-${currentQuestion.id}-${index}`;
+                      if (playingItem === itemId && isPlaying) {
+                        stopTTS();
+                        setPlayingItem(null);
+                      } else {
+                        const cleanText = option
+                          .replace(/\*\*/g, '')
+                          .replace(/\*/g, '')
+                          .replace(/`/g, '')
+                          .trim();
+                        setPlayingItem(itemId);
+                        toggleTTS(cleanText);
+                      }
+                    }}
+                    disabled={isTTSLoading}
+                    className="flex-shrink-0 p-1.5 text-slate-400 hover:text-purple-400 hover:bg-purple-500/20 rounded-md transition-colors disabled:opacity-50 pointer-events-auto"
+                    title="Read option aloud"
+                  >
+                    {isTTSLoading && playingItem === `option-${currentQuestion.id}-${index}` ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Volume2 className="w-4 h-4" />
+                    )}
+                  </button>
                   {(isRevealed || isSubmitted) && (
                     <>
                       {(isCorrect || showSubmittedState) && (

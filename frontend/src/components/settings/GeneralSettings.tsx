@@ -25,7 +25,7 @@ export default function GeneralSettings() {
   useEffect(() => {
     const loadPreferences = async () => {
       try {
-        const response = await api.get('/api/tts/preferences');
+        const response = await api.get('/tts/preferences');
         setTtsVoice(response.data.voice || 'alloy');
         setTtsSpeed(response.data.speed || 1.0);
       } catch (error) {
@@ -39,7 +39,7 @@ export default function GeneralSettings() {
   const saveTTSPreferences = async (voice: string, speed: number) => {
     setIsSavingTTS(true);
     try {
-      await api.put('/api/tts/preferences', { voice, speed });
+      await api.patch('/tts/preferences', { voice, speed });
       toast.success('Audio preferences saved!');
     } catch (error) {
       toast.error('Failed to save preferences');
@@ -67,7 +67,7 @@ export default function GeneralSettings() {
     }
 
     try {
-      const response = await api.post('/api/tts', {
+      const response = await api.post('/tts', {
         text: 'Hello! This is how I sound. I can help you study by reading summaries and quiz questions aloud.',
         voice,
         speed: ttsSpeed,
@@ -170,23 +170,23 @@ export default function GeneralSettings() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {voices.map((voice) => (
                 <button
-                  key={voice}
-                  onClick={() => handleVoiceChange(voice)}
+                  key={voice.id}
+                  onClick={() => handleVoiceChange(voice.id)}
                   disabled={isSavingTTS}
                   className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all ${
-                    ttsVoice === voice
+                    ttsVoice === voice.id
                       ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 shadow-sm'
                       : 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-white/20'
                   }`}
                 >
-                  <span className="font-medium text-sm capitalize">{voice}</span>
+                  <span className="font-medium text-sm capitalize">{voice.name}</span>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      playVoicePreview(voice);
+                      playVoicePreview(voice.id);
                     }}
                     className="p-1.5 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-md transition-colors"
-                    title="Preview voice"
+                    title={`Preview ${voice.name} - ${voice.description}`}
                   >
                     <Play className="w-4 h-4" />
                   </button>
