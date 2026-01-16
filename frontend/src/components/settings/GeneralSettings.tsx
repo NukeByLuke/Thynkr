@@ -1,137 +1,74 @@
-import { useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Moon, Sun, Monitor } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
-import Switch from '@/components/Switch';
 
 export default function GeneralSettings() {
-  const { user } = useAuth();
   const { themeMode, setThemeMode } = useTheme();
-  const [darkModeSync, setDarkModeSync] = useState(themeMode === 'system');
+  const { user } = useAuth();
+  
+  // Default to English if no language set
+  const currentLanguage = user?.preferredLanguage || 'en';
 
   return (
-    <div className="space-y-6">
-      {/* Preferences */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-        <h3 className="text-lg font-medium text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2 mb-6">
-          Preferences
-        </h3>
+    <div className="space-y-10">
+      <section>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">Appearance</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+          Customize how Thynkr looks on your device.
+        </p>
 
-        <div className="space-y-4">
-          <Switch
-            checked={darkModeSync}
-            onCheckedChange={(checked) => {
-              setDarkModeSync(checked);
-              setThemeMode(checked ? 'system' : 'light');
-            }}
-            label="Dark Mode System Sync"
-            description="Automatically match your system's theme preference"
-          />
-        </div>
-      </div>
-
-      {/* Theme Settings */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-        <h3 className="text-lg font-medium text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2 mb-6">
-          Theme Preferences
-        </h3>
-
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <button
             onClick={() => setThemeMode('light')}
-            className={`p-4 rounded-lg border-2 transition-all ${
+            className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${
               themeMode === 'light'
-                ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
-                : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
+                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 shadow-sm'
+                : 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-white/20'
             }`}
           >
-            <Sun
-              className={`w-6 h-6 mx-auto mb-2 ${
-                themeMode === 'light'
-                  ? 'text-brand-600 dark:text-brand-400'
-                  : 'text-slate-600 dark:text-slate-400'
-              }`}
-            />
-            <p
-              className={`text-sm font-medium ${
-                themeMode === 'light'
-                  ? 'text-brand-700 dark:text-brand-300'
-                  : 'text-slate-700 dark:text-slate-300'
-              }`}
-            >
-              Light
-            </p>
+            <Sun className={`w-8 h-8 mb-3 ${themeMode === 'light' ? 'fill-current' : ''}`} />
+            <span className="font-semibold text-sm">Light Mode</span>
           </button>
 
           <button
             onClick={() => setThemeMode('dark')}
-            className={`p-4 rounded-lg border-2 transition-all ${
+            className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${
               themeMode === 'dark'
-                ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
-                : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
+                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 shadow-sm'
+                : 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-white/20'
             }`}
           >
-            <Moon
-              className={`w-6 h-6 mx-auto mb-2 ${
-                themeMode === 'dark'
-                  ? 'text-brand-600 dark:text-brand-400'
-                  : 'text-slate-600 dark:text-slate-400'
-              }`}
-            />
-            <p
-              className={`text-sm font-medium ${
-                themeMode === 'dark'
-                  ? 'text-brand-700 dark:text-brand-300'
-                  : 'text-slate-700 dark:text-slate-300'
-              }`}
-            >
-              Dark
-            </p>
+             <Moon className={`w-8 h-8 mb-3 ${themeMode === 'dark' ? 'fill-current' : ''}`} />
+            <span className="font-semibold text-sm">Dark Mode</span>
           </button>
 
           <button
             onClick={() => setThemeMode('system')}
-            className={`p-4 rounded-lg border-2 transition-all ${
+            className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${
               themeMode === 'system'
-                ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
-                : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
+                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 shadow-sm'
+                : 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-white/20'
             }`}
           >
-            <Monitor
-              className={`w-6 h-6 mx-auto mb-2 ${
-                themeMode === 'system'
-                  ? 'text-brand-600 dark:text-brand-400'
-                  : 'text-slate-600 dark:text-slate-400'
-              }`}
-            />
-            <p
-              className={`text-sm font-medium ${
-                themeMode === 'system'
-                  ? 'text-brand-700 dark:text-brand-300'
-                  : 'text-slate-700 dark:text-slate-300'
-              }`}
-            >
-              System
-            </p>
+             <Monitor className={`w-8 h-8 mb-3`} />
+            <span className="font-semibold text-sm">System</span>
           </button>
         </div>
+      </section>
 
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-4">
-          {themeMode === 'system'
-            ? 'Automatically matches your operating system theme'
-            : `Theme is set to ${themeMode} mode regardless of system preference`}
+      <hr className="border-slate-200 dark:border-white/10" />
+
+      <section>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">Language</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+          Select your preferred language for the interface and study materials.
         </p>
-      </div>
-
-      {/* Language Settings */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-        <h3 className="text-lg font-medium text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2 mb-6">
-          Language Preferences
-        </h3>
-
-        <LanguageSelector value={user?.preferredLanguage || 'en'} />
-      </div>
+        
+        <div className="max-w-md">
+            <LanguageSelector value={currentLanguage} />
+        </div>
+      </section>
     </div>
   );
 }

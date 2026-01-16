@@ -1,6 +1,7 @@
 import { Bell } from 'lucide-react';
 import { useState } from 'react';
 import Switch from '@/components/Switch';
+import Button from '@/components/ui/Button';
 
 export default function NotificationSettings() {
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -9,14 +10,14 @@ export default function NotificationSettings() {
   const [chatMessages, setChatMessages] = useState(false);
 
   return (
-    <div className="space-y-6">
-      {/* Email Notifications */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-        <h3 className="text-lg font-medium text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2 mb-6">
-          Email Notifications
-        </h3>
+    <div className="space-y-10">
+      <section>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">Email Notifications</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+          Choose what you want to receive via email.
+        </p>
 
-        <div className="space-y-4">
+        <div className="space-y-6 max-w-2xl">
           <Switch
             checked={emailNotifications}
             onCheckedChange={setEmailNotifications}
@@ -45,34 +46,32 @@ export default function NotificationSettings() {
             description="Get notified about new messages in your chats"
           />
         </div>
-      </div>
+      </section>
 
-      {/* Push Notifications */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-          <Bell className="w-5 h-5" />
-          Push Notifications
-        </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
-          Manage browser and mobile notifications
+      <hr className="border-slate-200 dark:border-white/10" />
+
+      <section>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">Push Notifications</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+          Get notified directly on your device.
         </p>
 
-        <div className="text-center py-8">
-          <Bell className="w-12 h-12 mx-auto text-slate-300 dark:text-slate-600 mb-3" />
-          <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">
-            Push notifications are not enabled yet.
-          </p>
-          <button className="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
-            Enable Push Notifications
-          </button>
+        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-center">
+             <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 mb-4">
+               <Bell className="w-6 h-6" />
+             </div>
+             <h3 className="text-base font-medium text-slate-900 dark:text-white mb-1">Enable Browser Notifications</h3>
+             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 max-w-xs">
+                Stay updated even when you're not on the platform.
+             </p>
+             <Button>
+                Use Push Notifications
+            </Button>
         </div>
-      </div>
-
-      {/* Save Changes */}
-      <div className="flex justify-end">
-        <button className="px-6 py-2 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-lg hover:from-brand-700 hover:to-accent-700 transition-all font-medium">
-          Save Preferences
-        </button>
+      </section>
+      
+      <div className="flex justify-end pt-4">
+        <Button size="lg"> Save Preferences </Button>
       </div>
     </div>
   );

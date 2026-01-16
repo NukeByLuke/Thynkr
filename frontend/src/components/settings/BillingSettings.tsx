@@ -1,100 +1,99 @@
-import { CreditCard, Crown, CheckCircle } from 'lucide-react';
+import { CreditCard, ExternalLink } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import Button from '@/components/ui/Button';
 
 export default function BillingSettings() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
   const planInfo = {
-    BASIC: { name: 'Basic', color: 'slate', icon: '✨' },
-    STANDARD: { name: 'Standard', color: 'blue', icon: '⚡' },
-    PREMIUM: { name: 'Premium', color: 'brand', icon: '👑' },
+    BASIC: { name: 'Basic', description: 'Essential features for casual learners' },
+    STANDARD: { name: 'Standard', description: 'Advanced tools for serious students' },
+    PREMIUM: { name: 'Premium', description: 'Unlimited access to all AI features' },
+    ADMIN: { name: 'Admin', description: 'Full system access' },
   };
 
   const currentPlan = planInfo[user?.role as keyof typeof planInfo] || planInfo.BASIC;
 
   return (
-    <div className="space-y-6">
-      {/* Current Plan */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-          <Crown className="w-5 h-5" />
-          Current Plan
-        </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
-          Manage your subscription and billing information
+    <div className="space-y-10">
+      <section>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">Subscription</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+          Manage your subscription plan and billing details.
         </p>
 
-        <div className="bg-gradient-to-br from-brand-50 to-accent-50 dark:from-brand-900/20 dark:to-accent-900/20 rounded-lg p-6 border border-brand-200 dark:border-brand-800">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="text-3xl">{currentPlan.icon}</div>
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                  {currentPlan.name}
-                </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-300">Active Plan</p>
-              </div>
+        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-6 border border-slate-100 dark:border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                {currentPlan.name} Plan
+              </h3>
+              {user?.role !== 'BASIC' && (
+                <span className="bg-brand-100 dark:bg-brand-500/20 text-brand-700 dark:text-brand-300 text-xs px-2 py-0.5 rounded-full font-medium border border-brand-200 dark:border-brand-500/30">
+                  Active
+                </span>
+              )}
             </div>
-            <CheckCircle className="w-6 h-6 text-green-500" />
-          </div>
-
-          {user?.role === 'BASIC' && (
-            <p className="text-sm text-slate-700 dark:text-slate-300 mb-4">
-              Upgrade to unlock unlimited AI requests, private courses, and advanced features.
-            </p>
-          )}
-
-          <button
-            onClick={() => navigate('/pricing')}
-            className="w-full px-4 py-2 bg-gradient-to-r from-brand-600 to-accent-600 text-white rounded-lg hover:from-brand-700 hover:to-accent-700 transition-all font-medium"
-          >
-            {user?.role === 'BASIC' ? 'Upgrade Plan' : 'Change Plan'}
-          </button>
-        </div>
-      </div>
-
-      {/* Billing History */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-          <CreditCard className="w-5 h-5" />
-          Billing History
-        </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
-          View your past invoices and payment history
-        </p>
-
-        <div className="text-center py-12">
-          <CreditCard className="w-12 h-12 mx-auto text-slate-300 dark:text-slate-600 mb-3" />
-          <p className="text-slate-500 dark:text-slate-400 text-sm">
-            {user?.role === 'BASIC'
-              ? 'No billing history yet. Upgrade to a paid plan to see your invoices here.'
-              : 'Your billing history will appear here.'}
-          </p>
-        </div>
-      </div>
-
-      {/* Payment Method */}
-      {user?.role !== 'BASIC' && (
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-            Payment Method
-          </h2>
-          <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
-            Manage your payment methods and billing information
-          </p>
-
-          <div className="text-center py-8">
             <p className="text-slate-500 dark:text-slate-400 text-sm">
-              Payment methods are managed through Stripe. Click below to update your payment
-              information.
+              {currentPlan.description}
             </p>
-            <button className="mt-4 px-6 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-              Manage Payment Methods
-            </button>
+          </div>
+          
+          <div className="shrink-0">
+             <Button 
+                onClick={() => navigate('/pricing')}
+                variant={user?.role === 'BASIC' ? 'primary' : 'outline'}
+              >
+                {user?.role === 'BASIC' ? 'Upgrade Plan' : 'Change Plan'}
+             </Button>
           </div>
         </div>
+      </section>
+
+      {user?.role !== 'BASIC' && (
+        <>
+          <hr className="border-slate-200 dark:border-white/10" />
+          
+          <section>
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">Payment Method</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+              Update your payment card and billing address.
+            </p>
+
+            <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl">
+               <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
+                    <CreditCard className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-slate-900 dark:text-white">Stripe Secure Payment</h4>
+                    <p className="text-xs text-slate-500">Managed via Stripe Customer Portal</p>
+                  </div>
+               </div>
+               <Button variant="ghost" size="sm" onClick={() => window.open('https://billing.stripe.com/p/login/test', '_blank')} className="gap-2">
+                 Manage <ExternalLink className="w-3 h-3" />
+               </Button>
+            </div>
+          </section>
+          
+          <hr className="border-slate-200 dark:border-white/10" />
+
+          <section>
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">Billing History</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+              Download past invoices and receipts.
+            </p>
+
+            <div className="text-center py-8 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                    Invoices are emailed to you automatically. <br/>
+                    Check your email or the Stripe portal for history.
+                </p>
+            </div>
+          </section>
+        </>
       )}
     </div>
   );
