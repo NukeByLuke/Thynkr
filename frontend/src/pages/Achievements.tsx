@@ -44,6 +44,22 @@ interface AchievementDefinition {
   description: string;
   icon: string;
   category: 'study' | 'social' | 'skill' | 'streak' | 'content' | 'mastery';
+  thresholds?: {
+    BRONZE: number;
+    SILVER: number;
+    GOLD: number;
+    PLATINUM: number;
+    RUBY: number;
+    DIAMOND?: number;
+  };
+  xpRewards?: {
+    BRONZE: number;
+    SILVER: number;
+    GOLD: number;
+    PLATINUM: number;
+    RUBY: number;
+    DIAMOND?: number;
+  };
 }
 
 interface UserAchievement {
@@ -322,7 +338,7 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
     ? new Date(achievement.unlockedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : null;
 
-  // Get tier history (all tiers up to current)
+  // Get tier history (all tiers up to current) - moved inside useMemo
   const tierHistory = React.useMemo(() => {
     if (!achievement.currentTier) return [];
     const tierIndex = TIER_ORDER.indexOf(achievement.currentTier);
@@ -412,25 +428,6 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
             <Icon className="w-6 h-6 text-white drop-shadow-lg" />
           )}
         </div>
-
-        {/* Tier Progression Pips */}
-        {!isLocked && tierHistory.length > 0 && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20">
-            {tierHistory.map((historicTier) => {
-              const historicConfig = TIER_CONFIG[historicTier];
-              return (
-                <motion.div
-                  key={historicTier}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.2, delay: 0.1 }}
-                  className={`w-1.5 h-1.5 rounded-full bg-gradient-to-br ${historicConfig.gradient} shadow-sm`}
-                  title={historicConfig.label}
-                />
-              );
-            })}
-          </div>
-        )}
       </div>
 
       {/* Enhanced Tooltip with Smart Positioning */}
@@ -493,6 +490,35 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
                 <p className="text-sm text-slate-300 mb-4 leading-relaxed">
                   {achievement.definition.description}
                 </p>
+
+                {/* Tier Progression History - Only show if unlocked and has history */}
+                {!isLocked && tierHistory.length > 0 && (
+                  <div className="mb-4 pb-4 border-b border-slate-700/50">
+                    <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                      Tier Progression
+                    </h5>
+                    <div className="space-y-1.5">
+                      {tierHistory.map((historicTier) => {
+                        const historicConfig = TIER_CONFIG[historicTier];
+                        const threshold = achievement.definition.thresholds?.[historicTier];
+                        return (
+                          <div
+                            key={historicTier}
+                            className="flex items-center justify-between text-xs"
+                          >
+                            <div className="flex items-center gap-2">
+                              <div className={`w-2 h-2 rounded-full bg-gradient-to-br ${historicConfig.gradient}`} />
+                              <span className="text-slate-300">{historicConfig.label}</span>
+                            </div>
+                            <span className="text-slate-400">
+                              {threshold?.toLocaleString()} required
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
                 
                 {/* Progress section */}
                 {achievement.progress && (
