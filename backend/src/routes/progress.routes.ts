@@ -195,12 +195,21 @@ export default async function progressRoutes(server: FastifyInstance) {
           },
         });
 
-        // Calculate total XP from achievements
+        // Calculate total XP from achievements (cumulative for all tiers)
         let achievementXP = 0;
+        const tierOrder: ('BRONZE' | 'SILVER' | 'GOLD' | 'PLATINUM' | 'RUBY')[] = ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'RUBY'];
+        
         userAchievements.forEach((userAchievement) => {
           const achievement = ACHIEVEMENTS[userAchievement.achievementId];
           if (achievement && userAchievement.currentTier) {
-            achievementXP += achievement.xpRewards[userAchievement.currentTier];
+            // Calculate cumulative XP: add all tier XP from BRONZE up to current tier
+            const currentTierIndex = tierOrder.indexOf(userAchievement.currentTier as any);
+            if (currentTierIndex !== -1) {
+              for (let i = 0; i <= currentTierIndex; i++) {
+                const tier = tierOrder[i];
+                achievementXP += achievement.xpRewards[tier] || 0;
+              }
+            }
           }
         });
 

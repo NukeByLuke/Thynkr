@@ -117,38 +117,49 @@ const TIER_CONFIG = {
     gradient: 'from-yellow-500 to-amber-600',
     label: 'Gold',
   },
-  PLATINUM: {
-    // Icy cyan-blue
+  RUBY: {
+    // Ruby red/pink (renamed from PLATINUM)
+    border: 'border-pink-600/60 dark:border-pink-500/40',
+    borderHover: 'group-hover:border-pink-500/80 dark:group-hover:border-pink-400/60',
+    bg: 'bg-pink-500/5 dark:bg-transparent',
+    text: 'text-pink-700 dark:text-pink-400',
+    iconBg: 'bg-gradient-to-br from-rose-500 to-pink-600',
+    glow: 'shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40',
+    gradient: 'from-rose-500 to-pink-600',
+    label: 'Ruby',
+  },
+  DIAMOND: {
+    // Diamond cyan/blue
     border: 'border-cyan-600/60 dark:border-cyan-500/40',
     borderHover: 'group-hover:border-cyan-500/80 dark:group-hover:border-cyan-400/60',
     bg: 'bg-cyan-500/5 dark:bg-transparent',
     text: 'text-cyan-700 dark:text-cyan-400',
-    iconBg: 'bg-gradient-to-br from-cyan-500 to-blue-600',
+    iconBg: 'bg-gradient-to-br from-cyan-400 to-blue-600',
     glow: 'shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40',
-    gradient: 'from-cyan-500 to-blue-600',
+    gradient: 'from-cyan-400 to-blue-600',
+    label: 'Diamond',
+  },
+  PLATINUM: {
+    // Legacy Platinum (keeping for backwards compatibility)
+    border: 'border-slate-400/60 dark:border-slate-500/40',
+    borderHover: 'group-hover:border-slate-300/80 dark:group-hover:border-slate-400/60',
+    bg: 'bg-slate-500/5 dark:bg-transparent',
+    text: 'text-slate-700 dark:text-slate-300',
+    iconBg: 'bg-gradient-to-br from-slate-400 to-slate-600',
+    glow: 'shadow-lg shadow-slate-400/20 hover:shadow-slate-400/40',
+    gradient: 'from-slate-400 to-slate-600',
     label: 'Platinum',
   },
-  RUBY: {
-    // Deep rose-red
-    border: 'border-rose-600/60 dark:border-rose-500/40',
-    borderHover: 'group-hover:border-rose-500/80 dark:group-hover:border-rose-400/60',
-    bg: 'bg-rose-500/5 dark:bg-transparent',
-    text: 'text-rose-700 dark:text-rose-400',
-    iconBg: 'bg-gradient-to-br from-rose-500 to-red-700',
-    glow: 'shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40',
-    gradient: 'from-rose-500 to-red-700',
-    label: 'Ruby',
-  },
-  DIAMOND: {
-    // Premium violet-indigo
-    border: 'border-indigo-600/60 dark:border-indigo-500/40',
-    borderHover: 'group-hover:border-indigo-500/80 dark:group-hover:border-indigo-400/60',
-    bg: 'bg-indigo-500/5 dark:bg-transparent',
-    text: 'text-indigo-700 dark:text-indigo-400',
-    iconBg: 'bg-gradient-to-br from-indigo-500 to-violet-700',
-    glow: 'shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40',
-    gradient: 'from-indigo-500 to-violet-700',
-    label: 'Diamond',
+  MASTERY: {
+    // Special Mastery tier - violet/lavender
+    border: 'border-violet-600/60 dark:border-violet-500/40',
+    borderHover: 'group-hover:border-violet-500/80 dark:group-hover:border-violet-400/60',
+    bg: 'bg-violet-500/5 dark:bg-transparent',
+    text: 'text-violet-700 dark:text-violet-400',
+    iconBg: 'bg-gradient-to-br from-violet-500 to-purple-700',
+    glow: 'shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50',
+    gradient: 'from-violet-500 to-purple-700',
+    label: 'Mastery',
   },
 };
 
@@ -275,13 +286,13 @@ const LevelBanner = ({ level, currentXp, xpForNextLevel, totalXp }: LevelBannerP
             <div>
               <h3 className="text-2xl font-bold text-white">Level {level}</h3>
               <p className="text-slate-400 text-sm">
-                {currentXp.toLocaleString()} / {xpForNextLevel.toLocaleString()} XP
+                {Math.floor(currentXp).toLocaleString()} / {Math.floor(xpForNextLevel).toLocaleString()} XP
               </p>
             </div>
             <div className="text-right">
               <div className="text-sm text-slate-400">Total XP Earned</div>
               <div className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
-                {totalXp.toLocaleString()}
+                {Math.floor(totalXp).toLocaleString()}
               </div>
             </div>
           </div>
@@ -313,7 +324,7 @@ const LevelBanner = ({ level, currentXp, xpForNextLevel, totalXp }: LevelBannerP
           <div className="flex items-center gap-2 text-xs text-slate-400">
             <Zap className="w-3 h-3 text-yellow-400" />
             <span>
-              {(xpForNextLevel - currentXp).toLocaleString()} XP until Level {level + 1}
+              {Math.floor(xpForNextLevel - currentXp).toLocaleString()} XP until Level {level + 1}
             </span>
           </div>
         </div>
@@ -428,6 +439,25 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
             <Icon className="w-6 h-6 text-white drop-shadow-lg" />
           )}
         </div>
+
+        {/* Progress Pips */}
+        {!isLocked && tierHistory.length > 0 && (
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20">
+            {tierHistory.map((historicTier) => {
+              const historicConfig = TIER_CONFIG[historicTier];
+              return (
+                <motion.div
+                  key={historicTier}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.2, delay: 0.05 }}
+                  className={`w-1.5 h-1.5 rounded-full bg-gradient-to-br ${historicConfig.gradient} shadow-sm ring-1 ring-white/20`}
+                  title={historicConfig.label}
+                />
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Enhanced Tooltip with Smart Positioning */}
@@ -511,7 +541,7 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
                               <span className="text-slate-300">{historicConfig.label}</span>
                             </div>
                             <span className="text-slate-400">
-                              {threshold?.toLocaleString()} required
+                              {threshold ? Math.floor(threshold).toLocaleString() : '0'} required
                             </span>
                           </div>
                         );
@@ -549,7 +579,7 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
                     </div>
                     {achievement.progress.current !== undefined && achievement.progress.required && (
                       <div className="text-xs text-slate-400 text-center pt-1">
-                        {achievement.progress.current.toLocaleString()} / {achievement.progress.required.toLocaleString()}
+                        {Math.floor(achievement.progress.current).toLocaleString()} / {Math.floor(achievement.progress.required).toLocaleString()}
                       </div>
                     )}
                   </div>
