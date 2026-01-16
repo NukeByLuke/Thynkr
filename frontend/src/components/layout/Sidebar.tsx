@@ -108,21 +108,14 @@ const Sidebar = () => {
                 relative flex items-center gap-3 px-3 py-2.5 rounded-xl
                 transition-all duration-200 group
                 ${isLinkActive
-                  ? 'text-blue-600 dark:text-blue-400 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-500/10 dark:to-indigo-500/10 shadow-sm font-semibold'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5'
+                  ? 'text-blue-400 dark:text-blue-300 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 backdrop-blur-sm border border-blue-500/20 shadow-lg shadow-blue-500/10 font-semibold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 hover:scale-[1.02]'
                 }
               `}
             >
-              {/* Active Indicator */}
-              {isLinkActive && (
-                <motion.div
-                  layoutId="sidebar-active"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-r-full shadow-lg shadow-blue-500/50"
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                />
-              )}
-
-              <Icon className="w-5 h-5 flex-shrink-0" />
+              <Icon className={`w-5 h-5 flex-shrink-0 transition-all ${
+                isLinkActive ? 'drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]' : ''
+              }`} />
 
               {isExpanded && (
                 <span className="text-sm font-medium whitespace-nowrap">
@@ -174,12 +167,14 @@ const Sidebar = () => {
                 flex items-center gap-3 px-3 py-2.5 rounded-xl
                 transition-all duration-200 group
                 ${isLinkActive
-                  ? 'text-blue-600 dark:text-blue-400 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-500/10 dark:to-indigo-500/10 shadow-sm font-semibold'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5'
+                  ? 'text-blue-400 dark:text-blue-300 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 backdrop-blur-sm border border-blue-500/20 shadow-lg shadow-blue-500/10 font-semibold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 hover:scale-[1.02]'
                 }
               `}
             >
-              <Icon className="w-5 h-5 flex-shrink-0" />
+              <Icon className={`w-5 h-5 flex-shrink-0 transition-all ${
+                isLinkActive ? 'drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]' : ''
+              }`} />
               {isExpanded && (
                 <span className="text-sm font-medium whitespace-nowrap">
                   {link.label}

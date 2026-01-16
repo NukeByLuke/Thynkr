@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import {
   Info,
   TrendingUp,
@@ -62,39 +63,42 @@ export const StatCard = ({
   tooltip: string;
   gradient: string;
 }) => {
+  // Extract gradient colors for icon styling
+  const iconGradient = gradient.replace('bg-gradient-to-br', 'bg-gradient-to-br');
+  
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl p-6 ${gradient} text-white hover:-translate-y-1 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)] transition-all`}
+      className="relative overflow-hidden rounded-2xl p-6 bg-zinc-900/60 dark:bg-zinc-950/60 backdrop-blur-md border border-white/10 hover:-translate-y-1 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.3)] hover:border-white/20 transition-all"
     >
-      <div className="absolute inset-0 opacity-10">
+      <div className="absolute inset-0 opacity-5">
         <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/20 -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-white/20 translate-y-1/2 -translate-x-1/2" />
       </div>
 
       <div className="relative">
         <div className="flex items-start justify-between mb-4">
-          <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm">
-            <Icon className="w-6 h-6" />
+          <div className={`p-3 rounded-xl ${iconGradient}`}>
+            <Icon className="w-6 h-6 text-white" />
           </div>
           <Tooltip content={tooltip}>
-            <Info className="w-4 h-4 opacity-70 cursor-help hover:opacity-100 transition-opacity" />
+            <Info className="w-4 h-4 text-slate-400 cursor-help hover:text-slate-300 transition-colors" />
           </Tooltip>
         </div>
 
         <div className="space-y-1">
-          <p className="text-sm font-medium opacity-80">{title}</p>
-          <p className="text-3xl font-bold tracking-tight">{value}</p>
+          <p className="text-sm font-medium text-slate-400">{title}</p>
+          <p className="text-3xl font-bold tracking-tight text-white">{value}</p>
         </div>
 
         {trend && trendValue && (
-          <div className="flex items-center gap-1 mt-3 text-sm">
+          <div className="flex items-center gap-1 mt-3 text-sm text-slate-400">
             {trend === 'up' ? (
-              <TrendingUp className="w-4 h-4" />
+              <TrendingUp className="w-4 h-4 text-green-400" />
             ) : trend === 'down' ? (
-              <TrendingDown className="w-4 h-4" />
+              <TrendingDown className="w-4 h-4 text-red-400" />
             ) : null}
-            <span className="font-medium">{trendValue}</span>
-            <span className="opacity-70">vs last period</span>
+            <span className="font-medium text-white">{trendValue}</span>
+            <span>vs last period</span>
           </div>
         )}
       </div>
@@ -176,17 +180,19 @@ export const TabButton = ({
   label: string;
   onClick: () => void;
 }) => (
-  <button
+  <motion.button
     onClick={onClick}
-    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    className={`relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
       active
-        ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-md'
-        : 'text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'
+        ? 'bg-gradient-to-r from-blue-500/10 to-indigo-500/10 text-white border border-blue-500/30 shadow-lg shadow-blue-500/20'
+        : 'text-slate-400 hover:bg-white/5 hover:text-white hover:border hover:border-white/10'
     }`}
   >
-    <Icon className="w-4 h-4" />
+    <Icon className={`w-4 h-4 ${active ? 'drop-shadow-[0_0_6px_rgba(59,130,246,0.5)]' : ''}`} />
     {label}
-  </button>
+  </motion.button>
 );
 
 // Date Filter Component

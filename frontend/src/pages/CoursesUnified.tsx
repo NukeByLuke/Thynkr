@@ -42,21 +42,6 @@ const CATEGORIES = [
   { value: 'OTHER', label: 'Other' },
 ];
 
-// Category gradient colors
-const CATEGORY_GRADIENTS: Record<string, string> = {
-  MATHEMATICS: 'from-blue-500 to-indigo-600',
-  SCIENCE: 'from-emerald-500 to-teal-600',
-  TECHNOLOGY: 'from-violet-500 to-purple-600',
-  ENGINEERING: 'from-orange-500 to-red-600',
-  LANGUAGES: 'from-pink-500 to-rose-600',
-  HUMANITIES: 'from-amber-500 to-yellow-600',
-  BUSINESS: 'from-slate-500 to-gray-600',
-  ARTS: 'from-fuchsia-500 to-pink-600',
-  HEALTH: 'from-green-500 to-emerald-600',
-  LAW: 'from-indigo-500 to-blue-600',
-  OTHER: 'from-gray-500 to-slate-600',
-};
-
 type TabType = 'browse' | 'my-courses';
 
 interface Course {
@@ -421,10 +406,10 @@ export default function CoursesUnified() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="group cursor-pointer"
+                        className="group cursor-pointer bg-zinc-900/40 dark:bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl p-3 hover:-translate-y-1 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] hover:border-blue-500/30 transition-all duration-300"
                       >
                         {/* Cover Image with Hover Play Button */}
-                        <div className="relative aspect-video rounded-xl overflow-hidden mb-4">
+                        <div className="relative aspect-video rounded-2xl overflow-hidden mb-4 border border-white/10 shadow-lg">
                           <Link to={`/courses/${course.id}`} className="block h-full">
                             {course.coverImage ? (
                               <img
@@ -434,10 +419,9 @@ export default function CoursesUnified() {
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               />
                             ) : (
-                              <div
-                                className={`w-full h-full bg-gradient-to-br ${CATEGORY_GRADIENTS[course.category] || CATEGORY_GRADIENTS.OTHER} flex items-center justify-center`}
-                              >
-                                <BookOpen className="h-16 w-16 text-white/60" />
+                              <div className="w-full h-full bg-gradient-to-br from-zinc-900/80 via-zinc-900/60 to-zinc-900/80 backdrop-blur-xl flex items-center justify-center relative">
+                                <div className="absolute inset-0 bg-gradient-to-br from-blue-900/10 to-purple-900/10" />
+                                <BookOpen className="h-16 w-16 text-slate-400/60 relative z-10" />
                               </div>
                             )}
                             
@@ -503,25 +487,26 @@ export default function CoursesUnified() {
                         </div>
 
                         {/* Content Below Image */}
-                        <Link to={`/courses/${course.id}`} className="block">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xs text-slate-500 uppercase tracking-wide">
+                        <Link to={`/courses/${course.id}`} className="block space-y-2">
+                          <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-2">
+                            {course.title}
+                          </h3>
+                          
+                          {course.description && (
+                            <p className="text-sm text-slate-400 line-clamp-2">
+                              {course.description}
+                            </p>
+                          )}
+                          
+                          <div className="flex items-center gap-3 text-xs">
+                            <span className="px-2 py-1 bg-white/5 rounded-lg border border-white/10 text-slate-400">
                               {CATEGORIES.find((c) => c.value === course.category)?.label ||
                                 course.category.replace('_', ' ')}
                             </span>
-                            <span className="text-xs text-slate-600">•</span>
-                            <span className="text-xs text-slate-500">
+                            <span className="text-slate-500">
                               {course.filesCount} {course.filesCount === 1 ? 'file' : 'files'}
                             </span>
                           </div>
-
-                          <h3 className="text-base font-semibold text-white mb-1 line-clamp-2 group-hover:text-slate-300 transition-colors">
-                            {course.title}
-                          </h3>
-
-                          <p className="text-sm text-slate-500 truncate">
-                            {course.creator.name}
-                          </p>
                         </Link>
                       </motion.div>
                     ))}

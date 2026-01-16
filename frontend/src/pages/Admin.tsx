@@ -133,19 +133,19 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen ">
-      {/* Header with Gradient */}
-      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
-        <div className="max-w-6xl mx-auto px-8 lg:px-16 py-8">
+      {/* Header with Glass */}
+      <div className="max-w-6xl mx-auto px-8 lg:px-16 py-8">
+        <div className="bg-zinc-900/40 dark:bg-zinc-950/40 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-lg">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-white">Admin Dashboard</h1>
-              <p className="text-blue-100 mt-1">Manage your platform and monitor activity</p>
+              <p className="text-slate-400 mt-1">Manage your platform and monitor activity</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-8 lg:px-16 -mt-6">
+      <div className="max-w-6xl mx-auto px-8 lg:px-16 mt-8">
         {/* Stat Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatCard
@@ -187,8 +187,8 @@ export default function Admin() {
         </div>
 
         {/* Tabs Navigation */}
-        <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-2xl p-1.5 mb-6 overflow-x-auto shadow-sm">
-          <div className="flex gap-1 min-w-max">
+        <div className="bg-zinc-900/40 dark:bg-zinc-950/40 backdrop-blur-md border border-white/10 rounded-2xl p-1.5 mb-6 overflow-x-auto shadow-lg">
+          <div className="flex gap-1 min-w-max relative">
             <TabButton
               active={activeTab === 'users'}
               icon={Users}
@@ -223,7 +223,7 @@ export default function Admin() {
         </div>
 
         {/* Tab Content */}
-        <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-zinc-900/40 dark:bg-zinc-950/40 backdrop-blur-md border border-white/10 rounded-2xl shadow-lg overflow-hidden">
           <Suspense
             fallback={
               <div className="flex items-center justify-center py-20">
