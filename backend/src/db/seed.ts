@@ -262,24 +262,6 @@ Upgrade to Premium to unlock Thynkr's most powerful features.
 async function seedAchievements(users: { [key: string]: string }) {
   logger.info('🏆 Seeding user achievements...');
 
-  const achievementIds = [
-    'first_steps',
-    'scholar',
-    'speed_reader',
-    'quiz_master',
-    'flash_genius',
-    'night_owl',
-    'early_bird',
-    'streak_master',
-    'consistent',
-    'social_learner',
-    'course_creator',
-    'tutor_enthusiast',
-    'knowledge_sharer',
-    'perfectionist',
-    'explorer',
-  ];
-
   // Basic user - some locked (null unlockedAt), mostly bronze
   const basicAchievements = [
     { id: 'first_steps', tier: 'BRONZE', value: 100, unlocked: true },
@@ -299,7 +281,7 @@ async function seedAchievements(users: { [key: string]: string }) {
         achievementId: ach.id,
         currentTier: ach.tier as any,
         currentValue: ach.value,
-        unlockedAt: ach.unlocked ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000) : null,
+        unlockedAt: ach.unlocked ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000) : new Date(),
       },
     });
   }
@@ -325,7 +307,7 @@ async function seedAchievements(users: { [key: string]: string }) {
         achievementId: ach.id,
         currentTier: ach.tier as any,
         currentValue: ach.value,
-        unlockedAt: ach.unlocked ? new Date(Date.now() - Math.random() * 14 * 24 * 60 * 60 * 1000) : null,
+        unlockedAt: ach.unlocked ? new Date(Date.now() - Math.random() * 14 * 24 * 60 * 60 * 1000) : new Date(),
       },
     });
   }
@@ -353,7 +335,7 @@ async function seedAchievements(users: { [key: string]: string }) {
         achievementId: ach.id,
         currentTier: ach.tier as any,
         currentValue: ach.value,
-        unlockedAt: ach.unlocked ? new Date(Date.now() - Math.random() * 21 * 24 * 60 * 60 * 1000) : null,
+        unlockedAt: ach.unlocked ? new Date(Date.now() - Math.random() * 21 * 24 * 60 * 60 * 1000) : new Date(),
       },
     });
   }
@@ -384,7 +366,7 @@ async function seedAchievements(users: { [key: string]: string }) {
         achievementId: ach.id,
         currentTier: ach.tier as any,
         currentValue: ach.value,
-        unlockedAt: ach.unlocked ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000) : null,
+        unlockedAt: ach.unlocked ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000) : new Date(),
       },
     });
   }

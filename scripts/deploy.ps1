@@ -283,4 +283,37 @@ Write-Info "Your application is running at: https://thynkr.ca"
 Write-Info "To view logs, SSH to the server and run:"
 Write-Host "  docker compose -f docker-compose.prod.yml logs -f" -ForegroundColor Gray
 
+# Test Account Credentials
+Write-Host "`n=========================================" -ForegroundColor Cyan
+Write-Host " TEST ACCOUNT CREDENTIALS" -ForegroundColor Cyan
+Write-Host "=========================================`n" -ForegroundColor Cyan
+
+Write-Host "Password for all accounts: " -NoNewline -ForegroundColor White
+Write-Host "Password123!" -ForegroundColor Yellow
+
+Write-Host "`nTest Accounts:" -ForegroundColor White
+Write-Host "  1. Basic Account" -ForegroundColor Gray
+Write-Host "     Email:    " -NoNewline -ForegroundColor Gray
+Write-Host "basic@thynkr.ca" -ForegroundColor Cyan
+Write-Host "     Role:     BASIC" -ForegroundColor Gray
+
+Write-Host "`n  2. Standard Account" -ForegroundColor Gray
+Write-Host "     Email:    " -NoNewline -ForegroundColor Gray
+Write-Host "standard@thynkr.ca" -ForegroundColor Cyan
+Write-Host "     Role:     STANDARD" -ForegroundColor Gray
+
+Write-Host "`n  3. Premium Account" -ForegroundColor Gray
+Write-Host "     Email:    " -NoNewline -ForegroundColor Gray
+Write-Host "premium@thynkr.ca" -ForegroundColor Cyan
+Write-Host "     Role:     PREMIUM" -ForegroundColor Gray
+Write-Host "     Features: Full course access, 5 sample courses" -ForegroundColor DarkGray
+
+Write-Host "`n  4. Admin Account" -ForegroundColor Gray
+Write-Host "     Email:    " -NoNewline -ForegroundColor Gray
+Write-Host "admin@thynkr.ca" -ForegroundColor Cyan
+Write-Host "     Role:     ADMIN" -ForegroundColor Gray
+Write-Host "     Features: Full admin dashboard access" -ForegroundColor DarkGray
+
+Write-Host "`n=========================================" -ForegroundColor Cyan
+
 Set-Location $PROJECT_ROOT
