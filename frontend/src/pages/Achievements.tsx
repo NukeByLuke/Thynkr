@@ -132,7 +132,7 @@ interface AchievementCardProps {
 const AchievementCard = ({ achievement }: AchievementCardProps) => {
   const [hoveredCard, setHoveredCard] = useState(false);
   const Icon = getIcon(achievement.definition.icon);
-  const tier = TIER_CONFIG[achievement.currentTier];
+  const tier = achievement.currentTier ? TIER_CONFIG[achievement.currentTier] : TIER_CONFIG.BRONZE;
   const isLocked = !achievement.unlocked;
 
   return (
@@ -290,7 +290,7 @@ const PlayerCardExport = ({ user, achievements }: PlayerCardExportProps) => {
         <div className="grid grid-cols-10 gap-3">
           {unlockedAchievements.map((achievement) => {
             const Icon = getIcon(achievement.definition.icon);
-            const tier = TIER_CONFIG[achievement.currentTier];
+            const tier = achievement.currentTier ? TIER_CONFIG[achievement.currentTier] : TIER_CONFIG.BRONZE;
             return (
               <div
                 key={achievement.id}
