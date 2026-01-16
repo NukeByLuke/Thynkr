@@ -490,7 +490,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                 disabled={isSubmitted || isRevealed}
                 whileHover={!isSubmitted && !isRevealed ? { scale: 1.02, y: -4 } : {}}
                 whileTap={!isSubmitted && !isRevealed ? { scale: 0.98 } : {}}
-                className={`group relative w-full text-left p-4 rounded-2xl border-2 transition-all duration-200 text-base backdrop-blur-xl ${
+                className={`group relative w-full text-left p-4 rounded-2xl border-2 transition-all duration-200 text-base backdrop-blur-xl cursor-pointer ${
                   showSubmittedState || isCorrect
                     ? 'border-green-500 bg-green-500/20 text-white shadow-2xl shadow-green-500/30'
                     : showSubmittedWrong || isWrong
@@ -500,7 +500,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                         : 'border-zinc-700 hover:border-zinc-600 bg-zinc-900/50 text-slate-200 hover:bg-zinc-800/60 hover:shadow-lg hover:shadow-zinc-700/20'
                 } ${isSubmitted || isRevealed ? 'cursor-not-allowed' : 'cursor-pointer'}`}
               >
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-3 pointer-events-none">
                   <div className="flex items-center gap-3 flex-1">
                     {/* Keyboard Shortcut Keycap */}
                     <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-zinc-700 to-zinc-800 text-white font-bold text-sm border-2 border-zinc-600 shadow-lg group-hover:from-cyan-600 group-hover:to-blue-600 group-hover:border-cyan-500 transition-all duration-200">

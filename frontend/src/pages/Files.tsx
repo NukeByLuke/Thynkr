@@ -60,6 +60,10 @@ export default function Files() {
     id: string;
     name: string;
   } | null>(null);
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [isDragging, setIsDragging] = useState(false);
+  const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
 
   const getToken = () => localStorage.getItem('accessToken');
 
@@ -139,6 +143,50 @@ export default function Files() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['study-files'] });
       toast.success('File deleted');
+    },
+  });
+
+  // Mass delete mutation
+  const massDeleteMutation = useMutation({
+    mutationFn: async (items: { type: 'folder' | 'file'; id: string }[]) => {
+      const promises = items.map((item) => {
+        const url = item.type === 'folder' 
+          ? `${API_URL}/study/folders/${item.id}`
+          : `${API_URL}/study/files/${item.id}`;
+        return fetch(url, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${getToken()}` },
+        });
+      });
+      await Promise.all(promises);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['folders'] });
+      queryClient.invalidateQueries({ queryKey: ['study-files'] });
+      setSelectedItems(new Set());
+      toast.success('Items deleted successfully');
+    },
+  });
+
+  // Create folder mutation
+  const createFolderMutation = useMutation({
+    mutationFn: async (name: string) => {
+      const response = await fetch(`${API_URL}/study/folders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ name, parentId: currentFolderId }),
+      });
+      if (!response.ok) throw new Error('Failed to create folder');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['folders'] });
+      setShowCreateFolderModal(false);
+      setNewFolderName('');
+      toast.success('Folder created successfully');
     },
   });
 
@@ -260,6 +308,71 @@ export default function Files() {
     navigate(`/study?file=${fileId}`);
   };
 
+  // Drag and Drop handlers
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.currentTarget === e.target) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      uploadMutation.mutate(files);
+    }
+  };
+
+  // Selection handlers
+  const toggleSelection = (id: string) => {
+    const newSelection = new Set(selectedItems);
+    if (newSelection.has(id)) {
+      newSelection.delete(id);
+    } else {
+      newSelection.add(id);
+    }
+    setSelectedItems(newSelection);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedItems.size === filteredFiles.length + filteredFolders.length) {
+      setSelectedItems(new Set());
+    } else {
+      const allIds = new Set([
+        ...filteredFolders.map(f => `folder-${f.id}`),
+        ...filteredFiles.map(f => `file-${f.id}`)
+      ]);
+      setSelectedItems(allIds);
+    }
+  };
+
+  const handleMassDelete = () => {
+    const itemsToDelete = Array.from(selectedItems).map(id => {
+      const [type, itemId] = id.split('-');
+      return { type: type as 'folder' | 'file', id: itemId };
+    });
+
+    if (confirm(`Are you sure you want to delete ${itemsToDelete.length} item(s)?`)) {
+      massDeleteMutation.mutate(itemsToDelete);
+    }
+  };
+
   const isLoading = loadingFolders || loadingFiles;
 
   return (
@@ -271,12 +384,26 @@ export default function Files() {
 
       <div
         onClick={() => setContextMenu(null)}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         className="min-h-screen bg-slate-50 dark:bg-slate-950 relative overflow-hidden"
         style={{
           backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(148 163 184 / 0.15) 1px, transparent 0)',
           backgroundSize: '40px 40px',
         }}
       >
+        {/* Drag and Drop Overlay */}
+        {isDragging && (
+          <div className="fixed inset-0 bg-blue-500/20 backdrop-blur-sm z-40 flex items-center justify-center">
+            <div className="bg-white dark:bg-slate-900 border-4 border-dashed border-blue-500 rounded-3xl p-12 text-center">
+              <Upload className="w-20 h-20 text-blue-500 mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Drop files here</h3>
+              <p className="text-slate-600 dark:text-slate-400">Release to upload</p>
+            </div>
+          </div>
+        )}
         {/* Main Container */}
         <div className="max-w-7xl mx-auto p-6 space-y-8">
           {/* Header */}
@@ -316,12 +443,56 @@ export default function Files() {
             </div>
           </div>
 
+          {/* Selection Toolbar */}
+          <AnimatePresence>
+            {selectedItems.size > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="fixed top-20 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-4 rounded-full shadow-2xl z-30 flex items-center gap-4"
+              >
+                <span className="font-semibold">{selectedItems.size} selected</span>
+                <div className="w-px h-6 bg-white/20 dark:bg-slate-900/20" />
+                <button
+                  onClick={handleSelectAll}
+                  className="text-sm hover:text-blue-300 dark:hover:text-blue-600 transition-colors"
+                >
+                  {selectedItems.size === filteredFiles.length + filteredFolders.length ? 'Deselect All' : 'Select All'}
+                </button>
+                <button
+                  onClick={handleMassDelete}
+                  disabled={massDeleteMutation.isPending}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Delete</span>
+                </button>
+                <button
+                  onClick={() => setSelectedItems(new Set())}
+                  className="text-sm hover:text-blue-300 dark:hover:text-blue-600 transition-colors"
+                >
+                  Clear
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Folders Grid */}
-          {filteredFolders.length > 0 && (
-            <div className="min-h-[200px]">
-              <h2 className="text-sm uppercase text-slate-500 font-semibold mb-4 tracking-wider">
+          <div className="min-h-[200px]">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm uppercase text-slate-500 font-semibold tracking-wider">
                 Folders
               </h2>
+              <button
+                onClick={() => setShowCreateFolderModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition-colors text-sm font-medium"
+              >
+                <Folder className="w-4 h-4" />
+                <span>New Folder</span>
+              </button>
+            </div>
+            {filteredFolders.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 <AnimatePresence>
                   {filteredFolders.map((folder, index) => (
@@ -343,14 +514,22 @@ export default function Files() {
                   ))}
                 </AnimatePresence>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Files List - Modern Table Design */}
           {(isLoading || filteredFiles.length > 0) && (
             <div className="bg-white dark:bg-slate-900/60 backdrop-blur-md border-2 border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden min-h-[400px] shadow-lg">
               {/* Table Header - Sticky */}
-              <div className="grid grid-cols-[auto_1fr_auto_auto_auto_auto] gap-6 px-6 py-4 border-b-2 border-slate-200 dark:border-white/10 text-xs uppercase tracking-wider font-semibold text-slate-700 dark:text-slate-400 sticky top-0 bg-slate-50 dark:bg-slate-900/95 backdrop-blur-md z-10">
+              <div className="grid grid-cols-[auto_auto_1fr_auto_auto_auto_auto] gap-6 px-6 py-4 border-b-2 border-slate-200 dark:border-white/10 text-xs uppercase tracking-wider font-semibold text-slate-700 dark:text-slate-400 sticky top-0 bg-slate-50 dark:bg-slate-900/95 backdrop-blur-md z-10">
+                <div className="w-5">
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.size > 0 && selectedItems.size === filteredFiles.length}
+                    onChange={handleSelectAll}
+                    className="w-5 h-5 rounded border-2 border-slate-300 dark:border-slate-600 checked:bg-blue-600 checked:border-blue-600 cursor-pointer"
+                  />
+                </div>
                 <div className="w-5"></div>
                 <div>Name</div>
                 <div>Type</div>
@@ -378,6 +557,7 @@ export default function Files() {
                   <AnimatePresence>
                     {filteredFiles.map((file, index) => {
                       const { icon: FileIcon, color: iconColor } = getFileIcon(file.fileType, file.originalName);
+                      const isSelected = selectedItems.has(`file-${file.id}`);
                       
                       return (
                         <motion.div
@@ -388,8 +568,19 @@ export default function Files() {
                           transition={{ delay: index * 0.02, duration: 0.15 }}
                           onDoubleClick={() => handleFileDoubleClick(file.id)}
                           onContextMenu={(e) => handleContextMenu(e, 'file', file.id, file.originalName)}
-                          className="group grid grid-cols-[auto_1fr_auto_auto_auto_auto] gap-6 items-center px-6 py-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-all duration-150 cursor-pointer min-h-[64px] will-change-transform active:scale-[0.99] border-b border-slate-100 dark:border-white/5 last:border-0"
+                          className={`group grid grid-cols-[auto_auto_1fr_auto_auto_auto_auto] gap-6 items-center px-6 py-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-all duration-150 cursor-pointer min-h-[64px] will-change-transform active:scale-[0.99] border-b border-slate-100 dark:border-white/5 last:border-0 ${isSelected ? 'bg-blue-50 dark:bg-blue-500/10' : ''}`}
                         >
+                          {/* Checkbox */}
+                          <div className="flex items-center justify-center">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleSelection(`file-${file.id}`)}
+                              className="w-5 h-5 rounded border-2 border-slate-300 dark:border-slate-600 checked:bg-blue-600 checked:border-blue-600 cursor-pointer"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+
                           {/* Icon */}
                           <div className="flex items-center justify-center">
                             <FileIcon className={`w-5 h-5 ${iconColor}`} />
@@ -522,6 +713,57 @@ export default function Files() {
                   className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed font-medium active:scale-95 shadow-sm"
                 >
                   {renameMutation.isPending ? 'Saving...' : 'Save'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Create Folder Modal */}
+        {showCreateFolderModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4"
+            >
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">
+                Create New Folder
+              </h3>
+              <input
+                type="text"
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                placeholder="Folder name"
+                className="w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-4"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newFolderName.trim()) {
+                    createFolderMutation.mutate(newFolderName.trim());
+                  }
+                }}
+              />
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => {
+                    setShowCreateFolderModal(false);
+                    setNewFolderName('');
+                  }}
+                  className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors duration-150 active:scale-95"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    if (newFolderName.trim()) {
+                      createFolderMutation.mutate(newFolderName.trim());
+                    }
+                  }}
+                  disabled={!newFolderName.trim() || createFolderMutation.isPending}
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed font-medium active:scale-95 shadow-sm"
+                >
+                  {createFolderMutation.isPending ? 'Creating...' : 'Create'}
                 </button>
               </div>
             </motion.div>
