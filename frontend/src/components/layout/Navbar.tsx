@@ -56,7 +56,7 @@ const Navbar = memo(() => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden md:flex items-center space-x-2">
             {/* Main Navigation Links */}
             <NavLink
               to="/"

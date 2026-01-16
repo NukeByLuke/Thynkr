@@ -22,7 +22,7 @@ import BackgroundShapes from '@/components/ui/BackgroundShapes';
 import {
   Login, Register, AuthCallback, OAuthCallback, Pricing, Account, Admin,
   Study, ImmersiveStudy, Files, Settings, Courses, MyCourseDetail,
-  NotFound
+  Achievements, NotFound
 } from './routes';
 
 /**
@@ -150,6 +150,7 @@ function AppContent() {
             <Route path="/files" element={<Files />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/achievements" element={<Achievements />} />
 
             {/* Courses - Standard+ */}
             <Route

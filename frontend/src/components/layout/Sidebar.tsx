@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Logo from '@/components/Logo';
-import { Courses, Study, Files, Pricing } from '@/routes';
+import { Courses, Study, ImmersiveStudy, Files, Pricing } from '@/routes';
 
 interface NavLink {
   to: string;
@@ -26,7 +26,7 @@ interface NavLink {
 
 const navLinks: NavLink[] = [
   { to: '/study', icon: Home, label: 'Home', component: Study },
-  { to: '/immersive-study', icon: GraduationCap, label: 'Study', component: Study },
+  { to: '/immersive-study', icon: GraduationCap, label: 'Study', component: ImmersiveStudy },
   { to: '/courses', icon: BookOpen, label: 'Courses', component: Courses },
   { to: '/files', icon: FolderOpen, label: 'Files', component: Files },
   { to: '/pricing', icon: CreditCard, label: 'Pricing', component: Pricing },
