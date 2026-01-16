@@ -340,6 +340,7 @@ interface AchievementCardProps {
 const AchievementCard = ({ achievement }: AchievementCardProps) => {
   const [showTooltip, setShowTooltip] = React.useState(false);
   const [tooltipPosition, setTooltipPosition] = React.useState<'top' | 'bottom'>('top');
+  const [selectedTierIndex, setSelectedTierIndex] = React.useState(0);
   const cardRef = React.useRef<HTMLDivElement>(null);
   
   const Icon = getIcon(achievement.definition.icon);
@@ -356,14 +357,14 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
     return TIER_ORDER.slice(0, tierIndex + 1).reverse();
   }, [achievement.currentTier]);
 
-  // Smart tooltip positioning with better edge detection
+  // Smart tooltip positioning and reset selected tier
   React.useEffect(() => {
     if (showTooltip && cardRef.current) {
       const rect = cardRef.current.getBoundingClientRect();
-      const tooltipHeight = 450; // Estimated tooltip height
+      const tooltipHeight = 350; // Estimated tooltip height (reduced)
       const spaceAbove = rect.top;
       const spaceBelow = window.innerHeight - rect.bottom;
-      const margin = 16; // Minimum margin from screen edge
+      const margin = 16;
       
       // Prefer showing above unless there's significantly more space below
       if (spaceAbove < tooltipHeight + margin && spaceBelow > spaceAbove + 100) {
@@ -371,6 +372,9 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
       } else {
         setTooltipPosition('top');
       }
+      
+      // Reset to first tier when tooltip opens
+      setSelectedTierIndex(0);
     }
   }, [showTooltip]);
 
@@ -453,70 +457,32 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
             <Icon className="w-6 h-6 text-white drop-shadow-lg" />
           )}
         </div>
-
-        {/* Progress Pips */}
-        {!isLocked && tierHistory.length > 0 && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20">
-            {tierHistory.map((historicTier) => {
-              const historicConfig = TIER_CONFIG[historicTier];
-              return (
-                <motion.div
-                  key={historicTier}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.2, delay: 0.05 }}
-                  className={`w-1.5 h-1.5 rounded-full bg-gradient-to-br ${historicConfig.gradient} shadow-sm ring-1 ring-white/20`}
-                  title={historicConfig.label}
-                />
-              );
-            })}
-          </div>
-        )}
       </div>
 
-      {/* Enhanced Tooltip with Smart Positioning */}
+      {/* Simplified Tooltip with Tier-Specific Colors */}
       {showTooltip && (
         <motion.div
-          initial={{ opacity: 0, y: tooltipPosition === 'top' ? 10 : -10, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: tooltipPosition === 'top' ? 10 : -10, scale: 0.95 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
+          initial={{ opacity: 0, y: tooltipPosition === 'top' ? 10 : -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.15, ease: 'easeOut' }}
           className={`absolute ${
-            tooltipPosition === 'top' ? 'bottom-full mb-3' : 'top-full mt-3'
-          } left-1/2 -translate-x-1/2 w-80 pointer-events-none z-[100]`}
+            tooltipPosition === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
+          } left-1/2 -translate-x-1/2 w-72 pointer-events-auto z-[100]`}
         >
           <div className="relative">
-            {/* Tooltip arrow with aurora gradient border */}
+            {/* Tooltip arrow with tier-specific color */}
             <div 
               className={`absolute ${
-                tooltipPosition === 'top' ? '-bottom-2' : '-top-2'
-              } left-1/2 -translate-x-1/2 w-4 h-4 ${
+                tooltipPosition === 'top' ? '-bottom-1.5' : '-top-1.5'
+              } left-1/2 -translate-x-1/2 w-3 h-3 ${
                 tooltipPosition === 'top' ? 'rotate-45' : '-rotate-45'
-              }`}
-            >
-              {/* Aurora gradient border effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-60 rounded-sm" />
-              <div className="absolute inset-[1px] bg-slate-900 dark:bg-slate-800 rounded-sm" />
-            </div>
+              } bg-gradient-to-br ${tier.gradient}`}
+            />
             
-            {/* Tooltip content with enhanced Aurora border */}
-            <div className="relative rounded-2xl shadow-[0_20px_70px_-10px_rgba(0,0,0,0.8)] overflow-hidden">
-              {/* Aurora gradient border - animated shimmer */}
-              <motion.div 
-                className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-70"
-                animate={{ 
-                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-                }}
-                transition={{ 
-                  duration: 3, 
-                  repeat: Infinity, 
-                  ease: 'linear' 
-                }}
-                style={{ backgroundSize: '200% 200%' }}
-              />
-              
-              {/* Content background with enhanced blur */}
-              <div className="relative m-[2.5px] bg-slate-900/98 dark:bg-slate-800/98 backdrop-blur-2xl rounded-2xl p-6 shadow-inner">
+            {/* Tooltip content with tier-specific border */}
+            <div className={`relative rounded-xl shadow-2xl overflow-hidden border-2 ${tier.border}`}>
+              {/* Content background */}
+              <div className="relative bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-xl p-4">
                 {/* Tier badge and title */}
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex-1">
@@ -546,32 +512,63 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
                   {achievement.definition.description}
                 </p>
 
-                {/* Tier Progression History - Only show if unlocked and has history */}
+                {/* Interactive Tier Viewer - Only show if unlocked and has history */}
                 {!isLocked && tierHistory.length > 0 && (
                   <div className="mb-4 pb-4 border-b border-slate-700/50">
-                    <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                      Tier Progression
-                    </h5>
-                    <div className="space-y-1.5">
-                      {tierHistory.map((historicTier) => {
-                        const historicConfig = TIER_CONFIG[historicTier];
-                        const threshold = achievement.definition.thresholds?.[historicTier];
-                        return (
-                          <div
-                            key={historicTier}
-                            className="flex items-center justify-between text-xs"
-                          >
-                            <div className="flex items-center gap-2">
-                              <div className={`w-2 h-2 rounded-full bg-gradient-to-br ${historicConfig.gradient}`} />
-                              <span className="text-slate-300">{historicConfig.label}</span>
-                            </div>
-                            <span className="text-slate-400">
-                              {threshold ? Math.floor(threshold).toLocaleString() : '0'} required
+                    <div className="flex items-center justify-between mb-2">
+                      <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        Tier History ({selectedTierIndex + 1}/{tierHistory.length})
+                      </h5>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedTierIndex((prev) => Math.max(0, prev - 1));
+                          }}
+                          disabled={selectedTierIndex === 0}
+                          className="px-2 py-0.5 text-xs bg-slate-700/50 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed rounded transition-colors"
+                        >
+                          ←
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedTierIndex((prev) => Math.min(tierHistory.length - 1, prev + 1));
+                          }}
+                          disabled={selectedTierIndex === tierHistory.length - 1}
+                          className="px-2 py-0.5 text-xs bg-slate-700/50 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed rounded transition-colors"
+                        >
+                          →
+                        </button>
+                      </div>
+                    </div>
+                    {(() => {
+                      const displayTier = tierHistory[selectedTierIndex];
+                      const displayConfig = TIER_CONFIG[displayTier];
+                      const threshold = achievement.definition.thresholds?.[displayTier];
+                      const xpReward = achievement.definition.xpRewards?.[displayTier];
+                      return (
+                        <motion.div
+                          key={displayTier}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className={`p-3 rounded-lg bg-gradient-to-br ${displayConfig.gradient} bg-opacity-10 border ${displayConfig.border}`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className={`text-sm font-bold ${displayConfig.text}`}>
+                              {displayConfig.label} Tier
+                            </span>
+                            <span className="text-xs text-white bg-black/20 px-2 py-0.5 rounded-full">
+                              +{xpReward ? Math.floor(xpReward).toLocaleString() : '0'} XP
                             </span>
                           </div>
-                        );
-                      })}
-                    </div>
+                          <div className="text-xs text-slate-300">
+                            Required: {threshold ? Math.floor(threshold).toLocaleString() : '0'}
+                          </div>
+                        </motion.div>
+                      );
+                    })()}
                   </div>
                 )}
                 

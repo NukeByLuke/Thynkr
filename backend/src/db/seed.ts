@@ -303,7 +303,7 @@ async function seedAchievements(users: { [key: string]: string }) {
       userId: users['basic'],
       name: 'Basic',
       // Basic: Random value between 0 and Bronze threshold (most achievements locked)
-      getValueRange: (achievement: AchievementDefinition) => ({
+      getValueRange: (achievement: AchievementDefinition, _index?: number) => ({
         min: 0,
         max: Math.max(0, achievement.thresholds.BRONZE - 1),
       }),
@@ -313,7 +313,7 @@ async function seedAchievements(users: { [key: string]: string }) {
       userId: users['standard'],
       name: 'Standard',
       // Standard: Random value between Bronze and Gold thresholds
-      getValueRange: (achievement: AchievementDefinition) => ({
+      getValueRange: (achievement: AchievementDefinition, _index?: number) => ({
         min: achievement.thresholds.BRONZE,
         max: achievement.thresholds.GOLD,
       }),
@@ -322,18 +322,35 @@ async function seedAchievements(users: { [key: string]: string }) {
       username: 'premium',
       userId: users['premium'],
       name: 'Premium',
-      // Premium: Random value between Gold and Platinum
-      getValueRange: (achievement: AchievementDefinition) => ({
-        min: achievement.thresholds.GOLD,
-        max: achievement.thresholds.PLATINUM,
-      }),
+      // Premium: Diverse tiers - cycle through all tiers for variety
+      getValueRange: (achievement: AchievementDefinition, index: number = 0) => {
+        const tierCycle = index % 5; // Cycle through 5 tiers
+        if (tierCycle === 0) {
+          // Bronze tier
+          return { min: achievement.thresholds.BRONZE, max: achievement.thresholds.BRONZE + 5 };
+        } else if (tierCycle === 1) {
+          // Silver tier
+          return { min: achievement.thresholds.SILVER, max: achievement.thresholds.SILVER + 5 };
+        } else if (tierCycle === 2) {
+          // Gold tier
+          return { min: achievement.thresholds.GOLD, max: achievement.thresholds.GOLD + 5 };
+        } else if (tierCycle === 3) {
+          // Ruby tier
+          return { min: achievement.thresholds.RUBY, max: achievement.thresholds.RUBY + 5 };
+        } else {
+          // Diamond tier (if exists, otherwise max out Ruby)
+          return achievement.thresholds.DIAMOND
+            ? { min: achievement.thresholds.DIAMOND, max: achievement.thresholds.DIAMOND + 5 }
+            : { min: achievement.thresholds.RUBY + 10, max: achievement.thresholds.RUBY + 20 };
+        }
+      },
     },
     {
       username: 'admin',
       userId: users['admin'],
       name: 'Admin',
       // Admin: Value > Ruby threshold (Maxed out)
-      getValueRange: (achievement: AchievementDefinition) => ({
+      getValueRange: (achievement: AchievementDefinition, _index?: number) => ({
         min: achievement.thresholds.RUBY,
         max: achievement.thresholds.RUBY + 100, // Slightly over to show mastery
       }),
@@ -349,9 +366,11 @@ async function seedAchievements(users: { [key: string]: string }) {
     let lockedCount = 0;
 
     // Iterate through all achievements
-    for (const [achievementKey, achievement] of Object.entries(ACHIEVEMENTS)) {
-      // Get the value range for this user persona
-      const { min, max } = persona.getValueRange(achievement);
+    const achievementEntries = Object.entries(ACHIEVEMENTS);
+    for (let i = 0; i < achievementEntries.length; i++) {
+      const [achievementKey, achievement] = achievementEntries[i];
+      // Get the value range for this user persona (pass index for premium tier cycling)
+      const { min, max } = persona.getValueRange(achievement, i);
       const currentValue = randomBetween(min, max);
 
       // Calculate tier based on thresholds
