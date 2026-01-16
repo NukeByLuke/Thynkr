@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Zap, Volume2, Loader2 } from 'lucide-react';
 import { useTTS } from '@/hooks/useTTS';
 
@@ -368,18 +368,18 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             </motion.div>
           )}
         </div>
-        <div className="flex items-center justify-between text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium mb-1">
-          <span>
+        <div className="flex items-center justify-between text-xs sm:text-sm text-slate-400 dark:text-slate-400 font-medium mb-2">
+          <span className="px-3 py-1 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-lg text-cyan-300 font-bold">
             Question {currentIndex + 1} of {questions.length}
           </span>
           <span>
             {Object.keys(answers).length} / {questions.length} answered
           </span>
         </div>
-        {/* Progress bar */}
-        <div className="mt-1 w-full bg-slate-200 dark:bg-zinc-900 rounded-full h-2 border border-slate-300 dark:border-white/10">
+        {/* Progress bar - Enhanced with glow */}
+        <div className="mt-1 w-full bg-zinc-900/80 rounded-full h-3 border border-zinc-700">
           <div
-            className="bg-gradient-to-r from-blue-500 to-violet-500 h-2 rounded-full transition-[width] duration-300 shadow-lg shadow-blue-500/50"
+            className="bg-gradient-to-r from-cyan-500 via-blue-500 to-blue-600 h-3 rounded-full transition-[width] duration-300 shadow-lg shadow-cyan-500/50"
             style={{
               width: `${((currentIndex + 1) / questions.length) * 100}%`,
             }}
@@ -388,56 +388,63 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
       </div>
 
       {/* Scrollable Content Area */}
-      <div className="flex-1 overflow-y-auto mb-2">
-        {/* Question */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="bg-white dark:bg-zinc-950 rounded-2xl shadow-2xl border border-slate-200 dark:border-white/10 p-3 mb-2 backdrop-blur-md"
-        >
-          <div className="flex items-start gap-2">
-            <div className="flex-1 prose prose-sm dark:prose-invert max-w-none mb-3">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[rehypeHighlight]}
-                components={{
-                  p: ({ node, ...props }) => (
-                    <h4 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3" {...props} />
-                  ),
-                  h1: ({ node, ...props }) => <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-3" {...props} />,
-                  h2: ({ node, ...props }) => <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2" {...props} />,
-                  h3: ({ node, ...props }) => <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2" {...props} />,
-                  strong: ({ node, ...props }) => <strong className="font-bold text-brand-900 dark:text-brand-300" {...props} />,
-                  em: ({ node, ...props }) => <em className="italic text-gray-700 dark:text-gray-300" {...props} />,
-                  ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-1.5 text-gray-700 dark:text-gray-300 marker:text-brand-500" {...props} />,
-                  ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-1.5 text-gray-700 dark:text-gray-300 marker:text-brand-500" {...props} />,
-                  li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
-                  code: ({ node, className, children, ...props }) => {
-                    const isInline = !className;
-                    return isInline ? (
-                      <code
-                        className="bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 px-2 py-1 rounded-lg text-sm font-mono border border-brand-200 dark:border-brand-800 shadow-sm"
-                        {...props}
-                      >
-                        {children}
-                      </code>
-                    ) : (
-                      <code
-                        className={`block bg-gray-900 dark:bg-gray-950 text-gray-100 p-3 rounded-xl overflow-x-auto text-sm font-mono shadow-lg border border-gray-700 dark:border-gray-800 my-3 ${className || ''}`}
-                        {...props}
-                      >
-                        {children}
-                    </code>
-                  );
-                },
-              }}
-            >
-              {currentQuestion.question}
-            </ReactMarkdown>
-          </div>
-          {/* TTS Button for Question */}
-          <button
+      <div className="flex-1 overflow-y-auto mb-2 max-w-4xl mx-auto w-full">
+        {/* Question - Premium Glassmorphic Card with Ambient Glow */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentIndex}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="relative mb-4"
+          >
+            {/* Ambient Spotlight Glow */}
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-blue-500/5 to-violet-500/5 blur-3xl -z-10 rounded-3xl" />
+            
+            <div className="bg-zinc-950/40 backdrop-blur-xl rounded-3xl border border-white/10 p-6 shadow-2xl">
+              <div className="flex items-start gap-3">
+                <div className="flex-1 prose prose-lg dark:prose-invert max-w-none">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeHighlight]}
+                    components={{
+                      p: ({ node, ...props }) => (
+                        <h4 className="text-2xl sm:text-3xl font-bold text-white mb-4 text-balance leading-tight" style={{ textShadow: '0 0 20px rgba(59, 130, 246, 0.3)' }} {...props} />
+                      ),
+                      h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-white mb-3" {...props} />,
+                      h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-white mb-2" {...props} />,
+                      h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-white mb-2" {...props} />,
+                      strong: ({ node, ...props }) => <strong className="font-bold text-cyan-300" {...props} />,
+                      em: ({ node, ...props }) => <em className="italic text-gray-300" {...props} />,
+                      ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-1.5 text-gray-300 marker:text-cyan-400" {...props} />,
+                      ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-1.5 text-gray-300 marker:text-cyan-400" {...props} />,
+                      li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
+                      code: ({ node, className, children, ...props }) => {
+                        const isInline = !className;
+                        return isInline ? (
+                          <code
+                            className="bg-cyan-500/20 text-cyan-300 px-2 py-1 rounded-lg text-base font-mono border border-cyan-500/30 shadow-sm"
+                            {...props}
+                          >
+                            {children}
+                          </code>
+                        ) : (
+                          <code
+                            className={`block bg-gray-900/80 text-gray-100 p-4 rounded-xl overflow-x-auto text-sm font-mono shadow-lg border border-gray-700 my-3 ${className || ''}`}
+                            {...props}
+                          >
+                            {children}
+                          </code>
+                        );
+                      },
+                    }}
+                  >
+                    {currentQuestion.question}
+                  </ReactMarkdown>
+                </div>
+                {/* TTS Button for Question */}
+                <button
             onClick={() => {
               const cleanText = currentQuestion.question
                 .replace(/#{1,6}\s/g, '')
@@ -447,20 +454,23 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                 .trim();
               toggleTTS(cleanText);
             }}
-            disabled={isTTSLoading}
-            className="flex-shrink-0 p-2 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors disabled:opacity-50"
-            title="Read question aloud"
-          >
-            {isTTSLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Volume2 className="w-5 h-5" />
-            )}
-          </button>
-          </div>
-        </motion.div>
+                  disabled={isTTSLoading}
+                  className="flex-shrink-0 p-2 text-purple-400 hover:bg-purple-500/20 rounded-lg transition-colors disabled:opacity-50"
+                  title="Read question aloud"
+                >
+                  {isTTSLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Volume2 className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        {/* Enhanced Option Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {currentQuestion.options.map((option, index) => {
             const isSelected = selectedOption === option || userAnswer === option;
             const isCorrectAnswer = option === currentQuestion.correctAnswer;
@@ -468,42 +478,44 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             const isWrong = isRevealed && isSelected && !isCorrectAnswer;
             const showSubmittedState = isSubmitted && option === currentQuestion.correctAnswer;
             const showSubmittedWrong = isSubmitted && userAnswer === option && option !== currentQuestion.correctAnswer;
+            const keyLabel = ['A', 'B', 'C', 'D'][index];
 
             return (
               <motion.button
                 key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.3 }}
                 onClick={() => handleAnswerSelect(option)}
                 disabled={isSubmitted || isRevealed}
-                whileHover={!isSubmitted && !isRevealed ? { scale: 1.01 } : {}}
+                whileHover={!isSubmitted && !isRevealed ? { scale: 1.02, y: -4 } : {}}
                 whileTap={!isSubmitted && !isRevealed ? { scale: 0.98 } : {}}
-                className={`w-full text-left p-3 rounded-xl border-2 transition-[background-color,border-color,box-shadow,transform] duration-200 text-sm backdrop-blur-sm ${
+                className={`group relative w-full text-left p-4 rounded-2xl border-2 transition-all duration-200 text-base backdrop-blur-xl ${
                   showSubmittedState || isCorrect
-                    ? 'border-green-500 bg-green-500/10 text-green-900 dark:text-white shadow-xl shadow-green-500/20'
+                    ? 'border-green-500 bg-green-500/20 text-white shadow-2xl shadow-green-500/30'
                     : showSubmittedWrong || isWrong
-                      ? 'border-red-500 bg-red-500/10 text-red-900 dark:text-white shadow-xl shadow-red-500/20'
+                      ? 'border-red-500 bg-red-500/20 text-white shadow-2xl shadow-red-500/30'
                       : isSelected && !isRevealed
-                        ? 'border-blue-500 bg-blue-500/10 text-blue-900 dark:text-white shadow-xl shadow-blue-500/30'
-                        : 'border-slate-300 dark:border-white/10 hover:border-blue-500/50 bg-slate-50 dark:bg-zinc-900/50 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-zinc-800/50'
-                } ${isSubmitted || isRevealed ? 'cursor-not-allowed' : 'cursor-pointer active:scale-95'}`}
+                        ? 'border-transparent bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-white shadow-2xl shadow-blue-500/40 before:absolute before:inset-0 before:rounded-2xl before:p-[2px] before:bg-gradient-to-br before:from-blue-500 before:to-violet-500 before:-z-10'
+                        : 'border-zinc-700 hover:border-zinc-600 bg-zinc-900/50 text-slate-200 hover:bg-zinc-800/60 hover:shadow-lg hover:shadow-zinc-700/20'
+                } ${isSubmitted || isRevealed ? 'cursor-not-allowed' : 'cursor-pointer'}`}
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 flex-1">
-                    <span className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-slate-300 font-bold text-xs border border-slate-300 dark:border-white/20">
-                      {index + 1}
+                    {/* Keyboard Shortcut Keycap */}
+                    <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-zinc-700 to-zinc-800 text-white font-bold text-sm border-2 border-zinc-600 shadow-lg group-hover:from-cyan-600 group-hover:to-blue-600 group-hover:border-cyan-500 transition-all duration-200">
+                      {keyLabel}
                     </span>
-                    <div className="font-medium flex-1">
+                    <div className="font-semibold flex-1 text-base">
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         rehypePlugins={[rehypeHighlight]}
                         components={{
                           p: ({ node, ...props }) => <span className="inline" {...props} />,
-                          strong: ({ node, ...props }) => <strong className="font-bold" {...props} />,
+                          strong: ({ node, ...props }) => <strong className="font-bold text-cyan-300" {...props} />,
                           em: ({ node, ...props }) => <em className="italic" {...props} />,
                           code: ({ node, ...props }) => (
-                            <code className="bg-gray-100 dark:bg-gray-700 text-brand-600 dark:text-brand-400 px-1.5 py-0.5 rounded text-xs font-mono" {...props} />
+                            <code className="bg-zinc-700/50 text-cyan-300 px-2 py-0.5 rounded text-sm font-mono border border-zinc-600" {...props} />
                           ),
                         }}
                       >
@@ -618,25 +630,29 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
       {/* Navigation - Sticky Footer */}
       <div className="flex-shrink-0 sticky bottom-0 bg-white dark:bg-zinc-950 border-t border-slate-200 dark:border-white/10 py-3 backdrop-blur-sm">
         <div className="flex items-center justify-center">
-          {/* Show Reveal Answer button when answer is selected but not yet revealed */}
+          {/* Show Reveal Answer button when answer is selected but not yet revealed with pulse */}
           {!isSubmitted && !isRevealed && userAnswer && (
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
               onClick={() => setIsRevealed(true)}
-              className="px-8 sm:px-10 py-3.5 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-200 shadow-2xl shadow-blue-500/50 border-2 border-blue-500/50 text-base sm:text-lg active:scale-95"
+              className="px-8 sm:px-10 py-3.5 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-200 shadow-2xl shadow-blue-500/50 border-2 border-blue-500/50 text-base sm:text-lg"
             >
               Reveal Answer
             </motion.button>
           )}
 
-          {/* Show Next button when answer is revealed (not last question) */}
+          {/* Show Next button when answer is revealed (not last question) with pulse animation */}
           {!isSubmitted && isRevealed && currentIndex < questions.length - 1 && (
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
               onClick={handleNext}
-              className="px-8 sm:px-10 py-3.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-200 shadow-2xl shadow-violet-500/50 border-2 border-violet-500/50 text-base sm:text-lg active:scale-95"
+              className="px-8 sm:px-10 py-3.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-200 shadow-2xl shadow-violet-500/50 border-2 border-violet-500/50 text-base sm:text-lg"
             >
               Next Question →
             </motion.button>
