@@ -58,45 +58,51 @@ const TIER_ORDER: AchievementTier[] = ['DIAMOND', 'RUBY', 'PLATINUM', 'GOLD', 'S
 
 const TIER_CONFIG = {
   BRONZE: {
-    border: 'border-stone-500',
-    bg: 'bg-stone-100/80 dark:bg-stone-900/20',
-    text: 'text-stone-700 dark:text-stone-300',
-    gradient: 'from-stone-500 to-stone-600',
+    // Soft brownish-orange for Bronze
+    border: 'border-orange-200 dark:border-orange-800/30',
+    bg: 'bg-orange-50/50 dark:bg-orange-900/10',
+    text: 'text-orange-800 dark:text-orange-200',
+    gradient: 'from-orange-300 to-amber-500', 
     label: 'Bronze',
   },
   SILVER: {
-    border: 'border-slate-300',
-    bg: 'bg-slate-50/80 dark:bg-slate-800/20',
-    text: 'text-slate-600 dark:text-slate-300',
-    gradient: 'from-slate-200 to-slate-400',
+    // Clean, soft gray for Silver
+    border: 'border-slate-200 dark:border-slate-700/50',
+    bg: 'bg-slate-50/50 dark:bg-slate-800/30',
+    text: 'text-slate-700 dark:text-slate-200',
+    gradient: 'from-slate-300 to-slate-500', 
     label: 'Silver',
   },
   GOLD: {
-    border: 'border-yellow-400',
-    bg: 'bg-yellow-50/80 dark:bg-yellow-900/20',
-    text: 'text-yellow-700 dark:text-yellow-300',
-    gradient: 'from-yellow-300 to-yellow-400',
+    // Warm, not-too-yellow Gold
+    border: 'border-yellow-200 dark:border-yellow-800/30',
+    bg: 'bg-yellow-50/50 dark:bg-yellow-900/10',
+    text: 'text-yellow-800 dark:text-yellow-200',
+    gradient: 'from-amber-300 to-yellow-500',
     label: 'Gold',
   },
   PLATINUM: {
-    border: 'border-cyan-300',
-    bg: 'bg-cyan-50/80 dark:bg-cyan-900/20',
-    text: 'text-cyan-600 dark:text-cyan-300',
-    gradient: 'from-cyan-300 to-teal-400',
+    // Icy blue-cyan
+    border: 'border-cyan-200 dark:border-cyan-800/30',
+    bg: 'bg-cyan-50/50 dark:bg-cyan-900/10',
+    text: 'text-cyan-800 dark:text-cyan-200',
+    gradient: 'from-cyan-300 to-blue-400',
     label: 'Platinum',
   },
   RUBY: {
-    border: 'border-rose-300',
-    bg: 'bg-rose-50/80 dark:bg-rose-900/20',
-    text: 'text-rose-600 dark:text-rose-300',
-    gradient: 'from-rose-300 to-pink-400',
+    // Soft but deep red
+    border: 'border-rose-200 dark:border-rose-800/30',
+    bg: 'bg-rose-50/50 dark:bg-rose-900/10',
+    text: 'text-rose-800 dark:text-rose-200',
+    gradient: 'from-rose-400 to-red-600',
     label: 'Ruby',
   },
   DIAMOND: {
-    border: 'border-purple-300',
-    bg: 'bg-purple-50/80 dark:bg-purple-900/20',
-    text: 'text-purple-600 dark:text-purple-300',
-    gradient: 'from-purple-300 to-indigo-400',
+    // Premium deep purple/indigo
+    border: 'border-indigo-200 dark:border-indigo-800/30',
+    bg: 'bg-indigo-50/50 dark:bg-indigo-900/10',
+    text: 'text-indigo-800 dark:text-indigo-200',
+    gradient: 'from-indigo-400 to-violet-600',
     label: 'Diamond',
   },
 };
