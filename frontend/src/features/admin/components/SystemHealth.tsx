@@ -188,7 +188,7 @@ export const SystemHealth = () => {
     'overview'
   );
   const [liveMetrics, setLiveMetrics] = useState<DropletMetrics | null>(null);
-  const [connectionState, setConnectionState] = useState<'connecting' | 'connected' | 'error'>('connecting');
+  const [_connectionState, setConnectionState] = useState<'connecting' | 'connected' | 'error'>('connecting');
   const eventSourceRef = useRef<EventSource | null>(null);
 
   // Setup EventSource for live metrics
