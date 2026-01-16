@@ -5,30 +5,54 @@ interface LoadingProgressProps {
   stage?: string;
 }
 
+/**
+ * LoadingProgress - Professional loading component with shimmer effect
+ * 
+ * Features:
+ * - Subtle, professional shimmer animation (no sliding bars)
+ * - Clean spinner with gradient
+ * - Minimal, non-distracting design
+ * - Performance-optimized using transform/opacity only
+ */
 export default function LoadingProgress({
   message = 'Processing...',
   stage,
 }: LoadingProgressProps) {
   return (
     <div className="flex flex-col items-center justify-center py-12 px-4">
-      {/* Animated gradient bar */}
+      {/* Shimmer bar */}
       <div className="w-full max-w-md mb-6">
-        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden relative">
+          {/* Shimmer effect - subtle wave animation */}
           <motion.div
-            className="h-full bg-gradient-to-r from-brand-500 via-accent-500 to-brand-500 rounded-full"
-            initial={{ x: '-100%' }}
-            animate={{ x: '100%' }}
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-500/40 to-transparent"
+            animate={{
+              x: ['-100%', '200%'],
+            }}
             transition={{
-              duration: 1.5,
+              duration: 2,
               repeat: Infinity,
-              ease: 'linear',
+              ease: 'easeInOut',
             }}
             style={{ width: '50%' }}
+          />
+          
+          {/* Base gradient glow */}
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-brand-500/20 via-accent-500/20 to-brand-500/20"
+            animate={{
+              opacity: [0.3, 0.6, 0.3],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
           />
         </div>
       </div>
 
-      {/* Spinning icon */}
+      {/* Spinning icon with gradient */}
       <motion.div
         animate={{ rotate: 360 }}
         transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
@@ -74,20 +98,21 @@ export default function LoadingProgress({
         </motion.p>
       )}
 
-      {/* Pulsing dots */}
+      {/* Pulsing dots - more subtle */}
       <div className="flex items-center gap-1.5 mt-4">
         {[0, 1, 2].map((i) => (
           <motion.div
             key={i}
             className="w-2 h-2 bg-brand-500 rounded-full"
             animate={{
-              scale: [1, 1.5, 1],
-              opacity: [0.5, 1, 0.5],
+              scale: [1, 1.3, 1],
+              opacity: [0.4, 1, 0.4],
             }}
             transition={{
               duration: 1.5,
               repeat: Infinity,
               delay: i * 0.2,
+              ease: 'easeInOut',
             }}
           />
         ))}

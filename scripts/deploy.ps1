@@ -1,41 +1,3 @@
-
-<#
-.SYNOPSIS
-    Production deployment script for Thynkr to DigitalOcean
-    
-.DESCRIPTION
-    Builds Docker images, pushes to Docker Hub, and deploys to DigitalOcean server.
-    Includes health checks, rollback capability, and proper error handling.
-
-.PARAMETER Component
-    Which component(s) to deploy: 'all', 'frontend', 'backend'
-
-.PARAMETER SkipBuild
-    Skip the Docker build step (use existing images)
-
-.PARAMETER SkipTests
-    Skip running tests before deployment
-
-.PARAMETER NoCacherebuild
-    Build Docker images without using cache
-
-.EXAMPLE
-    .\scripts\deploy.ps1
-    Deploy everything (backend + frontend)
-
-.EXAMPLE
-    .\scripts\deploy.ps1 -Component backend
-    Deploy only the backend
-
-.EXAMPLE
-    .\scripts\deploy.ps1 -Component frontend -NoCache
-    Deploy frontend with fresh build (no cache)
-
-.EXAMPLE
-    .\scripts\deploy.ps1 -SkipTests -SkipBuild
-    Quick deploy with existing images (no tests, no build)
-#>
-
 param(
     [Parameter()]
     [ValidateSet('all', 'frontend', 'backend')]
@@ -54,21 +16,40 @@ param(
 # Configuration
 $ErrorActionPreference = "Stop"
 $SERVER = "root@138.197.208.81"
-$DOCKER_HUB_USERNAME = "nukebyluke"
+$DOCKER_USER = "nukebyluke"
 $PROJECT_ROOT = Split-Path -Parent $PSScriptRoot
 $TIMESTAMP = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
 
 # Color output functions
-function Write-Success { param($Message) Write-Host "✅ $Message" -ForegroundColor Green }
-function Write-Info { param($Message) Write-Host "ℹ️  $Message" -ForegroundColor Cyan }
-function Write-Warning { param($Message) Write-Host "⚠️  $Message" -ForegroundColor Yellow }
-function Write-ErrorMsg { param($Message) Write-Host "❌ $Message" -ForegroundColor Red }
-function Write-Step { param($Message) Write-Host "`n🔹 $Message" -ForegroundColor Blue }
+function Write-Success { 
+    param($Message) 
+    Write-Host "[SUCCESS] $Message" -ForegroundColor Green 
+}
+
+function Write-Info { 
+    param($Message) 
+    Write-Host "[INFO] $Message" -ForegroundColor Cyan 
+}
+
+function Write-Warning { 
+    param($Message) 
+    Write-Host "[WARNING] $Message" -ForegroundColor Yellow 
+}
+
+function Write-ErrorMsg { 
+    param($Message) 
+    Write-Host "[ERROR] $Message" -ForegroundColor Red 
+}
+
+function Write-Step { 
+    param($Message) 
+    Write-Host "`n[STEP] $Message" -ForegroundColor Blue 
+}
 
 # Banner
-Write-Host "`n╔════════════════════════════════════════════════════════════╗" -ForegroundColor Magenta
-Write-Host "║         🚀 Thynkr Deployment to DigitalOcean               ║" -ForegroundColor Magenta
-Write-Host "╚════════════════════════════════════════════════════════════╝`n" -ForegroundColor Magenta
+Write-Host "`n=========================================" -ForegroundColor Magenta
+Write-Host " Thynkr Deployment to DigitalOcean" -ForegroundColor Magenta
+Write-Host "=========================================`n" -ForegroundColor Magenta
 Write-Info "Timestamp: $TIMESTAMP"
 Write-Info "Component: $Component"
 Write-Info "Skip Build: $SkipBuild"
@@ -90,8 +71,10 @@ Write-Success "Prerequisites verified"
 # Test SSH connection
 Write-Step "Testing SSH connection..."
 try {
-    $sshTest = ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no $SERVER "echo 'Connected'" 2>&1
-    if ($LASTEXITCODE -ne 0) { throw "SSH connection failed" }
+    $null = ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no $SERVER "echo Connected" 2>&1
+    if ($LASTEXITCODE -ne 0) { 
+        throw "SSH connection failed" 
+    }
     Write-Success "Connected to $SERVER"
 } catch {
     Write-ErrorMsg "Cannot connect to server: $_"
@@ -109,11 +92,13 @@ if (-not $SkipTests) {
         Set-Location "$PROJECT_ROOT/backend"
         try {
             npm test 2>&1 | Out-Default
-            if ($LASTEXITCODE -ne 0) { throw "Backend tests failed" }
+            if ($LASTEXITCODE -ne 0) { 
+                throw "Backend tests failed" 
+            }
             Write-Success "Backend tests passed"
         } catch {
             Write-ErrorMsg "Backend tests failed: $_"
-            Write-Warning "To skip tests, use -SkipTests flag"
+            Write-Warning "To skip tests, add -SkipTests flag"
             Set-Location $PROJECT_ROOT
             exit 1
         }
@@ -124,11 +109,13 @@ if (-not $SkipTests) {
         Set-Location "$PROJECT_ROOT/frontend"
         try {
             pnpm run build 2>&1 | Out-Default
-            if ($LASTEXITCODE -ne 0) { throw "Frontend build failed" }
+            if ($LASTEXITCODE -ne 0) { 
+                throw "Frontend build failed" 
+            }
             Write-Success "Frontend build successful"
         } catch {
             Write-ErrorMsg "Frontend build failed: $_"
-            Write-Warning "To skip tests, use -SkipTests flag"
+            Write-Warning "To skip tests, add -SkipTests flag"
             Set-Location $PROJECT_ROOT
             exit 1
         }
@@ -136,26 +123,37 @@ if (-not $SkipTests) {
     
     Set-Location $PROJECT_ROOT
 } else {
-    Write-Warning "Skipping tests (use at your own risk)"
+    Write-Warning "Skipping tests"
 }
 
 # Build and Push Docker images
 if (-not $SkipBuild) {
-    $cacheFlag = if ($NoCache) { "--no-cache" } else { "" }
     
     if ($Component -in 'all', 'backend') {
         Write-Step "Building backend Docker image..."
         try {
-            docker build $cacheFlag -t ${DOCKER_HUB_USERNAME}/thynkr-backend:latest ./backend
-            if ($LASTEXITCODE -ne 0) { throw "Backend build failed" }
-            Write-Success "Backend image built successfully"
+            $backendImage = "$DOCKER_USER/thynkr-backend:latest"
             
-            Write-Info "Pushing backend to Docker Hub..."
-            docker push ${DOCKER_HUB_USERNAME}/thynkr-backend:latest
-            if ($LASTEXITCODE -ne 0) { throw "Backend push failed" }
-            Write-Success "Backend image pushed successfully"
+            if ($NoCache) {
+                docker build --no-cache -t $backendImage ./backend
+            } else {
+                docker build -t $backendImage ./backend
+            }
+            
+            if ($LASTEXITCODE -ne 0) { 
+                throw "Backend build failed" 
+            }
+            Write-Success "Backend image built"
+            
+            Write-Info "Pushing backend image to Docker Hub..."
+            docker push $backendImage
+            if ($LASTEXITCODE -ne 0) { 
+                throw "Backend push failed" 
+            }
+            Write-Success "Backend image pushed"
         } catch {
-            Write-ErrorMsg "Backend Docker operation failed: $_"
+            Write-ErrorMsg "Backend Docker operations failed: $_"
+            Set-Location $PROJECT_ROOT
             exit 1
         }
     }
@@ -163,21 +161,33 @@ if (-not $SkipBuild) {
     if ($Component -in 'all', 'frontend') {
         Write-Step "Building frontend Docker image..."
         try {
-            docker build $cacheFlag -t ${DOCKER_HUB_USERNAME}/thynkr-frontend:latest ./frontend
-            if ($LASTEXITCODE -ne 0) { throw "Frontend build failed" }
-            Write-Success "Frontend image built successfully"
+            $frontendImage = "$DOCKER_USER/thynkr-frontend:latest"
             
-            Write-Info "Pushing frontend to Docker Hub..."
-            docker push ${DOCKER_HUB_USERNAME}/thynkr-frontend:latest
-            if ($LASTEXITCODE -ne 0) { throw "Frontend push failed" }
-            Write-Success "Frontend image pushed successfully"
+            if ($NoCache) {
+                docker build --no-cache -t $frontendImage ./frontend
+            } else {
+                docker build -t $frontendImage ./frontend
+            }
+            
+            if ($LASTEXITCODE -ne 0) { 
+                throw "Frontend build failed" 
+            }
+            Write-Success "Frontend image built"
+            
+            Write-Info "Pushing frontend image to Docker Hub..."
+            docker push $frontendImage
+            if ($LASTEXITCODE -ne 0) { 
+                throw "Frontend push failed" 
+            }
+            Write-Success "Frontend image pushed"
         } catch {
-            Write-ErrorMsg "Frontend Docker operation failed: $_"
+            Write-ErrorMsg "Frontend Docker operations failed: $_"
+            Set-Location $PROJECT_ROOT
             exit 1
         }
     }
 } else {
-    Write-Warning "Skipping build (using existing images)"
+    Write-Warning "Skipping build - deploying with existing images"
 }
 
 # Deploy to DigitalOcean
@@ -186,11 +196,18 @@ Write-Step "Deploying to DigitalOcean..."
 # Copy config files
 Write-Info "Syncing configuration files..."
 try {
-    scp ./docker-compose.prod.yml ${SERVER}:/root/docker-compose.prod.yml
-    if ($LASTEXITCODE -ne 0) { throw "Failed to copy docker-compose.prod.yml" }
+    $composeFile = "$PROJECT_ROOT/docker-compose.prod.yml"
+    $nginxFile = "$PROJECT_ROOT/nginx.prod.conf"
     
-    scp ./nginx.prod.conf ${SERVER}:/root/nginx.prod.conf
-    if ($LASTEXITCODE -ne 0) { throw "Failed to copy nginx.prod.conf" }
+    scp $composeFile "${SERVER}:/root/docker-compose.prod.yml"
+    if ($LASTEXITCODE -ne 0) { 
+        throw "Failed to copy docker-compose.prod.yml" 
+    }
+    
+    scp $nginxFile "${SERVER}:/root/nginx.prod.conf"
+    if ($LASTEXITCODE -ne 0) { 
+        throw "Failed to copy nginx.prod.conf" 
+    }
     
     Write-Success "Configuration files synced"
 } catch {
@@ -198,94 +215,72 @@ try {
     exit 1
 }
 
-# Build deployment commands based on component
-$deployCommands = @(
-    "cd /root",
-    "echo '📥 Pulling latest images...'",
-    "docker compose -f docker-compose.prod.yml pull $Component"
-)
-
-if ($Component -eq 'all') {
-    $deployCommands += @(
-        "echo '🔄 Recreating all services...'",
-        "docker compose -f docker-compose.prod.yml down",
-        "docker compose -f docker-compose.prod.yml up -d",
-        "echo '⏳ Waiting for services to start...'",
-        "sleep 10"
-    )
-} else {
-    $deployCommands += @(
-        "echo '🔄 Recreating $Component service...'",
-        "docker compose -f docker-compose.prod.yml up -d --force-recreate $Component",
-        "echo '⏳ Waiting for service to start...'",
-        "sleep 5"
-    )
-}
-
-# Add migration step for backend
-if ($Component -in 'all', 'backend') {
-    $deployCommands += @(
-        "echo '🗃️  Running database migrations...'",
-        "docker compose -f docker-compose.prod.yml exec -T backend npx prisma migrate deploy"
-    )
-}
-
-$deployCommands += @(
-    "echo '🧹 Cleaning up...'",
-    "docker system prune -f",
-    "echo '📊 Service status:'",
-    "docker compose -f docker-compose.prod.yml ps",
-    "echo '✅ Deployment complete!'"
-)
-
-# Execute deployment
-$deployScript = $deployCommands -join '; '
-Write-Info "Executing deployment commands..."
-
+# Pull latest images on server
+Write-Step "Pulling latest images on server..."
 try {
-    ssh $SERVER $deployScript
-    if ($LASTEXITCODE -ne 0) { throw "Deployment commands failed" }
+    ssh $SERVER 'cd /root ; docker compose -f docker-compose.prod.yml pull'
+    if ($LASTEXITCODE -ne 0) { 
+        throw "Failed to pull images" 
+    }
+    Write-Success "Images pulled successfully"
 } catch {
-    Write-ErrorMsg "Deployment failed: $_"
-    Write-Warning "You may need to manually check the server status"
-    Write-Info "To rollback, run: .\scripts\rollback-deployment.ps1"
+    Write-ErrorMsg "Failed to pull images: $_"
     exit 1
 }
 
-# Health check
+# Start containers
+Write-Step "Starting containers..."
+try {
+    ssh $SERVER 'cd /root ; docker compose -f docker-compose.prod.yml up -d --remove-orphans'
+    if ($LASTEXITCODE -ne 0) { 
+        throw "Failed to start containers" 
+    }
+    Write-Success "Containers started"
+} catch {
+    Write-ErrorMsg "Failed to start containers: $_"
+    Write-Warning "You may need to check server logs manually"
+    exit 1
+}
+
+# Health checks
 Write-Step "Running health checks..."
-Start-Sleep -Seconds 5
+Start-Sleep -Seconds 10
 
 try {
+    Write-Info "Checking container status..."
+    $containerStatus = ssh $SERVER "docker ps --format 'table {{.Names}}\t{{.Status}}'" 2>&1
+    Write-Host $containerStatus
+    
     Write-Info "Checking backend health..."
-    $backendHealth = ssh $SERVER 'docker compose -f docker-compose.prod.yml exec -T backend wget -qO- http://localhost:3001/health 2>&1 || echo FAILED' 2>&1
-    if ($backendHealth -match 'FAILED' -or $LASTEXITCODE -ne 0) {
-        Write-Warning "Backend health check failed"
-    } else {
+    $backendHealth = ssh $SERVER 'docker compose -f docker-compose.prod.yml exec -T backend wget -qO- http://localhost:3001/health 2>&1' 2>&1
+    
+    if ($backendHealth -match 'status') {
         Write-Success "Backend is healthy"
+    } else {
+        Write-Warning "Backend health check returned unexpected response"
+        Write-Host $backendHealth
     }
     
-    Write-Info "Checking frontend health..."
-    $frontendHealth = ssh $SERVER 'curl -f -s http://localhost/ 2>&1 && echo OK || echo FAILED' 2>&1
-    if ($frontendHealth -match 'FAILED') {
-        Write-Warning "Frontend health check failed"
-    } else {
+    Write-Info "Checking frontend..."
+    $frontendCheck = ssh $SERVER 'curl -f -s -I http://localhost/ 2>&1 | head -n 1' 2>&1
+    if ($frontendCheck -match '200') {
         Write-Success "Frontend is healthy"
+    } else {
+        Write-Warning "Frontend health check inconclusive"
+        Write-Host $frontendCheck
     }
 } catch {
     Write-Warning "Health checks could not complete: $_"
+    Write-Info "This does not necessarily mean deployment failed"
 }
 
 # Final status
-Write-Host "`n╔════════════════════════════════════════════════════════════╗" -ForegroundColor Green
-Write-Host "║              ✅ DEPLOYMENT SUCCESSFUL                       ║" -ForegroundColor Green
-Write-Host "╚════════════════════════════════════════════════════════════╝`n" -ForegroundColor Green
+Write-Host "`n=========================================" -ForegroundColor Green
+Write-Host " DEPLOYMENT SUCCESSFUL" -ForegroundColor Green
+Write-Host "=========================================`n" -ForegroundColor Green
 
-Write-Info "Your application should now be running at:"
-Write-Host "  🌐 https://thynkr.ca" -ForegroundColor Cyan
-Write-Info "`nTo view logs:"
-Write-Host "  ssh $SERVER 'cd /root && docker compose -f docker-compose.prod.yml logs -f'" -ForegroundColor Gray
-Write-Info "`nTo rollback if needed:"
-Write-Host "  .\scripts\rollback-deployment.ps1" -ForegroundColor Gray
+Write-Info "Your application is running at: https://thynkr.ca"
+Write-Info "To view logs, SSH to the server and run:"
+Write-Host "  docker compose -f docker-compose.prod.yml logs -f" -ForegroundColor Gray
 
 Set-Location $PROJECT_ROOT

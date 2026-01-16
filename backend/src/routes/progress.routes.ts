@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { authenticate, AuthenticatedRequest } from '../middleware/auth.middleware';
 import prisma from '../db/client';
 import Redis from 'ioredis';
+import { getUserAchievements } from '../services/gamification.service';
 
 // Redis client with error handling - optional caching
 let redis: Redis | null = null;
@@ -254,6 +255,25 @@ export default async function progressRoutes(server: FastifyInstance) {
       } catch (error) {
         server.log.error({ error, userId }, 'Failed to fetch progress stats');
         return reply.code(500).send({ error: 'Failed to fetch progress stats' });
+      }
+    }
+  );
+
+  // Get user achievements
+  server.get(
+    '/achievements',
+    {
+      preHandler: [authenticate],
+    },
+    async (request: AuthenticatedRequest, reply) => {
+      const userId = request.user!.userId;
+
+      try {
+        const achievements = await getUserAchievements(userId);
+        return reply.send(achievements);
+      } catch (error) {
+        server.log.error({ error, userId }, 'Failed to fetch achievements');
+        return reply.code(500).send({ error: 'Failed to fetch achievements' });
       }
     }
   );

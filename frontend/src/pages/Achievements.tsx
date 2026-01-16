@@ -22,6 +22,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/ui/Button';
 import toast from 'react-hot-toast';
+import { api } from '@/lib/api';
 
 // --- Types ---
 type AchievementTier = 'BRONZE' | 'SILVER' | 'GOLD' | 'PLATINUM' | 'RUBY' | 'DIAMOND';
@@ -36,8 +37,12 @@ interface AchievementDefinition {
 
 interface UserAchievement {
   id: string;
+  achievementId: string;
+  userId: string;
   currentTier: AchievementTier;
   currentValue: number;
+  unlockedAt: Date | null;
+  updatedAt: Date;
   definition: AchievementDefinition;
   progress: {
     current: number;
@@ -323,131 +328,21 @@ const PlayerCardExport = ({ user, achievements }: PlayerCardExportProps) => {
 export default function Achievements() {
   const { user } = useAuth();
 
-  // Fetch achievements (Replace with real API call)
-  const { data: stats } = useQuery({
+  // Fetch achievements from backend
+  const { data: achievements, isLoading, error } = useQuery({
     queryKey: ['achievements', user?.id],
     queryFn: async () => {
-      // Mock data - replace with actual API call
-      return {
-        xp: 12500,
-        achievements: [
-          {
-            id: '1',
-            currentTier: 'GOLD' as AchievementTier,
-            currentValue: 100,
-            definition: {
-              id: 'def1',
-              name: 'Study Master',
-              description: 'Study for 100 hours',
-              icon: 'book',
-              category: 'study' as const,
-            },
-            progress: { current: 100, required: 100, percentage: 100 },
-            unlocked: true,
-          },
-          {
-            id: '2',
-            currentTier: 'PLATINUM' as AchievementTier,
-            currentValue: 50,
-            definition: {
-              id: 'def2',
-              name: 'Streak King',
-              description: '30 day study streak',
-              icon: 'flame',
-              category: 'streak' as const,
-            },
-            progress: { current: 30, required: 30, percentage: 100 },
-            unlocked: true,
-          },
-          {
-            id: '3',
-            currentTier: 'BRONZE' as AchievementTier,
-            currentValue: 5,
-            definition: {
-              id: 'def3',
-              name: 'Commenter',
-              description: 'Post 10 comments',
-              icon: 'message-circle',
-              category: 'social' as const,
-            },
-            progress: { current: 5, required: 10, percentage: 50 },
-            unlocked: false,
-          },
-          {
-            id: '4',
-            currentTier: 'DIAMOND' as AchievementTier,
-            currentValue: 1000,
-            definition: {
-              id: 'def4',
-              name: 'Quiz Wizard',
-              description: 'Score 100% on 50 quizzes',
-              icon: 'target',
-              category: 'mastery' as const,
-            },
-            progress: { current: 50, required: 50, percentage: 100 },
-            unlocked: true,
-          },
-          {
-            id: '5',
-            currentTier: 'RUBY' as AchievementTier,
-            currentValue: 1000,
-            definition: {
-              id: 'def5',
-              name: 'Knowledge Seeker',
-              description: 'Complete 25 courses',
-              icon: 'sparkles',
-              category: 'mastery' as const,
-            },
-            progress: { current: 25, required: 25, percentage: 100 },
-            unlocked: true,
-          },
-          {
-            id: '6',
-            currentTier: 'SILVER' as AchievementTier,
-            currentValue: 20,
-            definition: {
-              id: 'def6',
-              name: 'Note Taker',
-              description: 'Create 50 notes',
-              icon: 'file-text',
-              category: 'study' as const,
-            },
-            progress: { current: 20, required: 50, percentage: 40 },
-            unlocked: false,
-          },
-          {
-            id: '7',
-            currentTier: 'GOLD' as AchievementTier,
-            currentValue: 100,
-            definition: {
-              id: 'def7',
-              name: 'Social Butterfly',
-              description: 'Help 20 students',
-              icon: 'users',
-              category: 'social' as const,
-            },
-            progress: { current: 20, required: 20, percentage: 100 },
-            unlocked: true,
-          },
-          {
-            id: '8',
-            currentTier: 'PLATINUM' as AchievementTier,
-            currentValue: 500,
-            definition: {
-              id: 'def8',
-              name: 'Brain Power',
-              description: 'Earn 10,000 XP',
-              icon: 'brain',
-              category: 'skill' as const,
-            },
-            progress: { current: 10000, required: 10000, percentage: 100 },
-            unlocked: true,
-          },
-        ] as UserAchievement[],
-      };
+      const response = await api.get('/progress/achievements');
+      return response.data as UserAchievement[];
     },
-    initialData: { xp: 0, achievements: [] },
+    enabled: !!user?.id,
   });
+
+  // Add unlocked property based on unlockedAt field
+  const enrichedAchievements = achievements?.map(achievement => ({
+    ...achievement,
+    unlocked: achievement.unlockedAt !== null,
+  })) || [];
 
   const handleExport = async () => {
     const element = document.getElementById('player-card-export');
@@ -473,8 +368,38 @@ export default function Achievements() {
     }
   };
 
-  const unlockedCount = stats.achievements.filter((a) => a.unlocked).length;
-  const totalCount = stats.achievements.length;
+  const unlockedCount = enrichedAchievements.filter((a) => a.unlocked).length;
+  const totalCount = enrichedAchievements.length;
+
+  if (isLoading) {
+    return (
+      <PageContainer>
+        <PageContainer.Header subtitle="Loading achievements...">
+          Achievements
+        </PageContainer.Header>
+        <PageContainer.Section>
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500"></div>
+          </div>
+        </PageContainer.Section>
+      </PageContainer>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageContainer>
+        <PageContainer.Header subtitle="Error loading achievements">
+          Achievements
+        </PageContainer.Header>
+        <PageContainer.Section>
+          <div className="text-center py-20 text-red-500">
+            Failed to load achievements. Please try again.
+          </div>
+        </PageContainer.Section>
+      </PageContainer>
+    );
+  }
 
   return (
     <PageContainer>
@@ -494,13 +419,13 @@ export default function Achievements() {
         <div className="space-y-8">
           {/* Achievement Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {stats.achievements.map((achievement) => (
+            {enrichedAchievements.map((achievement) => (
               <AchievementCard key={achievement.id} achievement={achievement} />
             ))}
           </div>
 
           {/* Empty State */}
-          {stats.achievements.length === 0 && (
+          {enrichedAchievements.length === 0 && (
             <div className="text-center py-20 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
               <Trophy className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-slate-900 dark:text-white">
@@ -515,7 +440,7 @@ export default function Achievements() {
       </PageContainer.Section>
 
       {/* Hidden Export Component */}
-      <PlayerCardExport user={user} achievements={stats.achievements} />
+      <PlayerCardExport user={user} achievements={enrichedAchievements} />
     </PageContainer>
   );
 }
