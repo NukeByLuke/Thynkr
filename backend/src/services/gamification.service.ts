@@ -370,18 +370,40 @@ export async function checkAchievements(
         });
       }
 
-      // Check if user has reached next tier threshold
-      const nextTier = getNextTier(userAchievement.currentTier);
+      // Check if user has reached next tier threshold (support multiple tier jumps)
+      let currentCheckTier = userAchievement.currentTier;
+      let tiersUnlocked: { tier: AchievementTier; xp: number }[] = [];
       
-      if (!nextTier) {
-        // Already at max tier
-        return { tierUnlocked: false };
-      }
+      // Loop through all potential tier upgrades
+      while (true) {
+        const nextTier = getNextTier(currentCheckTier);
+        
+        if (!nextTier) {
+          // Already at max tier or no more tiers available
+          break;
+        }
 
-      const nextThreshold = achievement.thresholds[nextTier];
+        const nextThreshold = achievement.thresholds[nextTier];
+        
+        if (userAchievement.currentValue >= nextThreshold) {
+          // User qualifies for this tier
+          tiersUnlocked.push({
+            tier: nextTier,
+            xp: achievement.xpRewards[nextTier],
+          });
+          currentCheckTier = nextTier;
+        } else {
+          // User hasn't reached this tier yet
+          break;
+        }
+      }
       
-      if (userAchievement.currentValue >= nextThreshold) {
-        // Unlock next tier!
+      // If tiers were unlocked, update the database
+      if (tiersUnlocked.length > 0) {
+        const highestTierUnlocked = tiersUnlocked[tiersUnlocked.length - 1];
+        const totalXpAwarded = tiersUnlocked.reduce((sum, t) => sum + t.xp, 0);
+        
+        // Update to highest tier achieved
         await tx.userAchievement.update({
           where: {
             userId_achievementId: {
@@ -390,17 +412,16 @@ export async function checkAchievements(
             },
           },
           data: {
-            currentTier: nextTier,
+            currentTier: highestTierUnlocked.tier,
           },
         });
 
-        // Award XP
-        const xpAwarded = achievement.xpRewards[nextTier];
+        // Award total XP from all tiers
         const updatedUser = await tx.user.update({
           where: { id: userId },
           data: {
             xp: {
-              increment: xpAwarded,
+              increment: totalXpAwarded,
             },
             lastXpGain: new Date(),
           },
@@ -419,8 +440,8 @@ export async function checkAchievements(
         return {
           tierUnlocked: true,
           achievementId,
-          newTier: nextTier,
-          xpAwarded,
+          newTier: highestTierUnlocked.tier,
+          xpAwarded: totalXpAwarded,
           achievementName: achievement.name,
         };
       }
