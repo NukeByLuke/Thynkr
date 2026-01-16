@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { authenticate, AuthenticatedRequest } from '../middleware/auth.middleware';
 import prisma from '../db/client';
 import Redis from 'ioredis';
-import { getUserAchievements } from '../services/gamification.service';
+import { getUserAchievements, ACHIEVEMENTS } from '../services/gamification.service';
 
 // Redis client with error handling - optional caching
 let redis: Redis | null = null;
@@ -188,14 +188,34 @@ export default async function progressRoutes(server: FastifyInstance) {
 
         const perfectQuizzes = quizzes.filter((q) => q.score === 100).length;
 
-        // Calculate total XP and level
-        const totalXP = calculateTotalXP({
+        // Get unlocked achievements and calculate achievement XP
+        const userAchievements = await prisma.userAchievement.findMany({
+          where: {
+            userId,
+            unlockedAt: { not: null }, // Only count unlocked achievements
+          },
+        });
+
+        // Calculate total XP from achievements
+        let achievementXP = 0;
+        userAchievements.forEach((userAchievement) => {
+          const achievement = ACHIEVEMENTS[userAchievement.achievementId];
+          if (achievement && userAchievement.currentTier) {
+            achievementXP += achievement.xpRewards[userAchievement.currentTier];
+          }
+        });
+
+        // Calculate session/quiz XP
+        const sessionQuizXP = calculateTotalXP({
           totalSessions: allSessions.length,
           totalMinutes: streak.totalMinutes || 0,
           currentStreak: streak.currentStreak || 0,
           totalQuizzes: quizzes.length,
           perfectQuizzes,
         });
+
+        // Total XP includes both session/quiz XP and achievement XP
+        const totalXP = sessionQuizXP + achievementXP;
 
         const levelData = calculateLevel(totalXP);
 

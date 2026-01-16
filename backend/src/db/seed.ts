@@ -413,6 +413,111 @@ async function seedAchievements(users: { [key: string]: string }) {
   logger.info(`🏆 Created ${totalCreated} achievement records across all users`);
 }
 
+async function seedStudyData(users: { [key: string]: string }) {
+  logger.info('📊 Seeding study sessions and streaks...');
+
+  // Define study patterns for each user persona
+  const studyPatterns = [
+    {
+      username: 'basic',
+      userId: users['basic'],
+      name: 'Basic',
+      // Basic: Minimal activity - 5-10 sessions
+      sessionCount: randomBetween(5, 10),
+      avgDuration: randomBetween(15, 30), // 15-30 min sessions
+      streakDays: randomBetween(1, 3),
+    },
+    {
+      username: 'standard',
+      userId: users['standard'],
+      name: 'Standard',
+      // Standard: Moderate activity - 30-50 sessions
+      sessionCount: randomBetween(30, 50),
+      avgDuration: randomBetween(30, 60), // 30-60 min sessions
+      streakDays: randomBetween(5, 10),
+    },
+    {
+      username: 'premium',
+      userId: users['premium'],
+      name: 'Premium',
+      // Premium: High activity - 100-150 sessions
+      sessionCount: randomBetween(100, 150),
+      avgDuration: randomBetween(45, 90), // 45-90 min sessions
+      streakDays: randomBetween(15, 25),
+    },
+    {
+      username: 'admin',
+      userId: users['admin'],
+      name: 'Admin',
+      // Admin: Very high activity - 200-300 sessions
+      sessionCount: randomBetween(200, 300),
+      avgDuration: randomBetween(60, 120), // 1-2 hour sessions
+      streakDays: randomBetween(30, 50),
+    },
+  ];
+
+  const activityTypes = ['VIDEO_LEARNING', 'TEXT_READING', 'FLASHCARD_STUDY', 'QUIZ_PRACTICE', 'NOTE_TAKING', 'TUTORING'];
+
+  for (const pattern of studyPatterns) {
+    let totalMinutes = 0;
+    const createdSessions = [];
+
+    // Create study sessions spread over the last 60 days
+    for (let i = 0; i < pattern.sessionCount; i++) {
+      const daysAgo = randomBetween(0, 60);
+      const sessionDate = new Date();
+      sessionDate.setDate(sessionDate.getDate() - daysAgo);
+      
+      const duration = randomBetween(
+        Math.max(5, pattern.avgDuration - 20),
+        pattern.avgDuration + 20
+      );
+      
+      totalMinutes += duration;
+
+      const session = await prisma.studySession.create({
+        data: {
+          userId: pattern.userId,
+          activityType: activityTypes[randomBetween(0, activityTypes.length - 1)],
+          durationMinutes: duration,
+          createdAt: sessionDate,
+        },
+      });
+
+      createdSessions.push(session);
+    }
+
+    // Create or update study streak
+    const lastStudyDate = new Date();
+    lastStudyDate.setDate(lastStudyDate.getDate() - randomBetween(0, 2)); // Last studied 0-2 days ago
+
+    await prisma.studyStreak.upsert({
+      where: { userId: pattern.userId },
+      create: {
+        userId: pattern.userId,
+        currentStreak: pattern.streakDays,
+        longestStreak: pattern.streakDays + randomBetween(5, 15),
+        totalStudyDays: Math.ceil(pattern.sessionCount * 0.7), // Assume ~70% unique days
+        totalMinutes,
+        lastStudyDate,
+      },
+      update: {
+        currentStreak: pattern.streakDays,
+        longestStreak: pattern.streakDays + randomBetween(5, 15),
+        totalStudyDays: Math.ceil(pattern.sessionCount * 0.7),
+        totalMinutes,
+        lastStudyDate,
+      },
+    });
+
+    logger.info(
+      `   ✓ ${pattern.name}: ${pattern.sessionCount} sessions, ${totalMinutes} total minutes, ${pattern.streakDays} day streak`
+    );
+  }
+
+  logger.info('📊 Study data seeded successfully');
+}
+
 async function seed() {
   const startTime = Date.now();
   
@@ -438,6 +543,9 @@ async function seed() {
     // Seed achievements
     await seedAchievements(users);
 
+    // Seed study sessions and streaks
+    await seedStudyData(users);
+
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
     console.log('\n');
@@ -449,7 +557,8 @@ async function seed() {
     logger.info('   • 4 Users (basic, standard, premium, admin)');
     logger.info('   • 5 Courses with files');
     logger.info('   • 3 Content articles');
-    logger.info(`   • ${Object.keys(ACHIEVEMENTS).length * 4} Achievement records with realistic progress`);
+    logger.info(`   • ${Object.keys(ACHIEVEMENTS).length} Achievement types with realistic progress`);
+    logger.info('   • Study sessions and streaks for all users');
     console.log('\n');
     logger.info('🔑 Test Accounts (password: Password123!):');
     logger.info('   • basic@thynkr.ca');
