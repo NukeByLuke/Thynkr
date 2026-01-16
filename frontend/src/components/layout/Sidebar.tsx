@@ -7,7 +7,6 @@ import {
   GraduationCap,
   FolderOpen,
   CreditCard,
-  BarChart2,
   Sparkles,
   LogOut,
   ChevronLeft,
