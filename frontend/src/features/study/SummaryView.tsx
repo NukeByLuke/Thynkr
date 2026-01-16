@@ -2,7 +2,8 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Volume2, StopCircle, Loader2 } from 'lucide-react';
+import { useTTS } from '@/hooks/useTTS';
 
 interface SummaryViewProps {
   content: string;
@@ -11,22 +12,56 @@ interface SummaryViewProps {
 }
 
 export default function SummaryView({ content, onRegenerate, isRegenerating }: SummaryViewProps) {
+  const { isPlaying, isLoading, toggle } = useTTS();
+
+  const handlePlayAudio = () => {
+    // Strip markdown formatting for cleaner audio
+    const cleanText = content
+      .replace(/#{1,6}\s/g, '') // Remove headers
+      .replace(/\*\*/g, '') // Remove bold
+      .replace(/\*/g, '') // Remove italic
+      .replace(/`/g, '') // Remove code
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links but keep text
+      .trim();
+    
+    toggle(cleanText);
+  };
+
   return (
     <div className="max-w-none animate-fade-in">
       <div className="bg-gradient-to-br from-white to-brand-50/50 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-lg border border-brand-100/50 dark:border-gray-700 p-10">
         <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-brand-200/50 dark:border-gray-700">
           <h3 className="text-3xl font-bold bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-transparent">Summary</h3>
-          {onRegenerate && (
+          <div className="flex items-center gap-3">
+            {/* TTS Play Button */}
             <button
-              onClick={onRegenerate}
-              disabled={isRegenerating}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Regenerate summary with latest AI"
+              onClick={handlePlayAudio}
+              disabled={isLoading}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              title={isPlaying ? 'Stop audio' : 'Play audio'}
             >
-              <RefreshCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
-              {isRegenerating ? 'Regenerating...' : 'Regenerate'}
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : isPlaying ? (
+                <StopCircle className="w-4 h-4" />
+              ) : (
+                <Volume2 className="w-4 h-4" />
+              )}
+              {isLoading ? 'Loading...' : isPlaying ? 'Stop' : 'Play Audio'}
             </button>
-          )}
+            
+            {onRegenerate && (
+              <button
+                onClick={onRegenerate}
+                disabled={isRegenerating}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Regenerate summary with latest AI"
+              >
+                <RefreshCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
+                {isRegenerating ? 'Regenerating...' : 'Regenerate'}
+              </button>
+            )}
+          </div>
         </div>
         <div className="prose prose-lg dark:prose-invert max-w-none">
           <ReactMarkdown

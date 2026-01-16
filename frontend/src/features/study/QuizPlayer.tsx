@@ -4,7 +4,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import { motion } from 'framer-motion';
-import { Clock, Zap } from 'lucide-react';
+import { Clock, Zap, Volume2, Loader2 } from 'lucide-react';
+import { useTTS } from '@/hooks/useTTS';
 
 interface QuizQuestion {
   id: string;
@@ -34,6 +35,9 @@ interface QuizSettings {
 }
 
 export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, isGenerating, onSubmit }: QuizPlayerProps) {
+  // TTS hook for audio playback
+  const { isLoading: isTTSLoading, toggle: toggleTTS } = useTTS();
+  
   // Pre-test config state
   const [showSettings, setShowSettings] = useState(true);
   const [settings, setSettings] = useState<QuizSettings>({
@@ -392,45 +396,69 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
           transition={{ duration: 0.4 }}
           className="bg-white dark:bg-zinc-950 rounded-2xl shadow-2xl border border-slate-200 dark:border-white/10 p-3 mb-2 backdrop-blur-md"
         >
-          <div className="prose prose-sm dark:prose-invert max-w-none mb-3">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeHighlight]}
-              components={{
-                p: ({ node, ...props }) => (
-                  <h4 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3" {...props} />
-                ),
-                h1: ({ node, ...props }) => <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-3" {...props} />,
-                h2: ({ node, ...props }) => <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2" {...props} />,
-                h3: ({ node, ...props }) => <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2" {...props} />,
-                strong: ({ node, ...props }) => <strong className="font-bold text-brand-900 dark:text-brand-300" {...props} />,
-                em: ({ node, ...props }) => <em className="italic text-gray-700 dark:text-gray-300" {...props} />,
-                ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-1.5 text-gray-700 dark:text-gray-300 marker:text-brand-500" {...props} />,
-                ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-1.5 text-gray-700 dark:text-gray-300 marker:text-brand-500" {...props} />,
-                li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
-                code: ({ node, className, children, ...props }) => {
-                  const isInline = !className;
-                  return isInline ? (
-                    <code
-                      className="bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 px-2 py-1 rounded-lg text-sm font-mono border border-brand-200 dark:border-brand-800 shadow-sm"
-                      {...props}
-                    >
-                      {children}
+          <div className="flex items-start gap-2">
+            <div className="flex-1 prose prose-sm dark:prose-invert max-w-none mb-3">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeHighlight]}
+                components={{
+                  p: ({ node, ...props }) => (
+                    <h4 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3" {...props} />
+                  ),
+                  h1: ({ node, ...props }) => <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-3" {...props} />,
+                  h2: ({ node, ...props }) => <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2" {...props} />,
+                  h3: ({ node, ...props }) => <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2" {...props} />,
+                  strong: ({ node, ...props }) => <strong className="font-bold text-brand-900 dark:text-brand-300" {...props} />,
+                  em: ({ node, ...props }) => <em className="italic text-gray-700 dark:text-gray-300" {...props} />,
+                  ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-1.5 text-gray-700 dark:text-gray-300 marker:text-brand-500" {...props} />,
+                  ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-1.5 text-gray-700 dark:text-gray-300 marker:text-brand-500" {...props} />,
+                  li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
+                  code: ({ node, className, children, ...props }) => {
+                    const isInline = !className;
+                    return isInline ? (
+                      <code
+                        className="bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 px-2 py-1 rounded-lg text-sm font-mono border border-brand-200 dark:border-brand-800 shadow-sm"
+                        {...props}
+                      >
+                        {children}
+                      </code>
+                    ) : (
+                      <code
+                        className={`block bg-gray-900 dark:bg-gray-950 text-gray-100 p-3 rounded-xl overflow-x-auto text-sm font-mono shadow-lg border border-gray-700 dark:border-gray-800 my-3 ${className || ''}`}
+                        {...props}
+                      >
+                        {children}
                     </code>
-                  ) : (
-                    <code
-                      className={`block bg-gray-900 dark:bg-gray-950 text-gray-100 p-3 rounded-xl overflow-x-auto text-sm font-mono shadow-lg border border-gray-700 dark:border-gray-800 my-3 ${className || ''}`}
-                      {...props}
-                    >
-                      {children}
-                  </code>
-                );
-              },
+                  );
+                },
+              }}
+            >
+              {currentQuestion.question}
+            </ReactMarkdown>
+          </div>
+          {/* TTS Button for Question */}
+          <button
+            onClick={() => {
+              const cleanText = currentQuestion.question
+                .replace(/#{1,6}\s/g, '')
+                .replace(/\*\*/g, '')
+                .replace(/\*/g, '')
+                .replace(/`/g, '')
+                .trim();
+              toggleTTS(cleanText);
             }}
+            disabled={isTTSLoading}
+            className="flex-shrink-0 p-2 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors disabled:opacity-50"
+            title="Read question aloud"
           >
-            {currentQuestion.question}
-          </ReactMarkdown>
-        </div>
+            {isTTSLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Volume2 className="w-5 h-5" />
+            )}
+          </button>
+          </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {currentQuestion.options.map((option, index) => {
@@ -585,7 +613,6 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             </motion.div>
           )}
         </div>
-      </motion.div>
       </div>
 
       {/* Navigation - Sticky Footer */}

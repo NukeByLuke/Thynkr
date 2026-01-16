@@ -1,14 +1,96 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Moon, Sun, Monitor } from 'lucide-react';
+import { Moon, Sun, Monitor, Volume2, Play } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
+import { useTTSVoices } from '@/hooks/useTTS';
+import { useEffect, useState } from 'react';
+import api from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function GeneralSettings() {
   const { themeMode, setThemeMode } = useTheme();
   const { user, refetchUser } = useAuth();
+  const { voices } = useTTSVoices();
   
   // Default to English if no language set
   const currentLanguage = user?.preferredLanguage || 'en';
+
+  // TTS preferences state
+  const [ttsVoice, setTtsVoice] = useState<string>('alloy');
+  const [ttsSpeed, setTtsSpeed] = useState<number>(1.0);
+  const [isSavingTTS, setIsSavingTTS] = useState(false);
+  const [audioPreview, setAudioPreview] = useState<HTMLAudioElement | null>(null);
+
+  // Load TTS preferences
+  useEffect(() => {
+    const loadPreferences = async () => {
+      try {
+        const response = await api.get('/api/tts/preferences');
+        setTtsVoice(response.data.voice || 'alloy');
+        setTtsSpeed(response.data.speed || 1.0);
+      } catch (error) {
+        console.error('Failed to load TTS preferences:', error);
+      }
+    };
+    loadPreferences();
+  }, []);
+
+  // Save TTS preferences
+  const saveTTSPreferences = async (voice: string, speed: number) => {
+    setIsSavingTTS(true);
+    try {
+      await api.put('/api/tts/preferences', { voice, speed });
+      toast.success('Audio preferences saved!');
+    } catch (error) {
+      toast.error('Failed to save preferences');
+      console.error('Error saving TTS preferences:', error);
+    } finally {
+      setIsSavingTTS(false);
+    }
+  };
+
+  const handleVoiceChange = (voice: string) => {
+    setTtsVoice(voice);
+    saveTTSPreferences(voice, ttsSpeed);
+  };
+
+  const handleSpeedChange = (speed: number) => {
+    setTtsSpeed(speed);
+    saveTTSPreferences(ttsVoice, speed);
+  };
+
+  const playVoicePreview = async (voice: string) => {
+    // Stop any existing preview
+    if (audioPreview) {
+      audioPreview.pause();
+      audioPreview.currentTime = 0;
+    }
+
+    try {
+      const response = await api.post('/api/tts', {
+        text: 'Hello! This is how I sound. I can help you study by reading summaries and quiz questions aloud.',
+        voice,
+        speed: ttsSpeed,
+      }, { responseType: 'blob' });
+
+      const audioUrl = URL.createObjectURL(response.data);
+      const audio = new Audio(audioUrl);
+      setAudioPreview(audio);
+      
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+        setAudioPreview(null);
+      };
+
+      await audio.play();
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        toast.error('Upgrade to Pro for TTS features!');
+      } else {
+        toast.error('Failed to play preview');
+      }
+    }
+  };
 
   return (
     <div className="space-y-10">
@@ -67,6 +149,75 @@ export default function GeneralSettings() {
         
         <div className="max-w-md">
             <LanguageSelector value={currentLanguage} onUpdate={refetchUser} />
+        </div>
+      </section>
+
+      <hr className="border-slate-200 dark:border-white/10" />
+
+      <section>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">Voice & Audio</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+          Customize text-to-speech voice and playback speed for summaries and quizzes.
+        </p>
+
+        <div className="space-y-6 max-w-2xl">
+          {/* Voice Selection */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+              <Volume2 className="inline w-4 h-4 mr-1" />
+              Voice
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {voices.map((voice) => (
+                <button
+                  key={voice}
+                  onClick={() => handleVoiceChange(voice)}
+                  disabled={isSavingTTS}
+                  className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all ${
+                    ttsVoice === voice
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 shadow-sm'
+                      : 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-white/20'
+                  }`}
+                >
+                  <span className="font-medium text-sm capitalize">{voice}</span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      playVoicePreview(voice);
+                    }}
+                    className="p-1.5 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-md transition-colors"
+                    title="Preview voice"
+                  >
+                    <Play className="w-4 h-4" />
+                  </button>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Speed Control */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+              Playback Speed: {ttsSpeed.toFixed(2)}x
+            </label>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-slate-500 dark:text-slate-400 w-12">0.25x</span>
+              <input
+                type="range"
+                min="0.25"
+                max="4.0"
+                step="0.25"
+                value={ttsSpeed}
+                onChange={(e) => handleSpeedChange(parseFloat(e.target.value))}
+                disabled={isSavingTTS}
+                className="flex-1 h-2 bg-slate-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-purple-500"
+              />
+              <span className="text-sm text-slate-500 dark:text-slate-400 w-12 text-right">4.0x</span>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+              Adjust how fast the text is read aloud.
+            </p>
+          </div>
         </div>
       </section>
     </div>
