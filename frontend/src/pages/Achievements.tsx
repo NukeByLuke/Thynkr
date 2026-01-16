@@ -151,14 +151,14 @@ const TIER_CONFIG = {
     label: 'Platinum',
   },
   MASTERY: {
-    // Special Mastery tier - violet/lavender
-    border: 'border-violet-600/60 dark:border-violet-500/40',
-    borderHover: 'group-hover:border-violet-500/80 dark:group-hover:border-violet-400/60',
-    bg: 'bg-violet-500/5 dark:bg-transparent',
-    text: 'text-violet-700 dark:text-violet-400',
-    iconBg: 'bg-gradient-to-br from-violet-500 to-purple-700',
-    glow: 'shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50',
-    gradient: 'from-violet-500 to-purple-700',
+    // Special Mastery tier - violet/lavender with blues
+    border: 'border-violet-400/60 dark:border-violet-300/40',
+    borderHover: 'group-hover:border-violet-300/80 dark:group-hover:border-violet-200/60',
+    bg: 'bg-violet-400/5 dark:bg-transparent',
+    text: 'text-violet-600 dark:text-violet-300',
+    iconBg: 'bg-gradient-to-br from-violet-400 via-purple-400 to-blue-500',
+    glow: 'shadow-xl shadow-violet-400/40 hover:shadow-violet-400/60',
+    gradient: 'from-violet-400 via-purple-400 to-blue-500',
     label: 'Mastery',
   },
 };
@@ -356,15 +356,17 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
     return TIER_ORDER.slice(0, tierIndex + 1).reverse();
   }, [achievement.currentTier]);
 
-  // Smart tooltip positioning
+  // Smart tooltip positioning with better edge detection
   React.useEffect(() => {
     if (showTooltip && cardRef.current) {
       const rect = cardRef.current.getBoundingClientRect();
+      const tooltipHeight = 450; // Estimated tooltip height
       const spaceAbove = rect.top;
       const spaceBelow = window.innerHeight - rect.bottom;
+      const margin = 16; // Minimum margin from screen edge
       
-      // If not enough space above (less than 400px), show below
-      if (spaceAbove < 400 && spaceBelow > spaceAbove) {
+      // Prefer showing above unless there's significantly more space below
+      if (spaceAbove < tooltipHeight + margin && spaceBelow > spaceAbove + 100) {
         setTooltipPosition('bottom');
       } else {
         setTooltipPosition('top');
@@ -403,7 +405,19 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
           <motion.div
             animate={{ opacity: [0.3, 0.6, 0.3] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/20"
+            className="absolute inset-0 bg-gradient-to-br from-cyan-400/20 to-blue-500/20"
+          />
+        )}
+        
+        {/* Mastery special pulse animation */}
+        {!isLocked && achievement.definition.category === 'mastery' && (
+          <motion.div
+            animate={{ 
+              opacity: [0.2, 0.5, 0.2],
+              scale: [1, 1.05, 1]
+            }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute inset-0 bg-gradient-to-br from-violet-400/20 via-purple-400/20 to-blue-500/20"
           />
         )}
 
@@ -485,13 +499,24 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
               <div className="absolute inset-[1px] bg-slate-900 dark:bg-slate-800 rounded-sm" />
             </div>
             
-            {/* Tooltip content with Aurora border */}
-            <div className="relative rounded-2xl shadow-2xl overflow-hidden">
-              {/* Aurora gradient border */}
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-60" />
+            {/* Tooltip content with enhanced Aurora border */}
+            <div className="relative rounded-2xl shadow-[0_20px_70px_-10px_rgba(0,0,0,0.8)] overflow-hidden">
+              {/* Aurora gradient border - animated shimmer */}
+              <motion.div 
+                className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-70"
+                animate={{ 
+                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                }}
+                transition={{ 
+                  duration: 3, 
+                  repeat: Infinity, 
+                  ease: 'linear' 
+                }}
+                style={{ backgroundSize: '200% 200%' }}
+              />
               
-              {/* Content background */}
-              <div className="relative m-[2px] bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-2xl p-5">
+              {/* Content background with enhanced blur */}
+              <div className="relative m-[2.5px] bg-slate-900/98 dark:bg-slate-800/98 backdrop-blur-2xl rounded-2xl p-6 shadow-inner">
                 {/* Tier badge and title */}
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex-1">
@@ -500,7 +525,7 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
                       {achievement.definition.name}
                     </h4>
                     {!isLocked && (
-                      <span className={`inline-block text-[10px] font-bold px-2.5 py-1 rounded-full bg-gradient-to-r ${tier.gradient} text-white uppercase tracking-wider shadow-lg`}>
+                      <span className={`inline-block text-[11px] font-bold px-3 py-1.5 rounded-full bg-gradient-to-r ${tier.gradient} text-white uppercase tracking-widest shadow-lg ring-1 ring-white/20`}>
                         {tier.label}
                       </span>
                     )}
