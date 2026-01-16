@@ -322,26 +322,29 @@ async function seedAchievements(users: { [key: string]: string }) {
       username: 'premium',
       userId: users['premium'],
       name: 'Premium',
-      // Premium: Diverse tiers - cycle through all tiers for variety
+      // Premium: Diverse tiers across Bronze, Silver, Gold, Ruby, Diamond (evenly distributed)
       getValueRange: (achievement: AchievementDefinition, index: number = 0) => {
-        const tierCycle = index % 5; // Cycle through 5 tiers
-        if (tierCycle === 0) {
-          // Bronze tier
-          return { min: achievement.thresholds.BRONZE, max: achievement.thresholds.BRONZE + 5 };
-        } else if (tierCycle === 1) {
-          // Silver tier
-          return { min: achievement.thresholds.SILVER, max: achievement.thresholds.SILVER + 5 };
-        } else if (tierCycle === 2) {
-          // Gold tier
-          return { min: achievement.thresholds.GOLD, max: achievement.thresholds.GOLD + 5 };
-        } else if (tierCycle === 3) {
-          // Ruby tier
-          return { min: achievement.thresholds.RUBY, max: achievement.thresholds.RUBY + 5 };
-        } else {
-          // Diamond tier (if exists, otherwise max out Ruby)
-          return achievement.thresholds.DIAMOND
-            ? { min: achievement.thresholds.DIAMOND, max: achievement.thresholds.DIAMOND + 5 }
-            : { min: achievement.thresholds.RUBY + 10, max: achievement.thresholds.RUBY + 20 };
+        // Distribute evenly: Bronze, Silver, Gold, Ruby, Diamond
+        const tierCycle = index % 5;
+        
+        switch (tierCycle) {
+          case 0:
+            // Bronze tier (20% of achievements)
+            return { min: achievement.thresholds.BRONZE, max: achievement.thresholds.SILVER - 1 };
+          case 1:
+            // Silver tier (20% of achievements)
+            return { min: achievement.thresholds.SILVER, max: achievement.thresholds.GOLD - 1 };
+          case 2:
+            // Gold tier (20% of achievements)
+            return { min: achievement.thresholds.GOLD, max: achievement.thresholds.PLATINUM - 1 };
+          case 3:
+            // Ruby tier (20% of achievements)
+            return { min: achievement.thresholds.RUBY || achievement.thresholds.PLATINUM, max: (achievement.thresholds.RUBY || achievement.thresholds.PLATINUM) + 10 };
+          case 4:
+          default:
+            // Diamond tier (20% of achievements) - highest tier
+            const diamondThreshold = achievement.thresholds.DIAMOND || achievement.thresholds.RUBY || achievement.thresholds.PLATINUM;
+            return { min: diamondThreshold, max: diamondThreshold + 20 };
         }
       },
     },

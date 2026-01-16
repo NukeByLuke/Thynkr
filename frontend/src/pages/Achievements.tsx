@@ -151,14 +151,14 @@ const TIER_CONFIG = {
     label: 'Platinum',
   },
   MASTERY: {
-    // Special Mastery tier - violet/lavender with blues
-    border: 'border-violet-400/60 dark:border-violet-300/40',
-    borderHover: 'group-hover:border-violet-300/80 dark:group-hover:border-violet-200/60',
-    bg: 'bg-violet-400/5 dark:bg-transparent',
-    text: 'text-violet-600 dark:text-violet-300',
-    iconBg: 'bg-gradient-to-br from-violet-400 via-purple-400 to-blue-500',
-    glow: 'shadow-xl shadow-violet-400/40 hover:shadow-violet-400/60',
-    gradient: 'from-violet-400 via-purple-400 to-blue-500',
+    // EPIC Mastery tier - lavender/violet with blue gradients!
+    border: 'border-violet-400/80 dark:border-violet-300/60',
+    borderHover: 'group-hover:border-violet-300 dark:group-hover:border-violet-200',
+    bg: 'bg-gradient-to-br from-violet-500/10 via-purple-500/10 to-blue-500/10',
+    text: 'text-violet-400 dark:text-violet-300',
+    iconBg: 'bg-gradient-to-br from-violet-500 via-purple-500 via-indigo-500 to-blue-600',
+    glow: 'shadow-2xl shadow-violet-500/60 hover:shadow-violet-400/80',
+    gradient: 'from-violet-500 via-purple-500 via-indigo-500 to-blue-600',
     label: 'Mastery',
   },
 };
@@ -335,11 +335,12 @@ const LevelBanner = ({ level, currentXp, xpForNextLevel, totalXp }: LevelBannerP
 
 interface AchievementCardProps {
   achievement: UserAchievement;
+  index: number; // For determining left/right positioning
 }
 
-const AchievementCard = ({ achievement }: AchievementCardProps) => {
+const AchievementCard = ({ achievement, index }: AchievementCardProps) => {
   const [showTooltip, setShowTooltip] = React.useState(false);
-  const [tooltipPosition, setTooltipPosition] = React.useState<'top' | 'bottom'>('top');
+  const [tooltipPosition, setTooltipPosition] = React.useState<'left' | 'right'>('right');
   const [selectedTierIndex, setSelectedTierIndex] = React.useState(0);
   const cardRef = React.useRef<HTMLDivElement>(null);
   
@@ -357,26 +358,49 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
     return TIER_ORDER.slice(0, tierIndex + 1).reverse();
   }, [achievement.currentTier]);
 
-  // Smart tooltip positioning and reset selected tier
+  // Horizontal tooltip positioning based on card position
   React.useEffect(() => {
     if (showTooltip && cardRef.current) {
       const rect = cardRef.current.getBoundingClientRect();
-      const tooltipHeight = 350; // Estimated tooltip height (reduced)
-      const spaceAbove = rect.top;
-      const spaceBelow = window.innerHeight - rect.bottom;
+      const tooltipWidth = 320; // Estimated tooltip width
+      const spaceRight = window.innerWidth - rect.right;
+      const spaceLeft = rect.left;
       const margin = 16;
       
-      // Prefer showing above unless there's significantly more space below
-      if (spaceAbove < tooltipHeight + margin && spaceBelow > spaceAbove + 100) {
-        setTooltipPosition('bottom');
+      // Determine grid column (0-indexed) - assuming 10 columns on large screens
+      const columnIndex = index % 10;
+      
+      // Show on right for left half (columns 0-4), left for right half (columns 5-9)
+      if (columnIndex < 5) {
+        // Left side of grid - show tooltip on right
+        setTooltipPosition(spaceRight > tooltipWidth + margin ? 'right' : 'left');
       } else {
-        setTooltipPosition('top');
+        // Right side of grid - show tooltip on left
+        setTooltipPosition(spaceLeft > tooltipWidth + margin ? 'left' : 'right');
       }
       
       // Reset to first tier when tooltip opens
       setSelectedTierIndex(0);
     }
-  }, [showTooltip]);
+  }, [showTooltip, index]);
+  
+  // Keyboard navigation for tier cycling
+  React.useEffect(() => {
+    if (!showTooltip || tierHistory.length === 0) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedTierIndex((prev) => Math.max(0, prev - 1));
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedTierIndex((prev) => Math.min(tierHistory.length - 1, prev + 1));
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showTooltip, tierHistory.length]);
 
   return (
     <motion.div
@@ -413,16 +437,37 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
           />
         )}
         
-        {/* Mastery special pulse animation */}
+        {/* EPIC Mastery animations */}
         {!isLocked && achievement.definition.category === 'mastery' && (
-          <motion.div
-            animate={{ 
-              opacity: [0.2, 0.5, 0.2],
-              scale: [1, 1.05, 1]
-            }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute inset-0 bg-gradient-to-br from-violet-400/20 via-purple-400/20 to-blue-500/20"
-          />
+          <>
+            {/* Outer glow pulse */}
+            <motion.div
+              animate={{ 
+                opacity: [0.3, 0.6, 0.3],
+                scale: [1, 1.1, 1]
+              }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+              className="absolute inset-0 bg-gradient-to-br from-violet-500/30 via-purple-500/30 to-blue-500/30 blur-xl"
+            />
+            {/* Inner shimmer */}
+            <motion.div
+              animate={{ 
+                opacity: [0.2, 0.5, 0.2],
+                scale: [1, 1.05, 1],
+                rotate: [0, 5, 0]
+              }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+              className="absolute inset-0 bg-gradient-to-br from-violet-400/20 via-purple-400/20 via-indigo-400/20 to-blue-500/20"
+            />
+            {/* Sparkle effect */}
+            <motion.div
+              animate={{ 
+                opacity: [0, 0.8, 0],
+              }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+              className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent"
+            />
+          </>
         )}
 
         {/* Shimmer effect on hover for unlocked */}
@@ -459,44 +504,46 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
         </div>
       </div>
 
-      {/* Simplified Tooltip with Tier-Specific Colors */}
+      {/* Horizontal Tooltip with Tier-Specific Colors */}
       {showTooltip && (
         <motion.div
-          initial={{ opacity: 0, y: tooltipPosition === 'top' ? 10 : -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.15, ease: 'easeOut' }}
+          initial={{ opacity: 0, x: tooltipPosition === 'left' ? 10 : -10, scale: 0.95 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
           className={`absolute ${
-            tooltipPosition === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
-          } left-1/2 -translate-x-1/2 w-72 pointer-events-auto z-[100]`}
+            tooltipPosition === 'left' ? 'right-full mr-4' : 'left-full ml-4'
+          } top-1/2 -translate-y-1/2 w-80 pointer-events-auto z-[100]`}
         >
           <div className="relative">
             {/* Tooltip arrow with tier-specific color */}
             <div 
               className={`absolute ${
-                tooltipPosition === 'top' ? '-bottom-1.5' : '-top-1.5'
-              } left-1/2 -translate-x-1/2 w-3 h-3 ${
-                tooltipPosition === 'top' ? 'rotate-45' : '-rotate-45'
+                tooltipPosition === 'left' ? '-right-1.5' : '-left-1.5'
+              } top-1/2 -translate-y-1/2 w-3 h-3 ${
+                tooltipPosition === 'left' ? 'rotate-45' : '-rotate-45'
               } bg-gradient-to-br ${tier.gradient}`}
             />
             
             {/* Tooltip content with tier-specific border */}
-            <div className={`relative rounded-xl shadow-2xl overflow-hidden border-2 ${tier.border}`}>
-              {/* Content background */}
-              <div className="relative bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-xl p-4">
+            <div className={`relative rounded-xl shadow-2xl overflow-hidden border-2 ${tier.border} ${
+              achievement.definition.category === 'mastery' ? 'border-violet-400/80 shadow-violet-500/50' : ''
+            }`}>
+              {/* Content background with better contrast */}
+              <div className="relative bg-slate-900/98 dark:bg-slate-800/98 backdrop-blur-xl rounded-xl p-5">
                 {/* Tier badge and title */}
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex-1">
-                    <h4 className="font-bold text-lg text-white mb-1 flex items-center gap-2">
+                    <h4 className="font-bold text-base text-white mb-1.5 flex items-center gap-2 leading-tight">
                       {isLocked && <Lock className="w-4 h-4 text-slate-400" />}
                       {achievement.definition.name}
                     </h4>
                     {!isLocked && (
-                      <span className={`inline-block text-[11px] font-bold px-3 py-1.5 rounded-full bg-gradient-to-r ${tier.gradient} text-white uppercase tracking-widest shadow-lg ring-1 ring-white/20`}>
+                      <span className={`inline-block text-xs font-bold px-3 py-1.5 rounded-full bg-gradient-to-r ${tier.gradient} text-white uppercase tracking-widest shadow-lg ring-1 ring-white/30`}>
                         {tier.label}
                       </span>
                     )}
                   </div>
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  <div className={`w-11 h-11 rounded-lg flex items-center justify-center ${
                     isLocked ? 'bg-slate-700/50' : tier.iconBg
                   } shadow-lg`}>
                     {isLocked ? (
@@ -507,8 +554,8 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
                   </div>
                 </div>
                 
-                {/* Description */}
-                <p className="text-sm text-slate-300 mb-4 leading-relaxed">
+                {/* Description with better readability */}
+                <p className="text-sm text-slate-200 dark:text-slate-300 mb-4 leading-relaxed">
                   {achievement.definition.description}
                 </p>
 
@@ -516,9 +563,12 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
                 {!isLocked && tierHistory.length > 0 && (
                   <div className="mb-4 pb-4 border-b border-slate-700/50">
                     <div className="flex items-center justify-between mb-2">
-                      <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                        Tier History ({selectedTierIndex + 1}/{tierHistory.length})
-                      </h5>
+                      <div>
+                        <h5 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                          Tier History ({selectedTierIndex + 1}/{tierHistory.length})
+                        </h5>
+                        <p className="text-[10px] text-slate-500 mt-0.5">Use arrow keys to navigate</p>
+                      </div>
                       <div className="flex gap-1">
                         <button
                           onClick={(e) => {
@@ -526,7 +576,7 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
                             setSelectedTierIndex((prev) => Math.max(0, prev - 1));
                           }}
                           disabled={selectedTierIndex === 0}
-                          className="px-2 py-0.5 text-xs bg-slate-700/50 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed rounded transition-colors"
+                          className="px-2.5 py-1 text-xs font-medium bg-slate-700/70 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed rounded transition-colors text-white"
                         >
                           ←
                         </button>
@@ -536,7 +586,7 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
                             setSelectedTierIndex((prev) => Math.min(tierHistory.length - 1, prev + 1));
                           }}
                           disabled={selectedTierIndex === tierHistory.length - 1}
-                          className="px-2 py-0.5 text-xs bg-slate-700/50 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed rounded transition-colors"
+                          className="px-2.5 py-1 text-xs font-medium bg-slate-700/70 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed rounded transition-colors text-white"
                         >
                           →
                         </button>
@@ -547,36 +597,44 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
                       const displayConfig = TIER_CONFIG[displayTier];
                       const threshold = achievement.definition.thresholds?.[displayTier];
                       const xpReward = achievement.definition.xpRewards?.[displayTier];
+                      // Check if mastery using definition category instead
+                      const isMasteryCat = achievement.definition.category === 'mastery';
                       return (
                         <motion.div
                           key={displayTier}
-                          initial={{ opacity: 0, x: -10 }}
+                          initial={{ opacity: 0, x: selectedTierIndex > 0 ? -10 : 10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.2 }}
-                          className={`p-3 rounded-lg bg-gradient-to-br ${displayConfig.gradient} bg-opacity-10 border ${displayConfig.border}`}
+                          className={`p-4 rounded-lg bg-gradient-to-br ${displayConfig.gradient} bg-opacity-10 border-2 ${displayConfig.border} ${
+                            isMasteryCat ? 'shadow-lg shadow-violet-500/30' : ''
+                          }`}
                         >
                           <div className="flex items-center justify-between mb-2">
-                            <span className={`text-sm font-bold ${displayConfig.text}`}>
+                            <span className={`text-base font-bold ${displayConfig.text} ${
+                              isMasteryCat ? 'text-violet-300' : ''
+                            }`}>
                               {displayConfig.label} Tier
                             </span>
-                            <span className="text-xs text-white bg-black/20 px-2 py-0.5 rounded-full">
+                            <span className={`text-xs font-bold text-white px-2.5 py-1 rounded-full ${
+                              isMasteryCat ? 'bg-gradient-to-r from-violet-600 to-blue-600' : 'bg-black/30'
+                            }`}>
                               +{xpReward ? Math.floor(xpReward).toLocaleString() : '0'} XP
                             </span>
                           </div>
-                          <div className="text-xs text-slate-300">
+                          <div className="text-xs text-slate-200 font-medium">
                             Required: {threshold ? Math.floor(threshold).toLocaleString() : '0'}
                           </div>
                         </motion.div>
                       );
                     })()}
                   </div>
-                )}
+                )}  
                 
                 {/* Progress section */}
                 {achievement.progress && (
                   <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-medium">
-                      <span className={isLocked ? 'text-slate-400' : tier.text}>
+                    <div className="flex justify-between text-xs font-semibold">
+                      <span className={isLocked ? 'text-slate-400' : 'text-slate-300'}>
                         {isLocked ? 'Locked' : 'Progress'}
                       </span>
                       <span className={isLocked ? 'text-slate-400' : 'text-white'}>
@@ -600,7 +658,7 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
                       </motion.div>
                     </div>
                     {achievement.progress.current !== undefined && achievement.progress.required && (
-                      <div className="text-xs text-slate-400 text-center pt-1">
+                      <div className="text-xs text-slate-300 dark:text-slate-400 text-center pt-1 font-medium">
                         {Math.floor(achievement.progress.current).toLocaleString()} / {Math.floor(achievement.progress.required).toLocaleString()}
                       </div>
                     )}
@@ -902,8 +960,8 @@ export default function Achievements() {
 
                     {/* Achievement Grid */}
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-6">
-                      {categoryAchievements.map((achievement) => (
-                        <AchievementCard key={achievement.id} achievement={achievement} />
+                      {categoryAchievements.map((achievement, idx) => (
+                        <AchievementCard key={achievement.id} achievement={achievement} index={idx} />
                       ))}
                     </div>
                   </motion.div>
