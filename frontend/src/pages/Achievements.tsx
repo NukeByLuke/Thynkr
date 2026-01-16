@@ -131,15 +131,21 @@ interface AchievementCardProps {
 
 const AchievementCard = ({ achievement }: AchievementCardProps) => {
   const [hoveredCard, setHoveredCard] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const Icon = getIcon(achievement.definition.icon);
   const tier = achievement.currentTier ? TIER_CONFIG[achievement.currentTier] : TIER_CONFIG.BRONZE;
   const isLocked = !achievement.unlocked;
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    setMousePosition({ x: e.clientX, y: e.clientY });
+  };
 
   return (
     <motion.div
       className="relative group"
       onHoverStart={() => setHoveredCard(true)}
       onHoverEnd={() => setHoveredCard(false)}
+      onMouseMove={handleMouseMove}
       whileHover={{ scale: 1.15, zIndex: 50 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
     >
@@ -208,15 +214,19 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
       <AnimatePresence>
         {hoveredCard && (
           <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="absolute z-[100] bottom-full mb-3 left-1/2 transform -translate-x-1/2 w-72 pointer-events-none"
+            className="fixed z-[100] w-72 pointer-events-none"
+            style={{
+              left: `${mousePosition.x + 12}px`,
+              top: `${mousePosition.y + 12}px`,
+            }}
           >
             <div className="bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700/50 p-4 relative">
-              {/* Tooltip arrow */}
-              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 rotate-45 bg-slate-900/95 dark:bg-slate-800/95 border-r border-b border-slate-700/50" />
+              {/* Tooltip arrow pointing to northwest */}
+              <div className="absolute -top-1 -left-1 w-3 h-3 rotate-45 bg-slate-900/95 dark:bg-slate-800/95 border-t border-l border-slate-700/50" />
               
               <div className="relative z-10">
                 {/* Tier badge */}
