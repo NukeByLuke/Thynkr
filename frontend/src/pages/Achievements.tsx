@@ -131,14 +131,33 @@ interface AchievementCardProps {
 
 const AchievementCard = ({ achievement }: AchievementCardProps) => {
   const [hoveredCard, setHoveredCard] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState<'right' | 'left'>('right');
+  const cardRef = React.useRef<HTMLDivElement>(null);
   const Icon = getIcon(achievement.definition.icon);
   const tier = achievement.currentTier ? TIER_CONFIG[achievement.currentTier] : TIER_CONFIG.BRONZE;
   const isLocked = !achievement.unlocked;
 
+  const handleHoverStart = () => {
+    setHoveredCard(true);
+    if (cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      const tooltipWidth = 288; // w-72 = 18rem = 288px
+      const spaceOnRight = window.innerWidth - rect.right;
+      const spaceOnLeft = rect.left;
+      
+      if (spaceOnRight < tooltipWidth + 20 && spaceOnLeft > tooltipWidth + 20) {
+        setTooltipPosition('left');
+      } else {
+        setTooltipPosition('right');
+      }
+    }
+  };
+
   return (
     <motion.div
+      ref={cardRef}
       className="relative group"
-      onHoverStart={() => setHoveredCard(true)}
+      onHoverStart={handleHoverStart}
       onHoverEnd={() => setHoveredCard(false)}
       whileHover={{ scale: 1.15, zIndex: 50 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
@@ -212,11 +231,17 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="absolute z-[100] top-0 left-full ml-3 w-72 pointer-events-none"
+            className={`absolute z-[100] top-0 w-72 pointer-events-none ${
+              tooltipPosition === 'right' ? 'left-full ml-3' : 'right-full mr-3'
+            }`}
           >
             <div className="bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700/50 p-4 relative">
-              {/* Tooltip arrow pointing to west */}
-              <div className="absolute top-4 -left-1.5 w-3 h-3 rotate-45 bg-slate-900/95 dark:bg-slate-800/95 border-l border-b border-slate-700/50" />
+              {/* Tooltip arrow */}
+              <div className={`absolute top-4 w-3 h-3 rotate-45 bg-slate-900/95 dark:bg-slate-800/95 ${
+                tooltipPosition === 'right' 
+                  ? '-left-1.5 border-l border-b border-slate-700/50'
+                  : '-right-1.5 border-r border-t border-slate-700/50'
+              }`} />
               
               <div className="relative z-10">
                 {/* Tier badge */}
