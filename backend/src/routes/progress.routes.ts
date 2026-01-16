@@ -192,7 +192,9 @@ export default async function progressRoutes(server: FastifyInstance) {
         const userAchievements = await prisma.userAchievement.findMany({
           where: {
             userId,
-            unlockedAt: { not: null }, // Only count unlocked achievements
+            NOT: {
+              unlockedAt: null,
+            },
           },
         });
 

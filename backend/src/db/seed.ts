@@ -456,7 +456,15 @@ async function seedStudyData(users: { [key: string]: string }) {
     },
   ];
 
-  const activityTypes = ['VIDEO_LEARNING', 'TEXT_READING', 'FLASHCARD_STUDY', 'QUIZ_PRACTICE', 'NOTE_TAKING', 'TUTORING'];
+  const activityTypes = [
+    'FILE_UPLOAD',
+    'SUMMARY_VIEW',
+    'NOTES_VIEW',
+    'QUIZ_ATTEMPT',
+    'FLASHCARD_STUDY',
+    'TTS_GENERATE',
+    'STUDY_PACK_CREATE',
+  ] as const;
 
   for (const pattern of studyPatterns) {
     let totalMinutes = 0;
