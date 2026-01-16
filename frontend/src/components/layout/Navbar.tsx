@@ -13,7 +13,6 @@ import {
   Trophy,
   TrendingUp,
   GraduationCap,
-  Home,
 } from 'lucide-react';
 import { useState, useMemo, memo } from 'react';
 
@@ -48,30 +47,15 @@ const Navbar = memo(() => {
 
   return (
     <nav className="bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/10 sticky top-0 z-50 theme-transition">
-      <div className="max-w-6xl mx-auto px-8 lg:px-16">
-        <div className="flex justify-between h-16">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
+        <div className="flex justify-between h-14">
           {/* Logo */}
           <div className="flex items-center">
             <Logo variant="full" animated={true} />
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-2">
-            {/* Main Navigation Links */}
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                `text-sm font-semibold px-4 py-2 rounded-2xl transition-all duration-300 flex items-center gap-1.5 ${
-                  isActive
-                    ? 'text-white dark:text-white drop-shadow-md bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5'
-                }`
-              }
-            >
-              <Home className="w-4 h-4" />
-              Home
-            </NavLink>
-
+          <div className="hidden md:flex items-center space-x-1">
             {isAuthenticated && (
               <>
                 <NavLink
@@ -233,19 +217,6 @@ const Navbar = memo(() => {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200/50 dark:border-white/10 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl animate-in slide-in-from-top duration-200">
           <div className="px-3 pt-3 pb-4 space-y-1.5">
-            <Link
-              to="/"
-              className={`flex items-center px-3 py-2 rounded-xl text-base font-medium transition-all duration-300 ${
-                isActive('/')
-                  ? 'text-white dark:text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30'
-                  : 'text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5'
-              }`}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <Home className="w-4 h-4 mr-2" />
-              Home
-            </Link>
-            
             {isAuthenticated && (
               <>
                 <Link

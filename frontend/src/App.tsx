@@ -21,7 +21,7 @@ import GlobalLoadingBar from '@/components/ui/GlobalLoadingBar';
 import BackgroundShapes from '@/components/ui/BackgroundShapes';
 import {
   Login, Register, AuthCallback, OAuthCallback, Pricing, Account, Admin,
-  Study, ImmersiveStudy, Files, Settings, Courses, MyCourseDetail,
+  Study, Files, Settings, Courses, MyCourseDetail,
   Achievements, NotFound
 } from './routes';
 
@@ -180,16 +180,6 @@ function AppContent() {
               }
             />
           </Route>
-
-          {/* Immersive Study - Full-screen IDE-style layout (no DashboardLayout wrapper) */}
-          <Route
-            path="/immersive-study"
-            element={
-              <ProtectedRoute>
-                <ImmersiveStudy />
-              </ProtectedRoute>
-            }
-          />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
