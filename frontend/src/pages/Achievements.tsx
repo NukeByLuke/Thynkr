@@ -1,3 +1,4 @@
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import PageContainer from '@/components/layout/PageContainer';
 import { motion } from 'framer-motion';
@@ -270,6 +271,7 @@ interface AchievementCardProps {
 }
 
 const AchievementCard = ({ achievement }: AchievementCardProps) => {
+  const [showTooltip, setShowTooltip] = React.useState(false);
   const Icon = getIcon(achievement.definition.icon);
   const tier = achievement.currentTier ? TIER_CONFIG[achievement.currentTier] : TIER_CONFIG.BRONZE;
   const isLocked = !achievement.unlocked;
@@ -279,137 +281,162 @@ const AchievementCard = ({ achievement }: AchievementCardProps) => {
 
   return (
     <motion.div
-      className="group relative"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
+      className="relative group"
+      onHoverStart={() => setShowTooltip(true)}
+      onHoverEnd={() => setShowTooltip(false)}
+      whileHover={{ scale: 1.1, zIndex: 50 }}
+      transition={{ duration: 0.15, ease: 'easeOut' }}
     >
-      {/* Main Card */}
+      {/* Main Square Icon Card */}
       <div
-        className={`relative overflow-hidden rounded-xl border-2 p-5 transition-all duration-300 ${
+        className={`aspect-square rounded-xl border-2 flex items-center justify-center relative overflow-hidden transition-all duration-300 ${
           isLocked
-            ? 'border-slate-300/50 dark:border-slate-700/50 bg-slate-100/50 dark:bg-slate-900/30 grayscale opacity-60'
+            ? 'border-slate-300/50 dark:border-slate-700/50 bg-slate-100/50 dark:bg-slate-900/30 shadow-sm grayscale opacity-60'
             : `${tier.border} ${tier.borderHover} ${tier.bg} ${tier.glow}`
         }`}
       >
         {/* Subtle background glow for unlocked */}
         {!isLocked && (
           <motion.div
-            animate={{ opacity: [0.3, 0.5, 0.3] }}
+            animate={{ opacity: [0.2, 0.4, 0.2] }}
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            className={`absolute inset-0 bg-gradient-to-br ${tier.gradient} opacity-[0.08] dark:opacity-[0.06]`}
+            className={`absolute inset-0 bg-gradient-to-br ${tier.gradient} opacity-20 blur-lg`}
           />
         )}
 
         {/* Diamond pulse animation */}
         {!isLocked && achievement.currentTier === 'DIAMOND' && (
           <motion.div
-            animate={{ scale: [1, 1.05, 1], opacity: [0.4, 0.6, 0.4] }}
+            animate={{ opacity: [0.3, 0.6, 0.3] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20"
+            className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/20"
           />
         )}
 
         {/* Shimmer effect on hover for unlocked */}
-        {!isLocked && (
-          <motion.div
-            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-            initial={false}
-          >
+        {!isLocked && showTooltip && (
+          <>
             <motion.div
-              animate={{ x: ['-100%', '200%'] }}
-              transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 0.5 }}
-              className="h-full w-1/3 bg-gradient-to-r from-transparent via-white/20 dark:via-white/10 to-transparent transform -skew-x-12"
+              initial={{ x: '-150%' }}
+              animate={{ x: '250%' }}
+              transition={{ duration: 0.6, ease: 'easeInOut' }}
+              className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent transform -skew-x-12 blur-sm"
             />
-          </motion.div>
+            <motion.div
+              initial={{ x: '-150%' }}
+              animate={{ x: '250%' }}
+              transition={{ duration: 0.6, ease: 'easeInOut', delay: 0.1 }}
+              className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-white/70 dark:via-white/30 to-transparent transform -skew-x-12"
+            />
+          </>
         )}
 
-        <div className="relative z-10 flex items-center gap-4">
-          {/* Icon Container - Left Side */}
-          <div className="flex-shrink-0">
-            <div
-              className={`relative w-16 h-16 rounded-xl flex items-center justify-center transition-all duration-300 ${
-                isLocked 
-                  ? 'bg-slate-300/50 dark:bg-slate-700/50' 
-                  : `${tier.iconBg} shadow-xl group-hover:scale-110`
-              }`}
-            >
-              {isLocked ? (
-                <Lock className="w-7 h-7 text-slate-400 dark:text-slate-600" />
-              ) : (
-                <Icon className="w-7 h-7 text-white drop-shadow-lg" />
-              )}
-            </div>
-          </div>
-
-          {/* Content - Right Side */}
-          <div className="flex-1 min-w-0">
-            {/* Title and Tier Badge */}
-            <div className="flex items-start justify-between gap-2 mb-1">
-              <h3 className={`font-bold text-base leading-tight ${
-                isLocked 
-                  ? 'text-slate-600 dark:text-slate-400' 
-                  : 'text-slate-900 dark:text-white'
-              }`}>
-                {achievement.definition.name}
-              </h3>
-              {!isLocked && (
-                <span
-                  className={`flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${tier.text} bg-gradient-to-r ${tier.gradient} text-white uppercase tracking-wider shadow-md`}
-                >
-                  {tier.label}
-                </span>
-              )}
-            </div>
-
-            {/* Description */}
-            <p className={`text-sm leading-snug mb-3 line-clamp-2 ${
-              isLocked 
-                ? 'text-slate-500 dark:text-slate-500' 
-                  : 'text-slate-600 dark:text-slate-400'
-            }`}>
-              {achievement.definition.description}
-            </p>
-
-            {/* Progress Bar or Unlock Date */}
-            {achievement.progress && (
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-xs font-medium">
-                  <span className={isLocked ? 'text-slate-400 dark:text-slate-600' : tier.text}>
-                    {isLocked ? 'Locked' : 'Progress'}
-                  </span>
-                  <span className={isLocked ? 'text-slate-400 dark:text-slate-600' : tier.text}>
-                    {isLocked ? '0%' : `${Math.round(achievement.progress.percentage)}%`}
-                  </span>
-                </div>
-                <div className="w-full h-2 bg-slate-200/70 dark:bg-slate-800/70 rounded-full overflow-hidden shadow-inner">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${isLocked ? 0 : achievement.progress.percentage}%` }}
-                    transition={{ duration: 0.8, ease: 'easeOut', delay: 0.1 }}
-                    className={`h-full bg-gradient-to-r ${tier.gradient} shadow-lg relative overflow-hidden`}
-                  >
-                    {!isLocked && achievement.progress.percentage > 5 && (
-                      <motion.div
-                        animate={{ x: ['0%', '100%'] }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-                        className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                      />
-                    )}
-                  </motion.div>
-                </div>
-                {!isLocked && formattedDate && (
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-500 pt-0.5">
-                    <Clock className="w-3 h-3" />
-                    <span>Unlocked {formattedDate}</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+        {/* Achievement Icon */}
+        <div
+          className={`w-12 h-12 rounded-lg flex items-center justify-center relative z-20 transition-all duration-300 ${
+            isLocked 
+              ? 'bg-slate-300/50 dark:bg-slate-700/50 opacity-40' 
+              : `${tier.iconBg} shadow-xl group-hover:scale-110`
+          }`}
+        >
+          {isLocked ? (
+            <Lock className="w-6 h-6 text-slate-400 dark:text-slate-600" />
+          ) : (
+            <Icon className="w-6 h-6 text-white drop-shadow-lg" />
+          )}
         </div>
       </div>
+
+      {/* Enhanced Tooltip */}
+      {showTooltip && (
+        <motion.div
+          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-80 pointer-events-none z-[100]"
+        >
+          <div className="relative">
+            {/* Tooltip arrow */}
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 rotate-45 bg-slate-900/95 dark:bg-slate-800/95 border-b border-r border-slate-700/50" />
+            
+            {/* Tooltip content */}
+            <div className="relative bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700/50 p-5">
+              {/* Tier badge and title */}
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex-1">
+                  <h4 className="font-bold text-lg text-white mb-1 flex items-center gap-2">
+                    {isLocked && <Lock className="w-4 h-4 text-slate-400" />}
+                    {achievement.definition.name}
+                  </h4>
+                  {!isLocked && (
+                    <span className={`inline-block text-[10px] font-bold px-2.5 py-1 rounded-full bg-gradient-to-r ${tier.gradient} text-white uppercase tracking-wider shadow-lg`}>
+                      {tier.label}
+                    </span>
+                  )}
+                </div>
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  isLocked ? 'bg-slate-700/50' : tier.iconBg
+                } shadow-lg`}>
+                  {isLocked ? (
+                    <Lock className="w-5 h-5 text-slate-400" />
+                  ) : (
+                    <Icon className="w-5 h-5 text-white" />
+                  )}
+                </div>
+              </div>
+              
+              {/* Description */}
+              <p className="text-sm text-slate-300 mb-4 leading-relaxed">
+                {achievement.definition.description}
+              </p>
+              
+              {/* Progress section */}
+              {achievement.progress && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs font-medium">
+                    <span className={isLocked ? 'text-slate-400' : tier.text}>
+                      {isLocked ? 'Locked' : 'Progress'}
+                    </span>
+                    <span className={isLocked ? 'text-slate-400' : 'text-white'}>
+                      {isLocked ? '0%' : `${Math.round(achievement.progress.percentage)}%`}
+                    </span>
+                  </div>
+                  <div className="w-full h-3 bg-slate-700/50 rounded-full overflow-hidden shadow-inner">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${isLocked ? 0 : achievement.progress.percentage}%` }}
+                      transition={{ duration: 0.6, ease: 'easeOut' }}
+                      className={`h-full bg-gradient-to-r ${tier.gradient} shadow-lg relative overflow-hidden`}
+                    >
+                      {!isLocked && achievement.progress.percentage > 0 && (
+                        <motion.div
+                          animate={{ x: ['0%', '100%'] }}
+                          transition={{ duration: 1.2, repeat: Infinity, ease: 'linear' }}
+                          className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                        />
+                      )}
+                    </motion.div>
+                  </div>
+                  {achievement.progress.current !== undefined && achievement.progress.required && (
+                    <div className="text-xs text-slate-400 text-center pt-1">
+                      {achievement.progress.current.toLocaleString()} / {achievement.progress.required.toLocaleString()}
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Unlock date */}
+              {!isLocked && formattedDate && (
+                <div className="flex items-center gap-2 text-xs text-slate-400 mt-4 pt-4 border-t border-slate-700/50">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Unlocked on {formattedDate}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      )}
     </motion.div>
   );
 };
@@ -628,7 +655,7 @@ export default function Achievements() {
           )}
 
           {/* Achievement Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-6">
             {enrichedAchievements.map((achievement) => (
               <AchievementCard key={achievement.id} achievement={achievement} />
             ))}
