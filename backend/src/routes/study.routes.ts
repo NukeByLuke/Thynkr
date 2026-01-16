@@ -38,8 +38,7 @@ async function trackStudyActivity(
     | 'SUMMARY_VIEW'
     | 'NOTES_VIEW'
     | 'QUIZ_ATTEMPT'
-    | 'FLASHCARD_STUDY'
-    | 'TUTOR_CHAT',
+    | 'FLASHCARD_STUDY',
   fileId?: string
 ) {
   try {

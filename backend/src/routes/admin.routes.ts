@@ -167,11 +167,6 @@ export default async function adminRoutes(server: FastifyInstance) {
           // Delete quizzes and quiz attempts (via cascade from file)
           // Delete summaries and notes (via cascade from file)
 
-          // Delete tutor-related data
-          await tx.tutorMessage.deleteMany({ where: { session: { userId: id } } });
-          await tx.tutorSessionFile.deleteMany({ where: { session: { userId: id } } });
-          await tx.tutorSession.deleteMany({ where: { userId: id } });
-
           // Delete courses and course files
           await tx.courseFile.deleteMany({ where: { course: { createdBy: id } } });
           await tx.course.deleteMany({ where: { createdBy: id } });
@@ -1649,29 +1644,6 @@ export default async function adminRoutes(server: FastifyInstance) {
         0
       );
 
-      // Get AI request stats (using TutorSession as proxy)
-      const [aiRequestsToday, aiRequestsYesterday, aiRequestsWeek] = await Promise.all([
-        prisma.tutorSession.count({
-          where: { createdAt: { gte: startOfToday } },
-        }),
-        prisma.tutorSession.count({
-          where: {
-            createdAt: {
-              gte: subDays(startOfToday, 1),
-              lt: startOfToday,
-            },
-          },
-        }),
-        prisma.tutorSession.count({
-          where: { createdAt: { gte: sevenDaysAgo } },
-        }),
-      ]);
-
-      const aiTrend =
-        aiRequestsYesterday > 0
-          ? Math.round(((aiRequestsToday - aiRequestsYesterday) / aiRequestsYesterday) * 100)
-          : 0;
-
       return reply.send({
         users: {
           total: totalUsers,
@@ -1687,11 +1659,6 @@ export default async function adminRoutes(server: FastifyInstance) {
           total: totalFiles,
           totalSize,
           today: filesToday,
-        },
-        aiRequests: {
-          today: aiRequestsToday,
-          week: aiRequestsWeek,
-          trend: aiTrend,
         },
       });
     }
@@ -1711,19 +1678,11 @@ export default async function adminRoutes(server: FastifyInstance) {
         const dayEnd = new Date(dayStart);
         dayEnd.setHours(23, 59, 59, 999);
 
-        const [users, sessions, aiRequests] = await Promise.all([
+        const [users, sessions] = await Promise.all([
           prisma.user.count({
             where: { createdAt: { lte: dayEnd } },
           }),
           prisma.studySession.count({
-            where: {
-              createdAt: {
-                gte: dayStart,
-                lte: dayEnd,
-              },
-            },
-          }),
-          prisma.tutorSession.count({
             where: {
               createdAt: {
                 gte: dayStart,
@@ -1737,7 +1696,6 @@ export default async function adminRoutes(server: FastifyInstance) {
           date: format(dayStart, 'MMM d'),
           users,
           sessions,
-          aiRequests,
         });
       }
 
@@ -1766,7 +1724,6 @@ export default async function adminRoutes(server: FastifyInstance) {
           const startOfToday = startOfDay(now);
           const oneMinuteAgo = subDays(now, 0);
           oneMinuteAgo.setMinutes(oneMinuteAgo.getMinutes() - 1);
-          const sevenDaysAgo = subDays(now, 7);
 
           // Get all metrics in parallel
           const [
@@ -1776,8 +1733,6 @@ export default async function adminRoutes(server: FastifyInstance) {
             sessionsToday,
             totalFiles,
             filesToday,
-            aiRequestsToday,
-            aiRequestsWeek,
             activeSubscriptions,
             systemUptime,
           ] = await Promise.all([
@@ -1792,12 +1747,6 @@ export default async function adminRoutes(server: FastifyInstance) {
             prisma.uploadedFile.count(),
             prisma.uploadedFile.count({
               where: { createdAt: { gte: startOfToday } },
-            }),
-            prisma.tutorSession.count({
-              where: { createdAt: { gte: startOfToday } },
-            }),
-            prisma.tutorSession.count({
-              where: { createdAt: { gte: sevenDaysAgo } },
             }),
             prisma.subscription.count({
               where: { status: 'ACTIVE' },
@@ -1858,10 +1807,6 @@ export default async function adminRoutes(server: FastifyInstance) {
               total: totalFiles,
               today: filesToday,
               totalSize,
-            },
-            aiRequests: {
-              today: aiRequestsToday,
-              week: aiRequestsWeek,
             },
             subscriptions: {
               active: activeSubscriptions,

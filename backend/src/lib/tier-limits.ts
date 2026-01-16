@@ -88,12 +88,12 @@ export async function getMonthlyAIRequestCount(userId: string): Promise<number> 
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
 
-  // Count study sessions that use AI (summary, notes, quiz, flashcards, tutor)
+  // Count study sessions that use AI (summary, notes, quiz, flashcards)
   const count = await prisma.studySession.count({
     where: {
       userId,
       activityType: {
-        in: ['SUMMARY_VIEW', 'NOTES_VIEW', 'QUIZ_ATTEMPT', 'FLASHCARD_STUDY', 'TUTOR_CHAT'],
+        in: ['SUMMARY_VIEW', 'NOTES_VIEW', 'QUIZ_ATTEMPT', 'FLASHCARD_STUDY'],
       },
       createdAt: {
         gte: startOfMonth,

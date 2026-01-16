@@ -395,8 +395,7 @@ export default async function progressRoutes(server: FastifyInstance) {
           | 'SUMMARY_VIEW'
           | 'NOTES_VIEW'
           | 'QUIZ_ATTEMPT'
-          | 'FLASHCARD_STUDY'
-          | 'TUTOR_CHAT';
+          | 'FLASHCARD_STUDY';
         fileId?: string;
         durationMinutes?: number;
       };

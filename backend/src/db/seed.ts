@@ -24,9 +24,6 @@ async function clearDatabase() {
   await prisma.courseFileAI.deleteMany({});
   await prisma.courseFile.deleteMany({});
   await prisma.course.deleteMany({});
-  await prisma.tutorSessionFile.deleteMany({});
-  await prisma.tutorMessage.deleteMany({});
-  await prisma.tutorSession.deleteMany({});
   await prisma.flashcard.deleteMany({});
   await prisma.flashcardSet.deleteMany({});
   await prisma.quizAttempt.deleteMany({});
