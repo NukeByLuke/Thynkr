@@ -45,29 +45,19 @@ export default function GenerationModal({ isOpen, type }: GenerationModalProps) 
               {/* Floating Abstract Shapes */}
               <motion.div
                 animate={{ 
-                  y: [0, -15, 0],
-                  x: [0, 10, 0],
-                  scale: [1, 1.1, 1]
+                  scale: [1, 1.2, 1],
+                  opacity: [0.3, 0.5, 0.3]
                 }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-cyan-500/30 to-blue-500/30 rounded-full blur-2xl"
+                className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl"
               />
               <motion.div
                 animate={{ 
-                  y: [0, 15, 0],
-                  x: [0, -10, 0],
-                  scale: [1, 1.15, 1]
+                  scale: [1, 1.3, 1],
+                  opacity: [0.3, 0.5, 0.3]
                 }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                className="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-br from-violet-500/30 to-purple-500/30 rounded-full blur-2xl"
-              />
-              <motion.div
-                animate={{ 
-                  y: [0, -10, 0],
-                  rotate: [0, 180, 360]
-                }}
-                transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 rounded-full blur-xl"
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                className="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-br from-violet-500/20 to-purple-500/20 rounded-full blur-3xl"
               />
 
               {/* Content */}
@@ -91,29 +81,17 @@ export default function GenerationModal({ isOpen, type }: GenerationModalProps) 
                   </p>
                 </div>
 
-                {/* Animated Progress Bar */}
-                <div className="relative w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                {/* Simplified Indeterminate Progress Bar */}
+                <div className="relative w-full h-1.5 bg-slate-200/50 dark:bg-slate-800/50 rounded-full overflow-hidden">
+                  {/* Moving gradient bar */}
                   <motion.div
-                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full"
-                    initial={{ width: '0%' }}
-                    animate={{ 
-                      width: ['0%', '70%', '90%', '70%'],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                  />
-                  {/* Shimmer effect */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                    className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-500 rounded-full shadow-lg shadow-cyan-500/50"
                     initial={{ x: '-100%' }}
-                    animate={{ x: '200%' }}
+                    animate={{ x: '400%' }}
                     transition={{
                       duration: 1.5,
                       repeat: Infinity,
-                      ease: "linear"
+                      ease: "easeInOut"
                     }}
                   />
                 </div>
