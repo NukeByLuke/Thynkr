@@ -18,6 +18,17 @@ import {
   Brain,
   Rocket,
   Sparkles,
+  Clock,
+  Sun,
+  Moon,
+  Calendar,
+  Search,
+  Heart,
+  Globe,
+  Layers,
+  GraduationCap,
+  Library,
+  FileText,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/ui/Button';
@@ -62,7 +73,7 @@ const TIER_CONFIG = {
     border: 'border-orange-200 dark:border-orange-800/30',
     bg: 'bg-orange-50/50 dark:bg-orange-900/10',
     text: 'text-orange-800 dark:text-orange-200',
-    gradient: 'from-orange-300 to-amber-500', 
+    gradient: 'from-orange-400 to-stone-600', 
     label: 'Bronze',
   },
   SILVER: {
@@ -78,7 +89,7 @@ const TIER_CONFIG = {
     border: 'border-yellow-200 dark:border-yellow-800/30',
     bg: 'bg-yellow-50/50 dark:bg-yellow-900/10',
     text: 'text-yellow-800 dark:text-yellow-200',
-    gradient: 'from-amber-300 to-yellow-500',
+    gradient: 'from-yellow-300 to-amber-500',
     label: 'Gold',
   },
   PLATINUM: {
@@ -123,8 +134,18 @@ const getIcon = (iconName: string) => {
     users: Users,
     brain: Brain,
     sparkles: Sparkles,
-    'message-circle': Users,
-    'file-text': BookOpen,
+    clock: Clock,
+    sun: Sun,
+    moon: Moon,
+    calendar: Calendar,
+    search: Search,
+    heart: Heart,
+    globe: Globe,
+    layers: Layers,
+    'graduation-cap': GraduationCap,
+    library: Library,
+    'file-text': FileText,
+    'share-2': Share2,
   };
   return icons[iconName.toLowerCase()] || Trophy;
 };
