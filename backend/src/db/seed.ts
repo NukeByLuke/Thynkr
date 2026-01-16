@@ -2,6 +2,8 @@ import bcrypt from 'bcryptjs';
 import prisma from './client';
 import { logger } from '../lib/logger';
 import seedCoursesWithInternalFiles from './seed-courses-internal';
+import { ACHIEVEMENTS, AchievementDefinition } from '../services/gamification.service';
+import { AchievementTier } from '@prisma/client';
 
 /**
  * Thynkr Database Seed Script
@@ -10,8 +12,40 @@ import seedCoursesWithInternalFiles from './seed-courses-internal';
  * - 4 Users: basic, standard, premium, admin (all @thynkr.ca)
  * - 5+ Courses with realistic academic content
  * - Sample content articles
- * - User achievements with varied progress
+ * - User achievements with varied, realistic progress
  */
+
+// ============ HELPER FUNCTIONS ============
+
+/**
+ * Calculates the appropriate tier for a given currentValue and achievement thresholds
+ * Returns null if below BRONZE threshold
+ */
+function calculateTier(
+  currentValue: number,
+  thresholds: AchievementDefinition['thresholds']
+): AchievementTier | null {
+  if (currentValue >= thresholds.RUBY) return AchievementTier.RUBY;
+  if (currentValue >= thresholds.PLATINUM) return AchievementTier.PLATINUM;
+  if (currentValue >= thresholds.GOLD) return AchievementTier.GOLD;
+  if (currentValue >= thresholds.SILVER) return AchievementTier.SILVER;
+  if (currentValue >= thresholds.BRONZE) return AchievementTier.BRONZE;
+  return null; // Below bronze threshold - locked
+}
+
+/**
+ * Generates a random value within a range
+ */
+function randomBetween(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
+ * Calculate user level from XP (formula: sqrt(xp/100))
+ */
+function calculateLevel(xp: number): number {
+  return Math.floor(Math.sqrt(xp / 100));
+}
 
 async function clearDatabase() {
   logger.info('🗑️  Wiping database completely...');
@@ -262,120 +296,121 @@ Upgrade to Premium to unlock Thynkr's most powerful features.
 async function seedAchievements(users: { [key: string]: string }) {
   logger.info('🏆 Seeding user achievements...');
 
-  // Basic user - some locked (null unlockedAt), mostly bronze
-  const basicAchievements = [
-    { id: 'first_steps', tier: 'BRONZE', value: 100, unlocked: true },
-    { id: 'scholar', tier: 'BRONZE', value: 100, unlocked: true },
-    { id: 'speed_reader', tier: 'BRONZE', value: 45, unlocked: false },
-    { id: 'quiz_master', tier: 'BRONZE', value: 30, unlocked: false },
-    { id: 'flash_genius', tier: 'BRONZE', value: 20, unlocked: false },
-    { id: 'night_owl', tier: 'BRONZE', value: 10, unlocked: false },
-    { id: 'early_bird', tier: 'BRONZE', value: 5, unlocked: false },
-    { id: 'streak_master', tier: 'BRONZE', value: 0, unlocked: false },
+  // Define user personas with their achievement value generation strategies
+  const userPersonas = [
+    {
+      username: 'basic_user',
+      userId: users['basic_user'],
+      name: 'Basic',
+      // Basic: Random value between 0 and Bronze threshold (mostly locked)
+      getValueRange: (achievement: AchievementDefinition) => ({
+        min: 0,
+        max: achievement.thresholds.BRONZE - 1,
+      }),
+    },
+    {
+      username: 'standard_user',
+      userId: users['standard_user'],
+      name: 'Standard',
+      // Standard: Random value between Bronze and Gold thresholds
+      getValueRange: (achievement: AchievementDefinition) => ({
+        min: achievement.thresholds.BRONZE,
+        max: achievement.thresholds.GOLD,
+      }),
+    },
+    {
+      username: 'premium_user',
+      userId: users['premium_user'],
+      name: 'Premium',
+      // Premium: Random value between Gold and Platinum
+      getValueRange: (achievement: AchievementDefinition) => ({
+        min: achievement.thresholds.GOLD,
+        max: achievement.thresholds.PLATINUM,
+      }),
+    },
+    {
+      username: 'admin',
+      userId: users['admin'],
+      name: 'Admin',
+      // Admin: Value > Ruby threshold (Maxed out)
+      getValueRange: (achievement: AchievementDefinition) => ({
+        min: achievement.thresholds.RUBY,
+        max: achievement.thresholds.RUBY + 100, // Slightly over to show mastery
+      }),
+    },
   ];
 
-  for (const ach of basicAchievements) {
-    await prisma.userAchievement.create({
+  let totalCreated = 0;
+
+  // Process each user
+  for (const persona of userPersonas) {
+    let userTotalXP = 0;
+    let unlockedCount = 0;
+    let lockedCount = 0;
+
+    // Iterate through all achievements
+    for (const [achievementKey, achievement] of Object.entries(ACHIEVEMENTS)) {
+      // Get the value range for this user persona
+      const { min, max } = persona.getValueRange(achievement);
+      const currentValue = randomBetween(min, max);
+
+      // Calculate tier based on thresholds
+      const tier = calculateTier(currentValue, achievement.thresholds);
+
+      // Determine if unlocked (has tier)
+      const isUnlocked = tier !== null;
+
+      // Calculate unlocked date (random within last 30 days if unlocked)
+      const unlockedAt = isUnlocked
+        ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000)
+        : new Date(); // Still set date even if locked (Prisma schema requirement)
+
+      // Skip creating locked achievements (tier is null)
+      if (!isUnlocked) {
+        lockedCount++;
+        continue;
+      }
+
+      // Create the achievement record (only for unlocked)
+      await prisma.userAchievement.create({
+        data: {
+          userId: persona.userId,
+          achievementId: achievementKey,
+          currentValue,
+          currentTier: tier, // Now guaranteed to be non-null
+          unlockedAt,
+        },
+      });
+
+      // Add XP if unlocked
+      if (isUnlocked && tier) {
+        userTotalXP += achievement.xpRewards[tier];
+        unlockedCount++;
+      } else {
+        lockedCount++;
+      }
+
+      if (isUnlocked) {
+        totalCreated++;
+      }
+    }
+
+    // Update user with total XP and calculated level
+    const level = calculateLevel(userTotalXP);
+    await prisma.user.update({
+      where: { id: persona.userId },
       data: {
-        userId: users['basic_user'],
-        achievementId: ach.id,
-        currentTier: ach.tier as any,
-        currentValue: ach.value,
-        unlockedAt: ach.unlocked ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000) : new Date(),
+        xp: userTotalXP,
+        level,
       },
     });
+
+    logger.info(
+      `   ✓ ${persona.name}: ${unlockedCount} unlocked, ${lockedCount} locked | ${userTotalXP} XP (Level ${level})`
+    );
   }
 
-  // Standard user - mix of bronze, silver, gold
-  const standardAchievements = [
-    { id: 'first_steps', tier: 'GOLD', value: 100, unlocked: true },
-    { id: 'scholar', tier: 'GOLD', value: 100, unlocked: true },
-    { id: 'speed_reader', tier: 'SILVER', value: 100, unlocked: true },
-    { id: 'quiz_master', tier: 'SILVER', value: 100, unlocked: true },
-    { id: 'flash_genius', tier: 'SILVER', value: 100, unlocked: true },
-    { id: 'night_owl', tier: 'BRONZE', value: 100, unlocked: true },
-    { id: 'early_bird', tier: 'BRONZE', value: 100, unlocked: true },
-    { id: 'streak_master', tier: 'BRONZE', value: 75, unlocked: false },
-    { id: 'consistent', tier: 'BRONZE', value: 60, unlocked: false },
-    { id: 'social_learner', tier: 'BRONZE', value: 40, unlocked: false },
-  ];
-
-  for (const ach of standardAchievements) {
-    await prisma.userAchievement.create({
-      data: {
-        userId: users['standard_user'],
-        achievementId: ach.id,
-        currentTier: ach.tier as any,
-        currentValue: ach.value,
-        unlockedAt: ach.unlocked ? new Date(Date.now() - Math.random() * 14 * 24 * 60 * 60 * 1000) : new Date(),
-      },
-    });
-  }
-
-  // Premium user - varied with some high tiers (RUBY, PLATINUM, GOLD)
-  const premiumAchievements = [
-    { id: 'first_steps', tier: 'RUBY', value: 100, unlocked: true },
-    { id: 'scholar', tier: 'PLATINUM', value: 100, unlocked: true },
-    { id: 'speed_reader', tier: 'PLATINUM', value: 100, unlocked: true },
-    { id: 'quiz_master', tier: 'GOLD', value: 100, unlocked: true },
-    { id: 'flash_genius', tier: 'GOLD', value: 100, unlocked: true },
-    { id: 'night_owl', tier: 'SILVER', value: 100, unlocked: true },
-    { id: 'early_bird', tier: 'SILVER', value: 100, unlocked: true },
-    { id: 'streak_master', tier: 'SILVER', value: 100, unlocked: true },
-    { id: 'consistent', tier: 'BRONZE', value: 100, unlocked: true },
-    { id: 'social_learner', tier: 'BRONZE', value: 100, unlocked: true },
-    { id: 'course_creator', tier: 'BRONZE', value: 85, unlocked: false },
-    { id: 'tutor_enthusiast', tier: 'BRONZE', value: 70, unlocked: false },
-  ];
-
-  for (const ach of premiumAchievements) {
-    await prisma.userAchievement.create({
-      data: {
-        userId: users['premium_user'],
-        achievementId: ach.id,
-        currentTier: ach.tier as any,
-        currentValue: ach.value,
-        unlockedAt: ach.unlocked ? new Date(Date.now() - Math.random() * 21 * 24 * 60 * 60 * 1000) : new Date(),
-      },
-    });
-  }
-
-  // Admin user - all achievements, varied tiers with many high-tier
-  const adminAchievements = [
-    { id: 'first_steps', tier: 'RUBY', value: 100, unlocked: true },
-    { id: 'scholar', tier: 'RUBY', value: 100, unlocked: true },
-    { id: 'speed_reader', tier: 'RUBY', value: 100, unlocked: true },
-    { id: 'quiz_master', tier: 'RUBY', value: 100, unlocked: true },
-    { id: 'flash_genius', tier: 'PLATINUM', value: 100, unlocked: true },
-    { id: 'night_owl', tier: 'PLATINUM', value: 100, unlocked: true },
-    { id: 'early_bird', tier: 'PLATINUM', value: 100, unlocked: true },
-    { id: 'streak_master', tier: 'GOLD', value: 100, unlocked: true },
-    { id: 'consistent', tier: 'GOLD', value: 100, unlocked: true },
-    { id: 'social_learner', tier: 'GOLD', value: 100, unlocked: true },
-    { id: 'course_creator', tier: 'SILVER', value: 100, unlocked: true },
-    { id: 'tutor_enthusiast', tier: 'SILVER', value: 100, unlocked: true },
-    { id: 'knowledge_sharer', tier: 'SILVER', value: 100, unlocked: true },
-    { id: 'perfectionist', tier: 'BRONZE', value: 100, unlocked: true },
-    { id: 'explorer', tier: 'BRONZE', value: 100, unlocked: true },
-  ];
-
-  for (const ach of adminAchievements) {
-    await prisma.userAchievement.create({
-      data: {
-        userId: users['admin'],
-        achievementId: ach.id,
-        currentTier: ach.tier as any,
-        currentValue: ach.value,
-        unlockedAt: ach.unlocked ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000) : new Date(),
-      },
-    });
-  }
-
-  logger.info('   ✓ Basic: 2 unlocked (bronze), 6 locked with varied progress');
-  logger.info('   ✓ Standard: 7 unlocked (bronze/silver/gold), 3 locked');
-  logger.info('   ✓ Premium: 10 unlocked (bronze-ruby), 2 locked');
-  logger.info('   ✓ Admin: All 15 unlocked with high tiers');
-  logger.info(`🏆 Created achievements with varied progress`);
+  logger.info(`🏆 Created ${totalCreated} achievement records across all users`);
 }
 
 async function seed() {
@@ -412,9 +447,9 @@ async function seed() {
     console.log('\n');
     logger.info('📋 Summary:');
     logger.info('   • 4 Users (basic, standard, premium, admin)');
-    logger.info('   • 10+ Courses with files');
+    logger.info('   • 5 Courses with files');
     logger.info('   • 3 Content articles');
-    logger.info('   • User achievements with varied progress');
+    logger.info(`   • ${Object.keys(ACHIEVEMENTS).length * 4} Achievement records with realistic progress`);
     console.log('\n');
     logger.info('🔑 Test Accounts (password: Password123!):');
     logger.info('   • basic@thynkr.ca');
