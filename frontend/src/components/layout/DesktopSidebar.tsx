@@ -2,13 +2,10 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   BookOpen,
   FolderOpen,
-  TrendingUp,
-  MessageCircle,
   Settings,
   LogOut,
   Menu,
   X,
-  BarChart3,
   GraduationCap,
   Home,
   DollarSign,
@@ -20,29 +17,20 @@ import Logo from '@/components/Logo';
 import SidebarHeader from './SidebarHeader';
 
 export default function DesktopSidebar() {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const { isSidebarOpen, toggleSidebar } = useNavigation();
   const location = useLocation();
   const navigate = useNavigate();
 
   const navItems = [
-    ...(user?.role === 'ADMIN' ? [{ icon: BarChart3, label: 'Dashboard', path: '/admin' }] : []),
-    { icon: Home, label: 'Home', path: '/' },
-    { icon: GraduationCap, label: 'Study', path: '/study' },
+    { icon: Home, label: 'Home', path: '/study' },
+    { icon: GraduationCap, label: 'Study', path: '/immersive-study' },
     { icon: BookOpen, label: 'Courses', path: '/courses' },
     { icon: FolderOpen, label: 'Files', path: '/files' },
-    { icon: TrendingUp, label: 'Progress', path: '/progress' },
-    ...(user?.role === 'PREMIUM' || user?.role === 'ADMIN'
-      ? [{ icon: MessageCircle, label: 'AI Tutor', path: '/tutor' }]
-      : []),
     { icon: DollarSign, label: 'Pricing', path: '/pricing' },
   ];
 
   const isActive = (path: string) => {
-    if (path === '/') {
-      // Home button is never active in the sidebar (it redirects externally)
-      return false;
-    }
     if (path === '/courses') {
       return location.pathname === '/courses' || location.pathname.startsWith('/courses/');
     }
@@ -102,58 +90,6 @@ export default function DesktopSidebar() {
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
-          const isHome = item.path === '/';
-
-          // Home button redirects to external domain
-          if (isHome) {
-            return (
-              <motion.div key={item.path} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <motion.button
-                  layout
-                  transition={{ 
-                      layout: { duration: 0.2, type: "spring", bounce: 0, stiffness: 300 } 
-                  }}
-                  onClick={() => (window.location.href = 'https://thynkr.ca')}
-                  className={`flex items-center gap-3 px-3 py-3 rounded-xl group relative w-full ${
-                    active
-                      ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-900 dark:text-white'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
-                  } ${!isSidebarOpen && 'justify-center'}`}
-                >
-                  {active && (
-                    <div
-                      className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-[3px] bg-gradient-to-b from-primary-400 to-primary-500 rounded-full"
-                    />
-                  )}
-                  <div
-                    className={`flex items-center justify-center w-6 h-6 ${active ? 'text-primary-600 dark:text-primary-400' : ''}`}
-                  >
-                    <Icon className="w-6 h-6 flex-shrink-0" strokeWidth={2} />
-                  </div>
-                  <AnimatePresence mode="wait">
-                    {isSidebarOpen && (
-                      <motion.span
-                        initial={{ opacity: 0, width: 0 }}
-                        animate={{ opacity: 1, width: 'auto' }}
-                        exit={{ opacity: 0, width: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="font-medium whitespace-nowrap overflow-hidden text-sm"
-                      >
-                        {item.label}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-
-                  {/* Tooltip for collapsed state */}
-                  {!isSidebarOpen && (
-                    <div className="absolute left-full ml-4 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-50">
-                      {item.label}
-                    </div>
-                  )}
-                </motion.button>
-              </motion.div>
-            );
-          }
 
           return (
             <motion.div key={item.path} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>

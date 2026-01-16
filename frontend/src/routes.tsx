@@ -14,7 +14,6 @@ export const Files = lazyWithPreload(() => import('./pages/Files'));
 export const Settings = lazyWithPreload(() => import('./pages/SettingsPage'));
 export const Courses = lazyWithPreload(() => import('./pages/CoursesUnified'));
 export const MyCourseDetail = lazyWithPreload(() => import('./pages/MyCourseDetail'));
-export const StudyProgress = lazyWithPreload(() => import('./pages/StudyProgress'));
 export const Achievements = lazyWithPreload(() => import('./pages/Achievements'));
 export const SavedPacks = lazyWithPreload(() => import('./pages/SavedPacks'));
 export const NotFound = lazyWithPreload(() => import('./pages/NotFound'));

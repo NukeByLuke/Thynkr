@@ -896,7 +896,7 @@ export default async function adminRoutes(server: FastifyInstance) {
         'NOTES_VIEW',
         'QUIZ_ATTEMPT',
         'FLASHCARD_STUDY',
-        'TUTOR_CHAT',
+
         'TTS_GENERATE',
         'STUDY_PACK_CREATE',
       ] as any[];

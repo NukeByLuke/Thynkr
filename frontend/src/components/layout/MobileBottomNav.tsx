@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { GraduationCap, Menu as MenuIcon, Settings, User, LogOut } from 'lucide-react';
+import { Home, GraduationCap, BookOpen, FolderOpen, Menu as MenuIcon, Settings, User, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, memo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -36,8 +36,10 @@ const MobileBottomNav = memo(() => {
   };
 
   const navItems = [
-    { icon: GraduationCap, label: 'Study', path: '/study' },
-    { icon: GraduationCap, label: 'Courses', path: '/courses' },
+    { icon: Home, label: 'Home', path: '/study' },
+    { icon: GraduationCap, label: 'Study', path: '/immersive-study' },
+    { icon: BookOpen, label: 'Courses', path: '/courses' },
+    { icon: FolderOpen, label: 'Files', path: '/files' },
     { icon: MenuIcon, label: 'Menu', path: '#menu', action: () => setIsMenuOpen(!isMenuOpen) },
   ];
 

@@ -2,20 +2,20 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
+  Home,
   BookOpen,
   GraduationCap,
   FolderOpen,
-  Shield,
-  ChevronRight,
-  ChevronLeft,
-  Sparkles,
-  Settings,
   CreditCard,
+  BarChart2,
+  Sparkles,
   LogOut,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Logo from '@/components/Logo';
-import { Admin, Courses, Study, Files } from '@/routes';
+import { Courses, Study, Files, Pricing } from '@/routes';
 
 interface NavLink {
   to: string;
@@ -26,15 +26,15 @@ interface NavLink {
 }
 
 const navLinks: NavLink[] = [
+  { to: '/study', icon: Home, label: 'Home', component: Study },
+  { to: '/immersive-study', icon: GraduationCap, label: 'Study', component: Study },
   { to: '/courses', icon: BookOpen, label: 'Courses', component: Courses },
-  { to: '/study', icon: GraduationCap, label: 'Study', component: Study },
   { to: '/files', icon: FolderOpen, label: 'Files', component: Files },
-  { to: '/admin', icon: Shield, label: 'Admin', adminOnly: true, component: Admin },
+  { to: '/pricing', icon: CreditCard, label: 'Pricing', component: Pricing },
 ];
 
 const bottomLinks: NavLink[] = [
-  { to: '/subscription', icon: CreditCard, label: 'Subscription' },
-  { to: '/settings', icon: Settings, label: 'Settings' },
+  // Moved Pricing to main nav
 ];
 
 const Sidebar = () => {
@@ -141,6 +141,25 @@ const Sidebar = () => {
           );
         })}
       </nav>
+
+      {/* Upgrade CTA */}
+      {!isPremium && isExpanded && (
+        <div className="mx-3 mb-2 p-4 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg relative overflow-hidden group flex-shrink-0">
+          <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+            <Sparkles className="w-16 h-16 transform rotate-12" />
+          </div>
+          <h3 className="font-semibold text-sm mb-1 relative z-10">Upgrade to Pro</h3>
+          <p className="text-[10px] text-indigo-100 mb-3 relative z-10 leading-tight">
+            Unlock unlimited AI tutoring and advanced analytics.
+          </p>
+          <Link
+            to="/pricing"
+            className="block w-full py-1.5 bg-white text-indigo-600 text-xs font-bold text-center rounded-lg hover:bg-indigo-50 transition-colors relative z-10"
+          >
+            Get Pro Access
+          </Link>
+        </div>
+      )}
 
       {/* Bottom Section */}
       <div className="px-3 pb-4 space-y-1 border-t border-slate-200 dark:border-white/10 pt-4">

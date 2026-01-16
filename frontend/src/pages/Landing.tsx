@@ -14,7 +14,6 @@ import {
   Sparkles,
   BookOpen,
   Brain,
-  MessageCircle,
   FileText,
   Flame,
   FolderOpen,
@@ -31,7 +30,7 @@ export default function Landing() {
         <title>Thynkr - AI-Powered Study Platform</title>
         <meta
           name="description"
-          content="Transform your learning with AI-powered summaries, flashcards, quizzes, and an intelligent tutor. Study smarter, not harder."
+          content="Transform your learning with AI-powered summaries, flashcards, and quizzes. Study smarter, not harder."
         />
       </Helmet>
 
@@ -54,8 +53,7 @@ export default function Landing() {
               </span>
             </h1>
             <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 mb-10 max-w-2xl mx-auto text-balance leading-relaxed">
-              Upload your study materials and let AI create summaries, flashcards, quizzes, and get
-              personalized tutoring—all in one place.
+              Upload your study materials and let AI create summaries, flashcards, and quizzes—all in one place.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" onClick={() => (window.location.href = '/register')}>
@@ -119,25 +117,6 @@ export default function Landing() {
               <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
                 Generate interactive flashcards and quizzes from your notes. Choose difficulty and
                 number of questions.
-              </p>
-            </div>
-
-            {/* AI Tutor */}
-            <div className="group relative bg-white dark:bg-slate-800 p-8 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-shadow">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-amber-500 text-white rounded-xl mb-5">
-                <MessageCircle className="w-6 h-6" />
-              </div>
-              <div className="absolute top-6 right-6">
-                <span className="px-2.5 py-1 text-xs font-medium bg-violet-500 text-white rounded-md">
-                  Premium
-                </span>
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
-                AI Tutor Chat
-              </h3>
-              <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-                Get personalized help from an AI tutor that understands your study materials and
-                answers questions in context.
               </p>
             </div>
 

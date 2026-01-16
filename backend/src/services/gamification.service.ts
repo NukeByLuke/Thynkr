@@ -106,15 +106,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     thresholds: { BRONZE: 3, SILVER: 15, GOLD: 40, PLATINUM: 120, RUBY: 350 },
     xpRewards: { BRONZE: 50, SILVER: 175, GOLD: 430, PLATINUM: 1650, RUBY: 4300 },
   },
-  tutor_enthusiast: {
-    id: 'tutor_enthusiast',
-    name: 'Tutor Enthusiast',
-    description: 'AI tutor conversations started',
-    icon: '🤖',
-    category: 'study',
-    thresholds: { BRONZE: 5, SILVER: 20, GOLD: 60, PLATINUM: 180, RUBY: 500 },
-    xpRewards: { BRONZE: 50, SILVER: 185, GOLD: 450, PLATINUM: 1750, RUBY: 4500 },
-  },
+
   early_bird: {
     id: 'early_bird',
     name: 'Early Bird',
@@ -169,15 +161,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     thresholds: { BRONZE: 2, SILVER: 6, GOLD: 15, PLATINUM: 35, RUBY: 80 },
     xpRewards: { BRONZE: 50, SILVER: 175, GOLD: 440, PLATINUM: 1700, RUBY: 4400 },
   },
-  game_champion: {
-    id: 'game_champion',
-    name: 'Game Champion',
-    description: 'Arcade game sessions won',
-    icon: '🏆',
-    category: 'skill',
-    thresholds: { BRONZE: 3, SILVER: 10, GOLD: 30, PLATINUM: 80, RUBY: 200 },
-    xpRewards: { BRONZE: 50, SILVER: 190, GOLD: 460, PLATINUM: 1800, RUBY: 4600 },
-  },
+
   knowledge_seeker: {
     id: 'knowledge_seeker',
     name: 'Knowledge Seeker',
@@ -279,14 +263,14 @@ export type AchievementAction =
   | 'quick_answer'
   | 'notes_created'
   | 'flashcard_completed'
-  | 'tutor_session'
+
   | 'early_study'
   | 'night_study'
   | 'hard_quiz_perfect'
   | 'course_created'
   | 'long_session'
   | 'weekly_consistency'
-  | 'game_won'
+
   | 'topic_studied'
   | 'summary_created'
   | 'pack_shared'
@@ -301,14 +285,14 @@ const ACTION_TO_ACHIEVEMENT_MAP: Record<AchievementAction, string> = {
   quick_answer: 'speed_demon',
   notes_created: 'note_taker',
   flashcard_completed: 'flashcard_master',
-  tutor_session: 'tutor_enthusiast',
+
   early_study: 'early_bird',
   night_study: 'night_owl',
   hard_quiz_perfect: 'perfectionist',
   course_created: 'course_creator',
   long_session: 'marathon_runner',
   weekly_consistency: 'consistent_learner',
-  game_won: 'game_champion',
+
   topic_studied: 'knowledge_seeker',
   summary_created: 'summary_specialist',
   pack_shared: 'community_helper',

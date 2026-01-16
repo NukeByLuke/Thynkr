@@ -84,7 +84,6 @@ export default function Pricing() {
         { text: '500 AI requests per month', included: true },
         { text: 'Faster AI processing', included: true },
         { text: 'Email support', included: true },
-        { text: 'AI Tutor Chat', included: false },
         { text: 'Public course publishing', included: false },
         { text: 'Priority support', included: false },
       ],
@@ -102,7 +101,6 @@ export default function Pricing() {
       stripePriceYearly: STRIPE_PRICES.premium.yearly,
       features: [
         { text: 'Everything in Standard', included: true, highlight: true },
-        { text: 'AI Tutor Chat (unlimited)', included: true },
         { text: 'Public course publishing', included: true },
         { text: 'Unlimited file uploads', included: true },
         { text: 'Unlimited AI requests', included: true },

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { User, Image, Lock, Save, Target, Volume2 } from 'lucide-react';
+import { User, Image, Lock, Save, Volume2, Mail, Type } from 'lucide-react';
 import api from '@/lib/api';
 import SmartInput from '@/components/SmartInput';
 import SaveChangesBar from '@/components/SaveChangesBar';
@@ -24,8 +24,10 @@ export default function ProfileSettings() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [username, setUsername] = useState(user?.username || '');
-  const [displayName, setDisplayName] = useState('');
-  const [studyGoal, setStudyGoal] = useState('5');
+  const [firstName, setFirstName] = useState(user?.firstName || '');
+  const [lastName, setLastName] = useState(user?.lastName || '');
+  const [email, setEmail] = useState(user?.email || '');
+  
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -37,14 +39,15 @@ export default function ProfileSettings() {
   useEffect(() => {
     const hasChanges = 
       username !== (user?.username || '') ||
-      displayName !== '' ||
-      studyGoal !== '5';
+      firstName !== (user?.firstName || '') ||
+      lastName !== (user?.lastName || '') ||
+      email !== (user?.email || '');
     setIsDirty(hasChanges);
-  }, [username, displayName, studyGoal, user?.username]);
+  }, [username, firstName, lastName, email, user]);
 
   // Update profile mutation
   const updateProfileMutation = useMutation({
-    mutationFn: async (data: { username?: string }) => {
+    mutationFn: async (data: { username?: string; firstName?: string; lastName?: string; email?: string }) => {
       const response = await api.patch('/users/me', data);
       return response.data;
     },
@@ -127,7 +130,7 @@ export default function ProfileSettings() {
   });
 
   const handleProfileUpdate = () => {
-    updateProfileMutation.mutate({ username });
+    updateProfileMutation.mutate({ username, firstName, lastName, email });
   };
 
   const handleSaveChanges = () => {
@@ -136,8 +139,9 @@ export default function ProfileSettings() {
 
   const handleDiscardChanges = () => {
     setUsername(user?.username || '');
-    setDisplayName('');
-    setStudyGoal('5');
+    setFirstName(user?.firstName || '');
+    setLastName(user?.lastName || '');
+    setEmail(user?.email || '');
     setIsDirty(false);
   };
 
@@ -248,39 +252,46 @@ export default function ProfileSettings() {
             />
           </div>
 
-          {/* Display Name */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Display Name
-            </label>
-            <SmartInput
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="Your display name (optional)"
-            />
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-              This is how other users will see your name
-            </p>
+          {/* Name Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                First Name
+              </label>
+              <SmartInput
+                icon={<Type className="w-5 h-5" />}
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="John"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Last Name
+              </label>
+              <SmartInput
+                icon={<Type className="w-5 h-5" />}
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Doe"
+              />
+            </div>
           </div>
 
-          {/* Study Goal */}
+          {/* Email */}
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Study Goal (Hours/Week)
+              Email Address
             </label>
             <SmartInput
-              icon={<Target className="w-5 h-5" />}
-              type="number"
-              min="1"
-              max="168"
-              value={studyGoal}
-              onChange={(e) => setStudyGoal(e.target.value)}
-              placeholder="e.g., 10"
+              icon={<Mail className="w-5 h-5" />}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
             />
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-              Set your weekly study hour target
-            </p>
           </div>
 
           {/* Save Button */}

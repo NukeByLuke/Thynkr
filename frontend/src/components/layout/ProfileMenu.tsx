@@ -10,7 +10,7 @@ import {
   Bell,
   HelpCircle,
   LogOut,
-  ChevronDown,
+  Trophy,
 } from 'lucide-react';
 
 export default function ProfileMenu() {
@@ -73,18 +73,12 @@ export default function ProfileMenu() {
       {/* Profile Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
+        className="rounded-full hover:ring-2 hover:ring-slate-200 dark:hover:ring-slate-700 transition-all"
       >
         {/* Avatar */}
         <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
           {getUserInitial()}
         </div>
-
-        <ChevronDown
-          className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
-            isOpen ? 'rotate-180' : ''
-          }`}
-        />
       </button>
 
       {/* Dropdown Menu */}
@@ -111,11 +105,20 @@ export default function ProfileMenu() {
           <div className="p-2">
             {/* My Profile */}
             <button
-              onClick={() => handleNavigation('/settings')}
+              onClick={() => handleNavigation('/settings?tab=profile')}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 transition-colors text-left"
             >
               <User className="w-4 h-4 text-slate-500 dark:text-slate-400" />
               <span className="text-sm font-medium">My profile</span>
+            </button>
+
+            {/* Achievements */}
+            <button
+              onClick={() => handleNavigation('/achievements')}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 transition-colors text-left"
+            >
+              <Trophy className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+              <span className="text-sm font-medium">Achievements</span>
             </button>
 
             {/* Theme Toggle */}
@@ -152,6 +155,7 @@ export default function ProfileMenu() {
 
             {/* Change Language */}
             <button
+              onClick={() => handleNavigation('/settings?tab=general')}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 transition-colors text-left"
             >
               <Globe className="w-4 h-4 text-slate-500 dark:text-slate-400" />
@@ -160,20 +164,18 @@ export default function ProfileMenu() {
 
             {/* Notifications */}
             <button
+              onClick={() => handleNavigation('/settings?tab=notifications')}
               className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 transition-colors text-left"
             >
               <div className="flex items-center gap-3">
                 <Bell className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                 <span className="text-sm font-medium">Notifications</span>
               </div>
-              {/* Notification badge */}
-              <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-red-500 text-white rounded-full">
-                1
-              </span>
             </button>
 
             {/* Help Center */}
             <button
+              onClick={() => handleNavigation('/help')}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 transition-colors text-left"
             >
               <HelpCircle className="w-4 h-4 text-slate-500 dark:text-slate-400" />
