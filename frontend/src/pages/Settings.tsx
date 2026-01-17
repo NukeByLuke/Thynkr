@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLayout } from '@/contexts/LayoutContext';
 import PageContainer from '@/components/layout/PageContainer';
 import {
   User,
@@ -47,8 +48,15 @@ const toAbsoluteUrl = (url?: string) => {
 export default function Settings() {
   const { user, logout, refetchUser } = useAuth();
   const { theme, themeMode, setThemeMode } = useTheme();
+  const { setHideSidebar, setCustomHeaderContent } = useLayout();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // CRITICAL: Reset layout on mount
+  useEffect(() => {
+    setHideSidebar(false);
+    setCustomHeaderContent(null);
+  }, [setHideSidebar, setCustomHeaderContent]);
 
   // Form states
   const [username, setUsername] = useState(user?.username || '');

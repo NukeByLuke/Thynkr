@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import PageContainer from '@/components/layout/PageContainer';
 import { motion } from 'framer-motion';
@@ -32,6 +32,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/ui/Button';
 import { api } from '@/lib/api';
+import { useLayout } from '@/contexts/LayoutContext';
 
 import { ShareProfileModal } from '@/features/gamification/ShareProfileModal';
 
@@ -651,7 +652,14 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
 
 export default function Achievements() {
   const { user } = useAuth();
+  const { setHideSidebar, setCustomHeaderContent } = useLayout();
   const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
+
+  // CRITICAL: Clear custom header on mount
+  useEffect(() => {
+    setHideSidebar(false);
+    setCustomHeaderContent(null);
+  }, [setHideSidebar, setCustomHeaderContent]);
 
   // Fetch achievements from backend
   const { data: achievements, isLoading, error } = useQuery({

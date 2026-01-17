@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
+import { useLayout } from '@/contexts/LayoutContext';
 import PageContainer from '@/components/layout/PageContainer';
 import {
   User,
@@ -37,9 +38,16 @@ interface UserProfile {
 
 export default function Account() {
   const { user, refetchUser } = useAuth();
+  const { setHideSidebar, setCustomHeaderContent } = useLayout();
   const queryClient = useQueryClient();
   const [name, setName] = useState('');
   const [isEditingName, setIsEditingName] = useState(false);
+
+  // CRITICAL: Reset layout on mount
+  useEffect(() => {
+    setHideSidebar(false);
+    setCustomHeaderContent(null);
+  }, [setHideSidebar, setCustomHeaderContent]);
 
   // Fetch user profile with subscription
   const { data: profile, isLoading } = useQuery({

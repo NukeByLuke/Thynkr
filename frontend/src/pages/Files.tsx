@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -16,6 +16,7 @@ import {
 import toast from 'react-hot-toast';
 import { FileTypeBadge, getFileIcon } from '@/lib/fileTypeUtils';
 import UploadModal from '@/components/UploadModal';
+import { useLayout } from '@/contexts/LayoutContext';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -43,6 +44,7 @@ interface UploadedFile {
 export default function Files() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { setHideSidebar, setCustomHeaderContent } = useLayout();
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,6 +66,12 @@ export default function Files() {
   const [isDragging, setIsDragging] = useState(false);
   const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
+
+  // CRITICAL: Reset layout on mount
+  useEffect(() => {
+    setHideSidebar(false);
+    setCustomHeaderContent(null);
+  }, [setHideSidebar, setCustomHeaderContent]);
 
   const getToken = () => localStorage.getItem('accessToken');
 

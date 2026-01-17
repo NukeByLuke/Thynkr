@@ -4,9 +4,10 @@
  * Layout: Abstract Header → Action Grid → Recent Files
  */
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { useLayout } from '@/contexts/LayoutContext';
 import { UploadCloud, FolderOpen, FileText, Clock, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -26,9 +27,16 @@ interface UploadedFile {
 export default function Study() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { setHideSidebar, setCustomHeaderContent } = useLayout();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
+
+  // CRITICAL: Reset layout on mount
+  useEffect(() => {
+    setHideSidebar(false);
+    setCustomHeaderContent(null);
+  }, [setHideSidebar, setCustomHeaderContent]);
 
   const getToken = () => localStorage.getItem('accessToken');
 
