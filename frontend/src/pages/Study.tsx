@@ -119,8 +119,10 @@ export default function Study() {
 
   // Manage sidebar and header content based on selected file
   useEffect(() => {
-    // Only set custom header if we're actually on the study page
+    // If we're not on the study page, clear everything immediately
     if (!location.pathname.startsWith('/study')) {
+      setHideSidebar(false);
+      setCustomHeaderContent(null);
       return;
     }
 
@@ -175,7 +177,7 @@ export default function Study() {
       setHideSidebar(false);
       setCustomHeaderContent(null);
     };
-  }, [selectedFile, activeTab, location.pathname, setHideSidebar, setCustomHeaderContent, setActiveTab, setSelectedFlashcardSet]);
+  }, [selectedFile, activeTab, location.pathname, setHideSidebar, setCustomHeaderContent, setActiveTab, setSelectedFlashcardSet, navigate]);
 
   // Upload mutation
   const uploadMutation = useMutation({
