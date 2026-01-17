@@ -92,11 +92,20 @@ export default function StudyDetail() {
     }
   }, [fileId, files, selectedFile?.id, setSelectedFile, navigate]);
 
-  // Manage sidebar and header content
+  // Manage sidebar visibility - set once, cleanup on unmount
+  useEffect(() => {
+    setHideSidebar(true);
+    
+    // Cleanup on unmount - CRITICAL for proper navigation
+    return () => {
+      setHideSidebar(false);
+      setCustomHeaderContent(null);
+    };
+  }, [setHideSidebar, setCustomHeaderContent]);
+
+  // Manage custom header content - updates when file or tab changes
   useEffect(() => {
     if (selectedFile) {
-      // Hide sidebar and show custom header with tabs
-      setHideSidebar(true);
       setCustomHeaderContent(
         <>
           {/* Back Button + File Info */}
@@ -135,13 +144,7 @@ export default function StudyDetail() {
         </>
       );
     }
-
-    // Cleanup on unmount
-    return () => {
-      setHideSidebar(false);
-      setCustomHeaderContent(null);
-    };
-  }, [selectedFile, activeTab, setHideSidebar, setCustomHeaderContent, setActiveTab, setSelectedFlashcardSet, navigate]);
+  }, [selectedFile, activeTab, setCustomHeaderContent, setActiveTab, setSelectedFlashcardSet, navigate]);
 
   const renderTabContent = () => {
     if (!selectedFile || selectedFile.status !== 'COMPLETED') {
