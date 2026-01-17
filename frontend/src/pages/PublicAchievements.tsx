@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import PageContainer from '@/components/layout/PageContainer';
@@ -10,7 +10,7 @@ import {
   TIER_ORDER, 
   UserAchievement 
 } from '@/features/gamification/gamification.utils';
-import { Trophy, Share2, Crown, Lock } from 'lucide-react';
+import { Trophy, Share2, Lock } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { ShareProfileModal } from '@/features/gamification/ShareProfileModal';
 
@@ -110,7 +110,6 @@ export default function PublicAchievements() {
   return (
     <PageContainer>
        <PageContainer.Header 
-         title="Player Profile"
          subtitle={`${unlockedCount} Achievements Unlocked`}
          actions={
            <Button onClick={() => setIsShareModalOpen(true)} variant="primary" className="gap-2">
@@ -118,13 +117,7 @@ export default function PublicAchievements() {
            </Button>
          }
        >
-         <div className="flex items-center gap-2 text-sm text-slate-400">
-            <span>thynkr.ca</span>
-            <span>/</span>
-            <span className="text-white">u</span>
-            <span>/</span>
-            <span className="text-white">{user.username}</span>
-         </div>
+         Player Profile
        </PageContainer.Header>
 
        <PageContainer.Section>

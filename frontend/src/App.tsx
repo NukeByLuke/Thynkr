@@ -22,7 +22,7 @@ import BackgroundShapes from '@/components/ui/BackgroundShapes';
 import {
   Login, Register, AuthCallback, OAuthCallback, Pricing, Account, Admin,
   Study, Files, Settings, Courses, MyCourseDetail,
-  Achievements, SavedPacks, PublicAchievements, NotFound
+  Achievements, PublicAchievements, NotFound
 } from './routes';
 
 /**
