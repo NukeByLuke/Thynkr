@@ -6,7 +6,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { UploadCloud, FolderOpen, FileText, Clock, ArrowRight, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -49,6 +49,7 @@ type TabType = 'summary' | 'notes' | 'flashcards' | 'quizzes';
 export default function Study() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { fileId } = useParams<{ fileId: string }>();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -74,15 +75,6 @@ export default function Study() {
     selectedQuiz,
   } = useStudySession({ queryKey: ['study-files'] });
 
-  // Clear layout state when navigating away from /study
-  useEffect(() => {
-    if (!location.pathname.startsWith('/study')) {
-      setHideSidebar(false);
-      setCustomHeaderContent(null);
-      setSelectedFile(null);
-    }
-  }, [location.pathname, setHideSidebar, setCustomHeaderContent, setSelectedFile]);
-
   // Fetch uploaded files
   const { data: filesData, isLoading } = useQuery({
     queryKey: ['study-files'],
@@ -100,20 +92,30 @@ export default function Study() {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 3);
 
-  // Auto-select file from query param
+  // Auto-select file from URL parameter
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const fileId = searchParams.get('file');
-
     if (fileId && files.length > 0) {
       const file = files.find((f) => f.id === fileId);
-      if (file) {
+      if (file && file.id !== selectedFile?.id) {
         setSelectedFile(file);
-        // Clear the query param from URL
+      } else if (!file) {
+        // File not found, redirect to study home
         navigate('/study', { replace: true });
       }
+    } else if (!fileId && selectedFile) {
+      // No fileId in URL but file is selected, clear selection
+      setSelectedFile(null);
     }
-  }, [location.search, files, navigate]);
+  }, [fileId, files, selectedFile?.id, setSelectedFile, navigate]);
+
+  // Clear layout state when navigating away from /study
+  useEffect(() => {
+    if (!location.pathname.startsWith('/study')) {
+      setHideSidebar(false);
+      setCustomHeaderContent(null);
+      setSelectedFile(null);
+    }
+  }, [location.pathname, setHideSidebar, setCustomHeaderContent, setSelectedFile]);
 
   // Manage sidebar and header content based on selected file
   useEffect(() => {
@@ -129,7 +131,7 @@ export default function Study() {
         <>
           {/* Back Button + File Info */}
           <button
-            onClick={() => setSelectedFile(null)}
+            onClick={() => navigate('/study')}
             className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex-shrink-0"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -194,9 +196,9 @@ export default function Study() {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-      // Auto-select the first uploaded file
+      // Auto-navigate to the first uploaded file
       if (data.files && data.files.length > 0) {
-        setSelectedFile(data.files[0]);
+        navigate(`/study/${data.files[0].id}`);
       }
     },
     onError: (error: Error) => {
@@ -576,7 +578,7 @@ export default function Study() {
                 {recentFiles.map((file) => (
                   <motion.button
                     key={file.id}
-                    onClick={() => setSelectedFile(file)}
+                    onClick={() => navigate(`/study/${file.id}`)}
                     whileHover={{ x: 4 }}
                     whileTap={{ scale: 0.98 }}
                     className="w-full flex items-center gap-4 p-4 card-hover transition-[border-color,transform] duration-200 group hover:border-indigo-500/50"

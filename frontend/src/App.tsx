@@ -148,6 +148,7 @@ function AppContent() {
             }
           >
             <Route path="/study" element={<Study />} />
+            <Route path="/study/:fileId" element={<Study />} />
             <Route path="/files" element={<Files />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/account" element={<Account />} />
