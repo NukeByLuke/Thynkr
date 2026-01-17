@@ -849,7 +849,12 @@ export default function Achievements() {
         <ShareProfileModal 
           isOpen={isShareModalOpen} 
           onClose={() => setIsShareModalOpen(false)} 
-          user={user as any} 
+          user={{
+            username: user.username,
+            avatarUrl: user.avatarUrl,
+            xp: progressStats?.totalXp || 0,
+            level: progressStats?.level || 1
+          }}
           achievements={enrichedAchievements} 
         />
       )}
