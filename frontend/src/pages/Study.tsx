@@ -57,6 +57,15 @@ export default function Study() {
 
   const getToken = () => localStorage.getItem('accessToken');
 
+  // Clear layout state when navigating away from /study
+  useEffect(() => {
+    if (!location.pathname.startsWith('/study')) {
+      setHideSidebar(false);
+      setCustomHeaderContent(null);
+      setSelectedFile(null);
+    }
+  }, [location.pathname, setHideSidebar, setCustomHeaderContent, setSelectedFile]);
+
   // Use the unified study session hook
   const {
     selectedFile,
@@ -160,15 +169,6 @@ export default function Study() {
       setCustomHeaderContent(null);
     };
   }, [selectedFile, activeTab, setHideSidebar, setCustomHeaderContent, setActiveTab, setSelectedFlashcardSet]);
-
-  // Cleanup layout when navigating away from Study page
-  useEffect(() => {
-    return () => {
-      // Reset layout state when leaving the study page
-      setHideSidebar(false);
-      setCustomHeaderContent(null);
-    };
-  }, [location.pathname, setHideSidebar, setCustomHeaderContent]);
 
   // Upload mutation
   const uploadMutation = useMutation({
