@@ -9,7 +9,6 @@ export const Pricing = lazyWithPreload(() => import('./pages/Pricing'));
 export const Account = lazyWithPreload(() => import('./pages/Account'));
 export const Admin = lazyWithPreload(() => import('./pages/Admin'));
 export const Study = lazyWithPreload(() => import('./pages/Study'));
-export const StudyDetail = lazyWithPreload(() => import('./pages/StudyDetail'));
 export const ImmersiveStudy = lazyWithPreload(() => import('./pages/ImmersiveStudy'));
 export const Files = lazyWithPreload(() => import('./pages/Files'));
 export const Settings = lazyWithPreload(() => import('./pages/SettingsPage'));

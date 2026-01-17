@@ -63,6 +63,19 @@ async function cacheAudio(hash: string, buffer: Buffer): Promise<void> {
   await fs.writeFile(filePath, buffer);
 }
 
+// Get voice description
+function getVoiceDescription(voice: Voice): string {
+  const descriptions: Record<Voice, string> = {
+    alloy: 'Neutral and balanced voice',
+    echo: 'Clear and versatile voice',
+    fable: 'Warm and expressive voice',
+    onyx: 'Deep and authoritative voice',
+    nova: 'Bright and energetic voice',
+    shimmer: 'Soft and soothing voice',
+  };
+  return descriptions[voice] || 'Default voice';
+}
+
 interface TTSRequestBody {
   text: string;
   voice?: Voice;
@@ -79,9 +92,116 @@ export default async function ttsRoutes(server: FastifyInstance) {
   await ensureCacheDir();
 
   /**
+   * GET /api/tts/preferences - Get user's saved TTS preferences
+   */
+  server.get(
+    '/tts/preferences',
+    { preHandler: [authenticate] },
+    async (request: AuthenticatedRequest, reply: FastifyReply) => {
+      const userId = request.user!.userId;
+
+      try {
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          select: {
+            ttsVoice: true,
+            ttsSpeed: true,
+          },
+        });
+
+        if (!user) {
+          return reply.status(404).send({ error: 'User not found' });
+        }
+
+        return reply.send({
+          voice: user.ttsVoice,
+          speed: user.ttsSpeed,
+        });
+      } catch (error: any) {
+        logger.error({ error, userId }, 'Failed to fetch TTS preferences');
+        return reply.status(500).send({ error: 'Failed to fetch preferences' });
+      }
+    }
+  );
+
+  /**
+   * PATCH /api/tts/preferences - Update user's TTS preferences
+   */
+  server.patch(
+    '/tts/preferences',
+    { preHandler: [authenticate] },
+    async (request: AuthenticatedRequest, reply: FastifyReply) => {
+      const userId = request.user!.userId;
+      const body = request.body as TTSPreferencesBody;
+
+      try {
+        const updateData: any = {};
+
+        if (body.voice !== undefined) {
+          if (!VOICES.includes(body.voice)) {
+            return reply.status(400).send({
+              error: 'Invalid voice',
+              validVoices: VOICES,
+            });
+          }
+          updateData.ttsVoice = body.voice;
+        }
+
+        if (body.speed !== undefined) {
+          if (body.speed < MIN_SPEED || body.speed > MAX_SPEED) {
+            return reply.status(400).send({
+              error: 'Invalid speed',
+              minSpeed: MIN_SPEED,
+              maxSpeed: MAX_SPEED,
+            });
+          }
+          updateData.ttsSpeed = body.speed;
+        }
+
+        if (Object.keys(updateData).length === 0) {
+          return reply.status(400).send({ error: 'No valid updates provided' });
+        }
+
+        const user = await prisma.user.update({
+          where: { id: userId },
+          data: updateData,
+          select: {
+            ttsVoice: true,
+            ttsSpeed: true,
+          },
+        });
+
+        logger.info({ userId, updates: updateData }, 'Updated TTS preferences');
+
+        return reply.send({
+          voice: user.ttsVoice,
+          speed: user.ttsSpeed,
+        });
+      } catch (error: any) {
+        logger.error({ error, userId }, 'Failed to update TTS preferences');
+        return reply.status(500).send({ error: 'Failed to update preferences' });
+      }
+    }
+  );
+
+  /**
+   * GET /api/tts/voices - Get list of available TTS voices
+   */
+  server.get('/tts/voices', async (_request, reply: FastifyReply) => {
+    return reply.send({
+      voices: VOICES.map((voice) => ({
+        id: voice,
+        name: voice.charAt(0).toUpperCase() + voice.slice(1),
+        description: getVoiceDescription(voice),
+      })),
+    });
+  });
+
+  /**
    * POST /api/tts - Generate TTS audio with streaming and tier-based quality
    * Pro users get tts-1-hd, free users get tts-1
    * Implements edge caching for common phrases to reduce API costs
+   * Now falls back to user's saved preferences if voice/speed not provided
    */
   server.post(
     '/tts',
@@ -98,10 +218,35 @@ export default async function ttsRoutes(server: FastifyInstance) {
         return reply.status(400).send({ error: 'Text is required' });
       }
 
+      // Fetch user preferences if voice/speed not provided
+      let voice = body.voice as Voice | undefined;
+      let speed = body.speed;
+
+      if (!voice || speed === undefined) {
+        try {
+          const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { ttsVoice: true, ttsSpeed: true },
+          });
+
+          if (user) {
+            voice = voice || (user.ttsVoice as Voice);
+            speed = speed !== undefined ? speed : user.ttsSpeed;
+          }
+        } catch (error) {
+          logger.warn({ error, userId }, 'Failed to fetch user preferences, using defaults');
+        }
+      }
+
+      // Apply defaults if still not set
+      voice = voice || 'alloy';
+      speed = speed !== undefined ? Math.max(MIN_SPEED, Math.min(MAX_SPEED, speed)) : 1.0;
+
       // Validate voice
-      if (!body.voice || !VOICES.includes(body.voice as Voice)) {
+      if (!VOICES.includes(voice)) {
         return reply.status(400).send({ 
-          error: 'Voice is required and must be one of: alloy, echo, fable, onyx, nova, shimmer' 
+          error: 'Invalid voice',
+          validVoices: VOICES
         });
       }
 
@@ -118,11 +263,6 @@ export default async function ttsRoutes(server: FastifyInstance) {
           upgradeRequired: true,
         });
       }
-
-      const voice = body.voice as Voice;
-      const speed = body.speed 
-        ? Math.max(MIN_SPEED, Math.min(MAX_SPEED, body.speed)) 
-        : 1.0;
 
       // Determine model quality based on user tier using reusable helper
       const isProUser = isPro(userRole);
