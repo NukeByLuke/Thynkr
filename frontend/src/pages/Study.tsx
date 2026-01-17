@@ -161,6 +161,15 @@ export default function Study() {
     };
   }, [selectedFile, activeTab, setHideSidebar, setCustomHeaderContent, setActiveTab, setSelectedFlashcardSet]);
 
+  // Cleanup layout when navigating away from Study page
+  useEffect(() => {
+    return () => {
+      // Reset layout state when leaving the study page
+      setHideSidebar(false);
+      setCustomHeaderContent(null);
+    };
+  }, [location.pathname, setHideSidebar, setCustomHeaderContent]);
+
   // Upload mutation
   const uploadMutation = useMutation({
     mutationFn: async (files: FileList) => {

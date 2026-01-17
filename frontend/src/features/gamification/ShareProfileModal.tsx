@@ -111,16 +111,18 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
       className="max-w-3xl"
     >
       <div className="flex flex-col gap-6">
-        <div className="text-slate-400 text-sm">
+        <div className="text-slate-300 text-base leading-relaxed">
           Show off your progress! Download your player card or share your public profile link.
         </div>
 
-        {/* Card Preview Area */}
-        <div className="flex justify-center bg-slate-900/50 p-6 rounded-xl border border-slate-800/50 overflow-hidden relative">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-800/20 via-transparent to-transparent pointer-events-none" />
+        {/* Enhanced Card Preview Area */}
+        <div className="flex justify-center bg-gradient-to-br from-slate-900/60 to-slate-950/80 p-8 rounded-2xl border border-slate-700/50 overflow-hidden relative shadow-2xl">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-700/20 via-transparent to-transparent pointer-events-none" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 blur-[80px] rounded-full" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 blur-[80px] rounded-full" />
           
-          <div className="w-full overflow-x-auto flex justify-center py-2 no-scrollbar">
-             <div className="origin-center">
+          <div className="w-full overflow-x-auto flex justify-center py-4 no-scrollbar relative z-10">
+             <div className="origin-center transform scale-[0.6] hover:scale-[0.62] transition-transform duration-300">
                 <PlayerCardExport
                   ref={cardRef}
                   user={user}
@@ -131,21 +133,21 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <Button variant="secondary" onClick={handleCopyLink} className="flex gap-2 items-center justify-center h-12">
-            {copyingLink ? <Check size={18} className="text-green-500" /> : <LinkIcon size={18} />}
-            <span>{copyingLink ? 'Copied!' : 'Copy Link'}</span>
+        {/* Enhanced Action Buttons */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Button variant="secondary" onClick={handleCopyLink} className="flex gap-2.5 items-center justify-center h-14 font-semibold transition-all hover:scale-105">
+            {copyingLink ? <Check size={20} className="text-green-500" /> : <LinkIcon size={20} />}
+            <span className="text-base">{copyingLink ? 'Copied!' : 'Copy Link'}</span>
           </Button>
           
-          <Button variant="secondary" onClick={handleCopyImage} className="flex gap-2 items-center justify-center h-12">
-            <ImageIcon size={18} />
-            <span>Copy Image</span>
+          <Button variant="secondary" onClick={handleCopyImage} className="flex gap-2.5 items-center justify-center h-14 font-semibold transition-all hover:scale-105">
+            <ImageIcon size={20} />
+            <span className="text-base">Copy Image</span>
           </Button>
           
-          <Button variant="primary" onClick={handleDownloadImage} className="flex gap-2 items-center justify-center h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500">
-            <Download size={18} />
-            <span>Download PNG</span>
+          <Button variant="primary" onClick={handleDownloadImage} className="flex gap-2.5 items-center justify-center h-14 font-semibold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:via-indigo-500 hover:to-purple-500 transition-all hover:scale-105 shadow-lg hover:shadow-xl">
+            <Download size={20} />
+            <span className="text-base">Download PNG</span>
           </Button>
         </div>
       </div>
