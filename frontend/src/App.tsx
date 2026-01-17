@@ -21,7 +21,7 @@ import GlobalLoadingBar from '@/components/ui/GlobalLoadingBar';
 import BackgroundShapes from '@/components/ui/BackgroundShapes';
 import {
   Login, Register, AuthCallback, OAuthCallback, Pricing, Account, Admin,
-  Study, Files, Settings, Courses, MyCourseDetail,
+  Study, StudyDetail, Files, Settings, Courses, MyCourseDetail,
   Achievements, PublicAchievements, NotFound
 } from './routes';
 
@@ -148,7 +148,7 @@ function AppContent() {
             }
           >
             <Route path="/study" element={<Study />} />
-            <Route path="/study/:fileId" element={<Study />} />
+            <Route path="/study/:fileId" element={<StudyDetail />} />
             <Route path="/files" element={<Files />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/account" element={<Account />} />

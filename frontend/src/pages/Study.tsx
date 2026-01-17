@@ -1,25 +1,18 @@
 /**
- * Study Page - Fluid Workspace
+ * Study Page - Study Center Dashboard
  * Modern, abstract design with floating shapes and split-action cards.
- * Layout: Abstract Header → Action Grid → Recent Files → Full Study Interface
+ * Layout: Abstract Header → Action Grid → Recent Files
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { UploadCloud, FolderOpen, FileText, Clock, ArrowRight, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { UploadCloud, FolderOpen, FileText, Clock, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import SummaryView from '@/features/study/SummaryView';
-import NotesView from '@/features/study/NotesView';
-import FlashcardViewer from '@/features/study/FlashcardViewer';
-import QuizPlayer from '@/features/study/QuizPlayer';
-import { useStudySession } from '@/hooks/useStudySession';
 import { FileTypeBadge } from '@/lib/fileTypeUtils';
 import UploadModal from '@/components/UploadModal';
-import GenerationModal from '@/components/modals/GenerationModal';
 import api from '@/lib/api';
-import { useLayout } from '@/contexts/LayoutContext';
 
 interface UploadedFile {
   id: string;
@@ -28,52 +21,16 @@ interface UploadedFile {
   fileSize: number;
   status: 'UPLOADED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
   createdAt: string;
-  extractedText?: string;
-  summary?: { id: string; content: string };
-  notes?: { id: string; keyPoints: string[]; detailed: string };
-  quizzes?: Array<{
-    id: string;
-    title: string;
-    difficulty: string;
-    questions: any[];
-  }>;
-  flashcardSets?: Array<{
-    id: string;
-    title: string;
-    cards: any[];
-  }>;
 }
 
-type TabType = 'summary' | 'notes' | 'flashcards' | 'quizzes';
-
 export default function Study() {
-  const location = useLocation();
   const navigate = useNavigate();
-  const { fileId } = useParams<{ fileId: string }>();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const { setHideSidebar, setCustomHeaderContent } = useLayout();
 
   const getToken = () => localStorage.getItem('accessToken');
-
-  // Use the unified study session hook
-  const {
-    selectedFile,
-    activeTab,
-    selectedFlashcardSet,
-    numCards,
-    setSelectedFile,
-    setActiveTab,
-    setSelectedFlashcardSet,
-    setNumCards,
-    generateSummaryMutation,
-    generateNotesMutation,
-    generateFlashcardsMutation,
-    generateQuizMutation,
-    selectedQuiz,
-  } = useStudySession({ queryKey: ['study-files'] });
 
   // Fetch uploaded files
   const { data: filesData, isLoading } = useQuery({
@@ -91,93 +48,6 @@ export default function Study() {
   const recentFiles = [...files]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 3);
-
-  // Auto-select file from URL parameter
-  useEffect(() => {
-    if (fileId && files.length > 0) {
-      const file = files.find((f) => f.id === fileId);
-      if (file && file.id !== selectedFile?.id) {
-        setSelectedFile(file);
-      } else if (!file) {
-        // File not found, redirect to study home
-        navigate('/study', { replace: true });
-      }
-    } else if (!fileId && selectedFile) {
-      // No fileId in URL but file is selected, clear selection
-      setSelectedFile(null);
-    }
-  }, [fileId, files, selectedFile?.id, setSelectedFile, navigate]);
-
-  // Clear layout state when navigating away from /study
-  useEffect(() => {
-    if (!location.pathname.startsWith('/study')) {
-      setHideSidebar(false);
-      setCustomHeaderContent(null);
-      setSelectedFile(null);
-    }
-  }, [location.pathname, setHideSidebar, setCustomHeaderContent, setSelectedFile]);
-
-  // Manage sidebar and header content based on selected file
-  useEffect(() => {
-    // If we're not on the study page, clear everything immediately
-    if (!location.pathname.startsWith('/study')) {
-      setHideSidebar(false);
-      setCustomHeaderContent(null);
-      return;
-    }
-
-    if (selectedFile) {
-      // Hide sidebar and show custom header with tabs
-      setHideSidebar(true);
-      setCustomHeaderContent(
-        <>
-          {/* Back Button + File Info */}
-          <button
-            onClick={() => navigate('/study')}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex-shrink-0"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back</span>
-          </button>
-          <div className="min-w-0 hidden sm:block">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-white truncate">
-              {selectedFile.originalName}
-            </h2>
-          </div>
-          
-          {/* Tab Switcher Pills */}
-          <div className="flex items-center gap-2 ml-auto flex-shrink-0">
-            {(['summary', 'notes', 'flashcards', 'quizzes'] as TabType[]).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => {
-                  setActiveTab(tab);
-                  setSelectedFlashcardSet(null);
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium capitalize transition-all duration-200 whitespace-nowrap ${
-                  activeTab === tab
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                {tab === 'flashcards' ? 'Cards' : tab}
-              </button>
-            ))}
-          </div>
-        </>
-      );
-    } else {
-      // Show sidebar and clear custom header
-      setHideSidebar(false);
-      setCustomHeaderContent(null);
-    }
-
-    // Cleanup on unmount
-    return () => {
-      setHideSidebar(false);
-      setCustomHeaderContent(null);
-    };
-  }, [selectedFile, activeTab, location.pathname, setHideSidebar, setCustomHeaderContent, setActiveTab, setSelectedFlashcardSet, navigate]);
 
   // Upload mutation
   const uploadMutation = useMutation({
@@ -255,181 +125,6 @@ export default function Study() {
     return date.toLocaleDateString();
   };
 
-  const renderTabContent = () => {
-    if (!selectedFile || selectedFile.status !== 'COMPLETED') {
-      return (
-        <div className="text-center py-12 text-slate-600 dark:text-slate-300">
-          <p>File processing failed or not yet complete</p>
-        </div>
-      );
-    }
-
-    switch (activeTab) {
-      case 'summary':
-        if (selectedFile.summary) {
-          return (
-            <SummaryView
-              content={selectedFile.summary.content}
-              onRegenerate={() =>
-                generateSummaryMutation.mutate({ fileId: selectedFile.id, regenerate: true })
-              }
-              isRegenerating={generateSummaryMutation.isPending}
-            />
-          );
-        }
-        return (
-          <div className="text-center py-12 space-y-6">
-            {!generateSummaryMutation.isPending && (
-              <>
-                <p className="text-slate-600 dark:text-slate-400 mb-4">No summary generated yet</p>
-                <button
-                  onClick={() => generateSummaryMutation.mutate({ fileId: selectedFile.id })}
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-[background-image,box-shadow,transform] duration-200 active:scale-95 shadow-lg hover:shadow-xl"
-                  disabled={generateSummaryMutation.isPending}
-                >
-                  {generateSummaryMutation.isPending ? 'Generating...' : 'Generate Summary'}
-                </button>
-              </>
-            )}
-          </div>
-        );
-
-      case 'notes':
-        if (selectedFile.notes) {
-          return (
-            <NotesView
-              keyPoints={selectedFile.notes.keyPoints}
-              detailed={selectedFile.notes.detailed}
-              onRegenerate={() =>
-                generateNotesMutation.mutate({ fileId: selectedFile.id, regenerate: true })
-              }
-              isRegenerating={generateNotesMutation.isPending}
-            />
-          );
-        }
-        return (
-          <div className="text-center py-12 space-y-6">
-            {!generateNotesMutation.isPending && (
-              <>
-                <p className="text-slate-600 dark:text-slate-400 mb-4">No notes generated yet</p>
-                <button
-                  onClick={() => generateNotesMutation.mutate({ fileId: selectedFile.id })}
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-[background-image,box-shadow,transform] duration-200 active:scale-95 shadow-lg hover:shadow-xl"
-                  disabled={generateNotesMutation.isPending}
-                >
-                  {generateNotesMutation.isPending ? 'Generating...' : 'Generate Notes'}
-                </button>
-              </>
-            )}
-          </div>
-        );
-
-      case 'flashcards':
-        if (
-          selectedFlashcardSet ||
-          (selectedFile.flashcardSets && selectedFile.flashcardSets.length > 0)
-        ) {
-          const set = selectedFlashcardSet || selectedFile.flashcardSets![0];
-          return <FlashcardViewer cards={set.cards} title={set.title} />;
-        }
-        return (
-          <div className="text-center py-12 space-y-6">
-            {!generateFlashcardsMutation.isPending && (
-              <>
-                <p className="text-slate-600 dark:text-slate-400 mb-4">No flashcards yet</p>
-                <div className="max-w-xs mx-auto mb-4">
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Cards: {numCards}
-                  </label>
-                  <input
-                    type="range"
-                    min="10"
-                    max="50"
-                    value={numCards}
-                    onChange={(e) => setNumCards(Number(e.target.value))}
-                    className="w-full"
-                  />
-                </div>
-                <button
-                  onClick={() =>
-                    generateFlashcardsMutation.mutate({ fileId: selectedFile.id, numCards })
-                  }
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-[background-image,box-shadow,transform] duration-200 active:scale-95 shadow-lg hover:shadow-xl"
-                  disabled={generateFlashcardsMutation.isPending}
-                >
-                  {generateFlashcardsMutation.isPending ? 'Generating...' : 'Generate Flashcards'}
-                </button>
-              </>
-            )}
-          </div>
-        );
-
-      case 'quizzes':
-        // Always show QuizPlayer directly - no lists, no saving
-        return (
-          <div>
-            <QuizPlayer
-              quizId={selectedQuiz?.id || "temp-quiz"}
-              title={selectedFile.originalName}
-              questions={selectedQuiz?.questions || []} // Use generated quiz questions
-              fileId={selectedFile.id}
-              onGenerateQuiz={(difficulty: string, numQuestions: number) => {
-                // Convert difficulty to uppercase for backend API
-                generateQuizMutation.mutate({ 
-                  fileId: selectedFile.id, 
-                  difficulty: difficulty.toUpperCase(), 
-                  numQuestions 
-                });
-              }}
-              isGenerating={generateQuizMutation.isPending}
-              onSubmit={async (answers, timeSpentSeconds) => {
-                // Submit to backend if we have a real quiz ID
-                if (selectedQuiz?.id) {
-                  try {
-                    const response = await api.post(`/study/quizzes/${selectedQuiz.id}/submit`, {
-                      answers,
-                      timeSpentSeconds,
-                    });
-                    
-                    // Show achievement notifications if any were unlocked
-                    if (response.data.achievements && response.data.achievements.length > 0) {
-                      response.data.achievements.forEach((ach: any) => {
-                        toast.success(
-                          `🎉 Achievement Unlocked: ${ach.achievementName} (${ach.newTier})! +${ach.xpAwarded} XP`,
-                          { duration: 5000 }
-                        );
-                      });
-                    }
-                    
-                    if (response.data.xpGained > 0) {
-                      toast.success(`+${response.data.xpGained} XP earned!`);
-                    }
-                    
-                    return response.data;
-                  } catch (error: any) {
-                    toast.error(error.response?.data?.error || 'Failed to submit quiz');
-                    throw error;
-                  }
-                } else {
-                  // Fallback: Calculate score locally if no quiz ID (shouldn't happen normally)
-                  const questions = selectedQuiz?.questions || [];
-                  let score = 0;
-                  questions.forEach((question: any) => {
-                    if (answers[question.id] === question.correctAnswer) {
-                      score++;
-                    }
-                  });
-                  const total = questions.length;
-                  const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
-                  return { score, total, percentage };
-                }
-              }}
-            />
-          </div>
-        );
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -438,36 +133,6 @@ export default function Study() {
     );
   }
 
-  // Show full study interface if a file is selected
-  if (selectedFile) {
-    // Determine which generation modal to show
-    const getActiveGenerationType = (): 'summary' | 'notes' | 'flashcards' | 'quiz' | null => {
-      if (generateSummaryMutation.isPending) return 'summary';
-      if (generateNotesMutation.isPending) return 'notes';
-      if (generateFlashcardsMutation.isPending) return 'flashcards';
-      if (generateQuizMutation.isPending) return 'quiz';
-      return null;
-    };
-
-    const activeGenerationType = getActiveGenerationType();
-
-    return (
-      <>
-        {/* Generation Modal */}
-        <GenerationModal 
-          isOpen={activeGenerationType !== null} 
-          type={activeGenerationType || 'summary'} 
-        />
-
-        {/* Main Content Area - Full Height */}
-        <div className="h-full overflow-y-auto">
-          {renderTabContent()}
-        </div>
-      </>
-    );
-  }
-
-  // Main Study Center View (No file selected)
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Hidden File Input */}
