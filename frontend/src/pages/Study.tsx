@@ -57,15 +57,6 @@ export default function Study() {
 
   const getToken = () => localStorage.getItem('accessToken');
 
-  // Clear layout state when navigating away from /study
-  useEffect(() => {
-    if (!location.pathname.startsWith('/study')) {
-      setHideSidebar(false);
-      setCustomHeaderContent(null);
-      setSelectedFile(null);
-    }
-  }, [location.pathname, setHideSidebar, setCustomHeaderContent, setSelectedFile]);
-
   // Use the unified study session hook
   const {
     selectedFile,
@@ -82,6 +73,15 @@ export default function Study() {
     generateQuizMutation,
     selectedQuiz,
   } = useStudySession({ queryKey: ['study-files'] });
+
+  // Clear layout state when navigating away from /study
+  useEffect(() => {
+    if (!location.pathname.startsWith('/study')) {
+      setHideSidebar(false);
+      setCustomHeaderContent(null);
+      setSelectedFile(null);
+    }
+  }, [location.pathname, setHideSidebar, setCustomHeaderContent, setSelectedFile]);
 
   // Fetch uploaded files
   const { data: filesData, isLoading } = useQuery({
