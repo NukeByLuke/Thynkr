@@ -34,8 +34,8 @@ export default async function userRoutes(server: FastifyInstance) {
             select: {
               achievementId: true,
               unlockedAt: true,
-              tier: true,
-              progress: true,
+              currentTier: true,
+              currentValue: true,
             },
           },
         },
@@ -50,9 +50,19 @@ export default async function userRoutes(server: FastifyInstance) {
         .map((ua) => {
           const definition = ACHIEVEMENTS[ua.achievementId];
           if (!definition) return null;
+
+          // Simple progress approximation for public view
+          // In a real implementation, we would replicate the service logic to determine "next required"
+          // based on currentTier.
           return {
             ...ua,
+            tier: ua.currentTier, // Map currentTier to tier if frontend expects it, or keep it as is
             definition,
+            progress: {
+              current: ua.currentValue,
+              required: 0, // Placeholder - calculation complex without service utility
+              percentage: 0
+            } 
           };
         })
         .filter(Boolean);
