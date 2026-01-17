@@ -31,8 +31,8 @@ enum AchievementTier {
   BRONZE
   SILVER
   GOLD
-  PLATINUM
   RUBY
+  DIAMOND
 }
 
 model User {

@@ -1,0 +1,114 @@
+import React, { forwardRef } from 'react';
+import { Trophy, Award, Flame, Star, LucideIcon } from 'lucide-react';
+
+interface PlayerCardExportProps {
+  user: {
+    username: string;
+    avatarUrl?: string | null;
+    xp: number;
+    level: number;
+  };
+  totalAchievements: number;
+  featuredStats?: {
+    label: string;
+    value: string | number;
+    icon: LucideIcon;
+    color?: string;
+  }[];
+}
+
+export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps>(
+  ({ user, totalAchievements, featuredStats }, ref) => {
+    return (
+      <div
+        ref={ref}
+        id="player-card-export"
+        className="w-[600px] h-[315px] bg-slate-950 text-white relative overflow-hidden flex flex-col shadow-2xl"
+        style={{
+          fontFamily: "'Inter', sans-serif", // Ensure font matches
+        }}
+      >
+        {/* Background Gradient & Effects */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-950" />
+        
+        {/* Decorative Orbs */}
+        <div className="absolute top-[-100px] left-[-100px] w-[300px] h-[300px] bg-purple-500/20 blur-[80px] rounded-full" />
+        <div className="absolute bottom-[-50px] right-[-50px] w-[400px] h-[400px] bg-blue-600/10 blur-[100px] rounded-full" />
+        
+        {/* Content Container */}
+        <div className="relative z-10 flex flex-col h-full p-8 justify-between">
+          
+          {/* Header Section */}
+          <div className="flex items-center gap-6">
+            {/* Avatar with Ring */}
+            <div className="relative group">
+               <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-1000"></div>
+               <div className="relative w-24 h-24 rounded-full border-2 border-slate-800 overflow-hidden bg-slate-900 flex items-center justify-center">
+                 {user.avatarUrl ? (
+                   <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
+                 ) : (
+                   <span className="text-3xl font-bold text-slate-400">{user.username.charAt(0).toUpperCase()}</span>
+                 )}
+               </div>
+               
+               {/* Level Badge */}
+               <div className="absolute -bottom-1 -right-1 bg-slate-900 p-1 rounded-full">
+                 <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full border border-slate-700 shadow-sm flex items-center gap-1">
+                   <span>Lvl {user.level}</span>
+                 </div>
+               </div>
+            </div>
+
+            {/* User Info */}
+            <div className="flex flex-col">
+              <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 tracking-tight">
+                {user.username}
+              </h1>
+              <p className="text-slate-500 font-medium text-sm flex items-center gap-2">
+                Thynkr Scholar
+              </p>
+
+              {/* Badges/Chips */}
+              <div className="flex items-center gap-3 mt-3">
+                <div className="px-3 py-1 rounded-full bg-slate-800/60 border border-slate-700/50 flex items-center gap-2 backdrop-blur-sm">
+                   <Trophy size={14} className="text-yellow-500" />
+                   <span className="text-xs font-semibold text-slate-300">{user.xp.toLocaleString()} XP</span>
+                </div>
+                <div className="px-3 py-1 rounded-full bg-slate-800/60 border border-slate-700/50 flex items-center gap-2 backdrop-blur-sm">
+                   <Award size={14} className="text-purple-400" />
+                   <span className="text-xs font-semibold text-slate-300">{totalAchievements} Achievements</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Grid */}
+          {featuredStats && featuredStats.length > 0 && (
+            <div className="grid grid-cols-3 gap-4 border-t border-slate-800/50 pt-6 mt-2">
+              {featuredStats.map((stat, idx) => (
+                <div key={idx} className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2 text-slate-400 mb-1">
+                    <stat.icon size={16} className={stat.color} />
+                    <span className="text-xs font-medium uppercase tracking-wider">{stat.label}</span>
+                  </div>
+                  <span className="text-2xl font-bold text-white">{stat.value}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Branding Footer */}
+          <div className="absolute bottom-5 right-6 flex items-center gap-2 opacity-50">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+            <span className="text-[10px] font-semibold tracking-[0.2em] text-slate-400 uppercase">
+              Generated by thynkr.ca
+            </span>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+);
+
+PlayerCardExport.displayName = 'PlayerCardExport';

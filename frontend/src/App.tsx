@@ -22,7 +22,7 @@ import BackgroundShapes from '@/components/ui/BackgroundShapes';
 import {
   Login, Register, AuthCallback, OAuthCallback, Pricing, Account, Admin,
   Study, Files, Settings, Courses, MyCourseDetail,
-  Achievements, NotFound
+  Achievements, SavedPacks, PublicAchievements, NotFound
 } from './routes';
 
 /**
@@ -137,6 +137,7 @@ function AppContent() {
             {/* Public routes with PublicLayout (navbar) */}
             <Route element={<PublicLayout />}>
               <Route path="/pricing" element={<Pricing />} />
+              <Route path="/u/:username" element={<PublicAchievements />} />
             </Route>
 
           <Route

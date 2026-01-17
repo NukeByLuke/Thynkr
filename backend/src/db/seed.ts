@@ -25,8 +25,8 @@ function calculateTier(
   currentValue: number,
   thresholds: AchievementDefinition['thresholds']
 ): AchievementTier | null {
+  if (currentValue >= thresholds.DIAMOND) return AchievementTier.DIAMOND;
   if (currentValue >= thresholds.RUBY) return AchievementTier.RUBY;
-  if (currentValue >= thresholds.PLATINUM) return AchievementTier.PLATINUM;
   if (currentValue >= thresholds.GOLD) return AchievementTier.GOLD;
   if (currentValue >= thresholds.SILVER) return AchievementTier.SILVER;
   if (currentValue >= thresholds.BRONZE) return AchievementTier.BRONZE;
@@ -336,15 +336,14 @@ async function seedAchievements(users: { [key: string]: string }) {
             return { min: achievement.thresholds.SILVER, max: achievement.thresholds.GOLD - 1 };
           case 2:
             // Gold tier (20% of achievements)
-            return { min: achievement.thresholds.GOLD, max: achievement.thresholds.PLATINUM - 1 };
+            return { min: achievement.thresholds.GOLD, max: achievement.thresholds.RUBY - 1 };
           case 3:
             // Ruby tier (20% of achievements)
-            return { min: achievement.thresholds.RUBY || achievement.thresholds.PLATINUM, max: (achievement.thresholds.RUBY || achievement.thresholds.PLATINUM) + 10 };
+            return { min: achievement.thresholds.RUBY, max: achievement.thresholds.DIAMOND - 1 };
           case 4:
           default:
             // Diamond tier (20% of achievements) - highest tier
-            const diamondThreshold = achievement.thresholds.DIAMOND || achievement.thresholds.RUBY || achievement.thresholds.PLATINUM;
-            return { min: diamondThreshold, max: diamondThreshold + 20 };
+            return { min: achievement.thresholds.DIAMOND, max: achievement.thresholds.DIAMOND + 20 };
         }
       },
     },
@@ -352,10 +351,10 @@ async function seedAchievements(users: { [key: string]: string }) {
       username: 'admin',
       userId: users['admin'],
       name: 'Admin',
-      // Admin: Value > Ruby threshold (Maxed out)
+      // Admin: Value > Diamond threshold (Maxed out)
       getValueRange: (achievement: AchievementDefinition, _index?: number) => ({
-        min: achievement.thresholds.RUBY,
-        max: achievement.thresholds.RUBY + 100, // Slightly over to show mastery
+        min: achievement.thresholds.DIAMOND,
+        max: achievement.thresholds.DIAMOND + 100, // Slightly over to show mastery
       }),
     },
   ];

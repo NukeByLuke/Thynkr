@@ -19,15 +19,15 @@ export interface AchievementDefinition {
     BRONZE: number;
     SILVER: number;
     GOLD: number;
-    PLATINUM: number;
     RUBY: number;
+    DIAMOND: number;
   };
   xpRewards: {
     BRONZE: number;
     SILVER: number;
     GOLD: number;
-    PLATINUM: number;
     RUBY: number;
+    DIAMOND: number;
   };
   isMastery?: boolean;
 }
@@ -40,8 +40,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Total hours spent studying',
     icon: 'book',
     category: 'study',
-    thresholds: { BRONZE: 10, SILVER: 50, GOLD: 100, PLATINUM: 500, RUBY: 1000 },
-    xpRewards: { BRONZE: 50, SILVER: 200, GOLD: 500, PLATINUM: 2000, RUBY: 5000 },
+    thresholds: { BRONZE: 10, SILVER: 50, GOLD: 100, RUBY: 500, DIAMOND: 2000 },
+    xpRewards: { BRONZE: 50, SILVER: 200, GOLD: 500, RUBY: 2000, DIAMOND: 5000 },
   },
   streak_master: {
     id: 'streak_master',
@@ -49,8 +49,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Consecutive days of studying',
     icon: 'flame',
     category: 'streak',
-    thresholds: { BRONZE: 3, SILVER: 7, GOLD: 14, PLATINUM: 30, RUBY: 100 },
-    xpRewards: { BRONZE: 50, SILVER: 150, GOLD: 400, PLATINUM: 1500, RUBY: 4000 },
+    thresholds: { BRONZE: 3, SILVER: 7, GOLD: 14, RUBY: 30, DIAMOND: 100 },
+    xpRewards: { BRONZE: 50, SILVER: 150, GOLD: 400, RUBY: 1500, DIAMOND: 4000 },
   },
   quiz_whiz: {
     id: 'quiz_whiz',
@@ -58,8 +58,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Perfect quiz scores achieved',
     icon: 'target',
     category: 'skill',
-    thresholds: { BRONZE: 1, SILVER: 5, GOLD: 10, PLATINUM: 25, RUBY: 50 },
-    xpRewards: { BRONZE: 50, SILVER: 200, GOLD: 450, PLATINUM: 1800, RUBY: 4500 },
+    thresholds: { BRONZE: 1, SILVER: 5, GOLD: 10, RUBY: 25, DIAMOND: 50 },
+    xpRewards: { BRONZE: 50, SILVER: 200, GOLD: 450, RUBY: 1800, DIAMOND: 4500 },
   },
   librarian: {
     id: 'librarian',
@@ -67,8 +67,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Study materials uploaded',
     icon: 'library',
     category: 'content',
-    thresholds: { BRONZE: 5, SILVER: 20, GOLD: 50, PLATINUM: 150, RUBY: 500 },
-    xpRewards: { BRONZE: 50, SILVER: 180, GOLD: 420, PLATINUM: 1600, RUBY: 4200 },
+    thresholds: { BRONZE: 5, SILVER: 20, GOLD: 50, RUBY: 150, DIAMOND: 500 },
+    xpRewards: { BRONZE: 50, SILVER: 180, GOLD: 420, RUBY: 1600, DIAMOND: 4200 },
   },
   socialite: {
     id: 'socialite',
@@ -76,8 +76,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Study sessions shared with others',
     icon: 'share-2',
     category: 'social',
-    thresholds: { BRONZE: 3, SILVER: 10, GOLD: 25, PLATINUM: 75, RUBY: 200 },
-    xpRewards: { BRONZE: 50, SILVER: 170, GOLD: 400, PLATINUM: 1500, RUBY: 4000 },
+    thresholds: { BRONZE: 3, SILVER: 10, GOLD: 25, RUBY: 75, DIAMOND: 200 },
+    xpRewards: { BRONZE: 50, SILVER: 170, GOLD: 400, RUBY: 1500, DIAMOND: 4000 },
   },
   speed_demon: {
     id: 'speed_demon',
@@ -85,8 +85,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Quiz questions answered in under 5 seconds',
     icon: 'zap',
     category: 'skill',
-    thresholds: { BRONZE: 10, SILVER: 50, GOLD: 150, PLATINUM: 500, RUBY: 1500 },
-    xpRewards: { BRONZE: 50, SILVER: 190, GOLD: 470, PLATINUM: 1900, RUBY: 4700 },
+    thresholds: { BRONZE: 10, SILVER: 50, GOLD: 150, RUBY: 500, DIAMOND: 1500 },
+    xpRewards: { BRONZE: 50, SILVER: 190, GOLD: 470, RUBY: 1900, DIAMOND: 4700 },
   },
   note_taker: {
     id: 'note_taker',
@@ -94,8 +94,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'AI-generated notes created',
     icon: 'file-text',
     category: 'content',
-    thresholds: { BRONZE: 5, SILVER: 25, GOLD: 75, PLATINUM: 200, RUBY: 600 },
-    xpRewards: { BRONZE: 50, SILVER: 180, GOLD: 440, PLATINUM: 1700, RUBY: 4400 },
+    thresholds: { BRONZE: 5, SILVER: 25, GOLD: 75, RUBY: 200, DIAMOND: 600 },
+    xpRewards: { BRONZE: 50, SILVER: 180, GOLD: 440, RUBY: 1700, DIAMOND: 4400 },
   },
   flashcard_master: {
     id: 'flashcard_master',
@@ -103,8 +103,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Flashcard sets completed',
     icon: 'layers',
     category: 'study',
-    thresholds: { BRONZE: 3, SILVER: 15, GOLD: 40, PLATINUM: 120, RUBY: 350 },
-    xpRewards: { BRONZE: 50, SILVER: 175, GOLD: 430, PLATINUM: 1650, RUBY: 4300 },
+    thresholds: { BRONZE: 3, SILVER: 15, GOLD: 40, RUBY: 120, DIAMOND: 350 },
+    xpRewards: { BRONZE: 50, SILVER: 175, GOLD: 430, RUBY: 1650, DIAMOND: 4300 },
   },
 
   early_bird: {
@@ -113,8 +113,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Study sessions started before 8 AM',
     icon: 'sun',
     category: 'streak',
-    thresholds: { BRONZE: 5, SILVER: 15, GOLD: 35, PLATINUM: 100, RUBY: 300 },
-    xpRewards: { BRONZE: 50, SILVER: 165, GOLD: 410, PLATINUM: 1550, RUBY: 4100 },
+    thresholds: { BRONZE: 5, SILVER: 15, GOLD: 35, RUBY: 100, DIAMOND: 300 },
+    xpRewards: { BRONZE: 50, SILVER: 165, GOLD: 410, RUBY: 1550, DIAMOND: 4100 },
   },
   night_owl: {
     id: 'night_owl',
@@ -122,8 +122,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Study sessions after 10 PM',
     icon: 'moon',
     category: 'streak',
-    thresholds: { BRONZE: 5, SILVER: 15, GOLD: 35, PLATINUM: 100, RUBY: 300 },
-    xpRewards: { BRONZE: 50, SILVER: 165, GOLD: 410, PLATINUM: 1550, RUBY: 4100 },
+    thresholds: { BRONZE: 5, SILVER: 15, GOLD: 35, RUBY: 100, DIAMOND: 300 },
+    xpRewards: { BRONZE: 50, SILVER: 165, GOLD: 410, RUBY: 1550, DIAMOND: 4100 },
   },
   perfectionist: {
     id: 'perfectionist',
@@ -131,8 +131,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Hard difficulty quizzes completed with 100% score',
     icon: 'award',
     category: 'skill',
-    thresholds: { BRONZE: 1, SILVER: 3, GOLD: 8, PLATINUM: 20, RUBY: 50 },
-    xpRewards: { BRONZE: 50, SILVER: 220, GOLD: 520, PLATINUM: 2100, RUBY: 5200 },
+    thresholds: { BRONZE: 1, SILVER: 3, GOLD: 8, RUBY: 20, DIAMOND: 50 },
+    xpRewards: { BRONZE: 50, SILVER: 220, GOLD: 520, RUBY: 2100, DIAMOND: 5200 },
   },
   course_creator: {
     id: 'course_creator',
@@ -140,8 +140,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Study courses created',
     icon: 'graduation-cap',
     category: 'content',
-    thresholds: { BRONZE: 1, SILVER: 3, GOLD: 8, PLATINUM: 20, RUBY: 50 },
-    xpRewards: { BRONZE: 50, SILVER: 210, GOLD: 500, PLATINUM: 2000, RUBY: 5000 },
+    thresholds: { BRONZE: 1, SILVER: 3, GOLD: 8, RUBY: 20, DIAMOND: 50 },
+    xpRewards: { BRONZE: 50, SILVER: 210, GOLD: 500, RUBY: 2000, DIAMOND: 5000 },
   },
   marathon_runner: {
     id: 'marathon_runner',
@@ -149,8 +149,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Single study sessions over 2 hours',
     icon: 'clock',
     category: 'study',
-    thresholds: { BRONZE: 1, SILVER: 5, GOLD: 15, PLATINUM: 40, RUBY: 100 },
-    xpRewards: { BRONZE: 50, SILVER: 195, GOLD: 480, PLATINUM: 1850, RUBY: 4800 },
+    thresholds: { BRONZE: 1, SILVER: 5, GOLD: 15, RUBY: 40, DIAMOND: 100 },
+    xpRewards: { BRONZE: 50, SILVER: 195, GOLD: 480, RUBY: 1850, DIAMOND: 4800 },
   },
   consistent_learner: {
     id: 'consistent_learner',
@@ -158,8 +158,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Weeks with at least 5 study days',
     icon: 'calendar',
     category: 'streak',
-    thresholds: { BRONZE: 2, SILVER: 6, GOLD: 15, PLATINUM: 35, RUBY: 80 },
-    xpRewards: { BRONZE: 50, SILVER: 175, GOLD: 440, PLATINUM: 1700, RUBY: 4400 },
+    thresholds: { BRONZE: 2, SILVER: 6, GOLD: 15, RUBY: 35, DIAMOND: 80 },
+    xpRewards: { BRONZE: 50, SILVER: 175, GOLD: 440, RUBY: 1700, DIAMOND: 4400 },
   },
 
   knowledge_seeker: {
@@ -168,8 +168,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Unique topics studied',
     icon: 'search',
     category: 'study',
-    thresholds: { BRONZE: 5, SILVER: 15, GOLD: 40, PLATINUM: 100, RUBY: 250 },
-    xpRewards: { BRONZE: 50, SILVER: 175, GOLD: 435, PLATINUM: 1700, RUBY: 4350 },
+    thresholds: { BRONZE: 5, SILVER: 15, GOLD: 40, RUBY: 100, DIAMOND: 250 },
+    xpRewards: { BRONZE: 50, SILVER: 175, GOLD: 435, RUBY: 1700, DIAMOND: 4350 },
   },
   summary_specialist: {
     id: 'summary_specialist',
@@ -177,8 +177,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'AI summaries generated',
     icon: 'file-text',
     category: 'content',
-    thresholds: { BRONZE: 10, SILVER: 40, GOLD: 100, PLATINUM: 300, RUBY: 800 },
-    xpRewards: { BRONZE: 50, SILVER: 185, GOLD: 455, PLATINUM: 1800, RUBY: 4550 },
+    thresholds: { BRONZE: 10, SILVER: 40, GOLD: 100, RUBY: 300, DIAMOND: 800 },
+    xpRewards: { BRONZE: 50, SILVER: 185, GOLD: 455, RUBY: 1800, DIAMOND: 4550 },
   },
   community_helper: {
     id: 'community_helper',
@@ -186,8 +186,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Study packs shared publicly',
     icon: 'heart',
     category: 'social',
-    thresholds: { BRONZE: 2, SILVER: 8, GOLD: 20, PLATINUM: 50, RUBY: 150 },
-    xpRewards: { BRONZE: 50, SILVER: 195, GOLD: 470, PLATINUM: 1850, RUBY: 4700 },
+    thresholds: { BRONZE: 2, SILVER: 8, GOLD: 20, RUBY: 50, DIAMOND: 150 },
+    xpRewards: { BRONZE: 50, SILVER: 195, GOLD: 470, RUBY: 1850, DIAMOND: 4700 },
   },
   multilingual: {
     id: 'multilingual',
@@ -195,8 +195,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Different languages used for study materials',
     icon: 'globe',
     category: 'skill',
-    thresholds: { BRONZE: 2, SILVER: 3, GOLD: 5, PLATINUM: 8, RUBY: 12 },
-    xpRewards: { BRONZE: 50, SILVER: 250, GOLD: 600, PLATINUM: 2400, RUBY: 6000 },
+    thresholds: { BRONZE: 2, SILVER: 3, GOLD: 5, RUBY: 8, DIAMOND: 12 },
+    xpRewards: { BRONZE: 50, SILVER: 250, GOLD: 600, RUBY: 2400, DIAMOND: 6000 },
   },
 
   // ============ MASTERY ACHIEVEMENTS (5) ============
@@ -206,8 +206,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Achieve ultimate study dedication - 5000 total study hours',
     icon: 'crown',
     category: 'mastery',
-    thresholds: { BRONZE: 5000, SILVER: 5000, GOLD: 5000, PLATINUM: 5000, RUBY: 5000 },
-    xpRewards: { BRONZE: 10000, SILVER: 10000, GOLD: 10000, PLATINUM: 10000, RUBY: 10000 },
+    thresholds: { BRONZE: 5000, SILVER: 5000, GOLD: 5000, RUBY: 5000, DIAMOND: 5000 },
+    xpRewards: { BRONZE: 10000, SILVER: 10000, GOLD: 10000, RUBY: 10000, DIAMOND: 10000 },
     isMastery: true,
   },
   mastery_perfectionist: {
@@ -216,8 +216,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'The ultimate perfectionist - 500 perfect hard quiz scores',
     icon: 'trophy',
     category: 'mastery',
-    thresholds: { BRONZE: 500, SILVER: 500, GOLD: 500, PLATINUM: 500, RUBY: 500 },
-    xpRewards: { BRONZE: 15000, SILVER: 15000, GOLD: 15000, PLATINUM: 15000, RUBY: 15000 },
+    thresholds: { BRONZE: 500, SILVER: 500, GOLD: 500, RUBY: 500, DIAMOND: 500 },
+    xpRewards: { BRONZE: 15000, SILVER: 15000, GOLD: 15000, RUBY: 15000, DIAMOND: 15000 },
     isMastery: true,
   },
   mastery_streak: {
@@ -226,8 +226,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Never let the flame die - 365 day study streak',
     icon: 'flame',
     category: 'mastery',
-    thresholds: { BRONZE: 365, SILVER: 365, GOLD: 365, PLATINUM: 365, RUBY: 365 },
-    xpRewards: { BRONZE: 20000, SILVER: 20000, GOLD: 20000, PLATINUM: 20000, RUBY: 20000 },
+    thresholds: { BRONZE: 365, SILVER: 365, GOLD: 365, RUBY: 365, DIAMOND: 365 },
+    xpRewards: { BRONZE: 20000, SILVER: 20000, GOLD: 20000, RUBY: 20000, DIAMOND: 20000 },
     isMastery: true,
   },
   mastery_content: {
@@ -236,8 +236,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Master of creation - 1000 study materials created',
     icon: 'crown',
     category: 'mastery',
-    thresholds: { BRONZE: 1000, SILVER: 1000, GOLD: 1000, PLATINUM: 1000, RUBY: 1000 },
-    xpRewards: { BRONZE: 12000, SILVER: 12000, GOLD: 12000, PLATINUM: 12000, RUBY: 12000 },
+    thresholds: { BRONZE: 1000, SILVER: 1000, GOLD: 1000, RUBY: 1000, DIAMOND: 1000 },
+    xpRewards: { BRONZE: 12000, SILVER: 12000, GOLD: 12000, RUBY: 12000, DIAMOND: 12000 },
     isMastery: true,
   },
   mastery_social: {
@@ -246,8 +246,8 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Inspire the world - 500 materials shared publicly',
     icon: 'trophy',
     category: 'mastery',
-    thresholds: { BRONZE: 500, SILVER: 500, GOLD: 500, PLATINUM: 500, RUBY: 500 },
-    xpRewards: { BRONZE: 10000, SILVER: 10000, GOLD: 10000, PLATINUM: 10000, RUBY: 10000 },
+    thresholds: { BRONZE: 500, SILVER: 500, GOLD: 500, RUBY: 500, DIAMOND: 500 },
+    xpRewards: { BRONZE: 10000, SILVER: 10000, GOLD: 10000, RUBY: 10000, DIAMOND: 10000 },
     isMastery: true,
   },
 };
@@ -301,7 +301,7 @@ const ACTION_TO_ACHIEVEMENT_MAP: Record<AchievementAction, string> = {
 
 // ============ TIER ORDERING ============
 
-const TIER_ORDER: AchievementTier[] = ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'RUBY'];
+const TIER_ORDER: AchievementTier[] = ['BRONZE', 'SILVER', 'GOLD', 'RUBY', 'DIAMOND'];
 
 function getNextTier(currentTier: AchievementTier): AchievementTier | null {
   const currentIndex = TIER_ORDER.indexOf(currentTier);

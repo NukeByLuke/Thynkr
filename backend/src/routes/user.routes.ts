@@ -7,12 +7,70 @@ import { FastifyInstance } from 'fastify';
 import { authenticate, AuthenticatedRequest } from '../middleware/auth.middleware';
 import prisma from '../db/client';
 import { updateProfileSchema } from '../schemas/validation.schemas';
+import { ACHIEVEMENTS } from '../services/gamification.service';
 
 /**
  * Register user profile routes with the Fastify server
  * @param server - Fastify instance
  */
 export default async function userRoutes(server: FastifyInstance) {
+  // Public Profile - Get user achievements
+  server.get<{ Params: { username: string } }>(
+    '/:username/achievements',
+    async (request, reply) => {
+      const { username } = request.params;
+
+      const user = await prisma.user.findUnique({
+        where: { username },
+        select: {
+          username: true,
+          firstName: true,
+          lastName: true,
+          avatarUrl: true,
+          xp: true,
+          level: true,
+          createdAt: true,
+          userAchievements: {
+            select: {
+              achievementId: true,
+              unlockedAt: true,
+              tier: true,
+              progress: true,
+            },
+          },
+        },
+      });
+
+      if (!user) {
+        return reply.status(404).send({ error: 'User not found' });
+      }
+
+      // Format achievements with definitions
+      const achievementsWithMetadata = user.userAchievements
+        .map((ua) => {
+          const definition = ACHIEVEMENTS[ua.achievementId];
+          if (!definition) return null;
+          return {
+            ...ua,
+            definition,
+          };
+        })
+        .filter(Boolean);
+
+      return reply.send({
+        user: {
+          username: user.username,
+          displayName: user.firstName,
+          avatarUrl: user.avatarUrl,
+          xp: user.xp,
+          level: user.level,
+          joinedAt: user.createdAt,
+        },
+        achievements: achievementsWithMetadata,
+      });
+    }
+  );
+
   // Get current user profile
   server.get(
     '/me',
