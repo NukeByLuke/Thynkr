@@ -1,12 +1,13 @@
 /**
  * ImmersiveStudy Page - Focused File Study Interface
  * Displays AI-powered study tools for a specific file in an immersive view
- * Accessed via /study/:fileId
+ * Accessed ONLY via /study/:fileId
+ * This component MUST have a fileId param - if not, it redirects to /study
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import SummaryView from '@/features/study/SummaryView';
@@ -45,8 +46,33 @@ type TabType = 'summary' | 'notes' | 'flashcards' | 'quizzes';
 
 export default function ImmersiveStudy() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { fileId } = useParams<{ fileId: string }>();
   const { setHideSidebar, setCustomHeaderContent } = useLayout();
+
+  // CRITICAL GUARD: This component should ONLY render for /study/:fileId routes
+  // If we're on any other route, something is wrong with the routing
+  const isCorrectRoute = useMemo(() => {
+    return location.pathname.startsWith('/study/') && fileId;
+  }, [location.pathname, fileId]);
+
+  // Immediate redirect if on wrong route
+  useEffect(() => {
+    if (!isCorrectRoute) {
+      setHideSidebar(false);
+      setCustomHeaderContent(null);
+      if (location.pathname === '/study') {
+        // Already on correct route, do nothing
+      } else if (!fileId) {
+        navigate('/study', { replace: true });
+      }
+    }
+  }, [isCorrectRoute, fileId, location.pathname, navigate, setHideSidebar, setCustomHeaderContent]);
+
+  // Early return if not on correct route
+  if (!isCorrectRoute) {
+    return null;
+  }
 
   const getToken = () => localStorage.getItem('accessToken');
 
@@ -92,59 +118,73 @@ export default function ImmersiveStudy() {
     }
   }, [fileId, files, selectedFile?.id, setSelectedFile, navigate]);
 
-  // Manage sidebar visibility - set once, cleanup on unmount
+  // CRITICAL: Single effect to manage ALL layout changes with proper cleanup
   useEffect(() => {
+    // Only proceed if we have a valid fileId
+    if (!fileId) {
+      navigate('/study', { replace: true });
+      return;
+    }
+
+    // Set sidebar hidden immediately
     setHideSidebar(true);
     
-    // Cleanup on unmount - CRITICAL for proper navigation
+    // MANDATORY cleanup function - runs before re-render and on unmount
     return () => {
       setHideSidebar(false);
       setCustomHeaderContent(null);
     };
-  }, [setHideSidebar, setCustomHeaderContent]);
+  }, [fileId, setHideSidebar, setCustomHeaderContent, navigate]);
 
-  // Manage custom header content - updates when file or tab changes
+  // Separate effect for header content that updates based on selectedFile and activeTab
   useEffect(() => {
-    if (selectedFile) {
-      setCustomHeaderContent(
-        <>
-          {/* Back Button + File Info */}
-          <button
-            onClick={() => navigate('/study')}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex-shrink-0"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back</span>
-          </button>
-          <div className="min-w-0 hidden sm:block">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-white truncate">
-              {selectedFile.originalName}
-            </h2>
-          </div>
-          
-          {/* Tab Switcher Pills */}
-          <div className="flex items-center gap-2 ml-auto flex-shrink-0">
-            {(['summary', 'notes', 'flashcards', 'quizzes'] as TabType[]).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => {
-                  setActiveTab(tab);
-                  setSelectedFlashcardSet(null);
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium capitalize transition-all duration-200 whitespace-nowrap ${
-                  activeTab === tab
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                {tab === 'flashcards' ? 'Cards' : tab}
-              </button>
-            ))}
-          </div>
-        </>
-      );
+    if (!fileId || !selectedFile) {
+      return;
     }
-  }, [selectedFile, activeTab, setCustomHeaderContent, setActiveTab, setSelectedFlashcardSet, navigate]);
+
+    setCustomHeaderContent(
+      <>
+        {/* Back Button + File Info */}
+        <button
+          onClick={() => navigate('/study')}
+          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex-shrink-0"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span className="hidden sm:inline">Back</span>
+        </button>
+        <div className="min-w-0 hidden sm:block">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+            {selectedFile.originalName}
+          </h2>
+        </div>
+        
+        {/* Tab Switcher Pills */}
+        <div className="flex items-center gap-2 ml-auto flex-shrink-0">
+          {(['summary', 'notes', 'flashcards', 'quizzes'] as TabType[]).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => {
+                setActiveTab(tab);
+                setSelectedFlashcardSet(null);
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium capitalize transition-all duration-200 whitespace-nowrap ${
+                activeTab === tab
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              {tab === 'flashcards' ? 'Cards' : tab}
+            </button>
+          ))}
+        </div>
+      </>
+    );
+    
+    // Cleanup when fileId or selectedFile changes
+    return () => {
+      setCustomHeaderContent(null);
+    };
+  }, [fileId, selectedFile, activeTab, setCustomHeaderContent, setActiveTab, setSelectedFlashcardSet, navigate]);
 
   const renderTabContent = () => {
     if (!selectedFile || selectedFile.status !== 'COMPLETED') {
