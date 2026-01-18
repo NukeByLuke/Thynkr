@@ -30,6 +30,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
  * @param userId - User ID
  * @param activityType - Type of study activity
  * @param fileId - Optional associated file ID
+ * @param durationMinutes - Duration of study session (default: 1)
  */
 async function trackStudyActivity(
   userId: string,
@@ -39,17 +40,27 @@ async function trackStudyActivity(
     | 'NOTES_VIEW'
     | 'QUIZ_ATTEMPT'
     | 'FLASHCARD_STUDY',
-  fileId?: string
+  fileId?: string,
+  durationMinutes: number = 1
 ) {
   try {
+    const now = new Date();
+    
+    // Convert to EST for time-based achievements
+    const estTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    const hourEST = estTime.getHours();
+
     await prisma.studySession.create({
       data: {
         userId,
         activityType,
         fileId,
-        durationMinutes: 1,
+        durationMinutes,
       },
     });
+
+    // Import checkAchievements dynamically to avoid circular dependencies
+    const { checkAchievements } = await import('../services/gamification.service');
 
     // Update streak
     const today = new Date();
@@ -67,15 +78,19 @@ async function trackStudyActivity(
           longestStreak: 1,
           lastStudyDate: today,
           totalStudyDays: 1,
-          totalMinutes: 1,
+          totalMinutes: durationMinutes,
         },
       });
+      
+      // Track first day of streak
+      await checkAchievements(userId, 'study_streak', 1);
     } else {
       const lastStudy = streak.lastStudyDate ? new Date(streak.lastStudyDate) : null;
       lastStudy?.setHours(0, 0, 0, 0);
 
       let newCurrentStreak = streak.currentStreak;
       let newTotalDays = streak.totalStudyDays;
+      let isNewDay = false;
 
       if (!lastStudy || lastStudy.getTime() !== today.getTime()) {
         const yesterday = new Date(today);
@@ -87,6 +102,7 @@ async function trackStudyActivity(
           newCurrentStreak = 1;
         }
         newTotalDays = streak.totalStudyDays + 1;
+        isNewDay = true;
       }
 
       await prisma.studyStreak.update({
@@ -96,9 +112,32 @@ async function trackStudyActivity(
           longestStreak: Math.max(streak.longestStreak, newCurrentStreak),
           lastStudyDate: today,
           totalStudyDays: newTotalDays,
-          totalMinutes: streak.totalMinutes + 1,
+          totalMinutes: streak.totalMinutes + durationMinutes,
         },
       });
+      
+      // Track streak only on new days
+      if (isNewDay) {
+        await checkAchievements(userId, 'study_streak', newCurrentStreak);
+      }
+    }
+    
+    // Track study hours (convert minutes to hours)
+    const hoursToAdd = durationMinutes / 60;
+    await checkAchievements(userId, 'study_hours', hoursToAdd);
+    
+    // Track time-based achievements (only once per session)
+    if (durationMinutes >= 5) { // Only count sessions 5+ minutes
+      if (hourEST >= 5 && hourEST < 8) {
+        await checkAchievements(userId, 'early_study', 1);
+      } else if (hourEST >= 22 || hourEST < 3) {
+        await checkAchievements(userId, 'night_study', 1);
+      }
+      
+      // Track long session achievement (2+ hours)
+      if (durationMinutes >= 120) {
+        await checkAchievements(userId, 'long_session', 1);
+      }
     }
   } catch (error) {
     // Silently fail - don't break the main operation
@@ -685,7 +724,22 @@ export default async function studyRoutes(server: FastifyInstance) {
         // Track study activity
         await trackStudyActivity(request.user!.userId, 'SUMMARY_VIEW', file.id);
 
-        return reply.send({ summary });
+        // Track achievement for summary generation
+        const { checkAchievements } = await import('../services/gamification.service');
+        const achievementResult = await checkAchievements(request.user!.userId, 'summary_created', 1);
+        const notifications: any[] = [];
+        
+        if (achievementResult.tierUnlocked) {
+          notifications.push({
+            type: 'achievement',
+            ...achievementResult,
+          });
+        }
+
+        return reply.send({ 
+          summary,
+          ...(notifications.length > 0 && { notifications })
+        });
       } catch (error: any) {
         server.log.error({ error, fileId: id }, 'Failed to generate summary');
         return reply.code(500).send({ error: 'Failed to generate summary' });
@@ -761,7 +815,22 @@ export default async function studyRoutes(server: FastifyInstance) {
         // Track study activity
         await trackStudyActivity(request.user!.userId, 'NOTES_VIEW', file.id);
 
-        return reply.send({ notes });
+        // Track achievement for notes generation
+        const { checkAchievements } = await import('../services/gamification.service');
+        const achievementResult = await checkAchievements(request.user!.userId, 'notes_created', 1);
+        const notifications: any[] = [];
+        
+        if (achievementResult.tierUnlocked) {
+          notifications.push({
+            type: 'achievement',
+            ...achievementResult,
+          });
+        }
+
+        return reply.send({ 
+          notes,
+          ...(notifications.length > 0 && { notifications })
+        });
       } catch (error: any) {
         server.log.error({ error, fileId: id }, 'Failed to generate notes');
         return reply.code(500).send({ error: 'Failed to generate notes' });
@@ -916,7 +985,22 @@ export default async function studyRoutes(server: FastifyInstance) {
         // Track study activity
         await trackStudyActivity(request.user!.userId, 'FLASHCARD_STUDY', file.id);
 
-        return reply.send({ flashcardSet });
+        // Track achievement for flashcard generation/completion
+        const { checkAchievements } = await import('../services/gamification.service');
+        const achievementResult = await checkAchievements(request.user!.userId, 'flashcard_completed', 1);
+        const notifications: any[] = [];
+        
+        if (achievementResult.tierUnlocked) {
+          notifications.push({
+            type: 'achievement',
+            ...achievementResult,
+          });
+        }
+
+        return reply.send({ 
+          flashcardSet,
+          ...(notifications.length > 0 && { notifications })
+        });
       } catch (error: any) {
         server.log.error({ error, fileId: id }, 'Failed to generate flashcards');
         return reply.code(500).send({ error: 'Failed to generate flashcards' });

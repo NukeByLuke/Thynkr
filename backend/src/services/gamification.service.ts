@@ -323,6 +323,8 @@ export async function checkAchievements(
   newTier?: AchievementTier;
   xpAwarded?: number;
   achievementName?: string;
+  leveledUp?: boolean;
+  newLevel?: number;
 }> {
   const achievementId = ACTION_TO_ACHIEVEMENT_MAP[actionType];
   
@@ -430,11 +432,16 @@ export async function checkAchievements(
 
         // Calculate new level based on XP
         const newLevel = calculateLevel(updatedUser.xp);
+        let leveledUp = false;
+        let newLevelValue = updatedUser.level;
+        
         if (newLevel > updatedUser.level) {
           await tx.user.update({
             where: { id: userId },
             data: { level: newLevel },
           });
+          leveledUp = true;
+          newLevelValue = newLevel;
         }
 
         return {
@@ -443,6 +450,8 @@ export async function checkAchievements(
           newTier: highestTierUnlocked.tier,
           xpAwarded: totalXpAwarded,
           achievementName: achievement.name,
+          leveledUp,
+          newLevel: leveledUp ? newLevelValue : undefined,
         };
       }
 

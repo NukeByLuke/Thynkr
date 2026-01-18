@@ -43,7 +43,17 @@ api.interceptors.request.use(
  * Response interceptor - handles 401 errors and automatic token refresh
  */
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Check if response contains notifications
+    if (response.data?.notifications && Array.isArray(response.data.notifications)) {
+      // Store notifications in a global event bus that NotificationContext will pick up
+      const event = new CustomEvent('api-notification', {
+        detail: { notifications: response.data.notifications },
+      });
+      window.dispatchEvent(event);
+    }
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
     const isAuthEndpoint = originalRequest.url?.includes('/auth/');

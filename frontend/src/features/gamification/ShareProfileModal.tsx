@@ -48,22 +48,34 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
     if (!cardRef.current) return;
     const toastId = toast.loading('Generating image...');
     try {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait for images to load
+      await new Promise(resolve => setTimeout(resolve, 300));
       
       const canvas = await html2canvas(cardRef.current, {
         backgroundColor: '#020617', // slate-950
-        scale: 2, // Retina quality
-        useCORS: true, // For avatar images
-        logging: false
+        scale: 3, // Higher quality
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        windowWidth: 1200,
+        windowHeight: 630,
+        onclone: (clonedDoc) => {
+          const clonedCard = clonedDoc.getElementById('player-card-export');
+          if (clonedCard) {
+            clonedCard.style.transform = 'none';
+            clonedCard.style.width = '1200px';
+            clonedCard.style.height = '630px';
+          }
+        }
       });
       
       const link = document.createElement('a');
       link.download = `thynkr-${user.username}-card.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.href = canvas.toDataURL('image/png', 1.0);
       link.click();
       toast.success('Image downloaded!', { id: toastId });
     } catch (e) {
-      console.error(e);
+      console.error('Download error:', e);
       toast.error('Failed to generate image', { id: toastId });
     }
   };
@@ -72,13 +84,25 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
     if (!cardRef.current) return;
     const toastId = toast.loading('Generating image...');
     try {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait for images to load
+      await new Promise(resolve => setTimeout(resolve, 300));
       
       const canvas = await html2canvas(cardRef.current, {
         backgroundColor: '#020617',
-        scale: 2,
+        scale: 3,
         useCORS: true,
-        logging: false
+        allowTaint: true,
+        logging: false,
+        windowWidth: 1200,
+        windowHeight: 630,
+        onclone: (clonedDoc) => {
+          const clonedCard = clonedDoc.getElementById('player-card-export');
+          if (clonedCard) {
+            clonedCard.style.transform = 'none';
+            clonedCard.style.width = '1200px';
+            clonedCard.style.height = '630px';
+          }
+        }
       });
       
       canvas.toBlob(async (blob) => {
@@ -92,12 +116,12 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
           ]);
           toast.success('Image copied to clipboard!', { id: toastId });
         } catch (err) {
-          console.error(err);
-          toast.error('Browser does not support copying images via script', { id: toastId });
+          console.error('Copy error:', err);
+          toast.error('Browser does not support copying images', { id: toastId });
         }
-      });
+      }, 'image/png', 1.0);
     } catch (e) {
-      console.error(e);
+      console.error('Generate error:', e);
       toast.error('Failed to generate image', { id: toastId });
     }
   };

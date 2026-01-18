@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLayout } from '@/contexts/LayoutContext';
+import { useNotifications } from '@/contexts/NotificationContext';
 import PageContainer from '@/components/layout/PageContainer';
 import {
   User,
@@ -16,6 +17,8 @@ import {
   Save,
   PencilLine,
   Globe,
+  Bell,
+  BellOff,
 } from 'lucide-react';
 import api from '../lib/api';
 
@@ -67,6 +70,7 @@ export default function Settings() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState('');
   const [preferredLanguage, setPreferredLanguage] = useState(user?.preferredLanguage || 'en');
+  const { notificationsEnabled, notificationsPersist, updateSettings } = useNotifications();
 
   // Update preview when user data changes (after refetch or account switch)
   useEffect(() => {
@@ -556,6 +560,74 @@ export default function Settings() {
                         : `Theme is set to ${themeMode} mode regardless of system preference`}
                     </p>
                   </div>
+                </div>
+              </div>
+
+              {/* Notification Settings */}
+              <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl shadow-xl border border-slate-200/50 dark:border-white/10 p-6">
+                <h2 className="text-xl font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4 flex items-center gap-2 tracking-wide">
+                  {notificationsEnabled ? (
+                    <Bell className="w-5 h-5 text-indigo-500" />
+                  ) : (
+                    <BellOff className="w-5 h-5 text-slate-400" />
+                  )}
+                  Notifications
+                </h2>
+
+                <div className="space-y-4">
+                  {/* Enable Notifications Toggle */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="font-medium text-slate-900 dark:text-white">
+                        Enable Notifications
+                      </p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        Show notifications for achievements and level ups
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => updateSettings({ notificationsEnabled: !notificationsEnabled })}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        notificationsEnabled
+                          ? 'bg-gradient-to-r from-indigo-600 to-purple-600'
+                          : 'bg-slate-300 dark:bg-slate-600'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          notificationsEnabled ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Persist Notifications Toggle */}
+                  {notificationsEnabled && (
+                    <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700">
+                      <div className="flex-1">
+                        <p className="font-medium text-slate-900 dark:text-white">
+                          Keep Until Dismissed
+                        </p>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          Notifications stay visible until you manually close them
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => updateSettings({ notificationsPersist: !notificationsPersist })}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                          notificationsPersist
+                            ? 'bg-gradient-to-r from-indigo-600 to-purple-600'
+                            : 'bg-slate-300 dark:bg-slate-600'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            notificationsPersist ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 

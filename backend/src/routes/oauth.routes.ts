@@ -8,11 +8,15 @@ import { OAuth2Client } from 'google-auth-library';
 import prisma from '../db/client';
 import { generateAccessToken, generateRefreshToken } from '../lib/jwt';
 
+// Backend API URL (where OAuth callbacks are handled)
+// In production this should be https://thynkr.ca (the nginx proxies /auth to backend)
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+
 // Google OAuth client
 const googleClient = new OAuth2Client({
   clientId: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  redirectUri: `${process.env.VITE_API_URL || 'http://localhost:3001'}/auth/google/callback`,
+  redirectUri: `${BACKEND_URL}/auth/google/callback`,
 });
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -74,6 +78,7 @@ async function createSessionAndRedirect(
   await prisma.user.update({
     where: { id: userId },
     data: { lastLoginAt: new Date() },
+    select: { id: true },
   });
   
   // Redirect to frontend callback with tokens
@@ -155,6 +160,30 @@ export default async function oauthRoutes(server: FastifyInstance) {
             { email: payload.email },
           ],
         },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          googleId: true,
+          role: true,
+          password: true,
+          firstName: true,
+          lastName: true,
+          avatarUrl: true,
+          oauthProvider: true,
+          emailVerified: true,
+          theme: true,
+          preferredLanguage: true,
+          ttsVoice: true,
+          ttsSpeed: true,
+          createdAt: true,
+          updatedAt: true,
+          lastLoginAt: true,
+          stripeCustomerId: true,
+          level: true,
+          xp: true,
+          lastXpGain: true,
+        },
       });
       
       if (user) {
@@ -167,6 +196,30 @@ export default async function oauthRoutes(server: FastifyInstance) {
               oauthProvider: user.oauthProvider || 'google',
               emailVerified: true,
               avatarUrl: user.avatarUrl || payload.picture,
+            },
+            select: {
+              id: true,
+              email: true,
+              username: true,
+              googleId: true,
+              role: true,
+              password: true,
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+              oauthProvider: true,
+              emailVerified: true,
+              theme: true,
+              preferredLanguage: true,
+              ttsVoice: true,
+              ttsSpeed: true,
+              createdAt: true,
+              updatedAt: true,
+              lastLoginAt: true,
+              stripeCustomerId: true,
+              level: true,
+              xp: true,
+              lastXpGain: true,
             },
           });
         }

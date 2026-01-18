@@ -136,14 +136,16 @@ const Navbar = memo(() => {
                         <User className="w-4 h-4" />
                         My Profile
                       </Link>
-                      <Link
-                        to="/achievements"
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-indigo-50/50 dark:hover:bg-white/5 transition-colors"
-                        onClick={() => setProfileDropdownOpen(false)}
+                      <button
+                        onClick={() => {
+                          setProfileDropdownOpen(false);
+                          window.location.href = '/achievements';
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 w-full text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-indigo-50/50 dark:hover:bg-white/5 transition-colors"
                       >
                         <Trophy className="w-4 h-4" />
                         Achievements
-                      </Link>
+                      </button>
                       <Link
                         to="/settings"
                         className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-indigo-50/50 dark:hover:bg-white/5 transition-colors"
@@ -271,14 +273,16 @@ const Navbar = memo(() => {
                   <User className="w-4 h-4 mr-2" />
                   My Profile
                 </Link>
-                <Link
-                  to="/achievements"
-                  className="flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300"
-                  onClick={() => setMobileMenuOpen(false)}
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    window.location.href = '/achievements';
+                  }}
+                  className="flex items-center w-full text-left px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300"
                 >
                   <Trophy className="w-4 h-4 mr-2" />
                   Achievements
-                </Link>
+                </button>
                 <Link
                   to="/settings"
                   className="flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300"

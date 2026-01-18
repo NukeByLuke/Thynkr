@@ -305,7 +305,7 @@ const LevelBanner = ({ level, currentXp, xpForNextLevel, totalXp }: LevelBannerP
             {/* Progress text overlay */}
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="text-xs font-bold text-white drop-shadow-lg">
-                {progress.toFixed(1)}%
+                {Math.round(progress)}%
               </span>
             </div>
           </div>
@@ -430,7 +430,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
       <div
         className={`aspect-square rounded-xl border-2 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 ${
           isLocked
-            ? 'border-slate-300/50 dark:border-slate-700/50 bg-slate-100/50 dark:bg-slate-900/30 shadow-sm grayscale opacity-60'
+            ? 'border-slate-400/40 dark:border-slate-600/40 bg-slate-100/50 dark:bg-slate-900/30 shadow-sm grayscale opacity-60'
             : `${tier.border} ${tier.borderHover} ${tier.bg} ${tier.glow}`
         }`}
       >
@@ -524,18 +524,26 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
           } top-1/2 w-80 pointer-events-auto z-[100]`}
         >
           <div className="relative">
-            {/* Tooltip arrow with tier-specific color */}
+            {/* Tooltip arrow with current tier color */}
             <div 
               className={`absolute ${
                 tooltipPosition === 'left' ? '-right-1.5' : '-left-1.5'
               } top-1/2 -translate-y-1/2 w-3 h-3 ${
                 tooltipPosition === 'left' ? 'rotate-45' : '-rotate-45'
-              } bg-gradient-to-br ${tooltipTier.gradient}`}
+              } bg-gradient-to-br ${
+                isLocked 
+                  ? 'from-slate-500 to-slate-600'
+                  : tier.gradient
+              }`}
             />
             
             {/* Tooltip content with tier-specific border */}
-            <div className={`relative rounded-xl shadow-2xl overflow-hidden border-2 ${tooltipTier.border} ${
-              isMastery ? 'border-violet-400/80 shadow-violet-500/50' : ''
+            <div className={`relative rounded-xl shadow-2xl overflow-hidden border-2 ${
+              isLocked 
+                ? 'border-slate-400/40 dark:border-slate-600/40'
+                : `${tooltipTier.border} ${
+                  isMastery ? 'border-violet-400/80 shadow-violet-500/50' : ''
+                }`
             }`}>
               {/* Content background with better contrast */}
               <div className="relative bg-slate-900/98 dark:bg-slate-800/98 backdrop-blur-xl rounded-xl p-5">
@@ -630,7 +638,124 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                       );
                     })()}
                   </div>
-                )}  
+                )}
+
+                {/* Progress Section - Enhanced with current tier color */}
+                {(() => {
+                  const PROGRESS_ORDER: AchievementTier[] = ['BRONZE', 'SILVER', 'GOLD', 'RUBY', 'DIAMOND'];
+                  
+                  // Determine next tier and current tier for display
+                  let nextTier: AchievementTier | null = null;
+                  let displayTierConfig = null;
+                  let isLockedProgress = false;
+                  
+                  if (isLocked) {
+                    // Locked - show progress toward Bronze with gray bar
+                    nextTier = 'BRONZE';
+                    isLockedProgress = true;
+                    displayTierConfig = TIER_CONFIG['BRONZE']; // Use bronze config for locked
+                  } else if (achievement.currentTier && !isMastery) {
+                    // Unlocked - use CURRENT tier color for the bar
+                    displayTierConfig = TIER_CONFIG[achievement.currentTier];
+                    // Find next tier after current
+                    const currentIndex = PROGRESS_ORDER.indexOf(achievement.currentTier);
+                    if (currentIndex !== -1 && currentIndex < PROGRESS_ORDER.length - 1) {
+                      nextTier = PROGRESS_ORDER[currentIndex + 1];
+                    }
+                  }
+                  
+                  if (!nextTier || !achievement.definition.thresholds || !displayTierConfig) return null;
+                  
+                  const nextTierConfig = TIER_CONFIG[nextTier];
+                  const threshold = achievement.definition.thresholds[nextTier];
+                  const xpReward = achievement.definition.xpRewards?.[nextTier];
+                  
+                  if (!threshold) return null;
+                  
+                  const currentValue = achievement.currentValue || 0;
+                  const progress = Math.min(100, (currentValue / threshold) * 100);
+                  
+                  return (
+                    <div className="mb-4">
+                      <h5 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3.5">
+                        {isLockedProgress ? 'Progress to Unlock' : `Progress to ${nextTierConfig.label}`}
+                      </h5>
+                      <div className="space-y-3">
+                        {/* Info Row */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <span className={`text-sm font-bold ${
+                              isLockedProgress 
+                                ? 'text-slate-400' 
+                                : nextTierConfig.text
+                            }`}>
+                              {nextTierConfig.label} Tier
+                            </span>
+                            {xpReward && (
+                              <span className="text-[10px] px-2 py-1 rounded-md bg-yellow-500/20 text-yellow-400 font-bold border border-yellow-500/30">
+                                +{Math.floor(xpReward).toLocaleString()} XP
+                              </span>
+                            )}
+                          </div>
+                          <span className={`text-sm font-bold ${
+                            isLockedProgress ? 'text-slate-400' : 'text-slate-200'
+                          }`}>
+                            {Math.floor(currentValue).toLocaleString()} / {Math.floor(threshold).toLocaleString()}
+                          </span>
+                        </div>
+                        
+                        {/* Enhanced Progress Bar */}
+                        <div className="relative">
+                          {/* Outer glow effect */}
+                          <div className={`absolute -inset-0.5 bg-gradient-to-r ${
+                            isLockedProgress ? 'from-slate-500 to-slate-600' : displayTierConfig.gradient
+                          } rounded-full opacity-20 blur-md`} />
+                          
+                          {/* Progress bar container */}
+                          <div className="relative h-4 bg-slate-900/80 rounded-full overflow-hidden border-2 border-slate-700/50 shadow-inner">
+                            {/* Background pattern */}
+                            <div className="absolute inset-0 opacity-5">
+                              <div className="absolute inset-0" style={{
+                                backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px)'
+                              }} />
+                            </div>
+                            
+                            {/* Actual progress fill */}
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${progress}%` }}
+                              transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
+                              className={`h-full relative ${
+                                isLockedProgress
+                                  ? 'bg-gradient-to-r from-slate-500 via-slate-400 to-slate-500'
+                                  : `bg-gradient-to-r ${displayTierConfig.gradient}`
+                              } shadow-lg`}
+                            >
+                              {/* Animated shine effect */}
+                              {progress > 0 && (
+                                <motion.div
+                                  animate={{ x: ['-100%', '200%'] }}
+                                  transition={{ duration: 2.5, repeat: Infinity, ease: 'linear', repeatDelay: 1 }}
+                                  className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent transform skew-x-12"
+                                />
+                              )}
+                              
+                              {/* Inner highlight */}
+                              <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent h-1/2" />
+                            </motion.div>
+                            
+                            {/* Progress percentage text overlay */}
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="text-xs font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-wide">
+                                {Math.round(progress)}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}  
                 
                 {/* Unlock date */}
                 {!isLocked && formattedDate && (

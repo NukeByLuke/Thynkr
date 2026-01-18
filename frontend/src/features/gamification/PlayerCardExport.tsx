@@ -48,7 +48,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full blur-md opacity-90 animate-pulse" style={{ animationDuration: '3s' }}></div>
                <div className="relative w-32 h-32 rounded-full border-[3px] border-slate-800/50 overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center shadow-2xl">
                  {user.avatarUrl ? (
-                   <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
+                   <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" crossOrigin="anonymous" />
                  ) : (
                    <span className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-slate-300 to-slate-500">{user.username.charAt(0).toUpperCase()}</span>
                  )}
@@ -68,7 +68,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                 {user.username}
               </h1>
               <p className="text-slate-400 font-semibold text-lg flex items-center gap-2 mb-5">
-                Thynkr Scholar
+                Scholar
               </p>
 
               {/* Enhanced Badges with Better Styling */}

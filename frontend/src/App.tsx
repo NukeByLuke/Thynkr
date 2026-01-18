@@ -12,6 +12,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import { LayoutProvider } from './contexts/LayoutContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import ProtectedRoute from '@/features/auth/ProtectedRoute';
 import PublicLayout from './layouts/PublicLayout';
 import DashboardLayout from './layouts/DashboardLayout';
@@ -215,13 +216,15 @@ function App() {
     <AuthProvider>
       <NavigationProvider>
         <ThemeProvider>
-          <LayoutProvider>
-            {!gatePassed && previewPassword ? (
-              <PreviewGate onSuccess={() => setGatePassed(true)} />
-            ) : (
-              <AppContent />
-            )}
-          </LayoutProvider>
+          <NotificationProvider>
+            <LayoutProvider>
+              {!gatePassed && previewPassword ? (
+                <PreviewGate onSuccess={() => setGatePassed(true)} />
+              ) : (
+                <AppContent />
+              )}
+            </LayoutProvider>
+          </NotificationProvider>
         </ThemeProvider>
       </NavigationProvider>
     </AuthProvider>

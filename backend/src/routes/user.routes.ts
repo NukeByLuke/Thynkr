@@ -145,4 +145,51 @@ export default async function userRoutes(server: FastifyInstance) {
       return reply.send(user);
     }
   );
+
+  // Get notification preferences
+  server.get(
+    '/me/notifications',
+    {
+      preHandler: authenticate,
+    },
+    async (request: AuthenticatedRequest, reply) => {
+      const user = await prisma.user.findUnique({
+        where: { id: request.user!.userId },
+        select: {
+          notificationsEnabled: true,
+          notificationsPersist: true,
+        },
+      });
+
+      return reply.send(user);
+    }
+  );
+
+  // Update notification preferences
+  server.patch(
+    '/me/notifications',
+    {
+      preHandler: authenticate,
+    },
+    async (request: AuthenticatedRequest, reply) => {
+      const body = request.body as {
+        notificationsEnabled?: boolean;
+        notificationsPersist?: boolean;
+      };
+
+      const user = await prisma.user.update({
+        where: { id: request.user!.userId },
+        data: {
+          ...(body.notificationsEnabled !== undefined && { notificationsEnabled: body.notificationsEnabled }),
+          ...(body.notificationsPersist !== undefined && { notificationsPersist: body.notificationsPersist }),
+        },
+        select: {
+          notificationsEnabled: true,
+          notificationsPersist: true,
+        },
+      });
+
+      return reply.send(user);
+    }
+  );
 }

@@ -146,7 +146,7 @@ export default function ImmersiveStudy() {
       <>
         {/* Back Button + File Info */}
         <button
-          onClick={() => navigate('/study')}
+          onClick={() => window.location.href = '/study'}
           className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex-shrink-0"
         >
           <ArrowLeft className="w-4 h-4" />
