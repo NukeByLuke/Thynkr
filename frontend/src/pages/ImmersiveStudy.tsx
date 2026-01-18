@@ -18,6 +18,7 @@ import { useStudySession } from '@/hooks/useStudySession';
 import GenerationModal from '@/components/modals/GenerationModal';
 import api from '@/lib/api';
 import { useLayout } from '@/contexts/LayoutContext';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 interface UploadedFile {
   id: string;
@@ -319,13 +320,11 @@ export default function ImmersiveStudy() {
                       timeSpentSeconds,
                     });
                     
+                    // Dispatch achievement notifications
                     if (response.data.achievements && response.data.achievements.length > 0) {
-                      response.data.achievements.forEach((ach: any) => {
-                        toast.success(
-                          `🎉 Achievement Unlocked: ${ach.achievementName} (${ach.newTier})! +${ach.xpAwarded} XP`,
-                          { duration: 5000 }
-                        );
-                      });
+                      window.dispatchEvent(new CustomEvent('api-notification', {
+                        detail: { notifications: response.data.achievements }
+                      }));
                     }
                     
                     if (response.data.xpGained > 0) {
