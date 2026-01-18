@@ -18,7 +18,6 @@ import { useStudySession } from '@/hooks/useStudySession';
 import GenerationModal from '@/components/modals/GenerationModal';
 import api from '@/lib/api';
 import { useLayout } from '@/contexts/LayoutContext';
-import { useNotifications } from '@/contexts/NotificationContext';
 
 interface UploadedFile {
   id: string;
