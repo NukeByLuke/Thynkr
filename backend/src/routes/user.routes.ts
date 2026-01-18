@@ -152,7 +152,7 @@ export default async function userRoutes(server: FastifyInstance) {
     {
       preHandler: authenticate,
     },
-    async (request: AuthenticatedRequest, reply) => {
+    async (_request: AuthenticatedRequest, reply) => {
       // TODO: Add notification columns to Prisma schema
       // For now, return default values
       return reply.send({
