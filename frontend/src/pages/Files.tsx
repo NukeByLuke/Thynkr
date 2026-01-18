@@ -17,6 +17,7 @@ import toast from 'react-hot-toast';
 import { FileTypeBadge, getFileIcon } from '@/lib/fileTypeUtils';
 import UploadModal from '@/components/UploadModal';
 import { useLayout } from '@/contexts/LayoutContext';
+import api from '@/lib/api';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -262,18 +263,12 @@ export default function Files() {
   const handleUploadYouTube = async (url: string) => {
     setShowUploadModal(false);
     try {
-      const response = await fetch(`${API_URL}/study/upload-youtube`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ url, folderId: currentFolderId }),
-      });
-      if (!response.ok) throw new Error('Failed to upload YouTube link');
+      await api.post('/study/upload-youtube', { url, folderId: currentFolderId });
       queryClient.invalidateQueries({ queryKey: ['study-files'] });
+      queryClient.invalidateQueries({ queryKey: ['folders'] });
       toast.success('YouTube video added successfully');
     } catch (error) {
+      console.error('YouTube upload error:', error);
       toast.error('Failed to add YouTube video');
     }
   };
