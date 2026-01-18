@@ -82,7 +82,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
   speed_demon: {
     id: 'speed_demon',
     name: 'Speed Demon',
-    description: 'Quiz questions answered in under 5 seconds',
+    description: 'Complete quizzes quickly (under 5-10 seconds per question)',
     icon: 'zap',
     category: 'skill',
     thresholds: { BRONZE: 10, SILVER: 50, GOLD: 150, RUBY: 500, DIAMOND: 1500 },

@@ -1135,10 +1135,22 @@ export default async function studyRoutes(server: FastifyInstance) {
         }
 
         // 3. Speed Demon achievement (fast answers with good score)
-        if (timeSpentSeconds && scorePercentage > 80) {
+        // Award partial credit: 1 point per question if average < 10s, bonus if < 5s
+        if (timeSpentSeconds && quiz.questions.length > 0) {
           const avgTimePerQuestion = timeSpentSeconds / quiz.questions.length;
+          
+          // Award points based on speed tiers
+          let pointsToAward = 0;
           if (avgTimePerQuestion < 5) {
-            const speedDemonResult = await checkAchievements(request.user!.userId, 'quick_answer', quiz.questions.length);
+            // Very fast: award 1 point per question
+            pointsToAward = quiz.questions.length;
+          } else if (avgTimePerQuestion < 10 && scorePercentage >= 70) {
+            // Fast with decent score: award 0.5 points per question
+            pointsToAward = Math.floor(quiz.questions.length * 0.5);
+          }
+          
+          if (pointsToAward > 0) {
+            const speedDemonResult = await checkAchievements(request.user!.userId, 'quick_answer', pointsToAward);
             if (speedDemonResult.tierUnlocked) {
               unlockedAchievements.push(speedDemonResult);
             }
