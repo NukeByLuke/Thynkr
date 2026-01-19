@@ -7,7 +7,7 @@
  * CRITICAL: Layout context management ensures sidebar ALWAYS reappears on navigation away.
  */
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useLayoutEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -131,18 +131,20 @@ export default function ImmersiveStudy() {
 
   // ═══════════════════════════════════════════════════════════════════════════
   // CRITICAL: Zen Mode Layout Management
-  // Single effect manages sidebar visibility with guaranteed cleanup
+  // useLayoutEffect ensures synchronous cleanup BEFORE React commits any other changes
+  // Empty deps array ensures this ONLY runs on mount/unmount, not on re-renders
   // ═══════════════════════════════════════════════════════════════════════════
-  useEffect(() => {
+  useLayoutEffect(() => {
     // Enter Zen Mode - hide sidebar
     setHideSidebar(true);
 
-    // CRITICAL: Exit Zen Mode on unmount - ALWAYS restore sidebar
+    // CRITICAL: Exit Zen Mode on unmount - synchronous cleanup prevents race conditions
     return () => {
       setHideSidebar(false);
       setCustomHeaderContent(null);
     };
-  }, [setHideSidebar, setCustomHeaderContent]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - MUST only run on mount/unmount
 
   // Handle tab navigation
   const handleTabChange = useCallback((tab: TabType) => {
