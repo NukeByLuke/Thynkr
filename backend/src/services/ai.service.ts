@@ -16,9 +16,9 @@ const MAX_INPUT_CHARS = 48000;
 const MAX_OUTPUT_TOKENS = 2000;
 
 // Model Selection Strategy:
-// Using Gemini 1.5 models with -latest suffix for stability
-const GEMINI_PRO_MODEL = 'gemini-1.5-pro-latest';
-const GEMINI_FLASH_MODEL = 'gemini-1.5-flash-latest';
+// Using Gemini 2.0 Flash - confirmed working model
+const GEMINI_PRO_MODEL = 'gemini-2.0-flash';
+const GEMINI_FLASH_MODEL = 'gemini-2.0-flash';
 
 /**
  * Prompt injection detection patterns for security validation
