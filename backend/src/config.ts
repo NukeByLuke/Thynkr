@@ -53,6 +53,10 @@ export const config = {
     dsn: process.env.SENTRY_DSN,
   },
 
+  gemini: {
+    apiKey: process.env.GEMINI_API_KEY!,
+  },
+
   digitalOcean: {
     apiToken: process.env.DIGITALOCEAN_API_TOKEN,
     dropletId: process.env.DIGITALOCEAN_DROPLET_ID,

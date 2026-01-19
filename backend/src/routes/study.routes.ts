@@ -16,11 +16,12 @@ import { FileProcessorService } from '../services/file-processor.service';
 import { AIService } from '../services/ai.service';
 import prisma from '../db/client';
 import fs from 'fs/promises';
-import fsSync from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleAIFileManager } from '@google/generative-ai/server';
+import { config } from '../config';
 import { YoutubeTranscript } from 'youtube-transcript';
 import { normalizeFileForLanguage, resolveUserLanguage } from '../utils/language.utils';
 import { canUploadFile, getUserUsageStats } from '../lib/tier-limits';
@@ -29,7 +30,11 @@ const execPromise = promisify(exec);
 
 const fileProcessor = new FileProcessorService();
 const aiService = new AIService();
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Initialize Gemini for multimodal audio processing
+const geminiApiKey = config.gemini.apiKey || process.env.GEMINI_API_KEY || '';
+const genAI = new GoogleGenerativeAI(geminiApiKey);
+const fileManager = new GoogleAIFileManager(geminiApiKey);
 
 /**
  * Track user study activity and update streaks
@@ -448,10 +453,10 @@ export default async function studyRoutes(server: FastifyInstance) {
           server.log.warn({ error, videoId }, 'No captions available, will try Whisper transcription');
         }
 
-        // Fallback to Whisper transcription if no captions
+        // Fallback to Gemini multimodal audio analysis if no captions
         if (!hasTranscript) {
           try {
-            server.log.info({ videoId }, 'Starting Whisper transcription fallback...');
+            server.log.info({ videoId }, 'Starting Gemini multimodal audio analysis...');
             
             // Create temp directory if it doesn't exist
             const tempDir = path.join(process.cwd(), 'uploads', 'temp');
@@ -459,15 +464,15 @@ export default async function studyRoutes(server: FastifyInstance) {
             
             const tempAudioPath = path.join(tempDir, `${videoId}.mp3`);
             
-            // Download audio using yt-dlp (more reliable than ytdl-core)
+            // Download audio using yt-dlp (low bitrate for efficiency)
             server.log.info({ videoId, path: tempAudioPath }, 'Downloading audio with yt-dlp...');
             
             try {
-              // yt-dlp command: extract audio, convert to mp3, limit file size
-              const ytdlpCmd = `yt-dlp -f "bestaudio[filesize<25M]/worst" --extract-audio --audio-format mp3 --audio-quality 96K -o "${tempAudioPath}" "${url}"`;
+              // yt-dlp command: extract audio, convert to mp3, optimize for Gemini
+              const ytdlpCmd = `yt-dlp -f "bestaudio[filesize<50M]/worst" --extract-audio --audio-format mp3 --audio-quality 128K -o "${tempAudioPath}" "${url}"`;
               
               const { stdout, stderr } = await execPromise(ytdlpCmd, {
-                timeout: 120000 // 2 minute timeout
+                timeout: 180000 // 3 minute timeout
               });
               
               server.log.info({ videoId, stdout, stderr }, 'yt-dlp download completed');
@@ -486,31 +491,121 @@ export default async function studyRoutes(server: FastifyInstance) {
             const fileSizeMB = stats.size / (1024 * 1024);
             server.log.info({ videoId, fileSizeMB: fileSizeMB.toFixed(2) }, 'Audio file size');
 
-            if (fileSizeMB > 24) {
-              server.log.warn({ videoId, fileSizeMB }, 'Audio file too large for Whisper (25MB limit)');
-              throw new Error(`Audio file too large: ${fileSizeMB.toFixed(2)}MB (max 25MB)`);
-            }
-
             if (fileSizeMB < 0.01) {
               server.log.warn({ videoId, fileSizeMB }, 'Audio file too small, likely failed');
               throw new Error('Audio download produced invalid file');
             }
 
-            // Transcribe with Whisper
-            server.log.info({ videoId }, 'Transcribing with Whisper...');
-            const transcription = await openai.audio.transcriptions.create({
-              file: fsSync.createReadStream(tempAudioPath),
-              model: 'whisper-1',
-              response_format: 'text'
+            // Upload audio to Google's File Manager for processing
+            server.log.info({ videoId }, 'Uploading audio to Google File Manager...');
+            
+            const uploadResult = await fileManager.uploadFile(tempAudioPath, {
+              mimeType: 'audio/mpeg',
+              displayName: `youtube_${videoId}.mp3`,
             });
 
-            transcriptText = transcription as string;
+            server.log.info({ 
+              videoId, 
+              fileUri: uploadResult.file.uri,
+              state: uploadResult.file.state 
+            }, 'Audio uploaded to Google File Manager');
+
+            // Wait for file processing if needed
+            let file = uploadResult.file;
+            while (file.state === 'PROCESSING') {
+              server.log.info({ videoId }, 'Waiting for file processing...');
+              await new Promise(resolve => setTimeout(resolve, 2000));
+              const getResult = await fileManager.getFile(file.name);
+              file = getResult;
+            }
+
+            if (file.state === 'FAILED') {
+              throw new Error('Google File Manager failed to process audio file');
+            }
+
+            // Use Gemini 1.5 Pro for deep audio analysis
+            server.log.info({ videoId }, 'Analyzing audio with Gemini 1.5 Pro...');
+            
+            const model = genAI.getGenerativeModel({ 
+              model: 'gemini-1.5-pro',
+              generationConfig: {
+                temperature: 0.5,
+                maxOutputTokens: 8000,
+              },
+            });
+
+            const prompt = `Listen to this audio file deeply and comprehensively. Ignore any lack of metadata.
+
+Your task is to:
+1. Generate a COMPLETE and ACCURATE transcript of everything being said in the audio
+2. Create a comprehensive, easy-to-read educational summary
+3. Extract all key concepts, topics, and important points discussed
+
+IMPORTANT: 
+- Focus on educational value and accuracy
+- Be thorough - capture all significant content
+- Structure your response clearly
+
+Provide your response in this exact JSON format:
+{
+  "transcript": "Complete transcript of the audio content...",
+  "summary": "Comprehensive educational summary covering all main points...",
+  "keyConcepts": ["key concept 1", "key concept 2", "key concept 3", ...]
+}`;
+
+            const result = await model.generateContent([
+              {
+                fileData: {
+                  mimeType: file.mimeType || 'audio/mpeg',
+                  fileUri: file.uri,
+                },
+              },
+              { text: prompt },
+            ]);
+
+            const responseText = result.response.text();
+            
+            // Parse the JSON response
+            let parsedResponse: { transcript: string; summary: string; keyConcepts: string[] };
+            try {
+              // Extract JSON from potential markdown code blocks
+              const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/) || 
+                              responseText.match(/```\s*([\s\S]*?)\s*```/) ||
+                              [null, responseText];
+              parsedResponse = JSON.parse(jsonMatch[1] || responseText);
+            } catch (parseError) {
+              server.log.warn({ videoId, parseError }, 'Failed to parse JSON, using raw response');
+              parsedResponse = {
+                transcript: responseText,
+                summary: '',
+                keyConcepts: [],
+              };
+            }
+
+            transcriptText = parsedResponse.transcript || responseText;
             hasTranscript = true;
+            
+            // Enhance content with Gemini's analysis
+            if (parsedResponse.summary) {
+              contentParts.push(`\nAI Summary:\n${parsedResponse.summary}`);
+            }
+            if (parsedResponse.keyConcepts && parsedResponse.keyConcepts.length > 0) {
+              contentParts.push(`\nKey Concepts:\n• ${parsedResponse.keyConcepts.join('\n• ')}`);
+            }
             
             server.log.info({ 
               videoId, 
-              transcriptLength: transcriptText.length 
-            }, 'Whisper transcription completed successfully');
+              transcriptLength: transcriptText.length,
+              hasAnalysis: !!parsedResponse.summary
+            }, 'Gemini audio analysis completed successfully');
+
+            // Clean up: delete from Google File Manager
+            try {
+              await fileManager.deleteFile(file.name);
+              server.log.info({ videoId }, 'Deleted file from Google File Manager');
+            } catch (deleteError) {
+              server.log.warn({ videoId, deleteError }, 'Failed to delete from Google File Manager');
+            }
 
             // Clean up temp file
             try {
@@ -523,14 +618,14 @@ export default async function studyRoutes(server: FastifyInstance) {
               }, 'Failed to delete temp audio file');
             }
 
-          } catch (whisperError) {
-            const errorMessage = whisperError instanceof Error ? whisperError.message : String(whisperError);
-            const errorStack = whisperError instanceof Error ? whisperError.stack : undefined;
+          } catch (geminiError) {
+            const errorMessage = geminiError instanceof Error ? geminiError.message : String(geminiError);
+            const errorStack = geminiError instanceof Error ? geminiError.stack : undefined;
             server.log.error({ 
               error: errorMessage,
               stack: errorStack,
               videoId 
-            }, 'Whisper transcription failed');
+            }, 'Gemini audio analysis failed');
             // Continue with metadata only
           }
         }
