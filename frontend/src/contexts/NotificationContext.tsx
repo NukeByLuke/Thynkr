@@ -1,6 +1,11 @@
 /**
  * Notification Context
  * macOS-style notification system for achievements, level ups, and other events
+ * 
+ * Notification Modes:
+ * - OFF: notificationsEnabled = false
+ * - BUBBLES (Mac Style): notificationsEnabled = true, notificationsPersist = false (Auto-dismiss after 5s)
+ * - BANNERS (Persistent): notificationsEnabled = true, notificationsPersist = true (Manual dismiss only)
  */
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
@@ -45,9 +50,6 @@ export const useNotifications = () => {
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [queue, setQueue] = useState<Notification[]>([]);
-  const [localEnabled, setLocalEnabled] = useState(true);
-  const [localPersist, setLocalPersist] = useState(false);
 
   // Fetch notification settings from backend
   const { data: settings } = useQuery({
@@ -67,77 +69,34 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     },
   });
 
-  const notificationsEnabled = settings?.notificationsEnabled ?? localEnabled;
-  const notificationsPersist = settings?.notificationsPersist ?? localPersist;
+  const notificationsEnabled = settings?.notificationsEnabled ?? true;
+  const notificationsPersist = settings?.notificationsPersist ?? false;
 
   const updateSettings = useCallback((newSettings: { notificationsEnabled?: boolean; notificationsPersist?: boolean }) => {
-    if (newSettings.notificationsEnabled !== undefined) {
-      setLocalEnabled(newSettings.notificationsEnabled);
-    }
-    if (newSettings.notificationsPersist !== undefined) {
-      setLocalPersist(newSettings.notificationsPersist);
-    }
     if (isAuthenticated) {
       updateSettingsMutation.mutate(newSettings);
     }
   }, [isAuthenticated, updateSettingsMutation]);
 
-  // Listen for API notifications
-  useEffect(() => {
-    const handleApiNotification = (event: CustomEvent<{ notifications: any[] }>) => {
-      const { notifications: apiNotifications } = event.detail;
-      
-      apiNotifications.forEach((apiNotif) => {
-        if (apiNotif.type === 'achievement') {
-          const tierColors: Record<string, string> = {
-            BRONZE: 'bg-gradient-to-br from-amber-600 to-orange-700',
-            SILVER: 'bg-gradient-to-br from-slate-300 to-slate-500',
-            GOLD: 'bg-gradient-to-br from-yellow-400 to-yellow-600',
-            RUBY: 'bg-gradient-to-br from-red-500 to-rose-700',
-            DIAMOND: 'bg-gradient-to-br from-cyan-400 to-blue-600',
-          };
-
-          showNotification({
-            type: 'achievement',
-            title: `Achievement Unlocked!`,
-            message: `${apiNotif.achievementName} - ${apiNotif.newTier} tier (+${apiNotif.xpAwarded} XP)`,
-            tierColor: tierColors[apiNotif.newTier as string] || tierColors.BRONZE,
-          });
-
-          // If also leveled up, show that too
-          if (apiNotif.leveledUp) {
-            showNotification({
-              type: 'levelup',
-              title: 'Level Up!',
-              message: `You've reached level ${apiNotif.newLevel}!`,
-            });
-          }
-        }
-      });
-    };
-
-    window.addEventListener('api-notification' as any, handleApiNotification);
-    return () => window.removeEventListener('api-notification' as any, handleApiNotification);
-  }, []);
-
-  // Clear queue when notifications are disabled
-  useEffect(() => {
-    if (!notificationsEnabled) {
-      setQueue([]);
-      setNotifications([]);
-    }
-  }, [notificationsEnabled]);
-
+  // Show notification helper
   const showNotification = useCallback((notification: Omit<Notification, 'id'>) => {
     if (!notificationsEnabled) return;
 
+    const id = `${Date.now()}-${Math.random()}`;
     const newNotification: Notification = {
       ...notification,
-      id: `notification-${Date.now()}-${Math.random()}`,
-      duration: notificationsPersist ? 0 : (notification.duration ?? 5000),
+      id,
+      duration: notificationsPersist ? 0 : (notification.duration ?? 5000), // 0 = persistent, else 5s default
     };
 
-    setQueue((prev) => [...prev, newNotification]);
+    setNotifications((prev) => [...prev, newNotification]);
+
+    // Auto-dismiss if not persistent (Bubbles mode)
+    if (newNotification.duration && newNotification.duration > 0) {
+      setTimeout(() => {
+        dismissNotification(id);
+      }, newNotification.duration);
+    }
   }, [notificationsEnabled, notificationsPersist]);
 
   const dismissNotification = useCallback((id: string) => {
@@ -146,25 +105,48 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const clearAll = useCallback(() => {
     setNotifications([]);
-    setQueue([]);
   }, []);
 
-  // Process queue - show one notification at a time
+  // Listen for API notifications (achievements, level ups)
   useEffect(() => {
-    if (queue.length > 0 && notifications.length === 0) {
-      const [nextNotification, ...remainingQueue] = queue;
-      setNotifications([nextNotification]);
-      setQueue(remainingQueue);
+    const handleApiNotification = (event: CustomEvent<{ notifications: any[] }>) => {
+      if (!notificationsEnabled) return;
 
-      // Auto-dismiss if duration is set
-      if (nextNotification.duration && nextNotification.duration > 0) {
-        const timeout = setTimeout(() => {
-          dismissNotification(nextNotification.id);
-        }, nextNotification.duration);
-        return () => clearTimeout(timeout);
-      }
-    }
-  }, [queue, notifications, dismissNotification]);
+      const { notifications: apiNotifications } = event.detail;
+
+      apiNotifications.forEach((apiNotif) => {
+        if (apiNotif.type === 'achievement') {
+          const tierColors: Record<string, string> = {
+            BRONZE: 'from-orange-500 to-amber-600',
+            SILVER: 'from-slate-400 to-zinc-500',
+            GOLD: 'from-yellow-400 to-amber-500',
+            RUBY: 'from-red-500 to-pink-600',
+            DIAMOND: 'from-cyan-400 to-blue-500',
+          };
+
+          showNotification({
+            type: 'achievement',
+            title: `Achievement Unlocked: ${apiNotif.achievementName}`,
+            message: `${apiNotif.tier} Tier • +${apiNotif.xpAwarded} XP`,
+            icon: <Trophy className="w-5 h-5" />,
+            tierColor: tierColors[apiNotif.tier] || 'from-blue-500 to-violet-600',
+          });
+        } else if (apiNotif.type === 'levelup') {
+          showNotification({
+            type: 'levelup',
+            title: 'Level Up!',
+            message: `You've reached Level ${apiNotif.newLevel}`,
+            icon: <Zap className="w-5 h-5" />,
+          });
+        }
+      });
+    };
+
+    window.addEventListener('api-notification', handleApiNotification as EventListener);
+    return () => {
+      window.removeEventListener('api-notification', handleApiNotification as EventListener);
+    };
+  }, [notificationsEnabled, showNotification]);
 
   return (
     <NotificationContext.Provider
@@ -179,34 +161,47 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }}
     >
       {children}
-      <NotificationDisplay notifications={notifications} onDismiss={dismissNotification} />
+      <NotificationStack
+        notifications={notifications}
+        onDismiss={dismissNotification}
+        persist={notificationsPersist}
+      />
     </NotificationContext.Provider>
   );
 };
 
-// macOS-style notification display component
-const NotificationDisplay: React.FC<{
+// macOS-style notification stack in top-right corner
+const NotificationStack: React.FC<{
   notifications: Notification[];
   onDismiss: (id: string) => void;
-}> = ({ notifications, onDismiss }) => {
+  persist: boolean;
+}> = ({ notifications, onDismiss, persist }) => {
   return (
-    <div className="fixed top-4 right-4 z-[9999] pointer-events-none">
-      <AnimatePresence mode="sync">
-        {notifications.map((notification) => (
-          <NotificationCard key={notification.id} notification={notification} onDismiss={onDismiss} />
+    <div className="fixed top-4 right-4 z-50 space-y-3 pointer-events-none" style={{ maxWidth: '400px' }}>
+      <AnimatePresence>
+        {notifications.map((notification, index) => (
+          <NotificationCard
+            key={notification.id}
+            notification={notification}
+            onDismiss={onDismiss}
+            persist={persist}
+            index={index}
+          />
         ))}
       </AnimatePresence>
     </div>
   );
 };
 
+// Individual notification card
 const NotificationCard: React.FC<{
   notification: Notification;
   onDismiss: (id: string) => void;
-}> = ({ notification, onDismiss }) => {
+  persist: boolean;
+  index: number;
+}> = ({ notification, onDismiss, persist, index }) => {
   const getIcon = () => {
     if (notification.icon) return notification.icon;
-    
     switch (notification.type) {
       case 'achievement':
         return <Trophy className="w-5 h-5" />;
@@ -219,115 +214,59 @@ const NotificationCard: React.FC<{
     }
   };
 
-  const getColors = () => {
-    if (notification.tierColor) {
-      return {
-        iconBg: notification.tierColor,
-        border: notification.tierColor.replace('from-', 'from-').replace('to-', 'to-'),
-      };
-    }
-
+  const getGradient = () => {
+    if (notification.tierColor) return notification.tierColor;
     switch (notification.type) {
       case 'achievement':
-        return {
-          iconBg: 'bg-gradient-to-br from-yellow-400 to-amber-600',
-          border: 'border-yellow-500/30',
-        };
+        return 'from-blue-500 to-violet-600';
       case 'levelup':
-        return {
-          iconBg: 'bg-gradient-to-br from-violet-400 to-purple-600',
-          border: 'border-violet-500/30',
-        };
+        return 'from-yellow-400 to-orange-500';
       case 'success':
-        return {
-          iconBg: 'bg-gradient-to-br from-green-400 to-emerald-600',
-          border: 'border-green-500/30',
-        };
+        return 'from-green-500 to-emerald-600';
       default:
-        return {
-          iconBg: 'bg-gradient-to-br from-blue-400 to-indigo-600',
-          border: 'border-blue-500/30',
-        };
+        return 'from-slate-500 to-zinc-600';
     }
   };
 
-  const colors = getColors();
-
   return (
     <motion.div
-      initial={{ opacity: 0, x: 400, scale: 0.8 }}
+      initial={{ opacity: 0, x: 400, scale: 0.95 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: 400, scale: 0.8 }}
-      transition={{
-        type: 'spring',
-        stiffness: 300,
-        damping: 30,
-      }}
-      className="pointer-events-auto mb-3"
+      exit={{ opacity: 0, x: 400, scale: 0.95, transition: { duration: 0.2 } }}
+      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      className="pointer-events-auto"
     >
-      <div
-        className={`
-          relative w-[380px] rounded-2xl
-          bg-white/95 dark:bg-slate-800/95
-          backdrop-blur-xl
-          border ${colors.border}
-          shadow-2xl shadow-black/20
-          overflow-hidden
-        `}
-      >
-        {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent dark:from-white/5 pointer-events-none" />
-        
-        {/* Content */}
-        <div className="relative p-4 flex items-start gap-3">
+      <div className="relative bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden backdrop-blur-lg">
+        {/* Gradient accent bar */}
+        <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${getGradient()}`} />
+
+        <div className="p-4 flex items-start gap-3">
           {/* Icon */}
-          <div
-            className={`
-              flex-shrink-0 w-12 h-12 rounded-xl
-              ${colors.iconBg}
-              flex items-center justify-center
-              text-white shadow-lg
-            `}
-          >
+          <div className={`flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br ${getGradient()} flex items-center justify-center text-white shadow-lg`}>
             {getIcon()}
           </div>
 
-          {/* Text Content */}
-          <div className="flex-1 min-w-0 pt-1">
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-1">
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-0.5">
               {notification.title}
-            </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            </h4>
+            <p className="text-xs text-slate-600 dark:text-slate-400">
               {notification.message}
             </p>
           </div>
 
-          {/* Close Button */}
+          {/* Dismiss button */}
           <button
             onClick={() => onDismiss(notification.id)}
-            className="
-              flex-shrink-0 w-7 h-7 rounded-lg
-              flex items-center justify-center
-              text-slate-400 hover:text-slate-600
-              dark:text-slate-500 dark:hover:text-slate-300
-              hover:bg-slate-100 dark:hover:bg-slate-700/50
-              transition-colors
-            "
+            className="flex-shrink-0 w-6 h-6 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 flex items-center justify-center transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4 text-slate-400 dark:text-slate-500" />
           </button>
         </div>
-
-        {/* Progress bar for auto-dismiss */}
-        {notification.duration && notification.duration > 0 && (
-          <motion.div
-            initial={{ scaleX: 1 }}
-            animate={{ scaleX: 0 }}
-            transition={{ duration: notification.duration / 1000, ease: 'linear' }}
-            className={`h-1 ${colors.iconBg} origin-left`}
-          />
-        )}
       </div>
     </motion.div>
   );
 };
+
+export default NotificationContext;

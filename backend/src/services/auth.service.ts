@@ -159,7 +159,15 @@ export class AuthService {
     // Find refresh token in database
     const tokenRecord = await prisma.refreshToken.findUnique({
       where: { token: refreshToken },
-      include: { user: true },
+      include: { 
+        user: {
+          select: {
+            id: true,
+            email: true,
+            role: true,
+          }
+        }
+      },
     });
 
     if (!tokenRecord || tokenRecord.revoked || tokenRecord.expiresAt < new Date()) {

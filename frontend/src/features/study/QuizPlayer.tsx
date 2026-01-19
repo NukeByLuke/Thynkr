@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
@@ -23,7 +23,7 @@ interface QuizPlayerProps {
   fileId?: string;
   onGenerateQuiz?: (difficulty: string, numQuestions: number) => void;
   isGenerating?: boolean;
-  onSubmit: (answers: Record<string, string>, timeSpentSeconds?: number) => Promise<any>;
+  onSubmit: (answers: Record<string, string>, timeSpentSeconds?: number, questionTimings?: Record<string, number>) => Promise<any>;
 }
 
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -48,6 +48,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
     difficulty: 'medium',
     timeLimit: 'endless',
   });
+  const [numQuestions, setNumQuestions] = useState(1);
 
   // Quiz state
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -65,6 +66,10 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   
   // Track actual time spent (in seconds)
   const [quizStartTime, setQuizStartTime] = useState<number | null>(null);
+  
+  // Track per-question timing using ref (for mutable data)
+  const questionStartTimes = useRef<Record<string, number>>({});
+  const [questionTimings, setQuestionTimings] = useState<Record<string, number>>({});
 
   // When quiz generation completes, hide settings and start quiz
   useEffect(() => {
@@ -80,6 +85,15 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
       setQuizStartTime(Date.now());
     }
   }, [questions.length, showSettings, settings.timeLimit]);
+
+  // Track timing when question changes
+  useEffect(() => {
+    const question = questions[currentIndex];
+    if (question && !isSubmitted) {
+      // Start timing for this question
+      questionStartTimes.current[question.id] = Date.now();
+    }
+  }, [currentIndex, isSubmitted, questions]);
 
   
   // Timer effect
@@ -105,7 +119,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   const handleStartQuiz = useCallback(() => {
     if (onGenerateQuiz && fileId) {
       // Trigger quiz generation with current settings
-      onGenerateQuiz(settings.difficulty, 10); // Default to 10 questions
+      onGenerateQuiz(settings.difficulty, numQuestions);
     } else {
       // No generation needed, just start the quiz
       setShowSettings(false);
@@ -116,7 +130,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
         setTimerActive(true);
       }
     }
-  }, [settings.difficulty, settings.timeLimit, onGenerateQuiz, fileId]);
+  }, [settings.difficulty, settings.timeLimit, numQuestions, onGenerateQuiz, fileId]);
 
   const handleAnswerSelect = useCallback((option: string) => {
     if (!isSubmitted && !isRevealed && currentQuestion) {
@@ -125,6 +139,16 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
         ...prev,
         [currentQuestion.id]: option,
       }));
+      
+      // Record timing for this question
+      const startTime = questionStartTimes.current[currentQuestion.id];
+      if (startTime) {
+        const timeSpent = (Date.now() - startTime) / 1000; // Convert to seconds
+        setQuestionTimings(timings => ({
+          ...timings,
+          [currentQuestion.id]: timeSpent
+        }));
+      }
     }
   }, [isSubmitted, isRevealed, currentQuestion]);
 
@@ -150,11 +174,11 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
       ? Math.floor((Date.now() - quizStartTime) / 1000)
       : 0;
     
-    // Pass time spent to backend
-    const result = await onSubmit(answers, timeSpentSeconds);
+    // Pass time spent and per-question timings to backend
+    const result = await onSubmit(answers, timeSpentSeconds, questionTimings);
     setResults(result);
     setIsSubmitted(true);
-  }, [answers, onSubmit, quizStartTime]);
+  }, [answers, onSubmit, quizStartTime, questionTimings]);
 
   const handleRestart = useCallback(() => {
     setCurrentIndex(0);
@@ -216,6 +240,22 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             </div>
           </div>
 
+          {/* Number of Questions */}
+          <div className="mb-4">
+            <label className="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+              Questions: {numQuestions}
+            </label>
+            <input
+              type="range"
+              min="1"
+              max="20"
+              value={numQuestions}
+              onChange={(e) => setNumQuestions(Number(e.target.value))}
+              disabled={isGenerating}
+              className="w-full disabled:opacity-50 disabled:cursor-not-allowed"
+            />
+          </div>
+
           {/* Time Limit Setting */}
           <div className="mb-4">
             <label className="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white mb-2">
@@ -266,7 +306,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
           {/* Info Summary */}
           <div className="mt-4 p-3 bg-slate-100 dark:bg-zinc-900/50 rounded-xl border border-slate-200 dark:border-white/10 backdrop-blur-sm">
             <p className="text-sm text-slate-600 dark:text-slate-300 text-center font-medium">
-              <strong className="text-gray-900 dark:text-white">10</strong> questions • <strong className="text-gray-900 dark:text-white">{settings.difficulty}</strong> difficulty • {' '}
+              <strong className="text-gray-900 dark:text-white">{numQuestions}</strong> question{numQuestions !== 1 ? 's' : ''} • <strong className="text-gray-900 dark:text-white">{settings.difficulty}</strong> difficulty • {' '}
               <strong className="text-gray-900 dark:text-white">{settings.timeLimit === 'endless' ? 'No time limit' : settings.timeLimit}</strong>
             </p>
           </div>

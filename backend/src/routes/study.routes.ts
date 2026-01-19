@@ -335,7 +335,10 @@ export default async function studyRoutes(server: FastifyInstance) {
         }
 
         // Check user existence
-        const user = await prisma.user.findUnique({ where: { id: userId } });
+        const user = await prisma.user.findUnique({ 
+          where: { id: userId },
+          select: { id: true, role: true }
+        });
         if (!user) {
           return reply.code(404).send({ error: 'User not found' });
         }
@@ -846,7 +849,7 @@ export default async function studyRoutes(server: FastifyInstance) {
     },
     async (request: AuthenticatedRequest, reply) => {
       const { id } = request.params as { id: string };
-      const { numQuestions = 10, difficulty = 'MEDIUM' } = request.body as {
+      const { numQuestions = 1, difficulty = 'MEDIUM' } = request.body as {
         numQuestions?: number;
         difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
       };
@@ -870,8 +873,8 @@ export default async function studyRoutes(server: FastifyInstance) {
       }
 
       // Validate inputs
-      if (numQuestions < 5 || numQuestions > 20) {
-        return reply.code(400).send({ error: 'Number of questions must be between 5 and 20' });
+      if (numQuestions < 1 || numQuestions > 20) {
+        return reply.code(400).send({ error: 'Number of questions must be between 1 and 20' });
       }
 
       if (!['EASY', 'MEDIUM', 'HARD'].includes(difficulty)) {
@@ -1016,9 +1019,10 @@ export default async function studyRoutes(server: FastifyInstance) {
     },
     async (request: AuthenticatedRequest, reply) => {
       const { id } = request.params as { id: string };
-      const { answers, timeSpentSeconds } = request.body as { 
+      const { answers, timeSpentSeconds, questionTimings } = request.body as { 
         answers: Record<string, string>;
         timeSpentSeconds?: number;
+        questionTimings?: Record<string, number>;
       };
 
       const quiz = await prisma.quiz.findFirst({
@@ -1098,7 +1102,19 @@ export default async function studyRoutes(server: FastifyInstance) {
 
       const scorePercentage = Math.round((correctCount / quiz.questions.length) * 100);
       const isPerfectScore = scorePercentage === 100;
-      const isHardDifficulty = quiz.difficulty === 'HARD';
+      // Normalize difficulty to uppercase for case-insensitive comparison
+      const isHardDifficulty = quiz.difficulty?.toUpperCase() === 'HARD';
+
+      server.log.info({
+        quizId: quiz.id,
+        difficulty: quiz.difficulty,
+        difficultyUpperCase: quiz.difficulty?.toUpperCase(),
+        isHardDifficulty,
+        scorePercentage,
+        isPerfectScore,
+        correctCount,
+        totalQuestions: quiz.questions.length,
+      }, 'Quiz submission details');
 
       // Save attempt
       const attempt = await prisma.quizAttempt.create({
@@ -1128,26 +1144,50 @@ export default async function studyRoutes(server: FastifyInstance) {
 
         // 2. Perfectionist achievement (hard difficulty + perfect score)
         if (isHardDifficulty && isPerfectScore) {
+          server.log.info({
+            userId: request.user!.userId,
+            attemptingPerfectionist: true,
+            difficulty: quiz.difficulty,
+            score: scorePercentage
+          }, 'Checking Perfectionist achievement');
+          
           const perfectionistResult = await checkAchievements(request.user!.userId, 'hard_quiz_perfect', 1);
+          
+          server.log.info({ 
+            userId: request.user!.userId,
+            perfectionistResult, 
+            tierUnlocked: perfectionistResult.tierUnlocked,
+            currentValue: perfectionistResult.currentValue,
+            newTier: perfectionistResult.newTier
+          }, 'Perfectionist achievement check completed');
+          
           if (perfectionistResult.tierUnlocked) {
             unlockedAchievements.push(perfectionistResult);
           }
         }
 
-        // 3. Speed Demon achievement (fast answers with good score)
-        // Award partial credit: 1 point per question if average < 10s, bonus if < 5s
-        if (timeSpentSeconds && quiz.questions.length > 0) {
-          const avgTimePerQuestion = timeSpentSeconds / quiz.questions.length;
-          
-          // Award points based on speed tiers
+        // 3. Speed Demon achievement (fast answers per question)
+        // Award points based on individual question speed
+        if (questionTimings && Object.keys(questionTimings).length > 0) {
           let pointsToAward = 0;
-          if (avgTimePerQuestion < 5) {
-            // Very fast: award 1 point per question
-            pointsToAward = quiz.questions.length;
-          } else if (avgTimePerQuestion < 10 && scorePercentage >= 70) {
-            // Fast with decent score: award 0.5 points per question
-            pointsToAward = Math.floor(quiz.questions.length * 0.5);
-          }
+          
+          // Evaluate each question individually
+          Object.entries(questionTimings).forEach(([questionId, timeInSeconds]) => {
+            // Award 1 point if answered in under 5 seconds
+            if (timeInSeconds < 5) {
+              pointsToAward += 1;
+            }
+            // Award 0.5 points if answered in 5-10 seconds with correct answer
+            else if (timeInSeconds < 10) {
+              const wasCorrect = results[questionId]?.correct;
+              if (wasCorrect) {
+                pointsToAward += 0.5;
+              }
+            }
+          });
+          
+          // Round down to whole number
+          pointsToAward = Math.floor(pointsToAward);
           
           if (pointsToAward > 0) {
             const speedDemonResult = await checkAchievements(request.user!.userId, 'quick_answer', pointsToAward);

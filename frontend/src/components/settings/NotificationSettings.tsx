@@ -1,78 +1,140 @@
-import { Bell } from 'lucide-react';
-import { useState } from 'react';
-import Switch from '@/components/Switch';
-import Button from '@/components/ui/Button';
+import { Bell, BellOff, MessageSquare, Clock } from 'lucide-react';
+import { useNotifications } from '@/contexts/NotificationContext';
+import { motion } from 'framer-motion';
 
+/**
+ * Notification Settings Component
+ * Allows users to choose between three notification styles:
+ * 1. OFF - No notifications
+ * 2. BUBBLES (Mac Style) - Auto-dismiss after 5 seconds
+ * 3. BANNERS - Persistent until manually dismissed
+ */
 export default function NotificationSettings() {
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [studyReminders, setStudyReminders] = useState(true);
-  const [courseUpdates, setCourseUpdates] = useState(true);
-  const [chatMessages, setChatMessages] = useState(false);
+  const { notificationsEnabled, notificationsPersist, updateSettings } = useNotifications();
+
+  // Determine current mode
+  const currentMode = !notificationsEnabled 
+    ? 'off' 
+    : notificationsPersist 
+      ? 'banners' 
+      : 'bubbles';
+
+  const handleModeChange = (mode: 'off' | 'bubbles' | 'banners') => {
+    switch (mode) {
+      case 'off':
+        updateSettings({ notificationsEnabled: false, notificationsPersist: false });
+        break;
+      case 'bubbles':
+        updateSettings({ notificationsEnabled: true, notificationsPersist: false });
+        break;
+      case 'banners':
+        updateSettings({ notificationsEnabled: true, notificationsPersist: true });
+        break;
+    }
+  };
+
+  const modes = [
+    {
+      id: 'off',
+      name: 'Off',
+      description: 'No in-app notifications',
+      icon: BellOff,
+      color: 'slate',
+    },
+    {
+      id: 'bubbles',
+      name: 'Bubbles',
+      description: 'macOS style • Auto-dismiss after 5s',
+      icon: MessageSquare,
+      color: 'blue',
+    },
+    {
+      id: 'banners',
+      name: 'Banners',
+      description: 'Persistent until dismissed',
+      icon: Clock,
+      color: 'violet',
+    },
+  ] as const;
 
   return (
     <div className="space-y-10">
       <section>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">Email Notifications</h2>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">Notification Style</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-          Choose what you want to receive via email.
+          Choose how you want to see in-app notifications for achievements and level ups.
         </p>
 
-        <div className="space-y-6 max-w-2xl">
-          <Switch
-            checked={emailNotifications}
-            onCheckedChange={setEmailNotifications}
-            label="General Notifications"
-            description="Receive updates about your account and new features"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl">
+          {modes.map((mode) => {
+            const Icon = mode.icon;
+            const isSelected = currentMode === mode.id;
+            
+            return (
+              <motion.button
+                key={mode.id}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handleModeChange(mode.id)}
+                className={`
+                  relative p-6 rounded-xl border-2 transition-all duration-200 text-left
+                  ${isSelected
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20'
+                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800'
+                  }
+                `}
+              >
+                {/* Selected indicator */}
+                {isSelected && (
+                  <motion.div
+                    layoutId="selected-mode"
+                    className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center"
+                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                  >
+                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </motion.div>
+                )}
 
-          <Switch
-            checked={studyReminders}
-            onCheckedChange={setStudyReminders}
-            label="Study Reminders"
-            description="Get reminders about your study schedule and goals"
-          />
+                {/* Icon */}
+                <div className={`
+                  w-12 h-12 rounded-lg flex items-center justify-center mb-4
+                  ${isSelected
+                    ? 'bg-gradient-to-br from-blue-500 to-violet-600'
+                    : 'bg-slate-100 dark:bg-slate-700'
+                  }
+                `}>
+                  <Icon className={`w-6 h-6 ${isSelected ? 'text-white' : 'text-slate-600 dark:text-slate-400'}`} />
+                </div>
 
-          <Switch
-            checked={courseUpdates}
-            onCheckedChange={setCourseUpdates}
-            label="Course Updates"
-            description="Notifications about new content in your courses"
-          />
+                {/* Content */}
+                <h3 className={`font-bold text-lg mb-1 ${isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
+                  {mode.name}
+                </h3>
+                <p className={`text-sm ${isSelected ? 'text-slate-600 dark:text-slate-400' : 'text-slate-500 dark:text-slate-500'}`}>
+                  {mode.description}
+                </p>
+              </motion.button>
+            );
+          })}
+        </div>
 
-          <Switch
-            checked={chatMessages}
-            onCheckedChange={setChatMessages}
-            label="Chat Messages"
-            description="Get notified about new messages in your chats"
-          />
+        {/* Preview hint */}
+        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900 max-w-4xl">
+          <div className="flex items-start gap-3">
+            <Bell className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <div className="text-sm">
+              <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">Preview your notification style</p>
+              <p className="text-blue-700 dark:text-blue-300">
+                {currentMode === 'off' && 'Notifications are disabled. You won\'t see any in-app notifications.'}
+                {currentMode === 'bubbles' && 'Bubbles will appear in the top-right corner and automatically fade away after 5 seconds.'}
+                {currentMode === 'banners' && 'Banners will stay visible until you manually dismiss them using the × button.'}
+              </p>
+            </div>
+          </div>
         </div>
       </section>
-
-      <hr className="border-slate-200 dark:border-white/10" />
-
-      <section>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">Push Notifications</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-          Get notified directly on your device.
-        </p>
-
-        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-center">
-             <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 mb-4">
-               <Bell className="w-6 h-6" />
-             </div>
-             <h3 className="text-base font-medium text-slate-900 dark:text-white mb-1">Enable Browser Notifications</h3>
-             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 max-w-xs">
-                Stay updated even when you're not on the platform.
-             </p>
-             <Button>
-                Use Push Notifications
-            </Button>
-        </div>
-      </section>
-      
-      <div className="flex justify-end pt-4">
-        <Button size="lg"> Save Preferences </Button>
-      </div>
     </div>
   );
 }

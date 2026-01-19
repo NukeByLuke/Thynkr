@@ -244,7 +244,7 @@ export const StudyContentStage: React.FC<StudyContentStageProps> = ({
                         </label>
                         <input
                           type="range"
-                          min="5"
+                          min="1"
                           max="20"
                           value={numQuestions}
                           onChange={(e) => onSetNumQuestions(Number(e.target.value))}
@@ -293,7 +293,7 @@ export const StudyContentStage: React.FC<StudyContentStageProps> = ({
                     </label>
                     <input
                       type="range"
-                      min="5"
+                      min="1"
                       max="20"
                       value={numQuestions}
                       onChange={(e) => onSetNumQuestions(Number(e.target.value))}
