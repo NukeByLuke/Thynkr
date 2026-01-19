@@ -523,11 +523,11 @@ export default async function studyRoutes(server: FastifyInstance) {
               throw new Error('Google File Manager failed to process audio file');
             }
 
-            // Use Gemini 2.5 Pro for deep audio analysis
-            server.log.info({ videoId }, 'Analyzing audio with Gemini 2.5 Pro...');
+            // Use Gemini 2.0 Flash for audio analysis (better rate limits)
+            server.log.info({ videoId }, 'Analyzing audio with Gemini 2.0 Flash...');
             
             const model = genAI.getGenerativeModel({ 
-              model: 'gemini-2.5-pro',
+              model: 'gemini-2.0-flash',
               generationConfig: {
                 temperature: 0.5,
                 maxOutputTokens: 8000,
