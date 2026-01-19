@@ -16,10 +16,9 @@ const MAX_INPUT_CHARS = 48000;
 const MAX_OUTPUT_TOKENS = 2000;
 
 // Model Selection Strategy:
-// Using Gemini 2.0 Flash for all tasks - excellent balance of speed and quality
-// with better rate limits than 2.5 Pro on free tier
-const GEMINI_PRO_MODEL = 'gemini-2.0-flash';
-const GEMINI_FLASH_MODEL = 'gemini-2.0-flash';
+// Using Gemini 2.5 Flash for all tasks - best balance of quality, speed, and rate limits
+const GEMINI_PRO_MODEL = 'gemini-2.5-flash';
+const GEMINI_FLASH_MODEL = 'gemini-2.5-flash';
 
 /**
  * Prompt injection detection patterns for security validation
