@@ -16,10 +16,10 @@ const MAX_INPUT_CHARS = 48000;
 const MAX_OUTPUT_TOKENS = 2000;
 
 // Model Selection Strategy:
-// - Gemini 1.5 Pro: Complex reasoning, summaries, notes (requires deep understanding)
-// - Gemini 1.5 Flash: High-velocity tasks like quizzes and flashcards
-const GEMINI_PRO_MODEL = 'gemini-1.5-pro';
-const GEMINI_FLASH_MODEL = 'gemini-1.5-flash';
+// - Gemini 2.5 Pro: Complex reasoning, summaries, notes (requires deep understanding)
+// - Gemini 2.5 Flash: High-velocity tasks like quizzes and flashcards
+const GEMINI_PRO_MODEL = 'gemini-2.5-pro';
+const GEMINI_FLASH_MODEL = 'gemini-2.5-flash';
 
 /**
  * Prompt injection detection patterns for security validation
