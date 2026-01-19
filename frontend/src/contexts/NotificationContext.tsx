@@ -54,7 +54,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Queue holds all pending notifications; activeNotification is the one currently shown
   const [queue, setQueue] = useState<Notification[]>([]);
   const [activeNotification, setActiveNotification] = useState<Notification | null>(null);
-  const autoHideTimer = useRef<NodeJS.Timeout | null>(null);
+  const autoHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Fetch notification settings from backend
   const { data: settings } = useQuery({
