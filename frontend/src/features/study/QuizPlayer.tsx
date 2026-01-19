@@ -329,79 +329,68 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
 
   // Final score screen - show when submitted but NOT in review mode
   if (isSubmitted && results && !reviewMode) {
+    const isPassing = results.percentage >= 70;
+    
     return (
-      <div className="max-w-2xl mx-auto px-4 sm:px-0">
+      <div className="max-w-md mx-auto px-4 sm:px-0">
         <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="bg-white dark:bg-zinc-950 rounded-2xl shadow-2xl border border-slate-200 dark:border-white/10 p-6 sm:p-12 text-center backdrop-blur-md"
+          className="bg-zinc-900/80 backdrop-blur-xl rounded-2xl border border-white/10 p-6 text-center"
         >
-          <div className="mb-4 sm:mb-6">
-            {results.percentage >= 70 ? (
-              <svg
-                className="w-12 h-12 sm:w-20 sm:h-20 mx-auto text-green-500"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            ) : (
-              <svg
-                className="w-12 h-12 sm:w-20 sm:h-20 mx-auto text-yellow-500"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            )}
-          </div>
-
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3">Quiz Complete!</h2>
-          <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 mb-6 sm:mb-8">Here's how you did:</p>
-
-          <div className="bg-slate-100 dark:bg-zinc-900/50 rounded-2xl p-8 sm:p-10 mb-8 sm:mb-10 border border-slate-200 dark:border-white/10 shadow-xl backdrop-blur-sm">
-            <div className="text-6xl sm:text-7xl font-bold bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent mb-4">
-              {results.percentage}%
+          {/* Compact header with icon */}
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isPassing ? 'bg-green-500/20' : 'bg-amber-500/20'}`}>
+              {isPassing ? (
+                <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              )}
             </div>
-            <p className="text-base sm:text-lg text-slate-700 dark:text-slate-300 font-medium">
-              {results.score} out of {results.total} questions correct
-            </p>
+            <h2 className="text-xl font-bold text-white">Quiz Complete</h2>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+          {/* Score display - inline and compact */}
+          <div className="flex items-baseline justify-center gap-2 mb-2">
+            <span className={`text-5xl font-bold ${isPassing ? 'text-green-400' : 'text-amber-400'}`}>
+              {results.percentage}%
+            </span>
+          </div>
+          <p className="text-sm text-slate-400 mb-5">
+            {results.score}/{results.total} correct
+          </p>
+
+          {/* Compact button row */}
+          <div className="flex gap-2">
             <motion.button
               whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => {
                 setCurrentIndex(0);
                 setReviewMode(true);
               }}
-              className="px-6 sm:px-8 py-3.5 bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-white/20 rounded-xl text-slate-700 dark:text-white font-bold hover:bg-slate-200 dark:hover:bg-zinc-800 hover:border-slate-400 dark:hover:border-white/30 transition-[background-color,border-color,transform] duration-200 shadow-lg text-sm sm:text-base"
+              className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm font-medium hover:bg-zinc-700 hover:border-zinc-600 transition-colors"
             >
-              Review Answers
+              Review
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.97 }}
               onClick={handleRestart}
-              className="px-6 sm:px-8 py-3.5 bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-white/20 rounded-xl text-slate-700 dark:text-white font-bold hover:bg-slate-200 dark:hover:bg-zinc-800 hover:border-slate-400 dark:hover:border-white/30 transition-[background-color,border-color,transform] duration-200 shadow-lg text-sm sm:text-base"
+              className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm font-medium hover:bg-zinc-700 hover:border-zinc-600 transition-colors"
             >
-              Try Again
+              Retry
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.97 }}
               onClick={handleRestart}
-              className="px-6 sm:px-8 py-3.5 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-200 shadow-xl shadow-blue-500/50 border border-blue-500/50 text-sm sm:text-base"
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-lg text-sm font-medium transition-all shadow-lg shadow-indigo-500/25"
             >
               Continue
             </motion.button>
