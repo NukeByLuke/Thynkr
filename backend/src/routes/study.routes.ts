@@ -1216,7 +1216,12 @@ export default async function studyRoutes(server: FastifyInstance) {
       // Map achievements to notifications format for frontend interceptor
       const notifications = unlockedAchievements.map(ach => ({
         type: 'achievement' as const,
-        ...ach,
+        achievementId: ach.achievementId,
+        achievementName: ach.achievementName || 'Achievement Unlocked',
+        newTier: ach.newTier || 'BRONZE',
+        xpAwarded: ach.xpAwarded || 0,
+        leveledUp: ach.leveledUp || false,
+        newLevel: ach.newLevel,
       }));
 
       return reply.send({
