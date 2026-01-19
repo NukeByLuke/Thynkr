@@ -5,7 +5,7 @@
 
 import { Menu } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import ThynkrLogo from '@/components/brand/Logo';
+import Logo from '@/components/Logo';
 
 interface MobileHeaderProps {
   onMenuClick: () => void;
@@ -32,7 +32,7 @@ export default function MobileHeader({ onMenuClick }: MobileHeaderProps) {
 
         {/* Center: Logo */}
         <div className="flex items-center">
-          <ThynkrLogo variant="symbol" className="h-7 text-slate-900 dark:text-white" />
+          <Logo variant="symbol" size="sm" className="h-7 w-7" />
         </div>
 
         {/* Right: User Avatar */}

@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { useTheme } from '@/contexts/ThemeContext';
 import ThemeToggle from '@/components/ThemeToggle';
 import ThynkrTabs from '@/components/ThynkrTabs';
-import ThynkrLogo from '@/components/brand/Logo';
+import Logo from '@/components/Logo';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -30,7 +30,7 @@ function BrandingPanel() {
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center">
         {/* Thynkr Logo */}
         <div className="mb-8 transform hover:scale-105 transition-transform duration-500 w-64 h-64">
-          <ThynkrLogo variant="symbol" theme="dark" className="text-white drop-shadow-[0_0_30px_rgba(124,58,237,0.5)]" />
+          <Logo variant="symbol" theme="dark" size="lg" className="w-full h-full drop-shadow-[0_0_30px_rgba(124,58,237,0.5)]" />
         </div>
         
         {/* Brand Name */}
@@ -101,7 +101,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         >
           {/* Mobile Logo - Only shown on small screens */}
           <div className="md:hidden flex items-center justify-center mb-6">
-            <ThynkrLogo className="h-8 text-slate-900 dark:text-white" />
+            <Logo variant="full" size="md" />
           </div>
 
           {/* Auth Tabs */}
