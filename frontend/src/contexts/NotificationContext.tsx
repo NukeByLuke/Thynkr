@@ -175,17 +175,15 @@ const NotificationStack: React.FC<{
   notifications: Notification[];
   onDismiss: (id: string) => void;
   persist: boolean;
-}> = ({ notifications, onDismiss, persist }) => {
+}> = ({ notifications, onDismiss }) => {
   return (
     <div className="fixed top-4 right-4 z-50 space-y-3 pointer-events-none" style={{ maxWidth: '400px' }}>
       <AnimatePresence>
-        {notifications.map((notification, index) => (
+        {notifications.map((notification) => (
           <NotificationCard
             key={notification.id}
             notification={notification}
             onDismiss={onDismiss}
-            persist={persist}
-            index={index}
           />
         ))}
       </AnimatePresence>
@@ -197,9 +195,7 @@ const NotificationStack: React.FC<{
 const NotificationCard: React.FC<{
   notification: Notification;
   onDismiss: (id: string) => void;
-  persist: boolean;
-  index: number;
-}> = ({ notification, onDismiss, persist, index }) => {
+}> = ({ notification, onDismiss }) => {
   const getIcon = () => {
     if (notification.icon) return notification.icon;
     switch (notification.type) {
