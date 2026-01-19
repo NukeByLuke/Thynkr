@@ -1213,13 +1213,19 @@ export default async function studyRoutes(server: FastifyInstance) {
       // Track study activity
       await trackStudyActivity(request.user!.userId, 'QUIZ_ATTEMPT', file.id);
 
+      // Map achievements to notifications format for frontend interceptor
+      const notifications = unlockedAchievements.map(ach => ({
+        type: 'achievement' as const,
+        ...ach,
+      }));
+
       return reply.send({
         attempt,
         results,
         score: correctCount,
         total: quiz.questions.length,
         percentage: scorePercentage,
-        achievements: unlockedAchievements,
+        notifications,
         xpGained: unlockedAchievements.reduce((sum, ach) => sum + (ach.xpAwarded || 0), 0),
       });
     }

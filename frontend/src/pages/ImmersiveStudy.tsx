@@ -5,9 +5,9 @@
  * This component MUST have a fileId param - if not, it redirects to /study
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import SummaryView from '@/features/study/SummaryView';
@@ -46,32 +46,12 @@ type TabType = 'summary' | 'notes' | 'flashcards' | 'quizzes';
 
 export default function ImmersiveStudy() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { fileId } = useParams<{ fileId: string }>();
   const { setHideSidebar, setCustomHeaderContent } = useLayout();
 
-  // CRITICAL GUARD: This component should ONLY render for /study/:fileId routes
-  // If we're on any other route, something is wrong with the routing
-  const isCorrectRoute = useMemo(() => {
-    return location.pathname.startsWith('/study/') && fileId;
-  }, [location.pathname, fileId]);
-
-  // Immediate redirect if on wrong route
-  useEffect(() => {
-    if (!isCorrectRoute) {
-      setHideSidebar(false);
-      setCustomHeaderContent(null);
-      if (location.pathname === '/study') {
-        // Already on correct route, do nothing
-      } else if (!fileId) {
-        navigate('/study', { replace: true });
-      }
-    }
-  }, [isCorrectRoute, fileId, location.pathname, navigate, setHideSidebar, setCustomHeaderContent]);
-
-  // Early return if not on correct route
-  if (!isCorrectRoute) {
-    return null;
+  // Redirect if no fileId - let React Router handle this cleanly
+  if (!fileId) {
+    return <Navigate to="/study" replace />;
   }
 
   const getToken = () => localStorage.getItem('accessToken');
@@ -146,7 +126,7 @@ export default function ImmersiveStudy() {
       <>
         {/* Back Button + File Info */}
         <button
-          onClick={() => window.location.href = '/study'}
+          onClick={() => navigate('/study')}
           className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex-shrink-0"
         >
           <ArrowLeft className="w-4 h-4" />
