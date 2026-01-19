@@ -87,26 +87,34 @@ function AppContent() {
     const isDark = theme === 'dark';
     return (
       <Toaster
-        position="top-right"
+        position="bottom-center"
+        containerStyle={{
+          bottom: 24,
+        }}
         toastOptions={{
           duration: 3000,
           style: {
-            background: isDark ? '#2A2A2A' : '#FFFFFF',
+            background: isDark ? '#1e293b' : '#FFFFFF',
             color: isDark ? '#FFFFFF' : '#111827',
-            border: isDark ? '1px solid #374151' : '1px solid #E5E7EB',
+            border: isDark ? '1px solid #475569' : '1px solid #E5E7EB',
+            borderRadius: '12px',
+            padding: '12px 16px',
+            boxShadow: isDark 
+              ? '0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3)'
+              : '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
           },
           success: {
             duration: 3000,
             iconTheme: {
               primary: '#10b981',
-              secondary: isDark ? '#1F2937' : '#FFFFFF',
+              secondary: isDark ? '#1e293b' : '#FFFFFF',
             },
           },
           error: {
             duration: 4000,
             iconTheme: {
               primary: '#ef4444',
-              secondary: isDark ? '#1F2937' : '#FFFFFF',
+              secondary: isDark ? '#1e293b' : '#FFFFFF',
             },
           },
         }}

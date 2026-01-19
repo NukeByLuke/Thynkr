@@ -265,7 +265,7 @@ const NotificationStack: React.FC<{
   persist: boolean;
 }> = ({ notification, onDismiss, onSnooze, persist }) => {
   return (
-    <div className="fixed top-4 right-4 z-50 pointer-events-none" style={{ maxWidth: '380px', minWidth: '320px' }}>
+    <div className="fixed top-4 right-4 z-[9999] pointer-events-none" style={{ maxWidth: '400px', minWidth: '340px' }}>
       <AnimatePresence>
         {notification && (
           <NotificationCard
@@ -312,78 +312,90 @@ const NotificationCard: React.FC<{
       transition={{ type: 'spring', stiffness: 400, damping: 30 }}
       className="pointer-events-auto"
     >
-      <div className={`relative rounded-2xl shadow-2xl ${theme.glow} overflow-hidden backdrop-blur-xl border ${theme.border} ${theme.bg}`}>
-        {/* Gradient accent bar at top */}
-        <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${theme.gradient}`} />
+      {/* Outer glow effect for visibility */}
+      <div className={`relative rounded-2xl ${isAchievement ? 'shadow-[0_0_40px_-8px]' : 'shadow-2xl'} ${theme.glow} overflow-hidden`}>
+        {/* Inner container with blur and border */}
+        <div className={`relative rounded-2xl backdrop-blur-xl border-2 ${theme.border} ${theme.bg} overflow-hidden`}>
+          {/* Gradient accent bar at top */}
+          <div className={`h-1.5 bg-gradient-to-r ${theme.gradient}`} />
 
-        <div className="p-4">
-          {/* Header row: Icon + Title + Actions */}
-          <div className="flex items-start gap-3">
-            {/* Icon with gradient background */}
-            <div className={`flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br ${theme.gradient} flex items-center justify-center text-white shadow-lg`}>
-              {getIcon()}
-            </div>
+          <div className="p-4">
+            {/* Achievement Unlocked header for achievements */}
+            {isAchievement && (
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className={`w-4 h-4 ${theme.text}`} />
+                <span className={`text-xs font-bold uppercase tracking-widest ${theme.text}`}>
+                  Achievement Unlocked!
+                </span>
+              </div>
+            )}
 
-            {/* Content */}
-            <div className="flex-1 min-w-0 pt-0.5">
-              <h4 className="text-base font-bold text-white truncate">
-                {notification.title}
-              </h4>
-              {isAchievement ? (
-                <div className="flex items-center gap-2 mt-1">
-                  <span className={`text-sm font-semibold ${theme.text}`}>
-                    {tier} Tier
-                  </span>
-                  {notification.xp !== undefined && notification.xp > 0 && (
-                    <>
-                      <span className="text-slate-500">•</span>
-                      <span className="text-sm font-bold text-emerald-400">
+            {/* Header row: Icon + Title + Actions */}
+            <div className="flex items-start gap-3">
+              {/* Icon with gradient background */}
+              <div className={`flex-shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br ${theme.gradient} flex items-center justify-center text-white shadow-lg ring-2 ring-white/20`}>
+                {getIcon()}
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 min-w-0 pt-0.5">
+                <h4 className="text-lg font-bold text-white truncate">
+                  {notification.title}
+                </h4>
+                {isAchievement ? (
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className={`text-sm font-bold px-2 py-0.5 rounded-md bg-gradient-to-r ${theme.gradient} text-white`}>
+                      {tier} Tier
+                    </span>
+                    {notification.xp !== undefined && notification.xp > 0 && (
+                      <span className="text-sm font-bold text-emerald-400 flex items-center gap-1">
+                        <Zap className="w-3.5 h-3.5" />
                         +{notification.xp} XP
                       </span>
-                    </>
-                  )}
-                </div>
-              ) : (
-                notification.message && (
-                  <p className="text-sm text-slate-400 mt-0.5">
-                    {notification.message}
-                  </p>
-                )
-              )}
+                    )}
+                  </div>
+                ) : (
+                  notification.message && (
+                    <p className="text-sm text-slate-400 mt-0.5">
+                      {notification.message}
+                    </p>
+                  )
+                )}
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {/* Snooze button */}
+                <button
+                  onClick={onSnooze}
+                  className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors group"
+                  title="Snooze (show later)"
+                >
+                  <Clock className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
+                </button>
+                {/* Dismiss button */}
+                <button
+                  onClick={onDismiss}
+                  className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors group"
+                  title="Dismiss"
+                >
+                  <X className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
+                </button>
+              </div>
             </div>
 
-            {/* Action buttons */}
-            <div className="flex items-center gap-1 flex-shrink-0">
-              {/* Snooze button */}
-              <button
-                onClick={onSnooze}
-                className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors group"
-                title="Snooze (show later)"
-              >
-                <Clock className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
-              </button>
-              {/* Dismiss button */}
-              <button
-                onClick={onDismiss}
-                className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors group"
-                title="Dismiss"
-              >
-                <X className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
-              </button>
-            </div>
+            {/* Progress bar for auto-dismiss (Bubbles mode) */}
+            {!persist && (
+              <div className="mt-3 h-1 bg-white/10 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: '100%' }}
+                  animate={{ width: '0%' }}
+                  transition={{ duration: 5, ease: 'linear' }}
+                  className={`h-full bg-gradient-to-r ${theme.gradient}`}
+                />
+              </div>
+            )}
           </div>
-
-          {/* Progress bar for auto-dismiss (Bubbles mode) */}
-          {!persist && (
-            <div className="mt-3 h-1 bg-white/10 rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: '100%' }}
-                animate={{ width: '0%' }}
-                transition={{ duration: 5, ease: 'linear' }}
-                className={`h-full bg-gradient-to-r ${theme.gradient}`}
-              />
-            </div>
-          )}
         </div>
       </div>
     </motion.div>
