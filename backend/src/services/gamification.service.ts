@@ -347,6 +347,9 @@ export async function checkAchievements(
         },
       });
 
+      // Track the previous value to detect threshold crossings
+      const previousValue = userAchievement?.currentValue ?? 0;
+
       // Create if doesn't exist
       if (!userAchievement) {
         userAchievement = await tx.userAchievement.create({
@@ -373,30 +376,51 @@ export async function checkAchievements(
       }
 
       // Check if user has reached next tier threshold (support multiple tier jumps)
-      let currentCheckTier = userAchievement.currentTier;
+      // IMPORTANT: We need to check all tiers from the beginning to handle the case
+      // where BRONZE was set as default but never actually "earned"
       let tiersUnlocked: { tier: AchievementTier; xp: number }[] = [];
       
-      // Loop through all potential tier upgrades
-      while (true) {
-        const nextTier = getNextTier(currentCheckTier);
-        
-        if (!nextTier) {
-          // Already at max tier or no more tiers available
-          break;
-        }
-
-        const nextThreshold = achievement.thresholds[nextTier];
-        
-        if (userAchievement.currentValue >= nextThreshold) {
-          // User qualifies for this tier
-          tiersUnlocked.push({
-            tier: nextTier,
-            xp: achievement.xpRewards[nextTier],
-          });
-          currentCheckTier = nextTier;
+      // Find the highest tier the user qualifies for based on currentValue
+      let highestQualifiedTier: AchievementTier | null = null;
+      
+      for (const tier of TIER_ORDER) {
+        const threshold = achievement.thresholds[tier];
+        if (userAchievement.currentValue >= threshold) {
+          highestQualifiedTier = tier;
         } else {
-          // User hasn't reached this tier yet
-          break;
+          break; // Tiers are ordered, so stop once we fail a threshold
+        }
+      }
+      
+      // If the user qualifies for a tier higher than their current stored tier,
+      // OR if they just crossed the BRONZE threshold for the first time
+      if (highestQualifiedTier) {
+        const currentTierIndex = TIER_ORDER.indexOf(userAchievement.currentTier);
+        const qualifiedTierIndex = TIER_ORDER.indexOf(highestQualifiedTier);
+        
+        // Check if this is the first time crossing the BRONZE threshold
+        // (previous value was below threshold, now it's at or above)
+        const bronzeThreshold = achievement.thresholds.BRONZE;
+        const justCrossedBronze = 
+          previousValue < bronzeThreshold && 
+          userAchievement.currentValue >= bronzeThreshold;
+        
+        if (qualifiedTierIndex > currentTierIndex) {
+          // User has progressed to higher tiers - award all tiers from current+1 to qualified
+          for (let i = currentTierIndex + 1; i <= qualifiedTierIndex; i++) {
+            const tier = TIER_ORDER[i];
+            tiersUnlocked.push({
+              tier,
+              xp: achievement.xpRewards[tier],
+            });
+          }
+        } else if (justCrossedBronze && userAchievement.currentTier === 'BRONZE') {
+          // Special case: First time crossing Bronze threshold
+          // (currentTier is already BRONZE as default, but they just actually earned it)
+          tiersUnlocked.push({
+            tier: 'BRONZE',
+            xp: achievement.xpRewards.BRONZE,
+          });
         }
       }
       
