@@ -114,6 +114,57 @@ export class AIService {
   }
 
   /**
+   * Sleep helper for retry delays
+   */
+  private sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Execute API call with retry logic and exponential backoff for rate limits
+   */
+  private async withRetry<T>(
+    operation: () => Promise<T>,
+    maxRetries: number = 3,
+    baseDelayMs: number = 2000
+  ): Promise<T> {
+    let lastError: any;
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error: any) {
+        lastError = error;
+        
+        // Check if it's a rate limit error (429)
+        const isRateLimit = error?.status === 429 || 
+          error?.message?.includes('429') || 
+          error?.message?.includes('Too Many Requests') ||
+          error?.message?.includes('quota');
+        
+        if (isRateLimit && attempt < maxRetries) {
+          // Extract retry delay from error if available, otherwise use exponential backoff
+          let delayMs = baseDelayMs * Math.pow(2, attempt);
+          
+          // Try to get suggested delay from error
+          const retryMatch = error?.message?.match(/retryDelay":"(\d+)s"/);
+          if (retryMatch) {
+            delayMs = parseInt(retryMatch[1], 10) * 1000 + 1000; // Add 1s buffer
+          }
+          
+          logger.warn({ attempt, delayMs }, `Rate limited, retrying in ${delayMs}ms...`);
+          await this.sleep(delayMs);
+          continue;
+        }
+        
+        throw error;
+      }
+    }
+    
+    throw lastError;
+  }
+
+  /**
    * Fisher-Yates shuffle algorithm for randomizing quiz options
    * @param array - Array to shuffle
    * @returns Shuffled array
@@ -174,9 +225,11 @@ IMPORTANT: Verify all facts against the provided source material. Include specif
 Text:
 ${preparedText}`;
 
-      // Use Pro model for deep analysis tasks
-      const result = await this.proModel.generateContent({
-        contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
+      // Use Pro model for deep analysis tasks with retry logic
+      const result = await this.withRetry(async () => {
+        return this.proModel.generateContent({
+          contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
+        });
       });
 
       const content = result.response.text() || '';
@@ -186,7 +239,7 @@ ${preparedText}`;
       return generatedResult;
     } catch (error: any) {
       logger.error({ error }, 'Failed to generate summary with Gemini');
-      throw new Error('Failed to generate summary');
+      throw new Error('Failed to generate summary. Please try again in a moment.');
     }
   }
 
@@ -245,8 +298,10 @@ IMPORTANT: Verify all facts against the provided source material before outputti
 Text:
 ${preparedText}`;
 
-      const result = await jsonModel.generateContent({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      const result = await this.withRetry(async () => {
+        return jsonModel.generateContent({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        });
       });
 
       const content = result.response.text() || '{}';
@@ -256,7 +311,7 @@ ${preparedText}`;
       return parsed;
     } catch (error: any) {
       logger.error({ error }, 'Failed to generate notes with Gemini');
-      throw new Error('Failed to generate notes');
+      throw new Error('Failed to generate notes. Please try again in a moment.');
     }
   }
 
@@ -348,8 +403,10 @@ IMPORTANT: Verify every question and answer against the source text for 100% fac
 Text:
 ${preparedText}`;
 
-      const result = await jsonModel.generateContent({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      const result = await this.withRetry(async () => {
+        return jsonModel.generateContent({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        });
       });
 
       const content = result.response.text() || '{}';
@@ -369,7 +426,7 @@ ${preparedText}`;
       return parsed;
     } catch (error: any) {
       logger.error({ error }, 'Failed to generate quiz with Gemini Flash');
-      throw new Error('Failed to generate quiz');
+      throw new Error('Failed to generate quiz. Please try again in a moment.');
     }
   }
 
@@ -445,8 +502,10 @@ IMPORTANT: Verify all facts against the provided source material before outputti
 Text:
 ${preparedText}`;
 
-      const result = await jsonModel.generateContent({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      const result = await this.withRetry(async () => {
+        return jsonModel.generateContent({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        });
       });
 
       const content = result.response.text() || '{}';
@@ -456,7 +515,7 @@ ${preparedText}`;
       return parsed;
     } catch (error: any) {
       logger.error({ error }, 'Failed to generate flashcards with Gemini Flash');
-      throw new Error('Failed to generate flashcards');
+      throw new Error('Failed to generate flashcards. Please try again in a moment.');
     }
   }
 
