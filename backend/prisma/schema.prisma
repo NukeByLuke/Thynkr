@@ -69,8 +69,8 @@ model User {
   lastXpGain       DateTime? // Prevents XP farming/spam
 
   // Notification preferences
-  notificationsEnabled     Boolean @default(true)
-  notificationsPersist     Boolean @default(false) // Keep notifications until manually dismissed
+  notificationsEnabled     Boolean @default(true) @map("notificationsenabled")
+  notificationsPersist     Boolean @default(false) @map("notificationspersist") // Keep notifications until manually dismissed
 
   // Study system relations
   uploadedFiles  UploadedFile[]
