@@ -207,7 +207,7 @@ export default function ImmersiveStudy() {
         </div>
 
         {/* Right: Tab Pills */}
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center gap-1 flex-shrink-0 mr-2">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
