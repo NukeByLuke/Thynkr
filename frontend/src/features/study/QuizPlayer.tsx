@@ -55,6 +55,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [results, setResults] = useState<any>(null);
+  const [reviewMode, setReviewMode] = useState(false);
   
   // New state for delayed feedback
   const [isRevealed, setIsRevealed] = useState(false);
@@ -191,6 +192,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
     setIsRevealed(false);
     setSelectedOption(null);
     setQuizStartTime(null);
+    setReviewMode(false);
   }, []);
 
   const formatTime = useCallback((seconds: number) => {
@@ -315,8 +317,8 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
     );
   }
 
-  // Final score screen
-  if (isSubmitted && results && currentIndex === questions.length - 1) {
+  // Final score screen - show when submitted but NOT in review mode
+  if (isSubmitted && results && !reviewMode) {
     return (
       <div className="max-w-2xl mx-auto px-4 sm:px-0">
         <motion.div 
@@ -369,7 +371,10 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setCurrentIndex(0)}
+              onClick={() => {
+                setCurrentIndex(0);
+                setReviewMode(true);
+              }}
               className="px-6 sm:px-8 py-3.5 bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-white/20 rounded-xl text-slate-700 dark:text-white font-bold hover:bg-slate-200 dark:hover:bg-zinc-800 hover:border-slate-400 dark:hover:border-white/30 transition-[background-color,border-color,transform] duration-200 shadow-lg text-sm sm:text-base"
             >
               Review Answers
@@ -378,9 +383,17 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleRestart}
-              className="px-6 sm:px-8 py-3.5 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-200 shadow-xl shadow-blue-500/50 border border-blue-500/50 text-sm sm:text-base"
+              className="px-6 sm:px-8 py-3.5 bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-white/20 rounded-xl text-slate-700 dark:text-white font-bold hover:bg-slate-200 dark:hover:bg-zinc-800 hover:border-slate-400 dark:hover:border-white/30 transition-[background-color,border-color,transform] duration-200 shadow-lg text-sm sm:text-base"
             >
               Try Again
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleRestart}
+              className="px-6 sm:px-8 py-3.5 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-200 shadow-xl shadow-blue-500/50 border border-blue-500/50 text-sm sm:text-base"
+            >
+              Continue
             </motion.button>
           </div>
         </motion.div>
@@ -750,7 +763,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
           )}
 
           {/* Show Previous button only after quiz is submitted (review mode) */}
-          {isSubmitted && (
+          {isSubmitted && reviewMode && (
             <div className="flex items-center gap-4">
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -769,6 +782,14 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                 className="px-6 py-3 bg-slate-100 dark:bg-zinc-900 border-2 border-slate-300 dark:border-white/20 rounded-xl text-slate-700 dark:text-white font-bold hover:bg-slate-200 dark:hover:bg-zinc-800 hover:border-slate-400 dark:hover:border-white/30 disabled:opacity-30 disabled:cursor-not-allowed transition-[background-color,border-color,transform] duration-200 shadow-lg text-base active:scale-95"
               >
                 Next →
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setReviewMode(false)}
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-200 shadow-xl shadow-blue-500/50 border border-blue-500/50 text-base active:scale-95"
+              >
+                Back to Results
               </motion.button>
             </div>
           )}
