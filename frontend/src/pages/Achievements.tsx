@@ -524,7 +524,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
           } top-1/2 w-80 pointer-events-auto z-[100]`}
         >
           <div className="relative">
-            {/* Tooltip arrow with current tier color */}
+            {/* Tooltip arrow with tier-specific gradient matching TIER_THEMES */}
             <div 
               className={`absolute ${
                 tooltipPosition === 'left' ? '-right-1.5' : '-left-1.5'
@@ -533,20 +533,56 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
               } bg-gradient-to-br ${
                 isLocked 
                   ? 'from-slate-500 to-slate-600'
-                  : tier.gradient
+                  : isMastery
+                    ? 'from-violet-500 to-purple-600'
+                    : viewedTierCode === 'BRONZE'
+                      ? 'from-orange-500 to-amber-600'
+                      : viewedTierCode === 'SILVER'
+                        ? 'from-slate-400 to-zinc-500'
+                        : viewedTierCode === 'GOLD'
+                          ? 'from-yellow-400 to-amber-500'
+                          : viewedTierCode === 'RUBY'
+                            ? 'from-red-500 to-pink-600'
+                            : 'from-cyan-400 to-blue-500'
               }`}
             />
             
-            {/* Tooltip content with tier-specific border */}
-            <div className={`relative rounded-xl shadow-2xl overflow-hidden border-2 ${
+            {/* Tooltip content with tier-specific border matching notification TIER_THEMES */}
+            <div className={`relative rounded-xl overflow-hidden border-2 ${
               isLocked 
-                ? 'border-slate-400/40 dark:border-slate-600/40'
-                : `${tooltipTier.border} ${
-                  isMastery ? 'border-violet-400/80 shadow-violet-500/50' : ''
-                }`
+                ? 'border-slate-500/30 shadow-xl shadow-slate-500/10'
+                : isMastery
+                  ? 'border-violet-400/50 shadow-2xl shadow-violet-500/30'
+                  : viewedTierCode === 'BRONZE'
+                    ? 'border-orange-500/30 shadow-2xl shadow-orange-500/20'
+                    : viewedTierCode === 'SILVER'
+                      ? 'border-slate-400/30 shadow-2xl shadow-slate-400/20'
+                      : viewedTierCode === 'GOLD'
+                        ? 'border-yellow-400/30 shadow-2xl shadow-yellow-400/20'
+                        : viewedTierCode === 'RUBY'
+                          ? 'border-red-500/30 shadow-2xl shadow-red-500/20'
+                          : 'border-cyan-400/30 shadow-2xl shadow-cyan-400/20'
             }`}>
               {/* Content background with better contrast */}
-              <div className="relative bg-slate-900/98 dark:bg-slate-800/98 backdrop-blur-xl rounded-xl p-5">
+              <div className="relative bg-slate-900/98 dark:bg-slate-800/98 backdrop-blur-xl rounded-xl overflow-hidden">
+                {/* Top gradient accent bar */}
+                <div className={`h-1 w-full bg-gradient-to-r ${
+                  isLocked 
+                    ? 'from-slate-500 to-slate-600'
+                    : isMastery
+                      ? 'from-violet-500 via-purple-500 to-blue-600'
+                      : viewedTierCode === 'BRONZE'
+                        ? 'from-orange-500 to-amber-600'
+                        : viewedTierCode === 'SILVER'
+                          ? 'from-slate-400 to-zinc-500'
+                          : viewedTierCode === 'GOLD'
+                            ? 'from-yellow-400 to-amber-500'
+                            : viewedTierCode === 'RUBY'
+                              ? 'from-red-500 to-pink-600'
+                              : 'from-cyan-400 to-blue-500'
+                }`} />
+                
+                <div className="p-5">
                 {/* Tier badge and title */}
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex-1">
@@ -627,7 +663,8 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                             <span className={`text-base font-bold ${displayConfig.text}`}>
                               {displayConfig.label} Tier
                             </span>
-                            <span className={`text-xs font-bold text-white px-2.5 py-1 rounded-full bg-black/30`}>
+                            <span className={`text-xs font-black px-2.5 py-1 rounded-full bg-gradient-to-r ${displayConfig.gradient} text-white shadow-lg ring-1 ring-white/20`}>
+                              <Zap className="w-3 h-3 inline-block mr-1 -mt-0.5" />
                               +{xpReward ? Math.floor(xpReward).toLocaleString() : '0'} XP
                             </span>
                           </div>
@@ -684,15 +721,21 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                         {/* Info Row */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2.5">
-                            <span className={`text-sm font-bold ${
+                            <span className={`text-sm font-bold flex items-center gap-1.5 ${
                               isLockedProgress 
-                                ? 'text-slate-400' 
+                                ? 'text-amber-400' 
                                 : nextTierConfig.text
                             }`}>
+                              {isLockedProgress && <Trophy className="w-4 h-4" />}
                               {nextTierConfig.label} Tier
                             </span>
                             {xpReward && (
-                              <span className="text-[10px] px-2 py-1 rounded-md bg-yellow-500/20 text-yellow-400 font-bold border border-yellow-500/30">
+                              <span className={`text-[10px] px-2 py-1.5 rounded-md font-black flex items-center gap-1 ${
+                                isLockedProgress 
+                                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                  : `bg-gradient-to-r ${nextTierConfig.gradient} text-white shadow-md ring-1 ring-white/20`
+                              }`}>
+                                <Zap className="w-3 h-3" />
                                 +{Math.floor(xpReward).toLocaleString()} XP
                               </span>
                             )}
@@ -764,6 +807,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                     <span>Unlocked on {formattedDate}</span>
                   </div>
                 )}
+                </div>
               </div>
             </div>
           </div>
