@@ -72,6 +72,9 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   // Track per-question timing using ref (for mutable data)
   const questionStartTimes = useRef<Record<string, number>>({});
   const [questionTimings, setQuestionTimings] = useState<Record<string, number>>({});
+  
+  // Use ref to prevent double-submission without adding to dependency array
+  const isSubmittingRef = useRef(false);
 
   // When quiz generation completes, hide settings and start quiz
   useEffect(() => {
@@ -169,9 +172,10 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   }, [currentIndex]);
 
   const handleSubmit = useCallback(async () => {
-    // Prevent double-submission
-    if (isSubmitting) return;
+    // Prevent double-submission using ref
+    if (isSubmittingRef.current) return;
     
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
     setTimerActive(false);
     
@@ -186,13 +190,15 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
       setResults(result);
       setIsSubmitted(true);
     } finally {
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
-  }, [answers, onSubmit, quizStartTime, questionTimings, isSubmitting]);
+  }, [answers, onSubmit, quizStartTime, questionTimings]);
 
   const handleRestart = useCallback(() => {
     setCurrentIndex(0);
     setAnswers({});
+    isSubmittingRef.current = false;
     setIsSubmitting(false);
     setIsSubmitted(false);
     setResults(null);
