@@ -438,8 +438,7 @@ export default function ImmersiveStudy() {
       <div className="h-full overflow-y-auto">
         <div className="max-w-5xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
           {/* Content Container with Glass Effect */}
-          <motion.div
-            layout
+          <div
             className="relative rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl shadow-slate-200/20 dark:shadow-slate-900/30 overflow-hidden"
           >
             {/* Subtle gradient overlay */}
@@ -449,7 +448,7 @@ export default function ImmersiveStudy() {
             <div className="relative z-10 p-6 sm:p-8">
               {renderTabContent()}
             </div>
-          </motion.div>
+          </div>
 
           {/* Keyboard Hints */}
           <motion.div
