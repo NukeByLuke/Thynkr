@@ -11,7 +11,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { NavigationProvider } from './contexts/NavigationContext';
-import { LayoutProvider } from './contexts/LayoutContext';
+import { LayoutProvider, useLayout } from './contexts/LayoutContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import ProtectedRoute from '@/features/auth/ProtectedRoute';
 import PublicLayout from './layouts/PublicLayout';
@@ -53,6 +53,21 @@ function useAuthRedirects() {
  */
 function AppContent() {
   useAuthRedirects();
+  
+  const location = useLocation();
+  const { setHideSidebar, setCustomHeaderContent } = useLayout();
+
+  /**
+   * GLOBAL NAVIGATION SAFETY NET
+   * Resets layout state on every route change to prevent "zombie view" bugs
+   * where a page's custom layout state persists after navigation
+   */
+  useEffect(() => {
+    // Reset to default layout state on every route change
+    // This ensures no page can "trap" the user in a custom layout
+    setHideSidebar(false);
+    setCustomHeaderContent(null);
+  }, [location.pathname, setHideSidebar, setCustomHeaderContent]);
 
   /**
    * Home route component that redirects based on auth status
@@ -121,8 +136,6 @@ function AppContent() {
       />
     );
   };
-
-  const location = useLocation();
 
   return (
     <>
