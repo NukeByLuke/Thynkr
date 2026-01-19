@@ -33,8 +33,8 @@ COPY . .
 # Generate Prisma client
 RUN pnpm prisma generate
 
-# Build TypeScript (if you have a build script)
-RUN pnpm build
+# Build TypeScript with optimized memory settings
+RUN NODE_OPTIONS="--max-old-space-size=2048" pnpm build
 
 # Stage 3: Production runner
 FROM node:20-slim AS runner
