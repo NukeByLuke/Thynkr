@@ -102,9 +102,9 @@ function AppContent() {
     const isDark = theme === 'dark';
     return (
       <Toaster
-        position="bottom-center"
+        position="top-center"
         containerStyle={{
-          bottom: 24,
+          top: 24,
         }}
         toastOptions={{
           duration: 3000,
