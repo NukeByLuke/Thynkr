@@ -10,7 +10,7 @@
 import { useEffect, useCallback, useLayoutEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   ArrowLeft, 
   BookOpen, 
@@ -67,13 +67,6 @@ const TABS: { id: TabType; label: string; shortLabel: string; icon: typeof BookO
   { id: 'flashcards', label: 'Flashcards', shortLabel: 'Cards', icon: Layers },
   { id: 'quizzes', label: 'Quiz', shortLabel: 'Quiz', icon: Brain },
 ];
-
-// Animation variants
-const contentVariants = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -20 },
-};
 
 export default function ImmersiveStudy() {
   const navigate = useNavigate();
@@ -454,18 +447,7 @@ export default function ImmersiveStudy() {
 
             {/* Content */}
             <div className="relative z-10 p-6 sm:p-8">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeTab}
-                  variants={contentVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  transition={{ duration: 0.2, ease: 'easeInOut' }}
-                >
-                  {renderTabContent()}
-                </motion.div>
-              </AnimatePresence>
+              {renderTabContent()}
             </div>
           </motion.div>
 
