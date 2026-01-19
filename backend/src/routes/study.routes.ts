@@ -1157,7 +1157,6 @@ export default async function studyRoutes(server: FastifyInstance) {
             userId: request.user!.userId,
             perfectionistResult, 
             tierUnlocked: perfectionistResult.tierUnlocked,
-            currentValue: perfectionistResult.currentValue,
             newTier: perfectionistResult.newTier
           }, 'Perfectionist achievement check completed');
           
