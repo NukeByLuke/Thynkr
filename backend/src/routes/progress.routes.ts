@@ -13,8 +13,7 @@ try {
     maxRetriesPerRequest: 1,
     retryStrategy: (times) => {
       if (times > 3) {
-        console.log('[Redis] Connection failed, running without cache');
-        return null; // Stop retrying
+        return null; // Stop retrying - run without cache
       }
       return Math.min(times * 100, 1000);
     },
@@ -23,15 +22,11 @@ try {
 
   redis.on('connect', () => {
     redisConnected = true;
-    console.log('[Redis] Connected successfully');
   });
 
   redis.on('error', () => {
-    // Suppress repeated error logs - just mark as disconnected
-    if (redisConnected) {
-      redisConnected = false;
-      console.log('[Redis] Disconnected, cache disabled');
-    }
+    // Silently mark as disconnected
+    redisConnected = false;
   });
 
   // Attempt connection
@@ -39,7 +34,7 @@ try {
     redisConnected = false;
   });
 } catch {
-  console.log('[Redis] Not available, running without cache');
+  // Redis not available - run without cache
 }
 
 // Helper to safely get from cache

@@ -90,10 +90,6 @@ async function createSessionAndRedirect(
 }
 
 export default async function oauthRoutes(server: FastifyInstance) {
-  console.log('[OAuth Routes] Registering OAuth routes...');
-  console.log('[OAuth Routes] GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? 'SET' : 'NOT SET');
-  console.log('[OAuth Routes] GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET ? 'SET' : 'NOT SET');
-  
   // ═══════════════════════════════════════════════════════════════════
   // GOOGLE OAUTH
   // ═══════════════════════════════════════════════════════════════════
@@ -102,7 +98,6 @@ export default async function oauthRoutes(server: FastifyInstance) {
    * Redirect to Google OAuth consent screen
    */
   const googleHandler = async (_request: any, reply: any) => {
-    console.log('[OAuth Routes] /google route hit!');
     if (!process.env.GOOGLE_CLIENT_ID) {
       return reply.redirect(`${FRONTEND_URL}/login?error=google_not_configured`);
     }
@@ -120,7 +115,6 @@ export default async function oauthRoutes(server: FastifyInstance) {
   };
   
   server.get('/google', googleHandler);
-  console.log('[OAuth Routes] Registered GET /google');
   
   /**
    * Handle Google OAuth callback

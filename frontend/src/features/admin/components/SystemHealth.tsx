@@ -203,7 +203,6 @@ export const SystemHealth = () => {
     eventSourceRef.current = eventSource;
 
     eventSource.onopen = () => {
-      console.log('Live metrics connection established');
       setConnectionState('connected');
     };
 

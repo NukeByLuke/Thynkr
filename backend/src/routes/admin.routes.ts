@@ -1,6 +1,12 @@
 /**
  * Admin Routes
  * Comprehensive admin dashboard with user management, analytics, content moderation, and system monitoring.
+ * 
+ * TODO: This file is 1600+ lines. Consider splitting into:
+ * - admin/users.controller.ts (user management)
+ * - admin/analytics.controller.ts (metrics, charts)
+ * - admin/content.controller.ts (content moderation)
+ * - admin/system.controller.ts (health monitoring, logs)
  */
 
 import { FastifyInstance } from 'fastify';

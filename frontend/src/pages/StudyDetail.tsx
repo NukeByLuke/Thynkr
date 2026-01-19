@@ -277,24 +277,17 @@ export default function StudyDetail() {
                 // Submit to backend if we have a real quiz ID
                 if (selectedQuiz?.id) {
                   try {
-                    console.log('📤 Submitting quiz:', { answers, timeSpentSeconds, questionTimings });
                     const response = await api.post(`/study/quizzes/${selectedQuiz.id}/submit`, {
                       answers,
                       timeSpentSeconds,
                       questionTimings,
                     });
                     
-                    console.log('📥 Quiz response:', response.data);
-                    console.log('🏆 Achievements in response:', response.data.achievements);
-                    
                     // Dispatch achievement notifications
                     if (response.data.achievements && response.data.achievements.length > 0) {
-                      console.log('🚀 Dispatching api-notification event with', response.data.achievements.length, 'achievements');
                       window.dispatchEvent(new CustomEvent('api-notification', {
                         detail: { notifications: response.data.achievements }
                       }));
-                    } else {
-                      console.log('⚠️ No achievements to dispatch');
                     }
                     
                     if (response.data.xpGained > 0) {

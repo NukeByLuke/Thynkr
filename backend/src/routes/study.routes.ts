@@ -1,6 +1,12 @@
 /**
  * Study Routes
  * Handles file uploads, AI-generated study materials (summaries, notes, quizzes, flashcards), and folders.
+ * 
+ * TODO: This file is 1300+ lines. Consider splitting into:
+ * - study/files.controller.ts (upload, list, delete)
+ * - study/ai-content.controller.ts (summaries, notes, flashcards)
+ * - study/quizzes.controller.ts (generate, submit, history)
+ * - study/folders.controller.ts (organization)
  */
 
 import { FastifyInstance } from 'fastify';

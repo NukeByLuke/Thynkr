@@ -1,3 +1,12 @@
+/**
+ * User Courses Routes
+ * 
+ * TODO: This file is 800+ lines. Consider splitting into:
+ * - courses/enrollment.controller.ts (purchase, enroll, progress)
+ * - courses/content.controller.ts (files, streaming, viewing)
+ * - courses/admin.controller.ts (CRUD operations for creators)
+ */
+
 import { FastifyInstance } from 'fastify';
 import prisma from '../db/client';
 import {
