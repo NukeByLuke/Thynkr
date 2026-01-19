@@ -57,6 +57,10 @@ export const config = {
     apiKey: process.env.GEMINI_API_KEY!,
   },
 
+  openai: {
+    apiKey: process.env.OPENAI_API_KEY!,
+  },
+
   digitalOcean: {
     apiToken: process.env.DIGITALOCEAN_API_TOKEN,
     dropletId: process.env.DIGITALOCEAN_DROPLET_ID,
