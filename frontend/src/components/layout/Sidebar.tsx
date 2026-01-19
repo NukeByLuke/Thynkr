@@ -54,10 +54,10 @@ const Sidebar = () => {
       initial={false}
       animate={{ width: isExpanded ? 280 : 80 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      className="relative h-screen bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-white/10 flex flex-col"
+      className="relative h-screen bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-r border-slate-200/50 dark:border-white/10 flex flex-col shadow-xl shadow-slate-200/20 dark:shadow-black/20"
     >
       {/* Header */}
-      <div className="h-16 px-4 flex items-center justify-between border-b border-slate-200 dark:border-white/10">
+      <div className="h-16 px-4 flex items-center justify-between border-b border-slate-200/50 dark:border-white/10">
         <Link to="/study" className="flex items-center gap-3 overflow-hidden">
           <Logo variant="icon" animated={false} className="w-8 h-8 flex-shrink-0" />
           <AnimatePresence mode="wait">
@@ -106,15 +106,15 @@ const Sidebar = () => {
               onMouseEnter={() => link.component?.preload()}
               className={`
                 relative flex items-center gap-3 px-3 py-2.5 rounded-xl
-                transition-all duration-200 group
+                transition-all duration-300 group
                 ${isLinkActive
-                  ? 'text-blue-400 dark:text-blue-300 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 backdrop-blur-sm border border-blue-500/20 shadow-lg shadow-blue-500/10 font-semibold'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 hover:scale-[1.02]'
+                  ? 'text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30 font-semibold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/5 hover:scale-[1.02]'
                 }
               `}
             >
               <Icon className={`w-5 h-5 flex-shrink-0 transition-all ${
-                isLinkActive ? 'drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]' : ''
+                isLinkActive ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]' : ''
               }`} />
 
               {isExpanded && (
@@ -154,7 +154,7 @@ const Sidebar = () => {
       )}
 
       {/* Bottom Section */}
-      <div className="px-3 pb-4 space-y-1 border-t border-slate-200 dark:border-white/10 pt-4">
+      <div className="px-3 pb-4 space-y-1 border-t border-slate-200/50 dark:border-white/10 pt-4">
         {bottomLinks.map((link) => {
           const isLinkActive = isActive(link.to);
           const Icon = link.icon;
@@ -165,15 +165,15 @@ const Sidebar = () => {
               to={link.to}
               className={`
                 flex items-center gap-3 px-3 py-2.5 rounded-xl
-                transition-all duration-200 group
+                transition-all duration-300 group
                 ${isLinkActive
-                  ? 'text-blue-400 dark:text-blue-300 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 backdrop-blur-sm border border-blue-500/20 shadow-lg shadow-blue-500/10 font-semibold'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 hover:scale-[1.02]'
+                  ? 'text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30 font-semibold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/5 hover:scale-[1.02]'
                 }
               `}
             >
               <Icon className={`w-5 h-5 flex-shrink-0 transition-all ${
-                isLinkActive ? 'drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]' : ''
+                isLinkActive ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]' : ''
               }`} />
               {isExpanded && (
                 <span className="text-sm font-medium whitespace-nowrap">

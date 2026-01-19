@@ -130,10 +130,10 @@ const MobileBottomNav = memo(() => {
       <motion.nav
         initial={{ y: 0 }}
         animate={{ y: isVisible ? 0 : 100 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-white/10 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] dark:shadow-[0_-2px_10px_rgba(0,0,0,0.3)]"
+        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-t border-slate-200/50 dark:border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)] pb-safe"
       >
-        <div className="flex items-center justify-around px-2 py-3 pb-safe">
+        <div className="flex items-center justify-around px-2 pt-2 pb-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
@@ -181,11 +181,11 @@ const MobileBottomNav = memo(() => {
                 {active && (
                   <motion.div
                     layoutId="mobileActiveIndicator"
-                    className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full"
+                    className="absolute -top-1 left-1/2 -translate-x-1/2 w-10 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 rounded-full"
                     style={{
-                      boxShadow: '0 0 8px rgba(124, 58, 237, 0.6)',
+                      boxShadow: '0 0 12px rgba(124, 58, 237, 0.8), 0 0 24px rgba(124, 58, 237, 0.4)',
                     }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                   />
                 )}
 
@@ -195,7 +195,7 @@ const MobileBottomNav = memo(() => {
                 >
                   {/* Active gradient glow behind icon */}
                   {active && (
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl blur-md opacity-30" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl blur-lg opacity-40" />
                   )}
 
                   <div

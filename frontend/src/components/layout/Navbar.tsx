@@ -127,7 +127,7 @@ const Navbar = memo(() => {
 
                   {/* Dropdown Menu */}
                   {profileDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl rounded-2xl shadow-xl border border-slate-200/50 dark:border-white/10 py-2 z-50">
+                    <div className="absolute right-0 mt-2 w-48 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-200/50 dark:border-white/10 py-2 z-[100]">
                       <Link
                         to="/account"
                         className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-indigo-50/50 dark:hover:bg-white/5 transition-colors"
