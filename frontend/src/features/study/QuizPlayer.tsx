@@ -53,6 +53,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   // Quiz state
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [results, setResults] = useState<any>(null);
   const [reviewMode, setReviewMode] = useState(false);
@@ -168,22 +169,31 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   }, [currentIndex]);
 
   const handleSubmit = useCallback(async () => {
+    // Prevent double-submission
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
     setTimerActive(false);
     
-    // Calculate total time spent
-    const timeSpentSeconds = quizStartTime 
-      ? Math.floor((Date.now() - quizStartTime) / 1000)
-      : 0;
-    
-    // Pass time spent and per-question timings to backend
-    const result = await onSubmit(answers, timeSpentSeconds, questionTimings);
-    setResults(result);
-    setIsSubmitted(true);
-  }, [answers, onSubmit, quizStartTime, questionTimings]);
+    try {
+      // Calculate total time spent
+      const timeSpentSeconds = quizStartTime 
+        ? Math.floor((Date.now() - quizStartTime) / 1000)
+        : 0;
+      
+      // Pass time spent and per-question timings to backend
+      const result = await onSubmit(answers, timeSpentSeconds, questionTimings);
+      setResults(result);
+      setIsSubmitted(true);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [answers, onSubmit, quizStartTime, questionTimings, isSubmitting]);
 
   const handleRestart = useCallback(() => {
     setCurrentIndex(0);
     setAnswers({});
+    setIsSubmitting(false);
     setIsSubmitted(false);
     setResults(null);
     setShowSettings(true);
@@ -753,12 +763,13 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
           {/* Show Submit Quiz button on last question after reveal */}
           {!isSubmitted && isRevealed && currentIndex === questions.length - 1 && (
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={!isSubmitting ? { scale: 1.02 } : {}}
+              whileTap={!isSubmitting ? { scale: 0.95 } : {}}
               onClick={handleSubmit}
-              className="px-8 sm:px-10 py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-200 shadow-2xl shadow-green-500/50 border-2 border-green-500/50 text-base sm:text-lg active:scale-95"
+              disabled={isSubmitting}
+              className={`px-8 sm:px-10 py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-200 shadow-2xl shadow-green-500/50 border-2 border-green-500/50 text-base sm:text-lg active:scale-95 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              Submit Quiz
+              {isSubmitting ? 'Submitting...' : 'Submit Quiz'}
             </motion.button>
           )}
 
