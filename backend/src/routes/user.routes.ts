@@ -152,12 +152,22 @@ export default async function userRoutes(server: FastifyInstance) {
     {
       preHandler: authenticate,
     },
-    async (_request: AuthenticatedRequest, reply) => {
-      // TODO: Add notification columns to Prisma schema
-      // For now, return default values
+    async (request: AuthenticatedRequest, reply) => {
+      const user = await prisma.user.findUnique({
+        where: { id: request.user!.userId },
+        select: {
+          notificationsEnabled: true,
+          notificationsPersist: true,
+        },
+      });
+
+      if (!user) {
+        return reply.status(404).send({ error: 'User not found' });
+      }
+
       return reply.send({
-        notificationsEnabled: true,
-        notificationsPersist: false,
+        notificationsEnabled: user.notificationsEnabled,
+        notificationsPersist: user.notificationsPersist,
       });
     }
   );
@@ -174,11 +184,26 @@ export default async function userRoutes(server: FastifyInstance) {
         notificationsPersist?: boolean;
       };
 
-      // TODO: Add notification columns to Prisma schema
-      // For now, just return the requested values
+      const updateData: any = {};
+      if (body.notificationsEnabled !== undefined) {
+        updateData.notificationsEnabled = body.notificationsEnabled;
+      }
+      if (body.notificationsPersist !== undefined) {
+        updateData.notificationsPersist = body.notificationsPersist;
+      }
+
+      const user = await prisma.user.update({
+        where: { id: request.user!.userId },
+        data: updateData,
+        select: {
+          notificationsEnabled: true,
+          notificationsPersist: true,
+        },
+      });
+
       return reply.send({
-        notificationsEnabled: body.notificationsEnabled ?? true,
-        notificationsPersist: body.notificationsPersist ?? false,
+        notificationsEnabled: user.notificationsEnabled,
+        notificationsPersist: user.notificationsPersist,
       });
     }
   );

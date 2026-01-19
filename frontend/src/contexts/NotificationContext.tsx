@@ -11,7 +11,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trophy, Zap, Award, Star } from 'lucide-react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { useAuth } from './AuthContext';
 
@@ -62,10 +62,15 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
+  const queryClient = useQueryClient();
+
   const updateSettingsMutation = useMutation({
     mutationFn: async (newSettings: { notificationsEnabled?: boolean; notificationsPersist?: boolean }) => {
       const response = await api.patch('/users/me/notifications', newSettings);
       return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notification-settings'] });
     },
   });
 
