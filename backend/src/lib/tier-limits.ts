@@ -16,10 +16,10 @@ export interface TierLimits {
 
 export const TIER_LIMITS: Record<string, TierLimits> = {
   BASIC: {
-    uploadsPerMonth: 5,
-    aiRequestsPerMonth: 50,
-    ttsMaxCharactersPerRequest: 500,
-    ttsMaxRequestsPerDay: 10,
+    uploadsPerMonth: -1, // unlimited for testing
+    aiRequestsPerMonth: -1, // unlimited for testing
+    ttsMaxCharactersPerRequest: -1, // unlimited for testing
+    ttsMaxRequestsPerDay: -1, // unlimited for testing
     canCreatePrivateCourses: false,
     canCreatePublicCourses: false,
     canUseTutor: false,
@@ -27,10 +27,10 @@ export const TIER_LIMITS: Record<string, TierLimits> = {
     hasPrioritySupport: false,
   },
   STANDARD: {
-    uploadsPerMonth: 50,
-    aiRequestsPerMonth: 500,
-    ttsMaxCharactersPerRequest: 2000,
-    ttsMaxRequestsPerDay: 100,
+    uploadsPerMonth: -1, // unlimited for testing
+    aiRequestsPerMonth: -1, // unlimited for testing
+    ttsMaxCharactersPerRequest: -1, // unlimited for testing
+    ttsMaxRequestsPerDay: -1, // unlimited for testing
     canCreatePrivateCourses: true,
     canCreatePublicCourses: false,
     canUseTutor: false,
