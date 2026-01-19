@@ -2,24 +2,18 @@
 
 # Thynkr
 
+### The AI-Powered Learning Ecosystem
+
+[![CI Status](https://github.com/NukeByLuke/Thynkr/actions/workflows/ci.yml/badge.svg)](https://github.com/NukeByLuke/Thynkr/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://reactjs.org/)
-[![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Fastify](https://img.shields.io/badge/Fastify-000000?style=flat-square&logo=fastify&logoColor=white)](https://www.fastify.io/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=flat-square&logo=redis&logoColor=white)](https://redis.io/)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
-[![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=flat-square&logo=openai&logoColor=white)](https://openai.com/)
-[![Stripe](https://img.shields.io/badge/Stripe-008CDD?style=flat-square&logo=stripe&logoColor=white)](https://stripe.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg?logo=typescript)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18-61DAFB.svg?logo=react)](https://reactjs.org/)
+[![Fastify](https://img.shields.io/badge/Fastify-4.x-000000.svg?logo=fastify)](https://www.fastify.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-316192.svg?logo=postgresql)](https://www.postgresql.org/)
 
-**An intelligent learning management system that transforms how students study.**
+**Thynkr transforms static study materials into interactive, gamified learning experiences using advanced AI.**
 
-_Made by the DVLPR Team_
-
-[Features](#-features) • [Tech Stack](#-tech-stack) • [Architecture](#-architecture) • [Getting Started](#-getting-started) • [Deployment](#-deployment)
+[Features](#-features) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started) • [Workflow](#-development-workflow) • [Deployment](#-deployment)
 
 </div>
 
@@ -27,113 +21,155 @@ _Made by the DVLPR Team_
 
 ## 🚀 Overview
 
-Thynkr is a modern, AI-powered learning platform designed to optimize the study process. By uploading lecture notes, PDFs, or textbooks, students receive automatically generated, comprehensive study materials tailored to their learning style. From smart summaries to interactive quizzes, Thynkr makes studying smarter, not harder.
+Thynkr is an enterprise-grade EdTech platform that leverages OpenAI to parse PDFs, documents, and videos into structured study content. It features a **"Zen Mode"** immersive study interface, a comprehensive **gamification system** with tiered achievements, and a robust **subscription model** via Stripe.
+
+**Live Demo:** [https://thynkr.ca](https://thynkr.ca)
+
+---
 
 ## ✨ Features
 
-### 📚 Intelligent Study Tools
+### 🧠 Intelligent Study Engine
 
-- **Smart Summaries**: Instant, concise overviews of complex materials using GPT-4.
-- **Auto-Generated Notes**: Key concepts extracted and organized automatically.
-- **Interactive Quizzes**: Test your knowledge with AI-generated questions and instant feedback.
-- **Digital Flashcards**: Master terms and concepts with spaced repetition.
-- **AI Tutor Chat**: Have a conversation with your course materials to clarify doubts.
+- **Smart Parsing:** Extracts text from PDFs, DOCX, PPTX, and YouTube videos
+- **AI Content Generation:** Automatically creates Summaries, Bulleted Notes, Interactive Quizzes, and Flashcards
+- **Immersive Mode:** A distraction-free "Zen Mode" interface with glassmorphic UI, keyboard navigation, and smooth transitions
+- **Text-to-Speech:** Neural audio playback with OpenAI TTS for studying on the go
 
-### 🎓 Course Management
+### 🏆 Gamification & Progression
 
-- **Organized Workspace**: Structure files into courses and folders.
-- **Progress Tracking**: Visual analytics of your study progress.
-- **Cross-Platform**: Seamless synchronization across all your devices.
+- **XP System:** Earn experience points for studying, streaks, quiz performance, and content generation
+- **Tiered Achievements:** 6-tier system (Bronze → Silver → Gold → Ruby → Diamond → Mastery) for long-term engagement
+- **Achievement Notifications:** Beautiful animated popups with tier-specific colors and sounds
+- **Study Streaks:** Daily activity tracking with visual indicators
 
-### 🌍 Global Accessibility
+### 📚 Course Management
 
-- **Multi-Language Support**: Generate content in 30+ languages.
-- **Accessibility First**: Designed for diverse learning needs.
+- **Instructor Marketplace:** Premium users can access curated course content
+- **File Organization:** Drag-and-drop folders with batch operations
+- **Secure File Delivery:** Token-based secure streaming for video/audio content
+- **Progress Tracking:** Per-file and per-course completion analytics
 
-### 💎 Subscription Tiers
+### 💎 Enterprise Architecture
 
-- **Free**: Essential tools to get started.
-- **Pro**: Enhanced AI capabilities and increased storage.
-- **Premium**: Unlimited access to all features and priority processing.
+- **SaaS Ready:** Full Stripe integration (Checkout, Customer Portal, Webhooks) with tiered access control
+- **Role-Based Access:** BASIC, STANDARD, PREMIUM, and ADMIN tiers with feature gating
+- **OAuth Support:** Google Sign-In integration alongside email/password auth
+- **Aurora Design System:** Custom Tailwind CSS design system featuring glassmorphism, fluid animations, and dark mode
+
+---
 
 ## 🛠 Tech Stack
 
 ### Frontend
 
-- **Core**: React 18, TypeScript
-- **Build Tool**: Vite
-- **Styling**: TailwindCSS, Framer Motion
-- **State Management**: TanStack Query, Context API
+| Technology | Purpose |
+|------------|---------|
+| **React 18** | UI Framework with concurrent rendering |
+| **TypeScript 5.3** | Type-safe development |
+| **Vite** | Lightning-fast build tooling |
+| **Tailwind CSS** | Utility-first styling with custom "Aurora" theme |
+| **Framer Motion** | GPU-accelerated animations |
+| **TanStack Query** | Server state management with caching |
+| **React Router v6** | Client-side routing with lazy loading |
 
 ### Backend
 
-- **Runtime**: Node.js
-- **Framework**: Fastify
-- **ORM**: Prisma
-- **Language**: TypeScript
+| Technology | Purpose |
+|------------|---------|
+| **Node.js 20** | JavaScript runtime |
+| **Fastify 4.x** | High-performance web framework |
+| **Prisma ORM** | Type-safe database access |
+| **PostgreSQL 16** | Primary data store |
+| **Redis 7** | Caching, sessions, and rate limiting |
+| **OpenAI API** | GPT-4o for content generation, TTS for audio |
 
-### Data & Infrastructure
+### Infrastructure
 
-- **Database**: PostgreSQL 16
-- **Caching**: Redis 7
-- **Containerization**: Docker
-- **Cloud**: DigitalOcean
-- **Server**: Nginx
+| Technology | Purpose |
+|------------|---------|
+| **Docker** | Containerization with multi-stage builds |
+| **Docker Compose** | Local development orchestration |
+| **Nginx** | Reverse proxy, SSL termination, compression |
+| **DigitalOcean** | Cloud hosting (Droplet + managed DNS) |
+| **GitHub Actions** | CI/CD pipeline |
 
-### Integrations
-
-- **AI**: OpenAI GPT-4 Turbo
-- **Payments**: Stripe
+---
 
 ## 🏗 Architecture
 
 ```mermaid
 graph TD
-    Client["Frontend (React)"] -->|HTTPS| Nginx["Nginx Proxy"]
+    Client["Frontend (React + Vite)"] -->|HTTPS| Nginx["Nginx Proxy"]
     Nginx -->|"Reverse Proxy"| API["Backend API (Fastify)"]
     API -->|Query| DB[("PostgreSQL")]
-    API -->|Cache| Redis[("Redis")]
+    API -->|Cache/Sessions| Redis[("Redis")]
     API -->|"AI Processing"| OpenAI["OpenAI API"]
     API -->|Billing| Stripe["Stripe API"]
+    API -->|Storage| Uploads["File Storage"]
 ```
+
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- **Node.js** 18+
+- **Node.js** 18+ (20 recommended)
 - **pnpm** 8+
 - **Docker** & **Docker Compose**
+- **Git**
 
-### Installation
+### 1. Clone the Repository
 
-1.  **Clone the repository**
+```bash
+git clone https://github.com/NukeByLuke/Thynkr.git
+cd thynkr
+```
 
-    ```bash
-    git clone https://github.com/NukeByLuke/Thynkr.git
-    cd thynkr
-    ```
+### 2. Configure Environment
 
-2.  **Configure Environment**
+```bash
+# Copy environment templates
+cp .env.example .env
+cp frontend/.env.example frontend/.env
+```
 
-    ```bash
-    cp .env.example .env
-    ```
+Update `.env` with your credentials:
 
-    Update `.env` with your credentials (Database, Redis, OpenAI, Stripe).
+```env
+# Database
+DATABASE_URL=postgresql://user:password@localhost:5432/thynkr
 
-3.  **Start with Docker**
+# Redis
+REDIS_URL=redis://localhost:6379
 
-    ```bash
-    docker-compose up --build
-    ```
+# OpenAI
+OPENAI_API_KEY=sk-...
 
-    - **Frontend**: http://localhost:5173
-    - **Backend**: http://localhost:3001
+# Stripe
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 
-### Manual Development Setup
+# JWT
+JWT_SECRET=your-super-secret-key
+```
 
-**Backend**
+### 3. Start with Docker (Recommended)
+
+```bash
+docker-compose up --build
+```
+
+Services will be available at:
+- **Frontend:** http://localhost:5173
+- **Backend API:** http://localhost:5000
+- **PostgreSQL:** localhost:5432
+- **Redis:** localhost:6379
+
+### 4. Manual Development Setup
+
+**Backend:**
 
 ```bash
 cd backend
@@ -142,7 +178,7 @@ pnpm prisma migrate dev
 pnpm dev
 ```
 
-**Frontend**
+**Frontend:**
 
 ```bash
 cd frontend
@@ -150,36 +186,154 @@ pnpm install
 pnpm dev
 ```
 
-### 💳 Stripe Setup
+---
 
-1. Install the [Stripe CLI](https://docs.stripe.com/stripe-cli).
-2. Run the setup script:
-   ```bash
-   ./scripts/setup-stripe.ps1
-   ```
-3. Update your `.env` file with the Price IDs and API keys.
+## 🔧 Development Workflow
+
+Thynkr includes custom PowerShell scripts to streamline development. These are available as pnpm scripts at the root:
+
+### Create a New Feature Branch
+
+```bash
+pnpm feature:new <feature-name>
+# Example: pnpm feature:new user-dashboard
+# Creates: feature/user-dashboard
+```
+
+### Merge Feature to Develop
+
+```bash
+pnpm feature:merge
+# Merges current feature branch into develop
+```
+
+### Create a Release
+
+```bash
+pnpm release <version>
+# Example: pnpm release 1.2.0
+# Runs checks, merges develop → main, creates tag v1.2.0
+```
+
+### Deploy to Production
+
+```bash
+# Full deployment
+.\scripts\deploy.ps1
+
+# Quick deploy (skip tests)
+.\scripts\deploy.ps1 -SkipTests
+
+# Deploy specific component
+.\scripts\deploy.ps1 -Component frontend
+.\scripts\deploy.ps1 -Component backend
+
+# Fresh build (no Docker cache)
+.\scripts\deploy.ps1 -NoCache
+```
+
+### Rollback
+
+```bash
+.\scripts\rollback-deployment.ps1
+```
+
+---
 
 ## 📦 Deployment
 
-The application is production-ready and deployed on DigitalOcean.
+Thynkr is deployed on **DigitalOcean** using Docker containers with Nginx as a reverse proxy.
 
-- **Containerized**: Fully Dockerized services.
-- **Secure**: HTTPS enforcement via Nginx.
-- **Scalable**: Stateless API design with Redis caching.
+### Production Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│                  DigitalOcean Droplet           │
+├─────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌─────────────┐              │
+│  │   Nginx     │──│  Frontend   │              │
+│  │  (SSL/Gzip) │  │  (React)    │              │
+│  └─────────────┘  └─────────────┘              │
+│         │                                       │
+│  ┌─────────────┐  ┌─────────────┐              │
+│  │   Backend   │──│  PostgreSQL │              │
+│  │  (Fastify)  │  │             │              │
+│  └─────────────┘  └─────────────┘              │
+│         │                                       │
+│  ┌─────────────┐                               │
+│  │    Redis    │                               │
+│  └─────────────┘                               │
+└─────────────────────────────────────────────────┘
+```
+
+### Deployment Pipeline
+
+1. **Build:** Docker images built locally with multi-stage optimization
+2. **Push:** Images pushed to Docker Hub
+3. **Pull:** Server pulls latest images
+4. **Deploy:** Docker Compose orchestrates container updates
+5. **Migrate:** Prisma migrations run automatically
+6. **Health Check:** Automated verification of all services
+
+---
+
+## 📁 Project Structure
+
+```
+thynkr/
+├── backend/
+│   ├── prisma/           # Database schema & migrations
+│   │   └── schema.prisma
+│   └── src/
+│       ├── config/       # Environment configuration
+│       ├── lib/          # Shared utilities (logger, auth)
+│       ├── middleware/   # Auth, rate limiting, validation
+│       ├── routes/       # API route handlers
+│       └── services/     # Business logic (AI, gamification)
+├── frontend/
+│   └── src/
+│       ├── components/   # Reusable UI components
+│       ├── contexts/     # React contexts (Auth, Theme, Layout)
+│       ├── features/     # Feature-specific modules
+│       ├── hooks/        # Custom React hooks
+│       ├── layouts/      # Page layouts (Dashboard, Public)
+│       ├── lib/          # Utilities (api client, helpers)
+│       └── pages/        # Route page components
+├── scripts/              # DevOps automation (PowerShell)
+├── docker-compose.yml    # Local development
+├── docker-compose.prod.yml
+└── nginx.prod.conf
+```
+
+---
 
 ## 🤝 Contributing
 
 Contributions are welcome! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
+### Quick Start for Contributors
+
+1. Fork the repository
+2. Create a feature branch: `pnpm feature:new my-feature`
+3. Make your changes
+4. Run tests: `pnpm test`
+5. Run type check: `pnpm typecheck`
+6. Submit a pull request
+
+---
+
 ## 👥 The DVLPR Team
 
-Built with passion by:
+Built with ❤️ by:
 
-- **Luke**
-- **Ivan**
-- **Harshan**
+- **Luke** - Full Stack Development
+- **Ivan** - Backend Architecture
+- **Harshan** - Frontend & Design
+
+---
 
 ## 📄 License
 
-© 2025 Thynkr. All rights reserved.
+© 2025-2026 Thynkr. All rights reserved.
+
 Licensed under the [MIT License](LICENSE).
