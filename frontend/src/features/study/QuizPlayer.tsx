@@ -367,31 +367,31 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.12, ease: [0.25, 0.1, 0.25, 1.0] }}
-          className="bg-zinc-900/80 backdrop-blur-xl rounded-2xl border border-white/10 p-6 text-center"
+          className="bg-white/90 dark:bg-zinc-900/80 backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-white/10 p-6 text-center shadow-xl"
         >
           {/* Compact header with icon */}
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isPassing ? 'bg-green-500/20' : 'bg-amber-500/20'}`}>
               {isPassing ? (
-                <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 text-green-500 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               ) : (
-                <svg className="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 text-amber-500 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
               )}
             </div>
-            <h2 className="text-xl font-bold text-white">Quiz Complete</h2>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Quiz Complete</h2>
           </div>
 
           {/* Score display - inline and compact */}
           <div className="flex items-baseline justify-center gap-2 mb-2">
-            <span className={`text-5xl font-bold ${isPassing ? 'text-green-400' : 'text-amber-400'}`}>
+            <span className={`text-5xl font-bold ${isPassing ? 'text-green-500 dark:text-green-400' : 'text-amber-500 dark:text-amber-400'}`}>
               {results.percentage}%
             </span>
           </div>
-          <p className="text-sm text-slate-400 mb-5">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">
             {results.score}/{results.total} correct
           </p>
 
@@ -404,7 +404,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                 setCurrentIndex(0);
                 setReviewMode(true);
               }}
-              className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm font-medium hover:bg-zinc-700 hover:border-zinc-600 transition-colors"
+              className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-700 dark:text-white text-sm font-medium hover:bg-slate-200 dark:hover:bg-zinc-700 hover:border-slate-300 dark:hover:border-zinc-600 transition-colors"
             >
               Review
             </motion.button>
@@ -412,7 +412,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
               onClick={handleRestart}
-              className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm font-medium hover:bg-zinc-700 hover:border-zinc-600 transition-colors"
+              className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-700 dark:text-white text-sm font-medium hover:bg-slate-200 dark:hover:bg-zinc-700 hover:border-slate-300 dark:hover:border-zinc-600 transition-colors"
             >
               Retry
             </motion.button>

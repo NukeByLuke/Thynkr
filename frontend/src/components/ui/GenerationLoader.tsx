@@ -181,21 +181,18 @@ export default function GenerationLoader({
         </AnimatePresence>
       </div>
 
-      {/* Pulsing energy bar */}
-      <div className="w-32 h-1 bg-slate-800 rounded-full overflow-hidden">
+      {/* Slow progress bar - never fills completely */}
+      <div className="w-32 h-1 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
         <motion.div
           className="h-full bg-gradient-to-r from-cyan-400 via-violet-500 to-amber-400 rounded-full"
-          animate={{
-            x: ['-100%', '100%'],
-          }}
+          initial={{ width: '0%' }}
+          animate={{ width: '95%' }}
           transition={{
-            duration: 0.8,
-            repeat: Infinity,
-            ease: [0.4, 0, 0.2, 1],
+            duration: 45,
+            ease: 'easeOut',
           }}
           style={{ 
-            width: '60%',
-            willChange: 'transform',
+            willChange: 'width',
           }}
         />
       </div>
