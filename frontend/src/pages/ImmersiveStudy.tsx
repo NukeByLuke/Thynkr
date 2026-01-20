@@ -359,12 +359,7 @@ export default function ImmersiveStudy() {
                     questionTimings,
                   });
 
-                  // Dispatch achievement notifications
-                  if (response.data.achievements?.length > 0) {
-                    window.dispatchEvent(new CustomEvent('api-notification', {
-                      detail: { notifications: response.data.achievements }
-                    }));
-                  }
+                  // Notifications are automatically dispatched by api interceptor
 
                   if (response.data.xpGained > 0) {
                     toast.success(`+${response.data.xpGained} XP earned!`);

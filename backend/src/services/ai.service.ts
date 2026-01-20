@@ -243,7 +243,9 @@ ${preparedText}`,
             content: `You are a Senior Academic Content Specialist with expertise in creating highly accurate, context-aware educational assessments. ${languageInstruction}
             
 You must respond with valid JSON in this exact format:
-{"title": "Quiz Title", "questions": [{"question": "...", "options": ["A", "B", "C", "D"], "correctAnswer": "A", "explanation": "..."}]}`,
+{"title": "Quiz Title", "questions": [{"question": "Question text?", "options": ["Option A text", "Option B text", "Option C text", "Option D text"], "correctAnswer": "The exact text of the correct option", "explanation": "Why this answer is correct"}]}
+
+IMPORTANT: The "correctAnswer" field must contain the EXACT text of the correct option (not just a letter like "A").`,
           },
           {
             role: 'user',
@@ -274,10 +276,17 @@ ${preparedText}`,
       const content = completion.choices[0].message.content || '{}';
       const result = JSON.parse(content) as GeneratedQuiz;
 
-      // Randomize options using Fisher-Yates shuffle
+      // Process questions: handle correctAnswer and shuffle options
       if (result.questions) {
         result.questions = result.questions.map((question) => {
           if (question.options && question.options.length > 0) {
+            // If correctAnswer is a letter (A, B, C, D), convert to actual option text
+            const letterIndex = ['A', 'B', 'C', 'D'].indexOf(question.correctAnswer?.toUpperCase());
+            if (letterIndex !== -1 && question.options[letterIndex]) {
+              question.correctAnswer = question.options[letterIndex];
+            }
+            
+            // Shuffle options after fixing correctAnswer reference
             question.options = this.shuffleArray(question.options);
           }
           return question;
