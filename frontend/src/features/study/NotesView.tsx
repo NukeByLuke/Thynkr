@@ -2,13 +2,14 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, AlertTriangle } from 'lucide-react';
 
 interface NotesViewProps {
   keyPoints: string[];
   detailed: string;
   onRegenerate?: () => void;
   isRegenerating?: boolean;
+  error?: Error | null;
 }
 
 export default function NotesView({
@@ -16,7 +17,31 @@ export default function NotesView({
   detailed,
   onRegenerate,
   isRegenerating,
+  error,
 }: NotesViewProps) {
+  // Show error alert if generation failed
+  if (error) {
+    return (
+      <div className="space-y-8 animate-fade-in">
+        <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-2xl p-8 text-center">
+          <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-red-700 dark:text-red-400 mb-2">Failed to Generate Notes</h3>
+          <p className="text-red-600 dark:text-red-300 mb-4">{error.message || 'An unexpected error occurred. Please try again.'}</p>
+          {onRegenerate && (
+            <button
+              onClick={onRegenerate}
+              disabled={isRegenerating}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
+              Try Again
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Regenerate Button */}

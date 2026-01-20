@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
 import api from '@/lib/api';
 
 interface UseStudySessionOptions {
@@ -51,9 +50,7 @@ export function useStudySession(options: UseStudySessionOptions = {}) {
       }
       // Achievement notifications will be handled by api interceptor if applicable
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to generate summary: ${error.message}`);
-    },
+    // Errors are handled by UI components via mutation.error state
   });
 
   // Generate notes mutation
@@ -83,9 +80,7 @@ export function useStudySession(options: UseStudySessionOptions = {}) {
       }
       // Achievement notifications will be handled by api interceptor if applicable
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to generate notes: ${error.message}`);
-    },
+    // Errors are handled by UI components via mutation.error state
   });
 
   // Generate quiz mutation
@@ -127,9 +122,7 @@ export function useStudySession(options: UseStudySessionOptions = {}) {
       }
       // Achievement notifications will be handled by api interceptor if applicable
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to generate quiz: ${error.message}`);
-    },
+    // Errors are handled by UI components via mutation.error state
   });
 
   // Generate flashcards mutation
@@ -165,9 +158,7 @@ export function useStudySession(options: UseStudySessionOptions = {}) {
       }
       // Achievement notifications will be handled by api interceptor if applicable
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to generate flashcards: ${error.message}`);
-    },
+    // Errors are handled by UI components via mutation.error state
   });
 
   // Submit quiz mutation

@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, RotateCcw, Shuffle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RotateCcw, Shuffle, AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface Flashcard {
   id: string;
@@ -16,6 +16,9 @@ interface Flashcard {
 interface FlashcardViewerProps {
   cards: Flashcard[];
   title: string;
+  error?: Error | null;
+  onRegenerate?: () => void;
+  isRegenerating?: boolean;
 }
 
 // Memoize slide animation variants - Optimized for performance
@@ -45,7 +48,7 @@ const flipTransition = {
   ease: [0.25, 0.1, 0.25, 1.0] as [number, number, number, number],
 };
 
-const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: FlashcardViewerProps) {
+const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onRegenerate, isRegenerating }: FlashcardViewerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [shuffledCards, setShuffledCards] = useState<Flashcard[] | null>(null);
@@ -53,6 +56,29 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
 
   const displayCards = shuffledCards || cards;
   const currentCard = displayCards[currentIndex];
+
+  // Show error alert if generation failed
+  if (error) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 sm:px-0 animate-fade-in">
+        <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-2xl p-8 text-center">
+          <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-red-700 dark:text-red-400 mb-2">Failed to Generate Flashcards</h3>
+          <p className="text-red-600 dark:text-red-300 mb-4">{error.message || 'An unexpected error occurred. Please try again.'}</p>
+          {onRegenerate && (
+            <button
+              onClick={onRegenerate}
+              disabled={isRegenerating}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
+              Try Again
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   // Memoize handlers
   const handleNext = useCallback(() => {

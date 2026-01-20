@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Zap, Volume2, Loader2 } from 'lucide-react';
+import { Clock, Zap, Volume2, Loader2, AlertTriangle } from 'lucide-react';
 import { useTTS } from '@/hooks/useTTS';
 
 interface QuizQuestion {
@@ -75,6 +75,9 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   
   // Use ref to prevent double-submission without adding to dependency array
   const isSubmittingRef = useRef(false);
+  
+  // Local error state for inline feedback
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   // When quiz generation completes, hide settings and start quiz
   useEffect(() => {
@@ -145,6 +148,9 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
         [currentQuestion.id]: option,
       }));
       
+      // Clear any previous submission error when user changes answer
+      setSubmissionError(null);
+      
       // Record timing for this question
       const startTime = questionStartTimes.current[currentQuestion.id];
       if (startTime) {
@@ -178,6 +184,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
     isSubmittingRef.current = true;
     setIsSubmitting(true);
     setTimerActive(false);
+    setSubmissionError(null);
     
     try {
       // Calculate total time spent
@@ -190,7 +197,20 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
       setResults(result);
       setIsSubmitted(true);
       // Success - keep isSubmittingRef locked so no retries
-    } catch (error) {
+    } catch (error: unknown) {
+      // Handle specific error types with user-friendly messages
+      const axiosError = error as { response?: { status?: number; data?: { error?: string } } };
+      const status = axiosError?.response?.status;
+      const errorMessage = axiosError?.response?.data?.error;
+      
+      if (status === 429 || errorMessage?.toLowerCase().includes('duplicate')) {
+        setSubmissionError('You already submitted this quiz recently. Please wait before trying again.');
+      } else if (status === 400) {
+        setSubmissionError('You are submitting too fast. Please review your answers for a moment.');
+      } else {
+        setSubmissionError('Failed to submit quiz. Please try again.');
+      }
+      
       // On error, allow retry after a brief delay to prevent spam
       setTimeout(() => {
         isSubmittingRef.current = false;
@@ -729,6 +749,13 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
 
       {/* Navigation - Sticky Footer */}
       <div className="flex-shrink-0 pt-4 pb-2">
+        {/* Submission Error Display */}
+        {submissionError && (
+          <div className="flex items-center justify-center gap-2 mb-3 px-4 py-2 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400 text-sm font-medium">
+            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+            <span>{submissionError}</span>
+          </div>
+        )}
         <div className="flex items-center justify-center">
           {/* Show Reveal Answer button when answer is selected but not yet revealed with pulse */}
           {!isSubmitted && !isRevealed && userAnswer && (
