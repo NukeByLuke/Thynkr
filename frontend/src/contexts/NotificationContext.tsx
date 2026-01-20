@@ -55,6 +55,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [queue, setQueue] = useState<Notification[]>([]);
   const [activeNotification, setActiveNotification] = useState<Notification | null>(null);
   const autoHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Track shown notification IDs to prevent duplicates (e.g., from query refetches)
+  const shownNotificationIds = useRef<Set<string>>(new Set());
 
   // Fetch notification settings from backend
   const { data: settings } = useQuery({
@@ -162,6 +164,24 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const { notifications: apiNotifications } = event.detail;
 
       apiNotifications.forEach((apiNotif) => {
+        // Create a unique key for deduplication based on achievement ID and tier
+        const dedupeKey = apiNotif.type === 'achievement' 
+          ? `achievement-${apiNotif.achievementId}-${apiNotif.newTier}`
+          : `levelup-${apiNotif.newLevel}`;
+        
+        // Skip if we've already shown this notification
+        if (shownNotificationIds.current.has(dedupeKey)) {
+          return;
+        }
+        
+        // Mark as shown
+        shownNotificationIds.current.add(dedupeKey);
+        
+        // Clear old entries after 30 seconds to prevent memory buildup
+        setTimeout(() => {
+          shownNotificationIds.current.delete(dedupeKey);
+        }, 30000);
+
         if (apiNotif.type === 'achievement') {
           showNotification({
             type: 'achievement',
