@@ -241,14 +241,14 @@ const LevelBanner = ({ level, currentXp, xpForNextLevel, totalXp }: LevelBannerP
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-zinc-900/40 dark:bg-zinc-950/40 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-lg mb-8"
+      className="bg-white/80 dark:bg-zinc-950/40 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-lg mb-8"
     >
       <div className="flex flex-col md:flex-row md:items-center gap-6">
         {/* Level Badge */}
         <div className="flex-shrink-0">
           <div className="relative">
             <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 p-1 shadow-lg shadow-blue-500/50">
-              <div className="w-full h-full rounded-xl bg-zinc-900 flex items-center justify-center">
+              <div className="w-full h-full rounded-xl bg-slate-900 flex items-center justify-center">
                 <div className="text-center">
                   <div className="text-xs text-slate-400 uppercase tracking-wide">Level</div>
                   <div className="text-3xl font-bold text-white">{level}</div>
@@ -274,21 +274,21 @@ const LevelBanner = ({ level, currentXp, xpForNextLevel, totalXp }: LevelBannerP
         <div className="flex-1 space-y-3">
           <div className="flex items-baseline justify-between">
             <div>
-              <h3 className="text-2xl font-bold text-white">Level {level}</h3>
-              <p className="text-slate-400 text-sm">
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Level {level}</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">
                 {Math.floor(currentXp).toLocaleString()} / {Math.floor(xpForNextLevel).toLocaleString()} XP
               </p>
             </div>
             <div className="text-right">
-              <div className="text-sm text-slate-400">Total XP Earned</div>
-              <div className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
+              <div className="text-sm text-slate-500 dark:text-slate-400">Total XP Earned</div>
+              <div className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-500 dark:from-blue-400 dark:to-indigo-400">
                 {Math.floor(totalXp).toLocaleString()}
               </div>
             </div>
           </div>
 
           {/* Progress Bar */}
-          <div className="relative h-4 bg-zinc-800/50 rounded-full overflow-hidden border border-white/10">
+          <div className="relative h-4 bg-slate-200 dark:bg-zinc-800/50 rounded-full overflow-hidden border border-slate-300 dark:border-white/10">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
@@ -311,8 +311,8 @@ const LevelBanner = ({ level, currentXp, xpForNextLevel, totalXp }: LevelBannerP
           </div>
 
           {/* Next level indicator */}
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <Zap className="w-3 h-3 text-yellow-400" />
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+            <Zap className="w-3 h-3 text-yellow-500 dark:text-yellow-400" />
             <span>
               {Math.floor(xpForNextLevel - currentXp).toLocaleString()} XP until Level {level + 1}
             </span>
@@ -564,7 +564,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                           : 'border-cyan-400/30 shadow-2xl shadow-cyan-400/20'
             }`}>
               {/* Content background with better contrast */}
-              <div className="relative bg-slate-900/98 dark:bg-slate-800/98 backdrop-blur-xl rounded-xl overflow-hidden">
+              <div className="relative bg-white/98 dark:bg-slate-800/98 backdrop-blur-xl rounded-xl overflow-hidden">
                 {/* Top gradient accent bar */}
                 <div className={`h-1 w-full bg-gradient-to-r ${
                   isLocked 
@@ -586,7 +586,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                 {/* Tier badge and title */}
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex-1">
-                    <h4 className="font-bold text-base text-white mb-1.5 flex items-center gap-2 leading-tight">
+                    <h4 className="font-bold text-base text-slate-900 dark:text-white mb-1.5 flex items-center gap-2 leading-tight">
                       {isLocked && <Lock className="w-4 h-4 text-slate-400" />}
                       {achievement.definition.name}
                     </h4>
@@ -597,7 +597,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                     )}
                   </div>
                   <div className={`w-11 h-11 rounded-lg flex items-center justify-center ${
-                    isLocked ? 'bg-slate-700/50' : tooltipTier.iconBg
+                    isLocked ? 'bg-slate-200 dark:bg-slate-700/50' : tooltipTier.iconBg
                   } shadow-lg`}>
                     {isLocked ? (
                       <Lock className="w-5 h-5 text-slate-400" />
@@ -608,19 +608,19 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                 </div>
                 
                 {/* Description */}
-                <p className="text-sm text-slate-200 dark:text-slate-300 mb-4 leading-relaxed">
+                <p className="text-sm text-slate-600 dark:text-slate-300 mb-4 leading-relaxed">
                   {achievement.definition.description}
                 </p>
 
                 {/* Interactive Tier Viewer - Only show if unlocked and has multiple levels */}
                 {!isLocked && tierHistory.length > 1 && (
-                  <div className="mb-4 pb-4 border-b border-slate-700/50">
+                  <div className="mb-4 pb-4 border-b border-slate-200 dark:border-slate-700/50">
                     <div className="flex items-center justify-between mb-2">
                       <div>
-                        <h5 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                        <h5 className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                           Tier History ({selectedTierIndex + 1}/{tierHistory.length})
                         </h5>
-                        <p className="text-[10px] text-slate-500 mt-0.5">Use arrow keys or A/D</p>
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Use arrow keys or A/D</p>
                       </div>
                       <div className="flex gap-1">
                         <button
@@ -629,7 +629,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                             setSelectedTierIndex((prev) => Math.max(0, prev - 1));
                           }}
                           disabled={selectedTierIndex === 0}
-                          className="px-2.5 py-1 text-xs font-medium bg-slate-700/70 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed rounded transition-colors text-white"
+                          className="px-2.5 py-1 text-xs font-medium bg-slate-200 dark:bg-slate-700/70 hover:bg-slate-300 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed rounded transition-colors text-slate-700 dark:text-white"
                         >
                           ←
                         </button>
@@ -639,7 +639,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                             setSelectedTierIndex((prev) => Math.min(tierHistory.length - 1, prev + 1));
                           }}
                           disabled={selectedTierIndex === tierHistory.length - 1}
-                          className="px-2.5 py-1 text-xs font-medium bg-slate-700/70 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed rounded transition-colors text-white"
+                          className="px-2.5 py-1 text-xs font-medium bg-slate-200 dark:bg-slate-700/70 hover:bg-slate-300 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed rounded transition-colors text-slate-700 dark:text-white"
                         >
                           →
                         </button>
@@ -668,7 +668,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                               +{xpReward ? Math.floor(xpReward).toLocaleString() : '0'} XP
                             </span>
                           </div>
-                          <div className="text-xs text-slate-200 font-medium">
+                          <div className="text-xs text-slate-600 dark:text-slate-200 font-medium">
                             Required: {threshold ? Math.floor(threshold).toLocaleString() : '0'}
                           </div>
                         </motion.div>
@@ -714,7 +714,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                   
                   return (
                     <div className="mb-4">
-                      <h5 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3.5">
+                      <h5 className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-3.5">
                         {isLockedProgress ? 'Progress to Unlock' : `Progress to ${nextTierConfig.label}`}
                       </h5>
                       <div className="space-y-3">
@@ -741,7 +741,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                             )}
                           </div>
                           <span className={`text-sm font-bold ${
-                            isLockedProgress ? 'text-slate-400' : 'text-slate-200'
+                            isLockedProgress ? 'text-slate-400' : 'text-slate-600 dark:text-slate-200'
                           }`}>
                             {Math.floor(currentValue).toLocaleString()} / {Math.floor(threshold).toLocaleString()}
                           </span>
@@ -755,7 +755,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                           } rounded-full opacity-20 blur-md`} />
                           
                           {/* Progress bar container */}
-                          <div className="relative h-4 bg-slate-900/80 rounded-full overflow-hidden border-2 border-slate-700/50 shadow-inner">
+                          <div className="relative h-4 bg-slate-200 dark:bg-slate-900/80 rounded-full overflow-hidden border-2 border-slate-300 dark:border-slate-700/50 shadow-inner">
                             {/* Background pattern */}
                             <div className="absolute inset-0 opacity-5">
                               <div className="absolute inset-0" style={{
