@@ -145,7 +145,7 @@ export default function ImmersiveStudy() {
     setSelectedFlashcardSet(null);
   }, [setActiveTab, setSelectedFlashcardSet]);
 
-  // Keyboard navigation
+  // Keyboard navigation (A/D for tabs, arrow keys reserved for flashcards)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Skip if user is typing in an input
@@ -154,11 +154,12 @@ export default function ImmersiveStudy() {
       }
 
       const currentIndex = TABS.findIndex(t => t.id === activeTab);
+      const key = e.key.toLowerCase();
 
-      if (e.key === 'ArrowLeft' && currentIndex > 0) {
+      if (key === 'a' && currentIndex > 0) {
         e.preventDefault();
         handleTabChange(TABS[currentIndex - 1].id);
-      } else if (e.key === 'ArrowRight' && currentIndex < TABS.length - 1) {
+      } else if (key === 'd' && currentIndex < TABS.length - 1) {
         e.preventDefault();
         handleTabChange(TABS[currentIndex + 1].id);
       } else if (e.key === 'Escape') {
