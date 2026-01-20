@@ -563,8 +563,8 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                           ? 'border-red-500/30 shadow-2xl shadow-red-500/20'
                           : 'border-cyan-400/30 shadow-2xl shadow-cyan-400/20'
             }`}>
-              {/* Content background with better contrast */}
-              <div className="relative bg-white/98 dark:bg-slate-800/98 backdrop-blur-xl rounded-xl overflow-hidden">
+              {/* Content background with glass effect */}
+              <div className="relative bg-white/70 dark:bg-slate-900/80 backdrop-blur-2xl rounded-xl overflow-hidden border border-white/20 dark:border-white/10">
                 {/* Top gradient accent bar */}
                 <div className={`h-1 w-full bg-gradient-to-r ${
                   isLocked 
