@@ -57,7 +57,7 @@
   }
 
   .text-body {
-    @apply text-slate-600 dark:text-slate-400;
+    @apply text-slate-700 dark:text-slate-400;
   }
 
   .text-muted {
