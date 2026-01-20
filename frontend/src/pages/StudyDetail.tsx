@@ -8,7 +8,6 @@ import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import toast from 'react-hot-toast';
 import SummaryView from '@/features/study/SummaryView';
 import NotesView from '@/features/study/NotesView';
 import FlashcardViewer from '@/features/study/FlashcardViewer';
@@ -287,7 +286,7 @@ export default function StudyDetail() {
                     
                     return response.data;
                   } catch (error: any) {
-                    toast.error(error.response?.data?.error || 'Failed to submit quiz');
+                    // Let QuizPlayer handle the error with inline UI
                     throw error;
                   }
                 } else {

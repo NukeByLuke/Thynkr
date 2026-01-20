@@ -258,7 +258,7 @@ export default function ImmersiveStudy() {
         });
         return response.data;
       } catch (error: any) {
-        toast.error(error.response?.data?.error || 'Failed to submit quiz');
+        // Let QuizPlayer handle the error with inline UI
         throw error;
       }
     }

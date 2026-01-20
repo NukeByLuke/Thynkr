@@ -341,7 +341,7 @@ const NotificationCard: React.FC<{
       {/* Outer glow effect for visibility */}
       <div className={`relative rounded-2xl ${isAchievement ? 'shadow-[0_0_40px_-8px]' : 'shadow-2xl'} ${theme.glow} overflow-hidden`}>
         {/* Inner container with blur and border */}
-        <div className={`relative rounded-2xl backdrop-blur-xl border-2 ${theme.border} ${theme.bg} overflow-hidden`}>
+        <div className={`relative rounded-2xl backdrop-blur-xl border-2 ${theme.border} bg-white/95 dark:bg-zinc-900/95 ${theme.bg} overflow-hidden`}>
           {/* Gradient accent bar at top */}
           <div className={`h-1.5 bg-gradient-to-r ${theme.gradient}`} />
 
@@ -350,7 +350,7 @@ const NotificationCard: React.FC<{
             {isAchievement && (
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className={`w-4 h-4 ${theme.text}`} />
-                <span className={`text-xs font-bold uppercase tracking-widest ${theme.text}`}>
+                <span className={`text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-300`}>
                   Achievement Unlocked!
                 </span>
               </div>
@@ -365,7 +365,7 @@ const NotificationCard: React.FC<{
 
               {/* Content */}
               <div className="flex-1 min-w-0 pt-0.5">
-                <h4 className="text-lg font-bold text-white truncate">
+                <h4 className="text-lg font-bold text-slate-900 dark:text-white truncate">
                   {notification.title}
                 </h4>
                 {isAchievement ? (
@@ -374,7 +374,7 @@ const NotificationCard: React.FC<{
                       {tier} Tier
                     </span>
                     {notification.xp !== undefined && notification.xp > 0 && (
-                      <span className="text-sm font-bold text-emerald-400 flex items-center gap-1">
+                      <span className="text-sm font-bold text-emerald-500 dark:text-emerald-400 flex items-center gap-1">
                         <Zap className="w-3.5 h-3.5" />
                         +{notification.xp} XP
                       </span>
@@ -382,7 +382,7 @@ const NotificationCard: React.FC<{
                   </div>
                 ) : (
                   notification.message && (
-                    <p className="text-sm text-slate-400 mt-0.5">
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">
                       {notification.message}
                     </p>
                   )
@@ -394,25 +394,25 @@ const NotificationCard: React.FC<{
                 {/* Snooze button */}
                 <button
                   onClick={onSnooze}
-                  className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors group"
+                  className="w-8 h-8 rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center transition-colors group"
                   title="Snooze (show later)"
                 >
-                  <Clock className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
+                  <Clock className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-white transition-colors" />
                 </button>
                 {/* Dismiss button */}
                 <button
                   onClick={onDismiss}
-                  className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors group"
+                  className="w-8 h-8 rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center transition-colors group"
                   title="Dismiss"
                 >
-                  <X className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
+                  <X className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-white transition-colors" />
                 </button>
               </div>
             </div>
 
             {/* Progress bar for auto-dismiss (Bubbles mode) */}
             {!persist && (
-              <div className="mt-3 h-1 bg-white/10 rounded-full overflow-hidden">
+              <div className="mt-3 h-1 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: '100%' }}
                   animate={{ width: '0%' }}
