@@ -28,6 +28,7 @@ import FlashcardViewer from '@/features/study/FlashcardViewer';
 import QuizPlayer from '@/features/study/QuizPlayer';
 import GenerationModal from '@/components/modals/GenerationModal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import GenerationLoader from '@/components/ui/GenerationLoader';
 
 // Hooks & Context
 import { useStudySession } from '@/hooks/useStudySession';
@@ -508,13 +509,22 @@ interface GeneratePromptProps {
 
 function GeneratePrompt({ type, onGenerate, isGenerating, extraContent }: GeneratePromptProps) {
   const labels = {
-    summary: { title: 'No summary yet', button: 'Generate Summary', icon: BookOpen },
-    notes: { title: 'No notes yet', button: 'Generate Notes', icon: FileText },
-    flashcards: { title: 'No flashcards yet', button: 'Generate Flashcards', icon: Layers },
+    summary: { title: 'No summary yet', button: 'Generate Summary', icon: BookOpen, stages: ['Analyzing content...', 'Extracting key points...', 'Synthesizing summary...', 'Finalizing...'] },
+    notes: { title: 'No notes yet', button: 'Generate Notes', icon: FileText, stages: ['Scanning document...', 'Identifying concepts...', 'Organizing notes...', 'Adding details...'] },
+    flashcards: { title: 'No flashcards yet', button: 'Generate Flashcards', icon: Layers, stages: ['Processing content...', 'Creating Q&A pairs...', 'Optimizing cards...', 'Finalizing deck...'] },
   };
 
   const config = labels[type];
   const Icon = config.icon;
+
+  // Show full-screen loader when generating
+  if (isGenerating) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <GenerationLoader isVisible={true} stages={config.stages} size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="text-center py-16">
@@ -541,21 +551,10 @@ function GeneratePrompt({ type, onGenerate, isGenerating, extraContent }: Genera
         whileTap={{ scale: 0.98 }}
         className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30"
       >
-        {isGenerating ? (
-          <span className="flex items-center gap-2">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-              className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
-            />
-            Generating...
-          </span>
-        ) : (
-          <span className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4" />
-            {config.button}
-          </span>
-        )}
+        <span className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4" />
+          {config.button}
+        </span>
       </motion.button>
     </div>
   );
