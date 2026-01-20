@@ -163,7 +163,8 @@ export default function ImmersiveStudy() {
         handleTabChange(TABS[currentIndex + 1].id);
       } else if (e.key === 'Escape') {
         e.preventDefault();
-        navigate('/study');
+        // Navigate to study page and trigger refresh
+        window.location.href = '/study';
       }
     };
 
@@ -179,7 +180,10 @@ export default function ImmersiveStudy() {
       <div className="flex items-center justify-between w-full gap-4">
         {/* Left: Back button */}
         <motion.button
-          onClick={() => navigate('/study')}
+          onClick={() => {
+            // Navigate to study page and trigger refresh
+            window.location.href = '/study';
+          }}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded-lg transition-colors flex-shrink-0"
