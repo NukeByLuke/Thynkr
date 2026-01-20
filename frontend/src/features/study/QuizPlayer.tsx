@@ -435,7 +435,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
       {/* Header - Fixed */}
       <div className="flex-shrink-0 mb-2">
         <div className="flex items-center justify-between mb-1">
-          <h3 className="text-xl sm:text-2xl font-bold text-white">{title}</h3>
+          <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{title}</h3>
           {/* Timer Display */}
           {timeRemaining !== null && (
             <motion.div
@@ -463,7 +463,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
           </span>
         </div>
         {/* Progress bar - Enhanced with glow */}
-        <div className="mt-1 w-full bg-zinc-900/80 rounded-full h-3 border border-zinc-700">
+        <div className="mt-1 w-full bg-slate-200 dark:bg-zinc-900/80 rounded-full h-3 border border-slate-300 dark:border-zinc-700">
           <div
             className="bg-gradient-to-r from-cyan-500 via-blue-500 to-blue-600 h-3 rounded-full transition-[width] duration-150 shadow-lg shadow-cyan-500/50"
             style={{
@@ -488,7 +488,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             {/* Ambient Spotlight Glow */}
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-blue-500/5 to-violet-500/5 blur-3xl -z-10 rounded-3xl" />
             
-            <div className="bg-zinc-950/40 backdrop-blur-xl rounded-3xl border border-white/10 p-6 shadow-2xl">
+            <div className="bg-white/80 dark:bg-zinc-950/40 backdrop-blur-xl rounded-3xl border border-slate-200 dark:border-white/10 p-6 shadow-2xl">
               <div className="flex items-start gap-3">
                 <div className="flex-1 prose prose-lg dark:prose-invert max-w-none">
                   <ReactMarkdown
@@ -496,28 +496,28 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                     rehypePlugins={[rehypeHighlight]}
                     components={{
                       p: ({ node, ...props }) => (
-                        <h4 className="text-2xl sm:text-3xl font-bold text-white mb-4 text-balance leading-tight" style={{ textShadow: '0 0 20px rgba(59, 130, 246, 0.3)' }} {...props} />
+                        <h4 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-4 text-balance leading-tight" {...props} />
                       ),
-                      h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-white mb-3" {...props} />,
-                      h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-white mb-2" {...props} />,
-                      h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-white mb-2" {...props} />,
-                      strong: ({ node, ...props }) => <strong className="font-bold text-cyan-300" {...props} />,
-                      em: ({ node, ...props }) => <em className="italic text-gray-300" {...props} />,
-                      ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-1.5 text-gray-300 marker:text-cyan-400" {...props} />,
-                      ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-1.5 text-gray-300 marker:text-cyan-400" {...props} />,
+                      h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-3" {...props} />,
+                      h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2" {...props} />,
+                      h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2" {...props} />,
+                      strong: ({ node, ...props }) => <strong className="font-bold text-cyan-600 dark:text-cyan-300" {...props} />,
+                      em: ({ node, ...props }) => <em className="italic text-slate-600 dark:text-gray-300" {...props} />,
+                      ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-1.5 text-slate-600 dark:text-gray-300 marker:text-cyan-500 dark:marker:text-cyan-400" {...props} />,
+                      ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-1.5 text-slate-600 dark:text-gray-300 marker:text-cyan-500 dark:marker:text-cyan-400" {...props} />,
                       li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
                       code: ({ node, className, children, ...props }) => {
                         const isInline = !className;
                         return isInline ? (
                           <code
-                            className="bg-cyan-500/20 text-cyan-300 px-2 py-1 rounded-lg text-base font-mono border border-cyan-500/30 shadow-sm"
+                            className="bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 px-2 py-1 rounded-lg text-base font-mono border border-cyan-500/30 shadow-sm"
                             {...props}
                           >
                             {children}
                           </code>
                         ) : (
                           <code
-                            className={`block bg-gray-900/80 text-gray-100 p-4 rounded-xl overflow-x-auto text-sm font-mono shadow-lg border border-gray-700 my-3 ${className || ''}`}
+                            className={`block bg-slate-100 dark:bg-gray-900/80 text-slate-800 dark:text-gray-100 p-4 rounded-xl overflow-x-auto text-sm font-mono shadow-lg border border-slate-200 dark:border-gray-700 my-3 ${className || ''}`}
                             {...props}
                           >
                             {children}
@@ -548,7 +548,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                     }
                   }}
                   disabled={isTTSLoading}
-                  className="flex-shrink-0 p-2 text-purple-400 hover:bg-purple-500/20 rounded-lg transition-colors disabled:opacity-50"
+                  className="flex-shrink-0 p-2 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20 rounded-lg transition-colors disabled:opacity-50"
                   title="Read question aloud"
                 >
                   {isTTSLoading && playingItem === `question-${currentQuestion.id}` ? (
@@ -584,18 +584,18 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                 whileTap={!isSubmitted && !isRevealed ? { scale: 0.98 } : {}}
                 className={`group relative w-full text-left p-4 rounded-2xl border-2 transition-all duration-150 text-base backdrop-blur-xl cursor-pointer ${
                   showSubmittedState || isCorrect
-                    ? 'border-green-500 bg-green-500/20 text-white shadow-2xl shadow-green-500/30'
+                    ? 'border-green-500 bg-green-500/20 text-green-900 dark:text-white shadow-2xl shadow-green-500/30'
                     : showSubmittedWrong || isWrong
-                      ? 'border-red-500 bg-red-500/20 text-white shadow-2xl shadow-red-500/30'
+                      ? 'border-red-500 bg-red-500/20 text-red-900 dark:text-white shadow-2xl shadow-red-500/30'
                       : isSelected && !isRevealed
-                        ? 'border-transparent bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-white shadow-2xl shadow-blue-500/40 before:absolute before:inset-0 before:rounded-2xl before:p-[2px] before:bg-gradient-to-br before:from-blue-500 before:to-violet-500 before:-z-10'
-                        : 'border-zinc-700 hover:border-zinc-600 bg-zinc-900/50 text-slate-200 hover:bg-zinc-800/60 hover:shadow-lg hover:shadow-zinc-700/20'
+                        ? 'border-transparent bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-slate-900 dark:text-white shadow-2xl shadow-blue-500/40 before:absolute before:inset-0 before:rounded-2xl before:p-[2px] before:bg-gradient-to-br before:from-blue-500 before:to-violet-500 before:-z-10'
+                        : 'border-slate-200 dark:border-zinc-700 hover:border-slate-300 dark:hover:border-zinc-600 bg-white/80 dark:bg-zinc-900/50 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-zinc-800/60 hover:shadow-lg'
                 } ${isSubmitted || isRevealed ? 'cursor-not-allowed' : 'cursor-pointer'}`}
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 flex-1 pointer-events-none">
                     {/* Keyboard Shortcut Keycap */}
-                    <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-zinc-700 to-zinc-800 text-white font-bold text-sm border-2 border-zinc-600 shadow-lg group-hover:from-cyan-600 group-hover:to-blue-600 group-hover:border-cyan-500 transition-all duration-200">
+                    <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-slate-200 to-slate-300 dark:from-zinc-700 dark:to-zinc-800 text-slate-700 dark:text-white font-bold text-sm border-2 border-slate-300 dark:border-zinc-600 shadow-lg group-hover:from-cyan-600 group-hover:to-blue-600 group-hover:border-cyan-500 group-hover:text-white transition-all duration-200">
                       {keyLabel}
                     </span>
                     <div className="font-semibold flex-1 text-base">
@@ -604,10 +604,10 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                         rehypePlugins={[rehypeHighlight]}
                         components={{
                           p: ({ node, ...props }) => <span className="inline" {...props} />,
-                          strong: ({ node, ...props }) => <strong className="font-bold text-cyan-300" {...props} />,
+                          strong: ({ node, ...props }) => <strong className="font-bold text-cyan-600 dark:text-cyan-300" {...props} />,
                           em: ({ node, ...props }) => <em className="italic" {...props} />,
                           code: ({ node, ...props }) => (
-                            <code className="bg-zinc-700/50 text-cyan-300 px-2 py-0.5 rounded text-sm font-mono border border-zinc-600" {...props} />
+                            <code className="bg-slate-200/50 dark:bg-zinc-700/50 text-cyan-700 dark:text-cyan-300 px-2 py-0.5 rounded text-sm font-mono border border-slate-300 dark:border-zinc-600" {...props} />
                           ),
                         }}
                       >
@@ -634,7 +634,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                       }
                     }}
                     disabled={isTTSLoading}
-                    className="flex-shrink-0 p-1.5 text-slate-400 hover:text-purple-400 hover:bg-purple-500/20 rounded-md transition-colors disabled:opacity-50 pointer-events-auto"
+                    className="flex-shrink-0 p-1.5 text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-500/20 rounded-md transition-colors disabled:opacity-50 pointer-events-auto"
                     title="Read option aloud"
                   >
                     {isTTSLoading && playingItem === `option-${currentQuestion.id}-${index}` ? (
