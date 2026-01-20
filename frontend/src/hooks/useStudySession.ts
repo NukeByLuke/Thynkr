@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+import api from '@/lib/api';
 
 interface UseStudySessionOptions {
   onFileSelect?: (file: any) => void;
@@ -13,7 +12,7 @@ interface UseStudySessionOptions {
 export function useStudySession(options: UseStudySessionOptions = {}) {
   const queryClient = useQueryClient();
   const queryKey = options.queryKey || ['study-files'];
-  
+
   const [selectedFile, setSelectedFileState] = useState<any | null>(null);
   const [activeTab, setActiveTab] = useState<'summary' | 'notes' | 'flashcards' | 'quizzes'>('summary');
   const [selectedQuiz, setSelectedQuiz] = useState<any | null>(null);
@@ -22,24 +21,11 @@ export function useStudySession(options: UseStudySessionOptions = {}) {
   const [quizDifficulty, setQuizDifficulty] = useState<'EASY' | 'MEDIUM' | 'HARD'>('MEDIUM');
   const [numCards, setNumCards] = useState(20);
 
-  const getToken = () => localStorage.getItem('accessToken') || localStorage.getItem('token');
-
   // Generate summary mutation
   const generateSummaryMutation = useMutation({
     mutationFn: async ({ fileId, regenerate = false }: { fileId: string; regenerate?: boolean }) => {
-      const response = await fetch(`${API_URL}/study/files/${fileId}/summary`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ regenerate }),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to generate summary');
-      }
-      return response.json();
+      const response = await api.post(`/study/files/${fileId}/summary`, { regenerate });
+      return response.data;
     },
     onSuccess: async (data) => {
       if (options.fileSource === 'course') {
@@ -73,19 +59,8 @@ export function useStudySession(options: UseStudySessionOptions = {}) {
   // Generate notes mutation
   const generateNotesMutation = useMutation({
     mutationFn: async ({ fileId, regenerate = false }: { fileId: string; regenerate?: boolean }) => {
-      const response = await fetch(`${API_URL}/study/files/${fileId}/notes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ regenerate }),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to generate notes');
-      }
-      return response.json();
+      const response = await api.post(`/study/files/${fileId}/notes`, { regenerate });
+      return response.data;
     },
     onSuccess: async (data) => {
       if (options.fileSource === 'course') {
@@ -124,16 +99,8 @@ export function useStudySession(options: UseStudySessionOptions = {}) {
       numQuestions: number;
       difficulty: string;
     }) => {
-      const response = await fetch(`${API_URL}/study/files/${fileId}/quiz`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ numQuestions, difficulty }),
-      });
-      if (!response.ok) throw new Error('Failed to generate quiz');
-      return response.json();
+      const response = await api.post(`/study/files/${fileId}/quiz`, { numQuestions, difficulty });
+      return response.data;
     },
     onSuccess: async (data) => {
       if (options.fileSource === 'course') {
@@ -168,16 +135,8 @@ export function useStudySession(options: UseStudySessionOptions = {}) {
   // Generate flashcards mutation
   const generateFlashcardsMutation = useMutation({
     mutationFn: async ({ fileId, numCards }: { fileId: string; numCards: number }) => {
-      const response = await fetch(`${API_URL}/study/files/${fileId}/flashcards`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ numCards }),
-      });
-      if (!response.ok) throw new Error('Failed to generate flashcards');
-      return response.json();
+      const response = await api.post(`/study/files/${fileId}/flashcards`, { numCards });
+      return response.data;
     },
     onSuccess: async (data) => {
       if (options.fileSource === 'course') {
@@ -220,16 +179,8 @@ export function useStudySession(options: UseStudySessionOptions = {}) {
       quizId: string;
       answers: Record<string, string>;
     }) => {
-      const response = await fetch(`${API_URL}/study/quizzes/${quizId}/submit`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ answers }),
-      });
-      if (!response.ok) throw new Error('Failed to submit quiz');
-      return response.json();
+      const response = await api.post(`/study/quizzes/${quizId}/submit`, { answers });
+      return response.data;
     },
   });
 
