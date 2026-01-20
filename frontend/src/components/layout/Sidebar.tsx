@@ -109,13 +109,13 @@ const Sidebar = () => {
                 relative flex items-center gap-3 px-3 py-2.5 rounded-xl
                 transition-all duration-150 group
                 ${isLinkActive
-                  ? 'text-white bg-gradient-to-r from-indigo-500 to-purple-500 shadow-lg shadow-indigo-500/25 font-semibold'
+                  ? 'text-indigo-700 dark:text-white bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-500 dark:to-purple-500 shadow-lg shadow-indigo-200/50 dark:shadow-indigo-500/25 font-semibold'
                   : 'text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/5 hover:scale-[1.02]'
                 }
               `}
             >
               <Icon className={`w-5 h-5 flex-shrink-0 transition-all ${
-                isLinkActive ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]' : ''
+                isLinkActive ? 'text-indigo-600 dark:text-white dark:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]' : ''
               }`} />
 
               {isExpanded && (
@@ -137,17 +137,17 @@ const Sidebar = () => {
 
       {/* Upgrade CTA */}
       {!isPremium && isExpanded && (
-        <div className="mx-3 mb-2 p-4 rounded-xl bg-gradient-to-br from-indigo-400 to-violet-500 dark:from-indigo-500 dark:to-violet-600 text-white shadow-lg relative overflow-hidden group flex-shrink-0">
+        <div className="mx-3 mb-2 p-4 rounded-xl bg-gradient-to-br from-indigo-100 to-violet-200 dark:from-indigo-500 dark:to-violet-600 shadow-lg relative overflow-hidden group flex-shrink-0">
           <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
             <Sparkles className="w-16 h-16 transform rotate-12" />
           </div>
-          <h3 className="font-semibold text-sm mb-1 relative z-10">Upgrade to Pro</h3>
-          <p className="text-[10px] text-indigo-100 dark:text-indigo-100 mb-3 relative z-10 leading-tight">
+          <h3 className="font-semibold text-sm mb-1 relative z-10 text-indigo-900 dark:text-white">Upgrade to Pro</h3>
+          <p className="text-[10px] text-indigo-700 dark:text-indigo-100 mb-3 relative z-10 leading-tight">
             Unlock unlimited AI tutoring and advanced analytics.
           </p>
           <Link
             to="/pricing"
-            className="block w-full py-1.5 bg-white text-indigo-600 text-xs font-bold text-center rounded-lg hover:bg-indigo-50 transition-colors relative z-10"
+            className="block w-full py-1.5 bg-indigo-600 dark:bg-white text-white dark:text-indigo-600 text-xs font-bold text-center rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-50 transition-colors relative z-10"
           >
             Get Pro Access
           </Link>
@@ -168,13 +168,13 @@ const Sidebar = () => {
                 flex items-center gap-3 px-3 py-2.5 rounded-xl
                 transition-all duration-150 group
                 ${isLinkActive
-                  ? 'text-white bg-gradient-to-r from-indigo-500 to-purple-500 shadow-lg shadow-indigo-500/25 font-semibold'
+                  ? 'text-indigo-700 dark:text-white bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-500 dark:to-purple-500 shadow-lg shadow-indigo-200/50 dark:shadow-indigo-500/25 font-semibold'
                   : 'text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/5 hover:scale-[1.02]'
                 }
               `}
             >
               <Icon className={`w-5 h-5 flex-shrink-0 transition-all ${
-                isLinkActive ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]' : ''
+                isLinkActive ? 'text-indigo-600 dark:text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]' : ''
               }`} />
               {isExpanded && (
                 <span className="text-sm font-medium whitespace-nowrap">
