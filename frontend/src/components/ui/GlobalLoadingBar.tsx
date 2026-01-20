@@ -16,8 +16,8 @@ const springTransition = {
   mass: 0.5,
 };
 
-// Aggressive easeOut for immediate feedback
-const fastEaseOut = [0.25, 0.1, 0.25, 1.0];
+// Aggressive easeOut for immediate feedback (typed as tuple for framer-motion)
+const fastEaseOut: [number, number, number, number] = [0.25, 0.1, 0.25, 1.0];
 
 export default function GlobalLoadingBar() {
   const [isLoading, setIsLoading] = useState(false);
