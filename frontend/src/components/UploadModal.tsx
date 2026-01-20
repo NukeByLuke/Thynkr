@@ -7,6 +7,7 @@ import { useState, useRef, DragEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload, Youtube, File, Check, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import LoadingProgress from './ui/LoadingProgress';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -155,6 +156,25 @@ export default function UploadModal({
           transition={{ duration: 0.2, ease: 'easeOut' }}
           className="relative w-full max-w-2xl max-h-[90vh] bg-white dark:bg-zinc-950 backdrop-blur-md border-2 border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden will-change-transform"
         >
+          {/* Upload Loading Overlay */}
+          <AnimatePresence>
+            {isUploading && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="absolute inset-0 z-50 bg-white/90 dark:bg-zinc-950/95 backdrop-blur-sm flex items-center justify-center"
+              >
+                <LoadingProgress
+                  message="Uploading"
+                  stage={activeTab === 'youtube' ? 'Processing YouTube link...' : `Uploading ${selectedFiles.length} file${selectedFiles.length !== 1 ? 's' : ''}...`}
+                  variant="upload"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200 dark:border-white/10">
             <div>

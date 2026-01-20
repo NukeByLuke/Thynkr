@@ -1,135 +1,203 @@
-import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState, useCallback } from 'react';
+import clsx from 'clsx';
 
 interface GenerationLoaderProps {
   isVisible: boolean;
   stages?: string[];
+  size?: 'sm' | 'md' | 'lg';
 }
 
 const defaultStages = [
-  'Analyzing Context...',
-  'Synthesizing Notes...',
-  'Formatting Output...',
-  'Finalizing...',
+  'Parsing...',
+  'Synthesizing...',
+  'Optimizing...',
+  'Compiling...',
+  'Rendering...',
 ];
 
 /**
- * GenerationLoader - Professional loading animation with Zeno's Paradox progress
+ * GenerationLoader - Quantum Orbit Animation
  * 
- * Implements a "Zeno's Paradox" style progress bar that:
- * - Quickly animates to 60% (feels responsive)
- * - Slowly creeps towards 90% (visual feedback of ongoing work)
- * - Holds at 90% until completion (prevents false completion)
+ * High-frequency, GPU-accelerated loading animation featuring:
+ * - 3 orbiting particles (Cyan, Purple, Amber) at different speeds
+ * - Morphing particles with liquid-metal energy feel
+ * - Rapid text cycler with snappy transitions (800ms)
  * 
- * Optimized for performance using:
- * - transform and opacity only (GPU-accelerated)
- * - No heavy background animations
- * - Clean, professional aesthetic
+ * Performance optimizations:
+ * - Uses transform and opacity only (GPU-accelerated)
+ * - will-change hints for browser optimization
+ * - 60fps smooth animations
  */
 export default function GenerationLoader({
   isVisible,
   stages = defaultStages,
+  size = 'md',
 }: GenerationLoaderProps) {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
-  const progressControls = useAnimation();
 
-  // Cycle through stages every 2.5 seconds
+  // Rapid text cycling every 800ms
   useEffect(() => {
     if (!isVisible) {
       setCurrentStageIndex(0);
       return;
     }
 
-    const stageInterval = setInterval(() => {
-      setCurrentStageIndex((prev) => {
-        if (prev < stages.length - 1) {
-          return prev + 1;
-        }
-        return prev;
-      });
-    }, 2500);
-
-    return () => clearInterval(stageInterval);
-  }, [isVisible, stages.length]);
-
-  // Zeno's Paradox animation: Quick to 60%, slow creep to 90%, hold
-  useEffect(() => {
-    if (!isVisible) {
-      progressControls.set({ width: '0%' });
-      return;
-    }
-
-    // Phase 1: Quick animation to 60% (0.8s)
-    progressControls.start({
-      width: '60%',
-      transition: {
-        duration: 0.8,
-        ease: [0.25, 0.46, 0.45, 0.94], // easeOutCubic
-      },
-    });
-
-    // Phase 2: Slow creep from 60% to 90% (8s)
-    const phase2Timer = setTimeout(() => {
-      progressControls.start({
-        width: '90%',
-        transition: {
-          duration: 8,
-          ease: [0.16, 1, 0.3, 1], // easeOutExpo - exponential slowdown
-        },
-      });
+    const cycleInterval = setInterval(() => {
+      setCurrentStageIndex((prev) => (prev + 1) % stages.length);
     }, 800);
 
-    return () => {
-      clearTimeout(phase2Timer);
-    };
-  }, [isVisible, progressControls]);
+    return () => clearInterval(cycleInterval);
+  }, [isVisible, stages.length]);
+
+  const getSizeClasses = useCallback(() => {
+    switch (size) {
+      case 'sm': return { orbit: 'w-12 h-12', particle: 'w-2 h-2' };
+      case 'lg': return { orbit: 'w-24 h-24', particle: 'w-4 h-4' };
+      default: return { orbit: 'w-16 h-16', particle: 'w-3 h-3' };
+    }
+  }, [size]);
 
   if (!isVisible) return null;
 
+  const sizeClasses = getSizeClasses();
+
+  // Particle configurations with different orbital speeds and colors
+  const particles = [
+    { 
+      color: 'bg-cyan-400', 
+      shadow: 'shadow-cyan-400/60',
+      duration: 0.8, 
+      delay: 0,
+      radius: 100 
+    },
+    { 
+      color: 'bg-violet-500', 
+      shadow: 'shadow-violet-500/60',
+      duration: 1.2, 
+      delay: 0.1,
+      radius: 100 
+    },
+    { 
+      color: 'bg-amber-400', 
+      shadow: 'shadow-amber-400/60',
+      duration: 1.5, 
+      delay: 0.2,
+      radius: 100 
+    },
+  ];
+
   return (
-    <div className="w-full max-w-md mx-auto space-y-3">
-      {/* Status Text with fade animation */}
-      <div className="flex items-center justify-center h-6">
-        <AnimatePresence mode="wait">
+    <div className="flex flex-col items-center justify-center gap-6">
+      {/* Quantum Orbit Animation */}
+      <div className={clsx('relative', sizeClasses.orbit)}>
+        {/* Central anchor glow */}
+        <motion.div
+          className="absolute inset-0 m-auto w-2 h-2 bg-white/20 rounded-full blur-sm"
+          animate={{ 
+            scale: [1, 1.5, 1],
+            opacity: [0.3, 0.6, 0.3] 
+          }}
+          transition={{ 
+            duration: 1.5, 
+            repeat: Infinity, 
+            ease: 'easeInOut' 
+          }}
+        />
+
+        {/* Orbiting particles */}
+        {particles.map((particle, index) => (
           <motion.div
+            key={index}
+            className="absolute inset-0"
+            style={{ willChange: 'transform' }}
+            animate={{ rotate: 360 }}
+            transition={{
+              duration: particle.duration,
+              repeat: Infinity,
+              ease: 'linear',
+              delay: particle.delay,
+            }}
+          >
+            {/* The actual particle with morphing effect */}
+            <motion.div
+              className={clsx(
+                'absolute left-1/2 -translate-x-1/2 rounded-full shadow-lg',
+                sizeClasses.particle,
+                particle.color,
+                particle.shadow
+              )}
+              style={{ 
+                top: 0,
+                willChange: 'transform, border-radius',
+              }}
+              animate={{
+                scale: [1, 1.4, 0.8, 1.2, 1],
+                borderRadius: ['50%', '40%', '50%', '35%', '50%'],
+              }}
+              transition={{
+                duration: particle.duration * 0.8,
+                repeat: Infinity,
+                ease: [0.4, 0, 0.2, 1],
+              }}
+            />
+          </motion.div>
+        ))}
+
+        {/* Energy trail effect */}
+        <motion.div
+          className="absolute inset-2 rounded-full border border-cyan-500/20"
+          animate={{ 
+            scale: [1, 1.1, 1],
+            opacity: [0.2, 0.4, 0.2],
+            rotate: -360,
+          }}
+          transition={{ 
+            duration: 3, 
+            repeat: Infinity, 
+            ease: 'linear' 
+          }}
+          style={{ willChange: 'transform, opacity' }}
+        />
+      </div>
+
+      {/* Rapid Text Cycler with popLayout transitions */}
+      <div className="h-6 flex items-center justify-center overflow-hidden">
+        <AnimatePresence mode="popLayout">
+          <motion.span
             key={currentStageIndex}
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1.0] }}
-            className="text-xs font-medium uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400"
+            initial={{ opacity: 0, y: 12, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.9 }}
+            transition={{ 
+              duration: 0.15, 
+              ease: [0.32, 0.72, 0, 1] 
+            }}
+            className="text-xs font-bold uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-violet-400 to-amber-400"
+            style={{ willChange: 'transform, opacity' }}
           >
             {stages[currentStageIndex]}
-          </motion.div>
+          </motion.span>
         </AnimatePresence>
       </div>
 
-      {/* Progress Bar Container */}
-      <div
-        className="relative w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden"
-        role="progressbar"
-        aria-label="Generation progress"
-      >
-        {/* Animated Fill Bar with Zeno's Paradox progression */}
+      {/* Pulsing energy bar */}
+      <div className="w-32 h-1 bg-slate-800 rounded-full overflow-hidden">
         <motion.div
-          className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 rounded-full"
-          initial={{ width: '0%' }}
-          animate={progressControls}
-        >
-          {/* Subtle shimmer effect for polish */}
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-            animate={{
-              x: ['-100%', '200%'],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: 'linear',
-            }}
-            style={{ width: '50%' }}
-          />
-        </motion.div>
+          className="h-full bg-gradient-to-r from-cyan-400 via-violet-500 to-amber-400 rounded-full"
+          animate={{
+            x: ['-100%', '100%'],
+          }}
+          transition={{
+            duration: 0.8,
+            repeat: Infinity,
+            ease: [0.4, 0, 0.2, 1],
+          }}
+          style={{ 
+            width: '60%',
+            willChange: 'transform',
+          }}
+        />
       </div>
     </div>
   );
