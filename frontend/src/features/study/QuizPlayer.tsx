@@ -189,9 +189,13 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
       const result = await onSubmit(answers, timeSpentSeconds, questionTimings);
       setResults(result);
       setIsSubmitted(true);
-    } finally {
-      isSubmittingRef.current = false;
-      setIsSubmitting(false);
+      // Success - keep isSubmittingRef locked so no retries
+    } catch (error) {
+      // On error, allow retry after a brief delay to prevent spam
+      setTimeout(() => {
+        isSubmittingRef.current = false;
+        setIsSubmitting(false);
+      }, 2000); // 2 second cooldown before allowing retry
     }
   }, [answers, onSubmit, quizStartTime, questionTimings]);
 
