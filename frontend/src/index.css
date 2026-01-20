@@ -20,23 +20,35 @@
     background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='rgba(255, 255, 255, 0.02)' stroke-width='1'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E");
   }
 
-  /* Premium Glass Panel - Soft-Square Design */
+  /* Premium Glass Panel - Soft-Square Design (GPU Optimized) */
   .glass-panel {
     @apply backdrop-blur-md bg-white/90 dark:bg-zinc-950/90 border border-slate-200 dark:border-slate-800/50 shadow-lg rounded-xl;
+    isolation: isolate;
+    transform: translateZ(0);
+    will-change: transform;
   }
 
-  /* Glass Panel with stronger blur */
+  /* Glass Panel with stronger blur (GPU Optimized) */
   .glass-panel-strong {
     @apply backdrop-blur-md bg-white/95 dark:bg-zinc-950/95 border border-slate-300 dark:border-slate-800/60 shadow-xl rounded-2xl;
+    isolation: isolate;
+    transform: translateZ(0);
+    will-change: transform;
   }
 
-  /* Card - Theme-aware glass card with soft-square aesthetic */
+  /* Card - Theme-aware glass card with soft-square aesthetic (GPU Optimized) */
   .card {
     @apply bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border border-slate-200 dark:border-slate-800/50 rounded-xl shadow-md;
+    isolation: isolate;
+    transform: translateZ(0);
   }
 
   .card-hover {
-    @apply card hover:border-slate-300 dark:hover:border-slate-700/50 hover:shadow-lg transition-all;
+    @apply card hover:border-slate-300 dark:hover:border-slate-700/50 hover:shadow-lg;
+    transition: transform 0.12s cubic-bezier(0.25, 0.1, 0.25, 1.0),
+                box-shadow 0.12s cubic-bezier(0.25, 0.1, 0.25, 1.0),
+                border-color 0.12s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+    will-change: transform, box-shadow;
   }
 
   /* Typography - Softer reading experience */
@@ -65,10 +77,15 @@
     @apply bg-slate-100 dark:bg-slate-800;
   }
 
-  /* Floating ambient shapes for depth */
+  /* Floating ambient shapes for depth (GPU Optimized - transform only) */
   .floating-shape {
     @apply absolute rounded-full blur-3xl opacity-20 dark:opacity-10 pointer-events-none;
     animation: float 20s ease-in-out infinite;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    contain: strict;
   }
 
   .floating-shape-1 {
@@ -92,9 +109,9 @@
   }
 
   @keyframes float {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    33% { transform: translate(30px, -30px) rotate(5deg); }
-    66% { transform: translate(-20px, 20px) rotate(-5deg); }
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+    33% { transform: translate3d(30px, -30px, 0) rotate(5deg); }
+    66% { transform: translate3d(-20px, 20px, 0) rotate(-5deg); }
   }
 
   /* Gradient Text */
@@ -130,9 +147,10 @@
     box-shadow: 0 0 40px rgba(236, 72, 153, 0.3), 0 0 80px rgba(236, 72, 153, 0.15);
   }
 
-  /* Hover glow effects */
+  /* Hover glow effects (GPU Optimized) */
   .hover-glow-purple {
-    @apply transition-shadow duration-300;
+    transition: box-shadow 0.15s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+    will-change: box-shadow;
   }
   
   .hover-glow-purple:hover {

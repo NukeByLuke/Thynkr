@@ -7,37 +7,54 @@
  * Framer Motion Performance Settings
  * Ultra-fast durations for instant, snappy feel
  */
+/**
+ * Aggressive easeOut curve for immediate visual feedback
+ * Starts fast, decelerates smoothly - feels responsive
+ */
+const EASE_OUT_AGGRESSIVE = [0.25, 0.1, 0.25, 1.0] as const;
+const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
+
 export const ANIMATION_CONFIG = {
   // Ultra-fast transitions for UI elements (buttons, hover states)
   fast: {
-    duration: 0.08,
-    ease: 'easeOut',
+    duration: 0.06,
+    ease: EASE_OUT_AGGRESSIVE,
   },
 
-  // Standard transitions for most interactions
+  // Standard transitions - aggressive easeOut for immediate feedback
   standard: {
-    duration: 0.12,
-    ease: 'easeInOut',
+    duration: 0.1,
+    ease: EASE_OUT_AGGRESSIVE,
   },
 
-  // Page transitions - still quick
+  // Page transitions - still quick with expo easing
   page: {
-    duration: 0.15,
-    ease: 'easeInOut',
+    duration: 0.12,
+    ease: EASE_OUT_EXPO,
   },
 
-  // Spring animations (more natural feel, faster)
+  // Spring animations - high stiffness for instant reactivity
   spring: {
     type: 'spring' as const,
-    stiffness: 500,
-    damping: 35,
+    stiffness: 700,
+    damping: 40,
+    mass: 0.8,
   },
 
-  // Bouncy spring for playful interactions (snappier)
+  // Bouncy spring for playful interactions (snappier, controlled overshoot)
   springBouncy: {
     type: 'spring' as const,
-    stiffness: 600,
-    damping: 28,
+    stiffness: 800,
+    damping: 35,
+    mass: 0.6,
+  },
+
+  // Ultra-responsive spring for micro-interactions
+  springSnappy: {
+    type: 'spring' as const,
+    stiffness: 900,
+    damping: 45,
+    mass: 0.5,
   },
 } as const;
 
