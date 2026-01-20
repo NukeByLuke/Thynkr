@@ -61,7 +61,6 @@ export default function Pricing() {
         { text: '5 file uploads per month', included: true },
         { text: '50 AI requests per month', included: true },
         { text: 'Private courses', included: false },
-        { text: 'AI Tutor Chat', included: false },
         { text: 'Public course publishing', included: false },
         { text: 'Priority support', included: false },
       ],
@@ -93,7 +92,7 @@ export default function Pricing() {
     {
       id: 'premium',
       name: 'Premium',
-      description: 'Transform how you learn with unlimited AI and personal tutoring',
+      description: 'Transform how you learn with unlimited AI power and advanced features',
       monthlyPrice: 9.99,
       yearlyMonthlyPrice: 8.33,
       icon: <Crown className="w-6 h-6" />,
