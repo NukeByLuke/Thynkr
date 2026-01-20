@@ -19,7 +19,6 @@ import {
   Brain,
   Sparkles 
 } from 'lucide-react';
-import toast from 'react-hot-toast';
 
 // Components
 import SummaryView from '@/features/study/SummaryView';
@@ -117,7 +116,7 @@ export default function ImmersiveStudy() {
       if (file && file.id !== selectedFile?.id) {
         setSelectedFile(file);
       } else if (!file) {
-        toast.error('File not found');
+        // File not found, just redirect
         navigate('/study', { replace: true });
       }
     }
@@ -225,7 +224,7 @@ export default function ImmersiveStudy() {
                 {isActive && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg shadow-lg shadow-indigo-500/25"
+                    className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg shadow-lg shadow-indigo-500/20"
                     transition={{ type: 'spring', stiffness: 700, damping: 40 }}
                   />
                 )}
