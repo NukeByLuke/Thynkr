@@ -11,10 +11,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Shield,
+  Settings,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Logo from '@/components/Logo';
-import { Courses, Study, Files, Pricing, Admin } from '@/routes';
+import { Courses, Study, Files, Pricing, Admin, Settings as SettingsPage } from '@/routes';
 
 interface NavLink {
   to: string;
@@ -33,7 +34,7 @@ const navLinks: NavLink[] = [
 ];
 
 const bottomLinks: NavLink[] = [
-  // Moved Pricing to main nav
+  { to: '/settings', icon: Settings, label: 'Settings', component: SettingsPage },
 ];
 
 const Sidebar = () => {
