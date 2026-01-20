@@ -245,10 +245,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   if (questions.length === 0 || showSettings) {
     return (
       <div className="max-w-2xl mx-auto px-4 sm:px-0">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.12, ease: [0.25, 0.1, 0.25, 1.0] }}
+        <div
           className="bg-white dark:bg-zinc-950 rounded-2xl shadow-2xl border border-slate-200 dark:border-white/10 p-5 backdrop-blur-md"
         >
           <div className="text-center mb-5">
@@ -352,7 +349,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               <strong className="text-gray-900 dark:text-white">{settings.timeLimit === 'endless' ? 'No time limit' : settings.timeLimit}</strong>
             </p>
           </div>
-        </motion.div>
+        </div>
       </div>
     );
   }
@@ -363,10 +360,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
     
     return (
       <div className="max-w-md mx-auto px-4 sm:px-0">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.12, ease: [0.25, 0.1, 0.25, 1.0] }}
+        <div
           className="bg-white/90 dark:bg-zinc-900/80 backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-white/10 p-6 text-center shadow-xl"
         >
           {/* Compact header with icon */}
@@ -425,7 +419,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               Continue
             </motion.button>
           </div>
-        </motion.div>
+        </div>
       </div>
     );
   }
@@ -479,12 +473,10 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
         <AnimatePresence mode="wait">
           <motion.div
             key={currentIndex}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            transition={{ duration: 0.12, ease: [0.25, 0.1, 0.25, 1.0] }}
-            className="relative mb-4"
-          >
+            initial={false}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.15 }}
+            className="relative mb-4">
             {/* Ambient Spotlight Glow */}
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-blue-500/5 to-violet-500/5 blur-3xl -z-10 rounded-3xl" />
             
@@ -576,9 +568,9 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             return (
               <motion.button
                 key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.03, duration: 0.1, ease: [0.25, 0.1, 0.25, 1.0] }}
+                initial={false}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.1 }}
                 onClick={() => handleAnswerSelect(option)}
                 disabled={isSubmitted || isRevealed}
                 whileTap={!isSubmitted && !isRevealed ? { scale: 0.98 } : {}}

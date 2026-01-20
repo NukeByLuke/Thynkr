@@ -109,7 +109,7 @@ const Sidebar = () => {
                 relative flex items-center gap-3 px-3 py-2.5 rounded-xl
                 transition-all duration-150 group
                 ${isLinkActive
-                  ? 'text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30 font-semibold'
+                  ? 'text-white bg-gradient-to-r from-indigo-500 to-purple-500 shadow-lg shadow-indigo-500/25 font-semibold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/5 hover:scale-[1.02]'
                 }
               `}
@@ -137,12 +137,12 @@ const Sidebar = () => {
 
       {/* Upgrade CTA */}
       {!isPremium && isExpanded && (
-        <div className="mx-3 mb-2 p-4 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg relative overflow-hidden group flex-shrink-0">
+        <div className="mx-3 mb-2 p-4 rounded-xl bg-gradient-to-br from-indigo-400 to-violet-500 dark:from-indigo-500 dark:to-violet-600 text-white shadow-lg relative overflow-hidden group flex-shrink-0">
           <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
             <Sparkles className="w-16 h-16 transform rotate-12" />
           </div>
           <h3 className="font-semibold text-sm mb-1 relative z-10">Upgrade to Pro</h3>
-          <p className="text-[10px] text-indigo-100 mb-3 relative z-10 leading-tight">
+          <p className="text-[10px] text-indigo-100 dark:text-indigo-100 mb-3 relative z-10 leading-tight">
             Unlock unlimited AI tutoring and advanced analytics.
           </p>
           <Link
@@ -168,7 +168,7 @@ const Sidebar = () => {
                 flex items-center gap-3 px-3 py-2.5 rounded-xl
                 transition-all duration-150 group
                 ${isLinkActive
-                  ? 'text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30 font-semibold'
+                  ? 'text-white bg-gradient-to-r from-indigo-500 to-purple-500 shadow-lg shadow-indigo-500/25 font-semibold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/5 hover:scale-[1.02]'
                 }
               `}
