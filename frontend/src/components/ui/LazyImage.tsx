@@ -93,7 +93,7 @@ export default function LazyImage({
         onLoad={handleLoad}
         onError={handleError}
         className={`
-          transition-all duration-300
+          transition-all duration-150
           ${!isLoaded && !hasError ? 'blur-sm scale-105' : 'blur-0 scale-100'}
           ${className}
         `}

@@ -36,9 +36,9 @@ export default function GlassCard({
   const variantStyles = {
     default: '',
     hover:
-      'hover:bg-white/95 dark:hover:bg-zinc-950/95 hover:border-slate-300 dark:hover:border-slate-700/60 hover:shadow-xl transition-all duration-300',
+      'hover:bg-white/95 dark:hover:bg-zinc-950/95 hover:border-slate-300 dark:hover:border-slate-700/60 hover:shadow-xl transition-all duration-150',
     interactive:
-      'hover:bg-white/95 dark:hover:bg-zinc-950/95 hover:border-slate-300 dark:hover:border-slate-700/60 hover:shadow-xl hover:scale-[1.01] transition-all duration-300 cursor-pointer',
+      'hover:bg-white/95 dark:hover:bg-zinc-950/95 hover:border-slate-300 dark:hover:border-slate-700/60 hover:shadow-xl hover:scale-[1.01] transition-all duration-150 cursor-pointer',
   };
 
   // Gradient border effect with soft-square design

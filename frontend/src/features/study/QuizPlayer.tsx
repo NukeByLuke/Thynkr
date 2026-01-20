@@ -224,7 +224,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.12, ease: [0.25, 0.1, 0.25, 1.0] }}
           className="bg-white dark:bg-zinc-950 rounded-2xl shadow-2xl border border-slate-200 dark:border-white/10 p-5 backdrop-blur-md"
         >
           <div className="text-center mb-5">
@@ -342,7 +342,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.12, ease: [0.25, 0.1, 0.25, 1.0] }}
           className="bg-zinc-900/80 backdrop-blur-xl rounded-2xl border border-white/10 p-6 text-center"
         >
           {/* Compact header with icon */}
@@ -441,7 +441,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
         {/* Progress bar - Enhanced with glow */}
         <div className="mt-1 w-full bg-zinc-900/80 rounded-full h-3 border border-zinc-700">
           <div
-            className="bg-gradient-to-r from-cyan-500 via-blue-500 to-blue-600 h-3 rounded-full transition-[width] duration-300 shadow-lg shadow-cyan-500/50"
+            className="bg-gradient-to-r from-cyan-500 via-blue-500 to-blue-600 h-3 rounded-full transition-[width] duration-150 shadow-lg shadow-cyan-500/50"
             style={{
               width: `${((currentIndex + 1) / questions.length) * 100}%`,
             }}
@@ -458,7 +458,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ duration: 0.12, ease: [0.25, 0.1, 0.25, 1.0] }}
             className="relative mb-4"
           >
             {/* Ambient Spotlight Glow */}
@@ -554,12 +554,12 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1, duration: 0.3 }}
+                transition={{ delay: index * 0.03, duration: 0.1, ease: [0.25, 0.1, 0.25, 1.0] }}
                 onClick={() => handleAnswerSelect(option)}
                 disabled={isSubmitted || isRevealed}
                 whileHover={!isSubmitted && !isRevealed ? { scale: 1.02, y: -4 } : {}}
                 whileTap={!isSubmitted && !isRevealed ? { scale: 0.98 } : {}}
-                className={`group relative w-full text-left p-4 rounded-2xl border-2 transition-all duration-200 text-base backdrop-blur-xl cursor-pointer ${
+                className={`group relative w-full text-left p-4 rounded-2xl border-2 transition-all duration-150 text-base backdrop-blur-xl cursor-pointer ${
                   showSubmittedState || isCorrect
                     ? 'border-green-500 bg-green-500/20 text-white shadow-2xl shadow-green-500/30'
                     : showSubmittedWrong || isWrong
@@ -732,10 +732,10 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+              animate={{ scale: [1, 1.03, 1] }}
+              transition={{ repeat: Infinity, duration: 1.2, ease: [0.25, 0.1, 0.25, 1.0] }}
               onClick={() => setIsRevealed(true)}
-              className="px-8 sm:px-10 py-3.5 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-200 shadow-2xl shadow-blue-500/50 border-2 border-blue-500/50 text-base sm:text-lg"
+              className="px-8 sm:px-10 py-3.5 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-150 shadow-2xl shadow-blue-500/50 border-2 border-blue-500/50 text-base sm:text-lg"
             >
               Reveal Answer
             </motion.button>
@@ -746,10 +746,10 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+              animate={{ scale: [1, 1.03, 1] }}
+              transition={{ repeat: Infinity, duration: 1.2, ease: [0.25, 0.1, 0.25, 1.0] }}
               onClick={handleNext}
-              className="px-8 sm:px-10 py-3.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-200 shadow-2xl shadow-violet-500/50 border-2 border-violet-500/50 text-base sm:text-lg"
+              className="px-8 sm:px-10 py-3.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-150 shadow-2xl shadow-violet-500/50 border-2 border-violet-500/50 text-base sm:text-lg"
             >
               Next Question →
             </motion.button>
@@ -762,7 +762,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               whileTap={!isSubmitting ? { scale: 0.95 } : {}}
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className={`px-8 sm:px-10 py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-200 shadow-2xl shadow-green-500/50 border-2 border-green-500/50 text-base sm:text-lg active:scale-95 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`px-8 sm:px-10 py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-150 shadow-2xl shadow-green-500/50 border-2 border-green-500/50 text-base sm:text-lg active:scale-95 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {isSubmitting ? 'Submitting...' : 'Submit Quiz'}
             </motion.button>

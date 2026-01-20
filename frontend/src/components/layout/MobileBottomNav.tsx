@@ -96,7 +96,7 @@ const MobileBottomNav = memo(() => {
                 {/* Menu Items */}
                 <Link
                   to="/account"
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-indigo-50/50 dark:hover:bg-white/5 transition-all duration-300"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-indigo-50/50 dark:hover:bg-white/5 transition-all duration-150"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <User className="w-5 h-5" />
@@ -104,7 +104,7 @@ const MobileBottomNav = memo(() => {
                 </Link>
                 <Link
                   to="/settings"
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-indigo-50/50 dark:hover:bg-white/5 transition-all duration-300"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-indigo-50/50 dark:hover:bg-white/5 transition-all duration-150"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <Settings className="w-5 h-5" />
@@ -115,7 +115,7 @@ const MobileBottomNav = memo(() => {
                 
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/30 transition-all duration-300 w-full"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/30 transition-all duration-150 w-full"
                 >
                   <LogOut className="w-5 h-5" />
                   <span className="font-medium">Logout</span>
@@ -150,7 +150,7 @@ const MobileBottomNav = memo(() => {
                     className="relative"
                   >
                     <div
-                      className={`relative flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-300 ${
+                      className={`relative flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-150 ${
                         isMenuOpen
                           ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
                           : 'bg-transparent text-slate-600 dark:text-slate-400 group-active:bg-slate-100 dark:group-active:bg-white/5'
@@ -199,7 +199,7 @@ const MobileBottomNav = memo(() => {
                   )}
 
                   <div
-                    className={`relative flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-300 ${
+                    className={`relative flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-150 ${
                       active
                         ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
                         : 'bg-transparent text-slate-600 dark:text-slate-400 group-active:bg-slate-100 dark:group-active:bg-white/5'

@@ -75,7 +75,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
   return (
     <div 
-      className={`min-h-screen w-full flex items-center justify-center p-4 transition-colors duration-300 ${
+      className={`min-h-screen w-full flex items-center justify-center p-4 transition-colors duration-150 ${
         isDark 
           ? 'bg-slate-950'
           : 'bg-slate-100'
@@ -93,7 +93,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
         {/* Right Panel - Form */}
         <div 
-          className={`flex-1 p-8 sm:p-10 transition-colors duration-300 ${
+          className={`flex-1 p-8 sm:p-10 transition-colors duration-150 ${
             isDark 
               ? 'bg-slate-800' 
               : 'bg-white'

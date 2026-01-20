@@ -59,7 +59,7 @@ export default function DesktopSidebar() {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={toggleSidebar}
-              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-all duration-300"
+              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-all duration-150"
             >
               <X className="w-5 h-5 text-slate-500 dark:text-gray-400" />
             </motion.button>
@@ -71,7 +71,7 @@ export default function DesktopSidebar() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={toggleSidebar}
-            className="mx-auto mt-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-all duration-300 flex items-center justify-center"
+            className="mx-auto mt-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-all duration-150 flex items-center justify-center"
           >
             <Menu className="w-5 h-5 text-slate-500 dark:text-gray-400" />
           </motion.button>
@@ -95,7 +95,7 @@ export default function DesktopSidebar() {
             <motion.div key={item.path} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link
                 to={item.path}
-                className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 group relative ${
+                className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-150 group relative ${
                   active
                     ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-900 dark:text-white'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
@@ -143,7 +143,7 @@ export default function DesktopSidebar() {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => navigate('/settings')}
-          className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 w-full text-left group relative ${
+          className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-150 w-full text-left group relative ${
             location.pathname === '/settings'
               ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-900 dark:text-white'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
@@ -176,7 +176,7 @@ export default function DesktopSidebar() {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={handleLogout}
-          className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 w-full text-left group relative text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 dark:text-red-400 dark:hover:text-red-300 ${
+          className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-150 w-full text-left group relative text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 dark:text-red-400 dark:hover:text-red-300 ${
             !isSidebarOpen && 'justify-center'
           }`}
         >

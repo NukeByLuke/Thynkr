@@ -28,7 +28,7 @@ export default function PageHeader({ icon, title, description, actions }: PageHe
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className={`sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl transition-all duration-300 ease-out ${
+      className={`sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl transition-all duration-150 ease-out ${
         isScrolled ? 'shadow-soft-md' : ''
       }`}
     >

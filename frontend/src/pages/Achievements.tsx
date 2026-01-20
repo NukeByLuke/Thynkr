@@ -428,7 +428,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
     >
       {/* Main Square Icon Card (Uses 'tier' - the current status) */}
       <div
-        className={`aspect-square rounded-xl border-2 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 ${
+        className={`aspect-square rounded-xl border-2 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-150 ${
           isLocked
             ? 'border-slate-400/40 dark:border-slate-600/40 bg-slate-100/50 dark:bg-slate-900/30 shadow-sm grayscale opacity-60'
             : `${tier.border} ${tier.borderHover} ${tier.bg} ${tier.glow}`
@@ -491,7 +491,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
             <motion.div
               initial={{ x: '-150%' }}
               animate={{ x: '250%' }}
-              transition={{ duration: 0.6, ease: 'easeInOut' }}
+              transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1.0] }}
               className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent transform -skew-x-12 blur-sm"
             />
           </>
@@ -499,7 +499,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
 
         {/* Achievement Icon */}
         <div
-          className={`w-12 h-12 rounded-lg flex items-center justify-center relative z-20 transition-all duration-300 ${
+          className={`w-12 h-12 rounded-lg flex items-center justify-center relative z-20 transition-all duration-150 ${
             isLocked 
               ? 'bg-slate-300/50 dark:bg-slate-700/50 opacity-40' 
               : `${tier.iconBg} shadow-xl group-hover:scale-110`

@@ -503,10 +503,10 @@ export default function Files() {
                       key={folder.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.03, duration: 0.2 }}
+                      transition={{ delay: index * 0.02, duration: 0.1, ease: [0.25, 0.1, 0.25, 1.0] }}
                       onClick={() => setCurrentFolderId(folder.id)}
                       onContextMenu={(e) => handleContextMenu(e, 'folder', folder.id, folder.name)}
-                      className="group bg-white dark:bg-slate-800/40 hover:bg-slate-50 dark:hover:bg-slate-700/60 backdrop-blur-sm border-2 border-slate-200 dark:border-white/5 rounded-xl p-4 text-left transition-all duration-150 hover:scale-[1.02] active:scale-95 will-change-transform shadow-md hover:shadow-lg"
+                      className="group bg-white dark:bg-slate-800/40 hover:bg-slate-50 dark:hover:bg-slate-700/60 backdrop-blur-sm border-2 border-slate-200 dark:border-white/5 rounded-xl p-4 text-left transition-all duration-100 hover:scale-[1.02] active:scale-95 will-change-transform shadow-md hover:shadow-lg"
                     >
                       <Folder className="w-12 h-12 text-amber-500 dark:text-amber-400 mb-2" fill="currentColor" />
                       <p className="text-slate-900 dark:text-white font-medium truncate text-sm">{folder.name}</p>

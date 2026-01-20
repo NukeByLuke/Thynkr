@@ -406,7 +406,7 @@ export default function CoursesUnified() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="group cursor-pointer bg-zinc-900/40 dark:bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl p-3 hover:-translate-y-1 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] hover:border-blue-500/30 transition-all duration-300"
+                        className="group cursor-pointer bg-zinc-900/40 dark:bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl p-3 hover:-translate-y-1 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] hover:border-blue-500/30 transition-all duration-150"
                       >
                         {/* Cover Image with Hover Play Button */}
                         <div className="relative aspect-video rounded-2xl overflow-hidden mb-4 border border-white/10 shadow-lg">
@@ -416,7 +416,7 @@ export default function CoursesUnified() {
                                 src={course.coverImage}
                                 alt={course.title}
                                 loading="lazy"
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-150"
                               />
                             ) : (
                               <div className="w-full h-full bg-gradient-to-br from-zinc-900/80 via-zinc-900/60 to-zinc-900/80 backdrop-blur-xl flex items-center justify-center relative">
@@ -426,7 +426,7 @@ export default function CoursesUnified() {
                             )}
                             
                             {/* Play/Resume Overlay */}
-                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-center justify-center">
                               <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center transform group-hover:scale-110 transition-transform">
                                 <Play className="w-8 h-8 text-slate-950 ml-1" fill="currentColor" />
                               </div>

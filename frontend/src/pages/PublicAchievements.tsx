@@ -147,7 +147,7 @@ export default function PublicAchievements() {
                             const AchievementIcon = getIcon(achievement.definition.icon);
                             
                             return (
-                                <div key={achievement.id} className={`relative group p-4 rounded-xl border transition-all duration-300 ${
+                                <div key={achievement.id} className={`relative group p-4 rounded-xl border transition-all duration-150 ${
                                     isLocked 
                                      ? 'bg-slate-900/40 border-slate-800/60 opacity-60 grayscale'
                                      : `bg-slate-900/80 ${tier.border} ${tier.bg} hover:border-opacity-100`

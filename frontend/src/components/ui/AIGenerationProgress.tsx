@@ -69,7 +69,7 @@ export default function AIGenerationProgress({
           className={clsx(
             'h-full rounded-full relative overflow-hidden',
             'bg-gradient-aurora',
-            'transition-all duration-300 ease-out'
+            'transition-all duration-150 ease-out'
           )}
           style={{ width: `${fillWidth}%` }}
         >

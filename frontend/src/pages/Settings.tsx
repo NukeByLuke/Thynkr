@@ -309,7 +309,7 @@ export default function Settings() {
                         <button
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
-                          className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-500 hover:to-purple-500 transition-all duration-300 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40"
+                          className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-500 hover:to-purple-500 transition-all duration-150 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40"
                         >
                           <Image className="w-4 h-4 inline mr-2" />
                           Change Picture
@@ -350,7 +350,7 @@ export default function Settings() {
                         <button
                           type="button"
                           onClick={() => setIsEditingUsername(true)}
-                          className="inline-flex items-center gap-1 px-3 py-2 border border-slate-200/50 dark:border-white/10 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300"
+                          className="inline-flex items-center gap-1 px-3 py-2 border border-slate-200/50 dark:border-white/10 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-150"
                           aria-label="Edit username"
                         >
                           <PencilLine className="w-4 h-4" />
@@ -417,7 +417,7 @@ export default function Settings() {
                   <button
                     type="submit"
                     disabled={updateProfileMutation.isPending}
-                    className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 transition-all duration-300 flex items-center gap-2 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40"
+                    className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 transition-all duration-150 flex items-center gap-2 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40"
                   >
                     <Save className="w-4 h-4" />
                     {updateProfileMutation.isPending
@@ -479,7 +479,7 @@ export default function Settings() {
                   <button
                     type="submit"
                     disabled={changePasswordMutation.isPending}
-                    className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 transition-all duration-300 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40"
+                    className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 transition-all duration-150 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40"
                   >
                     {changePasswordMutation.isPending ? 'Changing...' : 'Change Password'}
                   </button>
@@ -648,7 +648,7 @@ export default function Settings() {
                   <button
                     onClick={handleDeleteAccount}
                     disabled={deleteAccountMutation.isPending}
-                    className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 disabled:opacity-50 transition-all duration-300 shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40"
+                    className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 disabled:opacity-50 transition-all duration-150 shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40"
                   >
                     {deleteAccountMutation.isPending ? 'Deleting...' : 'Delete Account'}
                   </button>

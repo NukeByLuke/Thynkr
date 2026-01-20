@@ -61,7 +61,7 @@ const Navbar = memo(() => {
                 <NavLink
                   to="/study"
                   className={({ isActive }) =>
-                    `text-sm font-semibold px-4 py-2 rounded-2xl transition-all duration-300 flex items-center gap-1.5 ${
+                    `text-sm font-semibold px-4 py-2 rounded-2xl transition-all duration-150 flex items-center gap-1.5 ${
                       isActive
                         ? 'text-white dark:text-white drop-shadow-md bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30'
                         : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5'
@@ -75,7 +75,7 @@ const Navbar = memo(() => {
                 <NavLink
                   to="/courses"
                   className={({ isActive }) =>
-                    `text-sm font-semibold px-4 py-2 rounded-2xl transition-all duration-300 flex items-center gap-1.5 ${
+                    `text-sm font-semibold px-4 py-2 rounded-2xl transition-all duration-150 flex items-center gap-1.5 ${
                       isActive || location.pathname.startsWith('/courses/')
                         ? 'text-white dark:text-white drop-shadow-md bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30'
                         : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5'
@@ -89,7 +89,7 @@ const Navbar = memo(() => {
                 <NavLink
                   to="/progress"
                   className={({ isActive }) =>
-                    `text-sm font-semibold px-4 py-2 rounded-2xl transition-all duration-300 flex items-center gap-1.5 ${
+                    `text-sm font-semibold px-4 py-2 rounded-2xl transition-all duration-150 flex items-center gap-1.5 ${
                       isActive
                         ? 'text-white dark:text-white drop-shadow-md bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30'
                         : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5'
@@ -110,7 +110,7 @@ const Navbar = memo(() => {
                 <div className="relative">
                   <button
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-2xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300"
+                    className="flex items-center gap-2 px-3 py-2 rounded-2xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-150"
                   >
                     {user?.avatarUrl ? (
                       <img
@@ -186,7 +186,7 @@ const Navbar = memo(() => {
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate('/login')}
-                  className="hover:bg-white/50 dark:hover:bg-white/5 rounded-2xl transition-all duration-300"
+                  className="hover:bg-white/50 dark:hover:bg-white/5 rounded-2xl transition-all duration-150"
                 >
                   Login
                 </Button>
@@ -194,7 +194,7 @@ const Navbar = memo(() => {
                   variant="primary"
                   size="sm"
                   onClick={() => navigate('/register')}
-                  className="rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/30 transition-all duration-300"
+                  className="rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/30 transition-all duration-150"
                 >
                   Get Started
                 </Button>
@@ -207,7 +207,7 @@ const Navbar = memo(() => {
             <ThemeToggle size="sm" />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 p-2.5 rounded-2xl hover:bg-white/5 transition-all duration-300"
+              className="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 p-2.5 rounded-2xl hover:bg-white/5 transition-all duration-150"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -223,7 +223,7 @@ const Navbar = memo(() => {
               <>
                 <Link
                   to="/study"
-                  className={`flex items-center px-3 py-2 rounded-xl text-base font-medium transition-all duration-300 ${
+                  className={`flex items-center px-3 py-2 rounded-xl text-base font-medium transition-all duration-150 ${
                     isActive('/study')
                       ? 'text-white dark:text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30'
                       : 'text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5'
@@ -235,7 +235,7 @@ const Navbar = memo(() => {
                 </Link>
                 <Link
                   to="/courses"
-                  className={`flex items-center px-3 py-2 rounded-xl text-base font-medium transition-all duration-300 ${
+                  className={`flex items-center px-3 py-2 rounded-xl text-base font-medium transition-all duration-150 ${
                     isActive('/courses') || location.pathname.startsWith('/courses/')
                       ? 'text-white dark:text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30'
                       : 'text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5'
@@ -247,7 +247,7 @@ const Navbar = memo(() => {
                 </Link>
                 <Link
                   to="/progress"
-                  className={`flex items-center px-3 py-2 rounded-xl text-base font-medium transition-all duration-300 ${
+                  className={`flex items-center px-3 py-2 rounded-xl text-base font-medium transition-all duration-150 ${
                     isActive('/progress')
                       ? 'text-white dark:text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30'
                       : 'text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5'
@@ -267,7 +267,7 @@ const Navbar = memo(() => {
 
                 <Link
                   to="/account"
-                  className="flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300"
+                  className="flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-150"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <User className="w-4 h-4 mr-2" />
@@ -278,14 +278,14 @@ const Navbar = memo(() => {
                     setMobileMenuOpen(false);
                     window.location.href = '/achievements';
                   }}
-                  className="flex items-center w-full text-left px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300"
+                  className="flex items-center w-full text-left px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-150"
                 >
                   <Trophy className="w-4 h-4 mr-2" />
                   Achievements
                 </button>
                 <Link
                   to="/settings"
-                  className="flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300"
+                  className="flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-150"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Settings className="w-4 h-4 mr-2" />
@@ -295,7 +295,7 @@ const Navbar = memo(() => {
                 {user?.role === 'ADMIN' && (
                   <Link
                     to="/admin"
-                    className="flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300"
+                    className="flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-150"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Shield className="w-4 h-4 mr-2" />
@@ -305,7 +305,7 @@ const Navbar = memo(() => {
                 
                 <button
                   onClick={handleLogout}
-                  className="flex items-center w-full text-left px-3 py-2 rounded-xl text-base font-medium text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/20 transition-all duration-300"
+                  className="flex items-center w-full text-left px-3 py-2 rounded-xl text-base font-medium text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/20 transition-all duration-150"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
                   Logout
@@ -315,14 +315,14 @@ const Navbar = memo(() => {
               <>
                 <Link
                   to="/login"
-                  className="block px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300"
+                  className="block px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-150"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="block px-3 py-2 rounded-xl text-base font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/30 transition-all duration-300"
+                  className="block px-3 py-2 rounded-xl text-base font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/30 transition-all duration-150"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Get Started

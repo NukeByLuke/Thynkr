@@ -134,7 +134,7 @@ export default function StudyFlashcards({
       {/* Progress Bar */}
       <div className="h-1 bg-gray-200 dark:bg-gray-700">
         <div
-          className="h-full bg-green-500 transition-all duration-300"
+          className="h-full bg-green-500 transition-all duration-150"
           style={{ width: `${(knownCount / totalCards) * 100}%` }}
         />
       </div>

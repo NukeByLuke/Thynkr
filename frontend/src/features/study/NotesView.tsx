@@ -25,7 +25,7 @@ export default function NotesView({
           <button
             onClick={onRegenerate}
             disabled={isRegenerating}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-xl transition-all duration-150 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             title="Regenerate notes with latest AI"
           >
             <RefreshCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
@@ -49,7 +49,7 @@ export default function NotesView({
         <ul className="space-y-4">
           {keyPoints.map((point, index) => (
             <li key={index} className="flex items-start group">
-              <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 text-white text-base font-bold mr-4 mt-1 shadow-md group-hover:shadow-lg transition-shadow duration-300">
+              <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 text-white text-base font-bold mr-4 mt-1 shadow-md group-hover:shadow-lg transition-shadow duration-150">
                 {index + 1}
               </span>
               <div className="text-brand-900 dark:text-brand-100 leading-loose prose prose-brand dark:prose-invert max-w-none text-lg">

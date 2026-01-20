@@ -107,7 +107,7 @@ const Sidebar = () => {
               onMouseEnter={() => link.component?.preload()}
               className={`
                 relative flex items-center gap-3 px-3 py-2.5 rounded-xl
-                transition-all duration-300 group
+                transition-all duration-150 group
                 ${isLinkActive
                   ? 'text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30 font-semibold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/5 hover:scale-[1.02]'
@@ -166,7 +166,7 @@ const Sidebar = () => {
               to={link.to}
               className={`
                 flex items-center gap-3 px-3 py-2.5 rounded-xl
-                transition-all duration-300 group
+                transition-all duration-150 group
                 ${isLinkActive
                   ? 'text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30 font-semibold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/5 hover:scale-[1.02]'

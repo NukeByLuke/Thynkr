@@ -215,7 +215,7 @@ export default function ImmersiveStudy() {
                 onClick={() => handleTabChange(tab.id)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className={`relative px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1.5 ${
+                className={`relative px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-100 flex items-center gap-1.5 ${
                   isActive
                     ? 'text-white'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
@@ -225,7 +225,7 @@ export default function ImmersiveStudy() {
                   <motion.div
                     layoutId="activeTab"
                     className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg shadow-lg shadow-indigo-500/25"
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    transition={{ type: 'spring', stiffness: 700, damping: 40 }}
                   />
                 )}
                 <span className="relative z-10 flex items-center gap-1.5">

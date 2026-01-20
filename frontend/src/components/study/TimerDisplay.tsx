@@ -33,10 +33,10 @@ export default function TimerDisplay({ durationMinutes, onComplete, timerKey }: 
   };
 
   return (
-    <div className="fixed top-4 right-4 z-40 animate-in fade-in slide-in-from-top-5 duration-300">
+    <div className="fixed top-4 right-4 z-40 animate-in fade-in slide-in-from-top-5 duration-150">
       <div
         className={`
-          flex items-center gap-3 px-4 py-2 rounded-full border-2 shadow-lg transition-all duration-300
+          flex items-center gap-3 px-4 py-2 rounded-full border-2 shadow-lg transition-all duration-150
           ${
             isCritical
               ? 'bg-red-600 border-red-700 text-white animate-pulse'
@@ -77,7 +77,7 @@ export default function TimerDisplay({ durationMinutes, onComplete, timerKey }: 
             }`}
           >
             <div
-              className={`h-full rounded-full transition-all duration-300 ${
+              className={`h-full rounded-full transition-all duration-150 ${
                 isCritical
                   ? 'bg-white'
                   : isWarning
@@ -130,7 +130,7 @@ export default function TimerDisplay({ durationMinutes, onComplete, timerKey }: 
 
       {/* Blur overlay when paused */}
       {!isActive && totalSeconds < durationMinutes * 60 && (
-        <div className="fixed inset-0 bg-slate-900/20 dark:bg-slate-900/40 backdrop-blur-sm z-30 animate-in fade-in duration-300" />
+        <div className="fixed inset-0 bg-slate-900/20 dark:bg-slate-900/40 backdrop-blur-sm z-30 animate-in fade-in duration-150" />
       )}
     </div>
   );

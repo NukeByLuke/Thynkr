@@ -325,7 +325,7 @@ export default function Pricing() {
               return (
                 <div
                   key={plan.id}
-                  className={`relative flex flex-col p-8 lg:p-10 rounded-3xl border border-white/20 dark:border-slate-700/30 transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-2 ${getCardStyles()}`}
+                  className={`relative flex flex-col p-8 lg:p-10 rounded-3xl border border-white/20 dark:border-slate-700/30 transition-[transform,box-shadow] duration-150 ease-out hover:-translate-y-2 ${getCardStyles()}`}
                 >
                   {getBadge()}
 
@@ -346,7 +346,7 @@ export default function Pricing() {
 
                   {/* Pricing with animation */}
                   <div className="text-center mb-6">
-                    <div className="flex items-baseline justify-center gap-1 transition-all duration-300">
+                    <div className="flex items-baseline justify-center gap-1 transition-all duration-150">
                       <span className="text-5xl font-bold text-slate-900 dark:text-white">
                         ${formatPrice(price)}
                       </span>
@@ -472,8 +472,8 @@ export default function Pricing() {
             </h2>
             <div className="grid md:grid-cols-3 gap-8">
               {/* Faster Learning */}
-              <div className="text-center group p-6 rounded-3xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-lg border border-white/20 dark:border-slate-700/30 hover:shadow-soft-xl transition-all duration-300 ease-out">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 mb-4 group-hover:scale-110 transition-transform duration-300">
+              <div className="text-center group p-6 rounded-3xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-lg border border-white/20 dark:border-slate-700/30 hover:shadow-soft-xl transition-all duration-150 ease-out">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 mb-4 group-hover:scale-110 transition-transform duration-150">
                   <TrendingUp className="w-8 h-8 text-green-600 dark:text-green-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
@@ -486,8 +486,8 @@ export default function Pricing() {
               </div>
 
               {/* Smarter Notes */}
-              <div className="text-center group p-6 rounded-3xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-lg border border-white/20 dark:border-slate-700/30 hover:shadow-soft-xl transition-all duration-300 ease-out">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 mb-4 group-hover:scale-110 transition-transform duration-300">
+              <div className="text-center group p-6 rounded-3xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-lg border border-white/20 dark:border-slate-700/30 hover:shadow-soft-xl transition-all duration-150 ease-out">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 mb-4 group-hover:scale-110 transition-transform duration-150">
                   <Brain className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
@@ -499,8 +499,8 @@ export default function Pricing() {
               </div>
 
               {/* More Power */}
-              <div className="text-center group p-6 rounded-3xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-lg border border-white/20 dark:border-slate-700/30 hover:shadow-soft-xl transition-all duration-300 ease-out">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-100 to-accent-100 dark:from-brand-900/30 dark:to-accent-900/30 mb-4 group-hover:scale-110 transition-transform duration-300">
+              <div className="text-center group p-6 rounded-3xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-lg border border-white/20 dark:border-slate-700/30 hover:shadow-soft-xl transition-all duration-150 ease-out">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-100 to-accent-100 dark:from-brand-900/30 dark:to-accent-900/30 mb-4 group-hover:scale-110 transition-transform duration-150">
                   <Bolt className="w-8 h-8 text-brand-600 dark:text-brand-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">

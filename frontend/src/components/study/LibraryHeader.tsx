@@ -55,22 +55,22 @@ export default function LibraryHeader({
             className="relative group"
           >
             {/* Gradient Border Container */}
-            <div className="p-[1px] rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:shadow-purple-500/50">
+            <div className="p-[1px] rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-lg transition-all duration-150 group-hover:shadow-xl group-hover:shadow-purple-500/50">
               {/* Inner Button */}
               <button
                 onClick={onUploadClick}
                 disabled={isUploading}
-                className="relative flex items-center gap-2.5 px-6 py-3 bg-slate-900 dark:bg-slate-950 backdrop-blur-md rounded-[11px] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden"
+                className="relative flex items-center gap-2.5 px-6 py-3 bg-slate-900 dark:bg-slate-950 backdrop-blur-md rounded-[11px] transition-all duration-150 disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden"
               >
                 {/* Animated Gradient Overlay on Hover */}
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/0 via-purple-600/0 to-pink-600/0 group-hover:from-indigo-600/10 group-hover:via-purple-600/10 group-hover:to-pink-600/10 transition-all duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/0 via-purple-600/0 to-pink-600/0 group-hover:from-indigo-600/10 group-hover:via-purple-600/10 group-hover:to-pink-600/10 transition-all duration-150" />
 
                 {/* Icon */}
                 <div className="relative">
                   {isUploading ? (
                     <div className="animate-spin h-5 w-5 border-2 border-white/20 border-t-white rounded-full" />
                   ) : (
-                    <Plus className="h-5 w-5 text-white group-hover:rotate-90 transition-transform duration-300" />
+                    <Plus className="h-5 w-5 text-white group-hover:rotate-90 transition-transform duration-150" />
                   )}
                 </div>
 
@@ -80,7 +80,7 @@ export default function LibraryHeader({
                 </span>
 
                 {/* Glow Effect */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
                   <div className="absolute inset-0 blur-xl bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20" />
                 </div>
               </button>

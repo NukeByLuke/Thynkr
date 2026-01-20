@@ -96,7 +96,7 @@ export default function GenerationLoader({
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1.0] }}
             className="text-xs font-medium uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400"
           >
             {stages[currentStageIndex]}

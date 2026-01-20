@@ -39,10 +39,10 @@ const slideVariants = {
   }),
 };
 
-// Optimized flip transition - smooth easing instead of spring
+// Optimized flip transition - aggressive easeOut for 60fps snappy feel
 const flipTransition = {
-  duration: 0.3, // Faster flip
-  ease: 'easeInOut' as const,
+  duration: 0.15,
+  ease: [0.25, 0.1, 0.25, 1.0] as [number, number, number, number],
 };
 
 const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: FlashcardViewerProps) {
@@ -123,7 +123,7 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={handleShuffle}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-xl transition-all duration-150 shadow-sm hover:shadow-md"
         >
           <Shuffle className="w-4 h-4" />
           Shuffle
@@ -133,7 +133,7 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleReset}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-xl transition-all duration-150 shadow-sm hover:shadow-md"
           >
             <RotateCcw className="w-4 h-4" />
             Reset Order
@@ -300,7 +300,7 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
             whileTap={{ scale: 0.95 }}
             onClick={handlePrevious}
             disabled={currentIndex === 0}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-2xl disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 shadow-lg font-bold text-lg touch-manipulation active:scale-95"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-2xl disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 shadow-lg font-bold text-lg touch-manipulation active:scale-95"
           >
             <ChevronLeft className="w-6 h-6" />
             Previous
@@ -310,7 +310,7 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
             whileTap={{ scale: 0.95 }}
             onClick={handleNext}
             disabled={currentIndex === displayCards.length - 1}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-2xl disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 shadow-lg font-bold text-lg touch-manipulation active:scale-95"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-2xl disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 shadow-lg font-bold text-lg touch-manipulation active:scale-95"
           >
             Next
             <ChevronRight className="w-6 h-6" />
@@ -324,7 +324,7 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
             whileTap={{ scale: 0.98 }}
             onClick={handlePrevious}
             disabled={currentIndex === 0}
-            className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-brand-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-brand-50 dark:hover:bg-gray-700 hover:border-brand-300 dark:hover:border-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm sm:text-base shadow-md font-semibold"
+            className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-brand-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-brand-50 dark:hover:bg-gray-700 hover:border-brand-300 dark:hover:border-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 text-sm sm:text-base shadow-md font-semibold"
           >
             <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             <span className="hidden sm:inline">Previous</span>
@@ -387,7 +387,7 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title }: Flashcar
             whileTap={{ scale: 0.98 }}
             onClick={handleNext}
             disabled={currentIndex === displayCards.length - 1}
-            className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-brand-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-brand-50 dark:hover:bg-gray-700 hover:border-brand-300 dark:hover:border-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm sm:text-base shadow-md font-semibold"
+            className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-brand-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-brand-50 dark:hover:bg-gray-700 hover:border-brand-300 dark:hover:border-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 text-sm sm:text-base shadow-md font-semibold"
           >
             <span className="hidden sm:inline">Next</span>
             <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />

@@ -297,7 +297,7 @@ export default function Register() {
                     <div className="flex items-center gap-2">
                       <div className="flex-1 h-1.5 rounded-full bg-slate-100 dark:bg-slate-600 overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all duration-300 ${
+                          className={`h-full rounded-full transition-all duration-150 ${
                             passwordStrength === 'weak' ? 'w-1/3 bg-red-500' :
                             passwordStrength === 'medium' ? 'w-2/3 bg-amber-500' : 'w-full bg-cyan-500'
                           }`}

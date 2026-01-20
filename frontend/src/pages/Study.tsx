@@ -155,21 +155,24 @@ export default function Study() {
 
       {/* Abstract Header */}
       <div className="relative overflow-hidden bg-gradient-to-br from-indigo-100 via-purple-100 to-slate-100 dark:from-slate-950 dark:via-indigo-950 dark:to-slate-950 h-44">
-        {/* Floating Abstract Shapes */}
+        {/* Floating Abstract Shapes - GPU optimized with transform3d */}
         <motion.div
           animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 8, repeat: Infinity, ease: [0.25, 0.1, 0.25, 1.0] }}
           className="absolute top-10 left-20 w-64 h-64 bg-indigo-500 rounded-full blur-3xl opacity-20"
+          style={{ transform: 'translateZ(0)', willChange: 'transform' }}
         />
         <motion.div
           animate={{ y: [0, 20, 0], x: [0, -15, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 10, repeat: Infinity, ease: [0.25, 0.1, 0.25, 1.0] }}
           className="absolute bottom-10 right-32 w-80 h-80 bg-purple-500 rounded-full blur-3xl opacity-20"
+          style={{ transform: 'translateZ(0)', willChange: 'transform' }}
         />
         <motion.div
           animate={{ y: [0, -15, 0], scale: [1, 1.1, 1] }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 7, repeat: Infinity, ease: [0.25, 0.1, 0.25, 1.0] }}
           className="absolute top-20 right-20 w-56 h-56 bg-cyan-500 rounded-full blur-3xl opacity-20"
+          style={{ transform: 'translateZ(0)', willChange: 'transform' }}
         />
 
         {/* Content */}

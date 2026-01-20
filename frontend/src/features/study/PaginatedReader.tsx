@@ -112,7 +112,7 @@ export default function PaginatedReader({
       <motion.div
         initial={{ y: 0 }}
         animate={{ y: showHeader ? 0 : -100 }}
-        transition={{ duration: 0.3, ease: 'easeInOut' }}
+        transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1.0] }}
         className="md:relative md:translate-y-0 fixed top-0 left-0 right-0 z-30 md:z-0 flex items-center justify-between p-3 md:p-4 border-b border-gray-200 dark:border-gray-700 bg-white/95 md:bg-white dark:bg-gray-900/95 dark:md:bg-gray-900 backdrop-blur-lg md:backdrop-blur-none shadow-sm md:shadow-none"
       >
         <div className="flex-1 min-w-0">

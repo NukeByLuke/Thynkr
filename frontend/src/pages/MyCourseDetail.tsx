@@ -681,7 +681,7 @@ export default function MyCourseDetail() {
                   <div className="flex items-center gap-3">
                     <div className="flex-1 bg-slate-200 dark:bg-slate-700 rounded-lg h-2 overflow-hidden">
                       <div
-                        className="bg-gradient-to-r from-blue-600 to-violet-600 h-2 rounded-lg transition-all duration-300"
+                        className="bg-gradient-to-r from-blue-600 to-violet-600 h-2 rounded-lg transition-all duration-150"
                         style={{ width: `${uploadProgress}%` }}
                       />
                     </div>

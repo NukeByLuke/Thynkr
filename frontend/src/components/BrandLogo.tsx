@@ -61,7 +61,7 @@ export default function BrandLogo({
     >
       {/* Pulsing gradient border on hover */}
       <motion.div
-        className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150"
         style={{
           background: 'linear-gradient(45deg, #4F46E5, #22D3EE, #6366F1, #22D3EE)',
           backgroundSize: '200% 200%',
@@ -94,7 +94,7 @@ export default function BrandLogo({
           strokeWidth="2"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
-          transition={{ duration: 1, ease: 'easeInOut' }}
+          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1.0] }}
         />
         <ellipse cx="32" cy="38" rx="4" ry="2.5" fill="#6366F1" opacity="0.8" />
         <rect x="30" y="35" width="4" height="3" rx="0.5" fill="#6366F1" opacity="0.8" />

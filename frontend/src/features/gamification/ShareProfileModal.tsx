@@ -146,7 +146,7 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 blur-[80px] rounded-full" />
           
           <div className="w-full overflow-x-auto flex justify-center py-4 no-scrollbar relative z-10">
-             <div className="origin-center transform scale-[0.6] hover:scale-[0.62] transition-transform duration-300">
+             <div className="origin-center transform scale-[0.6] hover:scale-[0.62] transition-transform duration-150">
                 <PlayerCardExport
                   ref={cardRef}
                   user={user}

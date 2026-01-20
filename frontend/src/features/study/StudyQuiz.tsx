@@ -147,7 +147,7 @@ const StudyQuiz = memo(function StudyQuiz({ data, onRegenerate, isRegenerating =
       {/* Progress Bar */}
       <div className="h-1 bg-gray-200 dark:bg-gray-700">
         <div
-          className={`h-full transition-all duration-300 ${
+          className={`h-full transition-all duration-150 ${
             showResults
               ? scorePercentage >= 70
                 ? 'bg-green-500'

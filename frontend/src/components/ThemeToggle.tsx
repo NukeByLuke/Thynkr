@@ -25,7 +25,7 @@ export default function ThemeToggle({ showLabel = false, size = 'md' }: ThemeTog
       onClick={toggleTheme}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      className={`relative flex items-center justify-center gap-2 ${buttonPadding} rounded-full overflow-hidden transition-all duration-300 shadow-lg ${
+      className={`relative flex items-center justify-center gap-2 ${buttonPadding} rounded-full overflow-hidden transition-all duration-150 shadow-lg ${
         isDark 
           ? 'bg-slate-800 hover:bg-slate-700' 
           : 'bg-white hover:bg-slate-50'
