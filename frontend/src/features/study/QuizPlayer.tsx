@@ -557,7 +557,6 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                 transition={{ delay: index * 0.03, duration: 0.1, ease: [0.25, 0.1, 0.25, 1.0] }}
                 onClick={() => handleAnswerSelect(option)}
                 disabled={isSubmitted || isRevealed}
-                whileHover={!isSubmitted && !isRevealed ? { scale: 1.02, y: -4 } : {}}
                 whileTap={!isSubmitted && !isRevealed ? { scale: 0.98 } : {}}
                 className={`group relative w-full text-left p-4 rounded-2xl border-2 transition-all duration-150 text-base backdrop-blur-xl cursor-pointer ${
                   showSubmittedState || isCorrect
@@ -725,7 +724,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
       </div>
 
       {/* Navigation - Sticky Footer */}
-      <div className="flex-shrink-0 sticky bottom-0 bg-white dark:bg-zinc-950 border-t border-slate-200 dark:border-white/10 py-3 backdrop-blur-sm">
+      <div className="flex-shrink-0 pt-4 pb-2">
         <div className="flex items-center justify-center">
           {/* Show Reveal Answer button when answer is selected but not yet revealed with pulse */}
           {!isSubmitted && !isRevealed && userAnswer && (
