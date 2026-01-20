@@ -345,7 +345,7 @@
     @apply outline-none ring-2 ring-thynkr-purple/20 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 transition-all duration-200;
   }
 
-  /* Input field styling - Premium Glass theme */
+  /* Input field styling - Light/Dark mode aware */
   input[type="text"],
   input[type="email"],
   input[type="password"],
@@ -355,10 +355,24 @@
   input[type="number"],
   textarea,
   select {
-    @apply bg-slate-900/50 backdrop-blur-xl border border-white/10;
-    @apply rounded-xl px-4 py-2.5 text-white;
-    @apply placeholder:text-slate-500;
+    @apply bg-slate-50 border border-slate-200;
+    @apply rounded-xl px-4 py-2.5 text-slate-900;
+    @apply placeholder:text-slate-400;
     @apply transition-all duration-200;
+  }
+
+  .dark input[type="text"],
+  .dark input[type="email"],
+  .dark input[type="password"],
+  .dark input[type="search"],
+  .dark input[type="url"],
+  .dark input[type="tel"],
+  .dark input[type="number"],
+  .dark textarea,
+  .dark select {
+    @apply bg-slate-900/50 backdrop-blur-xl border-white/10;
+    @apply text-white;
+    @apply placeholder:text-slate-500;
   }
 
   input[type="text"]:focus,
@@ -370,7 +384,19 @@
   input[type="number"]:focus,
   textarea:focus,
   select:focus {
-    @apply border-blue-400/50 ring-2 ring-blue-400/20 outline-none bg-slate-900/60;
+    @apply border-cyan-500 ring-2 ring-cyan-500/20 outline-none;
+  }
+
+  .dark input[type="text"]:focus,
+  .dark input[type="email"]:focus,
+  .dark input[type="password"]:focus,
+  .dark input[type="search"]:focus,
+  .dark input[type="url"]:focus,
+  .dark input[type="tel"]:focus,
+  .dark input[type="number"]:focus,
+  .dark textarea:focus,
+  .dark select:focus {
+    @apply border-blue-400/50 ring-blue-400/20 bg-slate-900/60;
   }
 
   /* Icon color inheritance */
