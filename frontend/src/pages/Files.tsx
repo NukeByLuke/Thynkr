@@ -524,8 +524,8 @@ export default function Files() {
           {(isLoading || filteredFiles.length > 0) && (
             <div className="bg-white dark:bg-slate-900/60 backdrop-blur-md border-2 border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden min-h-[400px] shadow-lg">
               {/* Table Header - Sticky */}
-              <div className="grid grid-cols-[auto_auto_1fr_auto_auto_auto_auto] gap-6 px-6 py-4 border-b-2 border-slate-200 dark:border-white/10 text-xs uppercase tracking-wider font-semibold text-slate-700 dark:text-slate-400 sticky top-0 bg-slate-50 dark:bg-slate-900/95 backdrop-blur-md z-10">
-                <div className="w-5">
+              <div className="grid grid-cols-[40px_40px_1fr_120px_120px_80px_40px] gap-4 px-6 py-4 border-b-2 border-slate-200 dark:border-white/10 text-xs uppercase tracking-wider font-semibold text-slate-700 dark:text-slate-400 sticky top-0 bg-slate-50 dark:bg-slate-900/95 backdrop-blur-md z-10">
+                <div className="flex items-center justify-center">
                   <input
                     type="checkbox"
                     checked={selectedItems.size > 0 && selectedItems.size === filteredFiles.length}
@@ -533,25 +533,26 @@ export default function Files() {
                     className="w-5 h-5 rounded border-2 border-slate-300 dark:border-slate-600 checked:bg-blue-600 checked:border-blue-600 cursor-pointer"
                   />
                 </div>
-                <div className="w-5"></div>
+                <div></div>
                 <div>Name</div>
-                <div>Type</div>
-                <div>Date</div>
+                <div className="text-center">Type</div>
+                <div className="text-center">Date</div>
                 <div className="text-right">Size</div>
-                <div className="w-8"></div>
+                <div></div>
               </div>
 
               {/* File Rows */}
               {isLoading ? (
-                <div className="p-6">
+                <div className="divide-y divide-slate-200/50 dark:divide-white/5">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="flex items-center gap-6 py-4 animate-pulse min-h-[64px]">
-                      <div className="w-5 h-5 bg-slate-200 dark:bg-slate-800 rounded" />
-                      <div className="flex-1 h-4 bg-slate-200 dark:bg-slate-800 rounded" />
-                      <div className="w-24 h-6 bg-slate-200 dark:bg-slate-800 rounded-full" />
-                      <div className="w-20 h-4 bg-slate-200 dark:bg-slate-800 rounded" />
-                      <div className="w-16 h-4 bg-slate-200 dark:bg-slate-800 rounded" />
-                      <div className="w-8 h-8 bg-slate-200 dark:bg-slate-800 rounded" />
+                    <div key={i} className="grid grid-cols-[40px_40px_1fr_120px_120px_80px_40px] gap-4 items-center px-6 py-4 animate-pulse min-h-[64px]">
+                      <div className="flex justify-center"><div className="w-5 h-5 bg-slate-200 dark:bg-slate-800 rounded" /></div>
+                      <div className="flex justify-center"><div className="w-5 h-5 bg-slate-200 dark:bg-slate-800 rounded" /></div>
+                      <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-3/4" />
+                      <div className="flex justify-center"><div className="w-20 h-6 bg-slate-200 dark:bg-slate-800 rounded-full" /></div>
+                      <div className="flex justify-center"><div className="w-24 h-4 bg-slate-200 dark:bg-slate-800 rounded" /></div>
+                      <div className="flex justify-end"><div className="w-16 h-4 bg-slate-200 dark:bg-slate-800 rounded" /></div>
+                      <div className="flex justify-center"><div className="w-6 h-6 bg-slate-200 dark:bg-slate-800 rounded" /></div>
                     </div>
                   ))}
                 </div>
@@ -571,7 +572,7 @@ export default function Files() {
                           transition={{ delay: index * 0.02, duration: 0.15 }}
                           onDoubleClick={() => handleFileDoubleClick(file.id)}
                           onContextMenu={(e) => handleContextMenu(e, 'file', file.id, file.originalName)}
-                          className={`group grid grid-cols-[auto_auto_1fr_auto_auto_auto_auto] gap-6 items-center px-6 py-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-all duration-150 cursor-pointer min-h-[64px] will-change-transform active:scale-[0.99] border-b border-slate-100 dark:border-white/5 last:border-0 ${isSelected ? 'bg-blue-50 dark:bg-blue-500/10' : ''}`}
+                          className={`group grid grid-cols-[40px_40px_1fr_120px_120px_80px_40px] gap-4 items-center px-6 py-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-all duration-150 cursor-pointer min-h-[64px] will-change-transform active:scale-[0.99] border-b border-slate-100 dark:border-white/5 last:border-0 ${isSelected ? 'bg-blue-50 dark:bg-blue-500/10' : ''}`}
                         >
                           {/* Checkbox */}
                           <div className="flex items-center justify-center">
@@ -597,12 +598,12 @@ export default function Files() {
                           </div>
 
                           {/* Type Badge */}
-                          <div>
+                          <div className="flex justify-center">
                             <FileTypeBadge mimeType={file.fileType} fileName={file.originalName} />
                           </div>
 
                           {/* Date */}
-                          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                          <div className="flex items-center justify-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                             <Calendar className="w-3.5 h-3.5" />
                             <span>{formatDate(file.createdAt)}</span>
                           </div>
@@ -613,7 +614,7 @@ export default function Files() {
                           </div>
 
                           {/* Actions */}
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                          <div className="flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
