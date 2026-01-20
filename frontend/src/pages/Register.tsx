@@ -160,7 +160,7 @@ export default function Register() {
 
   const inputBaseStyles = `
     w-full px-4 py-3 border rounded-lg transition-colors
-    bg-white dark:bg-slate-700 
+    bg-slate-50 dark:bg-slate-700 
     text-slate-900 dark:text-white 
     border-slate-200 dark:border-slate-600 
     placeholder-slate-400 dark:placeholder-slate-400

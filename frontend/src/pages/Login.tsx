@@ -99,7 +99,7 @@ export default function Login() {
 
   const inputBaseStyles = `
     w-full px-4 py-3 border rounded-xl transition-colors
-    bg-white dark:bg-slate-700 
+    bg-slate-50 dark:bg-slate-700 
     text-slate-900 dark:text-white 
     border-slate-200 dark:border-slate-600 
     placeholder-slate-400 dark:placeholder-slate-400
@@ -183,7 +183,7 @@ export default function Login() {
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 text-cyan-500 rounded bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-500 focus:ring-cyan-500/20"
+                className="w-4 h-4 text-cyan-500 rounded bg-slate-50 dark:bg-slate-700 border-slate-300 dark:border-slate-500 focus:ring-cyan-500/20"
                 aria-label="Remember me"
               />
               <span className="text-sm text-slate-600 dark:text-slate-300">Remember me</span>

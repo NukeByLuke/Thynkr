@@ -40,7 +40,7 @@ function BrandingPanel() {
         
         {/* Tagline */}
         <p className="text-slate-400 text-lg text-center max-w-[280px] leading-relaxed">
-          Transform your learning with intelligent AI tutoring
+          Transform your learning with intelligent AI study tools
         </p>
       </div>
 
