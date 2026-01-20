@@ -13,6 +13,16 @@ import {
   Trophy,
 } from 'lucide-react';
 
+// Helper to build absolute URLs for avatar images
+const API_BASE = (import.meta.env.VITE_API_URL as string) || '/api';
+const ASSET_BASE = API_BASE.replace(/\/_?api$/, '');
+const toAbsoluteUrl = (url?: string) => {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  if (import.meta.env.DEV && url.startsWith('/')) return url;
+  return `${ASSET_BASE}${url}`;
+};
+
 export default function ProfileMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -76,9 +86,17 @@ export default function ProfileMenu() {
         className="rounded-full hover:ring-2 hover:ring-slate-200 dark:hover:ring-slate-700 transition-all"
       >
         {/* Avatar */}
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
-          {getUserInitial()}
-        </div>
+        {user?.avatarUrl ? (
+          <img
+            src={toAbsoluteUrl(user.avatarUrl)}
+            alt={getUserDisplayName()}
+            className="w-9 h-9 rounded-full object-cover shadow-sm"
+          />
+        ) : (
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
+            {getUserInitial()}
+          </div>
+        )}
       </button>
 
       {/* Dropdown Menu */}
@@ -87,9 +105,17 @@ export default function ProfileMenu() {
           {/* User Info Header */}
           <div className="p-4 border-b border-slate-200 dark:border-white/10">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-sm">
-                {getUserInitial()}
-              </div>
+              {user?.avatarUrl ? (
+                <img
+                  src={toAbsoluteUrl(user.avatarUrl)}
+                  alt={getUserDisplayName()}
+                  className="w-10 h-10 rounded-full object-cover shadow-sm"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-sm">
+                  {getUserInitial()}
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
                   {getUserDisplayName()}
