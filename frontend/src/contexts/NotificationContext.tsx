@@ -119,9 +119,15 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     };
   }, [activeNotification, notificationsPersist]);
 
-  // Add notification to queue
+  // Add notification to queue - ONLY for achievements and level ups
   const showNotification = useCallback((notification: Omit<Notification, 'id'>) => {
     if (!notificationsEnabled) return;
+    
+    // Only queue achievement and levelup notifications
+    // Ignore info/success to prevent spam
+    if (notification.type !== 'achievement' && notification.type !== 'levelup') {
+      return;
+    }
 
     const id = `${Date.now()}-${Math.random()}`;
     const newNotification: Notification = {
