@@ -217,14 +217,14 @@ export default function ImmersiveStudy() {
                 whileTap={{ scale: 0.98 }}
                 className={`relative px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-100 flex items-center gap-1.5 ${
                   isActive
-                    ? 'text-white'
+                    ? 'text-indigo-700 dark:text-white'
                     : 'text-slate-700 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 {isActive && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg shadow-lg shadow-indigo-500/20"
+                    className="absolute inset-0 bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-500 dark:to-purple-500 rounded-lg shadow-lg shadow-indigo-200/50 dark:shadow-indigo-500/20"
                     transition={{ type: 'spring', stiffness: 700, damping: 40 }}
                   />
                 )}
