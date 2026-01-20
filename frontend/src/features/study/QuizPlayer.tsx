@@ -172,8 +172,8 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   }, [currentIndex]);
 
   const handleSubmit = useCallback(async () => {
-    // Prevent double-submission using ref
-    if (isSubmittingRef.current) return;
+    // Prevent double-submission using both ref AND state
+    if (isSubmittingRef.current || isSubmitted) return;
     
     isSubmittingRef.current = true;
     setIsSubmitting(true);
@@ -197,7 +197,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
         setIsSubmitting(false);
       }, 2000); // 2 second cooldown before allowing retry
     }
-  }, [answers, onSubmit, quizStartTime, questionTimings]);
+  }, [answers, onSubmit, quizStartTime, questionTimings, isSubmitted]);
 
   const handleRestart = useCallback(() => {
     setCurrentIndex(0);

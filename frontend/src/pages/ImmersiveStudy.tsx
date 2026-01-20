@@ -242,6 +242,39 @@ export default function ImmersiveStudy() {
     return () => setCustomHeaderContent(null);
   }, [fileId, selectedFile, activeTab, handleTabChange, navigate, setCustomHeaderContent]);
 
+  // Stable quiz submit handler to prevent recreation on each render
+  const handleQuizSubmit = useCallback(async (
+    answers: Record<string, string>, 
+    timeSpentSeconds?: number, 
+    questionTimings?: Record<string, number>
+  ) => {
+    if (selectedQuiz?.id) {
+      try {
+        const response = await api.post(`/study/quizzes/${selectedQuiz.id}/submit`, {
+          answers,
+          timeSpentSeconds,
+          questionTimings,
+        });
+        return response.data;
+      } catch (error: any) {
+        toast.error(error.response?.data?.error || 'Failed to submit quiz');
+        throw error;
+      }
+    }
+
+    // Fallback: Calculate score locally
+    const questions = selectedQuiz?.questions || [];
+    let score = 0;
+    questions.forEach((q: any) => {
+      if (answers[q.id] === q.correctAnswer) score++;
+    });
+    return {
+      score,
+      total: questions.length,
+      percentage: questions.length > 0 ? Math.round((score / questions.length) * 100) : 0,
+    };
+  }, [selectedQuiz]);
+
   // Determine active generation type
   const getActiveGenerationType = (): 'summary' | 'notes' | 'flashcards' | 'quiz' | null => {
     if (generateSummaryMutation.isPending) return 'summary';
@@ -350,36 +383,7 @@ export default function ImmersiveStudy() {
               });
             }}
             isGenerating={generateQuizMutation.isPending}
-            onSubmit={async (answers, timeSpentSeconds, questionTimings) => {
-              if (selectedQuiz?.id) {
-                try {
-                  const response = await api.post(`/study/quizzes/${selectedQuiz.id}/submit`, {
-                    answers,
-                    timeSpentSeconds,
-                    questionTimings,
-                  });
-
-                  // Notifications are automatically dispatched by api interceptor
-
-                  return response.data;
-                } catch (error: any) {
-                  toast.error(error.response?.data?.error || 'Failed to submit quiz');
-                  throw error;
-                }
-              }
-
-              // Fallback: Calculate score locally
-              const questions = selectedQuiz?.questions || [];
-              let score = 0;
-              questions.forEach((q: any) => {
-                if (answers[q.id] === q.correctAnswer) score++;
-              });
-              return {
-                score,
-                total: questions.length,
-                percentage: questions.length > 0 ? Math.round((score / questions.length) * 100) : 0,
-              };
-            }}
+            onSubmit={handleQuizSubmit}
           />
         );
 
