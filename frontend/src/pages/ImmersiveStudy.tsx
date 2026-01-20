@@ -361,10 +361,6 @@ export default function ImmersiveStudy() {
 
                   // Notifications are automatically dispatched by api interceptor
 
-                  if (response.data.xpGained > 0) {
-                    toast.success(`+${response.data.xpGained} XP earned!`);
-                  }
-
                   return response.data;
                 } catch (error: any) {
                   toast.error(error.response?.data?.error || 'Failed to submit quiz');

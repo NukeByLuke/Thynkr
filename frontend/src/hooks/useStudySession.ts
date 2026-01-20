@@ -49,7 +49,7 @@ export function useStudySession(options: UseStudySessionOptions = {}) {
       if (selectedFile) {
         setSelectedFileState({ ...selectedFile, summary: data.summary });
       }
-      toast.success('Summary generated successfully!');
+      // Achievement notifications will be handled by api interceptor if applicable
     },
     onError: (error: Error) => {
       toast.error(`Failed to generate summary: ${error.message}`);
@@ -81,7 +81,7 @@ export function useStudySession(options: UseStudySessionOptions = {}) {
       if (selectedFile) {
         setSelectedFileState({ ...selectedFile, notes: data.notes });
       }
-      toast.success('Notes generated successfully!');
+      // Achievement notifications will be handled by api interceptor if applicable
     },
     onError: (error: Error) => {
       toast.error(`Failed to generate notes: ${error.message}`);
@@ -125,7 +125,7 @@ export function useStudySession(options: UseStudySessionOptions = {}) {
           quizzes: [...(selectedFile.quizzes || []), data.quiz],
         });
       }
-      toast.success('Quiz generated successfully!');
+      // Achievement notifications will be handled by api interceptor if applicable
     },
     onError: (error: Error) => {
       toast.error(`Failed to generate quiz: ${error.message}`);
@@ -163,7 +163,7 @@ export function useStudySession(options: UseStudySessionOptions = {}) {
           flashcardSets: [...(selectedFile.flashcardSets || []), data.flashcardSet],
         });
       }
-      toast.success('Flashcards generated successfully!');
+      // Achievement notifications will be handled by api interceptor if applicable
     },
     onError: (error: Error) => {
       toast.error(`Failed to generate flashcards: ${error.message}`);
