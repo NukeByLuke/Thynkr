@@ -275,20 +275,21 @@ export default function CoursesUnified() {
       </Helmet>
 
       <div className="h-full flex flex-col overflow-hidden">
-        {/* Hero Section - Homey & Inviting */}
-        <div className={`relative overflow-hidden ${isDark ? 'bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950' : 'bg-gradient-to-b from-slate-50 via-white to-slate-50'}`}>
-          {/* Background Decorations */}
-          <div className="absolute inset-0 overflow-hidden">
-            <div className={`absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-purple-500/10' : 'bg-purple-300/20'}`} />
-            <div className={`absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-cyan-500/10' : 'bg-cyan-300/20'}`} />
+        {/* Glassmorphic Hero Section - Premium & Centered */}
+        <div className={`relative overflow-hidden py-20 ${isDark ? 'bg-gradient-to-br from-slate-900 via-slate-900/95 to-slate-950' : 'bg-gradient-to-br from-slate-50 via-white to-slate-100'}`}>
+          {/* Blurred Gradient Orbs */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-purple-500/20 blur-3xl" />
+            <div className="absolute top-40 -left-40 w-96 h-96 rounded-full bg-cyan-500/20 blur-3xl" />
+            <div className="absolute -bottom-40 right-40 w-96 h-96 rounded-full bg-blue-500/20 blur-3xl" />
           </div>
           
-          <div className="relative max-w-7xl mx-auto px-6 sm:px-8 py-12">
-            <div className="text-center max-w-3xl mx-auto">
+          <div className="relative max-w-5xl mx-auto px-6 sm:px-8">
+            <div className="text-center">
               <motion.h1 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`text-4xl sm:text-5xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}
+                className={`text-5xl sm:text-6xl font-bold mb-6 ${isDark ? 'text-white' : 'text-slate-900'}`}
               >
                 Discover Your Next{' '}
                 <span className="text-gradient bg-gradient-aurora">Course</span>
@@ -297,38 +298,48 @@ export default function CoursesUnified() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className={`text-lg mb-8 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}
+                className={`text-xl mb-12 max-w-2xl mx-auto ${isDark ? 'text-slate-300' : 'text-slate-600'}`}
               >
                 Transform your learning journey with AI-powered study materials
               </motion.p>
 
-              {/* Prominent Search Bar */}
+              {/* Glassmorphic Search Bar */}
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
                 className="relative max-w-2xl mx-auto"
               >
-                <Search className={`absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
-                <input
-                  type="text"
-                  placeholder="Search courses..."
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  className={`w-full pl-14 pr-12 py-4 rounded-2xl text-base transition-all shadow-lg focus:shadow-xl focus:ring-2 focus:ring-purple-400 ${
-                    isDark 
-                      ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 text-white placeholder-slate-500' 
-                      : 'bg-white border border-slate-200 text-slate-900 placeholder-slate-400'
-                  }`}
-                />
-                {searchInput && (
-                  <button
-                    onClick={() => setSearchInput('')}
-                    className={`absolute right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-lg hover:bg-opacity-20 ${isDark ? 'text-slate-400 hover:bg-slate-600' : 'text-slate-500 hover:bg-slate-200'}`}
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
+                <div className={`relative rounded-3xl shadow-2xl ${
+                  isDark 
+                    ? 'bg-white/5 backdrop-blur-xl border border-white/10' 
+                    : 'bg-white/80 backdrop-blur-xl border border-slate-200/50 shadow-xl'
+                }`}>
+                  <Search className={`absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 ${isDark ? 'text-slate-400' : 'text-slate-400'}`} />
+                  <input
+                    type="text"
+                    placeholder="Search for courses, topics, or skills..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    className={`w-full pl-16 pr-14 py-5 bg-transparent rounded-3xl text-lg font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all ${
+                      isDark 
+                        ? 'text-white placeholder-slate-400' 
+                        : 'text-slate-900 placeholder-slate-500'
+                    }`}
+                  />
+                  {searchInput && (
+                    <button
+                      onClick={() => setSearchInput('')}
+                      className={`absolute right-5 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all ${
+                        isDark 
+                          ? 'hover:bg-white/10 text-slate-400 hover:text-white' 
+                          : 'hover:bg-slate-100 text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  )}
+                </div>
               </motion.div>
             </div>
           </div>
@@ -392,46 +403,45 @@ export default function CoursesUnified() {
               )}
             </div>
 
-            {/* Interactive Category Pills - Framer Motion */}
-            <div className="mb-8 overflow-x-auto scrollbar-hide">
-              <LayoutGroup>
-                <div className="flex gap-2 pb-2">
-                  {CATEGORIES.map((cat) => {
-                    const Icon = cat.icon;
-                    const isActive = category === cat.value;
-                    return (
-                      <motion.button
-                        key={cat.value}
-                        layout
-                        onClick={() => setCategory(cat.value)}
-                        className={`relative flex items-center gap-2 px-4 py-2.5 rounded-full font-medium whitespace-nowrap transition-all ${
-                          isActive
-                            ? isDark
-                              ? 'text-white bg-gradient-aurora shadow-glow-purple'
-                              : 'text-white bg-gradient-to-r from-purple-600 to-cyan-600 shadow-lg'
-                            : isDark
-                              ? 'text-slate-400 bg-slate-800/50 hover:bg-slate-700/50 hover:text-white'
-                              : 'text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:text-slate-900 shadow-sm'
-                        }`}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {cat.label}
-                        {isActive && (
-                          <motion.div
-                            layoutId="activeCategory"
-                            className="absolute inset-0 bg-gradient-aurora rounded-full -z-10"
-                            initial={false}
-                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                          />
-                        )}
-                      </motion.button>
-                    );
-                  })}
-                </div>
-              </LayoutGroup>
+            {/* Horizontal Scrollable Category Tabs with layoutId Animation */}
+            <div className="mb-8 -mx-6 sm:-mx-8 px-6 sm:px-8">
+              <div className="overflow-x-auto scrollbar-hide">
+                <LayoutGroup>
+                  <div className="flex gap-3 pb-3 min-w-max">
+                    {CATEGORIES.map((cat) => {
+                      const Icon = cat.icon;
+                      const isActive = category === cat.value;
+                      return (
+                        <motion.button
+                          key={cat.value}
+                          onClick={() => setCategory(cat.value)}
+                          className={`relative flex items-center gap-2.5 px-5 py-3 rounded-2xl font-semibold whitespace-nowrap transition-all ${
+                            isActive
+                              ? 'text-white'
+                              : isDark
+                                ? 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                          }`}
+                          whileHover={{ scale: 1.05, y: -2 }}
+                          whileTap={{ scale: 0.98 }}
+                          transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                        >
+                          {isActive && (
+                            <motion.div
+                              layoutId="activeCategory"
+                              className="absolute inset-0 bg-gradient-aurora rounded-2xl shadow-glow-purple"
+                              initial={false}
+                              transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                            />
+                          )}
+                          <Icon className="h-5 w-5 relative z-10" />
+                          <span className="relative z-10">{cat.label}</span>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </LayoutGroup>
+              </div>
             </div>
 
             {/* Visibility Filter (Premium Only) */}
@@ -494,79 +504,90 @@ export default function CoursesUnified() {
                       <motion.div
                         key={course.id}
                         layout
-                        initial={{ opacity: 0, scale: 0.9 }}
+                        initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ 
                           delay: index * 0.03,
                           type: 'spring',
-                          stiffness: 400,
-                          damping: 25
+                          stiffness: 500,
+                          damping: 30
                         }}
-                        className={`group cursor-pointer rounded-3xl p-4 transition-all duration-200 hover:-translate-y-1 ${
+                        className={`group cursor-pointer rounded-3xl overflow-hidden transition-all duration-300 hover:-translate-y-2 ${
                           isDark
-                            ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 hover:border-purple-500/30 hover:shadow-glow-purple'
-                            : 'bg-white border border-slate-200 hover:border-purple-300 hover:shadow-2xl'
+                            ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 hover:border-purple-500/50 hover:shadow-glow-purple-lg'
+                            : 'bg-white border border-slate-200 hover:border-purple-400/50 hover:shadow-2xl'
                         }`}
                       >
-                        {/* Course Banner with Overlay */}
-                        <div className="relative aspect-video rounded-2xl overflow-hidden mb-4 shadow-md">
+                        {/* Banner Image (60% height) */}
+                        <div className="relative h-56 overflow-hidden">
                           <Link to={`/courses/${course.id}`} className="block h-full">
-                            {course.coverImage || course.bannerImage ? (
+                            {course.bannerImage || course.coverImage ? (
                               <LazyImage
-                                src={course.coverImage || course.bannerImage || ''}
+                                src={course.bannerImage || course.coverImage || ''}
                                 alt={course.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                               />
                             ) : (
                               <div className={`w-full h-full flex items-center justify-center ${
                                 isDark 
-                                  ? 'bg-gradient-to-br from-slate-700 to-slate-800' 
-                                  : 'bg-gradient-to-br from-slate-100 to-slate-200'
+                                  ? 'bg-gradient-to-br from-purple-900/50 via-slate-800 to-cyan-900/50' 
+                                  : 'bg-gradient-to-br from-purple-100 via-slate-100 to-cyan-100'
                               }`}>
-                                <CategoryIcon className={`h-16 w-16 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
+                                <CategoryIcon className={`h-20 w-20 ${isDark ? 'text-slate-600/50' : 'text-slate-400/50'}`} />
                               </div>
                             )}
                             
-                            {/* Play/Open Overlay */}
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-                              <div className="w-14 h-14 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transform group-hover:scale-110 transition-transform shadow-xl">
-                                <Play className="w-6 h-6 text-purple-600 ml-0.5" fill="currentColor" />
-                              </div>
+                            {/* Gradient Overlay */}
+                            <div className={`absolute inset-0 ${
+                              isDark 
+                                ? 'bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent' 
+                                : 'bg-gradient-to-t from-white/60 via-white/10 to-transparent'
+                            }`} />
+                            
+                            {/* Play Icon Overlay */}
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                              <motion.div 
+                                initial={{ scale: 0.8 }}
+                                whileHover={{ scale: 1.1 }}
+                                className="w-16 h-16 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center shadow-2xl"
+                              >
+                                <Play className="w-7 h-7 text-purple-600 ml-1" fill="currentColor" />
+                              </motion.div>
                             </div>
                           </Link>
                           
-                          {/* Top Badges */}
-                          <div className="absolute top-3 left-3">
+                          {/* Top Left Badge */}
+                          <div className="absolute top-4 left-4 z-10">
                             <VisibilityChip visibility={course.visibility} size="sm" />
                           </div>
 
                           {/* Menu Button */}
                           {course.isOwner && (
-                            <div className="absolute top-3 right-3">
+                            <div className="absolute top-4 right-4 z-10">
                               <button
                                 onClick={(e) => {
                                   e.preventDefault();
                                   setOpenMenu(openMenu === course.id ? null : course.id);
                                 }}
-                                className={`p-2 rounded-xl backdrop-blur-md transition-all ${
+                                className={`p-2.5 rounded-xl backdrop-blur-xl transition-all ${
                                   isDark 
-                                    ? 'bg-black/40 hover:bg-black/60' 
-                                    : 'bg-white/60 hover:bg-white/80'
+                                    ? 'bg-black/50 hover:bg-black/70 text-white' 
+                                    : 'bg-white/70 hover:bg-white/90 text-slate-700'
                                 }`}
                               >
-                                <MoreVertical className={`h-4 w-4 ${isDark ? 'text-white' : 'text-slate-700'}`} />
+                                <MoreVertical className="h-4 w-4" />
                               </button>
 
                               {openMenu === course.id && (
-                                <div className={`absolute right-0 mt-2 w-48 rounded-xl shadow-2xl py-1 z-10 ${
+                                <div className={`absolute right-0 mt-2 w-48 rounded-2xl shadow-2xl py-2 z-20 ${
                                   isDark 
                                     ? 'bg-slate-800 border border-slate-700' 
                                     : 'bg-white border border-slate-200'
                                 }`}>
                                   <Link
                                     to={`/courses/${course.id}`}
-                                    className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                                    className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${
                                       isDark 
                                         ? 'text-white hover:bg-slate-700' 
                                         : 'text-slate-700 hover:bg-slate-50'
@@ -582,7 +603,7 @@ export default function CoursesUnified() {
                                       toast.success('Link copied!');
                                       setOpenMenu(null);
                                     }}
-                                    className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm transition-colors ${
+                                    className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium transition-colors ${
                                       isDark 
                                         ? 'text-white hover:bg-slate-700' 
                                         : 'text-slate-700 hover:bg-slate-50'
@@ -591,10 +612,10 @@ export default function CoursesUnified() {
                                     <Share2 className="h-4 w-4" />
                                     Copy Link
                                   </button>
-                                  <hr className={isDark ? 'border-slate-700' : 'border-slate-200'} />
+                                  <hr className={`my-2 ${isDark ? 'border-slate-700' : 'border-slate-200'}`} />
                                   <button
                                     onClick={() => handleDelete(course.id)}
-                                    className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm transition-colors ${
+                                    className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium transition-colors ${
                                       isDark 
                                         ? 'text-red-400 hover:bg-red-900/20' 
                                         : 'text-red-600 hover:bg-red-50'
@@ -609,32 +630,33 @@ export default function CoursesUnified() {
                           )}
                         </div>
 
-                        {/* Course Info */}
-                        <Link to={`/courses/${course.id}`} className="block space-y-3">
-                          <h3 className={`text-lg font-bold line-clamp-2 group-hover:text-gradient group-hover:bg-gradient-aurora transition-all ${
+                        {/* Course Info (40% height) */}
+                        <Link to={`/courses/${course.id}`} className="block p-5 space-y-3">
+                          <h3 className={`text-xl font-bold line-clamp-2 group-hover:text-gradient group-hover:bg-gradient-aurora transition-all ${
                             isDark ? 'text-white' : 'text-slate-900'
                           }`}>
                             {course.title}
                           </h3>
                           
                           {course.description && (
-                            <p className={`text-sm line-clamp-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                            <p className={`text-sm leading-relaxed line-clamp-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                               {course.description}
                             </p>
                           )}
                           
-                          <div className="flex items-center justify-between">
-                            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
+                          <div className="flex items-center justify-between pt-2">
+                            <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold ${
                               isDark 
-                                ? 'bg-slate-700/50 text-slate-300' 
-                                : 'bg-slate-100 text-slate-600'
+                                ? 'bg-slate-700/70 text-slate-300' 
+                                : 'bg-slate-100 text-slate-700'
                             }`}>
-                              <CategoryIcon className="h-3.5 w-3.5" />
+                              <CategoryIcon className="h-4 w-4" />
                               {CATEGORIES.find((c) => c.value === course.category)?.label || course.category}
                             </div>
-                            <span className={`text-xs font-medium ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-                              {course.filesCount} {course.filesCount === 1 ? 'file' : 'files'}
-                            </span>
+                            <div className={`flex items-center gap-1.5 text-xs font-medium ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                              <FileText className="h-3.5 w-3.5" />
+                              {course.filesCount}
+                            </div>
                           </div>
                         </Link>
                       </motion.div>
