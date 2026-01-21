@@ -275,21 +275,20 @@ export default function CoursesUnified() {
       </Helmet>
 
       <div className="h-full flex flex-col overflow-hidden">
-        {/* Glassmorphic Hero Section - Premium & Centered */}
-        <div className={`relative overflow-hidden py-20 ${isDark ? 'bg-gradient-to-br from-slate-900 via-slate-900/95 to-slate-950' : 'bg-gradient-to-br from-slate-50 via-white to-slate-100'}`}>
+        {/* Glassmorphic Hero Section - Compact */}
+        <div className={`relative overflow-hidden py-8 ${isDark ? 'bg-gradient-to-br from-slate-900 via-slate-900/95 to-slate-950' : 'bg-gradient-to-br from-slate-50 via-white to-slate-100'}`}>
           {/* Blurred Gradient Orbs */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-purple-500/20 blur-3xl" />
-            <div className="absolute top-40 -left-40 w-96 h-96 rounded-full bg-cyan-500/20 blur-3xl" />
-            <div className="absolute -bottom-40 right-40 w-96 h-96 rounded-full bg-blue-500/20 blur-3xl" />
+            <div className="absolute top-20 -left-40 w-96 h-96 rounded-full bg-cyan-500/20 blur-3xl" />
           </div>
           
-          <div className="relative max-w-5xl mx-auto px-6 sm:px-8">
+          <div className="relative max-w-6xl mx-auto px-6 sm:px-8">
             <div className="text-center">
               <motion.h1 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`text-5xl sm:text-6xl font-bold mb-6 ${isDark ? 'text-white' : 'text-slate-900'}`}
+                className={`text-3xl sm:text-4xl font-bold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}
               >
                 Discover Your Next{' '}
                 <span className="text-gradient bg-gradient-aurora">Course</span>
@@ -298,7 +297,7 @@ export default function CoursesUnified() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className={`text-xl mb-12 max-w-2xl mx-auto ${isDark ? 'text-slate-300' : 'text-slate-600'}`}
+                className={`text-base mb-6 max-w-2xl mx-auto ${isDark ? 'text-slate-300' : 'text-slate-600'}`}
               >
                 Transform your learning journey with AI-powered study materials
               </motion.p>
@@ -310,18 +309,18 @@ export default function CoursesUnified() {
                 transition={{ delay: 0.2 }}
                 className="relative max-w-2xl mx-auto"
               >
-                <div className={`relative rounded-3xl shadow-2xl ${
+                <div className={`relative rounded-2xl shadow-lg ${
                   isDark 
                     ? 'bg-white/5 backdrop-blur-xl border border-white/10' 
-                    : 'bg-white/80 backdrop-blur-xl border border-slate-200/50 shadow-xl'
+                    : 'bg-white/80 backdrop-blur-xl border border-slate-200/50'
                 }`}>
-                  <Search className={`absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 ${isDark ? 'text-slate-400' : 'text-slate-400'}`} />
+                  <Search className={`absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 ${isDark ? 'text-slate-400' : 'text-slate-400'}`} />
                   <input
                     type="text"
                     placeholder="Search for courses, topics, or skills..."
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
-                    className={`w-full pl-16 pr-14 py-5 bg-transparent rounded-3xl text-lg font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all ${
+                    className={`w-full pl-14 pr-12 py-3 bg-transparent rounded-2xl text-base font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all ${
                       isDark 
                         ? 'text-white placeholder-slate-400' 
                         : 'text-slate-900 placeholder-slate-500'
@@ -330,13 +329,13 @@ export default function CoursesUnified() {
                   {searchInput && (
                     <button
                       onClick={() => setSearchInput('')}
-                      className={`absolute right-5 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all ${
+                      className={`absolute right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-all ${
                         isDark 
                           ? 'hover:bg-white/10 text-slate-400 hover:text-white' 
                           : 'hover:bg-slate-100 text-slate-500 hover:text-slate-700'
                       }`}
                     >
-                      <X className="h-5 w-5" />
+                      <X className="h-4 w-4" />
                     </button>
                   )}
                 </div>
@@ -347,10 +346,10 @@ export default function CoursesUnified() {
 
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 py-8">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 py-6">
             
             {/* Tab Switcher & Create Button */}
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
               <div className={`inline-flex gap-1 p-1 rounded-2xl ${isDark ? 'bg-slate-800/50' : 'bg-slate-100'}`}>
                 <button
                   onClick={() => canBrowse && setActiveTab('browse')}
@@ -404,7 +403,7 @@ export default function CoursesUnified() {
             </div>
 
             {/* Horizontal Scrollable Category Tabs with layoutId Animation */}
-            <div className="mb-8 -mx-6 sm:-mx-8 px-6 sm:px-8">
+            <div className="mb-6 -mx-6 sm:-mx-8 px-6 sm:px-8">
               <div className="overflow-x-auto scrollbar-hide">
                 <LayoutGroup>
                   <div className="flex gap-3 pb-3 min-w-max">
@@ -446,7 +445,7 @@ export default function CoursesUnified() {
 
             {/* Visibility Filter (Premium Only) */}
             {isPremium && (
-              <div className="flex items-center gap-3 mb-8">
+              <div className="flex items-center gap-3 mb-6">
                 <span className={`text-sm font-medium ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Filter:</span>
                 <div className={`inline-flex gap-1 p-1 rounded-xl ${isDark ? 'bg-slate-800/50' : 'bg-slate-100'}`}>
                   {['', 'PRIVATE', 'PUBLIC'].map((vis) => (
