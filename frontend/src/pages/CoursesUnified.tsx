@@ -665,9 +665,9 @@ export default function CoursesUnified() {
                 </AnimatePresence>
               </div>
             )}
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Create Course Modal */}
       {showCreateModal && (
@@ -896,8 +896,6 @@ export default function CoursesUnified() {
 
       {/* Click outside to close menu */}
       {openMenu && <div className="fixed inset-0 z-30" onClick={() => setOpenMenu(null)} />}
-          </div>
-        </div>
     </>
   );
 }
