@@ -66,13 +66,16 @@ const PLANS: Record<PlanType, PlanConfig> = {
     color: 'from-brand-500 to-accent-600',
     description: 'Everything in Standard plus priority support',
     features: [
-      'Everything in Standard',
+      'Unlimited file uploads',
+      'Advanced AI summaries & notes',
+      'Custom quiz generation',
+      'Interactive flashcards',
+      'YouTube video processing',
       'Priority AI processing',
-      'Advanced analytics',
-      'Course access',
+      'Advanced analytics & insights',
+      'Full course access',
       'Priority email support',
       'Early access to new features',
-      'Custom study schedules',
     ],
   },
 };
@@ -373,8 +376,13 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                   )}
                 </h4>
                 <p className="text-sm text-slate-600 dark:text-slate-400 [.exporting_&]:text-slate-600">{billing.label}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 [.exporting_&]:text-slate-500 mt-1">{plan.description}</p>
               </div>
+            </div>
+            
+            {/* About Section */}
+            <div className="mt-2">
+              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 [.exporting_&]:text-slate-700 mb-1">About:</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 [.exporting_&]:text-slate-600">{plan.description}</p>
             </div>
             
             {/* Plan Features */}
