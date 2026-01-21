@@ -276,8 +276,11 @@ export default async function progressRoutes(server: FastifyInstance) {
 
         return reply.send(response);
       } catch (error) {
-        server.log.error({ error, userId }, 'Failed to fetch progress stats');
-        return reply.code(500).send({ error: 'Failed to fetch progress stats' });
+        server.log.error({ error, userId, stack: error instanceof Error ? error.stack : undefined }, 'Failed to fetch progress stats');
+        return reply.code(500).send({ 
+          error: 'Failed to fetch progress stats',
+          message: error instanceof Error ? error.message : 'Unknown error'
+        });
       }
     }
   );
@@ -295,8 +298,11 @@ export default async function progressRoutes(server: FastifyInstance) {
         const achievements = await getUserAchievements(userId);
         return reply.send(achievements);
       } catch (error) {
-        server.log.error({ error, userId }, 'Failed to fetch achievements');
-        return reply.code(500).send({ error: 'Failed to fetch achievements' });
+        server.log.error({ error, userId, stack: error instanceof Error ? error.stack : undefined }, 'Failed to fetch achievements');
+        return reply.code(500).send({ 
+          error: 'Failed to fetch achievements',
+          message: error instanceof Error ? error.message : 'Unknown error'
+        });
       }
     }
   );
