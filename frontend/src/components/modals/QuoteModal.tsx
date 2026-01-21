@@ -68,34 +68,52 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
   const canApplyStudentDiscount = selectedPlan !== 'basic';
   const effectiveStudentDiscount = canApplyStudentDiscount && isStudentDiscount;
   
-  // Calculate pricing
+  // Calculate pricing with exact target prices
   const pricePerMonth = plan.monthlyPrice;
   const totalMonths = billing.months;
   const subtotal = pricePerMonth * totalMonths;
+  
+  // Define exact target prices for all billing cycles
+  const targetPrices: Record<PlanType, Record<BillingCycle, { standard: number; student: number }>> = {
+    basic: {
+      monthly: { standard: 0, student: 0 },
+      quarterly: { standard: 0, student: 0 },
+      semiannual: { standard: 0, student: 0 },
+      yearly: { standard: 0, student: 0 },
+    },
+    standard: {
+      monthly: { standard: 4.99, student: 2.49 },
+      quarterly: { standard: 13.99, student: 6.99 },
+      semiannual: { standard: 25.99, student: 12.99 },
+      yearly: { standard: 49.99, student: 24.99 },
+    },
+    premium: {
+      monthly: { standard: 9.99, student: 4.99 },
+      quarterly: { standard: 27.99, student: 13.99 },
+      semiannual: { standard: 53.99, student: 25.99 },
+      yearly: { standard: 99.99, student: 49.99 },
+    },
+  };
+  
+  // Get target price for current configuration
+  const targetPrice = effectiveStudentDiscount
+    ? targetPrices[selectedPlan][billingCycle].student
+    : targetPrices[selectedPlan][billingCycle].standard;
+  
+  // Calculate discounts to hit target price
+  const totalDiscountAmount = subtotal - targetPrice;
+  
+  // Split into billing discount and student discount
   const billingDiscountAmount = (subtotal * billing.discount) / 100;
+  const studentDiscountAmount = effectiveStudentDiscount ? Math.max(0, totalDiscountAmount - billingDiscountAmount) : 0;
   
-  // Student discount: Calculate to hit target prices
-  // Standard yearly should be $24.99, Premium yearly should be $49.99
-  let studentDiscountAmount = 0;
-  let studentDiscountPercent = 0;
+  // Calculate student discount percentage for display
+  const afterBillingDiscount = subtotal - billingDiscountAmount;
+  const studentDiscountPercent = effectiveStudentDiscount && afterBillingDiscount > 0
+    ? Math.round((studentDiscountAmount / afterBillingDiscount) * 100)
+    : 0;
   
-  if (effectiveStudentDiscount) {
-    const afterBillingDiscount = subtotal - billingDiscountAmount;
-    
-    if (billingCycle === 'yearly') {
-      // Target prices for yearly student plans
-      const targetPrice = selectedPlan === 'standard' ? 24.99 : selectedPlan === 'premium' ? 49.99 : afterBillingDiscount;
-      studentDiscountAmount = Math.max(0, afterBillingDiscount - targetPrice);
-      studentDiscountPercent = afterBillingDiscount > 0 ? Math.round((studentDiscountAmount / afterBillingDiscount) * 100) : 0;
-    } else {
-      // For non-yearly plans, use 50% discount
-      studentDiscountPercent = 50;
-      studentDiscountAmount = afterBillingDiscount * 0.5;
-    }
-  }
-  
-  const totalDiscountAmount = billingDiscountAmount + studentDiscountAmount;
-  const totalCost = subtotal - totalDiscountAmount;
+  const totalCost = targetPrice;
 
   const handleExportPNG = async () => {
     if (!quoteRef.current) return;
