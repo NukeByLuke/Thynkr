@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import {
   FileText,
   BookOpen,
@@ -181,20 +181,24 @@ export default function CourseStudyPanel({
   }
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-      {/* Header - Flat blue bar */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-blue-500">
-        <div className="flex items-center gap-3">
-          <Sparkles className="h-5 w-5 text-white" />
+    <div className="flex flex-col h-full bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-2xl">
+      {/* Header - Aurora Gradient */}
+      <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700 bg-gradient-aurora relative overflow-hidden">
+        {/* Animated background glow */}
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-cyan-500/20 blur-xl" />
+        <div className="flex items-center gap-3 relative z-10">
+          <div className="p-2 bg-white/10 backdrop-blur-sm rounded-xl">
+            <Sparkles className="h-5 w-5 text-white" />
+          </div>
           <div>
-            <h2 className="font-semibold text-white">AI Study Mode</h2>
-            <p className="text-sm text-white/80">{courseTitle}</p>
+            <h2 className="font-bold text-white text-lg">AI Study Mode</h2>
+            <p className="text-sm text-white/90 font-medium">{courseTitle}</p>
           </div>
         </div>
         {onClose && (
           <button
             onClick={onClose}
-            className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            className="p-2.5 text-white/90 hover:text-white hover:bg-white/20 rounded-xl transition-all relative z-10 backdrop-blur-sm"
           >
             <X className="h-5 w-5" />
           </button>
@@ -204,9 +208,9 @@ export default function CourseStudyPanel({
       {/* Content Area */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left: File Selection */}
-        <div className="w-64 border-r border-gray-200 dark:border-gray-700 flex flex-col bg-gray-50 dark:bg-gray-800/50">
-          <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <div className="w-72 border-r border-slate-200 dark:border-slate-700 flex flex-col bg-slate-50 dark:bg-slate-800/50">
+          <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               Select Files to Study
             </h3>
           </div>
@@ -222,54 +226,86 @@ export default function CourseStudyPanel({
         </div>
 
         {/* Right: Study Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Tabs - Minimal design */}
-          <div className="flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                disabled={selectedFileIds.size === 0}
-                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                  activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                }`}
-              >
-                <tab.icon className={`h-4 w-4 ${activeTab === tab.id ? 'text-blue-500' : 'text-gray-400'}`} />
-                {tab.label}
-              </button>
-            ))}
-          </div>
+        <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-slate-900">
+          {/* Tabs - Modern design with smooth animations */}
+          <LayoutGroup>
+            <div className="flex border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 relative">
+              {TABS.map((tab) => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <motion.button
+                    key={tab.id}
+                    onClick={() => handleTabChange(tab.id)}
+                    disabled={selectedFileIds.size === 0}
+                    whileHover={selectedFileIds.size > 0 ? { y: -1 } : {}}
+                    whileTap={selectedFileIds.size > 0 ? { scale: 0.98 } : {}}
+                    className={`relative flex items-center gap-2 px-6 py-3.5 text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                      isActive
+                        ? 'text-purple-600 dark:text-purple-400'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeTab"
+                        className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-500"
+                        transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                      />
+                    )}
+                    <tab.icon className={`h-4 w-4 transition-colors ${isActive ? 'text-purple-500' : 'text-slate-400'}`} />
+                    {tab.label}
+                  </motion.button>
+                );
+              })}
+            </div>
+          </LayoutGroup>
 
           {/* Content */}
-          <div className="flex-1 overflow-hidden">
-            {selectedFileIds.size === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-                <Sparkles className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  Select Files to Study
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400 max-w-sm">
-                  Choose one or more files from the left panel to generate AI-powered study
-                  materials.
-                </p>
-              </div>
-            ) : isGenerating ? (
-              <div className="flex flex-col items-center justify-center h-full p-8">
-                <Loader2 className="h-10 w-10 animate-spin text-primary-600 mb-4" />
-                <p className="text-gray-600 dark:text-gray-400">Generating {activeTab}...</p>
-                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                  This may take a moment for large files
-                </p>
-              </div>
-            ) : studyContent?.result ? (
-              <AnimatePresence mode="wait">
+          <div className="flex-1 overflow-hidden bg-slate-50 dark:bg-slate-900/50">
+            <AnimatePresence mode="wait">
+              {selectedFileIds.size === 0 ? (
                 <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+                  key="empty"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="flex flex-col items-center justify-center h-full p-8 text-center"
+                >
+                  <div className="p-4 bg-gradient-to-br from-purple-50 to-cyan-50 dark:from-purple-900/20 dark:to-cyan-900/20 rounded-2xl mb-4">
+                    <Sparkles className="h-12 w-12 text-purple-400 dark:text-purple-500" />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                    Select Files to Study
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-400 max-w-sm">
+                    Choose one or more files from the left panel to generate AI-powered study
+                    materials.
+                  </p>
+                </motion.div>
+              ) : isGenerating ? (
+                <motion.div
+                  key="loading"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="flex flex-col items-center justify-center h-full p-8"
+                >
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 bg-gradient-aurora rounded-full blur-xl opacity-30" />
+                    <Loader2 className="h-14 w-14 animate-spin text-purple-600 relative z-10" />
+                  </div>
+                  <p className="text-lg font-semibold text-slate-900 dark:text-white mb-1">Generating {activeTab}...</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    This may take a moment for large files
+                  </p>
+                </motion.div>
+              ) : studyContent?.result ? (
+                <motion.div
+                  key={activeTab + '-content'}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
                   className="h-full"
                 >
                   {activeTab === 'summary' && studyContent.result.pages && (
@@ -303,24 +339,34 @@ export default function CourseStudyPanel({
                     />
                   )}
                 </motion.div>
-              </AnimatePresence>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-                <AlertCircle className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  No Content Yet
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-4">
-                  Click the button below to generate study materials.
-                </p>
-                <button
-                  onClick={() => refetch()}
-                  className="px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-full transition-colors"
+              ) : (
+                <motion.div
+                  key="generate"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="flex flex-col items-center justify-center h-full p-8 text-center"
                 >
-                  Generate {activeTab}
-                </button>
-              </div>
-            )}
+                  <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-2xl mb-4">
+                    <AlertCircle className="h-12 w-12 text-slate-400 dark:text-slate-500" />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                    No Content Yet
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-sm">
+                    Click the button below to generate study materials.
+                  </p>
+                  <motion.button
+                    onClick={() => refetch()}
+                    whileHover={{ scale: 1.05, boxShadow: '0 20px 40px rgba(139, 92, 246, 0.3)' }}
+                    whileTap={{ scale: 0.98 }}
+                    className="px-6 py-3 bg-gradient-aurora text-white font-semibold rounded-2xl shadow-lg hover:shadow-glow-purple transition-all"
+                  >
+                    Generate {activeTab}
+                  </motion.button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>

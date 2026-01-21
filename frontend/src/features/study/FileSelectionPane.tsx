@@ -120,25 +120,27 @@ export default function FileSelectionPane({
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-        <button
+      <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+        <motion.button
           onClick={toggleSelectAll}
           disabled={disabled || aiCompatibleFiles.length === 0}
-          className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="flex items-center gap-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {allAIFilesSelected ? (
-            <CheckSquare className="h-4 w-4 text-blue-500" />
+            <CheckSquare className="h-4 w-4 text-purple-500" />
           ) : someSelected ? (
-            <div className="h-4 w-4 border-2 border-blue-500 rounded flex items-center justify-center">
-              <div className="h-2 w-2 bg-blue-500 rounded-sm" />
+            <div className="h-4 w-4 border-2 border-purple-500 rounded flex items-center justify-center">
+              <div className="h-2 w-2 bg-purple-500 rounded-sm" />
             </div>
           ) : (
             <Square className="h-4 w-4" />
           )}
           Select All
-        </button>
-        <span className="text-xs text-gray-500 dark:text-gray-400">
-          {selectedFileIds.size} of {aiCompatibleFiles.length} selected
+        </motion.button>
+        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 tabular-nums">
+          {selectedFileIds.size} of {aiCompatibleFiles.length}
         </span>
       </div>
 
@@ -152,29 +154,43 @@ export default function FileSelectionPane({
             return (
               <motion.button
                 key={file.id}
-                initial={{ opacity: 0, x: -10 }}
+                initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.03 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ 
+                  delay: index * 0.02,
+                  type: 'spring',
+                  stiffness: 400,
+                  damping: 25
+                }}
                 onClick={() => isCompatible && toggleFile(file.id)}
                 disabled={disabled || !isCompatible || isLoading}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-colors border-b border-gray-100 dark:border-gray-700/50 ${
+                whileHover={isCompatible && !disabled ? { x: 4, backgroundColor: isSelected ? 'rgba(139, 92, 246, 0.15)' : 'rgba(148, 163, 184, 0.05)' } : {}}
+                whileTap={isCompatible && !disabled ? { scale: 0.98 } : {}}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all border-b border-slate-100 dark:border-slate-700/50 ${
                   isCompatible
                     ? isSelected
-                      ? 'bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30'
-                      : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
-                    : 'opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-800/30'
+                      ? 'bg-purple-50 dark:bg-purple-900/20'
+                      : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                    : 'opacity-50 cursor-not-allowed bg-slate-50 dark:bg-slate-800/30'
                 }`}
               >
                 {/* Checkbox */}
                 <div className="flex-shrink-0">
                   {isCompatible ? (
                     isSelected ? (
-                      <CheckSquare className="h-4 w-4 text-blue-500" />
+                      <motion.div
+                        initial={{ scale: 0.8, rotate: -5 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                      >
+                        <CheckSquare className="h-5 w-5 text-purple-500" />
+                      </motion.div>
                     ) : (
-                      <Square className="h-4 w-4 text-gray-400" />
+                      <Square className="h-5 w-5 text-slate-400" />
                     )
                   ) : (
-                    <AlertCircle className="h-4 w-4 text-gray-400" />
+                    <AlertCircle className="h-5 w-5 text-slate-400" />
                   )}
                 </div>
 
@@ -184,17 +200,17 @@ export default function FileSelectionPane({
                 {/* File Info */}
                 <div className="flex-1 min-w-0">
                   <p
-                    className={`text-sm font-medium truncate ${
+                    className={`text-sm font-semibold truncate transition-colors ${
                       isSelected
-                        ? 'text-blue-700 dark:text-blue-300'
-                        : 'text-gray-700 dark:text-gray-200'
+                        ? 'text-purple-700 dark:text-purple-300'
+                        : 'text-slate-700 dark:text-slate-200'
                     }`}
                   >
                     {file.name}
                   </p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <FileTypeBadge mimeType={file.fileType} className="text-[10px] px-1.5 py-0.5" />
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center gap-2 mt-1">
+                    <FileTypeBadge mimeType={file.fileType} className="text-[10px] px-2 py-0.5" />
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400 tabular-nums">
                       {formatFileSize(file.fileSize)}
                     </span>
                   </div>
@@ -203,11 +219,16 @@ export default function FileSelectionPane({
                 {/* Status Badge */}
                 <div className="flex-shrink-0">
                   {isCompatible ? (
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium rounded bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400">
+                    <motion.span
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: index * 0.02 + 0.1, type: 'spring', stiffness: 500, damping: 20 }}
+                      className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-lg bg-gradient-to-br from-purple-50 to-cyan-50 dark:from-purple-900/30 dark:to-cyan-900/30 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-800/50"
+                    >
                       <Sparkles className="h-3 w-3" />
-                    </span>
+                    </motion.span>
                   ) : (
-                    <span className="text-xs text-gray-400">N/A</span>
+                    <span className="text-xs text-slate-400 font-medium">N/A</span>
                   )}
                 </div>
               </motion.button>
