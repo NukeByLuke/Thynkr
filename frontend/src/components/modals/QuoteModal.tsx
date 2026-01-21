@@ -24,6 +24,7 @@ interface PlanConfig {
   icon: React.ReactNode;
   color: string;
   description: string;
+  features: string[];
   comingSoon?: boolean;
 }
 
@@ -34,6 +35,13 @@ const PLANS: Record<PlanType, PlanConfig> = {
     icon: <Sparkles className="w-5 h-5" />,
     color: 'from-slate-500 to-slate-600',
     description: 'Essential study tools for getting started',
+    features: [
+      '5 file uploads per month',
+      'AI-powered summaries',
+      'Smart note generation',
+      'Basic quiz creation',
+      'Flashcard study sets',
+    ],
   },
   standard: {
     name: 'Standard',
@@ -41,6 +49,15 @@ const PLANS: Record<PlanType, PlanConfig> = {
     icon: <Zap className="w-5 h-5" />,
     color: 'from-blue-500 to-indigo-600',
     description: 'Advanced AI tools and unlimited uploads',
+    features: [
+      'Unlimited file uploads',
+      'Advanced AI summaries',
+      'Detailed study notes',
+      'Custom quiz generation',
+      'Interactive flashcards',
+      'YouTube video processing',
+      'Multi-language support',
+    ],
   },
   premium: {
     name: 'Premium',
@@ -48,6 +65,15 @@ const PLANS: Record<PlanType, PlanConfig> = {
     icon: <Crown className="w-5 h-5" />,
     color: 'from-brand-500 to-accent-600',
     description: 'Everything in Standard plus priority support',
+    features: [
+      'Everything in Standard',
+      'Priority AI processing',
+      'Advanced analytics',
+      'Course access',
+      'Priority email support',
+      'Early access to new features',
+      'Custom study schedules',
+    ],
   },
 };
 
@@ -311,9 +337,9 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
           style={{ padding: '2rem' }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-200 dark:border-slate-700 [&.exporting]:border-slate-200">
+          <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-200 dark:border-slate-700 [.exporting_&]:border-slate-200">
             <div>
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-transparent">
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-transparent [.exporting_&]:bg-none [.exporting_&]:text-slate-900">
                 Thynkr
               </h3>
               <p className="text-sm text-slate-600 dark:text-slate-400 [.exporting_&]:text-slate-600 mt-1">Pricing Quote</p>
@@ -333,11 +359,11 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
           {/* Plan Details */}
           <div className="space-y-3 mb-4">
             <div className="flex items-center gap-3">
-              {/* Solid color background instead of gradient for better export */}
-              <div className="p-3 rounded-xl bg-brand-500 text-white">
+              {/* Hide colored icon during export */}
+              <div className="p-3 rounded-xl bg-brand-500 text-white [.exporting_&]:hidden">
                 {plan.icon}
               </div>
-              <div>
+              <div className="flex-1">
                 <h4 className="text-xl font-bold text-slate-900 dark:text-white [.exporting_&]:text-slate-900 flex items-center gap-2">
                   {plan.name} Plan
                   {effectiveStudentDiscount && (
@@ -349,6 +375,19 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                 <p className="text-sm text-slate-600 dark:text-slate-400 [.exporting_&]:text-slate-600">{billing.label}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 [.exporting_&]:text-slate-500 mt-1">{plan.description}</p>
               </div>
+            </div>
+            
+            {/* Plan Features */}
+            <div className="mt-3">
+              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 [.exporting_&]:text-slate-700 mb-2">Included Features:</p>
+              <ul className="space-y-1">
+                {plan.features.map((feature, index) => (
+                  <li key={index} className="text-xs text-slate-600 dark:text-slate-400 [.exporting_&]:text-slate-600 flex items-start gap-2">
+                    <span className="text-green-600 dark:text-green-500 [.exporting_&]:text-green-600 mt-0.5">✓</span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
 
