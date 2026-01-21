@@ -37,7 +37,7 @@ import { useLayout } from '@/contexts/LayoutContext';
 import { ShareProfileModal } from '@/features/gamification/ShareProfileModal';
 
 // --- Types ---
-type AchievementTier = 'BRONZE' | 'SILVER' | 'GOLD' | 'RUBY' | 'DIAMOND' | 'MASTERY';
+type AchievementTier = 'COPPER' | 'GOLD' | 'RUBY' | 'AMETHYST' | 'DIAMOND' | 'MASTERY';
 
 interface AchievementDefinition {
   id: string;
@@ -46,18 +46,18 @@ interface AchievementDefinition {
   icon: string;
   category: 'study' | 'social' | 'skill' | 'streak' | 'content' | 'mastery';
   thresholds?: {
-    BRONZE: number;
-    SILVER: number;
+    COPPER: number;
     GOLD: number;
     RUBY: number;
+    AMETHYST: number;
     DIAMOND: number;
     MASTERY?: number;
   };
   xpRewards?: {
-    BRONZE: number;
-    SILVER: number;
+    COPPER: number;
     GOLD: number;
     RUBY: number;
+    AMETHYST: number;
     DIAMOND: number;
     MASTERY?: number;
   };
@@ -82,30 +82,19 @@ interface UserAchievement {
 
 // --- Config ---
 
-const TIER_ORDER: AchievementTier[] = ['MASTERY', 'DIAMOND', 'RUBY', 'GOLD', 'SILVER', 'BRONZE'];
+const TIER_ORDER: AchievementTier[] = ['MASTERY', 'DIAMOND', 'AMETHYST', 'RUBY', 'GOLD', 'COPPER'];
 
 const TIER_CONFIG = {
-  BRONZE: {
-    // Rich amber-brown for Bronze
-    border: 'border-amber-700/60 dark:border-amber-600/40',
-    borderHover: 'group-hover:border-amber-600/80 dark:group-hover:border-amber-500/60',
+  COPPER: {
+    // Rich copper/bronze color
+    border: 'border-orange-700/60 dark:border-orange-600/40',
+    borderHover: 'group-hover:border-orange-600/80 dark:group-hover:border-orange-500/60',
     bg: 'bg-orange-500/5 dark:bg-transparent',
-    text: 'text-amber-800 dark:text-amber-400',
-    iconBg: 'bg-gradient-to-br from-amber-600 to-orange-700',
-    glow: 'shadow-lg shadow-amber-600/20 hover:shadow-amber-600/40',
-    gradient: 'from-amber-700 to-orange-600', 
-    label: 'Bronze',
-  },
-  SILVER: {
-    // Clean slate-gray for Silver
-    border: 'border-slate-400/60 dark:border-slate-500/40',
-    borderHover: 'group-hover:border-slate-300/80 dark:group-hover:border-slate-400/60',
-    bg: 'bg-slate-500/5 dark:bg-transparent',
-    text: 'text-slate-700 dark:text-slate-300',
-    iconBg: 'bg-gradient-to-br from-slate-400 to-slate-600',
-    glow: 'shadow-lg shadow-slate-400/20 hover:shadow-slate-400/40',
-    gradient: 'from-slate-400 to-slate-600', 
-    label: 'Silver',
+    text: 'text-orange-800 dark:text-orange-400',
+    iconBg: 'bg-gradient-to-br from-orange-600 to-amber-700',
+    glow: 'shadow-lg shadow-orange-600/20 hover:shadow-orange-600/40',
+    gradient: 'from-orange-700 to-amber-600', 
+    label: 'Copper',
   },
   GOLD: {
     // Warm yellow-amber Gold
@@ -119,14 +108,14 @@ const TIER_CONFIG = {
     label: 'Gold',
   },
   RUBY: {
-    // Ruby red/pink
-    border: 'border-pink-600/60 dark:border-pink-500/40',
-    borderHover: 'group-hover:border-pink-500/80 dark:group-hover:border-pink-400/60',
-    bg: 'bg-pink-500/5 dark:bg-transparent',
-    text: 'text-pink-700 dark:text-pink-400',
-    iconBg: 'bg-gradient-to-br from-rose-500 to-pink-600',
-    glow: 'shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40',
-    gradient: 'from-rose-500 to-pink-600',
+    // Ruby red - deep crimson
+    border: 'border-red-600/60 dark:border-red-500/40',
+    borderHover: 'group-hover:border-red-500/80 dark:group-hover:border-red-400/60',
+    bg: 'bg-red-500/5 dark:bg-transparent',
+    text: 'text-red-700 dark:text-red-400',
+    iconBg: 'bg-gradient-to-br from-red-500 to-rose-600',
+    glow: 'shadow-lg shadow-red-500/20 hover:shadow-red-500/40',
+    gradient: 'from-red-500 to-rose-600',
     label: 'Ruby',
   },
   DIAMOND: {
@@ -139,6 +128,17 @@ const TIER_CONFIG = {
     glow: 'shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40',
     gradient: 'from-cyan-400 to-blue-600',
     label: 'Diamond',
+  },
+  AMETHYST: {
+    // Amethyst - rich purple/violet
+    border: 'border-purple-600/60 dark:border-purple-500/40',
+    borderHover: 'group-hover:border-purple-500/80 dark:group-hover:border-purple-400/60',
+    bg: 'bg-purple-500/5 dark:bg-transparent',
+    text: 'text-purple-700 dark:text-purple-400',
+    iconBg: 'bg-gradient-to-br from-purple-600 to-violet-700',
+    glow: 'shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40',
+    gradient: 'from-purple-600 to-violet-700',
+    label: 'Amethyst',
   },
   MASTERY: {
     // EPIC Mastery tier - lavender/violet with blue gradients!
@@ -197,7 +197,7 @@ const CATEGORY_CONFIG = {
     title: 'Social',
     icon: Users,
     description: 'Share knowledge and collaborate',
-    gradient: 'from-pink-500 to-rose-500',
+    gradient: 'from-violet-500 to-indigo-500',
   },
   skill: {
     title: 'Skill',
@@ -338,13 +338,13 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
   const isMastery = achievement.definition.category === 'mastery';
 
   // Determine effective current tier code for the CARD (always current)
-  // Logic: Locked -> Bronze (or Mastery if category is mastery), Unlocked -> achievement.currentTier or MASTERY
-  let currentTierCode: AchievementTier = achievement.currentTier || 'BRONZE';
+  // Logic: Locked -> Copper (or Mastery if category is mastery), Unlocked -> achievement.currentTier or MASTERY
+  let currentTierCode: AchievementTier = achievement.currentTier || 'COPPER';
   if (isMastery) {
      // Force mastery visual if it's a mastery achievement
      currentTierCode = 'MASTERY'; 
   } else if (!achievement.unlocked) {
-     currentTierCode = 'BRONZE';
+     currentTierCode = 'COPPER';
   }
   
   const tier = TIER_CONFIG[currentTierCode];
@@ -353,18 +353,18 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
     ? new Date(achievement.unlockedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : null;
 
-  // Get tier history (BRONZE -> SILVER -> ... -> CURRENT)
+  // Get tier history (COPPER -> GOLD -> ... -> CURRENT)
   const tierHistory: AchievementTier[] = React.useMemo(() => {
     if (isMastery) return ['MASTERY'];
     
-    // Explicit progression order
-    const PROGRESS_ORDER: AchievementTier[] = ['BRONZE', 'SILVER', 'GOLD', 'RUBY', 'DIAMOND'];
+    // Explicit progression order: Copper, Gold, Ruby, Amethyst, Diamond
+    const PROGRESS_ORDER: AchievementTier[] = ['COPPER', 'GOLD', 'RUBY', 'AMETHYST', 'DIAMOND'];
     
-    // If locked or no tier, show Bronze
-    if (!achievement.currentTier) return ['BRONZE'];
+    // If locked or no tier, show Copper
+    if (!achievement.currentTier) return ['COPPER'];
 
     const currentIdx = PROGRESS_ORDER.indexOf(achievement.currentTier);
-    if (currentIdx === -1) return ['BRONZE'];
+    if (currentIdx === -1) return ['COPPER'];
 
     // Return all tiers up to current
     return PROGRESS_ORDER.slice(0, currentIdx + 1);
@@ -535,15 +535,15 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                   ? 'from-slate-500 to-slate-600'
                   : isMastery
                     ? 'from-violet-500 to-purple-600'
-                    : viewedTierCode === 'BRONZE'
+                    : viewedTierCode === 'COPPER'
                       ? 'from-orange-500 to-amber-600'
-                      : viewedTierCode === 'SILVER'
-                        ? 'from-slate-400 to-zinc-500'
+                      : viewedTierCode === 'DIAMOND'
+                        ? 'from-cyan-400 to-blue-500'
                         : viewedTierCode === 'GOLD'
                           ? 'from-yellow-400 to-amber-500'
                           : viewedTierCode === 'RUBY'
-                            ? 'from-red-500 to-pink-600'
-                            : 'from-cyan-400 to-blue-500'
+                            ? 'from-red-500 to-rose-600'
+                            : 'from-purple-500 to-violet-600'
               }`}
             />
             
@@ -553,15 +553,15 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                 ? 'border-slate-500/30 shadow-xl shadow-slate-500/10'
                 : isMastery
                   ? 'border-violet-400/50 shadow-2xl shadow-violet-500/30'
-                  : viewedTierCode === 'BRONZE'
+                  : viewedTierCode === 'COPPER'
                     ? 'border-orange-500/30 shadow-2xl shadow-orange-500/20'
-                    : viewedTierCode === 'SILVER'
-                      ? 'border-slate-400/30 shadow-2xl shadow-slate-400/20'
+                    : viewedTierCode === 'DIAMOND'
+                      ? 'border-cyan-400/30 shadow-2xl shadow-cyan-400/20'
                       : viewedTierCode === 'GOLD'
                         ? 'border-yellow-400/30 shadow-2xl shadow-yellow-400/20'
                         : viewedTierCode === 'RUBY'
                           ? 'border-red-500/30 shadow-2xl shadow-red-500/20'
-                          : 'border-cyan-400/30 shadow-2xl shadow-cyan-400/20'
+                          : 'border-purple-500/30 shadow-2xl shadow-purple-500/20'
             }`}>
               {/* Content background with glass effect */}
               <div className="relative bg-white/70 dark:bg-slate-900/80 backdrop-blur-2xl rounded-xl overflow-hidden border border-white/20 dark:border-white/10">
@@ -571,15 +571,15 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                     ? 'from-slate-500 to-slate-600'
                     : isMastery
                       ? 'from-violet-500 via-purple-500 to-blue-600'
-                      : viewedTierCode === 'BRONZE'
+                      : viewedTierCode === 'COPPER'
                         ? 'from-orange-500 to-amber-600'
-                        : viewedTierCode === 'SILVER'
-                          ? 'from-slate-400 to-zinc-500'
+                        : viewedTierCode === 'DIAMOND'
+                          ? 'from-cyan-400 to-blue-500'
                           : viewedTierCode === 'GOLD'
                             ? 'from-yellow-400 to-amber-500'
                             : viewedTierCode === 'RUBY'
-                              ? 'from-red-500 to-pink-600'
-                              : 'from-cyan-400 to-blue-500'
+                              ? 'from-red-500 to-rose-600'
+                              : 'from-purple-500 to-violet-600'
                 }`} />
                 
                 <div className="p-5">
@@ -679,7 +679,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
 
                 {/* Progress Section - Enhanced with current tier color */}
                 {(() => {
-                  const PROGRESS_ORDER: AchievementTier[] = ['BRONZE', 'SILVER', 'GOLD', 'RUBY', 'DIAMOND'];
+                  const PROGRESS_ORDER: AchievementTier[] = ['COPPER', 'GOLD', 'RUBY', 'AMETHYST', 'DIAMOND'];
                   
                   // Determine next tier and current tier for display
                   let nextTier: AchievementTier | null = null;
@@ -687,10 +687,10 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                   let isLockedProgress = false;
                   
                   if (isLocked) {
-                    // Locked - show progress toward Bronze with gray bar
-                    nextTier = 'BRONZE';
+                    // Locked - show progress toward Copper with gray bar
+                    nextTier = 'COPPER';
                     isLockedProgress = true;
-                    displayTierConfig = TIER_CONFIG['BRONZE']; // Use bronze config for locked
+                    displayTierConfig = TIER_CONFIG['COPPER']; // Use copper config for locked
                   } else if (achievement.currentTier && !isMastery) {
                     // Unlocked - use CURRENT tier color for the bar
                     displayTierConfig = TIER_CONFIG[achievement.currentTier];

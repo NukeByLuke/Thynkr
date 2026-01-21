@@ -214,8 +214,8 @@ const CATEGORY_CONFIG: Record<CourseCategory, { label: string; color: string; bg
     },
     LANGUAGES: {
       label: 'Languages',
-      color: 'text-pink-700 dark:text-pink-400',
-      bgColor: 'bg-pink-100 dark:bg-pink-900/30',
+      color: 'text-violet-700 dark:text-violet-400',
+      bgColor: 'bg-violet-100 dark:bg-violet-900/30',
     },
     HUMANITIES: {
       label: 'Humanities',
@@ -229,8 +229,8 @@ const CATEGORY_CONFIG: Record<CourseCategory, { label: string; color: string; bg
     },
     ARTS: {
       label: 'Arts',
-      color: 'text-rose-700 dark:text-rose-400',
-      bgColor: 'bg-rose-100 dark:bg-rose-900/30',
+      color: 'text-indigo-700 dark:text-indigo-400',
+      bgColor: 'bg-indigo-100 dark:bg-indigo-900/30',
     },
     HEALTH: {
       label: 'Health',

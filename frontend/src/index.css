@@ -102,7 +102,7 @@
   }
 
   .floating-shape-3 {
-    @apply w-72 h-72 bg-pink-400 dark:bg-pink-500;
+    @apply w-72 h-72 bg-cyan-400 dark:bg-cyan-500;
     bottom: -5%;
     left: 30%;
     animation-delay: -10s;
@@ -116,7 +116,7 @@
 
   /* Gradient Text */
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-violet-400 to-cyan-400;
   }
 
   .text-gradient-blue {
@@ -126,7 +126,7 @@
   /* Mesh Gradient Backgrounds (Ambient Light) */
   .mesh-gradient-purple {
     background: radial-gradient(ellipse at 20% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%);
+                radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.15) 0%, transparent 50%);
   }
 
   .mesh-gradient-blue {
@@ -143,8 +143,12 @@
     box-shadow: 0 0 40px rgba(59, 130, 246, 0.3), 0 0 80px rgba(59, 130, 246, 0.15);
   }
 
-  .glow-pink {
-    box-shadow: 0 0 40px rgba(236, 72, 153, 0.3), 0 0 80px rgba(236, 72, 153, 0.15);
+  .glow-cyan {
+    box-shadow: 0 0 40px rgba(6, 182, 212, 0.3), 0 0 80px rgba(6, 182, 212, 0.15);
+  }
+
+  .glow-aqua {
+    box-shadow: 0 0 40px rgba(34, 211, 238, 0.3), 0 0 80px rgba(34, 211, 238, 0.15);
   }
 
   /* Hover glow effects (GPU Optimized) */

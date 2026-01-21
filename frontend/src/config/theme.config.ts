@@ -266,27 +266,27 @@ export const motion = {
 // =============================================================================
 
 export const gradients = {
-  // Primary gradient (blue to lavender)
-  primary: 'linear-gradient(135deg, #3B82F6 0%, #A78BFA 100%)',
+  // Primary gradient (purple to blue to cyan - aurora)
+  primary: 'linear-gradient(135deg, #7C3AED 0%, #3B82F6 50%, #06B6D4 100%)',
   
   // Accent gradient (purple to cyan - brand)
   accent: 'linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%)',
   
   // Soft background gradients
   bgSoft: {
-    light: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(167, 139, 250, 0.05) 100%)',
-    dark: 'linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%)',
+    light: 'linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(59, 130, 246, 0.05) 50%, rgba(6, 182, 212, 0.05) 100%)',
+    dark: 'linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(59, 130, 246, 0.1) 50%, rgba(6, 182, 212, 0.1) 100%)',
   },
   
   // Mesh gradient (subtle radial patterns)
   mesh: {
     light: `
-      radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.04), transparent 50%),
-      radial-gradient(ellipse at 80% 80%, rgba(167, 139, 250, 0.04), transparent 50%)
+      radial-gradient(ellipse at 20% 20%, rgba(124, 58, 237, 0.04), transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.04), transparent 50%)
     `,
     dark: `
-      radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.08), transparent 50%),
-      radial-gradient(ellipse at 80% 80%, rgba(167, 139, 250, 0.08), transparent 50%)
+      radial-gradient(ellipse at 20% 20%, rgba(124, 58, 237, 0.08), transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.08), transparent 50%)
     `,
   },
 } as const;

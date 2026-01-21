@@ -192,7 +192,7 @@ export default async function progressRoutes(server: FastifyInstance) {
 
         // Calculate total XP from achievements (cumulative for all tiers)
         let achievementXP = 0;
-        const tierOrder: ('BRONZE' | 'SILVER' | 'GOLD' | 'RUBY' | 'DIAMOND')[] = ['BRONZE', 'SILVER', 'GOLD', 'RUBY', 'DIAMOND'];
+        const tierOrder: ('COPPER' | 'GOLD' | 'RUBY' | 'AMETHYST' | 'DIAMOND')[] = ['COPPER', 'GOLD', 'RUBY', 'AMETHYST', 'DIAMOND'];
         
         userAchievements.forEach((userAchievement) => {
           const achievement = ACHIEVEMENTS[userAchievement.achievementId];

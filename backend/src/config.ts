@@ -32,8 +32,8 @@ export const config = {
     publishableKey: process.env.STRIPE_PUBLISHABLE_KEY!,
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
     prices: {
-      standardMonthly: process.env.STRIPE_PRICE_STANDARD_MONTHLY!,
-      standardYearly: process.env.STRIPE_PRICE_STANDARD_YEARLY!,
+      standardMonthly: process.env.STRIPE_PRICE_PRO_MONTHLY || process.env.STRIPE_PRICE_STANDARD_MONTHLY!,
+      standardYearly: process.env.STRIPE_PRICE_PRO_YEARLY || process.env.STRIPE_PRICE_STANDARD_YEARLY!,
       premiumMonthly: process.env.STRIPE_PRICE_PREMIUM_MONTHLY!,
       premiumYearly: process.env.STRIPE_PRICE_PREMIUM_YEARLY!,
     },

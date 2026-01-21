@@ -16,7 +16,7 @@ import api from '@/lib/api';
 import { useAuth } from './AuthContext';
 
 export type NotificationType = 'achievement' | 'levelup' | 'info' | 'success';
-export type AchievementTier = 'BRONZE' | 'SILVER' | 'GOLD' | 'RUBY' | 'DIAMOND';
+export type AchievementTier = 'BRONZE' | 'GOLD' | 'RUBY' | 'DIAMOND' | 'AMETHYST';
 
 export interface Notification {
   id: string;
@@ -253,13 +253,6 @@ const TIER_THEMES: Record<AchievementTier, {
     text: 'text-orange-400',
     glow: 'shadow-orange-500/20',
   },
-  SILVER: {
-    gradient: 'from-slate-400 to-zinc-500',
-    bg: 'bg-gradient-to-br from-slate-400/10 to-zinc-500/10',
-    border: 'border-slate-400/30',
-    text: 'text-slate-300',
-    glow: 'shadow-slate-400/20',
-  },
   GOLD: {
     gradient: 'from-yellow-400 to-amber-500',
     bg: 'bg-gradient-to-br from-yellow-400/10 to-amber-500/10',
@@ -268,8 +261,8 @@ const TIER_THEMES: Record<AchievementTier, {
     glow: 'shadow-yellow-400/20',
   },
   RUBY: {
-    gradient: 'from-red-500 to-pink-600',
-    bg: 'bg-gradient-to-br from-red-500/10 to-pink-600/10',
+    gradient: 'from-red-500 to-rose-600',
+    bg: 'bg-gradient-to-br from-red-500/10 to-rose-600/10',
     border: 'border-red-500/30',
     text: 'text-red-400',
     glow: 'shadow-red-500/20',
@@ -280,6 +273,13 @@ const TIER_THEMES: Record<AchievementTier, {
     border: 'border-cyan-400/30',
     text: 'text-cyan-400',
     glow: 'shadow-cyan-400/20',
+  },
+  AMETHYST: {
+    gradient: 'from-purple-500 to-violet-600',
+    bg: 'bg-gradient-to-br from-purple-500/10 to-violet-600/10',
+    border: 'border-purple-500/30',
+    text: 'text-purple-400',
+    glow: 'shadow-purple-500/20',
   },
 };
 

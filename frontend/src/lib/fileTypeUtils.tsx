@@ -118,7 +118,7 @@ export function getCleanFileType(mimeType: string, fileName?: string): FileTypeI
   if (type.startsWith('audio/') || ['mp3', 'wav', 'ogg', 'flac', 'm4a'].includes(extension)) {
     return {
       label: 'Audio',
-      color: 'text-pink-600 dark:text-pink-400 bg-pink-600/10 border-pink-600/20',
+      color: 'text-violet-600 dark:text-violet-400 bg-violet-600/10 border-violet-600/20',
       icon: Music,
     };
   }

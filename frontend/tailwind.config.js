@@ -290,11 +290,12 @@ export default {
         'xs': '2px',
       },
       // ═══════════════════════════════════════════════════════════════════
-      // AURORA GRADIENTS
+      // AURORA GRADIENTS - Purple/Blue/Aqua Palette
       // ═══════════════════════════════════════════════════════════════════
       backgroundImage: {
-        'gradient-aurora': 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-        'gradient-aurora-hover': 'linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)',
+        'gradient-aurora': 'linear-gradient(135deg, #7C3AED 0%, #3B82F6 50%, #06B6D4 100%)',
+        'gradient-aurora-hover': 'linear-gradient(135deg, #6D28D9 0%, #2563EB 50%, #0891B2 100%)',
+        'gradient-aurora-soft': 'linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(59, 130, 246, 0.1) 50%, rgba(6, 182, 212, 0.1) 100%)',
         'gradient-glass': 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
       },
     },

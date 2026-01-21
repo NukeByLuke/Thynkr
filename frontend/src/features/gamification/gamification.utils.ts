@@ -25,7 +25,7 @@ import {
   FileText,
 } from 'lucide-react';
 
-export type AchievementTier = 'BRONZE' | 'SILVER' | 'GOLD' | 'RUBY' | 'DIAMOND' | 'MASTERY';
+export type AchievementTier = 'BRONZE' | 'GOLD' | 'RUBY' | 'DIAMOND' | 'AMETHYST' | 'MASTERY';
 
 export interface AchievementDefinition {
   id: string;
@@ -35,18 +35,18 @@ export interface AchievementDefinition {
   category: 'study' | 'social' | 'skill' | 'streak' | 'content' | 'mastery';
   thresholds?: {
     BRONZE: number;
-    SILVER: number;
     GOLD: number;
     RUBY: number;
     DIAMOND: number;
+    AMETHYST: number;
     MASTERY?: number;
   };
   xpRewards?: {
     BRONZE: number;
-    SILVER: number;
     GOLD: number;
     RUBY: number;
     DIAMOND: number;
+    AMETHYST: number;
     MASTERY?: number;
   };
 }
@@ -68,7 +68,7 @@ export interface UserAchievement {
   unlocked: boolean;
 }
 
-export const TIER_ORDER: AchievementTier[] = ['MASTERY', 'DIAMOND', 'RUBY', 'GOLD', 'SILVER', 'BRONZE'];
+export const TIER_ORDER: AchievementTier[] = ['MASTERY', 'AMETHYST', 'DIAMOND', 'RUBY', 'GOLD', 'BRONZE'];
 
 export const TIER_CONFIG = {
   BRONZE: {
@@ -81,16 +81,6 @@ export const TIER_CONFIG = {
     gradient: 'from-amber-700 to-orange-600', 
     label: 'Bronze',
   },
-  SILVER: {
-    border: 'border-slate-400/60 dark:border-slate-500/40',
-    borderHover: 'group-hover:border-slate-300/80 dark:group-hover:border-slate-400/60',
-    bg: 'bg-slate-500/5 dark:bg-transparent',
-    text: 'text-slate-700 dark:text-slate-300',
-    iconBg: 'bg-gradient-to-br from-slate-400 to-slate-600',
-    glow: 'shadow-lg shadow-slate-400/20 hover:shadow-slate-400/40',
-    gradient: 'from-slate-400 to-slate-600', 
-    label: 'Silver',
-  },
   GOLD: {
     border: 'border-yellow-600/60 dark:border-yellow-500/40',
     borderHover: 'group-hover:border-yellow-500/80 dark:group-hover:border-yellow-400/60',
@@ -102,13 +92,13 @@ export const TIER_CONFIG = {
     label: 'Gold',
   },
   RUBY: {
-    border: 'border-pink-600/60 dark:border-pink-500/40',
-    borderHover: 'group-hover:border-pink-500/80 dark:group-hover:border-pink-400/60',
-    bg: 'bg-pink-500/5 dark:bg-transparent',
-    text: 'text-pink-700 dark:text-pink-400',
-    iconBg: 'bg-gradient-to-br from-rose-500 to-pink-600',
-    glow: 'shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40',
-    gradient: 'from-rose-500 to-pink-600',
+    border: 'border-red-600/60 dark:border-red-500/40',
+    borderHover: 'group-hover:border-red-500/80 dark:group-hover:border-red-400/60',
+    bg: 'bg-red-500/5 dark:bg-transparent',
+    text: 'text-red-700 dark:text-red-400',
+    iconBg: 'bg-gradient-to-br from-red-500 to-rose-600',
+    glow: 'shadow-lg shadow-red-500/20 hover:shadow-red-500/40',
+    gradient: 'from-red-500 to-rose-600',
     label: 'Ruby',
   },
   DIAMOND: {
@@ -120,6 +110,16 @@ export const TIER_CONFIG = {
     glow: 'shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40',
     gradient: 'from-cyan-400 to-blue-600',
     label: 'Diamond',
+  },
+  AMETHYST: {
+    border: 'border-purple-600/60 dark:border-purple-500/40',
+    borderHover: 'group-hover:border-purple-500/80 dark:group-hover:border-purple-400/60',
+    bg: 'bg-purple-500/5 dark:bg-transparent',
+    text: 'text-purple-700 dark:text-purple-400',
+    iconBg: 'bg-gradient-to-br from-purple-600 to-violet-700',
+    glow: 'shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40',
+    gradient: 'from-purple-600 to-violet-700',
+    label: 'Amethyst',
   },
   MASTERY: {
     border: 'border-violet-400/80 dark:border-violet-300/60',
@@ -174,7 +174,7 @@ export const CATEGORY_CONFIG = {
     title: 'Social',
     icon: Users,
     description: 'Share knowledge and collaborate',
-    gradient: 'from-pink-500 to-rose-500',
+    gradient: 'from-violet-500 to-indigo-500',
   },
   skill: {
     title: 'Skill',

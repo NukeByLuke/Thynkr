@@ -1319,7 +1319,7 @@ Provide your response in this exact JSON format:
         type: 'achievement' as const,
         achievementId: ach.achievementId,
         achievementName: ach.achievementName || 'Achievement Unlocked',
-        newTier: ach.newTier || 'BRONZE',
+        newTier: ach.newTier || 'COPPER',
         xpAwarded: ach.xpAwarded || 0,
         leveledUp: ach.leveledUp || false,
         newLevel: ach.newLevel,

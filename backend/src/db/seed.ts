@@ -26,11 +26,11 @@ function calculateTier(
   thresholds: AchievementDefinition['thresholds']
 ): AchievementTier | null {
   if (currentValue >= thresholds.DIAMOND) return AchievementTier.DIAMOND;
+  if (currentValue >= thresholds.AMETHYST) return AchievementTier.AMETHYST;
   if (currentValue >= thresholds.RUBY) return AchievementTier.RUBY;
   if (currentValue >= thresholds.GOLD) return AchievementTier.GOLD;
-  if (currentValue >= thresholds.SILVER) return AchievementTier.SILVER;
-  if (currentValue >= thresholds.BRONZE) return AchievementTier.BRONZE;
-  return null; // Below bronze threshold - locked
+  if (currentValue >= thresholds.COPPER) return AchievementTier.COPPER;
+  return null; // Below copper threshold - locked
 }
 
 /**
@@ -302,19 +302,19 @@ async function seedAchievements(users: { [key: string]: string }) {
       username: 'basic',
       userId: users['basic'],
       name: 'Basic',
-      // Basic: Random value between 0 and Bronze threshold (most achievements locked)
+      // Basic: Random value between 0 and Copper threshold (most achievements locked)
       getValueRange: (achievement: AchievementDefinition, _index?: number) => ({
         min: 0,
-        max: Math.max(0, achievement.thresholds.BRONZE - 1),
+        max: Math.max(0, achievement.thresholds.COPPER - 1),
       }),
     },
     {
       username: 'standard',
       userId: users['standard'],
       name: 'Standard',
-      // Standard: Random value between Bronze and Gold thresholds
+      // Standard: Random value between Copper and Gold thresholds
       getValueRange: (achievement: AchievementDefinition, _index?: number) => ({
-        min: achievement.thresholds.BRONZE,
+        min: achievement.thresholds.COPPER,
         max: achievement.thresholds.GOLD,
       }),
     },
@@ -322,24 +322,24 @@ async function seedAchievements(users: { [key: string]: string }) {
       username: 'premium',
       userId: users['premium'],
       name: 'Premium',
-      // Premium: Diverse tiers across Bronze, Silver, Gold, Ruby, Diamond (evenly distributed)
+      // Premium: Diverse tiers across Copper, Gold, Ruby, Amethyst, Diamond (evenly distributed)
       getValueRange: (achievement: AchievementDefinition, index: number = 0) => {
-        // Distribute evenly: Bronze, Silver, Gold, Ruby, Diamond
+        // Distribute evenly: Copper, Gold, Ruby, Amethyst, Diamond
         const tierCycle = index % 5;
         
         switch (tierCycle) {
           case 0:
-            // Bronze tier (20% of achievements)
-            return { min: achievement.thresholds.BRONZE, max: achievement.thresholds.SILVER - 1 };
+            // Copper tier (20% of achievements)
+            return { min: achievement.thresholds.COPPER, max: achievement.thresholds.GOLD - 1 };
           case 1:
-            // Silver tier (20% of achievements)
-            return { min: achievement.thresholds.SILVER, max: achievement.thresholds.GOLD - 1 };
-          case 2:
             // Gold tier (20% of achievements)
             return { min: achievement.thresholds.GOLD, max: achievement.thresholds.RUBY - 1 };
-          case 3:
+          case 2:
             // Ruby tier (20% of achievements)
-            return { min: achievement.thresholds.RUBY, max: achievement.thresholds.DIAMOND - 1 };
+            return { min: achievement.thresholds.RUBY, max: achievement.thresholds.AMETHYST - 1 };
+          case 3:
+            // Amethyst tier (20% of achievements)
+            return { min: achievement.thresholds.AMETHYST, max: achievement.thresholds.DIAMOND - 1 };
           case 4:
           default:
             // Diamond tier (20% of achievements) - highest tier

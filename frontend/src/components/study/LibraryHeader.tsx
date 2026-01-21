@@ -55,7 +55,7 @@ export default function LibraryHeader({
             className="relative group"
           >
             {/* Gradient Border Container */}
-            <div className="p-[1px] rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-lg transition-all duration-150 group-hover:shadow-xl group-hover:shadow-purple-500/50">
+            <div className="p-[1px] rounded-xl bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 shadow-lg transition-all duration-150 group-hover:shadow-xl group-hover:shadow-blue-500/50">
               {/* Inner Button */}
               <button
                 onClick={onUploadClick}
@@ -63,7 +63,7 @@ export default function LibraryHeader({
                 className="relative flex items-center gap-2.5 px-6 py-3 bg-slate-900 dark:bg-slate-950 backdrop-blur-md rounded-[11px] transition-all duration-150 disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden"
               >
                 {/* Animated Gradient Overlay on Hover */}
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/0 via-purple-600/0 to-pink-600/0 group-hover:from-indigo-600/10 group-hover:via-purple-600/10 group-hover:to-pink-600/10 transition-all duration-150" />
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-600/0 via-blue-600/0 to-cyan-600/0 group-hover:from-violet-600/10 group-hover:via-blue-600/10 group-hover:to-cyan-600/10 transition-all duration-150" />
 
                 {/* Icon */}
                 <div className="relative">
@@ -81,7 +81,7 @@ export default function LibraryHeader({
 
                 {/* Glow Effect */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-                  <div className="absolute inset-0 blur-xl bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20" />
+                  <div className="absolute inset-0 blur-xl bg-gradient-to-r from-violet-500/20 via-blue-500/20 to-cyan-500/20" />
                 </div>
               </button>
             </div>
@@ -89,7 +89,7 @@ export default function LibraryHeader({
             {/* Pulsing Border Animation (Active Upload) */}
             {isUploading && (
               <div className="absolute inset-0 rounded-xl">
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-75 animate-pulse" />
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 opacity-75 animate-pulse" />
               </div>
             )}
           </motion.div>

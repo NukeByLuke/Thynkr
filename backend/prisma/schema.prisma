@@ -28,10 +28,10 @@ enum SubscriptionStatus {
 }
 
 enum AchievementTier {
-  BRONZE
-  SILVER
+  COPPER
   GOLD
   RUBY
+  AMETHYST
   DIAMOND
 }
 
@@ -595,7 +595,7 @@ model UserAchievement {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   achievementId String // Achievement identifier (e.g., "scholar", "streak_master")
-  currentTier   AchievementTier @default(BRONZE)
+  currentTier   AchievementTier @default(COPPER)
   currentValue  Int             @default(0) // Current progress value
 
   unlockedAt DateTime @default(now())

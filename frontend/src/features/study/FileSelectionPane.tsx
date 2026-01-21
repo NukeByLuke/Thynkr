@@ -47,7 +47,7 @@ function isAICompatible(fileType: string): boolean {
 function getFileIcon(fileType: string) {
   if (fileType.startsWith('image/')) return <Image className="h-4 w-4 text-green-500" />;
   if (fileType.startsWith('video/')) return <Video className="h-4 w-4 text-purple-500" />;
-  if (fileType.startsWith('audio/')) return <Music className="h-4 w-4 text-pink-500" />;
+  if (fileType.startsWith('audio/')) return <Music className="h-4 w-4 text-violet-500" />;
   if (fileType === 'application/pdf') return <FileText className="h-4 w-4 text-red-500" />;
   if (fileType === 'application/zip') return <Archive className="h-4 w-4 text-yellow-500" />;
   return <FileIcon className="h-4 w-4 text-gray-500" />;
