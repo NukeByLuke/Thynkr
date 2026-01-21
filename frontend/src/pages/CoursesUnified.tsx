@@ -462,7 +462,7 @@ export default function CoursesUnified() {
 
             {/* Course Gallery */}
             {isLoading ? (
-              <GridSkeleton count={6} className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" />
+              <GridSkeleton count={6} columns={{ sm: 1, md: 2, lg: 3 }} aspectRatio="video" />
             ) : error ? (
               <div className="flex items-center justify-center py-20">
                 <div className="text-center">
