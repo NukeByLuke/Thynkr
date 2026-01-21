@@ -85,10 +85,10 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
     setIsExporting(true);
     try {
       const canvas = await html2canvas(quoteRef.current, {
-        backgroundColor: '#ffffff',
+        backgroundColor: '#0f172a', // slate-900 for dark professional look
         scale: 2,
         logging: false,
-        windowWidth: 800,
+        windowWidth: 600,
       });
 
       const link = document.createElement('a');
@@ -108,10 +108,10 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
     setIsExporting(true);
     try {
       const canvas = await html2canvas(quoteRef.current, {
-        backgroundColor: '#ffffff',
+        backgroundColor: '#0f172a', // slate-900 for dark professional look
         scale: 2,
         logging: false,
-        windowWidth: 800,
+        windowWidth: 600,
       });
 
       const imgData = canvas.toDataURL('image/png');
@@ -250,19 +250,20 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
         {/* Right Column: Quote Preview */}
         <div
           ref={quoteRef}
-          className="bg-white dark:bg-slate-900 rounded-xl border-2 border-slate-200 dark:border-slate-700 p-6 shadow-lg"
+          className="bg-slate-900 rounded-xl border-2 border-slate-700 p-8 shadow-lg"
+          style={{ padding: '2rem' }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-200 dark:border-slate-700">
+          <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-700">
             <div>
               <h3 className="text-2xl font-bold bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-transparent">
                 Thynkr
               </h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Pricing Quote</p>
+              <p className="text-sm text-slate-400 mt-1">Pricing Quote</p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-slate-600 dark:text-slate-400">Date</p>
-              <p className="font-semibold text-slate-900 dark:text-white">
+              <p className="text-sm text-slate-400">Date</p>
+              <p className="font-semibold text-white">
                 {new Date().toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
@@ -279,55 +280,55 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                 {plan.icon}
               </div>
               <div>
-                <h4 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <h4 className="text-xl font-bold text-white flex items-center gap-2">
                   {plan.name} Plan
                   {effectiveStudentDiscount && (
-                    <span className="text-xs px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-full font-medium">
+                    <span className="text-xs px-2 py-1 bg-emerald-900/30 text-emerald-300 rounded-full font-medium">
                       + Student Discount
                     </span>
                   )}
                 </h4>
-                <p className="text-sm text-slate-600 dark:text-slate-400">{billing.label}</p>
+                <p className="text-sm text-slate-400">{billing.label}</p>
               </div>
             </div>
           </div>
 
           {/* Pricing Breakdown */}
-          <div className="space-y-2 mb-4 pb-4 border-b border-slate-200 dark:border-slate-700">
+          <div className="space-y-2 mb-4 pb-4 border-b border-slate-700">
             <div className="flex justify-between text-sm">
-              <span className="text-slate-600 dark:text-slate-400">Price per month</span>
-              <span className="font-semibold text-slate-900 dark:text-white">
+              <span className="text-slate-400">Price per month</span>
+              <span className="font-semibold text-white">
                 ${pricePerMonth.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-slate-600 dark:text-slate-400">Duration</span>
-              <span className="font-semibold text-slate-900 dark:text-white">
+              <span className="text-slate-400">Duration</span>
+              <span className="font-semibold text-white">
                 {totalMonths} {totalMonths === 1 ? 'month' : 'months'}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-slate-600 dark:text-slate-400">Subtotal</span>
-              <span className="font-semibold text-slate-900 dark:text-white">
+              <span className="text-slate-400">Subtotal</span>
+              <span className="font-semibold text-white">
                 ${subtotal.toFixed(2)}
               </span>
             </div>
             {billing.discount > 0 && (
               <div className="flex justify-between text-sm">
-                <span className="text-green-600 dark:text-green-400 font-medium">
+                <span className="text-green-400 font-medium">
                   Billing Discount ({billing.discount}%)
                 </span>
-                <span className="font-semibold text-green-600 dark:text-green-400">
+                <span className="font-semibold text-green-400">
                   -${billingDiscountAmount.toFixed(2)}
                 </span>
               </div>
             )}
             {effectiveStudentDiscount && (
               <div className="flex justify-between text-sm">
-                <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                <span className="text-emerald-400 font-medium">
                   Student Discount ({STUDENT_DISCOUNT_PERCENT}%)
                 </span>
-                <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                <span className="font-semibold text-emerald-400">
                   -${studentDiscountAmount.toFixed(2)}
                 </span>
               </div>
@@ -336,15 +337,15 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
 
           {/* Total */}
           <div className="flex justify-between items-center">
-            <span className="text-lg font-bold text-slate-900 dark:text-white">Total Cost</span>
+            <span className="text-lg font-bold text-white">Total Cost</span>
             <span className="text-3xl font-bold bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-transparent">
               ${totalCost.toFixed(2)}
             </span>
           </div>
 
           {/* Footer Note */}
-          <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-            <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
+          <div className="mt-4 pt-4 border-t border-slate-700">
+            <p className="text-xs text-slate-400 text-center">
               All plans include a 7-day money-back guarantee. Cancel anytime.
               <br />
               Questions? Contact us at support@thynkr.com
