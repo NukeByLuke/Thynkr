@@ -47,8 +47,6 @@ const PLANS: Record<PlanType, PlanConfig> = {
   },
 };
 
-const STUDENT_DISCOUNT_PERCENT = 40; // 40% off for students (Coming Soon)
-
 const BILLING_CYCLES: Record<BillingCycle, { label: string; months: number; discount: number }> = {
   monthly: { label: 'Monthly', months: 1, discount: 0 },
   quarterly: { label: 'Quarterly (3 months)', months: 3, discount: 5 },
