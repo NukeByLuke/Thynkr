@@ -368,12 +368,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
               </div>
               <div className="flex-1">
                 <h4 className="text-xl font-bold text-slate-900 dark:text-white [.exporting_&]:text-slate-900 flex items-center gap-2">
-                  {plan.name} Plan
-                  {effectiveStudentDiscount && (
-                    <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium border border-green-200">
-                      + Student
-                    </span>
-                  )}
+                  {effectiveStudentDiscount ? `${plan.name} Student Plan` : `${plan.name} Plan`}
                 </h4>
                 <p className="text-sm text-slate-600 dark:text-slate-400 [.exporting_&]:text-slate-600">{billing.label}</p>
               </div>
@@ -444,7 +439,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
           {/* Total */}
           <div className="flex justify-between items-center">
             <span className="text-lg font-bold text-slate-900 dark:text-white [.exporting_&]:text-slate-900">Total Cost</span>
-            <span className="text-3xl font-bold bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-transparent">
+            <span className="text-3xl font-bold text-slate-900 dark:text-white [.exporting_&]:text-slate-900">
               ${totalCost.toFixed(2)}
             </span>
           </div>
