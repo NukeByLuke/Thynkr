@@ -370,7 +370,7 @@ export default function UploadModal({
                   </div>
                 )}
               </div>
-            ) : (
+            ) : activeTab === 'youtube' ? (
               <div className="space-y-5">
                 {/* YouTube URL Input */}
                 <div>
