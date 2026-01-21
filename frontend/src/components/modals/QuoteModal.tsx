@@ -15,7 +15,7 @@ interface QuoteModalProps {
   onClose: () => void;
 }
 
-type PlanType = 'basic' | 'standard' | 'premium' | 'student';
+type PlanType = 'basic' | 'standard' | 'premium';
 type BillingCycle = 'monthly' | 'quarterly' | 'semiannual' | 'yearly';
 
 interface PlanConfig {
@@ -45,14 +45,9 @@ const PLANS: Record<PlanType, PlanConfig> = {
     icon: <Crown className="w-5 h-5" />,
     color: 'from-brand-500 to-accent-600',
   },
-  student: {
-    name: 'Student',
-    monthlyPrice: 2.99,
-    icon: <GraduationCap className="w-5 h-5" />,
-    color: 'from-emerald-500 to-teal-600',
-    comingSoon: true,
-  },
 };
+
+const STUDENT_DISCOUNT_PERCENT = 40; // 40% off for students (Coming Soon)
 
 const BILLING_CYCLES: Record<BillingCycle, { label: string; months: number; discount: number }> = {
   monthly: { label: 'Monthly', months: 1, discount: 0 },
@@ -64,18 +59,25 @@ const BILLING_CYCLES: Record<BillingCycle, { label: string; months: number; disc
 export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
   const [selectedPlan, setSelectedPlan] = useState<PlanType>('standard');
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
+  const [isStudentDiscount, setIsStudentDiscount] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const quoteRef = useRef<HTMLDivElement>(null);
 
   const plan = PLANS[selectedPlan];
   const billing = BILLING_CYCLES[billingCycle];
   
+  // Student discount only applies to Standard and Premium
+  const canApplyStudentDiscount = selectedPlan !== 'basic';
+  const effectiveStudentDiscount = canApplyStudentDiscount && isStudentDiscount;
+  
   // Calculate pricing
   const pricePerMonth = plan.monthlyPrice;
   const totalMonths = billing.months;
   const subtotal = pricePerMonth * totalMonths;
-  const discountAmount = (subtotal * billing.discount) / 100;
-  const totalCost = subtotal - discountAmount;
+  const billingDiscountAmount = (subtotal * billing.discount) / 100;
+  const studentDiscountAmount = effectiveStudentDiscount ? (subtotal * STUDENT_DISCOUNT_PERCENT) / 100 : 0;
+  const totalDiscountAmount = billingDiscountAmount + studentDiscountAmount;
+  const totalCost = subtotal - totalDiscountAmount;
 
   const handleExportPNG = async () => {
     if (!quoteRef.current) return;
@@ -211,6 +213,38 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
             )}
           </div>
           </div>
+
+          {/* Student Discount Toggle */}
+          <div>
+            <div className="flex items-center justify-between p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+                  <GraduationCap className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                    Student Discount
+                    <span className="text-xs px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-full font-medium">
+                      Coming Soon
+                    </span>
+                  </div>
+                  <div className="text-sm text-slate-600 dark:text-slate-400">
+                    {canApplyStudentDiscount ? `${STUDENT_DISCOUNT_PERCENT}% off Standard & Premium` : 'Not available for Basic plan'}
+                  </div>
+                </div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isStudentDiscount}
+                  onChange={(e) => setIsStudentDiscount(e.target.checked)}
+                  disabled={!canApplyStudentDiscount}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-slate-300 dark:bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-300 dark:peer-focus:ring-brand-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
+              </label>
+            </div>
+          </div>
         </div>
 
         {/* Right Column: Quote Preview */}
@@ -247,9 +281,9 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
               <div>
                 <h4 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   {plan.name} Plan
-                  {plan.comingSoon && (
+                  {effectiveStudentDiscount && (
                     <span className="text-xs px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-full font-medium">
-                      Coming Soon
+                      + Student Discount
                     </span>
                   )}
                 </h4>
@@ -281,10 +315,20 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
             {billing.discount > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-green-600 dark:text-green-400 font-medium">
-                  Discount ({billing.discount}%)
+                  Billing Discount ({billing.discount}%)
                 </span>
                 <span className="font-semibold text-green-600 dark:text-green-400">
-                  -${discountAmount.toFixed(2)}
+                  -${billingDiscountAmount.toFixed(2)}
+                </span>
+              </div>
+            )}
+            {effectiveStudentDiscount && (
+              <div className="flex justify-between text-sm">
+                <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                  Student Discount ({STUDENT_DISCOUNT_PERCENT}%)
+                </span>
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                  -${studentDiscountAmount.toFixed(2)}
                 </span>
               </div>
             )}
