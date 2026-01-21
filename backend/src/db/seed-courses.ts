@@ -7,11 +7,11 @@ async function seedCourses() {
 
     // Get the premium user to be the course creator
     const premiumUser = await prisma.user.findUnique({
-      where: { email: 'premium@test.local' },
+      where: { email: 'premium@thynkr.ca' },
     });
 
     if (!premiumUser) {
-      logger.error('Premium user not found. Run main seed first.');
+      logger.error('Premium user (premium@thynkr.ca) not found. Run main seed first.');
       return;
     }
 

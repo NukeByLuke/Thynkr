@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import {
   BookOpen,
   Plus,
@@ -15,31 +15,61 @@ import {
   Share2,
   X,
   Play,
+  Calculator,
+  Beaker,
+  Laptop,
+  Cog,
+  Languages,
+  BookMarked,
+  Briefcase,
+  Palette,
+  HeartPulse,
+  Scale,
+  Sparkles,
+  FileText,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import VisibilityChip from '@/features/courses/VisibilityChip';
 import EmptyState from '@/components/ui/EmptyState';
+import LazyImage from '@/components/ui/LazyImage';
+import { GridSkeleton } from '@/components/ui/Skeleton';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import {
   canCreatePublicCourses,
   canAccessCourses,
   canBrowsePublicCourses,
 } from '@/features/auth/ProtectedRoute';
 
+// Category Icons Mapping
+const categoryIcons: Record<string, any> = {
+  MATHEMATICS: Calculator,
+  SCIENCE: Beaker,
+  TECHNOLOGY: Laptop,
+  ENGINEERING: Cog,
+  LANGUAGES: Languages,
+  HUMANITIES: BookMarked,
+  BUSINESS: Briefcase,
+  ARTS: Palette,
+  HEALTH: HeartPulse,
+  LAW: Scale,
+  OTHER: Sparkles,
+};
+
 const CATEGORIES = [
-  { value: '', label: 'All Categories' },
-  { value: 'MATHEMATICS', label: 'Mathematics' },
-  { value: 'SCIENCE', label: 'Science' },
-  { value: 'TECHNOLOGY', label: 'Technology' },
-  { value: 'ENGINEERING', label: 'Engineering' },
-  { value: 'LANGUAGES', label: 'Languages' },
-  { value: 'HUMANITIES', label: 'Humanities' },
-  { value: 'BUSINESS', label: 'Business' },
-  { value: 'ARTS', label: 'Arts' },
-  { value: 'HEALTH', label: 'Health' },
-  { value: 'LAW', label: 'Law' },
-  { value: 'OTHER', label: 'Other' },
+  { value: '', label: 'All Categories', icon: FileText },
+  { value: 'MATHEMATICS', label: 'Mathematics', icon: Calculator },
+  { value: 'SCIENCE', label: 'Science', icon: Beaker },
+  { value: 'TECHNOLOGY', label: 'Technology', icon: Laptop },
+  { value: 'ENGINEERING', label: 'Engineering', icon: Cog },
+  { value: 'LANGUAGES', label: 'Languages', icon: Languages },
+  { value: 'HUMANITIES', label: 'Humanities', icon: BookMarked },
+  { value: 'BUSINESS', label: 'Business', icon: Briefcase },
+  { value: 'ARTS', label: 'Arts', icon: Palette },
+  { value: 'HEALTH', label: 'Health', icon: HeartPulse },
+  { value: 'LAW', label: 'Law', icon: Scale },
+  { value: 'OTHER', label: 'Other', icon: Sparkles },
 ];
 
 type TabType = 'browse' | 'my-courses';
@@ -76,13 +106,13 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-// Skeleton Loader for Course Gallery
-
-
 export default function CoursesUnified() {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const isDark = theme === 'dark';
 
   // Access control checks
   const canAccess = canAccessCourses(user?.role);
@@ -218,15 +248,15 @@ export default function CoursesUnified() {
         </Helmet>
         <div className="h-full flex items-center justify-center">
           <div className="text-center max-w-md px-6">
-            <div className="card p-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-brand-500 to-accent-500 rounded-full mb-6">
+            <div className={`p-8 rounded-3xl shadow-2xl ${isDark ? 'bg-slate-800/50 backdrop-blur-xl' : 'bg-white shadow-2xl'}`}>
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-aurora rounded-full mb-6">
                 <Lock className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-heading mb-3">Courses Locked</h2>
-              <p className="text-body mb-6">Upgrade to explore courses and create your own.</p>
+              <h2 className={`text-2xl font-bold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>Courses Locked</h2>
+              <p className={`mb-6 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Upgrade to explore courses and create your own.</p>
               <button
                 onClick={() => navigate('/pricing')}
-                className="w-full px-6 py-3 bg-gradient-to-r from-brand-500 to-accent-500 text-white rounded-xl font-semibold text-sm tracking-wide shadow-[0_8px_30px_rgba(99,102,241,0.3)] hover:shadow-[0_12px_40px_rgba(99,102,241,0.4)] transition-all duration-200"
+                className="w-full px-6 py-3 bg-gradient-aurora text-white rounded-2xl font-semibold text-sm tracking-wide shadow-glow-purple hover:shadow-glow-purple-lg transition-all duration-200"
               >
                 View Pricing
               </button>
@@ -244,34 +274,86 @@ export default function CoursesUnified() {
         <meta name="description" content="Explore, create, and study smarter with Thynkr courses" />
       </Helmet>
 
-      <div className="h-full flex flex-col">
-        {/* Hero Header with Gradient */}
-        <div className="relative overflow-hidden">
-          {/* Gradient Background */}
-          <div className="absolute inset-0 bg-gradient-to-b from-indigo-900/40 via-indigo-900/20 to-transparent dark:from-indigo-900/40 dark:via-slate-950/60 dark:to-slate-950" />
+      <div className="h-full flex flex-col overflow-hidden">
+        {/* Hero Section - Homey & Inviting */}
+        <div className={`relative overflow-hidden ${isDark ? 'bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950' : 'bg-gradient-to-b from-slate-50 via-white to-slate-50'}`}>
+          {/* Background Decorations */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className={`absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-purple-500/10' : 'bg-purple-300/20'}`} />
+            <div className={`absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-cyan-500/10' : 'bg-cyan-300/20'}`} />
+          </div>
           
-          <div className="relative max-w-[1400px] mx-auto px-8 py-12">
-            <h1 className="text-4xl font-bold text-white dark:text-white mb-2">Courses</h1>
-            <p className="text-slate-200 dark:text-slate-400 text-lg">
-              Explore, create, and organize your learning materials
-            </p>
+          <div className="relative max-w-7xl mx-auto px-6 sm:px-8 py-12">
+            <div className="text-center max-w-3xl mx-auto">
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`text-4xl sm:text-5xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}
+              >
+                Discover Your Next{' '}
+                <span className="text-gradient bg-gradient-aurora">Course</span>
+              </motion.h1>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className={`text-lg mb-8 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}
+              >
+                Transform your learning journey with AI-powered study materials
+              </motion.p>
+
+              {/* Prominent Search Bar */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="relative max-w-2xl mx-auto"
+              >
+                <Search className={`absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
+                <input
+                  type="text"
+                  placeholder="Search courses..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className={`w-full pl-14 pr-12 py-4 rounded-2xl text-base transition-all shadow-lg focus:shadow-xl focus:ring-2 focus:ring-purple-400 ${
+                    isDark 
+                      ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 text-white placeholder-slate-500' 
+                      : 'bg-white border border-slate-200 text-slate-900 placeholder-slate-400'
+                  }`}
+                />
+                {searchInput && (
+                  <button
+                    onClick={() => setSearchInput('')}
+                    className={`absolute right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-lg hover:bg-opacity-20 ${isDark ? 'text-slate-400 hover:bg-slate-600' : 'text-slate-500 hover:bg-slate-200'}`}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </motion.div>
+            </div>
           </div>
         </div>
 
+        {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-[1400px] mx-auto px-8 pt-6 pb-10">
-            {/* Tab Switcher & Controls */}
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-              <div className="flex gap-2">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 py-8">
+            
+            {/* Tab Switcher & Create Button */}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+              <div className={`inline-flex gap-1 p-1 rounded-2xl ${isDark ? 'bg-slate-800/50' : 'bg-slate-100'}`}>
                 <button
                   onClick={() => canBrowse && setActiveTab('browse')}
                   disabled={!canBrowse}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
+                  className={`px-5 py-2.5 rounded-xl font-medium transition-all ${
                     activeTab === 'browse'
-                      ? 'bg-white text-slate-950'
+                      ? isDark 
+                        ? 'bg-gradient-aurora text-white shadow-lg' 
+                        : 'bg-white text-slate-900 shadow-md'
                       : canBrowse
-                        ? 'text-slate-400 hover:text-white'
-                        : 'text-slate-600 cursor-not-allowed opacity-50'
+                        ? isDark
+                          ? 'text-slate-400 hover:text-white'
+                          : 'text-slate-600 hover:text-slate-900'
+                        : 'text-slate-500 cursor-not-allowed opacity-50'
                   }`}
                 >
                   Browse
@@ -280,10 +362,14 @@ export default function CoursesUnified() {
 
                 <button
                   onClick={() => setActiveTab('my-courses')}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
+                  className={`px-5 py-2.5 rounded-xl font-medium transition-all ${
                     activeTab === 'my-courses'
-                      ? 'bg-white text-slate-950'
-                      : 'text-slate-400 hover:text-white'
+                      ? isDark 
+                        ? 'bg-gradient-aurora text-white shadow-lg' 
+                        : 'bg-white text-slate-900 shadow-md'
+                      : isDark
+                        ? 'text-slate-400 hover:text-white'
+                        : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   My Courses
@@ -294,146 +380,163 @@ export default function CoursesUnified() {
               {user && canAccess && (
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white text-slate-950 rounded-full font-medium hover:bg-white/90 transition"
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-medium transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 ${
+                    isDark 
+                      ? 'bg-gradient-aurora text-white' 
+                      : 'bg-gradient-to-r from-purple-600 to-cyan-600 text-white'
+                  }`}
                 >
                   <Plus className="h-4 w-4" />
                   Create Course
                 </button>
               )}
             </div>
-            {/* Search & Filters */}
-            <div className="flex flex-col lg:flex-row gap-4 mb-8">
-              {/* Search */}
-              <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
-                <input
-                  type="text"
-                  placeholder="Search courses..."
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-slate-900 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-slate-700 transition"
-                />
-                {searchInput && (
-                  <button
-                    onClick={() => setSearchInput('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-slate-300"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
 
-              {/* Filters */}
-              <div className="flex gap-3">
-                {/* Category */}
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="px-4 py-3 bg-slate-900 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-slate-700 cursor-pointer min-w-[160px]"
-                >
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat.value} value={cat.value}>
-                      {cat.label}
-                    </option>
-                  ))}
-                </select>
+            {/* Interactive Category Pills - Framer Motion */}
+            <div className="mb-8 overflow-x-auto scrollbar-hide">
+              <LayoutGroup>
+                <div className="flex gap-2 pb-2">
+                  {CATEGORIES.map((cat) => {
+                    const Icon = cat.icon;
+                    const isActive = category === cat.value;
+                    return (
+                      <motion.button
+                        key={cat.value}
+                        layout
+                        onClick={() => setCategory(cat.value)}
+                        className={`relative flex items-center gap-2 px-4 py-2.5 rounded-full font-medium whitespace-nowrap transition-all ${
+                          isActive
+                            ? isDark
+                              ? 'text-white bg-gradient-aurora shadow-glow-purple'
+                              : 'text-white bg-gradient-to-r from-purple-600 to-cyan-600 shadow-lg'
+                            : isDark
+                              ? 'text-slate-400 bg-slate-800/50 hover:bg-slate-700/50 hover:text-white'
+                              : 'text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:text-slate-900 shadow-sm'
+                        }`}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                      >
+                        <Icon className="h-4 w-4" />
+                        {cat.label}
+                        {isActive && (
+                          <motion.div
+                            layoutId="activeCategory"
+                            className="absolute inset-0 bg-gradient-aurora rounded-full -z-10"
+                            initial={false}
+                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                          />
+                        )}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </LayoutGroup>
+            </div>
 
-                {/* Visibility (Premium only) */}
-                {isPremium && (
-                  <select
-                    value={visibility}
-                    onChange={(e) => setVisibility(e.target.value)}
-                    className="px-4 py-3 bg-slate-900 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-slate-700 cursor-pointer min-w-[140px]"
-                  >
-                    <option value="">All Visibility</option>
-                    <option value="PRIVATE">Private</option>
-                    <option value="PUBLIC">Public</option>
-                  </select>
-                )}
-
-                  {/* Clear Filters */}
-                  {hasActiveFilters && (
+            {/* Visibility Filter (Premium Only) */}
+            {isPremium && (
+              <div className="flex items-center gap-3 mb-8">
+                <span className={`text-sm font-medium ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Filter:</span>
+                <div className={`inline-flex gap-1 p-1 rounded-xl ${isDark ? 'bg-slate-800/50' : 'bg-slate-100'}`}>
+                  {['', 'PRIVATE', 'PUBLIC'].map((vis) => (
                     <button
-                      onClick={clearFilters}
-                      className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+                      key={vis}
+                      onClick={() => setVisibility(vis)}
+                      className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                        visibility === vis
+                          ? isDark
+                            ? 'bg-slate-700 text-white'
+                            : 'bg-white text-slate-900 shadow-sm'
+                          : isDark
+                            ? 'text-slate-400 hover:text-white'
+                            : 'text-slate-600 hover:text-slate-900'
+                      }`}
                     >
-                      Clear
+                      {vis === '' ? 'All' : vis === 'PRIVATE' ? 'Private' : 'Public'}
                     </button>
-                  )}
+                  ))}
                 </div>
               </div>
+            )}
+
             {/* Course Gallery */}
             {isLoading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6">
-                  {[...Array(6)].map((_, i) => (
-                    <div key={i} className="space-y-4 animate-pulse">
-                      <div className="aspect-video bg-slate-800 rounded-xl" />
-                      <div className="space-y-2">
-                        <div className="h-4 bg-slate-800 rounded w-3/4" />
-                        <div className="h-3 bg-slate-800 rounded w-1/2" />
-                      </div>
-                    </div>
-                  ))}
+              <GridSkeleton count={6} className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" />
+            ) : error ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="text-center">
+                  <p className={`font-medium ${isDark ? 'text-red-400' : 'text-red-600'}`}>Failed to load courses</p>
+                  <p className={`text-sm mt-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    {error instanceof Error ? error.message : 'Unknown error'}
+                  </p>
                 </div>
-              ) : error ? (
-                <div className="flex items-center justify-center py-20">
-                  <div className="text-center">
-                    <p className="text-red-600 dark:text-red-400">Failed to load courses</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                      {error instanceof Error ? error.message : 'Unknown error'}
-                    </p>
-                  </div>
-                </div>
-              ) : courses.length === 0 ? (
-                /* Empty State */
-                <div className="flex items-center justify-center py-20">
-                  <EmptyState
-                    icon={<BookOpen className="h-8 w-8" />}
-                    title={emptyState.title}
-                    description={emptyState.description}
-                    actionLabel={emptyState.actionLabel}
-                    onAction={emptyState.onAction}
-                    illustration={hasActiveFilters ? undefined : 'courses'}
-                  />
-                </div>
-              ) : (
-                /* Streaming-Style Course Gallery */
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6">
-                  <AnimatePresence>
-                    {courses.map((course: Course, index: number) => (
+              </div>
+            ) : courses.length === 0 ? (
+              /* Empty State */
+              <div className="flex items-center justify-center py-20">
+                <EmptyState
+                  icon={<BookOpen className="h-8 w-8" />}
+                  title={emptyState.title}
+                  description={emptyState.description}
+                  actionLabel={emptyState.actionLabel}
+                  onAction={emptyState.onAction}
+                  illustration={hasActiveFilters ? undefined : 'courses'}
+                />
+              </div>
+            ) : (
+              /* Premium Course Cards Grid */
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <AnimatePresence mode="popLayout">
+                  {courses.map((course: Course, index: number) => {
+                    const CategoryIcon = categoryIcons[course.category] || Sparkles;
+                    return (
                       <motion.div
                         key={course.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="group cursor-pointer bg-zinc-900/40 dark:bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl p-3 hover:-translate-y-1 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] hover:border-blue-500/30 transition-all duration-150"
+                        layout
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ 
+                          delay: index * 0.03,
+                          type: 'spring',
+                          stiffness: 400,
+                          damping: 25
+                        }}
+                        className={`group cursor-pointer rounded-3xl p-4 transition-all duration-200 hover:-translate-y-1 ${
+                          isDark
+                            ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 hover:border-purple-500/30 hover:shadow-glow-purple'
+                            : 'bg-white border border-slate-200 hover:border-purple-300 hover:shadow-2xl'
+                        }`}
                       >
-                        {/* Cover Image with Hover Play Button */}
-                        <div className="relative aspect-video rounded-2xl overflow-hidden mb-4 border border-white/10 shadow-lg">
+                        {/* Course Banner with Overlay */}
+                        <div className="relative aspect-video rounded-2xl overflow-hidden mb-4 shadow-md">
                           <Link to={`/courses/${course.id}`} className="block h-full">
-                            {course.coverImage ? (
-                              <img
-                                src={course.coverImage}
+                            {course.coverImage || course.bannerImage ? (
+                              <LazyImage
+                                src={course.coverImage || course.bannerImage || ''}
                                 alt={course.title}
-                                loading="lazy"
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-150"
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               />
                             ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-zinc-900/80 via-zinc-900/60 to-zinc-900/80 backdrop-blur-xl flex items-center justify-center relative">
-                                <div className="absolute inset-0 bg-gradient-to-br from-blue-900/10 to-purple-900/10" />
-                                <BookOpen className="h-16 w-16 text-slate-400/60 relative z-10" />
+                              <div className={`w-full h-full flex items-center justify-center ${
+                                isDark 
+                                  ? 'bg-gradient-to-br from-slate-700 to-slate-800' 
+                                  : 'bg-gradient-to-br from-slate-100 to-slate-200'
+                              }`}>
+                                <CategoryIcon className={`h-16 w-16 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
                               </div>
                             )}
                             
-                            {/* Play/Resume Overlay */}
-                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-center justify-center">
-                              <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center transform group-hover:scale-110 transition-transform">
-                                <Play className="w-8 h-8 text-slate-950 ml-1" fill="currentColor" />
+                            {/* Play/Open Overlay */}
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                              <div className="w-14 h-14 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transform group-hover:scale-110 transition-transform shadow-xl">
+                                <Play className="w-6 h-6 text-purple-600 ml-0.5" fill="currentColor" />
                               </div>
                             </div>
                           </Link>
                           
-                          {/* Visibility Badge */}
+                          {/* Top Badges */}
                           <div className="absolute top-3 left-3">
                             <VisibilityChip visibility={course.visibility} size="sm" />
                           </div>
@@ -446,16 +549,28 @@ export default function CoursesUnified() {
                                   e.preventDefault();
                                   setOpenMenu(openMenu === course.id ? null : course.id);
                                 }}
-                                className="p-1.5 rounded-full bg-black/60 hover:bg-black/80 transition-colors"
+                                className={`p-2 rounded-xl backdrop-blur-md transition-all ${
+                                  isDark 
+                                    ? 'bg-black/40 hover:bg-black/60' 
+                                    : 'bg-white/60 hover:bg-white/80'
+                                }`}
                               >
-                                <MoreVertical className="h-4 w-4 text-white" />
+                                <MoreVertical className={`h-4 w-4 ${isDark ? 'text-white' : 'text-slate-700'}`} />
                               </button>
 
                               {openMenu === course.id && (
-                                <div className="absolute right-0 mt-1 w-48 bg-slate-900 rounded-lg shadow-xl py-1 z-10 border border-slate-800">
+                                <div className={`absolute right-0 mt-2 w-48 rounded-xl shadow-2xl py-1 z-10 ${
+                                  isDark 
+                                    ? 'bg-slate-800 border border-slate-700' 
+                                    : 'bg-white border border-slate-200'
+                                }`}>
                                   <Link
                                     to={`/courses/${course.id}`}
-                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-white hover:bg-slate-800"
+                                    className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                                      isDark 
+                                        ? 'text-white hover:bg-slate-700' 
+                                        : 'text-slate-700 hover:bg-slate-50'
+                                    }`}
                                   >
                                     <Edit className="h-4 w-4" />
                                     Edit
@@ -467,15 +582,23 @@ export default function CoursesUnified() {
                                       toast.success('Link copied!');
                                       setOpenMenu(null);
                                     }}
-                                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-white hover:bg-slate-800"
+                                    className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm transition-colors ${
+                                      isDark 
+                                        ? 'text-white hover:bg-slate-700' 
+                                        : 'text-slate-700 hover:bg-slate-50'
+                                    }`}
                                   >
                                     <Share2 className="h-4 w-4" />
                                     Copy Link
                                   </button>
-                                  <hr className="my-1 border-slate-800" />
+                                  <hr className={isDark ? 'border-slate-700' : 'border-slate-200'} />
                                   <button
                                     onClick={() => handleDelete(course.id)}
-                                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-400 hover:bg-red-900/20"
+                                    className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm transition-colors ${
+                                      isDark 
+                                        ? 'text-red-400 hover:bg-red-900/20' 
+                                        : 'text-red-600 hover:bg-red-50'
+                                    }`}
                                   >
                                     <Trash2 className="h-4 w-4" />
                                     Delete
@@ -486,33 +609,40 @@ export default function CoursesUnified() {
                           )}
                         </div>
 
-                        {/* Content Below Image */}
-                        <Link to={`/courses/${course.id}`} className="block space-y-2">
-                          <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-2">
+                        {/* Course Info */}
+                        <Link to={`/courses/${course.id}`} className="block space-y-3">
+                          <h3 className={`text-lg font-bold line-clamp-2 group-hover:text-gradient group-hover:bg-gradient-aurora transition-all ${
+                            isDark ? 'text-white' : 'text-slate-900'
+                          }`}>
                             {course.title}
                           </h3>
                           
                           {course.description && (
-                            <p className="text-sm text-slate-400 line-clamp-2">
+                            <p className={`text-sm line-clamp-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                               {course.description}
                             </p>
                           )}
                           
-                          <div className="flex items-center gap-3 text-xs">
-                            <span className="px-2 py-1 bg-white/5 rounded-lg border border-white/10 text-slate-400">
-                              {CATEGORIES.find((c) => c.value === course.category)?.label ||
-                                course.category.replace('_', ' ')}
-                            </span>
-                            <span className="text-slate-500">
+                          <div className="flex items-center justify-between">
+                            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
+                              isDark 
+                                ? 'bg-slate-700/50 text-slate-300' 
+                                : 'bg-slate-100 text-slate-600'
+                            }`}>
+                              <CategoryIcon className="h-3.5 w-3.5" />
+                              {CATEGORIES.find((c) => c.value === course.category)?.label || course.category}
+                            </div>
+                            <span className={`text-xs font-medium ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
                               {course.filesCount} {course.filesCount === 1 ? 'file' : 'files'}
                             </span>
                           </div>
                         </Link>
                       </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-              )}
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -520,18 +650,26 @@ export default function CoursesUnified() {
       {/* Create Course Modal */}
       {showCreateModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
           onClick={() => setShowCreateModal(false)}
         >
-          <div
-            className="backdrop-blur-lg bg-white/95 dark:bg-slate-900/95 rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.3)] w-full max-w-lg p-6 border border-white/20 dark:border-white/10"
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            className={`w-full max-w-lg p-6 rounded-3xl shadow-2xl ${
+              isDark 
+                ? 'bg-slate-800/95 backdrop-blur-xl border border-slate-700' 
+                : 'bg-white'
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl">
+              <div className="p-2 bg-gradient-aurora rounded-xl shadow-glow-purple">
                 <Plus className="h-5 w-5 text-white" />
               </div>
-              <h2 className="text-xl font-bold text-slate-100">Create New Course</h2>
+              <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Create New Course</h2>
             </div>
 
             <form
@@ -542,7 +680,7 @@ export default function CoursesUnified() {
             >
               <div className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                     Course Title <span className="text-red-400">*</span>
                   </label>
                   <input
@@ -550,13 +688,17 @@ export default function CoursesUnified() {
                     value={newCourse.title}
                     onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })}
                     placeholder="e.g., Introduction to Calculus"
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    className={`w-full px-4 py-3 rounded-xl transition-all focus:ring-2 focus:ring-purple-500 ${
+                      isDark 
+                        ? 'bg-slate-700/50 border border-slate-600 text-white placeholder-slate-500' 
+                        : 'bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400'
+                    }`}
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                     Description
                   </label>
                   <textarea
@@ -564,18 +706,26 @@ export default function CoursesUnified() {
                     onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })}
                     placeholder="What will students learn in this course?"
                     rows={3}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
+                    className={`w-full px-4 py-3 rounded-xl transition-all resize-none focus:ring-2 focus:ring-purple-500 ${
+                      isDark 
+                        ? 'bg-slate-700/50 border border-slate-600 text-white placeholder-slate-500' 
+                        : 'bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400'
+                    }`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                     Category
                   </label>
                   <select
                     value={newCourse.category}
                     onChange={(e) => setNewCourse({ ...newCourse, category: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent cursor-pointer"
+                    className={`w-full px-4 py-3 rounded-xl transition-all cursor-pointer focus:ring-2 focus:ring-purple-500 ${
+                      isDark 
+                        ? 'bg-slate-700/50 border border-slate-600 text-white' 
+                        : 'bg-slate-50 border border-slate-200 text-slate-900'
+                    }`}
                   >
                     {CATEGORIES.slice(1).map((cat) => (
                       <option key={cat.value} value={cat.value}>
@@ -586,15 +736,17 @@ export default function CoursesUnified() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-3">
+                  <label className={`block text-sm font-medium mb-3 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                     Visibility
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     <label
-                      className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                      className={`flex items-center gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
                         newCourse.visibility === 'PRIVATE'
-                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                          ? 'border-purple-500 bg-purple-500/10'
+                          : isDark
+                            ? 'border-slate-600 hover:border-slate-500'
+                            : 'border-slate-200 hover:border-slate-300'
                       }`}
                     >
                       <input
@@ -606,25 +758,33 @@ export default function CoursesUnified() {
                         className="sr-only"
                       />
                       <div
-                        className={`p-2 rounded-lg ${newCourse.visibility === 'PRIVATE' ? 'bg-primary-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500'}`}
+                        className={`p-2 rounded-lg ${
+                          newCourse.visibility === 'PRIVATE' 
+                            ? 'bg-purple-500 text-white' 
+                            : isDark 
+                              ? 'bg-slate-700 text-slate-400' 
+                              : 'bg-slate-100 text-slate-500'
+                        }`}
                       >
                         <Lock className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="font-medium text-slate-100 text-sm">Private</p>
-                        <p className="text-xs text-slate-400">
+                        <p className={`font-medium text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>Private</p>
+                        <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                           Only you & shared links
                         </p>
                       </div>
                     </label>
 
                     <label
-                      className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
+                      className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all ${
                         !isPremium
-                          ? 'opacity-50 cursor-not-allowed border-gray-200 dark:border-gray-600'
+                          ? 'opacity-50 cursor-not-allowed border-slate-300 dark:border-slate-600'
                           : newCourse.visibility === 'PUBLIC'
-                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 cursor-pointer'
-                            : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 cursor-pointer'
+                            ? 'border-purple-500 bg-purple-500/10 cursor-pointer'
+                            : isDark
+                              ? 'border-slate-600 hover:border-slate-500 cursor-pointer'
+                              : 'border-slate-200 hover:border-slate-300 cursor-pointer'
                       }`}
                     >
                       <input
@@ -637,20 +797,26 @@ export default function CoursesUnified() {
                         className="sr-only"
                       />
                       <div
-                        className={`p-2 rounded-lg ${newCourse.visibility === 'PUBLIC' ? 'bg-primary-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500'}`}
+                        className={`p-2 rounded-lg ${
+                          newCourse.visibility === 'PUBLIC' 
+                            ? 'bg-purple-500 text-white' 
+                            : isDark 
+                              ? 'bg-slate-700 text-slate-400' 
+                              : 'bg-slate-100 text-slate-500'
+                        }`}
                       >
                         <Globe className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="font-medium text-slate-100 text-sm">
+                        <p className={`font-medium text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
                           Public
                           {!isPremium && (
-                            <span className="ml-1 text-xs text-indigo-400">
+                            <span className="ml-1 text-xs text-purple-400">
                               (Premium)
                             </span>
                           )}
                         </p>
-                        <p className="text-xs text-slate-400">
+                        <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                           Visible to all users
                         </p>
                       </div>
@@ -659,18 +825,22 @@ export default function CoursesUnified() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-white/10">
+              <div className={`flex justify-end gap-3 mt-8 pt-6 border-t ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-5 py-2.5 text-slate-300 hover:bg-white/5 rounded-xl transition-colors"
+                  className={`px-5 py-2.5 rounded-xl transition-colors ${
+                    isDark 
+                      ? 'text-slate-300 hover:bg-slate-700' 
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={!newCourse.title || createCourseMutation.isPending}
-                  className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:shadow-[0_8px_30px_rgba(124,58,237,0.4)] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
+                  className="px-5 py-2.5 bg-gradient-aurora text-white rounded-xl shadow-glow-purple hover:shadow-glow-purple-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {createCourseMutation.isPending ? (
                     <span className="flex items-center gap-2">
@@ -698,7 +868,7 @@ export default function CoursesUnified() {
                 </button>
               </div>
             </form>
-          </div>
+          </motion.div>
         </div>
       )}
 
