@@ -6,7 +6,7 @@
 import { useState, useRef } from 'react';
 import Modal, { ModalFooter } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
-import { Download, FileImage, FileText, Sparkles, Zap, Crown, GraduationCap } from 'lucide-react';
+import { FileImage, FileText, Sparkles, Zap, Crown, GraduationCap } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
