@@ -137,15 +137,17 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
       onClose={onClose}
       title="Get a Quote"
       description="Configure your plan and export a professional quote"
-      size="lg"
+      size="full"
     >
-      <div className="space-y-6">
-        {/* Plan Selection */}
-        <div>
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
-            Select Plan
-          </label>
-          <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Column: Configuration */}
+        <div className="space-y-4">
+          {/* Plan Selection */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+              Select Plan
+            </label>
+            <div className="grid grid-cols-2 gap-3">
             {(Object.entries(PLANS) as [PlanType, PlanConfig][]).map(([key, planConfig]) => (
               <button
                 key={key}
@@ -181,11 +183,11 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
           </div>
         </div>
 
-        {/* Billing Cycle Selection */}
-        <div>
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
-            Billing Cycle
-          </label>
+          {/* Billing Cycle Selection */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+              Billing Cycle
+            </label>
           <div className="space-y-2">
             {(Object.entries(BILLING_CYCLES) as [BillingCycle, typeof BILLING_CYCLES[BillingCycle]][]).map(
               ([key, cycle]) => (
@@ -208,15 +210,16 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
               )
             )}
           </div>
+          </div>
         </div>
 
-        {/* Quote Preview */}
+        {/* Right Column: Quote Preview */}
         <div
           ref={quoteRef}
-          className="bg-white dark:bg-slate-900 rounded-xl border-2 border-slate-200 dark:border-slate-700 p-8 shadow-lg"
+          className="bg-white dark:bg-slate-900 rounded-xl border-2 border-slate-200 dark:border-slate-700 p-6 shadow-lg"
         >
           {/* Header */}
-          <div className="flex items-center justify-between mb-6 pb-6 border-b border-slate-200 dark:border-slate-700">
+          <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-200 dark:border-slate-700">
             <div>
               <h3 className="text-2xl font-bold bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-transparent">
                 Thynkr
@@ -236,7 +239,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
           </div>
 
           {/* Plan Details */}
-          <div className="space-y-4 mb-6">
+          <div className="space-y-3 mb-4">
             <div className="flex items-center gap-3">
               <div className={`p-3 rounded-xl bg-gradient-to-br ${plan.color} text-white`}>
                 {plan.icon}
@@ -256,7 +259,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
           </div>
 
           {/* Pricing Breakdown */}
-          <div className="space-y-3 mb-6 pb-6 border-b border-slate-200 dark:border-slate-700">
+          <div className="space-y-2 mb-4 pb-4 border-b border-slate-200 dark:border-slate-700">
             <div className="flex justify-between text-sm">
               <span className="text-slate-600 dark:text-slate-400">Price per month</span>
               <span className="font-semibold text-slate-900 dark:text-white">
@@ -296,7 +299,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
           </div>
 
           {/* Footer Note */}
-          <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+          <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
             <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
               All plans include a 7-day money-back guarantee. Cancel anytime.
               <br />
@@ -304,9 +307,10 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
             </p>
           </div>
         </div>
+      </div>
 
-        {/* Export Actions */}
-        <ModalFooter>
+      {/* Export Actions */}
+      <ModalFooter>
           <Button variant="secondary" onClick={onClose}>
             Close
           </Button>
