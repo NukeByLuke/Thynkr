@@ -23,6 +23,7 @@ interface PlanConfig {
   monthlyPrice: number;
   icon: React.ReactNode;
   color: string;
+  description: string;
   comingSoon?: boolean;
 }
 
@@ -32,18 +33,21 @@ const PLANS: Record<PlanType, PlanConfig> = {
     monthlyPrice: 0,
     icon: <Sparkles className="w-5 h-5" />,
     color: 'from-slate-500 to-slate-600',
+    description: 'Essential study tools for getting started',
   },
   standard: {
     name: 'Standard',
     monthlyPrice: 4.99,
     icon: <Zap className="w-5 h-5" />,
     color: 'from-blue-500 to-indigo-600',
+    description: 'Advanced AI tools and unlimited uploads',
   },
   premium: {
     name: 'Premium',
     monthlyPrice: 9.99,
     icon: <Crown className="w-5 h-5" />,
     color: 'from-brand-500 to-accent-600',
+    description: 'Everything in Standard plus priority support',
   },
 };
 
@@ -120,6 +124,9 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
 
     setIsExporting(true);
     try {
+      // Temporarily add export class for light mode styling
+      quoteRef.current.classList.add('exporting');
+      
       const canvas = await html2canvas(quoteRef.current, {
         backgroundColor: '#ffffff', // White background for light mode
         scale: 2,
@@ -134,6 +141,10 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
     } catch (error) {
       console.error('Failed to export PNG:', error);
     } finally {
+      // Remove export class
+      if (quoteRef.current) {
+        quoteRef.current.classList.remove('exporting');
+      }
       setIsExporting(false);
     }
   };
@@ -143,6 +154,9 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
 
     setIsExporting(true);
     try {
+      // Temporarily add export class for light mode styling
+      quoteRef.current.classList.add('exporting');
+      
       const canvas = await html2canvas(quoteRef.current, {
         backgroundColor: '#ffffff', // White background for light mode
         scale: 2,
@@ -165,6 +179,10 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
     } catch (error) {
       console.error('Failed to export PDF:', error);
     } finally {
+      // Remove export class
+      if (quoteRef.current) {
+        quoteRef.current.classList.remove('exporting');
+      }
       setIsExporting(false);
     }
   };
@@ -216,6 +234,9 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                     </div>
                   </div>
                 </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  {planConfig.description}
+                </p>
               </button>
             ))}
           </div>
@@ -286,20 +307,20 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
         {/* Right Column: Quote Preview */}
         <div
           ref={quoteRef}
-          className="bg-white rounded-xl border-2 border-slate-200 p-8 shadow-lg"
+          className="bg-white dark:bg-slate-800 rounded-xl border-2 border-slate-200 dark:border-slate-700 p-8 shadow-lg [&.exporting]:bg-white [&.exporting]:border-slate-200"
           style={{ padding: '2rem' }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-200">
+          <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-200 dark:border-slate-700 [&.exporting]:border-slate-200">
             <div>
               <h3 className="text-2xl font-bold bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-transparent">
                 Thynkr
               </h3>
-              <p className="text-sm text-slate-600 mt-1">Pricing Quote</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400 [.exporting_&]:text-slate-600 mt-1">Pricing Quote</p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-slate-600">Date</p>
-              <p className="font-semibold text-slate-900">
+              <p className="text-sm text-slate-600 dark:text-slate-400 [.exporting_&]:text-slate-600">Date</p>
+              <p className="font-semibold text-slate-900 dark:text-white [.exporting_&]:text-slate-900">
                 {new Date().toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
@@ -317,7 +338,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                 {plan.icon}
               </div>
               <div>
-                <h4 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <h4 className="text-xl font-bold text-slate-900 dark:text-white [.exporting_&]:text-slate-900 flex items-center gap-2">
                   {plan.name} Plan
                   {effectiveStudentDiscount && (
                     <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium border border-green-200">
@@ -325,47 +346,48 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                     </span>
                   )}
                 </h4>
-                <p className="text-sm text-slate-600">{billing.label}</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400 [.exporting_&]:text-slate-600">{billing.label}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 [.exporting_&]:text-slate-500 mt-1">{plan.description}</p>
               </div>
             </div>
           </div>
 
           {/* Pricing Breakdown */}
-          <div className="space-y-2 mb-4 pb-4 border-b border-slate-200">
+          <div className="space-y-2 mb-4 pb-4 border-b border-slate-200 dark:border-slate-700 [.exporting_&]:border-slate-200">
             <div className="flex justify-between text-sm">
-              <span className="text-slate-600">Price per month</span>
-              <span className="font-semibold text-slate-900">
+              <span className="text-slate-600 dark:text-slate-400 [.exporting_&]:text-slate-600">Price per month</span>
+              <span className="font-semibold text-slate-900 dark:text-white [.exporting_&]:text-slate-900">
                 ${pricePerMonth.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-slate-600">Duration</span>
-              <span className="font-semibold text-slate-900">
+              <span className="text-slate-600 dark:text-slate-400 [.exporting_&]:text-slate-600">Duration</span>
+              <span className="font-semibold text-slate-900 dark:text-white [.exporting_&]:text-slate-900">
                 {totalMonths} {totalMonths === 1 ? 'month' : 'months'}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-slate-600">Subtotal</span>
-              <span className="font-semibold text-slate-900">
+              <span className="text-slate-600 dark:text-slate-400 [.exporting_&]:text-slate-600">Subtotal</span>
+              <span className="font-semibold text-slate-900 dark:text-white [.exporting_&]:text-slate-900">
                 ${subtotal.toFixed(2)}
               </span>
             </div>
             {billing.discount > 0 && (
               <div className="flex justify-between text-sm">
-                <span className="text-green-700 font-semibold">
+                <span className="text-green-700 dark:text-green-400 [.exporting_&]:text-green-700 font-semibold">
                   Billing Discount ({billing.discount}%)
                 </span>
-                <span className="font-bold text-green-700">
+                <span className="font-bold text-green-700 dark:text-green-400 [.exporting_&]:text-green-700">
                   -${billingDiscountAmount.toFixed(2)}
                 </span>
               </div>
             )}
             {effectiveStudentDiscount && (
               <div className="flex justify-between text-sm">
-                <span className="text-green-700 font-semibold">
+                <span className="text-green-700 dark:text-green-400 [.exporting_&]:text-green-700 font-semibold">
                   Student Discount ({studentDiscountPercent}%)
                 </span>
-                <span className="font-bold text-green-700">
+                <span className="font-bold text-green-700 dark:text-green-400 [.exporting_&]:text-green-700">
                   -${studentDiscountAmount.toFixed(2)}
                 </span>
               </div>
@@ -374,15 +396,15 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
 
           {/* Total */}
           <div className="flex justify-between items-center">
-            <span className="text-lg font-bold text-slate-900">Total Cost</span>
+            <span className="text-lg font-bold text-slate-900 dark:text-white [.exporting_&]:text-slate-900">Total Cost</span>
             <span className="text-3xl font-bold bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-transparent">
               ${totalCost.toFixed(2)}
             </span>
           </div>
 
           {/* Footer Note */}
-          <div className="mt-4 pt-4 border-t border-slate-200">
-            <p className="text-xs text-slate-500 text-center">
+          <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 [.exporting_&]:border-slate-200">
+            <p className="text-xs text-slate-500 dark:text-slate-400 [.exporting_&]:text-slate-500 text-center">
               All plans include a 7-day money-back guarantee. Cancel anytime.
               <br />
               Questions? Contact us at support@thynkr.com
