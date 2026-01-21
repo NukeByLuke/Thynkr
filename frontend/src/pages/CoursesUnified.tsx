@@ -274,17 +274,17 @@ export default function CoursesUnified() {
         <meta name="description" content="Explore, create, and study smarter with Thynkr courses" />
       </Helmet>
 
-      <div className="h-full flex flex-col overflow-hidden">
-        {/* Glassmorphic Hero Section - Compact */}
-        <div className={`relative overflow-hidden py-8 ${isDark ? 'bg-gradient-to-br from-slate-900 via-slate-900/95 to-slate-950' : 'bg-gradient-to-br from-slate-50 via-white to-slate-100'}`}>
+      <div className="h-full flex flex-col relative">
+        {/* Glassmorphic Hero Section - Fixed Background */}
+        <div className={`fixed top-0 left-0 right-0 h-[50vh] overflow-hidden ${isDark ? 'bg-gradient-to-br from-slate-900 via-slate-900/95 to-slate-950' : 'bg-gradient-to-br from-slate-50 via-white to-slate-100'} z-0`}>
           {/* Blurred Gradient Orbs */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-purple-500/20 blur-3xl" />
             <div className="absolute top-20 -left-40 w-96 h-96 rounded-full bg-cyan-500/20 blur-3xl" />
           </div>
           
-          <div className="relative max-w-6xl mx-auto px-6 sm:px-8">
-            <div className="text-center">
+          <div className="relative max-w-6xl mx-auto px-6 sm:px-8 py-8 flex items-center h-full">
+            <div className="text-center w-full">
               <motion.h1 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -344,9 +344,10 @@ export default function CoursesUnified() {
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 py-6">
+        {/* Main Content - Scrollable Over Hero */}
+        <div className="relative z-10 flex-1 overflow-y-auto pt-[50vh]">
+          <div className={`${isDark ? 'bg-slate-900' : 'bg-white'} rounded-t-3xl shadow-2xl`}>
+            <div className="max-w-7xl mx-auto px-6 sm:px-8 py-6">
             
             {/* Tab Switcher & Create Button */}
             <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
@@ -895,6 +896,8 @@ export default function CoursesUnified() {
 
       {/* Click outside to close menu */}
       {openMenu && <div className="fixed inset-0 z-30" onClick={() => setOpenMenu(null)} />}
+          </div>
+        </div>
     </>
   );
 }
