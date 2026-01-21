@@ -151,7 +151,7 @@ export default function UploadModal({
 
     // Create a File object from the text content
     const blob = new Blob([textContent], { type: 'text/plain' });
-    const file = new File([blob], `${textTitle}.txt`, { type: 'text/plain' });
+    const file = new (File as any)([blob], `${textTitle}.txt`, { type: 'text/plain' }) as File;
     
     // Use DataTransfer to create a FileList
     const dataTransfer = new DataTransfer();
