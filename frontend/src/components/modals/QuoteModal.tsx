@@ -333,7 +333,6 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
             {isExporting ? 'Exporting...' : 'Download PDF'}
           </Button>
         </ModalFooter>
-      </div>
     </Modal>
   );
 }
