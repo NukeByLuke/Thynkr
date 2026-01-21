@@ -5,7 +5,7 @@
 
 import { useState, useRef, DragEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Upload, Youtube, File, Check, AlertCircle } from 'lucide-react';
+import { X, Upload, Youtube, File, Check, AlertCircle, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import LoadingProgress from './ui/LoadingProgress';
 
@@ -18,7 +18,7 @@ interface UploadModalProps {
   currentFolderId?: string | null;
 }
 
-type TabType = 'files' | 'youtube';
+type TabType = 'files' | 'youtube' | 'text';
 
 const ACCEPTED_FILE_TYPES = '.pdf,.doc,.docx,.ppt,.pptx,.pps,.ppsx,.txt';
 const ACCEPTED_MIME_TYPES = [
@@ -41,6 +41,8 @@ export default function UploadModal({
   const [isDragging, setIsDragging] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [textTitle, setTextTitle] = useState('');
+  const [textContent, setTextContent] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Reset state when modal closes
@@ -48,6 +50,8 @@ export default function UploadModal({
     setActiveTab('files');
     setYoutubeUrl('');
     setSelectedFiles([]);
+    setTextTitle('');
+    setTextContent('');
     setIsDragging(false);
     onClose();
   };
@@ -133,6 +137,29 @@ export default function UploadModal({
     handleClose();
   };
 
+  // Submit pasted text
+  const handleSubmitText = () => {
+    if (!textTitle.trim()) {
+      toast.error('Please enter a title');
+      return;
+    }
+
+    if (!textContent.trim()) {
+      toast.error('Please enter some content');
+      return;
+    }
+
+    // Create a File object from the text content
+    const file = new File([textContent], `${textTitle}.txt`, { type: 'text/plain' });
+    
+    // Use DataTransfer to create a FileList
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    
+    onUploadFiles(dataTransfer.files);
+    handleClose();
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -168,7 +195,13 @@ export default function UploadModal({
               >
                 <LoadingProgress
                   message="Uploading"
-                  stage={activeTab === 'youtube' ? 'Processing YouTube link...' : `Uploading ${selectedFiles.length} file${selectedFiles.length !== 1 ? 's' : ''}...`}
+                  stage={
+                    activeTab === 'youtube'
+                      ? 'Processing YouTube link...'
+                      : activeTab === 'text'
+                      ? 'Processing text content...'
+                      : `Uploading ${selectedFiles.length} file${selectedFiles.length !== 1 ? 's' : ''}...`
+                  }
                   variant="upload"
                 />
               </motion.div>
@@ -224,6 +257,25 @@ export default function UploadModal({
                 <span>YouTube Link</span>
               </div>
               {activeTab === 'youtube' && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-violet-500"
+                />
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('text')}
+              className={`flex-1 px-6 py-4 text-sm font-medium transition-all duration-150 relative active:scale-95 ${
+                activeTab === 'text'
+                  ? 'text-slate-900 dark:text-white'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <FileText className="w-4 h-4" />
+                <span>Paste Text</span>
+              </div>
+              {activeTab === 'text' && (
                 <motion.div
                   layoutId="activeTab"
                   className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-violet-500"
@@ -386,6 +438,54 @@ export default function UploadModal({
                   </p>
                 </div>
               </div>
+            ) : (
+              <div className="space-y-5">
+                {/* Title Input */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-3">
+                    Title
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={textTitle}
+                      onChange={(e) => setTextTitle(e.target.value)}
+                      placeholder="Enter a title for your text..."
+                      className="w-full px-4 py-4 bg-white/5 dark:bg-white/5 backdrop-blur-sm border-2 border-slate-200 dark:border-white/20 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+                      maxLength={100}
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                    {textTitle.length}/100 characters
+                  </p>
+                </div>
+
+                {/* Content Textarea */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-3">
+                    Content
+                  </label>
+                  <div className="relative">
+                    <textarea
+                      value={textContent}
+                      onChange={(e) => setTextContent(e.target.value)}
+                      placeholder="Paste or type your content here...&#10;&#10;This could be lecture notes, study materials, or any text you want to process."
+                      rows={12}
+                      className="w-full px-4 py-4 bg-white/5 dark:bg-white/5 backdrop-blur-sm border-2 border-slate-200 dark:border-white/20 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all resize-none font-mono text-sm"
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                    {textContent.length.toLocaleString()} characters
+                  </p>
+                </div>
+
+                {/* Info Banner */}
+                <div className="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 rounded-xl p-4">
+                  <p className="text-sm text-purple-700 dark:text-purple-300 font-medium">
+                    Your text will be saved and processed like a regular file
+                  </p>
+                </div>
+              </div>
             )}
           </div>
 
@@ -399,10 +499,20 @@ export default function UploadModal({
               Cancel
             </button>
             <button
-              onClick={activeTab === 'files' ? handleSubmitFiles : handleSubmitYouTube}
+              onClick={
+                activeTab === 'files'
+                  ? handleSubmitFiles
+                  : activeTab === 'youtube'
+                  ? handleSubmitYouTube
+                  : handleSubmitText
+              }
               disabled={
                 isUploading ||
-                (activeTab === 'files' ? selectedFiles.length === 0 : !isValidYouTubeUrl(youtubeUrl))
+                (activeTab === 'files'
+                  ? selectedFiles.length === 0
+                  : activeTab === 'youtube'
+                  ? !isValidYouTubeUrl(youtubeUrl)
+                  : !textTitle.trim() || !textContent.trim())
               }
               className="px-6 py-2 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white font-medium rounded-lg shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-95 will-change-transform"
             >
