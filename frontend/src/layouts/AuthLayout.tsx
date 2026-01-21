@@ -18,28 +18,50 @@ interface AuthLayoutProps {
 /**
  * BrandingPanel - Left side with logo and tagline
  */
-function BrandingPanel() {
+function BrandingPanel({ isDark }: { isDark: boolean }) {
   return (
-    <div className="hidden md:flex flex-col items-center justify-between w-[420px] bg-slate-950 relative overflow-hidden rounded-l-3xl p-10 text-white">
+    <div className={`hidden md:flex flex-col items-center justify-between w-[420px] relative overflow-hidden rounded-l-3xl p-10 transition-colors duration-150 ${
+      isDark 
+        ? 'bg-slate-950 text-white' 
+        : 'bg-gradient-to-br from-slate-100 to-slate-200 text-slate-900'
+    }`}>
       {/* Background Effects */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(124,58,237,0.15),rgba(15,23,42,0))]" />
-      <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+      <div className={`absolute inset-0 ${
+        isDark 
+          ? 'bg-[radial-gradient(circle_at_50%_120%,rgba(124,58,237,0.15),rgba(15,23,42,0))]'
+          : 'bg-[radial-gradient(circle_at_50%_120%,rgba(124,58,237,0.08),rgba(255,255,255,0))]'
+      }`} />
+      <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 ${
+        isDark ? 'bg-cyan-500/5' : 'bg-cyan-500/10'
+      }`} />
+      <div className={`absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 ${
+        isDark ? 'bg-purple-500/5' : 'bg-purple-500/10'
+      }`} />
 
       {/* Logo and Brand */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center">
         {/* Thynkr Logo */}
         <div className="mb-8 transform hover:scale-105 transition-transform duration-500 w-64 h-64">
-          <Logo variant="symbol" theme="dark" size="lg" className="w-full h-full drop-shadow-[0_0_30px_rgba(124,58,237,0.5)]" />
+          <Logo variant="symbol" size="lg" className={`w-full h-full ${
+            isDark 
+              ? 'drop-shadow-[0_0_30px_rgba(124,58,237,0.5)]' 
+              : 'drop-shadow-[0_0_20px_rgba(124,58,237,0.3)]'
+          }`} />
         </div>
         
         {/* Brand Name */}
-        <h1 className="text-5xl font-bold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-400">
+        <h1 className={`text-5xl font-bold tracking-tight mb-4 bg-clip-text text-transparent ${
+          isDark 
+            ? 'bg-gradient-to-b from-white to-slate-400'
+            : 'bg-gradient-to-b from-slate-800 to-slate-600'
+        }`}>
           Thynkr
         </h1>
         
         {/* Tagline */}
-        <p className="text-slate-400 text-lg text-center max-w-[280px] leading-relaxed">
+        <p className={`text-lg text-center max-w-[280px] leading-relaxed ${
+          isDark ? 'text-slate-400' : 'text-slate-600'
+        }`}>
           Transform your learning with intelligent AI study tools
         </p>
       </div>
@@ -48,19 +70,25 @@ function BrandingPanel() {
       <nav className="relative z-10 flex items-center gap-8 text-sm font-medium">
         <Link
           to="/about"
-          className="text-slate-400 hover:text-white transition-colors"
+          className={`transition-colors ${
+            isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'
+          }`}
         >
           About
         </Link>
         <Link
           to="/testimonials"
-          className="text-slate-400 hover:text-white transition-colors"
+          className={`transition-colors ${
+            isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'
+          }`}
         >
           Testimonials
         </Link>
         <Link
           to="/contact"
-          className="text-slate-400 hover:text-white transition-colors"
+          className={`transition-colors ${
+            isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'
+          }`}
         >
           Contact
         </Link>
@@ -89,7 +117,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       {/* Two-Panel Container */}
       <div className="flex rounded-3xl overflow-hidden shadow-2xl max-w-[900px] w-full">
         {/* Left Panel - Branding */}
-        <BrandingPanel />
+        <BrandingPanel isDark={isDark} />
 
         {/* Right Panel - Form */}
         <div 
