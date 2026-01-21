@@ -3,9 +3,10 @@ import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import Button from '@/components/ui/Button';
-import { Check, X, Sparkles, Zap, Crown, ArrowRight, TrendingUp, Brain, Bolt } from 'lucide-react';
+import { Check, X, Sparkles, Zap, Crown, ArrowRight, TrendingUp, Brain, Bolt, FileText } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
+import QuoteModal from '@/components/modals/QuoteModal';
 
 type BillingCycle = 'monthly' | 'yearly';
 
@@ -43,6 +44,7 @@ const STRIPE_PRICES = {
 export default function Pricing() {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -214,37 +216,49 @@ export default function Pricing() {
               Every plan includes AI-powered study tools.
             </p>
 
-            {/* Billing Toggle */}
-            <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-2 rounded-2xl shadow-soft border border-white/20 dark:border-white/10">
-              <button
-                onClick={() => setBillingCycle('monthly')}
-                className={`px-6 py-3 rounded-xl text-sm font-semibold transition-[background-color,box-shadow,transform] duration-200 active:scale-95 ${
-                  billingCycle === 'monthly'
-                    ? 'bg-gradient-to-r from-brand-500 to-accent-500 text-white shadow-glow-brand'
-                    : 'text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-700/50'
-                }`}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setBillingCycle('yearly')}
-                className={`px-6 py-3 rounded-xl text-sm font-semibold transition-[background-color,box-shadow,transform] duration-200 active:scale-95 flex items-center gap-2 ${
-                  billingCycle === 'yearly'
-                    ? 'bg-gradient-to-r from-brand-500 to-accent-500 text-white shadow-glow-brand'
-                    : 'text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-700/50'
-                }`}
-              >
-                Yearly
-                <span
-                  className={`text-xs px-2.5 py-1 rounded-full font-bold ${
-                    billingCycle === 'yearly'
-                      ? 'bg-white/20 text-white'
-                      : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+            {/* Billing Toggle and Export Quote Button */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
+              <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-2 rounded-2xl shadow-soft border border-white/20 dark:border-white/10">
+                <button
+                  onClick={() => setBillingCycle('monthly')}
+                  className={`px-6 py-3 rounded-xl text-sm font-semibold transition-[background-color,box-shadow,transform] duration-200 active:scale-95 ${
+                    billingCycle === 'monthly'
+                      ? 'bg-gradient-to-r from-brand-500 to-accent-500 text-white shadow-glow-brand'
+                      : 'text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-700/50'
                   }`}
                 >
-                  Save ~17%
-                </span>
-              </button>
+                  Monthly
+                </button>
+                <button
+                  onClick={() => setBillingCycle('yearly')}
+                  className={`px-6 py-3 rounded-xl text-sm font-semibold transition-[background-color,box-shadow,transform] duration-200 active:scale-95 flex items-center gap-2 ${
+                    billingCycle === 'yearly'
+                      ? 'bg-gradient-to-r from-brand-500 to-accent-500 text-white shadow-glow-brand'
+                      : 'text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-700/50'
+                  }`}
+                >
+                  Yearly
+                  <span
+                    className={`text-xs px-2.5 py-1 rounded-full font-bold ${
+                      billingCycle === 'yearly'
+                        ? 'bg-white/20 text-white'
+                        : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                    }`}
+                  >
+                    Save ~17%
+                  </span>
+                </button>
+              </div>
+
+              {/* Export Quote Button */}
+              <Button
+                variant="secondary"
+                onClick={() => setShowQuoteModal(true)}
+                className="flex items-center gap-2 px-6 py-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl shadow-soft border border-white/20 dark:border-white/10 hover:bg-white dark:hover:bg-slate-700"
+              >
+                <FileText className="w-4 h-4" />
+                Export Quote
+              </Button>
             </div>
           </div>
 
@@ -548,6 +562,9 @@ export default function Pricing() {
           </div>
         </div>
       </div>
+
+      {/* Quote Modal */}
+      <QuoteModal isOpen={showQuoteModal} onClose={() => setShowQuoteModal(false)} />
     </>
   );
 }
