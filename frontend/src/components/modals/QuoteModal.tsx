@@ -294,15 +294,16 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
           {/* Plan Details */}
           <div className="space-y-3 mb-4">
             <div className="flex items-center gap-3">
-              <div className={`p-3 rounded-xl bg-gradient-to-br ${plan.color} text-white`}>
+              {/* Solid color background instead of gradient for better export */}
+              <div className="p-3 rounded-xl bg-brand-500 text-white">
                 {plan.icon}
               </div>
               <div>
                 <h4 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                   {plan.name} Plan
                   {effectiveStudentDiscount && (
-                    <span className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full font-medium">
-                      + Student Discount
+                    <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium border border-green-200">
+                      + Student
                     </span>
                   )}
                 </h4>
@@ -333,20 +334,20 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
             </div>
             {billing.discount > 0 && (
               <div className="flex justify-between text-sm">
-                <span className="text-green-600 font-medium">
+                <span className="text-green-700 font-semibold">
                   Billing Discount ({billing.discount}%)
                 </span>
-                <span className="font-semibold text-green-600">
+                <span className="font-bold text-green-700">
                   -${billingDiscountAmount.toFixed(2)}
                 </span>
               </div>
             )}
             {effectiveStudentDiscount && (
               <div className="flex justify-between text-sm">
-                <span className="text-emerald-600 font-medium">
+                <span className="text-green-700 font-semibold">
                   Student Discount ({studentDiscountPercent}%)
                 </span>
-                <span className="font-semibold text-emerald-600">
+                <span className="font-bold text-green-700">
                   -${studentDiscountAmount.toFixed(2)}
                 </span>
               </div>
