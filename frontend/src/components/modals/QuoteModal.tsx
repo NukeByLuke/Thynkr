@@ -224,7 +224,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
       description="Configure your plan and export a professional quote"
       size="full"
     >
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-h-[calc(100vh-16rem)] overflow-y-auto">
         {/* Left Column: Configuration */}
         <div className="space-y-4">
           {/* Plan Selection */}
