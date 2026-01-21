@@ -20,7 +20,7 @@ const defaultStages = [
  * GenerationLoader - Quantum Orbit Animation
  * 
  * Smooth, GPU-accelerated loading animation featuring:
- * - 3 orbiting particles (Cyan, Purple, Pink) at slower, graceful speeds
+ * - 3 orbiting particles (Purple, Blue, Aqua) at slower, graceful speeds
  * - Morphing particles with liquid-metal energy feel
  * - Text cycler with 3.75s intervals (15s total for 4 stages)
  * 
@@ -65,22 +65,22 @@ export default function GenerationLoader({
   // Particle configurations with slower orbital speeds and smoother animations
   const particles = [
     { 
-      color: 'bg-cyan-400 dark:bg-cyan-400', 
-      shadow: 'shadow-cyan-400/60',
+      color: 'bg-violet-500 dark:bg-violet-500', 
+      shadow: 'shadow-violet-500/60',
       duration: 2.5, 
       delay: 0,
       radius: 100 
     },
     { 
-      color: 'bg-violet-500 dark:bg-violet-500', 
-      shadow: 'shadow-violet-500/60',
+      color: 'bg-blue-500 dark:bg-blue-500', 
+      shadow: 'shadow-blue-500/60',
       duration: 3.5, 
       delay: 0.3,
       radius: 100 
     },
     { 
-      color: 'bg-pink-500 dark:bg-pink-500', 
-      shadow: 'shadow-pink-500/60',
+      color: 'bg-cyan-400 dark:bg-cyan-400', 
+      shadow: 'shadow-cyan-400/60',
       duration: 4.5, 
       delay: 0.6,
       radius: 100 
@@ -146,7 +146,7 @@ export default function GenerationLoader({
 
         {/* Energy trail effect */}
         <motion.div
-          className="absolute inset-2 rounded-full border border-cyan-500/30 dark:border-cyan-500/20"
+          className="absolute inset-2 rounded-full border border-violet-500/30 dark:border-violet-500/20"
           animate={{ 
             scale: [1, 1.1, 1],
             opacity: [0.2, 0.4, 0.2],
@@ -173,7 +173,7 @@ export default function GenerationLoader({
               duration: 0.3, 
               ease: [0.32, 0.72, 0, 1] 
             }}
-            className="text-xs font-bold uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-violet-500 to-pink-500"
+            className="text-xs font-bold uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-400"
             style={{ willChange: 'transform, opacity' }}
           >
             {stages[currentStageIndex]}
@@ -184,7 +184,7 @@ export default function GenerationLoader({
       {/* Progress bar - slightly bigger, never fills completely */}
       <div className="w-40 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
         <motion.div
-          className="h-full bg-gradient-to-r from-cyan-400 via-violet-500 to-pink-500 rounded-full"
+          className="h-full bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-400 rounded-full"
           initial={{ width: '0%' }}
           animate={{ width: '95%' }}
           transition={{
