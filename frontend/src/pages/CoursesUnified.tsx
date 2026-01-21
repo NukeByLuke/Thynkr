@@ -668,6 +668,7 @@ export default function CoursesUnified() {
             </div>
           </div>
         </div>
+      </div>
 
       {/* Create Course Modal */}
       {showCreateModal && (
