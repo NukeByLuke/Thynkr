@@ -38,6 +38,7 @@ import FileAIActions from '@/features/courses/FileAIActions';
 import FileAIViewer from '@/features/courses/FileAIViewer';
 import { useAuth } from '@/contexts/AuthContext';
 import { canCreatePublicCourses } from '@/features/auth/ProtectedRoute';
+import UploadModal from '@/components/UploadModal';
 
 interface CourseFile {
   id: string;
@@ -154,6 +155,7 @@ export default function MyCourseDetail() {
     file: CourseFile;
     tab: 'summary' | 'notes' | 'quiz' | 'flashcards';
   } | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   // Check if user can create public courses (Premium/Admin only)
   const isPremium = canCreatePublicCourses(user?.role);
@@ -348,12 +350,12 @@ export default function MyCourseDetail() {
     reorderFilesMutation.mutate(files.map((f) => f.id));
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+  const handleFileUpload = async (files: FileList) => {
     if (!files || files.length === 0) return;
 
     setUploading(true);
     setUploadProgress(0);
+    setShowUploadModal(false);
 
     try {
       for (let i = 0; i < files.length; i++) {
@@ -382,10 +384,14 @@ export default function MyCourseDetail() {
     } finally {
       setUploading(false);
       setUploadProgress(0);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
     }
+  };
+
+  const handleUploadYouTube = async (url: string) => {
+    setShowUploadModal(false);
+    // YouTube upload for courses - placeholder, needs backend support
+    console.log('YouTube URL:', url);
+    toast.success('YouTube uploads coming soon for courses');
   };
 
   const course: Course | null = data?.course || null;
@@ -652,24 +658,14 @@ export default function MyCourseDetail() {
                     </button>
                   )}
                   {course.isOwner && (
-                    <div>
-                      <input
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={handleFileUpload}
-                        multiple
-                        className="hidden"
-                        accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.mp4,.webm,.mp3,.wav,.zip"
-                      />
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={uploading}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900 rounded-lg hover:bg-slate-900 dark:hover:bg-white disabled:opacity-50 transition-all shadow-md border border-slate-700 dark:border-slate-200 font-semibold"
-                      >
-                        <Upload className="h-4 w-4" />
-                        {uploading ? `${Math.round(uploadProgress)}%` : 'Upload'}
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => setShowUploadModal(true)}
+                      disabled={uploading}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900 rounded-lg hover:bg-slate-900 dark:hover:bg-white disabled:opacity-50 transition-all shadow-md border border-slate-700 dark:border-slate-200 font-semibold"
+                    >
+                      <Upload className="h-4 w-4" />
+                      {uploading ? `${Math.round(uploadProgress)}%` : 'Upload'}
+                    </button>
                   )}
                 </div>
               </div>
@@ -1087,6 +1083,15 @@ export default function MyCourseDetail() {
           onClose={() => setAiViewerFile(null)}
         />
       )}
+
+      {/* Upload Modal */}
+      <UploadModal
+        isOpen={showUploadModal}
+        onClose={() => setShowUploadModal(false)}
+        onUploadFiles={handleFileUpload}
+        onUploadYouTube={handleUploadYouTube}
+        isUploading={uploading}
+      />
     </div>
   );
 }

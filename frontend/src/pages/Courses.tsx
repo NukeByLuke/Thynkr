@@ -611,13 +611,13 @@ export default function Courses() {
                 ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700/50' 
                 : 'bg-white/80 backdrop-blur-xl border border-slate-200/50 shadow-sm'
             }`}>
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 z-10 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search your sets..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className={`w-full pl-11 pr-10 py-3 bg-transparent focus:outline-none text-sm ${
+                className={`w-full pl-11 pr-10 py-3 bg-transparent focus:outline-none text-sm relative z-0 ${
                   isDark 
                     ? 'text-white placeholder-slate-500' 
                     : 'text-slate-900 placeholder-slate-400'

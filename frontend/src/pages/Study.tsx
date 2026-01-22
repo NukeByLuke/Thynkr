@@ -28,7 +28,6 @@ export default function Study() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { setHideSidebar, setCustomHeaderContent } = useLayout();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
 
@@ -87,12 +86,6 @@ export default function Study() {
     },
   });
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      uploadMutation.mutate(e.target.files);
-    }
-  };
-
   const handleQuickUpload = () => {
     setShowUploadModal(true);
   };
@@ -143,16 +136,6 @@ export default function Study() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      {/* Hidden File Input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        className="hidden"
-        accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.pps,.ppsx"
-        multiple
-        onChange={handleFileSelect}
-      />
-
       {/* Abstract Header */}
       <div className="relative overflow-hidden bg-gradient-to-br from-indigo-100 via-purple-100 to-slate-100 dark:from-slate-950 dark:via-indigo-950 dark:to-slate-950 h-44">
         {/* Floating Abstract Shapes - GPU optimized with transform3d */}
