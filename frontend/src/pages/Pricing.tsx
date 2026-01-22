@@ -413,15 +413,19 @@ export default function Pricing() {
                   {/* CTA Button */}
                   <Button
                     variant={
-                      plan.id === 'premium' || plan.id === 'standard'
-                        ? 'primary'
-                        : 'secondary'
+                      isCurrent
+                        ? 'secondary'
+                        : plan.id === 'premium' || plan.id === 'standard'
+                          ? 'primary'
+                          : 'secondary'
                     }
                     fullWidth
                     onClick={() => handleSelectPlan(plan)}
                     disabled={isCurrent || isLoading === plan.id}
                     className={`mt-auto ${
-                      isCurrent ? 'opacity-70 cursor-not-allowed' : ''
+                      isCurrent 
+                        ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 cursor-not-allowed hover:bg-emerald-50 dark:hover:bg-emerald-900/20' 
+                        : ''
                     }`}
                   >
                     {isLoading === plan.id ? (
