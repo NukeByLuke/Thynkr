@@ -617,7 +617,8 @@ export default function Courses() {
                 placeholder="Search your sets..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className={`w-full pl-16 pr-10 py-3 bg-transparent focus:outline-none text-sm relative z-0 ${
+                style={{ textIndent: '2rem' }}
+                className={`w-full pl-4 pr-10 py-3 bg-transparent focus:outline-none text-sm relative z-0 ${
                   isDark 
                     ? 'text-white placeholder-slate-500' 
                     : 'text-slate-900 placeholder-slate-400'
