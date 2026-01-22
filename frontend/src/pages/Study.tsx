@@ -14,7 +14,6 @@ import toast from 'react-hot-toast';
 import { FileTypeBadge } from '@/lib/fileTypeUtils';
 import UploadModal from '@/components/UploadModal';
 import api from '@/lib/api';
-import api from '@/lib/api';
 
 interface UploadedFile {
   id: string;
