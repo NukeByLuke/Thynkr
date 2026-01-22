@@ -182,7 +182,7 @@ export default function GenerationLoader({
       </div>
 
       {/* Progress bar - larger and more visible */}
-      <div className="w-56 h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+      <div className="w-56 h-3 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
         <motion.div
           className="h-full bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-400 rounded-full"
           initial={{ width: '0%' }}
