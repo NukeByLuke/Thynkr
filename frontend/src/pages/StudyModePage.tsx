@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import { useLayout } from '@/contexts/LayoutContext';
 import FileSelectionPane from '@/features/study/FileSelectionPane';
 import PaginatedReader from '@/features/study/PaginatedReader';
 import StudyFlashcards from '@/features/study/StudyFlashcards';
@@ -68,11 +69,18 @@ export default function StudyModePage() {
   const { id: courseId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { setHideSidebar } = useLayout();
 
   const [activeTab, setActiveTab] = useState<StudyTab>('summary');
   const [selectedFileIds, setSelectedFileIds] = useState<Set<string>>(new Set());
   const [showSidebar, setShowSidebar] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  // Hide the main app sidebar for immersive experience
+  useEffect(() => {
+    setHideSidebar(true);
+    return () => setHideSidebar(false);
+  }, [setHideSidebar]);
 
   // Fetch course details
   const { data: course, isLoading: courseLoading } = useQuery<Course>({
@@ -246,9 +254,9 @@ export default function StudyModePage() {
         <meta name="description" content={`AI-powered study mode for ${course?.title || 'your course'}`} />
       </Helmet>
 
-      <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
+      <div className="h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
         {/* Header */}
-        <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800">
+        <header className="flex-shrink-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center justify-between px-4 h-14">
             {/* Left: Back button & Title */}
             <div className="flex items-center gap-3">
