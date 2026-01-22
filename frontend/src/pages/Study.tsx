@@ -4,7 +4,7 @@
  * Layout: Abstract Header → Action Grid → Recent Files
  */
 
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useLayout } from '@/contexts/LayoutContext';
@@ -13,6 +13,7 @@ import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { FileTypeBadge } from '@/lib/fileTypeUtils';
 import UploadModal from '@/components/UploadModal';
+import api from '@/lib/api';
 import api from '@/lib/api';
 
 interface UploadedFile {
@@ -72,9 +73,6 @@ export default function Study() {
       // Refetch immediately to show new files
       await queryClient.invalidateQueries({ queryKey: ['study-files'] });
       await queryClient.refetchQueries({ queryKey: ['study-files'] });
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
       // Auto-navigate to the first uploaded file
       if (data.files && data.files.length > 0) {
         navigate(`/study/${data.files[0].id}`);
