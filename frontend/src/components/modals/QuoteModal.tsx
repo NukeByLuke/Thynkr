@@ -200,24 +200,31 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
         format: 'a4',
       });
 
-      // A4 dimensions with margins
-      const pageWidth = 190; // A4 width minus margins (210 - 20)
-      const pageHeight = 277; // A4 height minus margins (297 - 20)
+      // A4 dimensions: 210mm x 297mm
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const margin = 10; // 10mm margin on all sides
       
-      // Calculate dimensions to fit within page
-      let imgWidth = pageWidth;
-      let imgHeight = (canvas.height * imgWidth) / canvas.width;
+      // Available space for content
+      const maxWidth = pageWidth - (2 * margin);
+      const maxHeight = pageHeight - (2 * margin);
       
-      // If image is taller than page, scale it down
-      if (imgHeight > pageHeight) {
-        imgHeight = pageHeight;
-        imgWidth = (canvas.width * imgHeight) / canvas.height;
+      // Calculate dimensions maintaining aspect ratio
+      const imgAspectRatio = canvas.width / canvas.height;
+      let imgWidth = maxWidth;
+      let imgHeight = imgWidth / imgAspectRatio;
+      
+      // If height exceeds available space, scale down based on height
+      if (imgHeight > maxHeight) {
+        imgHeight = maxHeight;
+        imgWidth = imgHeight * imgAspectRatio;
       }
 
-      // Center the image horizontally if it's narrower than page
-      const xOffset = (210 - imgWidth) / 2;
+      // Center the image on the page
+      const xOffset = (pageWidth - imgWidth) / 2;
+      const yOffset = (pageHeight - imgHeight) / 2;
 
-      pdf.addImage(imgData, 'PNG', xOffset, 10, imgWidth, imgHeight);
+      pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
       pdf.save(`thynkr-quote-${selectedPlan}-${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (error) {
       console.error('Failed to export PDF:', error);
