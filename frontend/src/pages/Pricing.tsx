@@ -197,73 +197,67 @@ export default function Pricing() {
         />
       </Helmet>
 
-      <div className="py-24 min-h-screen relative">
-        {/* Background decoration */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-50/50 to-transparent dark:via-slate-900/50 pointer-events-none" />
-        <div className="absolute top-20 left-20 w-80 h-80 bg-gradient-to-br from-brand-400/15 to-brand-600/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-accent-400/15 to-accent-600/15 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="max-w-6xl mx-auto px-8 lg:px-16 relative">
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 via-slate-50/50 to-white dark:from-slate-950 dark:via-slate-900/50 dark:to-slate-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           {/* Header */}
-          <div className="text-center mb-16">
-            <h1 className="text-5xl md:text-6xl font-bold text-slate-900 dark:text-white mb-6">
-              Invest in Your <span className="gradient-text">Success</span>
+          <div className="text-center mb-12">
+            <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+              Invest in Your <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Success</span>
             </h1>
-            <p className="text-xl text-slate-600 dark:text-slate-100 mb-3 leading-relaxed">
+            <p className="text-lg text-slate-600 dark:text-slate-300 mb-2">
               Choose the plan that fits your learning goals — upgrade anytime.
             </p>
-            <p className="text-base text-slate-500 dark:text-slate-200 mb-10">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Every plan includes AI-powered study tools.
             </p>
+          </div>
 
-            {/* Billing Toggle and Export Quote Button */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
-              <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-2 rounded-2xl shadow-soft border border-white/20 dark:border-white/10">
-                <button
-                  onClick={() => setBillingCycle('monthly')}
-                  className={`px-6 py-3 rounded-xl text-sm font-semibold transition-[background-color,box-shadow,transform] duration-200 active:scale-95 ${
-                    billingCycle === 'monthly'
-                      ? 'bg-gradient-to-r from-brand-500 to-accent-500 text-white shadow-glow-brand'
-                      : 'text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-700/50'
-                  }`}
-                >
-                  Monthly
-                </button>
-                <button
-                  onClick={() => setBillingCycle('yearly')}
-                  className={`px-6 py-3 rounded-xl text-sm font-semibold transition-[background-color,box-shadow,transform] duration-200 active:scale-95 flex items-center gap-2 ${
-                    billingCycle === 'yearly'
-                      ? 'bg-gradient-to-r from-brand-500 to-accent-500 text-white shadow-glow-brand'
-                      : 'text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-700/50'
-                  }`}
-                >
-                  Yearly
-                  <span
-                    className={`text-xs px-2.5 py-1 rounded-full font-bold ${
-                      billingCycle === 'yearly'
-                        ? 'bg-white/20 text-white'
-                        : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
-                    }`}
-                  >
-                    Save ~17%
-                  </span>
-                </button>
-              </div>
-
-              {/* Export Quote Button */}
-              <Button
-                variant="secondary"
-                onClick={() => setShowQuoteModal(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl shadow-soft border border-white/20 dark:border-white/10 hover:bg-white dark:hover:bg-slate-700"
+          {/* Billing Toggle and Export Quote */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+            <div className="inline-flex items-center gap-1 bg-white dark:bg-slate-800 p-1.5 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+              <button
+                onClick={() => setBillingCycle('monthly')}
+                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${
+                  billingCycle === 'monthly'
+                    ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white shadow-lg'
+                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                }`}
               >
-                <FileText className="w-4 h-4" />
-                Export Quote
-              </Button>
+                Monthly
+              </button>
+              <button
+                onClick={() => setBillingCycle('yearly')}
+                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                  billingCycle === 'yearly'
+                    ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white shadow-lg'
+                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                }`}
+              >
+                Yearly
+                <span
+                  className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+                    billingCycle === 'yearly'
+                      ? 'bg-white/20 text-white'
+                      : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                  }`}
+                >
+                  Save ~17%
+                </span>
+              </button>
             </div>
+
+            <Button
+              variant="secondary"
+              onClick={() => setShowQuoteModal(true)}
+              className="flex items-center gap-2"
+            >
+              <FileText className="w-4 h-4" />
+              Export Quote
+            </Button>
           </div>
 
           {/* Pricing Cards */}
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
+          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-16">
             {plans.map((plan) => {
               const price =
                 billingCycle === 'monthly' ? plan.monthlyPrice : plan.yearlyMonthlyPrice;
@@ -279,24 +273,277 @@ export default function Pricing() {
                 plan.monthlyPrice > 0 ? (plan.monthlyPrice * 12 - yearlyTotal).toFixed(2) : 0;
               const isCurrent = isCurrentPlan(plan);
 
-              // Format price with proper decimals
               const formatPrice = (p: number) => {
                 return p % 1 === 0 ? p.toString() : p.toFixed(2);
               };
 
-              // Define card styles based on plan type
               const getCardStyles = () => {
                 if (isCurrent) {
-                  return 'ring-2 ring-emerald-500/50 dark:ring-emerald-400/50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-soft-xl';
+                  return 'ring-2 ring-emerald-500/50 bg-white dark:bg-slate-800 shadow-lg';
                 }
                 if (plan.id === 'standard') {
-                  return 'ring-2 ring-brand-500/50 dark:ring-brand-400/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-glow-brand md:scale-105 z-10';
+                  return 'ring-2 ring-violet-500/50 bg-white dark:bg-slate-800 shadow-xl md:scale-[1.02] z-10';
+                }
+                return 'bg-white dark:bg-slate-800 shadow-md hover:shadow-lg';
+              };
+
+              const getBadge = () => {
+                if (isCurrent) {
+                  return (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg">
+                      Current Plan
+                    </div>
+                  );
+                }
+                if (plan.id === 'standard') {
+                  return (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg flex items-center gap-1">
+                      <span>⭐</span> Most Popular
+                    </div>
+                  );
                 }
                 if (plan.id === 'premium') {
-                  return 'bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-soft-xl hover:shadow-glow-accent';
+                  return (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg flex items-center gap-1 whitespace-nowrap">
+                      <span>👑</span> Most Powerful
+                    </div>
+                  );
                 }
-                return 'bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-soft-lg';
+                return null;
               };
+
+              const getIconStyles = () => {
+                if (plan.id === 'standard') {
+                  return 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400';
+                }
+                if (plan.id === 'premium') {
+                  return 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400';
+                }
+                return 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400';
+              };
+
+              return (
+                <div
+                  key={plan.id}
+                  className={`relative flex flex-col p-6 rounded-2xl border border-slate-200 dark:border-slate-700 transition-all ${getCardStyles()}`}
+                >
+                  {getBadge()}
+
+                  {/* Plan Header */}
+                  <div className="text-center mb-6 pt-2">
+                    <div
+                      className={`inline-flex items-center justify-center w-12 h-12 rounded-xl mb-3 ${getIconStyles()}`}
+                    >
+                      {plan.icon}
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+                      {plan.name}
+                    </h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-300">
+                      {plan.description}
+                    </p>
+                  </div>
+
+                  {/* Pricing */}
+                  <div className="text-center mb-6">
+                    <div className="flex items-baseline justify-center gap-1">
+                      <span className="text-4xl font-bold text-slate-900 dark:text-white">
+                        ${formatPrice(price)}
+                      </span>
+                      <span className="text-slate-500 dark:text-slate-400 font-medium">/mo</span>
+                    </div>
+                    <div className="h-10 flex flex-col justify-center mt-1">
+                      {billingCycle === 'yearly' && plan.monthlyPrice > 0 ? (
+                        <div className="space-y-0.5">
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            ${yearlyTotal.toFixed(2)} billed yearly
+                          </p>
+                          <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+                            Save ${yearlySavings}/year
+                          </p>
+                        </div>
+                      ) : plan.monthlyPrice === 0 ? (
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                          Free forever
+                        </p>
+                      ) : (
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Billed monthly</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Features */}
+                  <ul className="space-y-2.5 mb-6 flex-grow">
+                    {plan.features.map((feature, index) => (
+                      <li key={index} className="flex items-start gap-2.5">
+                        {feature.included ? (
+                          <div
+                            className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5 ${
+                              feature.highlight
+                                ? 'bg-violet-100 dark:bg-violet-900/30'
+                                : 'bg-emerald-100 dark:bg-emerald-900/30'
+                            }`}
+                          >
+                            <Check
+                              className={`w-3 h-3 ${
+                                feature.highlight
+                                  ? 'text-violet-600 dark:text-violet-400'
+                                  : 'text-emerald-600 dark:text-emerald-400'
+                              }`}
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex-shrink-0 w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mt-0.5">
+                            <X className="w-3 h-3 text-slate-400" />
+                          </div>
+                        )}
+                        <span
+                          className={`text-sm ${
+                            feature.included
+                              ? 'text-slate-700 dark:text-slate-200'
+                              : 'text-slate-500 dark:text-slate-400'
+                          } ${feature.highlight ? 'font-medium' : ''}`}
+                        >
+                          {feature.text}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* CTA Button */}
+                  <Button
+                    variant={
+                      plan.id === 'premium' || plan.id === 'standard'
+                        ? 'primary'
+                        : 'secondary'
+                    }
+                    fullWidth
+                    onClick={() => handleSelectPlan(plan)}
+                    disabled={isCurrent || isLoading === plan.id}
+                    className={`mt-auto ${
+                      isCurrent ? 'opacity-70 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    {isLoading === plan.id ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                            fill="none"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
+                        </svg>
+                        Processing...
+                      </span>
+                    ) : (
+                      <span className="flex items-center justify-center gap-2">
+                        {getButtonText(plan)}
+                        {!isCurrent && plan.id !== 'basic' && <ArrowRight className="w-4 h-4" />}
+                      </span>
+                    )}
+                  </Button>
+
+                  <p className="mt-2.5 text-xs text-center text-slate-500 dark:text-slate-400">
+                    {plan.id === 'basic' ? 'No credit card required.' : 'Cancel anytime.'}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Why Upgrade Section */}
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold text-center mb-8 bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Why Upgrade?
+            </h2>
+            <div className="grid md:grid-cols-3 gap-6 mb-8">
+              <div className="text-center p-5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 mb-3">
+                  <TrendingUp className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1.5 flex items-center justify-center gap-1.5">
+                  <span>📈</span> Faster Learning
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-300">
+                  AI-powered tools help you learn more in less time with personalized study
+                  materials.
+                </p>
+              </div>
+
+              <div className="text-center p-5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 mb-3">
+                  <Brain className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1.5 flex items-center justify-center gap-1.5">
+                  <span>🧠</span> Smarter Notes
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-300">
+                  Transform your notes into flashcards, summaries, and quizzes automatically.
+                </p>
+              </div>
+
+              <div className="text-center p-5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 mb-3">
+                  <Bolt className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                </div>
+                <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1.5 flex items-center justify-center gap-1.5">
+                  <span>⚡</span> More Power
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-300">
+                  Unlimited uploads, AI requests, and exclusive features to supercharge your
+                  studies.
+                </p>
+              </div>
+            </div>
+
+            <div className="text-center mb-12">
+              <Button
+                variant="primary"
+                onClick={() =>
+                  !isAuthenticated
+                    ? navigate('/register')
+                    : document
+                        .querySelector('.grid.md\\:grid-cols-3')
+                        ?.scrollIntoView({ behavior: 'smooth' })
+                }
+                className="inline-flex items-center gap-2"
+              >
+                Join thousands of students using Thynkr
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center border-t border-slate-200 dark:border-slate-700 pt-8">
+            <p className="text-slate-600 dark:text-slate-300 mb-2">
+              All plans include a 7-day money-back guarantee. Cancel anytime.
+            </p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Questions? Contact us at{' '}
+              <a
+                href="mailto:support@thynkr.com"
+                className="text-violet-600 dark:text-violet-400 hover:underline"
+              >
+                support@thynkr.com
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <QuoteModal isOpen={showQuoteModal} onClose={() => setShowQuoteModal(false)} />
+    </>
+  );
 
               // Define badge for each plan
               const getBadge = () => {
