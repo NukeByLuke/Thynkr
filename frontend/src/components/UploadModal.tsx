@@ -379,7 +379,7 @@ export default function UploadModal({
                     YouTube Video URL
                   </label>
                   <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center z-10 pointer-events-none">
                       <Youtube className="w-5 h-5 text-red-500" />
                     </div>
                     <input
@@ -387,8 +387,8 @@ export default function UploadModal({
                       value={youtubeUrl}
                       onChange={(e) => setYoutubeUrl(e.target.value)}
                       placeholder="https://www.youtube.com/watch?v=..."
-                      style={{ textIndent: '2.5rem' }}
-                      className={`w-full pl-4 pr-12 py-4 bg-white dark:bg-slate-800 border-2 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
+                      style={{ textIndent: '3.5rem' }}
+                      className={`relative z-0 w-full pl-4 pr-12 py-4 bg-white dark:bg-slate-800 border-2 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
                         youtubeUrl && isValidYouTubeUrl(youtubeUrl)
                           ? 'border-green-500 dark:border-green-500 focus:ring-green-500/30'
                           : youtubeUrl && !isValidYouTubeUrl(youtubeUrl)
