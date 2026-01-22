@@ -36,7 +36,7 @@ export default function GenerationLoader({
 }: GenerationLoaderProps) {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
 
-  // Slow text cycling - 15 seconds total for 4 stages = ~3.75s per stage
+  // Slow text cycling - 30 seconds total for 5 stages = 6s per stage
   useEffect(() => {
     if (!isVisible) {
       setCurrentStageIndex(0);
@@ -45,7 +45,7 @@ export default function GenerationLoader({
 
     const cycleInterval = setInterval(() => {
       setCurrentStageIndex((prev) => (prev + 1) % stages.length);
-    }, 3750);
+    }, 6000);
 
     return () => clearInterval(cycleInterval);
   }, [isVisible, stages.length]);
@@ -181,8 +181,8 @@ export default function GenerationLoader({
         </AnimatePresence>
       </div>
 
-      {/* Progress bar - slightly bigger, never fills completely */}
-      <div className="w-40 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+      {/* Progress bar - larger and more visible */}
+      <div className="w-56 h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
         <motion.div
           className="h-full bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-400 rounded-full"
           initial={{ width: '0%' }}

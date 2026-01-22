@@ -12,6 +12,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trophy, Zap, Clock, Sparkles } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import api from '@/lib/api';
 import { useAuth } from './AuthContext';
 
@@ -314,6 +315,7 @@ const NotificationCard: React.FC<{
   onSnooze: () => void;
   persist: boolean;
 }> = ({ notification, onDismiss, onSnooze, persist }) => {
+  const navigate = useNavigate();
   const tier = notification.tier || 'BRONZE';
   const theme = TIER_THEMES[tier];
 
@@ -330,6 +332,13 @@ const NotificationCard: React.FC<{
 
   const isAchievement = notification.type === 'achievement';
 
+  const handleClick = () => {
+    if (isAchievement) {
+      navigate('/achievements');
+      onDismiss();
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 400, scale: 0.9 }}
@@ -337,6 +346,8 @@ const NotificationCard: React.FC<{
       exit={{ opacity: 0, x: 400, scale: 0.9, transition: { duration: 0.2 } }}
       transition={{ type: 'spring', stiffness: 400, damping: 30 }}
       className="pointer-events-auto"
+      onClick={handleClick}
+      style={{ cursor: isAchievement ? 'pointer' : 'default' }}
     >
       {/* Outer glow effect for visibility */}
       <div className={`relative rounded-2xl ${isAchievement ? 'shadow-[0_0_40px_-8px]' : 'shadow-2xl'} ${theme.glow} overflow-hidden`}>
@@ -393,7 +404,10 @@ const NotificationCard: React.FC<{
               <div className="flex items-center gap-1 flex-shrink-0">
                 {/* Snooze button */}
                 <button
-                  onClick={onSnooze}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSnooze();
+                  }}
                   className="w-8 h-8 rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center transition-colors group"
                   title="Snooze (show later)"
                 >
@@ -401,7 +415,10 @@ const NotificationCard: React.FC<{
                 </button>
                 {/* Dismiss button */}
                 <button
-                  onClick={onDismiss}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDismiss();
+                  }}
                   className="w-8 h-8 rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center transition-colors group"
                   title="Dismiss"
                 >

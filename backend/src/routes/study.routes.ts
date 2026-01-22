@@ -156,6 +156,46 @@ async function trackStudyActivity(
   }
 }
 
+/**
+ * Track language usage for multilingual achievement
+ * Checks if user has used this language before and triggers achievement tracking
+ */
+async function trackLanguageUsage(userId: string, language: string): Promise<void> {
+  try {
+    const { checkAchievements } = await import('../services/gamification.service');
+    
+    // Check if user has any content in this language
+    const [summaryCount, notesCount, flashcardCount, quizCount] = await Promise.all([
+      prisma.fileSummary.count({ where: { file: { userId }, language } }),
+      prisma.fileNotes.count({ where: { file: { userId }, language } }),
+      prisma.flashcardSet.count({ where: { file: { userId }, language } }),
+      prisma.quiz.count({ where: { file: { userId }, language } }),
+    ]);
+
+    // If this is the first content in this language, count it as a new language used
+    if (summaryCount + notesCount + flashcardCount + quizCount === 1) {
+      // Get total unique languages used
+      const uniqueLanguages = await prisma.$queryRaw<{ count: bigint }[]>`
+        SELECT COUNT(DISTINCT language) as count
+        FROM (
+          SELECT language FROM file_summaries WHERE file_id IN (SELECT id FROM uploaded_files WHERE user_id = ${userId})
+          UNION
+          SELECT language FROM file_notes WHERE file_id IN (SELECT id FROM uploaded_files WHERE user_id = ${userId})
+          UNION
+          SELECT language FROM flashcard_sets WHERE file_id IN (SELECT id FROM uploaded_files WHERE user_id = ${userId})
+          UNION
+          SELECT language FROM quizzes WHERE file_id IN (SELECT id FROM uploaded_files WHERE user_id = ${userId})
+        ) AS languages
+      `;
+      
+      const languageCount = Number(uniqueLanguages[0]?.count || 0);
+      await checkAchievements(userId, 'language_used', languageCount);
+    }
+  } catch (error) {
+    console.error('Failed to track language usage:', error);
+  }
+}
+
 // Helper function to check if user can access a file (owns it)
 async function canAccessFile(fileId: string, userId: string): Promise<boolean> {
   const file = await prisma.uploadedFile.findUnique({
@@ -426,7 +466,7 @@ export default async function studyRoutes(server: FastifyInstance) {
         }
 
         // Build content with title and description as baseline
-        let contentParts = [`Title: ${videoTitle}`];
+        const contentParts = [`Title: ${videoTitle}`];
         
         if (videoDescription && videoDescription.trim().length > 0) {
           // Limit description to first 2000 characters to avoid overly long text
@@ -828,6 +868,9 @@ Provide your response in this exact JSON format:
         // Track study activity
         await trackStudyActivity(request.user!.userId, 'SUMMARY_VIEW', file.id);
 
+        // Track language usage for multilingual achievement
+        await trackLanguageUsage(request.user!.userId, language);
+
         // Track achievement for summary generation
         const { checkAchievements } = await import('../services/gamification.service');
         const achievementResult = await checkAchievements(request.user!.userId, 'summary_created', 1);
@@ -918,6 +961,9 @@ Provide your response in this exact JSON format:
 
         // Track study activity
         await trackStudyActivity(request.user!.userId, 'NOTES_VIEW', file.id);
+
+        // Track language usage for multilingual achievement
+        await trackLanguageUsage(request.user!.userId, language);
 
         // Track achievement for notes generation
         const { checkAchievements } = await import('../services/gamification.service');
@@ -1017,6 +1063,9 @@ Provide your response in this exact JSON format:
         // Track study activity
         await trackStudyActivity(request.user!.userId, 'QUIZ_ATTEMPT', file.id);
 
+        // Track language usage for multilingual achievement
+        await trackLanguageUsage(request.user!.userId, language);
+
         return reply.send({ quiz });
       } catch (error: any) {
         server.log.error({ error, fileId: id }, 'Failed to generate quiz');
@@ -1088,6 +1137,9 @@ Provide your response in this exact JSON format:
 
         // Track study activity
         await trackStudyActivity(request.user!.userId, 'FLASHCARD_STUDY', file.id);
+
+        // Track language usage for multilingual achievement
+        await trackLanguageUsage(request.user!.userId, language);
 
         // Track achievement for flashcard generation/completion
         const { checkAchievements } = await import('../services/gamification.service');
