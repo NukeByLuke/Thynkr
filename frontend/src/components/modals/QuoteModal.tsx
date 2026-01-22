@@ -200,10 +200,24 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
         format: 'a4',
       });
 
-      const imgWidth = 190; // A4 width minus margins
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      // A4 dimensions with margins
+      const pageWidth = 190; // A4 width minus margins (210 - 20)
+      const pageHeight = 277; // A4 height minus margins (297 - 20)
+      
+      // Calculate dimensions to fit within page
+      let imgWidth = pageWidth;
+      let imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      // If image is taller than page, scale it down
+      if (imgHeight > pageHeight) {
+        imgHeight = pageHeight;
+        imgWidth = (canvas.width * imgHeight) / canvas.height;
+      }
 
-      pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+      // Center the image horizontally if it's narrower than page
+      const xOffset = (210 - imgWidth) / 2;
+
+      pdf.addImage(imgData, 'PNG', xOffset, 10, imgWidth, imgHeight);
       pdf.save(`thynkr-quote-${selectedPlan}-${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (error) {
       console.error('Failed to export PDF:', error);
