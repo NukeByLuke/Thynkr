@@ -72,9 +72,10 @@ const updateCourseFileSchema = z.object({
 });
 
 // Helper to generate secure view URL with token (no direct file access)
+// Note: Don't include /api prefix - the frontend will add the appropriate base URL
 function getSecureFileUrl(fileId: string, courseId: string, userId: string): string {
   const token = generateFileViewToken(fileId, courseId, userId);
-  return `/api/user-courses/files/${fileId}/view?token=${token}`;
+  return `/user-courses/files/${fileId}/view?token=${token}`;
 }
 
 // Helper to format creator name

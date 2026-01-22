@@ -12,7 +12,7 @@ export const Study = lazyWithPreload(() => import('./pages/Study'));
 export const ImmersiveStudy = lazyWithPreload(() => import('./pages/ImmersiveStudy'));
 export const Files = lazyWithPreload(() => import('./pages/Files'));
 export const Settings = lazyWithPreload(() => import('./pages/SettingsPage'));
-export const Courses = lazyWithPreload(() => import('./pages/CoursesUnified'));
+export const Courses = lazyWithPreload(() => import('./pages/Courses'));
 export const MyCourseDetail = lazyWithPreload(() => import('./pages/MyCourseDetail'));
 export const Achievements = lazyWithPreload(() => import('./pages/Achievements'));
 export const SavedPacks = lazyWithPreload(() => import('./pages/SavedPacks'));

@@ -123,7 +123,6 @@ export const ROUTES = {
   // Dashboard
   DASHBOARD: '/dashboard',
   COURSES: '/courses',
-  MY_COURSES: '/my-courses',
   LIBRARY: '/library',
   FILES: '/files',
   TUTOR: '/tutor',
