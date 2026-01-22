@@ -421,104 +421,116 @@ export default function MyCourseDetail() {
     : `${window.location.origin}/courses/${course.id}`;
 
   return (
-    <div className="h-full ">
-      {/* Soft Header Section */}
-      <div className="relative bg-gradient-to-br from-blue-900/80 via-purple-900/80 to-indigo-900/80 dark:from-blue-950/90 dark:via-purple-950/90 dark:to-indigo-950/90 border-b border-white/10">
-        {/* Back Navigation */}
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-          <Link
-            to="/courses"
-            className="inline-flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Back to Courses</span>
-          </Link>
+    <div className="h-full">
+      {/* Enhanced Header Banner */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-900 dark:via-purple-900 dark:to-pink-900">
+        {/* Animated Background Gradient Orbs */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-400/30 dark:bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-400/30 dark:bg-indigo-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         </div>
 
-        {/* Course Header Info */}
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col md:flex-row md:items-start gap-6">
-            {/* Banner Image (optional, smaller) */}
-            {course.bannerImage && (
-              <div className="relative w-full md:w-48 h-32 md:h-28 rounded-lg overflow-hidden flex-shrink-0 border border-white/10">
-                <img src={course.bannerImage} alt="" loading="lazy" className="w-full h-full object-cover" />
-                {course.isOwner && (
-                  <>
-                    <input
-                      type="file"
-                      ref={bannerInputRef}
-                      onChange={handleBannerUpload}
-                      accept="image/*"
-                      className="hidden"
-                    />
-                    <button
-                      onClick={() => bannerInputRef.current?.click()}
-                      disabled={uploadingBanner}
-                      className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity"
-                    >
-                      <ImagePlus className="h-5 w-5 text-white" />
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
+        {/* Content Container */}
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Back Navigation - Improved */}
+          <div className="pt-6 pb-4">
+            <Link
+              to="/courses"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-lg transition-all duration-200 border border-white/20 hover:border-white/30 active:scale-95"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to Courses</span>
+            </Link>
+          </div>
 
-            {/* Title and Meta */}
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className={`px-3 py-1 text-xs font-semibold rounded-lg ${getCategoryColor(course.category)}`}>
-                  {course.category.replace('_', ' ')}
-                </span>
-                <span
-                  className={`inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold ${
-                    course.visibility === 'PUBLIC'
-                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800'
-                      : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
-                  }`}
-                >
-                  {course.visibility === 'PUBLIC' ? (
-                    <Globe className="h-3 w-3" />
-                  ) : (
-                    <Lock className="h-3 w-3" />
+          {/* Course Header Info */}
+          <div className="pb-8">
+            <div className="flex flex-col md:flex-row md:items-start gap-6">
+              {/* Banner Image (enhanced) */}
+              {course.bannerImage && (
+                <div className="relative w-full md:w-56 h-36 md:h-32 rounded-xl overflow-hidden flex-shrink-0 border-2 border-white/20 shadow-2xl group">
+                  <img src={course.bannerImage} alt="" loading="lazy" className="w-full h-full object-cover" />
+                  {course.isOwner && (
+                    <>
+                      <input
+                        type="file"
+                        ref={bannerInputRef}
+                        onChange={handleBannerUpload}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                      <button
+                        onClick={() => bannerInputRef.current?.click()}
+                        disabled={uploadingBanner}
+                        className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
+                      >
+                        <div className="flex flex-col items-center gap-2">
+                          <ImagePlus className="h-6 w-6 text-white" />
+                          <span className="text-xs text-white font-medium">Change Image</span>
+                        </div>
+                      </button>
+                    </>
                   )}
-                  {course.visibility}
-                </span>
-              </div>
-              <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">
-                {course.title}
-              </h1>
-              <div className="flex flex-wrap items-center gap-4 text-sm text-white/70">
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span>{course.creator.name}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <span>{formatDate(course.createdAt)}</span>
-                </div>
-              </div>
-            </div>
+              )}
 
-            {/* Banner Upload (if no banner) */}
-            {course.isOwner && !course.bannerImage && (
-              <div>
-                <input
-                  type="file"
-                  ref={bannerInputRef}
-                  onChange={handleBannerUpload}
-                  accept="image/*"
-                  className="hidden"
-                />
-                <button
-                  onClick={() => bannerInputRef.current?.click()}
-                  disabled={uploadingBanner}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-white/90 border border-white/20 rounded-lg hover:bg-white/10 transition-colors backdrop-blur-sm"
-                >
-                  <ImagePlus className="h-4 w-4" />
-                  {uploadingBanner ? 'Uploading...' : 'Add Banner'}
-                </button>
+              {/* Title and Meta - Enhanced */}
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  <span className="px-3 py-1.5 text-xs font-bold rounded-lg bg-white/20 text-white backdrop-blur-md border border-white/30">
+                    {course.category.replace('_', ' ')}
+                  </span>
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold backdrop-blur-md border ${
+                      course.visibility === 'PUBLIC'
+                        ? 'bg-emerald-500/30 text-white border-emerald-400/50'
+                        : 'bg-white/20 text-white border-white/30'
+                    }`}
+                  >
+                    {course.visibility === 'PUBLIC' ? (
+                      <Globe className="h-3.5 w-3.5" />
+                    ) : (
+                      <Lock className="h-3.5 w-3.5" />
+                    )}
+                    {course.visibility}
+                  </span>
+                </div>
+                <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">
+                  {course.title}
+                </h1>
+                <div className="flex flex-wrap items-center gap-5 text-sm text-white/90">
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                    <User className="h-4 w-4" />
+                    <span className="font-medium">{course.creator.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                    <Calendar className="h-4 w-4" />
+                    <span>{formatDate(course.createdAt)}</span>
+                  </div>
+                </div>
               </div>
-            )}
+
+              {/* Banner Upload Button (if no banner) - Enhanced */}
+              {course.isOwner && !course.bannerImage && (
+                <div className="md:self-start">
+                  <input
+                    type="file"
+                    ref={bannerInputRef}
+                    onChange={handleBannerUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <button
+                    onClick={() => bannerInputRef.current?.click()}
+                    disabled={uploadingBanner}
+                    className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-white/20 hover:bg-white/30 border-2 border-white/30 hover:border-white/40 rounded-xl transition-all duration-200 backdrop-blur-md active:scale-95 shadow-lg"
+                  >
+                    <ImagePlus className="h-4 w-4" />
+                    {uploadingBanner ? 'Uploading...' : 'Add Banner'}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
