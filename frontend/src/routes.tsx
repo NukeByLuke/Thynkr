@@ -14,6 +14,7 @@ export const Files = lazyWithPreload(() => import('./pages/Files'));
 export const Settings = lazyWithPreload(() => import('./pages/SettingsPage'));
 export const Courses = lazyWithPreload(() => import('./pages/Courses'));
 export const MyCourseDetail = lazyWithPreload(() => import('./pages/MyCourseDetail'));
+export const StudyModePage = lazyWithPreload(() => import('./pages/StudyModePage'));
 export const Achievements = lazyWithPreload(() => import('./pages/Achievements'));
 export const SavedPacks = lazyWithPreload(() => import('./pages/SavedPacks'));
 export const PublicAchievements = lazyWithPreload(() => import('./pages/PublicAchievements'));

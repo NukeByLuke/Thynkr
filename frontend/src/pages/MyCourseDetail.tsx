@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileTypeBadge } from '@/lib/fileTypeUtils';
 import {
@@ -36,7 +36,6 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import SecureFileViewer from '@/features/courses/SecureFileViewer';
 import FileAIActions from '@/features/courses/FileAIActions';
 import FileAIViewer from '@/features/courses/FileAIViewer';
-import { CourseStudyPanel } from '@/features/study';
 import { useAuth } from '@/contexts/AuthContext';
 import { canCreatePublicCourses } from '@/features/auth/ProtectedRoute';
 
@@ -129,6 +128,7 @@ function getCategoryColor(category: string): string {
 
 export default function MyCourseDetail() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -154,9 +154,6 @@ export default function MyCourseDetail() {
     file: CourseFile;
     tab: 'summary' | 'notes' | 'quiz' | 'flashcards';
   } | null>(null);
-
-  // Study Panel
-  const [showStudyPanel, setShowStudyPanel] = useState(false);
 
   // Check if user can create public courses (Premium/Admin only)
   const isPremium = canCreatePublicCourses(user?.role);
@@ -646,7 +643,7 @@ export default function MyCourseDetail() {
                       f.fileType === 'application/pdf' || f.fileType.startsWith('image/')
                   ) && (
                     <button
-                      onClick={() => setShowStudyPanel(true)}
+                      onClick={() => navigate(`/courses/${id}/study`)}
                       className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:from-blue-700 hover:to-violet-700 transition-all shadow-lg shadow-blue-500/30 font-semibold"
                     >
                       <GraduationCap className="h-4 w-4" />
@@ -1088,38 +1085,6 @@ export default function MyCourseDetail() {
           initialTab={aiViewerFile.tab}
           onClose={() => setAiViewerFile(null)}
         />
-      )}
-
-      {/* Course Study Panel */}
-      {showStudyPanel && course && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
-          <div className="absolute inset-4 md:inset-8 lg:inset-12 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border border-slate-200 dark:border-slate-800/50 rounded-xl shadow-2xl overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-slate-200/50 dark:border-white/10">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                  <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Study Mode</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{course.title}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowStudyPanel(false)}
-                className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <CourseStudyPanel
-                courseId={course.id}
-                courseTitle={course.title}
-                onClose={() => setShowStudyPanel(false)}
-              />
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );

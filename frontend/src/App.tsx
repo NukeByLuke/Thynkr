@@ -23,7 +23,7 @@ import BackgroundShapes from '@/components/ui/BackgroundShapes';
 import {
   Login, Register, AuthCallback, OAuthCallback, Pricing, Account, Admin,
   Study, ImmersiveStudy, Files, Settings, Courses, MyCourseDetail,
-  Achievements, PublicAchievements, NotFound
+  StudyModePage, Achievements, PublicAchievements, NotFound
 } from './routes';
 
 /**
@@ -190,6 +190,14 @@ function AppContent() {
               element={
                 <ProtectedRoute requiredRole="STANDARD">
                   <MyCourseDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/courses/:id/study"
+              element={
+                <ProtectedRoute requiredRole="STANDARD">
+                  <StudyModePage />
                 </ProtectedRoute>
               }
             />
