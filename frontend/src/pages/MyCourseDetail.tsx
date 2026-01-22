@@ -524,7 +524,8 @@ export default function MyCourseDetail() {
           <div className="lg:col-span-2 space-y-6">
             {/* Description Card */}
             {(course.description || isEditing) && (
-              <div className="bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border border-slate-200 dark:border-slate-800/50 rounded-xl shadow-lg p-6">\n                {isEditing ? (
+              <div className="bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border border-slate-200 dark:border-slate-800/50 rounded-xl shadow-lg p-6">
+                {isEditing ? (
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
