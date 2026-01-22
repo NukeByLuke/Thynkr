@@ -611,7 +611,7 @@ export default function Courses() {
                 ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700/50' 
                 : 'bg-white/80 backdrop-blur-xl border border-slate-200/50 shadow-sm'
             }`}>
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 z-10 pointer-events-none" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search your sets..."
