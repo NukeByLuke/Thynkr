@@ -316,7 +316,6 @@ const NotificationCard: React.FC<{
   persist: boolean;
 }> = ({ notification, onDismiss, onSnooze, persist }) => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const tier = notification.tier || 'BRONZE';
   const theme = TIER_THEMES[tier];
 
@@ -335,10 +334,10 @@ const NotificationCard: React.FC<{
 
   const handleClick = () => {
     if (isAchievement) {
-      // Invalidate achievements query to refresh data
-      queryClient.invalidateQueries({ queryKey: ['achievements'] });
       navigate('/achievements');
       onDismiss();
+      // Refresh the page to show latest achievements
+      window.location.reload();
     }
   };
 
