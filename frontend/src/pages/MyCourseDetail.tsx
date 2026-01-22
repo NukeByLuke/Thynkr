@@ -109,24 +109,6 @@ function formatDate(dateString: string) {
   });
 }
 
-// Soft category colors for minimal UI
-function getCategoryColor(category: string): string {
-  const colors: Record<string, string> = {
-    MATHEMATICS: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    SCIENCE: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-    TECHNOLOGY: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
-    ENGINEERING: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-    LANGUAGES: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    HUMANITIES: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
-    BUSINESS: 'bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-400',
-    ARTS: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
-    HEALTH: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-    LAW: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-    OTHER: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400',
-  };
-  return colors[category] || colors['OTHER'];
-}
-
 export default function MyCourseDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
