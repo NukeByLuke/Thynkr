@@ -489,7 +489,7 @@ export default function Files() {
               </h2>
               <button
                 onClick={() => setShowCreateFolderModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition-colors text-sm font-medium"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg transition-colors text-sm font-medium"
               >
                 <Folder className="w-4 h-4" />
                 <span>New Folder</span>

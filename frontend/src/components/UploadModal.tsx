@@ -387,7 +387,8 @@ export default function UploadModal({
                       value={youtubeUrl}
                       onChange={(e) => setYoutubeUrl(e.target.value)}
                       placeholder="https://www.youtube.com/watch?v=..."
-                      className={`w-full pl-16 pr-12 py-4 bg-white dark:bg-slate-800 border-2 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
+                      style={{ textIndent: '2.5rem' }}
+                      className={`w-full pl-4 pr-12 py-4 bg-white dark:bg-slate-800 border-2 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
                         youtubeUrl && isValidYouTubeUrl(youtubeUrl)
                           ? 'border-green-500 dark:border-green-500 focus:ring-green-500/30'
                           : youtubeUrl && !isValidYouTubeUrl(youtubeUrl)
