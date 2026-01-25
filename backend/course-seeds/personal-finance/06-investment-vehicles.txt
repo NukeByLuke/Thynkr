@@ -1,0 +1,228 @@
+Investment Vehicles: TFSAs, RRSPs, and Beyond
+
+Building long-term wealth in Canada necessitates the use of tax-advantaged accounts to protect growth from the CRA. This file provides a deep dive into the Tax-Free Savings Account (TFSA), emphasizing its flexibility and tax-free withdrawal status, and the Registered Retirement Savings Plan (RRSP), which offers immediate tax deductions but deferred taxation on withdrawal. It introduces the concept of Exchange-Traded Funds (ETFs) and Index Funds as low-cost, diversified ways to capture broad market growth. The module stresses Asset Allocation, explaining how to balance risk and reward based on an individual's time horizon and personal risk tolerance.
+
+Tax-Advantaged Accounts:
+
+TFSA (Tax-Free Savings Account):
+
+Contribution Rules:
+- Annual limit: $7,000 (2026)
+- Cumulative room since 2009 (when you turned 18)
+- Unused room carries forward forever
+- Withdrawal room returns next calendar year
+
+Tax Benefits:
+- Contributions not tax-deductible
+- Growth is tax-free
+- Withdrawals are tax-free
+- No income reporting required
+
+Best Uses:
+- Emergency fund (once built)
+- Short to medium-term goals (house, car, wedding)
+- Long-term investing (especially if low income)
+- Already maxing RRSP
+
+What You Can Hold:
+- Cash, GICs, bonds
+- Stocks, ETFs, mutual funds
+- Options (if broker allows)
+- Some restrictions on foreign stocks
+
+RRSP (Registered Retirement Savings Plan):
+
+Contribution Rules:
+- 18% of previous year's earned income
+- Maximum: $31,560 (2026)
+- Unused room carries forward indefinitely
+- Reduces current year's taxable income
+
+Tax Benefits:
+- Contributions are tax-deductible
+- Growth is tax-deferred
+- Taxed as income upon withdrawal
+- Best when marginal rate at contribution > rate at withdrawal
+
+Best Uses:
+- High income earners (30%+ marginal rate)
+- Long-term retirement savings
+- When employer matches contributions
+- Pension Adjustment reduces room
+
+Withdrawal Rules:
+- Can withdraw anytime (but lose room permanently)
+- Added to income (taxed at marginal rate)
+- Withholding tax applied: 10% up to $5K, 20% $5K-$15K, 30% over $15K
+- Exceptions: Home Buyers' Plan, Lifelong Learning Plan
+
+TFSA vs RRSP Decision Matrix:
+
+Choose TFSA when:
+- Current marginal tax rate < 30%
+- Expect higher income in retirement
+- Need flexibility to access funds
+- Already maxing RRSP
+- Saving for non-retirement goals
+
+Choose RRSP when:
+- Current marginal tax rate > 30%
+- Employer matches contributions
+- Expect lower income in retirement
+- Committed to long-term retirement saving
+- Want immediate tax refund
+
+Ideal Strategy:
+- Max RRSP to get employer match
+- Build emergency fund in TFSA
+- Max RRSP if high income
+- Then max TFSA
+- Then taxable account
+
+Investment Vehicles:
+
+1. Exchange-Traded Funds (ETFs):
+   - Trade like stocks on exchange
+   - Low management fees (0.03% - 0.75%)
+   - Instant diversification
+   - Examples: VGRO, XEQT, VFV
+
+2. Index Funds:
+   - Mutual fund tracking specific index
+   - Slightly higher fees than ETFs (0.1% - 1%)
+   - Auto-invest available
+   - Examples: TD e-Series, Vanguard funds
+
+3. Mutual Funds:
+   - Actively managed by fund manager
+   - Higher fees (1.5% - 2.5%)
+   - May underperform index over time
+   - Common in employer plans
+
+4. Individual Stocks:
+   - Direct ownership in companies
+   - Higher risk, higher potential return
+   - Requires research and monitoring
+   - Not recommended for beginners
+
+5. Bonds and GICs:
+   - Fixed income, lower risk
+   - GICs: guaranteed return (1-5%)
+   - Bonds: can be sold before maturity
+   - Good for stability and short-term goals
+
+6. REITs (Real Estate Investment Trusts):
+   - Invest in real estate without buying property
+   - Monthly distributions
+   - Diversification from stocks/bonds
+   - Examples: Canadian Apartment REIT, RioCan
+
+Asset Allocation:
+
+Risk Tolerance Assessment:
+- Time horizon (years until need money)
+- Emotional capacity (can you stomach losses?)
+- Financial capacity (can you afford losses?)
+- Recovery ability (can you make up losses?)
+
+Common Allocations by Age:
+
+Age 20-30: 90% Stocks / 10% Bonds
+- Long time horizon
+- Can weather volatility
+- Maximize growth potential
+
+Age 30-40: 80% Stocks / 20% Bonds
+- Still long time horizon
+- Slight risk reduction
+- Balance growth and stability
+
+Age 40-50: 70% Stocks / 30% Bonds
+- Moderate time horizon
+- Preserve some gains
+- Reduce volatility
+
+Age 50-60: 60% Stocks / 40% Bonds
+- Nearing retirement
+- Protect accumulated wealth
+- Generate income
+
+Age 60+: 50% Stocks / 50% Bonds
+- In retirement
+- Preserve capital
+- Generate stable income
+
+Rule of Thumb: 100 - Your Age = % in Stocks
+(Adjust based on personal risk tolerance)
+
+Geographic Diversification:
+- 30% Canadian market (home bias)
+- 40% US market (largest economy)
+- 30% International (Europe, Asia, emerging markets)
+
+Sector Diversification:
+- Technology, Healthcare, Financials
+- Energy, Real Estate, Consumer goods
+- ETFs do this automatically
+
+Rebalancing:
+- Review annually or when allocation shifts 5%+
+- Sell winners, buy losers (counterintuitive but effective)
+- Tax implications: do rebalancing in TFSA/RRSP when possible
+
+Investment Strategies for Students:
+
+1. Start Small:
+   - Even $50/month compounds significantly
+   - $100/month at 7% = $119,000 in 30 years
+   - Don't wait for "enough" money
+
+2. Automate Everything:
+   - Pre-authorized contributions
+   - Remove emotion from process
+   - Dollar-cost averaging (buy more when prices low)
+
+3. Low-Cost Index Approach:
+   - Buy broad market ETFs
+   - VGRO (80/20) or VEQT (100% equity)
+   - Set and forget for decades
+
+4. Avoid Common Mistakes:
+   - Don't try to time the market
+   - Don't check portfolio daily
+   - Don't panic sell in downturns
+   - Don't chase hot stocks or crypto
+
+5. Tax Optimization:
+   - Canadian dividends in taxable account (tax credit)
+   - US stocks in RRSP (no withholding tax)
+   - Bonds in RRSP (interest taxed as income)
+   - Growth stocks in TFSA (tax-free gains)
+
+Compound Growth Examples:
+
+$500/month at 7% annual return:
+- 10 years: $87,000 (contributed $60,000)
+- 20 years: $262,000 (contributed $120,000)
+- 30 years: $607,000 (contributed $180,000)
+- 40 years: $1,310,000 (contributed $240,000)
+
+Key Insight: Last 10 years nearly doubles your wealth
+Early contributions have outsized impact
+
+Common Questions:
+
+Q: Should I invest or pay off debt?
+A: Pay off high-interest debt (>6%) first, then invest
+
+Q: What if the market crashes after I invest?
+A: Keep investing - buying more shares at lower prices
+
+Q: Do I need an advisor?
+A: Not necessary with index funds; robo-advisors if you want help
+
+Q: How much should I have invested by age 30?
+A: 1x annual salary recommended
+
+Q: Can I lose money in my TFSA/RRSP?
+A: Yes, if investments decline. Accounts don't protect from losses.

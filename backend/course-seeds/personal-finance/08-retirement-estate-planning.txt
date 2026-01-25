@@ -1,0 +1,411 @@
+Long-Term Horizons: Retirement and Estate Planning
+
+Mastery of personal finance culminates in planning for the eventual cessation of active labor through passive income streams. This module discusses Retirement Horizons and the "4% Rule" for sustainable portfolio withdrawals. It briefly introduces the pillars of the Canadian Retirement System, including the Canada Pension Plan (CPP) and Old Age Security (OAS), and how they integrate with private savings. Finally, it touches on Estate Planning, emphasizing the importance of a Will and Power of Attorney to ensure that assets are distributed according to one's wishes and that medical decisions are handled by trusted individuals in the event of incapacity.
+
+Retirement Planning Fundamentals:
+
+The Three Pillars of Canadian Retirement:
+
+Pillar 1: Government Benefits (OAS & CPP)
+Pillar 2: Employer Pensions & RRSPs
+Pillar 3: Personal Savings (TFSA, taxable accounts)
+
+Old Age Security (OAS):
+
+Basics:
+- Available at age 65
+- Does not require contributions
+- Based on years of residence in Canada
+- Must have lived in Canada 10+ years after age 18
+
+Amount (2026):
+- Maximum: ~$700/month ($8,400/year)
+- Requires 40+ years of Canadian residence
+- Partial benefits for 10-39 years
+- Indexed quarterly to inflation
+
+Clawback:
+- Starts at $90,997 income
+- Fully clawed back at $148,451
+- Based on previous year's income
+- Plan RRSP withdrawals to minimize clawback
+
+Guaranteed Income Supplement (GIS):
+- Additional benefit for low-income seniors
+- Maximum: ~$1,000/month
+- Income-tested (excludes OAS)
+- Not taxable
+
+Canada Pension Plan (CPP):
+
+Basics:
+- Contributory pension (you pay in, you get out)
+- Based on earnings and years contributing
+- Both employee and employer contribute (4.95% each)
+- Self-employed pay both portions (9.9%)
+
+Contribution Limits (2026):
+- Maximum pensionable earnings: $68,500
+- Basic exemption: $3,500
+- Effective max contribution: ~$3,754/year
+
+Benefit Amount:
+- Maximum at age 65: ~$1,364/month ($16,368/year)
+- Average benefit: ~$760/month ($9,120/year)
+- Based on average career earnings
+- Indexed annually to inflation
+
+Taking CPP Early vs. Late:
+- Can start as early as age 60
+  - Reduced by 0.6% per month (36% at age 60)
+- Can delay until age 70
+  - Increased by 0.7% per month (42% at age 70)
+
+Decision Factors:
+- Health and life expectancy
+- Other income sources
+- Need for money
+- Longevity in family
+- Break-even analysis
+
+Example:
+Age 60: $873/month
+Age 65: $1,364/month (standard)
+Age 70: $1,937/month
+
+Break-even (60 vs 65): Age 74
+Break-even (65 vs 70): Age 82
+
+Retirement Savings Targets:
+
+The 4% Rule:
+- Withdraw 4% of portfolio annually
+- Adjust for inflation each year
+- Historically sustainable for 30+ years
+- Example: $1M portfolio = $40,000/year
+
+How Much You Need:
+
+25x Annual Spending Rule:
+- Multiply retirement spending by 25
+- Example: Need $50,000/year = $1.25M portfolio
+- Excludes CPP and OAS
+- More conservative: 30x spending
+
+Age-Based Targets:
+- Age 30: 1x annual salary saved
+- Age 40: 3x annual salary saved
+- Age 50: 6x annual salary saved
+- Age 60: 8x annual salary saved
+- Age 67: 10x annual salary saved
+
+Factors Affecting Your Number:
+- Retirement age (earlier = more needed)
+- Life expectancy
+- Lifestyle expectations
+- Pension income
+- Part-time work plans
+- Healthcare needs
+
+Retirement Income Strategy:
+
+Tax-Efficient Withdrawal Order:
+
+1. Non-Registered Accounts First:
+   - Least tax-efficient holding account
+   - Capital gains only 50% taxable
+   - Dividend tax credit applies
+
+2. RRSP/RRIF Next:
+   - Fully taxable as income
+   - Mandatory withdrawals start at 72 (RRIF)
+   - Manage withdrawals to minimize taxes
+
+3. TFSA Last:
+   - Tax-free withdrawals
+   - Can be emergency fund
+   - Leave to grow tax-free as long as possible
+
+OAS Optimization:
+- Keep income below $90,997 to avoid clawback
+- May warrant delaying RRSP withdrawals
+- Consider income splitting with spouse
+
+Pension Income Splitting:
+- Can split up to 50% of pension income
+- Both spouses must be 65+
+- Reduces overall family tax burden
+- Applies to RRIF, annuities, pension income
+
+RRIF (Registered Retirement Income Fund):
+
+Conversion from RRSP:
+- Must convert by December 31 of year you turn 71
+- Can convert earlier if desired
+- RRSP stops accepting contributions
+
+Minimum Withdrawals:
+- Age 65: 4.00%
+- Age 70: 5.00%
+- Age 75: 5.82%
+- Age 80: 6.82%
+- Age 90: 11.92%
+- Age 95+: 20%
+
+Based on beginning-of-year balance
+
+Tax Implications:
+- Withdrawals fully taxable as income
+- Withholding tax applies (like RRSP)
+- Added to income for OAS clawback calculation
+
+Estate Planning Essentials:
+
+Why You Need a Will:
+
+Without a Will:
+- Province decides asset distribution
+- May not reflect your wishes
+- Lengthy probate process
+- Family disputes more likely
+- No guardian named for minor children
+
+With a Will:
+- You control asset distribution
+- Name executor and guardians
+- Can minimize taxes
+- Faster estate settlement
+- Clear instructions reduce conflict
+
+What to Include:
+
+1. Executor:
+   - Trusted person to manage estate
+   - Can be family member or professional
+   - Should be organized and available
+   - Consider naming alternate
+
+2. Beneficiaries:
+   - Who gets what
+   - Specific bequests (items, money)
+   - Residual estate distribution
+   - Contingent beneficiaries
+
+3. Guardians for Minor Children:
+   - Who will raise your children
+   - Critical for parents
+   - Discuss with proposed guardians first
+   - Name alternates
+
+4. Asset Distribution:
+   - Percentage or specific amounts
+   - Family, friends, charities
+   - Consider tax implications
+   - Address digital assets
+
+When to Update:
+- Marriage or divorce
+- Birth of children
+- Death of beneficiary or executor
+- Major asset changes
+- Moving provinces
+- Every 3-5 years generally
+
+Power of Attorney (POA):
+
+Types:
+
+1. Power of Attorney for Property:
+   - Manage financial affairs
+   - Pay bills, invest, sell property
+   - Active immediately or upon incapacity
+   - Ends at death
+
+2. Power of Attorney for Personal Care:
+   - Make healthcare decisions
+   - Living arrangement decisions
+   - Only active if you're incapacitated
+   - Also called Healthcare Directive
+
+Why Critical:
+- Accident or sudden illness
+- No one can access accounts without POA
+- Avoid lengthy court applications
+- Ensure wishes are followed
+
+Choosing Your POA:
+- Trustworthy and responsible
+- Understands your wishes
+- Willing to serve
+- Available when needed
+- Consider naming alternates
+
+Living Will / Advance Directive:
+
+What It Covers:
+- End-of-life care wishes
+- Life support preferences
+- Organ donation
+- Palliative care instructions
+
+Not Legally Binding in All Provinces:
+- Guides POA for personal care
+- Documents wishes clearly
+- Reduces family burden of decisions
+
+Beneficiary Designations:
+
+Direct Beneficiaries:
+- RRSP/RRIF
+- TFSA
+- Life insurance
+- Some pension plans
+
+Advantages:
+- Bypasses estate (no probate fees)
+- Faster transfer to beneficiaries
+- More privacy
+- Creditor protection
+
+Important:
+- Review designations regularly
+- Update after life changes
+- Don't contradict your Will
+- Consider tax implications
+
+Estate Tax Planning:
+
+Canada Has No "Inheritance Tax":
+- Beneficiaries receive inheritance tax-free
+- However, estate may owe taxes
+
+Deemed Disposition at Death:
+- All assets "sold" at fair market value
+- Capital gains taxes due
+- RRSP/RRIF fully taxable
+- Can be significant tax bill
+
+Strategies to Minimize:
+
+1. Spousal Rollover:
+   - Transfer RRSP/RRIF to spouse tax-free
+   - Capital assets at cost basis
+   - Defers tax to surviving spouse
+
+2. Charitable Donations:
+   - Gifts in Will generate tax credits
+   - Can offset capital gains
+   - Donate appreciated securities (avoid capital gains)
+
+3. Insurance for Tax Liability:
+   - Life insurance to pay estate taxes
+   - Ensures heirs receive full value
+   - Beneficiaries outside estate (no probate)
+
+4. Income Splitting in Retirement:
+   - Reduces overall family tax
+   - Equalizes retirement assets between spouses
+   - Consider spousal RRSPs
+
+5. Gifting While Alive:
+   - No gift tax in Canada
+   - Reduce estate size
+   - See beneficiaries enjoy gifts
+   - Potential loss of assets if needed
+
+Probate Fees:
+- Court validates will
+- Province-specific fees
+- Ontario: 1.5% on estate over $50K
+- BC: 1.4% on estate over $50K
+- Quebec: No probate fees
+- Can add up on large estates
+
+Strategies to Avoid Probate:
+- Joint ownership (with right of survivorship)
+- Beneficiary designations
+- Gifts while alive
+- Assets in trust
+- Multiple wills (for business interests)
+
+Digital Estate Planning:
+
+Digital Assets:
+- Online bank accounts
+- Investment accounts
+- Email and social media
+- Cryptocurrency
+- Photos and documents stored online
+- Subscriptions and recurring payments
+
+Planning Steps:
+1. Create inventory of digital assets
+2. Store passwords securely (password manager)
+3. Include in estate plan
+4. Give executor access instructions
+5. Specify what to do with accounts
+
+Common Mistakes:
+- Not telling anyone where passwords are
+- Forgetting about small accounts
+- No plan for social media profiles
+- Cryptocurrency without recovery keys
+
+Planning Timeline for Young Adults:
+
+Age 20-30:
+- ✓ Name beneficiaries on TFSA/RRSP
+- ✓ Get simple Will if you have assets
+- ✓ Consider POA if moving away from family
+
+Age 30-40:
+- ✓ Comprehensive Will (especially with children)
+- ✓ Name guardians for children
+- ✓ POA for property and personal care
+- ✓ Review beneficiary designations
+- ✓ Discuss plans with family
+
+Age 40-50:
+- ✓ Update Will for asset changes
+- ✓ Consider trust for children
+- ✓ Review and optimize estate taxes
+- ✓ Ensure adequate life insurance
+- ✓ Update POA if needed
+
+Age 50+:
+- ✓ Estate tax planning strategies
+- ✓ Charitable giving plans
+- ✓ Long-term care discussions
+- ✓ Ensure executor still able/willing
+- ✓ Review estate plan every 3 years
+
+Final Thoughts:
+
+The Long Game:
+- Retirement planning starts in your 20s
+- Small, consistent contributions compound powerfully
+- Maximize employer matches
+- Understand government benefits
+- Plan for longevity (live to 90+)
+
+Peace of Mind:
+- Estate plan protects family
+- Reduces stress during grief
+- Your wishes are clear
+- Legal documents are accessible
+- Review and update regularly
+
+Integration:
+- Retirement and estate planning work together
+- Tax-efficient during life and at death
+- Protect wealth for next generation
+- Balance present needs with future security
+
+Action Steps:
+1. Calculate retirement number (25x spending)
+2. Create or update Will
+3. Name POA for property and personal care
+4. Review beneficiary designations
+5. Discuss plans with family
+6. Store documents securely (tell someone where)
+7. Review annually or after major life changes

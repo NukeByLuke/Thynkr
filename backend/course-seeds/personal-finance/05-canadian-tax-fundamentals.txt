@@ -1,0 +1,172 @@
+Canadian Tax Fundamentals and Optimization
+
+Navigating the Canadian Income Tax Act requires an understanding of marginal tax rates versus effective tax rates. This module explains how progressive taxation works in Canada and identifies key deductions and credits available to students, such as the Tuition Tax Credit and moving expense deductions. It covers the importance of the T4 slip and the Notice of Assessment, teaching users how to forecast their tax liability to avoid "tax season surprises." Understanding how the government uses taxes to fund public goods allows for a more informed perspective on how personal tax planning can legally and ethically minimize one's annual tax burden.
+
+Canadian Tax System Overview:
+
+Progressive Tax Brackets (2026 Federal):
+- Up to $55,867: 15%
+- $55,867 to $111,733: 20.5%
+- $111,733 to $173,205: 26%
+- $173,205 to $246,752: 29%
+- Over $246,752: 33%
+
+Plus Provincial Tax (varies by province)
+Combined rate example (Ontario): 20-53%
+
+Marginal vs. Effective Tax Rate:
+
+Marginal Rate:
+- Rate on your next dollar earned
+- What bracket you're in
+- Used for tax planning decisions
+
+Effective Rate:
+- Average rate across all income
+- Total tax divided by total income
+- Always lower than marginal rate
+
+Example:
+Income: $75,000
+Total Tax: $13,500
+Marginal Rate: 29.65% (Ontario)
+Effective Rate: 18% ($13,500 / $75,000)
+
+Key Tax Documents:
+
+T4 Slip (Employment Income):
+- Issued by employer by end of February
+- Shows: gross income, CPP, EI, income tax withheld
+- Box 14: Employment income
+- Box 22: Income tax deducted
+
+Notice of Assessment (NOA):
+- CRA's response to your tax return
+- Confirms RRSP contribution room
+- Shows TFSA contribution room
+- Details any balance owing or refund
+- Keep for 6 years
+
+T2202 (Tuition Certificate):
+- Issued by educational institutions
+- Shows eligible tuition fees
+- Used to claim tuition tax credit
+- Can be carried forward or transferred
+
+Student Tax Credits and Deductions:
+
+1. Tuition Tax Credit:
+   - Federal: 15% of eligible tuition
+   - Provincial: varies (5-20%)
+   - Eligible: university, college, vocational programs
+   - Can carry forward indefinitely
+   - Can transfer up to $5,000 to parent/spouse
+
+2. Education and Textbook Credits:
+   - Eliminated in 2017 but can use carry-forwards
+   - Check your NOA for unused amounts
+
+3. Student Loan Interest:
+   - Deduction for interest paid on government student loans
+   - Keep receipts from NSLSC or provincial lender
+   - Can claim interest from past 5 years
+
+4. Moving Expenses:
+   - Must move 40km+ closer to school or new job
+   - Deductible: transportation, lodging, meals, storage
+   - Save all receipts
+   - Can only deduct against income at new location
+
+5. Scholarship and Bursary Exemption:
+   - Elementary/secondary: fully exempt
+   - Post-secondary: exempt if for tuition + $500
+   - Research grants: may be taxable
+
+Other Common Credits:
+
+GST/HST Credit:
+- Quarterly payments for low-income individuals
+- Automatic when you file taxes
+- Based on previous year's income
+
+Canada Workers Benefit (CWB):
+- For low-income workers
+- Refundable tax credit
+- Requires employment income
+
+Medical Expenses:
+- Can claim expenses over 3% of income
+- Includes prescriptions, dental, vision
+- Keep all receipts
+
+Public Transit:
+- Eliminated in 2017
+- Some provinces still offer
+
+Charitable Donations:
+- 15% federal credit on first $200
+- 29% federal credit on amount over $200
+- Plus provincial credits
+
+Tax Planning Strategies:
+
+1. RRSP Contributions:
+   - Reduces taxable income
+   - Get refund at marginal rate
+   - Example: $5,000 contribution at 30% = $1,500 refund
+   - Deadline: 60 days after year-end
+
+2. Income Splitting (Legal):
+   - Spousal RRSP contributions
+   - Pension income splitting (retirees)
+   - Family member employment (if legitimate)
+
+3. Tax Loss Harvesting:
+   - Sell losing investments to offset gains
+   - Can carry back 3 years or forward indefinitely
+   - "Superficial loss" rule: can't rebuy within 30 days
+
+4. Timing of Income:
+   - Defer bonuses to next year if appropriate
+   - Time capital gains realization
+   - Manage RRSP withdrawals strategically
+
+Filing Your Taxes:
+
+Methods:
+- NETFILE (online through CRA)
+- Certified tax software (Wealthsimple Tax, TurboTax, UFile)
+- Accountant (complex situations)
+- Community Volunteer Income Tax Program (free for simple returns)
+
+Deadline:
+- April 30 for most Canadians
+- June 15 if self-employed (but payment due April 30)
+
+Penalties:
+- Late filing: 5% + 1% per month (max 12 months)
+- Late payment: interest compounds daily
+- Repeated late filing: 10% + 2% per month
+
+Record Keeping:
+- Keep tax records for 6 years
+- Digital or physical copies
+- Organize by year
+- Include: receipts, T-slips, NOA, invoices
+
+Tax Myths to Avoid:
+
+Myth: "I don't need to file if I don't owe"
+Reality: File to get refund, credits, and build RRSP room
+
+Myth: "Cash income doesn't need to be reported"
+Reality: All income is taxable; CRA has many ways to detect
+
+Myth: "I can deduct anything work-related"
+Reality: Employees have limited deductions; need T2200 form
+
+Myth: "Paying more tax means I'm losing money"
+Reality: Higher income = higher wealth, despite higher tax rate
+
+Myth: "Tax evasion and tax avoidance are the same"
+Reality: Evasion is illegal; avoidance (using legal strategies) is smart

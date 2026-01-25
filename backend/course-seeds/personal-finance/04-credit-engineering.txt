@@ -1,0 +1,124 @@
+Credit Engineering and Debt Elimination
+
+Credit is not just a borrowing tool but a reputation metric that affects everything from apartment rentals to future mortgage rates. This file breaks down the FICO score components, specifically focusing on credit utilization ratios and payment history as the two most significant variables. It contrasts the Debt Snowball method, which targets the smallest balances first for psychological momentum, with the Debt Avalanche method, which prioritizes the highest interest rates to minimize total cost. Learners will understand the distinction between "good debt" used for appreciating assets like education or real estate, and "bad debt" used for depreciating consumer goods.
+
+Credit Score Components (Canadian Context):
+
+1. Payment History (35%)
+   - Most important factor
+   - Late payments stay on report for 6 years in Canada
+   - Even one 30-day late can drop score significantly
+   - Solution: Set up auto-pay for minimum payments
+
+2. Credit Utilization (30%)
+   - Percentage of available credit you're using
+   - Keep below 30% on all cards, ideally below 10%
+   - Example: $5,000 limit = use max $1,500
+   - Requesting limit increases helps (don't increase spending)
+
+3. Length of Credit History (15%)
+   - Average age of all accounts
+   - Keep old accounts open even if unused
+   - Don't close your first credit card
+   - Time in credit system matters
+
+4. Credit Mix (10%)
+   - Variety of credit types (cards, loans, line of credit)
+   - Not necessary to seek out, but helps if present
+   - Shows you can manage different credit products
+
+5. New Credit Inquiries (10%)
+   - Hard inquiries stay on report for 3 years
+   - Multiple inquiries in short period = red flag
+   - Rate shopping for mortgages/auto loans counted as one
+
+Building Credit from Zero:
+
+Step 1: Secured Credit Card
+- Deposit $500-$1,000 as collateral
+- Use for small purchases, pay in full monthly
+- After 6-12 months, upgrade to unsecured card
+
+Step 2: Student or Starter Credit Card
+- Lower limits, easier approval
+- Build payment history
+- Graduate to better cards after 1 year
+
+Step 3: Authorized User Status
+- Parent adds you to their established card
+- Their payment history helps your score
+- No liability for the debt
+
+Debt Elimination Strategies:
+
+Debt Snowball Method:
+- List debts from smallest to largest balance
+- Pay minimums on all, extra to smallest
+- When paid off, roll payment to next smallest
+- Psychological wins build momentum
+- Best for: People who need motivation
+
+Debt Avalanche Method:
+- List debts from highest to lowest interest rate
+- Pay minimums on all, extra to highest rate
+- Mathematically optimal, saves most money
+- Best for: People motivated by numbers
+
+Comparison Example:
+Card A: $1,000 at 19.99% APR
+Card B: $5,000 at 15.99% APR
+Card C: $2,500 at 22.99% APR
+
+Snowball Order: A → C → B
+Avalanche Order: C → A → B
+
+Good Debt vs. Bad Debt:
+
+Good Debt (Can increase net worth):
+- Student loans (increases earning potential)
+- Mortgage (builds equity in appreciating asset)
+- Business loans (generates income)
+- Low-interest debt with tax benefits
+
+Bad Debt (Decreases net worth):
+- Credit card debt for consumption
+- Payday loans (predatory rates 400%+)
+- Car loans for depreciating assets
+- Consumer financing for wants not needs
+
+Credit Card Optimization:
+
+Strategic Use:
+- Use for rewards/cashback (2-5%)
+- Pay statement balance in full monthly
+- Never pay interest
+- Track spending in budget app
+
+Red Flags to Avoid:
+- Carrying balance "to build credit" (myth)
+- Taking cash advances (high fees + immediate interest)
+- Missing payments
+- Maxing out cards
+- Paying only minimums
+
+Debt Recovery Plan:
+
+Step 1: Acknowledge total debt
+Step 2: Stop accumulating new debt
+Step 3: Build $1,000 emergency fund
+Step 4: Choose snowball or avalanche method
+Step 5: Automate extra payments
+Step 6: Track progress monthly
+Step 7: Celebrate milestones
+
+When to Consider Debt Consolidation:
+- Multiple high-interest debts
+- Can secure lower interest loan
+- Won't accumulate new debt
+- Have stable income for payments
+
+When to Seek Professional Help:
+- Debt exceeds annual income
+- Can't make minimum payments
+- Constant stress about money
+- Consider: Non-profit credit counseling

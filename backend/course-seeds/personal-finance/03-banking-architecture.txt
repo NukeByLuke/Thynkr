@@ -1,0 +1,70 @@
+Banking Architecture and Liquidity Management
+
+Choosing the right financial infrastructure is critical for maintaining liquidity while maximizing interest gains. This module explains the difference between traditional chequing accounts and High-Yield Savings Accounts (HYSAs), emphasizing the need for an Emergency Fund that covers three to six months of essential living expenses. It highlights the utility of Cash Management Accounts that offer ATM fee reimbursements and higher interest rates than standard big-bank offerings. For students and young professionals, understanding the mechanics of direct deposits and automated bill payments is presented as the first step toward a "set and forget" financial system that minimizes manual maintenance.
+
+Account Types and Their Purpose:
+
+1. Chequing Accounts
+   - For daily transactions and bill payments
+   - Features: debit card, unlimited transactions, overdraft protection
+   - Look for: No monthly fees, free e-transfers, good mobile app
+   - Canadian Options: Tangerine, Simplii, EQ Bank
+
+2. High-Yield Savings Accounts (HYSAs)
+   - For emergency funds and short-term savings
+   - Current rates: 3-5% APY (varies with Bank of Canada rate)
+   - CDIC insured up to $100,000 per institution
+   - Easy transfers to chequing account (1-2 business days)
+
+3. Cash Management Accounts
+   - Hybrid between chequing and savings
+   - Higher interest than chequing, more liquid than savings
+   - Often include ATM fee reimbursements
+   - Ideal for larger cash reserves
+
+Emergency Fund Strategy:
+
+Phase 1: $1,000 Mini Emergency Fund
+- Cover minor emergencies (car repair, vet bill)
+- Prevent going into debt for small surprises
+
+Phase 2: 3-6 Months of Expenses
+- Calculate essential monthly expenses
+- Multiply by 3 (dual income) or 6 (single income)
+- Store in HYSA for safety and accessibility
+
+Phase 3: Optimize Returns
+- Once fully funded, consider GICs for portion
+- Ladder maturity dates for ongoing access
+- Balance liquidity vs. return optimization
+
+Automation Best Practices:
+
+Direct Deposit Setup:
+- Split paycheck across multiple accounts automatically
+- Example: 70% to chequing, 20% to HYSA, 10% to investment
+
+Automated Bill Payments:
+- Set up pre-authorized debits for fixed expenses
+- Use credit card auto-pay (full balance only)
+- Review transactions monthly for accuracy
+
+Account Structure Example:
+1. Primary Chequing: Day-to-day spending
+2. Bills Account: Pre-funded monthly expenses
+3. Emergency HYSA: 3-6 months expenses
+4. Short-term Savings: Vacation, gifts, annual expenses
+5. Investment Account: Long-term wealth building
+
+Fee Minimization:
+- Avoid monthly account fees (use online banks)
+- Watch for NSF (non-sufficient funds) charges
+- Use in-network ATMs or fee reimbursement accounts
+- Cancel unused accounts to avoid maintenance fees
+
+Security Considerations:
+- Enable two-factor authentication
+- Monitor accounts weekly for fraud
+- Set up account alerts for large transactions
+- Never share PINs or passwords
+- Use strong, unique passwords for each institution
