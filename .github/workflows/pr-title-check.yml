@@ -7,6 +7,8 @@ on:
 jobs:
   check-title:
     runs-on: ubuntu-latest
+    # Skip for Dependabot - their titles are fine
+    if: github.actor != 'dependabot[bot]'
     permissions:
       pull-requests: write
 
