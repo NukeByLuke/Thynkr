@@ -133,41 +133,34 @@ export default function Study() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      {/* Abstract Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-sunrise-cream via-sunrise-pink/30 to-sunrise-orange/25 dark:from-midnight-blue dark:via-midnight-violet/40 dark:to-midnight-navy h-44">
+      {/* Abstract Header - Elegant Aurora Theme */}
+      <div className="relative overflow-hidden h-36 border-b border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-br from-pink-50/80 via-fuchsia-50/60 to-orange-50/50 dark:from-slate-900/95 dark:via-slate-800/90 dark:to-slate-900/95 backdrop-blur-xl">
         {/* Floating Abstract Shapes - GPU optimized with transform3d */}
         <motion.div
           animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
           transition={{ duration: 8, repeat: Infinity, ease: [0.25, 0.1, 0.25, 1.0] }}
-          className="absolute top-10 left-20 w-64 h-64 bg-sunrise-fuchsia dark:bg-midnight-purple rounded-full blur-3xl opacity-25"
+          className="absolute -top-16 left-10 w-72 h-72 bg-gradient-to-br from-pink-400 to-fuchsia-500 dark:from-cyan-500 dark:to-violet-500 rounded-full blur-3xl opacity-20 dark:opacity-15"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
         />
         <motion.div
           animate={{ y: [0, 20, 0], x: [0, -15, 0] }}
           transition={{ duration: 10, repeat: Infinity, ease: [0.25, 0.1, 0.25, 1.0] }}
-          className="absolute bottom-10 right-32 w-80 h-80 bg-sunrise-pink dark:bg-midnight-blue-light rounded-full blur-3xl opacity-25"
+          className="absolute -bottom-20 right-20 w-96 h-96 bg-gradient-to-br from-fuchsia-400 to-orange-500 dark:from-violet-500 dark:to-blue-500 rounded-full blur-3xl opacity-20 dark:opacity-15"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
         />
         <motion.div
           animate={{ y: [0, -15, 0], scale: [1, 1.1, 1] }}
           transition={{ duration: 7, repeat: Infinity, ease: [0.25, 0.1, 0.25, 1.0] }}
-          className="absolute top-20 right-20 w-56 h-56 bg-sunrise-orange dark:bg-midnight-cyan rounded-full blur-3xl opacity-25"
-          style={{ transform: 'translateZ(0)', willChange: 'transform' }}
-        />
-        {/* Additional center shape for light mode richness */}
-        <motion.div
-          animate={{ scale: [1, 1.15, 1], rotate: [0, 90, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: [0.25, 0.1, 0.25, 1.0] }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-sunrise-peach dark:bg-midnight-blue rounded-full blur-3xl opacity-20"
+          className="absolute top-10 right-32 w-64 h-64 bg-gradient-to-br from-orange-400 to-pink-500 dark:from-blue-500 dark:to-cyan-500 rounded-full blur-3xl opacity-15 dark:opacity-10"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
         />
 
         {/* Content */}
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-600 via-fuchsia-600 to-orange-600 dark:from-cyan-400 dark:via-violet-400 dark:to-blue-400 bg-clip-text text-transparent mb-1.5">
             Study Center
           </h1>
-          <p className="text-base text-slate-600 dark:text-slate-300 max-w-2xl">
+          <p className="text-sm text-slate-600 dark:text-slate-400 max-w-2xl">
             Resume where you left off or start something new
           </p>
         </div>
