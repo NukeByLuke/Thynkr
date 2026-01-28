@@ -41,12 +41,16 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
       {/* Logo and Brand */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center">
         {/* Thynkr Logo */}
-        <div className="mb-8 transform hover:scale-105 transition-transform duration-500 w-80 h-80">
-          <Logo variant="symbol" size="lg" className={`w-full h-full ${
-            isDark 
-              ? 'drop-shadow-[0_0_30px_rgba(124,58,237,0.5)]' 
-              : 'drop-shadow-[0_0_20px_rgba(124,58,237,0.3)]'
-          }`} />
+        <div className="mb-8 transform hover:scale-105 transition-transform duration-500">
+          <img
+            src={isDark ? '/brand/brain-dark.png' : '/brand/brain-light.png'}
+            alt="Thynkr"
+            className={`w-80 h-80 object-contain ${
+              isDark 
+                ? 'drop-shadow-[0_0_30px_rgba(124,58,237,0.5)]' 
+                : 'drop-shadow-[0_0_20px_rgba(124,58,237,0.3)]'
+            }`}
+          />
         </div>
         
         {/* Brand Wordmark */}
