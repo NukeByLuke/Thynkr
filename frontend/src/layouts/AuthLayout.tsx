@@ -49,14 +49,12 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
           }`} />
         </div>
         
-        {/* Brand Name - Sunrise & Midnight gradient */}
-        <h1 className={`text-5xl font-bold tracking-tight mb-4 bg-clip-text text-transparent ${
-          isDark 
-            ? 'bg-gradient-to-b from-stone-50 to-stone-400'
-            : 'bg-gradient-to-b from-stone-800 to-stone-600'
-        }`}>
-          THYNKR
-        </h1>
+        {/* Brand Wordmark */}
+        <img
+          src={isDark ? '/brand/wordmark-dark.png' : '/brand/wordmark-light.png'}
+          alt="THYNKR"
+          className="h-12 mb-4 object-contain"
+        />
         
         {/* Tagline */}
         <p className={`text-lg text-center max-w-[280px] leading-relaxed ${

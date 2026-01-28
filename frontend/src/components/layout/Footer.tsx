@@ -11,9 +11,16 @@ export default function Footer() {
         <div className="flex flex-col items-center gap-4">
           <div className="flex items-center gap-2">
             <Logo variant="icon" animated={false} />
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
-              THYNKR
-            </span>
+            <img
+              src="/brand/wordmark-light.png"
+              alt="THYNKR"
+              className="h-4 object-contain dark:hidden"
+            />
+            <img
+              src="/brand/wordmark-dark.png"
+              alt="THYNKR"
+              className="h-4 object-contain hidden dark:block"
+            />
           </div>
           <p className="text-sm text-[#6B7280] dark:text-gray-400">
             AI-powered learning for everyone.

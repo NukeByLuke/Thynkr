@@ -45,15 +45,14 @@ export default function Logo({
   const { theme: currentTheme } = useTheme();
   
   // Determine which theme's assets to use
-  // If on dark mode, we want the light logo (white/light colored)
-  // If on light mode, we want the dark logo (dark colored)
+  // Dark mode uses midnight colors, light mode uses sunrise colors
   const effectiveTheme = themeOverride || currentTheme;
   const brainSrc = effectiveTheme === 'dark' 
-    ? '/brand/brain-light.png' 
-    : '/brand/brain-dark.png';
+    ? '/brand/brain-dark.png' 
+    : '/brand/brain-light.png';
   const wordmarkSrc = effectiveTheme === 'dark'
-    ? '/brand/wordmark-light.png'
-    : '/brand/wordmark-dark.png';
+    ? '/brand/wordmark-dark.png'
+    : '/brand/wordmark-light.png';
 
   // Size configurations for brain icon and wordmark
   const sizeConfig = {

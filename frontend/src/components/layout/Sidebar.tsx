@@ -68,11 +68,18 @@ const Sidebar = () => {
                 animate={{ opacity: 1, width: 'auto' }}
                 exit={{ opacity: 0, width: 0 }}
                 transition={{ duration: 0.2 }}
-                className="flex flex-col overflow-hidden"
+                className="flex flex-col overflow-hidden items-start"
               >
-                <span className="text-base font-semibold text-stone-900 dark:text-white leading-tight whitespace-nowrap">
-                  THYNKR
-                </span>
+                <img
+                  src="/brand/wordmark-light.png"
+                  alt="THYNKR"
+                  className="h-5 object-contain dark:hidden"
+                />
+                <img
+                  src="/brand/wordmark-dark.png"
+                  alt="THYNKR"
+                  className="h-5 object-contain hidden dark:block"
+                />
                 <span className="text-[10px] text-stone-500 dark:text-stone-400 leading-tight whitespace-nowrap">
                   AI Study Platform
                 </span>

@@ -22,7 +22,7 @@ function Watermark({ courseTitle, userId }: { courseTitle: string; userId: strin
     >
       <div className="absolute inset-0 flex items-center justify-center opacity-[0.08] rotate-[-30deg]">
         <div className="text-center whitespace-nowrap">
-          <div className="text-4xl font-bold text-gray-900 dark:text-gray-100">THYNKR</div>
+          <img src="/brand/wordmark-light.png" alt="THYNKR" className="h-16 mx-auto mb-2" />
           <div className="text-lg text-gray-700 dark:text-gray-300 mt-2">{courseTitle}</div>
           <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             User: {userId.slice(0, 8)}...
