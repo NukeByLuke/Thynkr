@@ -55,7 +55,7 @@ const Sidebar = () => {
       initial={false}
       animate={{ width: isExpanded ? 280 : 80 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      className="relative h-screen bg-stone-50/80 dark:bg-midnight-violet/80 backdrop-blur-xl border-r border-stone-200/50 dark:border-midnight-blue/30 flex flex-col shadow-xl shadow-stone-200/20 dark:shadow-midnight-violet/20"
+      className="relative h-screen bg-stone-50/80 dark:bg-midnight-navy/95 backdrop-blur-xl border-r border-stone-200/50 dark:border-midnight-blue/30 flex flex-col shadow-xl shadow-stone-200/20 dark:shadow-black/40"
     >
       {/* Header */}
       <div className="h-16 px-4 flex items-center justify-between border-b border-stone-200/50 dark:border-midnight-blue/30">
