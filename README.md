@@ -63,36 +63,36 @@ Thynkr is an enterprise-grade EdTech platform that leverages OpenAI to parse PDF
 
 ### Frontend
 
-| Technology | Purpose |
-|------------|---------|
-| **React 18** | UI Framework with concurrent rendering |
-| **TypeScript 5.3** | Type-safe development |
-| **Vite** | Lightning-fast build tooling |
-| **Tailwind CSS** | Utility-first styling with custom "Aurora" theme |
-| **Framer Motion** | GPU-accelerated animations |
-| **TanStack Query** | Server state management with caching |
-| **React Router v6** | Client-side routing with lazy loading |
+| Technology          | Purpose                                          |
+| ------------------- | ------------------------------------------------ |
+| **React 18**        | UI Framework with concurrent rendering           |
+| **TypeScript 5.3**  | Type-safe development                            |
+| **Vite**            | Lightning-fast build tooling                     |
+| **Tailwind CSS**    | Utility-first styling with custom "Aurora" theme |
+| **Framer Motion**   | GPU-accelerated animations                       |
+| **TanStack Query**  | Server state management with caching             |
+| **React Router v6** | Client-side routing with lazy loading            |
 
 ### Backend
 
-| Technology | Purpose |
-|------------|---------|
-| **Node.js 20** | JavaScript runtime |
-| **Fastify 4.x** | High-performance web framework |
-| **Prisma ORM** | Type-safe database access |
-| **PostgreSQL 16** | Primary data store |
-| **Redis 7** | Caching, sessions, and rate limiting |
-| **OpenAI API** | GPT-4o for content generation, TTS for audio |
+| Technology        | Purpose                                      |
+| ----------------- | -------------------------------------------- |
+| **Node.js 20**    | JavaScript runtime                           |
+| **Fastify 4.x**   | High-performance web framework               |
+| **Prisma ORM**    | Type-safe database access                    |
+| **PostgreSQL 16** | Primary data store                           |
+| **Redis 7**       | Caching, sessions, and rate limiting         |
+| **OpenAI API**    | GPT-4o for content generation, TTS for audio |
 
 ### Infrastructure
 
-| Technology | Purpose |
-|------------|---------|
-| **Docker** | Containerization with multi-stage builds |
-| **Docker Compose** | Local development orchestration |
-| **Nginx** | Reverse proxy, SSL termination, compression |
-| **DigitalOcean** | Cloud hosting (Droplet + managed DNS) |
-| **GitHub Actions** | CI/CD pipeline |
+| Technology         | Purpose                                     |
+| ------------------ | ------------------------------------------- |
+| **Docker**         | Containerization with multi-stage builds    |
+| **Docker Compose** | Local development orchestration             |
+| **Nginx**          | Reverse proxy, SSL termination, compression |
+| **DigitalOcean**   | Cloud hosting (Droplet + managed DNS)       |
+| **GitHub Actions** | CI/CD pipeline                              |
 
 ---
 
@@ -124,65 +124,109 @@ graph TD
 
 ```bash
 git clone https://github.com/NukeByLuke/Thynkr.git
-cd thynkr
+cd Thynkr
 ```
 
-### 2. Configure Environment
+### 2. Automated Setup (Recommended) ⭐
+
+We provide setup scripts that handle database creation, migrations, and configuration automatically:
+
+**Windows (PowerShell):**
+
+```powershell
+.\setup.ps1
+```
+
+**Linux/macOS:**
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+The setup script will:
+
+- ✅ Check prerequisites
+- ✅ Create environment files
+- ✅ Install dependencies
+- ✅ Start Docker services (PostgreSQL & Redis)
+- ✅ **Create the database** (fixes common setup errors)
+- ✅ Run Prisma migrations
+- ✅ Generate Prisma Client
+
+### 3. Configure Environment
+
+Edit `.env` and add your API keys:
+
+```env
+# Required for AI features
+OPENAI_API_KEY=sk-your-openai-api-key-here
+
+# Optional for payment testing
+STRIPE_SECRET_KEY=sk_test_your-stripe-secret-key
+```
+
+### 4. Start Development Servers
+
+```bash
+pnpm dev
+```
+
+Services will be available at:
+
+- **Frontend:** http://localhost:5173
+- **Backend API:** http://localhost:3001
+- **PostgreSQL:** localhost:5432
+- **Redis:** localhost:6379
+
+### 5. Create an Admin User (Optional)
+
+```bash
+cd backend
+node create-admin.js
+```
+
+---
+
+### Manual Setup (Alternative)
+
+If you prefer manual setup:
+
+**1. Environment & Dependencies:**
 
 ```bash
 # Copy environment templates
 cp .env.example .env
 cp frontend/.env.example frontend/.env
+
+# Install dependencies
+pnpm install
 ```
 
-Update `.env` with your credentials:
-
-```env
-# Database
-DATABASE_URL=postgresql://user:password@localhost:5432/thynkr
-
-# Redis
-REDIS_URL=redis://localhost:6379
-
-# OpenAI
-OPENAI_API_KEY=sk-...
-
-# Stripe
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-
-# JWT
-JWT_SECRET=your-super-secret-key
-```
-
-### 3. Start with Docker (Recommended)
+**2. Start Docker Services:**
 
 ```bash
-docker-compose up --build
+docker-compose up -d postgres redis
+
+# Wait for services to be ready
+sleep 10
 ```
 
-Services will be available at:
-- **Frontend:** http://localhost:5173
-- **Backend API:** http://localhost:5000
-- **PostgreSQL:** localhost:5432
-- **Redis:** localhost:6379
-
-### 4. Manual Development Setup
-
-**Backend:**
+**3. Initialize Database:**
 
 ```bash
+# Create the database (important!)
+docker-compose exec postgres psql -U thynkr -c "CREATE DATABASE thynkr_db;"
+
+# Run migrations
 cd backend
-pnpm install
 pnpm prisma migrate dev
-pnpm dev
+cd ..
 ```
 
-**Frontend:**
+**4. Start Development:**
 
 ```bash
-cd frontend
-pnpm install
 pnpm dev
 ```
 

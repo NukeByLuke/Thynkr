@@ -1,6 +1,102 @@
-# Thynkr Git Workflow
+# Contributing to Thynkr
 
-This document outlines the Git workflow and branching strategy for the Thynkr project.
+Thank you for your interest in contributing to Thynkr! This guide will help you get started.
+
+## 🚀 Quick Start for New Contributors
+
+### 1. Fork & Clone
+
+```bash
+# Fork the repository on GitHub, then clone your fork:
+git clone https://github.com/YOUR_USERNAME/Thynkr.git
+cd Thynkr
+```
+
+### 2. Automated Setup (Recommended)
+
+We provide setup scripts that handle everything automatically:
+
+**Windows (PowerShell):**
+
+```powershell
+.\setup.ps1
+```
+
+**Linux/macOS:**
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+The setup script will:
+
+- ✅ Check prerequisites (Node.js, pnpm, Docker, Git)
+- ✅ Create environment files from templates
+- ✅ Install dependencies
+- ✅ Start Docker services (PostgreSQL & Redis)
+- ✅ **Create the database** (fixes "database does not exist" error)
+- ✅ Run Prisma migrations
+- ✅ Generate Prisma Client
+
+### 3. Manual Setup (Alternative)
+
+If you prefer manual setup or the script fails:
+
+```bash
+# 1. Install dependencies
+pnpm install
+
+# 2. Copy environment files
+cp .env.example .env
+cp frontend/.env.example frontend/.env
+
+# 3. Start Docker services
+docker-compose up -d postgres redis
+
+# 4. Wait for PostgreSQL to be ready (important!)
+sleep 10
+
+# 5. Create the database (THIS FIXES THE ERROR)
+docker-compose exec postgres psql -U thynkr -c "CREATE DATABASE thynkr_db;"
+
+# 6. Run migrations
+cd backend
+pnpm prisma migrate dev
+cd ..
+
+# 7. Generate Prisma Client
+pnpm --filter backend db:generate
+```
+
+### 4. Configure Environment
+
+Edit `.env` and add your API keys:
+
+```env
+# Required for AI features
+OPENAI_API_KEY=sk-your-key-here
+
+# Optional for payment testing
+STRIPE_SECRET_KEY=sk_test_your-key-here
+```
+
+### 5. Start Development Servers
+
+```bash
+pnpm dev
+```
+
+Access the application at:
+
+- **Frontend:** http://localhost:5173
+- **Backend API:** http://localhost:3001
+
+---
+
+## 🧭 Git Workflow
+
+This section outlines the Git workflow and branching strategy for the Thynkr project.
 
 ## 🧭 Branching Model
 
