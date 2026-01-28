@@ -14,8 +14,8 @@ const cache = new NodeCache({ stdTTL: 3600 });
 
 const MAX_INPUT_CHARS = 200000; // Gemini has much higher token limits
 
-// Model Selection: Gemini 1.5 Pro - most capable stable model
-const MODEL = 'gemini-1.5-pro';
+// Model Selection: Gemini 2.0 Flash Experimental - fastest, latest model
+const MODEL = 'gemini-2.0-flash-exp';
 
 /**
  * Prompt injection detection patterns for security validation
@@ -91,11 +91,10 @@ export class AIService {
         topK: 40,
         topP: 0.95,
         maxOutputTokens: 8192,
-        responseMimeType: 'application/json',
       },
     });
 
-    logger.info('Google Gemini AI Service initialized with Gemini 1.5 Flash');
+    logger.info('Google Gemini AI Service initialized with Gemini 2.0 Flash');
   }
 
   /**
