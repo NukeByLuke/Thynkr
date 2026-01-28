@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/luked177/Thynkr/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 📚 Documentation
+    url: https://github.com/luked177/Thynkr/wiki
+    about: Read the project documentation and guides
+  - name: 🔒 Security Issue
+    url: https://github.com/luked177/Thynkr/security/advisories/new
+    about: Report a security vulnerability privately
