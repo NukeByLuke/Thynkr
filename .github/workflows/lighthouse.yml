@@ -1,0 +1,49 @@
+name: Lighthouse Performance
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'frontend/**'
+  workflow_dispatch:
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build frontend
+        run: pnpm --filter frontend build
+        env:
+          VITE_API_URL: http://localhost:3001/api
+
+      - name: Serve build
+        run: |
+          pnpm --filter frontend preview &
+          sleep 10
+        env:
+          PORT: 4173
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          urls: |
+            http://localhost:4173
+          uploadArtifacts: true
+          temporaryPublicStorage: true

@@ -1,0 +1,59 @@
+# Labeler configuration for automatic PR labeling based on file paths
+
+backend:
+  - changed-files:
+    - any-glob-to-any-file: 'backend/**/*'
+
+frontend:
+  - changed-files:
+    - any-glob-to-any-file: 'frontend/**/*'
+
+documentation:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'docs/**/*'
+      - '*.md'
+      - '.github/**/*.md'
+
+ci:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/workflows/**'
+      - '.github/actions/**'
+      - 'docker-compose*.yml'
+
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/package.json'
+      - '**/pnpm-lock.yaml'
+      - '**/package-lock.json'
+
+database:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/prisma/**'
+      - 'backend/prisma/**'
+
+docker:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/Dockerfile*'
+      - 'docker-compose*.yml'
+      - '**/nginx*.conf'
+
+scripts:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'scripts/**/*'
+      - '**/*.sh'
+      - '**/*.ps1'
+
+configuration:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.config.*'
+      - '**/tsconfig.json'
+      - '**/.eslintrc*'
+      - '**/.prettierrc*'
+      - '**/tailwind.config.*'

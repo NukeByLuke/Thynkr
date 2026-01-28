@@ -1,0 +1,52 @@
+name: PR Title Check
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  check-title:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Check PR title format
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Configure which types are allowed
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          # Configure which scopes are allowed (optional)
+          scopes: |
+            frontend
+            backend
+            api
+            ui
+            db
+            deps
+            deps-dev
+            docker
+            ci
+            config
+          # Require a scope
+          requireScope: false
+          # Subject may not be empty
+          subjectPattern: ^.+$
+          # Subject must start with lowercase
+          subjectPatternError: |
+            The subject "{subject}" found in the pull request title "{title}"
+            didn't match the configured pattern. Please ensure that the subject
+            starts with a lowercase character.
