@@ -134,24 +134,31 @@ export default function Study() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Abstract Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-sunrise-cream via-sunrise-pink/20 to-sunrise-peach/20 dark:from-midnight-blue dark:via-midnight-violet/40 dark:to-midnight-navy h-44">
+      <div className="relative overflow-hidden bg-gradient-to-br from-sunrise-cream via-sunrise-pink/30 to-sunrise-orange/25 dark:from-midnight-blue dark:via-midnight-violet/40 dark:to-midnight-navy h-44">
         {/* Floating Abstract Shapes - GPU optimized with transform3d */}
         <motion.div
           animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
           transition={{ duration: 8, repeat: Infinity, ease: [0.25, 0.1, 0.25, 1.0] }}
-          className="absolute top-10 left-20 w-64 h-64 bg-sunrise-fuchsia dark:bg-midnight-purple rounded-full blur-3xl opacity-20"
+          className="absolute top-10 left-20 w-64 h-64 bg-sunrise-fuchsia dark:bg-midnight-purple rounded-full blur-3xl opacity-25"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
         />
         <motion.div
           animate={{ y: [0, 20, 0], x: [0, -15, 0] }}
           transition={{ duration: 10, repeat: Infinity, ease: [0.25, 0.1, 0.25, 1.0] }}
-          className="absolute bottom-10 right-32 w-80 h-80 bg-sunrise-pink dark:bg-midnight-blue-light rounded-full blur-3xl opacity-20"
+          className="absolute bottom-10 right-32 w-80 h-80 bg-sunrise-pink dark:bg-midnight-blue-light rounded-full blur-3xl opacity-25"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
         />
         <motion.div
           animate={{ y: [0, -15, 0], scale: [1, 1.1, 1] }}
           transition={{ duration: 7, repeat: Infinity, ease: [0.25, 0.1, 0.25, 1.0] }}
-          className="absolute top-20 right-20 w-56 h-56 bg-sunrise-orange dark:bg-midnight-cyan rounded-full blur-3xl opacity-20"
+          className="absolute top-20 right-20 w-56 h-56 bg-sunrise-orange dark:bg-midnight-cyan rounded-full blur-3xl opacity-25"
+          style={{ transform: 'translateZ(0)', willChange: 'transform' }}
+        />
+        {/* Additional center shape for light mode richness */}
+        <motion.div
+          animate={{ scale: [1, 1.15, 1], rotate: [0, 90, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: [0.25, 0.1, 0.25, 1.0] }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-sunrise-peach dark:bg-midnight-blue rounded-full blur-3xl opacity-20"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
         />
 
