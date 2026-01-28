@@ -41,7 +41,7 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
       {/* Logo and Brand */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center">
         {/* Thynkr Logo */}
-        <div className="mb-8 transform hover:scale-105 transition-transform duration-500 w-64 h-64">
+        <div className="mb-8 transform hover:scale-105 transition-transform duration-500 w-80 h-80">
           <Logo variant="symbol" size="lg" className={`w-full h-full ${
             isDark 
               ? 'drop-shadow-[0_0_30px_rgba(124,58,237,0.5)]' 
@@ -53,15 +53,8 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
         <img
           src={isDark ? '/brand/wordmark-dark.png' : '/brand/wordmark-light.png'}
           alt="THYNKR"
-          className="h-12 mb-4 object-contain"
+          className="h-16 object-contain"
         />
-        
-        {/* Tagline */}
-        <p className={`text-lg text-center max-w-[280px] leading-relaxed ${
-          isDark ? 'text-stone-300' : 'text-stone-600'
-        }`}>
-          Transform your learning with intelligent AI study tools
-        </p>
       </div>
 
       {/* Footer Links */}
