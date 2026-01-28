@@ -60,7 +60,7 @@ const Sidebar = () => {
       {/* Header */}
       <div className="h-16 px-4 flex items-center justify-between border-b border-stone-200/50 dark:border-midnight-blue/30">
         <Link to="/study" className="flex items-center gap-3 overflow-hidden">
-          <Logo variant="icon" animated={false} className="w-8 h-8 flex-shrink-0" />
+          <Logo variant="icon" animated={false} className="w-10 h-10 flex-shrink-0" />
           <AnimatePresence mode="wait">
             {isExpanded && (
               <motion.div
@@ -73,16 +73,13 @@ const Sidebar = () => {
                 <img
                   src="/brand/wordmark-light.png"
                   alt="THYNKR"
-                  className="h-5 object-contain dark:hidden"
+                  className="h-6 object-contain dark:hidden"
                 />
                 <img
                   src="/brand/wordmark-dark.png"
                   alt="THYNKR"
-                  className="h-5 object-contain hidden dark:block"
+                  className="h-6 object-contain hidden dark:block"
                 />
-                <span className="text-[10px] text-stone-500 dark:text-stone-400 leading-tight whitespace-nowrap">
-                  AI Study Platform
-                </span>
               </motion.div>
             )}
           </AnimatePresence>
