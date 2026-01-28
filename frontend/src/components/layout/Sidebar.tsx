@@ -113,7 +113,7 @@ const Sidebar = () => {
                 relative flex items-center gap-3 px-3 py-2.5 rounded-xl
                 transition-all duration-150 group
                 ${isLinkActive
-                  ? 'text-indigo-700 dark:text-white bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-500 dark:to-purple-500 shadow-lg shadow-indigo-200/50 dark:shadow-indigo-500/25 font-semibold'
+                  ? 'text-sunrise-fuchsia dark:text-white bg-gradient-to-r from-sunrise-pink/20 to-sunrise-peach/20 dark:from-midnight-purple/30 dark:to-midnight-blue-light/30 shadow-lg shadow-sunrise-pink/20 dark:shadow-midnight-purple/25 font-semibold border border-sunrise-pink/30 dark:border-midnight-purple/30'
                   : 'text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/5 hover:scale-[1.02]'
                 }
               `}
