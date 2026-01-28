@@ -45,13 +45,13 @@ export default function LoadingProgress({
     <div className="flex flex-col items-center justify-center py-8 px-4">
       {/* Data Stream Animation - Racing Blocks */}
       <div className="w-full max-w-sm mb-6">
-        <div className="relative h-3 bg-slate-800/80 rounded-full overflow-hidden">
+        <div className="relative h-3 bg-slate-200 dark:bg-slate-800/80 rounded-full overflow-hidden shadow-inner">
           {/* Multiple racing blocks at different speeds */}
           {variant === 'upload' ? (
             // High-velocity upload variant - triple stream
             <>
               <motion.div
-                className="absolute top-0 left-0 h-full w-1/4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-full shadow-lg shadow-cyan-500/50"
+                className="absolute top-0 left-0 h-full w-1/4 bg-gradient-to-r from-cyan-500 to-cyan-600 dark:from-cyan-400 dark:to-cyan-500 rounded-full shadow-lg shadow-cyan-500/50"
                 animate={{ x: ['-100%', '500%'] }}
                 transition={{
                   duration: 0.6,
@@ -61,7 +61,7 @@ export default function LoadingProgress({
                 style={{ willChange: 'transform' }}
               />
               <motion.div
-                className="absolute top-0 left-0 h-full w-1/5 bg-gradient-to-r from-violet-500 to-purple-500 rounded-full shadow-lg shadow-violet-500/50"
+                className="absolute top-0 left-0 h-full w-1/5 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-500 dark:to-purple-500 rounded-full shadow-lg shadow-violet-500/50"
                 animate={{ x: ['-100%', '600%'] }}
                 transition={{
                   duration: 0.5,
@@ -72,7 +72,7 @@ export default function LoadingProgress({
                 style={{ willChange: 'transform' }}
               />
               <motion.div
-                className="absolute top-0 left-0 h-full w-1/6 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full shadow-lg shadow-blue-500/50"
+                className="absolute top-0 left-0 h-full w-1/6 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500 rounded-full shadow-lg shadow-blue-500/50"
                 animate={{ x: ['-100%', '700%'] }}
                 transition={{
                   duration: 0.4,
@@ -90,11 +90,10 @@ export default function LoadingProgress({
                 <motion.div
                   key={i}
                   className={clsx(
-                    'absolute top-0 h-full w-8 rounded-full',
-                    i % 3 === 0 && 'bg-cyan-400 shadow-cyan-400/50',
-                    i % 3 === 1 && 'bg-violet-500 shadow-violet-500/50',
-                    i % 3 === 2 && 'bg-blue-400 shadow-blue-400/50',
-                    'shadow-lg'
+                    'absolute top-0 h-full w-8 rounded-full shadow-lg',
+                    i % 3 === 0 && 'bg-cyan-500 dark:bg-cyan-400 shadow-cyan-500/50 dark:shadow-cyan-400/50',
+                    i % 3 === 1 && 'bg-violet-600 dark:bg-violet-500 shadow-violet-600/50 dark:shadow-violet-500/50',
+                    i % 3 === 2 && 'bg-blue-500 dark:bg-blue-400 shadow-blue-500/50 dark:shadow-blue-400/50'
                   )}
                   animate={{ 
                     x: ['-32px', 'calc(100% + 32px)'],
@@ -114,7 +113,7 @@ export default function LoadingProgress({
             // Default variant - racing pulse
             <>
               <motion.div
-                className="absolute top-0 left-0 h-full w-1/3 bg-gradient-to-r from-cyan-400 via-violet-500 to-blue-400 rounded-full"
+                className="absolute top-0 left-0 h-full w-1/3 bg-gradient-to-r from-cyan-500 via-violet-600 to-blue-500 dark:from-cyan-400 dark:via-violet-500 dark:to-blue-400 rounded-full"
                 animate={{ 
                   x: ['-100%', '400%'],
                   scaleX: [1, 1.2, 0.8, 1],
@@ -127,7 +126,7 @@ export default function LoadingProgress({
                 style={{ willChange: 'transform' }}
               />
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-white/10 to-transparent"
                 animate={{ x: ['-100%', '200%'] }}
                 transition={{
                   duration: 0.6,
@@ -148,9 +147,9 @@ export default function LoadingProgress({
             key={i}
             className={clsx(
               'w-2 h-2 rounded-full',
-              i === 0 && 'bg-cyan-400',
-              i === 1 && 'bg-violet-500',
-              i === 2 && 'bg-amber-400'
+              i === 0 && 'bg-cyan-500 dark:bg-cyan-400',
+              i === 1 && 'bg-violet-600 dark:bg-violet-500',
+              i === 2 && 'bg-amber-500 dark:bg-amber-400'
             )}
             animate={{
               scale: [1, 1.8, 1],
@@ -175,7 +174,7 @@ export default function LoadingProgress({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.15 }}
-          className="text-slate-200 font-semibold text-sm"
+          className="text-slate-800 dark:text-slate-200 font-semibold text-sm"
         >
           {message}{dots[dotIndex]}
         </motion.p>
@@ -186,7 +185,7 @@ export default function LoadingProgress({
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-xs text-slate-400 mt-2 font-medium"
+          className="text-xs text-slate-600 dark:text-slate-400 mt-2 font-medium"
         >
           {stage}
         </motion.p>
@@ -197,7 +196,7 @@ export default function LoadingProgress({
         {[0, 1, 2, 3, 4].map((i) => (
           <motion.div
             key={i}
-            className="w-6 h-0.5 bg-gradient-to-r from-cyan-400/60 to-transparent rounded-full"
+            className="w-6 h-0.5 bg-gradient-to-r from-cyan-500/60 dark:from-cyan-400/60 to-transparent rounded-full"
             animate={{
               scaleX: [0.3, 1, 0.3],
               opacity: [0.3, 0.8, 0.3],

@@ -1,15 +1,17 @@
 import { FastifyInstance, FastifyReply } from 'fastify';
 import { authenticate, AuthenticatedRequest, isPro } from '../middleware/auth.middleware';
-import { checkAIRateLimit, recordAIUsage } from '../middleware/ai-rate-limit.middleware';
+import { checkAIRateLimit } from '../middleware/ai-rate-limit.middleware';
 import { ttsRateLimit } from '../middleware/tts-rate-limit.middleware';
 import { canUseTTS } from '../lib/tier-limits';
 import OpenAI from 'openai';
-import { createHash } from 'crypto';
+import { createHash, randomBytes } from 'crypto';
 // NodeCache imported for potential future in-memory caching
 import prisma from '../db/client';
 import { logger } from '../lib/logger';
 import fs from 'fs/promises';
+import { createReadStream } from 'fs';
 import path from 'path';
+import { Readable } from 'stream';
 
 // Supported voices
 const VOICES = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'] as const;
@@ -18,6 +20,28 @@ type Voice = (typeof VOICES)[number];
 // Supported speeds
 const MIN_SPEED = 0.25;
 const MAX_SPEED = 4.0;
+
+// Temporary token store for streaming (Token -> { text, voice, speed, userId, userRole })
+// Expires after 1 minute
+interface StreamRequest {
+  text: string;
+  voice: Voice;
+  speed: number;
+  userId: string;
+  userRole: string;
+  expiresAt: number;
+}
+const streamTokens = new Map<string, StreamRequest>();
+
+// Periodic cleanup of expired tokens
+setInterval(() => {
+  const now = Date.now();
+  for (const [token, data] of streamTokens.entries()) {
+    if (data.expiresAt < now) {
+      streamTokens.delete(token);
+    }
+  }
+}, 60000);
 
 // OpenAI client
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -198,12 +222,135 @@ export default async function ttsRoutes(server: FastifyInstance) {
   });
 
   /**
-   * POST /api/tts - Generate TTS audio with streaming and tier-based quality
-   * Pro users get tts-1-hd, free users get tts-1
-   * Implements edge caching for common phrases to reduce API costs
-   * Now falls back to user's saved preferences if voice/speed not provided
+   * POST /api/tts/negotiate - Prepare for streaming
+   * Validates request and returns a one-time token for the stream endpoint
    */
   server.post(
+    '/tts/negotiate',
+    {
+      preHandler: [authenticate, ttsRateLimit, checkAIRateLimit],
+    },
+    async (request: AuthenticatedRequest, reply: FastifyReply) => {
+      const userId = request.user!.userId;
+      const userRole = request.user!.role;
+      const body = request.body as TTSRequestBody;
+
+      if (!body.text || typeof body.text !== 'string') {
+        return reply.status(400).send({ error: 'Text is required' });
+      }
+
+      // Check limits early
+      const ttsCheck = await canUseTTS(userId, userRole, body.text.length);
+      if (!ttsCheck.allowed) {
+        return reply.status(403).send({ error: ttsCheck.reason, upgradeRequired: true });
+      }
+
+      // Resolve voice/speed defaults
+      let voice = body.voice as Voice | undefined;
+      let speed = body.speed;
+
+      if (!voice || speed === undefined) {
+          const user = await prisma.user.findUnique({
+             where: { id: userId },
+             select: { ttsVoice: true, ttsSpeed: true }
+          });
+          if (user) {
+             voice = voice || (user.ttsVoice as Voice);
+             speed = speed !== undefined ? speed : user.ttsSpeed;
+          }
+      }
+      voice = voice || 'alloy';
+      speed = speed !== undefined ? Math.max(MIN_SPEED, Math.min(MAX_SPEED, speed)) : 1.0;
+
+      // Generate token
+      const token = randomBytes(16).toString('hex');
+      streamTokens.set(token, {
+        text: body.text.slice(0, 4096),
+        voice,
+        speed,
+        userId,
+        userRole,
+        expiresAt: Date.now() + 60000 // 1 minute to start stream
+      });
+
+      return reply.send({ token, url: `/api/tts/stream/${token}` });
+    }
+  );
+
+  /**
+   * GET /api/tts/stream/:token - Stream the audio
+   * Uses the token to retrieve parameters and streams directly from OpenAI
+   */
+  server.get(
+    '/tts/stream/:token',
+    async (request: any, reply: FastifyReply) => {
+      const { token } = request.params as { token: string };
+      const data = streamTokens.get(token);
+
+      if (!data) {
+        return reply.status(404).send({ error: 'Invalid or expired stream token' });
+      }
+
+      // One-time use? strictly speaking yes, but for seeking sometimes browsers request multiple times if we supported range. 
+      // For now, let's keep it but maybe expire it purely on time or remove after a short delay.
+      // We won't delete immediately to allow potential browser retries or segmented loading.
+
+      const { text, voice, speed, userId } = data;
+      const model = 'tts-1'; // Force fast model
+
+      // 1. Check disk cache first
+      const cacheHash = generateContentHash(text, voice, speed);
+      const cachePath = getCacheFilePath(cacheHash);
+      
+      try {
+        await fs.access(cachePath);
+        // Serve from disk if exists
+        const stat = await fs.stat(cachePath);
+        
+        reply.header('Content-Type', 'audio/mpeg');
+        reply.header('Content-Length', stat.size);
+        reply.header('X-TTS-Cached', 'true');
+        
+        const fileStream = createReadStream(cachePath);
+        return reply.send(fileStream); 
+      } catch (e) {
+        // Not in cache, stream from OpenAI
+      }
+
+      try {
+        logger.info({ userId, textLength: text.length }, 'Starting TTS stream');
+        
+        const response = await openai.audio.speech.create({
+          model,
+          voice,
+          input: text,
+          speed,
+          response_format: 'mp3',
+        });
+
+        if (!response.body) {
+          throw new Error('No response body from OpenAI');
+        }
+
+        // Set headers for streaming
+        reply.header('Content-Type', 'audio/mpeg');
+        reply.header('X-TTS-Quality', model);
+        
+        // Convert ReadableStream to Node Stream
+        // @ts-ignore
+        const nodeStream = Readable.fromWeb(response.body);
+        
+        return reply.send(nodeStream);
+
+      } catch (error: any) {
+        logger.error({ error: error.message, userId }, 'Stream generation failed');
+        return reply.status(500).send({ error: 'Generation failed' });
+      }
+    }
+  );
+
+  /**
+   * POST /api/tts - Legacy endpoint (kept for compatibility)
     '/tts',
     {
       preHandler: [authenticate, ttsRateLimit, checkAIRateLimit],
@@ -266,7 +413,8 @@ export default async function ttsRoutes(server: FastifyInstance) {
 
       // Determine model quality based on user tier using reusable helper
       const isProUser = isPro(userRole);
-      const model = isProUser ? 'tts-1-hd' : 'tts-1';
+      // Forced downgrade to tts-1 for speed per user request, even for Pro users
+      const model = 'tts-1'; 
 
       // Check cache for common phrases (helps reduce API costs)
       const cacheHash = generateContentHash(text, voice, speed);

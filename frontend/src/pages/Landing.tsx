@@ -27,7 +27,7 @@ export default function Landing() {
   return (
     <>
       <Helmet>
-        <title>THYNKR - AI-Powered Study Platform</title>
+        <title>Thynkr - AI Study Platform</title>
         <meta
           name="description"
           content="Transform your learning with AI-powered summaries, flashcards, and quizzes. Study smarter, not harder."

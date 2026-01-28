@@ -36,7 +36,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
         {/* Enhanced Decorative Orbs with Animation */}
         <div className="absolute top-[-150px] left-[-150px] w-[450px] h-[450px] bg-purple-500/25 blur-[120px] rounded-full animate-pulse" style={{ animationDuration: '4s' }} />
         <div className="absolute bottom-[-100px] right-[-100px] w-[500px] h-[500px] bg-blue-600/15 blur-[140px] rounded-full animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/10 blur-[100px] rounded-full" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-pink-600/10 dark:bg-cyan-600/10 blur-[100px] rounded-full" />
         
         {/* Content Container */}
         <div className="relative z-10 flex flex-col h-full p-12 justify-between">

@@ -263,7 +263,7 @@ export default async function studyRoutes(server: FastifyInstance) {
 
         // Handle multipart form data with multer using promisified version
         const files: Express.Multer.File[] = await new Promise((resolve, reject) => {
-          const multerMiddleware = upload.array('files', 5);
+          const multerMiddleware = upload.array('files', 10);
           multerMiddleware(request.raw as any, reply.raw as any, (err: any) => {
             if (err) {
               server.log.error({ err }, 'Multer error');
@@ -311,26 +311,7 @@ export default async function studyRoutes(server: FastifyInstance) {
             file.originalname
           );
 
-          // Extract text when supported; otherwise keep as uploaded-only
-          let extractedText: string | null = null;
-          let status: 'UPLOADED' | 'COMPLETED' | 'FAILED' = 'UPLOADED';
-
-          if (canExtractText) {
-            try {
-              extractedText = await fileProcessor.extractText(file.path, file.mimetype);
-              status = 'COMPLETED';
-            } catch (error: any) {
-              server.log.error({ error, file: file.originalname }, 'Failed to extract text');
-              status = 'FAILED';
-            }
-          } else {
-            server.log.info(
-              { file: file.originalname, mimetype: file.mimetype },
-              'Skipping text extraction for unsupported type'
-            );
-          }
-
-          // Save to database
+          // Save to database immediately with PROCESSING status
           const uploadedFile = await prisma.uploadedFile.create({
             data: {
               userId: request.user!.userId,
@@ -339,12 +320,35 @@ export default async function studyRoutes(server: FastifyInstance) {
               fileType: file.mimetype,
               fileSize: file.size,
               filePath: file.path,
-              status,
-              extractedText,
+              status: canExtractText ? 'PROCESSING' : 'UPLOADED',
+              extractedText: null,
             },
           });
 
           uploadedFiles.push(uploadedFile);
+
+          // Process text extraction asynchronously in the background (don't await)
+          if (canExtractText) {
+            setImmediate(async () => {
+              try {
+                const extractedText = await fileProcessor.extractText(file.path, file.mimetype);
+                await prisma.uploadedFile.update({
+                  where: { id: uploadedFile.id },
+                  data: {
+                    extractedText,
+                    status: 'COMPLETED',
+                  },
+                });
+                server.log.info({ fileId: uploadedFile.id, fileName: file.originalname }, 'Text extraction completed');
+              } catch (error: any) {
+                server.log.error({ error, fileId: uploadedFile.id, file: file.originalname }, 'Failed to extract text in background');
+                await prisma.uploadedFile.update({
+                  where: { id: uploadedFile.id },
+                  data: { status: 'FAILED' },
+                });
+              }
+            });
+          }
         }
 
         // Track study activity for file upload

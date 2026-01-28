@@ -71,7 +71,7 @@ export default function Library() {
   return (
     <>
       <Helmet>
-        <title>Content Library - Thynkr</title>
+        <title>Library - Thynkr</title>
         <meta
           name="description"
           content="Browse our extensive library of premium content for all membership tiers."

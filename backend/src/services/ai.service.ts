@@ -150,11 +150,13 @@ You are a Senior Academic Researcher with expertise in creating comprehensive ed
 You must respond with valid JSON in this exact format:
 {"content": "your comprehensive summary here"}
 
-Create a comprehensive, well-structured summary of the following text. The summary should:
-- Capture all key concepts and main ideas
-- Be organized with clear sections if the content warrants it
-- Use bullet points for lists of items
-- Maintain academic accuracy while being accessible
+Create a comprehensive, visually engaging, and well-structured summary of the following text. The summary should:
+- **Title**: Start with a clear, engaging title (H1).
+- **Structure**: Use Markdown headers (H2, H3) to organize content logically.
+- **Formatting**: Use **bold** for key terms and concepts to improve scanning.
+- **Readability**: Use bullet points and short paragraphs to make it easy on the eyes.
+- **Key Takeaways**: End with a section highlighting the top 3-5 most important points.
+- **Tone**: Professional, academic, yet easy to understand.
 
 Text:
 ${preparedText}`;
@@ -197,9 +199,17 @@ You are a Senior Academic Note-Taker specializing in creating comprehensive stud
 You must respond with valid JSON in this exact format:
 {"keyPoints": ["point 1", "point 2", ...], "detailed": "detailed notes here"}
 
-Create detailed study notes from the following text. Include:
-1. Key Points: 5-10 essential bullet points capturing the most important concepts
-2. Detailed Notes: Comprehensive notes with headers, explanations, and examples
+Create detailed study notes from the following text. Includes:
+
+1. **Key Points**: 5-10 essential bullet points capturing the most important concepts. Make them concise and memorable.
+
+2. **Detailed Notes**: Create a comprehensive set of notes using Markdown:
+   - Use clear Headers ( ## Topic, ### Sub-topic ) to organize the hierarchy.
+   - Use **bold** for definitions and key vocabulary.
+   - Use *italics* for emphasis.
+   - Use bullet points and numbered lists for clarity.
+   - Include examples where relevant to clarify complex ideas.
+   - Make the notes visually appealing and easy to skim.
 
 Text:
 ${preparedText}`;
@@ -261,14 +271,12 @@ Difficulty level: ${difficulty}
 ${difficultyInstructions[difficulty]}
 
 CRITICAL REQUIREMENTS:
-- Generate highly accurate, context-aware questions that test genuine understanding
-- Each question must have exactly 4 options with ONE clear correct answer
-- The three incorrect options must be PLAUSIBLE DISTRACTORS that:
-  * Sound reasonable but are factually wrong based on the text
-  * Test common misconceptions or similar concepts
-  * Are not obviously wrong at first glance
+- **Questions**: Clear, unambiguous, and directly based on the text.
+- **Options**: exactly 4 options per question. ONE correct, THREE plausible distractors. Avoid "All of the above" or "None of the above" unless absolutely necessary.
+- **Accuracy**: Verify every question and answer against the source text for 100% factual accuracy.
+- **Explanations**: Provide a clear, helpful explanation for the correct answer. Explain *why* it is correct and, if useful, briefly mention why distractors are incorrect.
 
-IMPORTANT: Verify every question and answer against the source text for 100% factual accuracy.
+Make the quiz comprehensive and reflective of the material's core concepts.
 
 Text:
 ${preparedText}`;
@@ -332,12 +340,14 @@ You are a Senior Academic Researcher specializing in creating effective study fl
 You must respond with valid JSON in this exact format:
 {"title": "Flashcard Set Title", "cards": [{"front": "Question/Concept", "back": "Answer/Explanation"}]}
 
-Create exactly ${numCards} flashcards from the following text. Each flashcard should:
-- Have a clear question or concept on the front
-- Have a concise, accurate answer on the back
-- Focus on key concepts, definitions, and important facts
+Create exactly ${numCards} high-quality flashcards from the following text. Each flashcard should:
+- **Front**: A clear, specific question, term, or concept. Keep it short and punchy.
+- **Back**: A clear, accurate, and easy-to-read explanation.
+  - Use bullet points if the answer has multiple parts.
+  - Keep it focused on the core concept.
+- **Variety**: Cover definitions, key concepts, cause-and-effect relationships, and major facts.
 
-IMPORTANT: Verify all facts against the provided source material.
+IMPORTANT: Verify all facts against the provided source material. Ensure the content is easy to read on a card.
 
 Text:
 ${preparedText}`;

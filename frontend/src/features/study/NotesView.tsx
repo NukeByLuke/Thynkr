@@ -121,25 +121,25 @@ export default function NotesView({
             components={{
               h1: ({ node, ...props }) => (
                 <h1
-                  className="text-3xl font-bold text-gray-900 dark:text-white mt-8 mb-4 pb-2 border-b-2 border-primary-500 dark:border-primary-400"
+                  className="text-3xl font-extrabold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mt-8 mb-6 pb-2 border-b-4 border-primary-500/30 dark:border-primary-400/30"
                   {...props}
                 />
               ),
               h2: ({ node, ...props }) => (
                 <h2
-                  className="text-2xl font-bold text-gray-900 dark:text-white mt-7 mb-3"
+                  className="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4 pl-4 border-l-4 border-primary-500 dark:border-primary-400"
                   {...props}
                 />
               ),
               h3: ({ node, ...props }) => (
                 <h3
-                  className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-2"
+                  className="text-xl font-bold text-gray-800 dark:text-gray-200 mt-6 mb-3 flex items-center gap-2"
                   {...props}
                 />
               ),
               h4: ({ node, ...props }) => (
                 <h4
-                  className="text-lg font-semibold text-gray-800 dark:text-gray-200 mt-5 mb-2"
+                  className="text-lg font-semibold text-primary-700 dark:text-primary-300 mt-5 mb-2"
                   {...props}
                 />
               ),
@@ -163,10 +163,10 @@ export default function NotesView({
               ),
               li: ({ node, ...props }) => <li className="leading-relaxed pl-2" {...props} />,
               strong: ({ node, ...props }) => (
-                <strong className="font-bold text-gray-900 dark:text-white" {...props} />
+                <strong className="font-bold text-primary-700 dark:text-primary-300" {...props} />
               ),
               em: ({ node, ...props }) => (
-                <em className="italic text-gray-800 dark:text-gray-200" {...props} />
+                <em className="italic text-gray-800 dark:text-gray-200 bg-yellow-100 dark:bg-yellow-900/30 px-1 rounded-sm" {...props} />
               ),
               code: ({ node, className, children, ...props }) => {
                 const isInline = !className;
@@ -188,7 +188,7 @@ export default function NotesView({
               },
               blockquote: ({ node, ...props }) => (
                 <blockquote
-                  className="border-l-4 border-primary-500 dark:border-primary-400 bg-primary-50 dark:bg-primary-900/20 pl-6 pr-4 py-4 italic text-gray-700 dark:text-gray-300 my-5 rounded-r-lg"
+                  className="border-l-4 border-primary-500 dark:border-primary-400 bg-primary-50 dark:bg-primary-900/20 pl-6 pr-4 py-4 italic text-gray-700 dark:text-gray-300 my-5 rounded-r-lg shadow-sm"
                   {...props}
                 />
               ),

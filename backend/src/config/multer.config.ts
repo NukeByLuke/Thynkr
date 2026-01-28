@@ -66,6 +66,7 @@ export const upload = multer({
   storage,
   fileFilter,
   limits: {
-    files: 5, // Max 5 files at once
+    fileSize: 100 * 1024 * 1024, // 100MB per file
+    files: 10, // Max 10 files at once
   },
 });

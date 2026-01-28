@@ -126,7 +126,7 @@ export default function Study() {
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 dark:border-indigo-400"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 dark:border-cyan-400"></div>
       </div>
     );
   }
@@ -255,7 +255,7 @@ export default function Study() {
                         </span>
                       </div>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+                    <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-pink-600 dark:group-hover:text-cyan-400 transition-colors" />
                   </motion.button>
                 ))}
               </div>
@@ -265,8 +265,8 @@ export default function Study() {
           {/* Empty State */}
           {files.length === 0 && (
             <div className="text-center py-12">
-              <div className="mx-auto w-20 h-20 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-2xl flex items-center justify-center mb-6">
-                <FileText className="h-10 w-10 text-indigo-500" />
+              <div className="mx-auto w-20 h-20 bg-gradient-to-br from-pink-500/10 to-fuchsia-500/10 dark:from-cyan-500/10 dark:to-violet-500/10 rounded-2xl flex items-center justify-center mb-6">
+                <FileText className="h-10 w-10 text-pink-600 dark:text-cyan-400" />
               </div>
               <h3 className="text-2xl font-bold text-heading mb-2">
                 No files yet
