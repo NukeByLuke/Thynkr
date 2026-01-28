@@ -73,12 +73,14 @@ export default function Logo({
   // Symbol variant - just the brain icon, no wrapper
   if (variant === 'symbol') {
     return (
-      <motion.img
-        src={brainSrc}
-        alt="THYNKR"
-        className={clsx('object-contain', sizes.brain, className)}
-        {...motionProps}
-      />
+      <div className={clsx('flex items-center justify-center', sizes.brain, className)}>
+        <motion.img
+          src={brainSrc}
+          alt="THYNKR"
+          className="w-full h-full object-contain"
+          {...motionProps}
+        />
+      </div>
     );
   }
 
@@ -90,12 +92,14 @@ export default function Logo({
         className={clsx('flex items-center select-none', className)}
         aria-label="THYNKR Home"
       >
-        <motion.img
-          src={brainSrc}
-          alt="THYNKR"
-          className={clsx('object-contain', sizes.brain)}
-          {...motionProps}
-        />
+        <div className={clsx('flex items-center justify-center flex-shrink-0', sizes.brain)}>
+          <motion.img
+            src={brainSrc}
+            alt="THYNKR"
+            className="w-full h-full object-contain"
+            {...motionProps}
+          />
+        </div>
       </Link>
     );
   }
@@ -107,12 +111,14 @@ export default function Logo({
       className={clsx('group flex items-center select-none', sizes.gap, className)}
       aria-label="THYNKR Home"
     >
-      <motion.img
-        src={brainSrc}
-        alt="THYNKR Brain"
-        className={clsx('object-contain flex-shrink-0', sizes.brain)}
-        {...motionProps}
-      />
+      <div className={clsx('flex items-center justify-center flex-shrink-0', sizes.brain)}>
+        <motion.img
+          src={brainSrc}
+          alt="THYNKR Brain"
+          className="w-full h-full object-contain"
+          {...motionProps}
+        />
+      </div>
       <motion.img
         src={wordmarkSrc}
         alt="THYNKR"
