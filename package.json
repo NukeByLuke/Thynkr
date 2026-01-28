@@ -27,12 +27,12 @@
     "release": "powershell -ExecutionPolicy Bypass -File ./scripts/release.ps1"
   },
   "devDependencies": {
-    "@types/node": "^20.10.6",
-    "concurrently": "^8.2.2",
-    "husky": "^8.0.3",
-    "lint-staged": "^15.2.0",
-    "prettier": "^3.1.1",
-    "typescript": "^5.3.3"
+    "@types/node": "^25.1.0",
+    "concurrently": "^9.2.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=18.0.0",
