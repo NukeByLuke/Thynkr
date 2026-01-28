@@ -394,7 +394,7 @@ export async function checkAchievements(
       }
 
       // Check if user has reached next tier threshold (support multiple tier jumps)
-      let tiersUnlocked: { tier: AchievementTier; xp: number }[] = [];
+      const tiersUnlocked: { tier: AchievementTier; xp: number }[] = [];
       
       // Find the highest tier the user qualifies for based on currentValue
       let highestQualifiedTier: AchievementTier | null = null;
