@@ -48,23 +48,21 @@ export default function Logo({
   // If on dark mode, we want the light logo (white/light colored)
   // If on light mode, we want the dark logo (dark colored)
   const effectiveTheme = themeOverride || currentTheme;
-  const logoSrc = effectiveTheme === 'dark' 
-    ? '/brand/logo-dark.png' 
-    : '/brand/logo-light.png';
+  const brainSrc = effectiveTheme === 'dark' 
+    ? '/brand/brain-light.png' 
+    : '/brand/brain-dark.png';
+  const wordmarkSrc = effectiveTheme === 'dark'
+    ? '/brand/wordmark-light.png'
+    : '/brand/wordmark-dark.png';
 
-  // Size configurations
+  // Size configurations for brain icon and wordmark
   const sizeConfig = {
-    sm: { logo: 'h-6 w-6', text: 'text-base', gap: 'gap-1.5' },
-    md: { logo: 'h-8 w-8', text: 'text-xl', gap: 'gap-2' },
-    lg: { logo: 'h-12 w-12', text: 'text-2xl', gap: 'gap-3' },
+    sm: { brain: 'h-6 w-6', wordmark: 'h-4', gap: 'gap-1.5' },
+    md: { brain: 'h-8 w-8', wordmark: 'h-5', gap: 'gap-2' },
+    lg: { brain: 'h-12 w-12', wordmark: 'h-7', gap: 'gap-3' },
   };
 
   const sizes = sizeConfig[size];
-
-  // Text color based on theme
-  const textColorClass = effectiveTheme === 'dark' 
-    ? 'text-white' 
-    : 'text-slate-900';
 
   // Animation variants
   const motionProps = animated ? {
@@ -72,62 +70,55 @@ export default function Logo({
     whileTap: { scale: 0.98 },
   } : {};
 
-  // Symbol variant - just the image, no wrapper
+  // Symbol variant - just the brain icon, no wrapper
   if (variant === 'symbol') {
     return (
       <motion.img
-        src={logoSrc}
-        alt="Thynkr"
-        className={clsx('object-contain', sizes.logo, className)}
+        src={brainSrc}
+        alt="THYNKR"
+        className={clsx('object-contain', sizes.brain, className)}
         {...motionProps}
       />
     );
   }
 
-  // Icon variant - logo image only with Link
+  // Icon variant - brain icon only with Link
   if (variant === 'icon') {
     return (
       <Link
         to="/"
         className={clsx('flex items-center select-none', className)}
-        aria-label="Thynkr Home"
+        aria-label="THYNKR Home"
       >
         <motion.img
-          src={logoSrc}
-          alt="Thynkr"
-          className={clsx('object-contain', sizes.logo)}
+          src={brainSrc}
+          alt="THYNKR"
+          className={clsx('object-contain', sizes.brain)}
           {...motionProps}
         />
       </Link>
     );
   }
 
-  // Full variant - logo + text with Link
+  // Full variant - brain icon + wordmark image with Link
   return (
     <Link
       to="/"
       className={clsx('group flex items-center select-none', sizes.gap, className)}
-      aria-label="Thynkr Home"
+      aria-label="THYNKR Home"
     >
       <motion.img
-        src={logoSrc}
-        alt="Thynkr"
-        className={clsx('object-contain flex-shrink-0', sizes.logo)}
+        src={brainSrc}
+        alt="THYNKR Brain"
+        className={clsx('object-contain flex-shrink-0', sizes.brain)}
         {...motionProps}
       />
-      <span
-        className={clsx(
-          'font-bold tracking-tight transition-colors',
-          sizes.text,
-          textColorClass
-        )}
-        style={{
-          fontFamily: "'Inter', 'Geist', sans-serif",
-          letterSpacing: '-0.03em',
-        }}
-      >
-        THYNKR
-      </span>
+      <motion.img
+        src={wordmarkSrc}
+        alt="THYNKR"
+        className={clsx('object-contain flex-shrink-0', sizes.wordmark)}
+        {...motionProps}
+      />
     </Link>
   );
 }
