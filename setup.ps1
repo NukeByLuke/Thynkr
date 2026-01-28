@@ -204,7 +204,8 @@ Write-Host @"
 
 Write-Host "1. Configure your .env file with API keys:" -ForegroundColor White
 Write-Host "   • OPENAI_API_KEY (required for AI features)" -ForegroundColor Gray
-Write-Host "   • STRIPE_SECRET_KEY (for payment testing)" -ForegroundColor Gray
+Write-Host "   • GEMINI_API_KEY (optional, for additional AI features)" -ForegroundColor Gray
+Write-Host "   • STRIPE_SECRET_KEY (optional, for payment testing)" -ForegroundColor Gray
 Write-Host ""
 Write-Host "2. Start the development servers:" -ForegroundColor White
 Write-Host "   pnpm dev" -ForegroundColor Cyan

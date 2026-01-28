@@ -204,7 +204,8 @@ ${GREEN}╔═══════════════════════
 
 ${NC}1. Configure your .env file with API keys:
    ${GRAY}• OPENAI_API_KEY (required for AI features)
-   • STRIPE_SECRET_KEY (for payment testing)${NC}
+   • GEMINI_API_KEY (optional, for additional AI features)
+   • STRIPE_SECRET_KEY (optional, for payment testing)${NC}
 
 2. Start the development servers:
    ${CYAN}pnpm dev${NC}
