@@ -29,10 +29,10 @@ function Test-Command($command) {
 # Function to display status
 function Write-Status($message, $status = "info") {
     switch ($status) {
-        "success" { Write-Host "✓ $message" -ForegroundColor Green }
-        "error" { Write-Host "✗ $message" -ForegroundColor Red }
-        "warning" { Write-Host "⚠ $message" -ForegroundColor Yellow }
-        default { Write-Host "→ $message" -ForegroundColor Cyan }
+        "success" { Write-Host "[OK] $message" -ForegroundColor Green }
+        "error"   { Write-Host "[FAIL] $message" -ForegroundColor Red }
+        "warning" { Write-Host "[WARN] $message" -ForegroundColor Yellow }
+        default   { Write-Host "-> $message" -ForegroundColor Cyan }
     }
 }
 
