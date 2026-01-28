@@ -164,7 +164,7 @@ importers:
         version: 2.2.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@hookform/resolvers':
         specifier: ^3.3.4
-        version: 3.10.0(react-hook-form@7.65.0(react@18.3.1))
+        version: 3.10.0(react-hook-form@7.71.1(react@18.3.1))
       '@stripe/stripe-js':
         specifier: ^2.4.0
         version: 2.4.0
@@ -214,8 +214,8 @@ importers:
         specifier: ^2.0.4
         version: 2.0.5(react@18.3.1)
       react-hook-form:
-        specifier: ^7.49.3
-        version: 7.65.0(react@18.3.1)
+        specifier: ^7.71.1
+        version: 7.71.1(react@18.3.1)
       react-hot-toast:
         specifier: ^2.6.0
         version: 2.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -3329,8 +3329,8 @@ packages:
     peerDependencies:
       react: ^16.6.0 || ^17.0.0 || ^18.0.0
 
-  react-hook-form@7.65.0:
-    resolution: {integrity: sha512-xtOzDz063WcXvGWaHgLNrNzlsdFgtUWcb32E6WFaGTd7kPZG3EeDusjdZfUsPwKCKVXy1ZlntifaHZ4l8pAsmw==}
+  react-hook-form@7.71.1:
+    resolution: {integrity: sha512-9SUJKCGKo8HUSsCO+y0CtqkqI5nNuaDqTxyqPsZPqIwudpj4rCrAz/jZV+jn57bx5gtZKOh3neQu94DXMc+w5w==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
@@ -4546,9 +4546,9 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       use-sync-external-store: 1.6.0(react@18.3.1)
 
-  '@hookform/resolvers@3.10.0(react-hook-form@7.65.0(react@18.3.1))':
+  '@hookform/resolvers@3.10.0(react-hook-form@7.71.1(react@18.3.1))':
     dependencies:
-      react-hook-form: 7.65.0(react@18.3.1)
+      react-hook-form: 7.71.1(react@18.3.1)
 
   '@humanwhocodes/config-array@0.13.0':
     dependencies:
@@ -7459,7 +7459,7 @@ snapshots:
       react-fast-compare: 3.2.2
       shallowequal: 1.1.0
 
-  react-hook-form@7.65.0(react@18.3.1):
+  react-hook-form@7.71.1(react@18.3.1):
     dependencies:
       react: 18.3.1
 
