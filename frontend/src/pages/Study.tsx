@@ -189,11 +189,11 @@ export default function Study() {
             {/* Card 1: Browse Library */}
             <button
               onClick={() => navigate('/files')}
-              className="group card-hover p-5 text-left transition-[border-color,transform] duration-200 active:scale-95 hover:border-sunrise-pink dark:hover:border-midnight-purple"
+              className="group card-hover p-5 text-left transition-[border-color,transform] duration-200 active:scale-95 hover:border-cyan-500 dark:hover:border-violet-500"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-sunrise-pink/10 to-sunrise-peach/10 dark:from-midnight-purple/10 dark:to-midnight-blue-light/10 rounded-lg flex items-center justify-center flex-shrink-0 border border-sunrise-pink/20 dark:border-midnight-purple/20">
-                  <FolderOpen className="w-6 h-6 text-sunrise-fuchsia dark:text-midnight-cyan" />
+                <div className="w-12 h-12 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 dark:from-violet-500/10 dark:to-blue-600/10 rounded-lg flex items-center justify-center flex-shrink-0 border border-cyan-500/20 dark:border-violet-500/20">
+                  <FolderOpen className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg font-semibold text-heading mb-1">
@@ -211,11 +211,11 @@ export default function Study() {
             <button
               onClick={handleQuickUpload}
               disabled={uploadMutation.isPending}
-              className="group card-hover p-5 text-left transition-[border-color,transform] duration-200 active:scale-95 hover:border-sunrise-pink dark:hover:border-midnight-purple disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group card-hover p-5 text-left transition-[border-color,transform] duration-200 active:scale-95 hover:border-violet-500 dark:hover:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-sunrise-orange/10 to-sunrise-peach/10 dark:from-midnight-blue-light/10 dark:to-midnight-cyan/10 rounded-lg flex items-center justify-center flex-shrink-0 border border-sunrise-orange/20 dark:border-midnight-blue-light/20">
-                  <UploadCloud className="w-6 h-6 text-sunrise-orange dark:text-midnight-blue-light" />
+                <div className="w-12 h-12 bg-gradient-to-br from-violet-500/10 to-purple-500/10 dark:from-blue-600/10 dark:to-cyan-500/10 rounded-lg flex items-center justify-center flex-shrink-0 border border-violet-500/20 dark:border-blue-500/20">
+                  <UploadCloud className="w-6 h-6 text-violet-600 dark:text-blue-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg font-semibold text-heading mb-1">
@@ -246,13 +246,13 @@ export default function Study() {
                     onClick={() => navigate(`/study/${file.id}`)}
                     whileHover={{ x: 4 }}
                     whileTap={{ scale: 0.98 }}
-                    className="w-full flex items-center gap-4 p-4 card-hover transition-[border-color,transform] duration-200 group hover:border-sunrise-fuchsia/50 dark:hover:border-midnight-purple/50"
+                    className="w-full flex items-center gap-4 p-4 card-hover transition-[border-color,transform] duration-200 group hover:border-cyan-500/50 dark:hover:border-violet-500/50"
                   >
-                    <div className="w-12 h-12 bg-gradient-to-br from-sunrise-fuchsia/20 to-sunrise-pink/20 dark:from-midnight-purple/20 dark:to-midnight-blue-light/20 rounded-xl flex items-center justify-center border border-sunrise-fuchsia/20 dark:border-midnight-purple/20">
-                      <FileText className="w-6 h-6 text-sunrise-fuchsia dark:text-midnight-purple" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-cyan-500/20 to-violet-500/20 dark:from-violet-600/20 dark:to-blue-500/20 rounded-xl flex items-center justify-center border border-cyan-500/20 dark:border-violet-500/20">
+                      <FileText className="w-6 h-6 text-cyan-600 dark:text-violet-400" />
                     </div>
                     <div className="flex-1 text-left">
-                      <h3 className="font-semibold text-heading group-hover:text-sunrise-fuchsia dark:group-hover:text-midnight-purple transition-colors">
+                      <h3 className="font-semibold text-heading group-hover:text-cyan-600 dark:group-hover:text-violet-400 transition-colors">
                         {file.originalName}
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
