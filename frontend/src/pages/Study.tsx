@@ -189,11 +189,11 @@ export default function Study() {
             {/* Card 1: Browse Library */}
             <button
               onClick={() => navigate('/files')}
-              className="group card-hover p-5 text-left transition-[border-color,transform] duration-200 active:scale-95 hover:border-cyan-500 dark:hover:border-violet-500"
+              className="group card-hover p-5 text-left transition-[border-color,transform] duration-200 active:scale-95 hover:border-pink-500 dark:hover:border-cyan-500"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 dark:from-violet-500/10 dark:to-blue-600/10 rounded-lg flex items-center justify-center flex-shrink-0 border border-cyan-500/20 dark:border-violet-500/20">
-                  <FolderOpen className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
+                <div className="w-12 h-12 bg-gradient-to-br from-pink-500/10 to-orange-500/10 dark:from-cyan-500/10 dark:to-violet-500/10 rounded-lg flex items-center justify-center flex-shrink-0 border border-pink-500/20 dark:border-cyan-500/20">
+                  <FolderOpen className="w-6 h-6 text-pink-600 dark:text-cyan-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg font-semibold text-heading mb-1">
@@ -211,11 +211,11 @@ export default function Study() {
             <button
               onClick={handleQuickUpload}
               disabled={uploadMutation.isPending}
-              className="group card-hover p-5 text-left transition-[border-color,transform] duration-200 active:scale-95 hover:border-violet-500 dark:hover:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group card-hover p-5 text-left transition-[border-color,transform] duration-200 active:scale-95 hover:border-fuchsia-500 dark:hover:border-violet-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-violet-500/10 to-purple-500/10 dark:from-blue-600/10 dark:to-cyan-500/10 rounded-lg flex items-center justify-center flex-shrink-0 border border-violet-500/20 dark:border-blue-500/20">
-                  <UploadCloud className="w-6 h-6 text-violet-600 dark:text-blue-400" />
+                <div className="w-12 h-12 bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10 dark:from-violet-500/10 dark:to-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0 border border-fuchsia-500/20 dark:border-violet-500/20">
+                  <UploadCloud className="w-6 h-6 text-fuchsia-600 dark:text-violet-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg font-semibold text-heading mb-1">
@@ -246,13 +246,13 @@ export default function Study() {
                     onClick={() => navigate(`/study/${file.id}`)}
                     whileHover={{ x: 4 }}
                     whileTap={{ scale: 0.98 }}
-                    className="w-full flex items-center gap-4 p-4 card-hover transition-[border-color,transform] duration-200 group hover:border-cyan-500/50 dark:hover:border-violet-500/50"
+                    className="w-full flex items-center gap-4 p-4 card-hover transition-[border-color,transform] duration-200 group hover:border-pink-500/50 dark:hover:border-violet-500/50"
                   >
-                    <div className="w-12 h-12 bg-gradient-to-br from-cyan-500/20 to-violet-500/20 dark:from-violet-600/20 dark:to-blue-500/20 rounded-xl flex items-center justify-center border border-cyan-500/20 dark:border-violet-500/20">
-                      <FileText className="w-6 h-6 text-cyan-600 dark:text-violet-400" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-pink-500/20 to-fuchsia-500/20 dark:from-violet-500/20 dark:to-cyan-500/20 rounded-xl flex items-center justify-center border border-pink-500/20 dark:border-violet-500/20">
+                      <FileText className="w-6 h-6 text-pink-600 dark:text-violet-400" />
                     </div>
                     <div className="flex-1 text-left">
-                      <h3 className="font-semibold text-heading group-hover:text-cyan-600 dark:group-hover:text-violet-400 transition-colors">
+                      <h3 className="font-semibold text-heading group-hover:text-pink-600 dark:group-hover:text-violet-400 transition-colors">
                         {file.originalName}
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
