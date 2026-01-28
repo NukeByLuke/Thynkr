@@ -14,8 +14,8 @@ const cache = new NodeCache({ stdTTL: 3600 });
 
 const MAX_INPUT_CHARS = 200000; // Gemini has much higher token limits
 
-// Model Selection: Gemini 2.0 Flash Experimental - fastest, latest model
-const MODEL = 'gemini-2.0-flash-exp';
+// Model Selection: Gemini 2.5 Flash - newest, fastest model
+const MODEL = 'gemini-2.5-flash';
 
 /**
  * Prompt injection detection patterns for security validation
@@ -98,6 +98,23 @@ export class AIService {
   }
 
   /**
+   * Clean JSON response from Gemini - removes markdown code fences
+   */
+  private cleanJsonResponse(text: string): string {
+    // Remove markdown code fences if present
+    let cleaned = text.trim();
+    if (cleaned.startsWith('```json')) {
+      cleaned = cleaned.replace(/^```json\s*\n/, '');
+    } else if (cleaned.startsWith('```')) {
+      cleaned = cleaned.replace(/^```\s*\n/, '');
+    }
+    if (cleaned.endsWith('```')) {
+      cleaned = cleaned.replace(/\n```\s*$/, '');
+    }
+    return cleaned.trim();
+  }
+
+  /**
    * Fisher-Yates shuffle algorithm for randomizing quiz options
    */
   private shuffleArray<T>(array: T[]): T[] {
@@ -145,7 +162,8 @@ ${preparedText}`;
       const result = await this.model.generateContent(prompt);
       const response = result.response;
       const content = response.text();
-      const parsed = JSON.parse(content) as GeneratedSummary;
+      const cleanedContent = this.cleanJsonResponse(content);
+      const parsed = JSON.parse(cleanedContent) as GeneratedSummary;
 
       cache.set(cacheKey, parsed);
       return parsed;
@@ -189,7 +207,8 @@ ${preparedText}`;
       const result = await this.model.generateContent(prompt);
       const response = result.response;
       const content = response.text();
-      const parsed = JSON.parse(content) as GeneratedNotes;
+      const cleanedContent = this.cleanJsonResponse(content);
+      const parsed = JSON.parse(cleanedContent) as GeneratedNotes;
 
       cache.set(cacheKey, parsed);
       return parsed;
@@ -257,7 +276,8 @@ ${preparedText}`;
       const result = await this.model.generateContent(prompt);
       const response = result.response;
       const content = response.text();
-      const parsed = JSON.parse(content) as GeneratedQuiz;
+      const cleanedContent = this.cleanJsonResponse(content);
+      const parsed = JSON.parse(cleanedContent) as GeneratedQuiz;
 
       // Process questions: handle correctAnswer and shuffle options
       if (parsed.questions) {
@@ -325,7 +345,8 @@ ${preparedText}`;
       const result = await this.model.generateContent(prompt);
       const response = result.response;
       const content = response.text();
-      const parsed = JSON.parse(content) as GeneratedFlashcards;
+      const cleanedContent = this.cleanJsonResponse(content);
+      const parsed = JSON.parse(cleanedContent) as GeneratedFlashcards;
 
       cache.set(cacheKey, parsed);
       return parsed;
