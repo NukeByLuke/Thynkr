@@ -55,7 +55,7 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
             ? 'bg-gradient-to-b from-stone-50 to-stone-400'
             : 'bg-gradient-to-b from-stone-800 to-stone-600'
         }`}>
-          Thynkr
+          THYNKR
         </h1>
         
         {/* Tagline */}

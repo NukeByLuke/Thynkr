@@ -71,7 +71,7 @@ const Sidebar = () => {
                 className="flex flex-col overflow-hidden"
               >
                 <span className="text-base font-semibold text-stone-900 dark:text-white leading-tight whitespace-nowrap">
-                  Thynkr
+                  THYNKR
                 </span>
                 <span className="text-[10px] text-stone-500 dark:text-stone-400 leading-tight whitespace-nowrap">
                   AI Study Platform

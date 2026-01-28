@@ -12,7 +12,7 @@ export default function Footer() {
           <div className="flex items-center gap-2">
             <Logo variant="icon" animated={false} />
             <span className="text-sm font-medium text-gray-900 dark:text-white">
-              Thynkr
+              THYNKR
             </span>
           </div>
           <p className="text-sm text-[#6B7280] dark:text-gray-400">
@@ -43,7 +43,7 @@ export default function Footer() {
 
           {/* Copyright */}
           <p className="text-sm text-[#6B7280] dark:text-gray-400">
-            © {currentYear} Thynkr
+            © {currentYear} THYNKR
           </p>
         </div>
       </div>

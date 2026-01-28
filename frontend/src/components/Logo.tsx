@@ -126,7 +126,7 @@ export default function Logo({
           letterSpacing: '-0.03em',
         }}
       >
-        Thynkr
+        THYNKR
       </span>
     </Link>
   );
