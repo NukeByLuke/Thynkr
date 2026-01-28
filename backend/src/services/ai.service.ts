@@ -80,7 +80,11 @@ export class AIService {
     const apiKey = config.gemini?.apiKey || process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-      throw new Error('GEMINI_API_KEY environment variable is required');
+      logger.warn('GEMINI_API_KEY not provided - AI features will be limited to OpenAI only');
+      // Initialize with a dummy key to prevent crashes - requests will fail gracefully
+      this.gemini = new GoogleGenerativeAI('dummy-key');
+      this.model = this.gemini.getGenerativeModel({ model: MODEL });
+      return;
     }
 
     this.gemini = new GoogleGenerativeAI(apiKey);

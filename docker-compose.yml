@@ -60,7 +60,7 @@ services:
       FRONTEND_URL: http://localhost:5175
       OPENAI_API_KEY: ${OPENAI_API_KEY:-dummy}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       # JWT secrets - use your values from .env
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
@@ -118,18 +118,21 @@ services:
       - thynkr-network
 
   # Stripe CLI - Forwards webhook events from Stripe to local backend for testing
+  # Optional: Only runs if STRIPE_SECRET_KEY is valid
   stripe-cli:
     image: stripe/stripe-cli:latest
     container_name: thynkr-stripe-cli
-    restart: unless-stopped
-    command: listen --api-key ${STRIPE_SECRET_KEY} --forward-to http://backend:3001/api/stripe/webhook
+    restart: on-failure:3
+    command: listen --api-key ${STRIPE_SECRET_KEY:-sk_test_placeholder} --forward-to http://backend:3001/api/stripe/webhook
     environment:
-      STRIPE_API_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_API_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}
       STRIPE_DEVICE_NAME: thynkr-docker
     depends_on:
       - backend
     networks:
       - thynkr-network
+    profiles:
+      - stripe  # Only start with: docker-compose --profile stripe up
 
 # Persistent volumes for database and cache data
 volumes:
