@@ -1,10 +1,10 @@
 /**
- * AI Service - OpenAI-powered content generation for educational materials
- * Uses GPT-4o-mini for fast, cost-effective generation.
+ * AI Service - Google Gemini-powered content generation for educational materials
+ * Uses Gemini 2.0 Flash - blazing fast, highly accurate, cost-effective.
  * Handles summaries, notes, quizzes, and flashcards with caching and security validation.
  */
 
-import OpenAI from 'openai';
+import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 import NodeCache from 'node-cache';
 import { logger } from '../lib/logger';
 import { config } from '../config';
@@ -12,10 +12,10 @@ import { DEFAULT_LANGUAGE } from '../constants/language.constants';
 
 const cache = new NodeCache({ stdTTL: 3600 });
 
-const MAX_INPUT_CHARS = 48000;
+const MAX_INPUT_CHARS = 200000; // Gemini has much higher token limits
 
-// Model Selection: GPT-4o-mini - fast, cheap, excellent quality
-const MODEL = 'gpt-4o-mini';
+// Model Selection: Gemini 1.5 Flash - fastest, most cost-effective production model
+const MODEL = 'gemini-1.5-flash-latest';
 
 /**
  * Prompt injection detection patterns for security validation
@@ -70,21 +70,32 @@ export interface GeneratedFlashcards {
 }
 
 /**
- * AIService - Main service class for OpenAI-powered educational content generation
+ * AIService - Main service class for Google Gemini-powered educational content generation
  */
 export class AIService {
-  private openai: OpenAI;
+  private gemini: GoogleGenerativeAI;
+  private model: GenerativeModel;
 
   constructor() {
-    const apiKey = config.openai?.apiKey || process.env.OPENAI_API_KEY;
+    const apiKey = config.gemini?.apiKey || process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-      throw new Error('OPENAI_API_KEY environment variable is required');
+      throw new Error('GEMINI_API_KEY environment variable is required');
     }
 
-    this.openai = new OpenAI({ apiKey });
+    this.gemini = new GoogleGenerativeAI(apiKey);
+    this.model = this.gemini.getGenerativeModel({ 
+      model: MODEL,
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 8192,
+        responseMimeType: 'application/json',
+      },
+    });
 
-    logger.info('OpenAI AI Service initialized with GPT-4o-mini');
+    logger.info('Google Gemini AI Service initialized with Gemini 1.5 Flash');
   }
 
   /**
@@ -100,7 +111,7 @@ export class AIService {
   }
 
   /**
-   * Generate a comprehensive summary using GPT-4o-mini
+   * Generate a comprehensive summary using Gemini 2.0 Flash
    */
   async generateSummary(text: string, language: string = DEFAULT_LANGUAGE): Promise<GeneratedSummary> {
     const normalizedLanguage = this.normalizeLanguage(language);
@@ -116,38 +127,29 @@ export class AIService {
     try {
       const languageInstruction = this.buildLanguageInstruction(normalizedLanguage);
 
-      const completion = await this.openai.chat.completions.create({
-        model: MODEL,
-        messages: [
-          {
-            role: 'system',
-            content: `You are a Senior Academic Researcher with expertise in creating comprehensive educational summaries. ${languageInstruction}
-            
+      const prompt = `${languageInstruction}
+
+You are a Senior Academic Researcher with expertise in creating comprehensive educational summaries.
+
 You must respond with valid JSON in this exact format:
-{"content": "your comprehensive summary here"}`,
-          },
-          {
-            role: 'user',
-            content: `Create a comprehensive, well-structured summary of the following text. The summary should:
+{"content": "your comprehensive summary here"}
+
+Create a comprehensive, well-structured summary of the following text. The summary should:
 - Capture all key concepts and main ideas
 - Be organized with clear sections if the content warrants it
 - Use bullet points for lists of items
 - Maintain academic accuracy while being accessible
 
 Text:
-${preparedText}`,
-          },
-        ],
-        response_format: { type: 'json_object' },
-        temperature: 0.7,
-        max_tokens: 2500,
-      });
+${preparedText}`;
 
-      const content = completion.choices[0].message.content || '{}';
-      const result = JSON.parse(content) as GeneratedSummary;
+      const result = await this.model.generateContent(prompt);
+      const response = result.response;
+      const content = response.text();
+      const parsed = JSON.parse(content) as GeneratedSummary;
 
-      cache.set(cacheKey, result);
-      return result;
+      cache.set(cacheKey, parsed);
+      return parsed;
     } catch (error: any) {
       logger.error({ error: error.message }, 'Failed to generate summary');
       throw new Error(error.message || 'Failed to generate summary. Please try again.');
@@ -155,7 +157,7 @@ ${preparedText}`,
   }
 
   /**
-   * Generate structured study notes using GPT-4o-mini
+   * Generate structured study notes using Gemini 2.0 Flash
    */
   async generateNotes(text: string, language: string = DEFAULT_LANGUAGE): Promise<GeneratedNotes> {
     const normalizedLanguage = this.normalizeLanguage(language);
@@ -171,36 +173,27 @@ ${preparedText}`,
     try {
       const languageInstruction = this.buildLanguageInstruction(normalizedLanguage);
 
-      const completion = await this.openai.chat.completions.create({
-        model: MODEL,
-        messages: [
-          {
-            role: 'system',
-            content: `You are a Senior Academic Note-Taker specializing in creating comprehensive study notes. ${languageInstruction}
-            
+      const prompt = `${languageInstruction}
+
+You are a Senior Academic Note-Taker specializing in creating comprehensive study notes.
+
 You must respond with valid JSON in this exact format:
-{"keyPoints": ["point 1", "point 2", ...], "detailed": "detailed notes here"}`,
-          },
-          {
-            role: 'user',
-            content: `Create detailed study notes from the following text. Include:
+{"keyPoints": ["point 1", "point 2", ...], "detailed": "detailed notes here"}
+
+Create detailed study notes from the following text. Include:
 1. Key Points: 5-10 essential bullet points capturing the most important concepts
 2. Detailed Notes: Comprehensive notes with headers, explanations, and examples
 
 Text:
-${preparedText}`,
-          },
-        ],
-        response_format: { type: 'json_object' },
-        temperature: 0.7,
-        max_tokens: 3000,
-      });
+${preparedText}`;
 
-      const content = completion.choices[0].message.content || '{}';
-      const result = JSON.parse(content) as GeneratedNotes;
+      const result = await this.model.generateContent(prompt);
+      const response = result.response;
+      const content = response.text();
+      const parsed = JSON.parse(content) as GeneratedNotes;
 
-      cache.set(cacheKey, result);
-      return result;
+      cache.set(cacheKey, parsed);
+      return parsed;
     } catch (error: any) {
       logger.error({ error: error.message }, 'Failed to generate notes');
       throw new Error(error.message || 'Failed to generate notes. Please try again.');
@@ -208,7 +201,7 @@ ${preparedText}`,
   }
 
   /**
-   * Generate a quiz with multiple-choice questions using GPT-4o-mini
+   * Generate a quiz with multiple-choice questions using Gemini 2.0 Flash
    */
   async generateQuiz(
     text: string,
@@ -217,7 +210,7 @@ ${preparedText}`,
     language: string = DEFAULT_LANGUAGE
   ): Promise<GeneratedQuiz> {
     const normalizedLanguage = this.normalizeLanguage(language);
-    const preparedText = this.prepareText(text, 12000);
+    const preparedText = this.prepareText(text, 120000); // Gemini can handle much more
     const cacheKey = `quiz_${normalizedLanguage}_${this.hashText(preparedText)}_${numQuestions}_${difficulty}`;
     const cached = cache.get<GeneratedQuiz>(cacheKey);
 
@@ -235,21 +228,16 @@ ${preparedText}`,
     try {
       const languageInstruction = this.buildLanguageInstruction(normalizedLanguage);
 
-      const completion = await this.openai.chat.completions.create({
-        model: MODEL,
-        messages: [
-          {
-            role: 'system',
-            content: `You are a Senior Academic Content Specialist with expertise in creating highly accurate, context-aware educational assessments. ${languageInstruction}
-            
+      const prompt = `${languageInstruction}
+
+You are a Senior Academic Content Specialist with expertise in creating highly accurate, context-aware educational assessments.
+
 You must respond with valid JSON in this exact format:
 {"title": "Quiz Title", "questions": [{"question": "Question text?", "options": ["Option A text", "Option B text", "Option C text", "Option D text"], "correctAnswer": "The exact text of the correct option", "explanation": "Why this answer is correct"}]}
 
-IMPORTANT: The "correctAnswer" field must contain the EXACT text of the correct option (not just a letter like "A").`,
-          },
-          {
-            role: 'user',
-            content: `Create a quiz with exactly ${numQuestions} multiple-choice questions from the following text.
+IMPORTANT: The "correctAnswer" field must contain the EXACT text of the correct option (not just a letter like "A").
+
+Create a quiz with exactly ${numQuestions} multiple-choice questions from the following text.
 
 Difficulty level: ${difficulty}
 ${difficultyInstructions[difficulty]}
@@ -265,20 +253,16 @@ CRITICAL REQUIREMENTS:
 IMPORTANT: Verify every question and answer against the source text for 100% factual accuracy.
 
 Text:
-${preparedText}`,
-          },
-        ],
-        response_format: { type: 'json_object' },
-        temperature: 0.8,
-        max_tokens: 4000,
-      });
+${preparedText}`;
 
-      const content = completion.choices[0].message.content || '{}';
-      const result = JSON.parse(content) as GeneratedQuiz;
+      const result = await this.model.generateContent(prompt);
+      const response = result.response;
+      const content = response.text();
+      const parsed = JSON.parse(content) as GeneratedQuiz;
 
       // Process questions: handle correctAnswer and shuffle options
-      if (result.questions) {
-        result.questions = result.questions.map((question) => {
+      if (parsed.questions) {
+        parsed.questions = parsed.questions.map((question) => {
           if (question.options && question.options.length > 0) {
             // If correctAnswer is a letter (A, B, C, D), convert to actual option text
             const letterIndex = ['A', 'B', 'C', 'D'].indexOf(question.correctAnswer?.toUpperCase());
@@ -293,8 +277,8 @@ ${preparedText}`,
         });
       }
 
-      cache.set(cacheKey, result);
-      return result;
+      cache.set(cacheKey, parsed);
+      return parsed;
     } catch (error: any) {
       logger.error({ error: error.message }, 'Failed to generate quiz');
       throw new Error(error.message || 'Failed to generate quiz. Please try again.');
@@ -302,7 +286,7 @@ ${preparedText}`,
   }
 
   /**
-   * Generate flashcards from the text using GPT-4o-mini
+   * Generate flashcards from the text using Gemini 2.0 Flash
    */
   async generateFlashcards(
     text: string,
@@ -310,7 +294,7 @@ ${preparedText}`,
     language: string = DEFAULT_LANGUAGE
   ): Promise<GeneratedFlashcards> {
     const normalizedLanguage = this.normalizeLanguage(language);
-    const preparedText = this.prepareText(text, 10000);
+    const preparedText = this.prepareText(text, 100000);
     const cacheKey = `flashcards_${normalizedLanguage}_${this.hashText(preparedText)}_${numCards}`;
     const cached = cache.get<GeneratedFlashcards>(cacheKey);
 
@@ -322,19 +306,14 @@ ${preparedText}`,
     try {
       const languageInstruction = this.buildLanguageInstruction(normalizedLanguage);
 
-      const completion = await this.openai.chat.completions.create({
-        model: MODEL,
-        messages: [
-          {
-            role: 'system',
-            content: `You are a Senior Academic Researcher specializing in creating effective study flashcards from educational content. ${languageInstruction}
-            
+      const prompt = `${languageInstruction}
+
+You are a Senior Academic Researcher specializing in creating effective study flashcards from educational content.
+
 You must respond with valid JSON in this exact format:
-{"title": "Flashcard Set Title", "cards": [{"front": "Question/Concept", "back": "Answer/Explanation"}]}`,
-          },
-          {
-            role: 'user',
-            content: `Create exactly ${numCards} flashcards from the following text. Each flashcard should:
+{"title": "Flashcard Set Title", "cards": [{"front": "Question/Concept", "back": "Answer/Explanation"}]}
+
+Create exactly ${numCards} flashcards from the following text. Each flashcard should:
 - Have a clear question or concept on the front
 - Have a concise, accurate answer on the back
 - Focus on key concepts, definitions, and important facts
@@ -342,19 +321,15 @@ You must respond with valid JSON in this exact format:
 IMPORTANT: Verify all facts against the provided source material.
 
 Text:
-${preparedText}`,
-          },
-        ],
-        response_format: { type: 'json_object' },
-        temperature: 0.7,
-        max_tokens: 3000,
-      });
+${preparedText}`;
 
-      const content = completion.choices[0].message.content || '{}';
-      const result = JSON.parse(content) as GeneratedFlashcards;
+      const result = await this.model.generateContent(prompt);
+      const response = result.response;
+      const content = response.text();
+      const parsed = JSON.parse(content) as GeneratedFlashcards;
 
-      cache.set(cacheKey, result);
-      return result;
+      cache.set(cacheKey, parsed);
+      return parsed;
     } catch (error: any) {
       logger.error({ error: error.message }, 'Failed to generate flashcards');
       throw new Error(error.message || 'Failed to generate flashcards. Please try again.');
@@ -381,27 +356,16 @@ ${preparedText}`,
         throw new Error('Prompt too short for meaningful generation');
       }
 
-      const completion = await this.openai.chat.completions.create({
-        model: MODEL,
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an AI assistant that generates educational content. Always respond with valid JSON in the exact format requested. Do not include any explanations outside the JSON.',
-          },
-          {
-            role: 'user',
-            content: sanitizedPrompt,
-          },
-        ],
-        response_format: { type: 'json_object' },
-        temperature: 0.8,
-        max_tokens: 2000,
-      });
+      const fullPrompt = `You are an AI assistant that generates educational content. Always respond with valid JSON in the exact format requested. Do not include any explanations outside the JSON.
 
-      const content = completion.choices[0].message.content?.trim() || '';
+${sanitizedPrompt}`;
+
+      const result = await this.model.generateContent(fullPrompt);
+      const response = result.response;
+      const content = response.text().trim();
 
       if (!content) {
-        throw new Error('Empty response from OpenAI');
+        throw new Error('Empty response from Gemini');
       }
 
       cache.set(cacheKey, content);
@@ -419,82 +383,17 @@ ${preparedText}`,
   }
 
   /**
-   * Generate content from audio file using OpenAI Whisper + GPT-4o-mini
-   * Used for YouTube video transcription when captions are unavailable
+   * Generate content from audio file
+   * NOTE: Gemini doesn't have a Whisper equivalent yet. This method is kept for compatibility
+   * but will throw an error. YouTube transcription should use captions instead.
    */
   async generateFromAudio(
-    audioBase64: string,
-    mimeType: string
+    _audioBase64: string,
+    _mimeType: string
   ): Promise<{ transcript: string; summary: string; title: string; keyConcepts: string[] }> {
     try {
-      logger.info({ mimeType }, 'Generating content from audio with OpenAI');
-
-      // Convert base64 to buffer
-      const audioBuffer = Buffer.from(audioBase64, 'base64');
-      
-      // Determine file extension from mime type
-      const extMap: Record<string, string> = {
-        'audio/mp3': 'mp3',
-        'audio/mpeg': 'mp3',
-        'audio/mp4': 'm4a',
-        'audio/m4a': 'm4a',
-        'audio/wav': 'wav',
-        'audio/webm': 'webm',
-      };
-      const ext = extMap[mimeType] || 'mp3';
-
-      // Create a File object for the API
-      const audioFile = new File([audioBuffer], `audio.${ext}`, { type: mimeType });
-
-      // Transcribe with Whisper
-      const transcription = await this.openai.audio.transcriptions.create({
-        file: audioFile,
-        model: 'whisper-1',
-      });
-
-      const transcript = transcription.text;
-
-      // Now generate summary and key concepts from the transcript
-      const completion = await this.openai.chat.completions.create({
-        model: MODEL,
-        messages: [
-          {
-            role: 'system',
-            content: `You are an educational content analyst. Analyze the transcript and extract educational value.
-            
-You must respond with valid JSON in this exact format:
-{"summary": "comprehensive summary", "title": "suggested title", "keyConcepts": ["concept1", "concept2", ...]}`,
-          },
-          {
-            role: 'user',
-            content: `Analyze this transcript and provide:
-1. A comprehensive educational summary
-2. An appropriate title
-3. 5-10 key concepts or topics discussed
-
-Transcript:
-${transcript}`,
-          },
-        ],
-        response_format: { type: 'json_object' },
-        temperature: 0.5,
-        max_tokens: 2000,
-      });
-
-      const content = completion.choices[0].message.content || '{}';
-      const analysis = JSON.parse(content);
-
-      logger.info({
-        transcriptLength: transcript.length,
-        summaryLength: analysis.summary?.length || 0,
-      }, 'Audio content generated successfully');
-
-      return {
-        transcript,
-        summary: analysis.summary || '',
-        title: analysis.title || 'Untitled Audio Content',
-        keyConcepts: analysis.keyConcepts || [],
-      };
+      logger.warn('Audio transcription requested but Gemini does not support audio-to-text yet');
+      throw new Error('Audio transcription is not supported with Gemini. Please ensure YouTube videos have captions available.');
     } catch (error: any) {
       logger.error({ error: error.message }, 'Failed to generate content from audio');
       throw new Error(error.message || 'Failed to process audio content');
