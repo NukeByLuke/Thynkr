@@ -59,7 +59,7 @@ const Sidebar = () => {
     >
       {/* Header */}
       <div className="h-16 px-4 flex items-center justify-between border-b border-stone-200/50 dark:border-midnight-blue/30">
-        <Link to="/study" className="flex items-center gap-1 overflow-hidden">
+        <Link to="/study" className="flex items-center gap-0.5 overflow-hidden">
           <Logo variant="icon" size="xl" animated={false} className="flex-shrink-0" />
           <AnimatePresence mode="wait">
             {isExpanded && (
@@ -73,30 +73,18 @@ const Sidebar = () => {
                 <img
                   src="/brand/wordmark-light.png"
                   alt="THYNKR"
-                  className="h-8 object-contain dark:hidden"
+                  className="h-6 object-contain dark:hidden"
                 />
                 <img
                   src="/brand/wordmark-dark.png"
                   alt="THYNKR"
-                  className="h-8 object-contain hidden dark:block"
+                  className="h-6 object-contain hidden dark:block"
                 />
               </motion.div>
             )}
           </AnimatePresence>
         </Link>
       </div>
-
-      {/* Premium Badge */}
-      {isPremium && (
-        <div className={`mx-4 mt-4 ${isExpanded ? 'px-3 py-2' : 'px-2 py-2'} rounded-xl bg-gradient-to-r from-sunrise-fuchsia/10 to-sunrise-orange/10 dark:from-midnight-violet/10 dark:to-midnight-cyan/10 border border-sunrise-pink/20 dark:border-midnight-blue/20`}>
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-sunrise-fuchsia dark:text-midnight-cyan flex-shrink-0" />
-            {isExpanded && (
-              <span className="text-xs font-medium text-sunrise-pink dark:text-midnight-blue">Premium</span>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Main Navigation */}
       <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto scrollbar-hide">
