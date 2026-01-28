@@ -308,7 +308,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
           <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-200 dark:border-slate-700 [.exporting_&]:border-slate-200">
             <div>
               <h3 className="text-2xl font-bold bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-transparent [.exporting_&]:bg-none [.exporting_&]:text-slate-900">
-                Thynkr
+                THYNKR
               </h3>
               <p className="text-sm text-slate-600 dark:text-slate-400 [.exporting_&]:text-slate-600 mt-1">Pricing Quote</p>
             </div>
