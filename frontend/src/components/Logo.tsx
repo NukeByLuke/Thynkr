@@ -77,7 +77,7 @@ export default function Logo({
         <motion.img
           src={brainSrc}
           alt="THYNKR"
-          className={clsx('w-full h-full object-contain', effectiveTheme === 'light' && 'scale-110')}
+          className={clsx('w-full h-full object-contain', effectiveTheme === 'light' && 'scale-105')}
           {...motionProps}
         />
       </div>
@@ -96,7 +96,7 @@ export default function Logo({
           <motion.img
             src={brainSrc}
             alt="THYNKR"
-            className={clsx('w-full h-full object-contain', effectiveTheme === 'light' && 'scale-110')}
+            className={clsx('w-full h-full object-contain', effectiveTheme === 'light' && 'scale-105')}
             {...motionProps}
           />
         </div>
@@ -115,7 +115,7 @@ export default function Logo({
         <motion.img
           src={brainSrc}
           alt="THYNKR Brain"
-          className={clsx('w-full h-full object-contain', effectiveTheme === 'light' && 'scale-110')}
+          className={clsx('w-full h-full object-contain', effectiveTheme === 'light' && 'scale-105')}
           {...motionProps}
         />
       </div>
