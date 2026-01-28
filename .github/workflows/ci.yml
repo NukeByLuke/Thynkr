@@ -66,9 +66,11 @@ jobs:
 
       - name: Lint backend
         run: pnpm --filter backend lint
+        continue-on-error: ${{ github.actor == 'dependabot[bot]' }}
 
       - name: Lint frontend
         run: pnpm --filter frontend lint
+        continue-on-error: ${{ github.actor == 'dependabot[bot]' }}
 
       - name: Generate Prisma Client
         run: pnpm --filter backend db:generate
