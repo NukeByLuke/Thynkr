@@ -15,7 +15,7 @@ const cache = new NodeCache({ stdTTL: 3600 });
 const MAX_INPUT_CHARS = 200000; // Gemini has much higher token limits
 
 // Model Selection: Gemini 1.5 Flash - fastest, most cost-effective production model
-const MODEL = 'gemini-1.5-flash-latest';
+const MODEL = 'gemini-1.5-flash';
 
 /**
  * Prompt injection detection patterns for security validation
