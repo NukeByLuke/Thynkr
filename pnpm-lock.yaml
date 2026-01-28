@@ -100,7 +100,7 @@ importers:
         version: 5.1.2
       openai:
         specifier: ^6.6.0
-        version: 6.6.0(zod@3.25.76)
+        version: 6.6.0(ws@8.18.3)(zod@3.25.76)
       pdf-parse:
         specifier: ^2.4.5
         version: 2.4.5
@@ -238,8 +238,8 @@ importers:
         specifier: ^4.0.1
         version: 4.0.1
       socket.io-client:
-        specifier: ^4.8.1
-        version: 4.8.1
+        specifier: ^4.8.3
+        version: 4.8.3
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -1920,8 +1920,8 @@ packages:
   end-of-stream@1.4.5:
     resolution: {integrity: sha512-ooEGc6HP26xXq/N+GCGOT0JKCLDGrq2bQUZrQ7gyrJiZANJ/8YDTxTpQBXGMn+WbIQXNVpyWymm7KYVICQnyOg==}
 
-  engine.io-client@6.6.3:
-    resolution: {integrity: sha512-T0iLjnyNWahNyv/lcjS2y4oE358tVS/SYQNxYXGAJ9/GLgH4VCvOQ/mhTjqU88mLZCQgiG8RIegFHYCdVC+j5w==}
+  engine.io-client@6.6.4:
+    resolution: {integrity: sha512-+kjUJnZGwzewFDw951CDWcwj35vMNf2fcj7xQWOctq1F2i1jkDdVvdFG9kM/BEChymCH36KgjnW0NsL58JYRxw==}
 
   engine.io-parser@5.2.3:
     resolution: {integrity: sha512-HqD3yTBfnBxIrbnM1DoD6Pcq8NECnh8d4As1Qgh0z5Gg3jRRIqijury0CL3ghu/edArpUYiYqQiDUQBIs4np3Q==}
@@ -3588,12 +3588,16 @@ packages:
   socket.io-adapter@2.5.5:
     resolution: {integrity: sha512-eLDQas5dzPgOWCk9GuuJC2lBqItuhKI4uxGgo9aIV7MYbk2h9Q6uULEh8WBzThoI7l+qU9Ast9fVUmkqPP9wYg==}
 
-  socket.io-client@4.8.1:
-    resolution: {integrity: sha512-hJVXfu3E28NmzGk8o1sHhN3om52tRvwYeidbj7xKy2eIIse5IoKX3USlS6Tqt3BHAtflLIkCQBkzVrEEfWUyYQ==}
+  socket.io-client@4.8.3:
+    resolution: {integrity: sha512-uP0bpjWrjQmUt5DTHq9RuoCBdFJF10cdX9X+a368j/Ft0wmaVgxlrjvK3kjvgCODOMMOz9lcaRzxmso0bTWZ/g==}
     engines: {node: '>=10.0.0'}
 
   socket.io-parser@4.2.4:
     resolution: {integrity: sha512-/GbIKmo8ioc+NIWIhwdecY0ge+qVBSMdgxGygevmdHj24bsfgtCmcUUcQ5ZzcylGFHsN3k4HB4Cgkl96KVnuew==}
+    engines: {node: '>=10.0.0'}
+
+  socket.io-parser@4.2.5:
+    resolution: {integrity: sha512-bPMmpy/5WWKHea5Y/jYAP6k74A+hvmRCQaJuJB6I/ML5JZq/KfNieUVo/3Mh7SAqn7TyFdIo6wqYHInG1MU1bQ==}
     engines: {node: '>=10.0.0'}
 
   socket.io@4.8.1:
@@ -4026,6 +4030,18 @@ packages:
 
   ws@8.17.1:
     resolution: {integrity: sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
+  ws@8.18.3:
+    resolution: {integrity: sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -5615,12 +5631,12 @@ snapshots:
     dependencies:
       once: 1.4.0
 
-  engine.io-client@6.6.3:
+  engine.io-client@6.6.4:
     dependencies:
       '@socket.io/component-emitter': 3.1.2
-      debug: 4.3.7
+      debug: 4.4.3
       engine.io-parser: 5.2.3
-      ws: 8.17.1
+      ws: 8.18.3
       xmlhttprequest-ssl: 2.1.2
     transitivePeerDependencies:
       - bufferutil
@@ -7111,8 +7127,9 @@ snapshots:
     dependencies:
       mimic-function: 5.0.1
 
-  openai@6.6.0(zod@3.25.76):
+  openai@6.6.0(ws@8.18.3)(zod@3.25.76):
     optionalDependencies:
+      ws: 8.18.3
       zod: 3.25.76
 
   option@0.2.4: {}
@@ -7750,12 +7767,12 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  socket.io-client@4.8.1:
+  socket.io-client@4.8.3:
     dependencies:
       '@socket.io/component-emitter': 3.1.2
-      debug: 4.3.7
-      engine.io-client: 6.6.3
-      socket.io-parser: 4.2.4
+      debug: 4.4.3
+      engine.io-client: 6.6.4
+      socket.io-parser: 4.2.5
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -7765,6 +7782,13 @@ snapshots:
     dependencies:
       '@socket.io/component-emitter': 3.1.2
       debug: 4.3.7
+    transitivePeerDependencies:
+      - supports-color
+
+  socket.io-parser@4.2.5:
+    dependencies:
+      '@socket.io/component-emitter': 3.1.2
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -8234,6 +8258,8 @@ snapshots:
   wrappy@1.0.2: {}
 
   ws@8.17.1: {}
+
+  ws@8.18.3: {}
 
   xmlbuilder@10.1.1: {}
 
