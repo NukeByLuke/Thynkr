@@ -59,7 +59,7 @@ const Sidebar = () => {
     >
       {/* Header */}
       <div className="h-16 px-4 flex items-center justify-between border-b border-stone-200/50 dark:border-midnight-blue/30">
-        <Link to="/study" className="flex items-center gap-2 overflow-hidden">
+        <Link to="/study" className="flex items-center gap-1 overflow-hidden">
           <Logo variant="icon" size="xl" animated={false} className="flex-shrink-0" />
           <AnimatePresence mode="wait">
             {isExpanded && (
