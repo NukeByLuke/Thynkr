@@ -6,7 +6,7 @@
 import { useState, useRef } from 'react';
 import Modal, { ModalFooter } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
-import { FileImage, FileText, Sparkles, Zap, Crown, GraduationCap } from 'lucide-react';
+import { FileImage, FileText, Sparkles, Zap, Crown } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
@@ -16,7 +16,7 @@ interface QuoteModalProps {
 }
 
 type PlanType = 'basic' | 'standard' | 'premium';
-type BillingCycle = 'monthly' | 'quarterly' | 'semiannual' | 'yearly';
+type BillingCycle = 'monthly' | 'yearly';
 
 interface PlanConfig {
   name: string;
@@ -82,69 +82,45 @@ const PLANS: Record<PlanType, PlanConfig> = {
 
 const BILLING_CYCLES: Record<BillingCycle, { label: string; months: number; discount: number }> = {
   monthly: { label: 'Monthly', months: 1, discount: 0 },
-  quarterly: { label: 'Quarterly (3 months)', months: 3, discount: 5 },
-  semiannual: { label: 'Semi-Annual (6 months)', months: 6, discount: 10 },
   yearly: { label: 'Yearly (12 months)', months: 12, discount: 17 },
 };
 
 export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
   const [selectedPlan, setSelectedPlan] = useState<PlanType>('standard');
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
-  const [isStudentDiscount, setIsStudentDiscount] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const quoteRef = useRef<HTMLDivElement>(null);
 
   const plan = PLANS[selectedPlan];
   const billing = BILLING_CYCLES[billingCycle];
   
-  // Student discount only applies to Standard and Premium
-  const canApplyStudentDiscount = selectedPlan !== 'basic';
-  const effectiveStudentDiscount = canApplyStudentDiscount && isStudentDiscount;
-  
   // Calculate pricing with exact target prices
   const pricePerMonth = plan.monthlyPrice;
   const totalMonths = billing.months;
   const subtotal = pricePerMonth * totalMonths;
   
-  // Define exact target prices for all billing cycles
-  const targetPrices: Record<PlanType, Record<BillingCycle, { standard: number; student: number }>> = {
+  // Define exact target prices for billing cycles (student discount removed)
+  const targetPrices: Record<PlanType, Record<BillingCycle, number>> = {
     basic: {
-      monthly: { standard: 0, student: 0 },
-      quarterly: { standard: 0, student: 0 },
-      semiannual: { standard: 0, student: 0 },
-      yearly: { standard: 0, student: 0 },
+      monthly: 0,
+      yearly: 0,
     },
     standard: {
-      monthly: { standard: 4.99, student: 2.49 },
-      quarterly: { standard: 13.99, student: 6.99 },
-      semiannual: { standard: 25.99, student: 12.99 },
-      yearly: { standard: 49.99, student: 24.99 },
+      monthly: 4.99,
+      yearly: 49.99,
     },
     premium: {
-      monthly: { standard: 9.99, student: 4.99 },
-      quarterly: { standard: 27.99, student: 13.99 },
-      semiannual: { standard: 53.99, student: 25.99 },
-      yearly: { standard: 99.99, student: 49.99 },
+      monthly: 9.99,
+      yearly: 99.99,
     },
   };
   
   // Get target price for current configuration
-  const targetPrice = effectiveStudentDiscount
-    ? targetPrices[selectedPlan][billingCycle].student
-    : targetPrices[selectedPlan][billingCycle].standard;
+  const targetPrice = targetPrices[selectedPlan][billingCycle];
   
-  // Calculate discounts to hit target price
+  // Calculate discount to hit target price
   const totalDiscountAmount = subtotal - targetPrice;
-  
-  // Split into billing discount and student discount
-  const billingDiscountAmount = (subtotal * billing.discount) / 100;
-  const studentDiscountAmount = effectiveStudentDiscount ? Math.max(0, totalDiscountAmount - billingDiscountAmount) : 0;
-  
-  // Calculate student discount percentage for display
-  const afterBillingDiscount = subtotal - billingDiscountAmount;
-  const studentDiscountPercent = effectiveStudentDiscount && afterBillingDiscount > 0
-    ? Math.round((studentDiscountAmount / afterBillingDiscount) * 100)
-    : 0;
+  const billingDiscountAmount = totalDiscountAmount;
   
   const totalCost = targetPrice;
 
@@ -320,38 +296,6 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
             )}
           </div>
           </div>
-
-          {/* Student Discount Toggle */}
-          <div>
-            <div className="flex items-center justify-between p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
-                  <GraduationCap className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                    Student Discount
-                    <span className="text-xs px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-full font-medium">
-                      Coming Soon
-                    </span>
-                  </div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400">
-                    {canApplyStudentDiscount ? '50% off Standard & Premium' : 'Not available for Basic plan'}
-                  </div>
-                </div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isStudentDiscount}
-                  onChange={(e) => setIsStudentDiscount(e.target.checked)}
-                  disabled={!canApplyStudentDiscount}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-slate-300 dark:bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-300 dark:peer-focus:ring-brand-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
-              </label>
-            </div>
-          </div>
         </div>
 
         {/* Right Column: Quote Preview */}
@@ -389,7 +333,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
               </div>
               <div className="flex-1">
                 <h4 className="text-xl font-bold text-slate-900 dark:text-white [.exporting_&]:text-slate-900 flex items-center gap-2">
-                  {effectiveStudentDiscount ? `${plan.name} Student Plan` : `${plan.name} Plan`}
+                  {plan.name} Plan
                 </h4>
                 <p className="text-sm text-slate-600 dark:text-slate-400 [.exporting_&]:text-slate-600">{billing.label}</p>
               </div>
@@ -442,16 +386,6 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                 </span>
                 <span className="font-bold text-green-700 dark:text-green-400 [.exporting_&]:text-green-700">
                   -${billingDiscountAmount.toFixed(2)}
-                </span>
-              </div>
-            )}
-            {effectiveStudentDiscount && (
-              <div className="flex justify-between text-sm">
-                <span className="text-green-700 dark:text-green-400 [.exporting_&]:text-green-700 font-semibold">
-                  Student Discount ({studentDiscountPercent}%)
-                </span>
-                <span className="font-bold text-green-700 dark:text-green-400 [.exporting_&]:text-green-700">
-                  -${studentDiscountAmount.toFixed(2)}
                 </span>
               </div>
             )}

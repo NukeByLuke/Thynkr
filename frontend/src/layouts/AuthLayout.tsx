@@ -22,20 +22,20 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
   return (
     <div className={`hidden md:flex flex-col items-center justify-between w-[420px] relative overflow-hidden rounded-l-3xl p-10 transition-colors duration-150 ${
       isDark 
-        ? 'bg-slate-950 text-white' 
-        : 'bg-gradient-to-br from-slate-100 to-slate-200 text-slate-900'
+        ? 'bg-midnight-violet/20 text-white' 
+        : 'bg-gradient-to-br from-stone-100 to-stone-200 text-stone-900'
     }`}>
-      {/* Background Effects */}
+      {/* Background Effects - Sunrise & Midnight */}
       <div className={`absolute inset-0 ${
         isDark 
-          ? 'bg-[radial-gradient(circle_at_50%_120%,rgba(124,58,237,0.15),rgba(15,23,42,0))]'
-          : 'bg-[radial-gradient(circle_at_50%_120%,rgba(124,58,237,0.08),rgba(255,255,255,0))]'
+          ? 'bg-[radial-gradient(circle_at_50%_120%,rgba(91,33,182,0.2),rgba(2,6,23,0))]'
+          : 'bg-[radial-gradient(circle_at_50%_120%,rgba(236,72,153,0.12),rgba(253,251,247,0))]'
       }`} />
       <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 ${
-        isDark ? 'bg-cyan-500/5' : 'bg-cyan-500/10'
+        isDark ? 'bg-midnight-cyan/10' : 'bg-sunrise-orange/15'
       }`} />
       <div className={`absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 ${
-        isDark ? 'bg-purple-500/5' : 'bg-purple-500/10'
+        isDark ? 'bg-midnight-blue/10' : 'bg-sunrise-fuchsia/15'
       }`} />
 
       {/* Logo and Brand */}
@@ -49,18 +49,18 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
           }`} />
         </div>
         
-        {/* Brand Name */}
+        {/* Brand Name - Sunrise & Midnight gradient */}
         <h1 className={`text-5xl font-bold tracking-tight mb-4 bg-clip-text text-transparent ${
           isDark 
-            ? 'bg-gradient-to-b from-white to-slate-400'
-            : 'bg-gradient-to-b from-slate-800 to-slate-600'
+            ? 'bg-gradient-to-b from-stone-50 to-stone-400'
+            : 'bg-gradient-to-b from-stone-800 to-stone-600'
         }`}>
           Thynkr
         </h1>
         
         {/* Tagline */}
         <p className={`text-lg text-center max-w-[280px] leading-relaxed ${
-          isDark ? 'text-slate-400' : 'text-slate-600'
+          isDark ? 'text-stone-300' : 'text-stone-600'
         }`}>
           Transform your learning with intelligent AI study tools
         </p>
@@ -71,7 +71,7 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
         <Link
           to="/about"
           className={`transition-colors ${
-            isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'
+            isDark ? 'text-stone-400 hover:text-white' : 'text-stone-500 hover:text-stone-900'
           }`}
         >
           About
@@ -79,7 +79,7 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
         <Link
           to="/testimonials"
           className={`transition-colors ${
-            isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'
+            isDark ? 'text-stone-400 hover:text-white' : 'text-stone-500 hover:text-stone-900'
           }`}
         >
           Testimonials
@@ -87,7 +87,7 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
         <Link
           to="/contact"
           className={`transition-colors ${
-            isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'
+            isDark ? 'text-stone-400 hover:text-white' : 'text-stone-500 hover:text-stone-900'
           }`}
         >
           Contact
