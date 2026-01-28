@@ -6,87 +6,89 @@ export default {
     extend: {
       colors: {
         // ═══════════════════════════════════════════════════════════════════
-        // BRAND NAVY - Primary identity color (#1E1B4B)
+        // SUNRISE & MIDNIGHT DESIGN SYSTEM
         // ═══════════════════════════════════════════════════════════════════
-        navy: {
-          DEFAULT: '#1E1B4B',
-          50: '#EEEDF7',
-          100: '#DDDCEF',
-          200: '#BBB8DF',
-          300: '#9995CF',
-          400: '#7771BF',
-          500: '#554EAF',
-          600: '#433E8C',
-          700: '#322F69',
-          800: '#1E1B4B',
-          900: '#141236',
-        },
-
+        
         // ═══════════════════════════════════════════════════════════════════
-        // BACKGROUND COLORS
+        // BACKGROUND COLORS - Sunrise (Cream) & Midnight (Deep Blue/Black)
         // ═══════════════════════════════════════════════════════════════════
-        'bg-light': '#F9FAFB',
-        'bg-dark': '#1E293B',
+        'bg-light': '#FDFBF7',
+        'bg-dark': '#020617',
         background: {
-          light: '#F9FAFB',
-          'light-alt': '#F3F4F6',
-          dark: '#1E293B',
-          'dark-alt': '#0F172A',
+          light: '#FDFBF7', // Warm cream/paper
+          'light-alt': '#F8F6F1',
+          dark: '#020617', // Deep midnight
+          'dark-alt': '#0A0E1F',
         },
 
         // ═══════════════════════════════════════════════════════════════════
-        // TEXT COLORS
+        // TEXT COLORS - Warm for light, Crisp for dark
         // ═══════════════════════════════════════════════════════════════════
-        'text-primary-light': '#111827',
-        'text-primary-dark': '#F1F5F9',
-        'text-secondary-light': '#6B7280',
-        'text-secondary-dark': '#9CA3AF',
+        'text-primary-light': '#1C1917', // Warm dark gray
+        'text-primary-dark': '#FAFAF9', // Crisp off-white
+        'text-secondary-light': '#78716C',
+        'text-secondary-dark': '#D6D3D1',
 
         // ═══════════════════════════════════════════════════════════════════
-        // BORDER COLORS
+        // BORDER COLORS - Warm for light, Cool for dark
         // ═══════════════════════════════════════════════════════════════════
-        'border-light': '#E5E7EB',
-        'border-dark': '#374151',
+        'border-light': '#E7E5E4', // Warm border
+        'border-dark': '#1E3A8A', // Cool blue border
 
         // ═══════════════════════════════════════════════════════════════════
-        // PRIMARY ACCENT - accessible blue (#3B82F6)
+        // SUNRISE GRADIENT - Fuchsia/Purple → Pink → Orange/Gold
         // ═══════════════════════════════════════════════════════════════════
+        sunrise: {
+          fuchsia: '#C026D3', // Fuchsia 600
+          pink: '#EC4899', // Pink 500
+          orange: '#F59E0B', // Amber 500
+          gold: '#EAB308', // Yellow 500
+        },
+
+        // ═══════════════════════════════════════════════════════════════════
+        // MIDNIGHT GRADIENT - Deep Violet → Royal Blue → Teal/Cyan
+        // ═══════════════════════════════════════════════════════════════════
+        midnight: {
+          violet: '#5B21B6', // Violet 800
+          blue: '#1D4ED8', // Blue 700
+          royal: '#2563EB', // Blue 600
+          teal: '#0891B2', // Cyan 600
+          cyan: '#06B6D4', // Cyan 500
+        },
+
+        // ═══════════════════════════════════════════════════════════════════
+        // LEGACY COMPATIBILITY - Map to new gradient colors
+        // ═════════════════════════════════════════════════════════════════
         primary: {
-          DEFAULT: '#3B82F6',
-          50: '#EFF6FF',
-          100: '#DBEAFE',
-          200: '#BFDBFE',
-          300: '#93C5FD',
-          400: '#60A5FA',
-          500: '#3B82F6',
-          600: '#2563EB',
-          700: '#1D4ED8',
-          800: '#1E40AF',
-          900: '#1E3A8A',
+          DEFAULT: '#C026D3', // Sunrise fuchsia for light mode
+          50: '#FDF4FF',
+          100: '#FAE8FF',
+          200: '#F5D0FE',
+          300: '#F0ABFC',
+          400: '#E879F9',
+          500: '#D946EF',
+          600: '#C026D3',
+          700: '#A21CAF',
+          800: '#86198F',
+          900: '#701A75',
         },
 
-        // ═══════════════════════════════════════════════════════════════════
-        // SECONDARY ACCENT - gentle lavender (#A78BFA)
-        // ═══════════════════════════════════════════════════════════════════
         secondary: {
-          DEFAULT: '#A78BFA',
-          50: '#FAF5FF',
-          100: '#F3E8FF',
-          200: '#E9D5FF',
-          300: '#D8B4FE',
-          400: '#C4B5FD',
-          500: '#A78BFA',
-          600: '#8B5CF6',
-          700: '#7C3AED',
-          800: '#6D28D9',
-          900: '#4C1D95',
+          DEFAULT: '#EC4899', // Sunrise pink
+          50: '#FFF1F2',
+          100: '#FFE4E6',
+          200: '#FECDD3',
+          300: '#FDA4AF',
+          400: '#FB7185',
+          500: '#F43F5E',
+          600: '#E11D48',
+          700: '#BE123C',
+          800: '#9F1239',
+          900: '#881337',
         },
 
-        // ═══════════════════════════════════════════════════════════════════
-        // ACCENT - calming cyan (#06B6D4)
-        // ═══════════════════════════════════════════════════════════════════
         accent: {
-          DEFAULT: '#06B6D4',
+          DEFAULT: '#06B6D4', // Midnight cyan
           50: '#ECFEFF',
           100: '#CFFAFE',
           200: '#A5F3FC',
@@ -100,47 +102,32 @@ export default {
         },
 
         // ═══════════════════════════════════════════════════════════════════
-        // AURORA DESIGN SYSTEM - Thynkr Brand Colors
-        // ═══════════════════════════════════════════════════════════════════
-        'thynkr-blue': '#3b82f6',
-        'thynkr-purple': '#8b5cf6',
-        'thynkr-cyan': '#06b6d4',
-
-        // ═══════════════════════════════════════════════════════════════════
-        // AURORA THEME TOKENS
+        // SURFACE TOKENS - Sunrise & Midnight
         // ═══════════════════════════════════════════════════════════════════
         surface: {
-          light: '#ffffff',
-          dark: '#0f172a',
+          light: '#FFFFFF',
+          dark: '#0A0E1F',
         },
         'surface-highlight': {
-          light: '#f8fafc',
-          dark: '#1e293b',
+          light: '#FEF9F3', // Warm white
+          dark: '#1E3A8A', // Cool blue
         },
         'border-subtle': {
-          light: '#e2e8f0',
-          dark: '#334155',
+          light: '#F3F0EB',
+          dark: '#1E40AF',
         },
 
-        // ═══════════════════════════════════════════════════════════════════
-        // SEMANTIC COLORS
-        // ═══════════════════════════════════════════════════════════════════
-        success: '#10B981',
-        warning: '#F59E0B',
-        error: '#EF4444',
-        info: '#3B82F6',
-
-        // Brand alias (for backward compatibility)
+        // Brand alias for backward compatibility (uses Sunrise gradient in light, Midnight in dark)
         brand: {
-          50: '#FAF5FF',
-          100: '#F3E8FF',
-          200: '#E9D5FF',
-          300: '#D8B4FE',
-          400: '#C4B5FD',
-          500: '#A78BFA',
-          600: '#8B5CF6',
-          700: '#7C3AED',
-          800: '#6D28D9',
+          50: '#FDF4FF',
+          100: '#FAE8FF',
+          200: '#F5D0FE',
+          300: '#F0ABFC',
+          400: '#E879F9',
+          500: '#D946EF',
+          600: '#C026D3',
+          700: '#A21CAF',
+          800: '#5B21B6', // Midnight violet
           900: '#4C1D95',
           950: '#2E1065',
         },
@@ -290,13 +277,20 @@ export default {
         'xs': '2px',
       },
       // ═══════════════════════════════════════════════════════════════════
-      // AURORA GRADIENTS - Purple/Blue/Aqua Palette
+      // SUNRISE & MIDNIGHT GRADIENTS
       // ═══════════════════════════════════════════════════════════════════
       backgroundImage: {
-        'gradient-aurora': 'linear-gradient(135deg, #7C3AED 0%, #3B82F6 50%, #06B6D4 100%)',
-        'gradient-aurora-hover': 'linear-gradient(135deg, #6D28D9 0%, #2563EB 50%, #0891B2 100%)',
-        'gradient-aurora-soft': 'linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(59, 130, 246, 0.1) 50%, rgba(6, 182, 212, 0.1) 100%)',
-        'gradient-glass': 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+        // SUNRISE GRADIENT (Light Mode) - Fuchsia → Pink → Orange/Gold
+        'gradient-sunrise': 'linear-gradient(135deg, #C026D3 0%, #EC4899 50%, #F59E0B 100%)',
+        'gradient-sunrise-soft': 'linear-gradient(135deg, rgba(192, 38, 211, 0.15) 0%, rgba(236, 72, 153, 0.15) 50%, rgba(245, 158, 11, 0.15) 100%)',
+        
+        // MIDNIGHT GRADIENT (Dark Mode) - Deep Violet → Royal Blue → Teal/Cyan
+        'gradient-midnight': 'linear-gradient(135deg, #5B21B6 0%, #1D4ED8 50%, #06B6D4 100%)',
+        'gradient-midnight-soft': 'linear-gradient(135deg, rgba(91, 33, 182, 0.2) 0%, rgba(29, 78, 216, 0.2) 50%, rgba(6, 182, 212, 0.2) 100%)',
+        
+        // Glass effects for Sunrise & Midnight
+        'gradient-glass-sunrise': 'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.3) 100%)',
+        'gradient-glass-midnight': 'linear-gradient(180deg, rgba(91, 33, 182, 0.05) 0%, rgba(6, 182, 212, 0.05) 100%)',
       },
     },
   },

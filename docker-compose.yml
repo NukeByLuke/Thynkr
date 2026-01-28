@@ -101,6 +101,10 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_URL: http://localhost:3003/api
+        VITE_STRIPE_PRICE_STANDARD_MONTHLY: ${VITE_STRIPE_PRICE_STANDARD_MONTHLY}
+        VITE_STRIPE_PRICE_STANDARD_YEARLY: ${VITE_STRIPE_PRICE_STANDARD_YEARLY}
+        VITE_STRIPE_PRICE_PREMIUM_MONTHLY: ${VITE_STRIPE_PRICE_PREMIUM_MONTHLY}
+        VITE_STRIPE_PRICE_PREMIUM_YEARLY: ${VITE_STRIPE_PRICE_PREMIUM_YEARLY}
     container_name: thynkr-frontend
     restart: unless-stopped
     ports:
@@ -108,6 +112,20 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    networks:
+      - thynkr-network
+
+  # Stripe CLI - Forwards webhook events from Stripe to local backend for testing
+  stripe-cli:
+    image: stripe/stripe-cli:latest
+    container_name: thynkr-stripe-cli
+    restart: unless-stopped
+    command: listen --api-key ${STRIPE_SECRET_KEY} --forward-to http://backend:3001/api/stripe/webhook
+    environment:
+      STRIPE_API_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_DEVICE_NAME: thynkr-docker
+    depends_on:
+      - backend
     networks:
       - thynkr-network
 

@@ -10,14 +10,39 @@ if (-not (Test-Path "backend") -or -not (Test-Path "frontend")) {
     exit 1
 }
 
-# Check if Stripe CLI is available
-if (-not (Test-Path "stripe-cli\stripe.exe")) {
-    Write-Host "❌ Error: Stripe CLI not found. Please run the setup first." -ForegroundColor Red
-    exit 1
+# Check if Stripe CLI is available (check both local and system-wide)
+$stripeExe = $null
+if (Test-Path "stripe-cli\stripe.exe") {
+    $stripeExe = ".\stripe-cli\stripe.exe"
+} else {
+    # Try to find stripe in PATH
+    try {
+        $stripePath = Get-Command stripe -ErrorAction Stop
+        $stripeExe = "stripe"
+        Write-Host "✅ Found Stripe CLI in system PATH" -ForegroundColor Green
+    } catch {
+        Write-Host "❌ Error: Stripe CLI not found." -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Please install Stripe CLI:" -ForegroundColor Yellow
+        Write-Host "  1. Using Scoop: scoop install stripe" -ForegroundColor Cyan
+        Write-Host "  2. Or download from: https://github.com/stripe/stripe-cli/releases/latest" -ForegroundColor Cyan
+        Write-Host ""
+        exit 1
+    }
 }
 
 Write-Host "✅ Starting Stripe Webhook Listener..." -ForegroundColor Green
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD'; .\stripe-cli\stripe.exe listen --forward-to localhost:3001/api/webhooks/stripe"
+Write-Host "   Forwarding to: http://localhost:3001/api/stripe/webhook" -ForegroundColor Gray
+Write-Host ""
+Write-Host "⚠️  IMPORTANT: Copy the webhook signing secret (whsec_...) to backend/.env" -ForegroundColor Yellow
+Write-Host ""
+
+# Start the webhook listener
+if ($stripeExe -eq "stripe") {
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD\backend'; stripe listen --forward-to localhost:3001/api/stripe/webhook"
+} else {
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD'; $stripeExe listen --forward-to localhost:3001/api/stripe/webhook"
+}
 
 Start-Sleep -Seconds 2
 

@@ -10,14 +10,31 @@ export const stripe = new Stripe(config.stripe.secretKey, {
 export interface PriceInfo {
   role: 'STANDARD' | 'PREMIUM';
   billingCycle: 'MONTHLY' | 'YEARLY';
+  displayName: string;
 }
 
 export function getPriceInfo(priceId: string): PriceInfo | null {
   const priceMap: { [key: string]: PriceInfo } = {
-    [config.stripe.prices.standardMonthly]: { role: 'STANDARD', billingCycle: 'MONTHLY' },
-    [config.stripe.prices.standardYearly]: { role: 'STANDARD', billingCycle: 'YEARLY' },
-    [config.stripe.prices.premiumMonthly]: { role: 'PREMIUM', billingCycle: 'MONTHLY' },
-    [config.stripe.prices.premiumYearly]: { role: 'PREMIUM', billingCycle: 'YEARLY' },
+    [config.stripe.prices.standardMonthly]: { 
+      role: 'STANDARD', 
+      billingCycle: 'MONTHLY',
+      displayName: 'Standard Monthly'
+    },
+    [config.stripe.prices.standardYearly]: { 
+      role: 'STANDARD', 
+      billingCycle: 'YEARLY',
+      displayName: 'Standard Yearly'
+    },
+    [config.stripe.prices.premiumMonthly]: { 
+      role: 'PREMIUM', 
+      billingCycle: 'MONTHLY',
+      displayName: 'Premium Monthly'
+    },
+    [config.stripe.prices.premiumYearly]: { 
+      role: 'PREMIUM', 
+      billingCycle: 'YEARLY',
+      displayName: 'Premium Yearly'
+    },
   };
 
   return priceMap[priceId] || null;
@@ -43,11 +60,11 @@ export function getPlanName(priceId: string): string {
 // Price amounts for reference (in cents)
 export const PLAN_PRICES = {
   standard: {
-    monthly: 800, // $8/mo
-    yearly: 6000, // $5/mo * 12 = $60/year
+    monthly: 499, // $4.99/mo
+    yearly: 4999, // $49.99/year (~$4.17/mo)
   },
   premium: {
-    monthly: 1200, // $12/mo
-    yearly: 12000, // $10/mo * 12 = $120/year
+    monthly: 999, // $9.99/mo
+    yearly: 9999, // $99.99/year (~$8.33/mo)
   },
 };

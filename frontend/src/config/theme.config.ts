@@ -1,15 +1,13 @@
 /**
- * Thynkr Design System
+ * Thynkr Sunrise & Midnight Design System
  * ═══════════════════════════════════════════════════════════════════════════
- * Centralized theme configuration inspired by Thea.study's clean, minimal,
- * and student-friendly aesthetic.
+ * Centralized theme configuration for the new dual-theme aesthetic.
  * 
  * Usage: Import tokens from this file for consistent design across components
  * 
  * Color Philosophy:
- * - Primary: Accessible blue (#3B82F6) - trust, clarity, focus
- * - Secondary: Gentle lavender (#A78BFA) - creativity, calm
- * - Accent: Calming cyan (#06B6D4) - energy, freshness
+ * - Sunrise (Light): Warm Fuchsia/Pink/Orange gradient on cream backgrounds
+ * - Midnight (Dark): Cool Violet/Blue/Cyan gradient on deep blue-black backgrounds
  * 
  * Typography Philosophy:
  * - Font: Inter / Plus Jakarta Sans - modern, highly readable
@@ -24,59 +22,76 @@
 export const colors = {
   // Background colors
   background: {
-    light: '#F9FAFB',
-    dark: '#1E293B',
+    light: '#FDFBF7', // Warm cream/paper
+    dark: '#020617', // Deep midnight
   },
 
   // Text colors
   text: {
     light: {
-      primary: '#111827',
-      secondary: '#6B7280',
+      primary: '#1C1917', // Warm dark gray
+      secondary: '#78716C',
     },
     dark: {
-      primary: '#F1F5F9',
-      secondary: '#9CA3AF',
+      primary: '#FAFAF9', // Crisp off-white
+      secondary: '#D6D3D1',
     },
   },
 
   // Border colors
   border: {
-    light: '#E5E7EB',
-    dark: '#374151',
+    light: '#E7E5E4', // Warm border
+    dark: '#1E3A8A', // Cool blue border
   },
 
-  // Primary accent - accessible blue
+  // Sunrise gradient colors (Light Mode)
+  sunrise: {
+    fuchsia: '#C026D3',
+    pink: '#EC4899',
+    orange: '#F59E0B',
+    gold: '#EAB308',
+  },
+
+  // Midnight gradient colors (Dark Mode)
+  midnight: {
+    violet: '#5B21B6',
+    blue: '#1D4ED8',
+    royal: '#2563EB',
+    teal: '#0891B2',
+    cyan: '#06B6D4',
+  },
+
+  // Legacy compatibility - maps to Sunrise/Midnight
   primary: {
-    DEFAULT: '#3B82F6',
-    50: '#EFF6FF',
-    100: '#DBEAFE',
-    200: '#BFDBFE',
-    300: '#93C5FD',
-    400: '#60A5FA',
-    500: '#3B82F6',
-    600: '#2563EB',
-    700: '#1D4ED8',
-    800: '#1E40AF',
-    900: '#1E3A8A',
+    DEFAULT: '#C026D3', // Sunrise fuchsia
+    50: '#FDF4FF',
+    100: '#FAE8FF',
+    200: '#F5D0FE',
+    300: '#F0ABFC',
+    400: '#E879F9',
+    500: '#D946EF',
+    600: '#C026D3',
+    700: '#A21CAF',
+    800: '#86198F',
+    900: '#701A75',
   },
 
-  // Secondary accent - gentle lavender
+  // Secondary - Sunrise pink / Midnight blue
   secondary: {
-    DEFAULT: '#A78BFA',
-    50: '#FAF5FF',
-    100: '#F3E8FF',
-    200: '#E9D5FF',
-    300: '#D8B4FE',
-    400: '#C4B5FD',
-    500: '#A78BFA',
-    600: '#8B5CF6',
-    700: '#7C3AED',
-    800: '#6D28D9',
-    900: '#4C1D95',
+    DEFAULT: '#EC4899',
+    50: '#FFF1F2',
+    100: '#FFE4E6',
+    200: '#FECDD3',
+    300: '#FDA4AF',
+    400: '#FB7185',
+    500: '#F43F5E',
+    600: '#E11D48',
+    700: '#BE123C',
+    800: '#9F1239',
+    900: '#881337',
   },
 
-  // Accent - calming cyan
+  // Accent - Midnight cyan
   accent: {
     DEFAULT: '#06B6D4',
     50: '#ECFEFF',

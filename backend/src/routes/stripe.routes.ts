@@ -120,61 +120,94 @@ export default async function stripeRoutes(server: FastifyInstance) {
         return reply.code(400).send({ error: 'Webhook signature verification failed' });
       }
 
-      server.log.info({ type: event.type }, 'Stripe webhook received');
+      server.log.info({ type: event.type, eventId: event.id }, 'Stripe webhook received');
 
       try {
         switch (event.type) {
           case 'checkout.session.completed': {
             const session = event.data.object;
-            await handleCheckoutSessionCompleted(session);
+            server.log.info({ sessionId: session.id, userId: session.metadata?.userId }, 'Processing checkout.session.completed');
+            await handleCheckoutSessionCompleted(session, server);
             break;
           }
 
           case 'customer.subscription.updated': {
             const subscription = event.data.object;
-            await handleSubscriptionUpdated(subscription);
+            server.log.info({ subscriptionId: subscription.id }, 'Processing customer.subscription.updated');
+            await handleSubscriptionUpdated(subscription, server);
             break;
           }
 
           case 'customer.subscription.deleted': {
             const subscription = event.data.object;
-            await handleSubscriptionDeleted(subscription);
+            server.log.info({ subscriptionId: subscription.id }, 'Processing customer.subscription.deleted');
+            await handleSubscriptionDeleted(subscription, server);
             break;
           }
 
           case 'invoice.payment_succeeded': {
             const invoice = event.data.object;
-            await handleInvoicePaymentSucceeded(invoice);
+            server.log.info({ invoiceId: invoice.id }, 'Processing invoice.payment_succeeded');
+            await handleInvoicePaymentSucceeded(invoice, server);
             break;
           }
 
           case 'invoice.payment_failed': {
             const invoice = event.data.object;
-            await handleInvoicePaymentFailed(invoice);
+            server.log.info({ invoiceId: invoice.id }, 'Processing invoice.payment_failed');
+            await handleInvoicePaymentFailed(invoice, server);
             break;
           }
+
+          default:
+            server.log.info({ type: event.type }, 'Unhandled webhook event type');
         }
 
         return reply.send({ received: true });
       } catch (error: any) {
-        server.log.error({ error: error.message }, 'Webhook handler error');
+        server.log.error({ 
+          error: error.message, 
+          stack: error.stack,
+          eventType: event.type,
+          eventId: event.id 
+        }, 'Webhook handler error');
         return reply.code(500).send({ error: 'Webhook handler failed' });
       }
     }
   );
 }
 
-async function handleCheckoutSessionCompleted(session: any) {
+async function handleCheckoutSessionCompleted(session: any, server: FastifyInstance) {
   const userId = session.metadata.userId;
   const customerId = session.customer;
 
+  if (!userId) {
+    server.log.error({ sessionId: session.id }, 'Missing userId in checkout session metadata');
+    throw new Error('Missing userId in session metadata');
+  }
+
+  if (!session.subscription) {
+    server.log.error({ sessionId: session.id, userId }, 'No subscription ID in checkout session');
+    throw new Error('No subscription found in checkout session');
+  }
+
+  server.log.info({ userId, subscriptionId: session.subscription }, 'Retrieving subscription details');
+  
   const subscription = await stripe.subscriptions.retrieve(session.subscription);
   const priceId = subscription.items.data[0].price.id;
   const priceInfo = getPriceInfo(priceId);
 
   if (!priceInfo) {
+    server.log.error({ priceId, userId }, 'Unknown price ID from subscription');
     throw new Error(`Unknown price ID: ${priceId}`);
   }
+
+  server.log.info({ 
+    userId, 
+    role: priceInfo.role, 
+    billingCycle: priceInfo.billingCycle,
+    priceId 
+  }, 'Updating user role and subscription');
 
   // Update user and create subscription record
   await prisma.$transaction([
@@ -208,13 +241,19 @@ async function handleCheckoutSessionCompleted(session: any) {
       },
     }),
   ]);
+
+  server.log.info({ userId, role: priceInfo.role }, 'Successfully updated user role and subscription');
 }
 
-async function handleSubscriptionUpdated(subscription: any) {
+async function handleSubscriptionUpdated(subscription: any, server: FastifyInstance) {
+  server.log.info({ subscriptionId: subscription.id, customerId: subscription.customer }, 'Retrieving customer for subscription update');
   const customer = await stripe.customers.retrieve(subscription.customer);
   const userId = (customer as any).metadata?.userId;
 
-  if (!userId) return;
+  if (!userId) {
+    server.log.warn({ subscriptionId: subscription.id, customerId: subscription.customer }, 'No userId found in customer metadata for subscription update');
+    return;
+  }
 
   const priceId = subscription.items.data[0].price.id;
   const priceInfo = getPriceInfo(priceId);
@@ -245,11 +284,15 @@ async function handleSubscriptionUpdated(subscription: any) {
   ]);
 }
 
-async function handleSubscriptionDeleted(subscription: any) {
+async function handleSubscriptionDeleted(subscription: any, server: FastifyInstance) {
+  server.log.info({ subscriptionId: subscription.id }, 'Processing subscription deletion');
   const customer = await stripe.customers.retrieve(subscription.customer);
   const userId = (customer as any).metadata?.userId;
 
-  if (!userId) return;
+  if (!userId) {
+    server.log.warn({ subscriptionId: subscription.id }, 'No userId found for subscription deletion');
+    return;
+  }
 
   await prisma.$transaction([
     prisma.subscription.update({
@@ -261,9 +304,11 @@ async function handleSubscriptionDeleted(subscription: any) {
       data: { role: 'BASIC' },
     }),
   ]);
+
+  server.log.info({ userId }, 'Successfully downgraded user to BASIC after subscription deletion');
 }
 
-async function handleInvoicePaymentSucceeded(invoice: any) {
+async function handleInvoicePaymentSucceeded(invoice: any, server: FastifyInstance) {
   const customer = await stripe.customers.retrieve(invoice.customer);
   const userId = (customer as any).metadata?.userId;
 
@@ -298,11 +343,12 @@ async function handleInvoicePaymentSucceeded(invoice: any) {
   // Update subscription if exists
   if (invoice.subscription) {
     const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
-    await handleSubscriptionUpdated(subscription);
+    await handleSubscriptionUpdated(subscription, server);
   }
 }
 
-async function handleInvoicePaymentFailed(invoice: any) {
+async function handleInvoicePaymentFailed(invoice: any, server: FastifyInstance) {
+  server.log.warn({ invoiceId: invoice.id }, 'Processing failed invoice payment');
   const customer = await stripe.customers.retrieve(invoice.customer);
   const userId = (customer as any).metadata?.userId;
 

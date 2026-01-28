@@ -48,9 +48,12 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variants = {
       primary: clsx(
-        'bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-lg shadow-blue-500/30',
-        'hover:from-blue-700 hover:to-violet-700 hover:shadow-xl hover:shadow-blue-500/40',
-        'dark:from-blue-500 dark:to-violet-500 dark:hover:from-blue-600 dark:hover:to-violet-600',
+        // Sunrise gradient for light mode
+        'bg-gradient-to-r from-sunrise-fuchsia via-sunrise-pink to-sunrise-orange text-white shadow-lg shadow-pink-500/30',
+        'hover:from-fuchsia-700 hover:via-pink-600 hover:to-orange-600 hover:shadow-xl hover:shadow-pink-500/40',
+        // Midnight gradient for dark mode
+        'dark:from-midnight-violet dark:via-midnight-blue dark:to-midnight-cyan',
+        'dark:hover:from-violet-800 dark:hover:via-blue-800 dark:hover:to-cyan-700',
         'active:scale-95'
       ),
       secondary: clsx(
