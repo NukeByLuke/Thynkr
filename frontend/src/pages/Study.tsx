@@ -134,24 +134,24 @@ export default function Study() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Abstract Header - Elegant Aurora Theme */}
-      <div className="relative overflow-hidden h-36 bg-gradient-to-br from-pink-100/90 via-fuchsia-100/80 via-30% to-orange-100/70 dark:from-cyan-950/40 dark:via-violet-950/50 dark:via-30% dark:to-blue-950/40">
+      <div className="relative overflow-hidden h-36 bg-gradient-to-br from-pink-100/90 via-fuchsia-100/80 via-30% to-orange-100/70 dark:from-cyan-900/60 dark:via-violet-900/70 dark:via-30% dark:to-blue-900/60">
         {/* Floating Abstract Shapes - GPU optimized with transform3d */}
         <motion.div
           animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
           transition={{ duration: 8, repeat: Infinity, ease: [0.25, 0.1, 0.25, 1.0] }}
-          className="absolute -top-24 -left-12 w-96 h-96 bg-gradient-to-br from-pink-400 to-fuchsia-500 dark:from-cyan-500 dark:to-violet-600 rounded-full blur-3xl opacity-25 dark:opacity-20"
+          className="absolute -top-24 -left-12 w-96 h-96 bg-gradient-to-br from-pink-400 to-fuchsia-500 dark:from-cyan-400 dark:to-violet-500 rounded-full blur-3xl opacity-25 dark:opacity-30"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
         />
         <motion.div
           animate={{ y: [0, 20, 0], x: [0, -15, 0] }}
           transition={{ duration: 10, repeat: Infinity, ease: [0.25, 0.1, 0.25, 1.0] }}
-          className="absolute -bottom-24 -right-12 w-[32rem] h-[32rem] bg-gradient-to-br from-fuchsia-400 to-orange-500 dark:from-violet-500 dark:to-blue-600 rounded-full blur-3xl opacity-30 dark:opacity-25"
+          className="absolute -bottom-24 -right-12 w-[32rem] h-[32rem] bg-gradient-to-br from-fuchsia-400 to-orange-500 dark:from-violet-400 dark:to-blue-500 rounded-full blur-3xl opacity-30 dark:opacity-35"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
         />
         <motion.div
           animate={{ y: [0, -15, 0], scale: [1, 1.1, 1] }}
           transition={{ duration: 7, repeat: Infinity, ease: [0.25, 0.1, 0.25, 1.0] }}
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-br from-orange-400 to-pink-500 dark:from-blue-500 dark:to-cyan-600 rounded-full blur-3xl opacity-20 dark:opacity-15"
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-br from-orange-400 to-pink-500 dark:from-blue-400 dark:to-cyan-500 rounded-full blur-3xl opacity-20 dark:opacity-25"
           style={{ transform: 'translateZ(0)', willChange: 'transform' }}
         />
 
