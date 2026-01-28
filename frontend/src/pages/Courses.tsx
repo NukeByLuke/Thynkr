@@ -570,7 +570,7 @@ export default function Courses() {
   return (
     <>
       <Helmet>
-        <title>Your Library - Thynkr</title>
+        <title>Courses - Thynkr</title>
         <meta name="description" content="Browse and manage your study sets" />
       </Helmet>
 

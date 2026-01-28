@@ -173,7 +173,7 @@ export default function Account() {
   return (
     <>
       <Helmet>
-        <title>Account Settings - Thynkr</title>
+        <title>Account - Thynkr</title>
         <meta name="description" content="Manage your Thynkr account and subscription" />
       </Helmet>
 

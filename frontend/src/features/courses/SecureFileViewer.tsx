@@ -122,7 +122,7 @@ function ImageViewer({
       <Watermark courseTitle={courseTitle} userId={userId} />
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center z-20">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+          <Loader2 className="w-8 h-8 animate-spin text-pink-600 dark:text-cyan-400" />
         </div>
       )}
       {error ? (
@@ -224,10 +224,10 @@ function AudioViewer({
   // Validate URL before rendering
   if (!url || url === 'undefined' || url === 'null') {
     return (
-      <div className="relative w-full p-8 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg">
+      <div className="relative w-full p-8 bg-gradient-to-br from-pink-100 to-fuchsia-100 dark:from-cyan-900/30 dark:to-violet-900/30 rounded-lg">
         <Watermark courseTitle={courseTitle} userId={userId} />
         <div className="flex flex-col items-center gap-4">
-          <Music className="w-16 h-16 text-indigo-600 dark:text-indigo-400" />
+          <Music className="w-16 h-16 text-pink-600 dark:text-cyan-400" />
           <p className="text-lg font-medium text-gray-900 dark:text-white">{fileName}</p>
           <p className="text-sm text-gray-600 dark:text-gray-400">Audio URL is not available</p>
         </div>
@@ -236,10 +236,10 @@ function AudioViewer({
   }
 
   return (
-    <div className="relative w-full p-8 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg">
+    <div className="relative w-full p-8 bg-gradient-to-br from-pink-100 to-fuchsia-100 dark:from-cyan-900/30 dark:to-violet-900/30 rounded-lg">
       <Watermark courseTitle={courseTitle} userId={userId} />
       <div className="flex flex-col items-center gap-4">
-        <Music className="w-16 h-16 text-indigo-600 dark:text-indigo-400" />
+        <Music className="w-16 h-16 text-pink-600 dark:text-cyan-400" />
         <p className="text-lg font-medium text-gray-900 dark:text-white">{fileName}</p>
         <audio
           src={url}

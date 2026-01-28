@@ -229,8 +229,8 @@ const CATEGORY_CONFIG: Record<CourseCategory, { label: string; color: string; bg
     },
     ARTS: {
       label: 'Arts',
-      color: 'text-indigo-700 dark:text-indigo-400',
-      bgColor: 'bg-indigo-100 dark:bg-indigo-900/30',
+      color: 'text-pink-700 dark:text-cyan-400',
+      bgColor: 'bg-pink-100 dark:bg-cyan-900/30',
     },
     HEALTH: {
       label: 'Health',

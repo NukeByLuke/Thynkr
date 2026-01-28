@@ -488,34 +488,40 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                     rehypePlugins={[rehypeHighlight]}
                     components={{
                       p: ({ node, ...props }) => (
-                        <h4 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-4 text-balance leading-tight" {...props} />
+                        <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-4 text-balance leading-snug" {...props} />
                       ),
-                      h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-3" {...props} />,
-                      h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2" {...props} />,
+                      h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 text-balance" {...props} />,
+                      h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2 text-balance" {...props} />,
                       h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2" {...props} />,
-                      strong: ({ node, ...props }) => <strong className="font-bold text-cyan-600 dark:text-cyan-300" {...props} />,
-                      em: ({ node, ...props }) => <em className="italic text-slate-600 dark:text-gray-300" {...props} />,
-                      ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-1.5 text-slate-600 dark:text-gray-300 marker:text-cyan-500 dark:marker:text-cyan-400" {...props} />,
-                      ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-1.5 text-slate-600 dark:text-gray-300 marker:text-cyan-500 dark:marker:text-cyan-400" {...props} />,
+                      strong: ({ node, ...props }) => <strong className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-300 dark:to-blue-400" {...props} />,
+                      em: ({ node, ...props }) => <em className="italic text-slate-700 dark:text-slate-300" {...props} />,
+                      ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-2 text-slate-700 dark:text-slate-300 marker:text-cyan-500 dark:marker:text-cyan-400 text-lg" {...props} />,
+                      ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-2 text-slate-700 dark:text-slate-300 marker:text-cyan-500 dark:marker:text-cyan-400 text-lg" {...props} />,
                       li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
                       code: ({ node, className, children, ...props }) => {
                         const isInline = !className;
                         return isInline ? (
                           <code
-                            className="bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 px-2 py-1 rounded-lg text-base font-mono border border-cyan-500/30 shadow-sm"
+                            className="bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 px-1.5 py-0.5 rounded-md text-base font-mono border border-cyan-200 dark:border-cyan-800"
                             {...props}
                           >
                             {children}
                           </code>
                         ) : (
                           <code
-                            className={`block bg-slate-100 dark:bg-gray-900/80 text-slate-800 dark:text-gray-100 p-4 rounded-xl overflow-x-auto text-sm font-mono shadow-lg border border-slate-200 dark:border-gray-700 my-3 ${className || ''}`}
+                            className={`block bg-slate-100 dark:bg-gray-900/80 text-slate-800 dark:text-gray-100 p-4 rounded-xl overflow-x-auto text-sm font-mono shadow-lg border border-slate-200 dark:border-gray-700 my-4 ${className || ''}`}
                             {...props}
                           >
                             {children}
                           </code>
                         );
                       },
+                      blockquote: ({ node, ...props }) => (
+                        <blockquote
+                          className="border-l-4 border-cyan-500 dark:border-cyan-400 bg-cyan-50 dark:bg-cyan-900/10 p-4 rounded-r-lg italic text-slate-700 dark:text-slate-300 my-4 shadow-sm"
+                          {...props}
+                        />
+                      ),
                     }}
                   >
                     {currentQuestion.question}

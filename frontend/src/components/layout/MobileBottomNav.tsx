@@ -96,7 +96,7 @@ const MobileBottomNav = memo(() => {
                 {/* Menu Items */}
                 <Link
                   to="/account"
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-indigo-50/50 dark:hover:bg-white/5 transition-all duration-150"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-pink-50/50 dark:hover:bg-cyan-900/10 transition-all duration-150"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <User className="w-5 h-5" />
@@ -104,7 +104,7 @@ const MobileBottomNav = memo(() => {
                 </Link>
                 <Link
                   to="/settings"
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-indigo-50/50 dark:hover:bg-white/5 transition-all duration-150"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-pink-50/50 dark:hover:bg-cyan-900/10 transition-all duration-150"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <Settings className="w-5 h-5" />
@@ -162,7 +162,7 @@ const MobileBottomNav = memo(() => {
 
                   <span
                     className={`mt-1 text-[10px] font-medium transition-colors text-center ${
-                      isMenuOpen ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400'
+                      isMenuOpen ? 'text-pink-600 dark:text-cyan-400' : 'text-slate-600 dark:text-slate-400'
                     }`}
                   >
                     {item.label}
@@ -211,7 +211,7 @@ const MobileBottomNav = memo(() => {
 
                 <span
                   className={`mt-1 text-[10px] font-medium transition-colors text-center ${
-                    active ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400'
+                    active ? 'text-pink-600 dark:text-cyan-400' : 'text-slate-600 dark:text-slate-400'
                   }`}
                 >
                   {item.label}

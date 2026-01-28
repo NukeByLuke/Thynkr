@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { useState, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
-import { RefreshCw, Volume2, StopCircle, Loader2, AlertTriangle } from 'lucide-react';
-import { useTTS } from '@/hooks/useTTS';
+import { RefreshCw, Play, AlertTriangle } from 'lucide-react';
+import AudioPlayer from '@/components/audio/AudioPlayer';
 
 interface SummaryViewProps {
   content: string;
@@ -13,7 +14,19 @@ interface SummaryViewProps {
 }
 
 export default function SummaryView({ content, onRegenerate, isRegenerating, error }: SummaryViewProps) {
-  const { isPlaying, isLoading, toggle } = useTTS();
+  const [showAudioPlayer, setShowAudioPlayer] = useState(false);
+
+  // Clean text for TTS (strip markdown formatting)
+  const cleanTextForTTS = useMemo(() => {
+    return content
+      .replace(/#{1,6}\s/g, '') // Remove headers
+      .replace(/\*\*/g, '') // Remove bold
+      .replace(/\*/g, '') // Remove italic
+      .replace(/`/g, '') // Remove code
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links but keep text
+      .replace(/\n{3,}/g, '\n\n') // Normalize multiple newlines
+      .trim();
+  }, [content]);
 
   // Show error alert if generation failed
   if (error) {
@@ -38,47 +51,43 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
     );
   }
 
-  const handlePlayAudio = () => {
-    // Strip markdown formatting for cleaner audio
-    const cleanText = content
-      .replace(/#{1,6}\s/g, '') // Remove headers
-      .replace(/\*\*/g, '') // Remove bold
-      .replace(/\*/g, '') // Remove italic
-      .replace(/`/g, '') // Remove code
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links but keep text
-      .trim();
-    
-    toggle(cleanText);
-  };
-
   return (
-    <div className="max-w-none animate-fade-in">
+    <div className="max-w-none animate-fade-in space-y-6">
+      {/* Docked Audio Player */}
+      {showAudioPlayer && (
+        <AudioPlayer 
+          text={cleanTextForTTS} 
+          docked 
+          onClose={() => setShowAudioPlayer(false)}
+          onPlayStart={() => {}} 
+        />
+      )}
+
+      {/* Summary Content */}
       <div className="bg-gradient-to-br from-white to-brand-50/50 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-lg border border-brand-100/50 dark:border-gray-700 p-10">
         <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-brand-200/50 dark:border-gray-700">
-          <h3 className="text-3xl font-bold bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-transparent">Summary</h3>
+          <h3 className="text-3xl font-bold">
+            <span className="hidden dark:block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-violet-400 to-violet-500">
+              Summary
+            </span>
+            <span className="block dark:hidden text-transparent bg-clip-text bg-gradient-to-r from-pink-600 via-fuchsia-600 to-fuchsia-700">
+              Summary
+            </span>
+          </h3>
           <div className="flex items-center gap-3">
-            {/* TTS Play Button */}
-            <button
-              onClick={handlePlayAudio}
-              disabled={isLoading}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-xl transition-all duration-150 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-              title={isPlaying ? 'Stop audio' : 'Play audio'}
+             <button
+              onClick={() => setShowAudioPlayer(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-pink-600 to-fuchsia-600 dark:from-cyan-500 dark:to-violet-600 hover:opacity-90 rounded-xl transition-all shadow-md hover:shadow-lg"
             >
-              {isLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : isPlaying ? (
-                <StopCircle className="w-4 h-4" />
-              ) : (
-                <Volume2 className="w-4 h-4" />
-              )}
-              {isLoading ? 'Loading...' : isPlaying ? 'Stop' : 'Play Audio'}
+              <Play className="w-4 h-4 fill-current" />
+              Play Audio
             </button>
-            
+
             {onRegenerate && (
               <button
                 onClick={onRegenerate}
                 disabled={isRegenerating}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-xl transition-all duration-150 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-fuchsia-600 dark:text-violet-400 hover:text-fuchsia-700 dark:hover:text-violet-300 bg-fuchsia-50 dark:bg-violet-900/30 hover:bg-fuchsia-100 dark:hover:bg-violet-900/50 rounded-xl transition-all duration-150 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Regenerate summary with latest AI"
               >
                 <RefreshCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
@@ -94,25 +103,34 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
             components={{
               h1: ({ node, ...props }) => (
                 <h1
-                  className="text-3xl font-bold text-gray-900 dark:text-white mt-8 mb-5 pb-3 border-b-2 border-brand-500 dark:border-brand-400"
+                  className="text-4xl font-extrabold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mt-8 mb-6 pb-4 border-b-4 border-brand-500/20"
                   {...props}
                 />
               ),
               h2: ({ node, ...props }) => (
                 <h2
-                  className="text-2xl font-bold text-gray-900 dark:text-white mt-7 mb-4"
+                  className="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-8 mb-4 pl-4 border-l-4 border-pink-500 dark:border-cyan-500"
                   {...props}
                 />
               ),
               h3: ({ node, ...props }) => (
                 <h3
-                  className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-2"
+                  className="text-xl font-bold text-gray-800 dark:text-gray-200 mt-6 mb-3 flex items-center gap-2"
                   {...props}
                 />
               ),
               h4: ({ node, ...props }) => (
                 <h4
-                  className="text-lg font-semibold text-gray-800 dark:text-gray-200 mt-5 mb-2"
+                  className="text-lg font-semibold text-brand-700 dark:text-brand-300 mt-5 mb-2"
+                  {...props}
+                />
+              ),
+              strong: ({ node, ...props }) => (
+                <strong className="font-bold text-brand-700 dark:text-brand-300" {...props} />
+              ),
+              blockquote: ({ node, ...props }) => (
+                <blockquote
+                  className="border-l-4 border-brand-300 dark:border-brand-700 bg-brand-50 dark:bg-brand-900/10 p-4 rounded-r-lg italic text-gray-700 dark:text-gray-300 my-4 shadow-sm"
                   {...props}
                 />
               ),
@@ -135,12 +153,6 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
                 />
               ),
               li: ({ node, ...props }) => <li className="leading-loose pl-2" {...props} />,
-              strong: ({ node, ...props }) => (
-                <strong className="font-bold text-gray-900 dark:text-white" {...props} />
-              ),
-              em: ({ node, ...props }) => (
-                <em className="italic text-gray-800 dark:text-gray-200" {...props} />
-              ),
               code: ({ node, className, children, ...props }) => {
                 const isInline = !className;
                 return isInline ? (
@@ -160,12 +172,6 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
                 );
               },
               pre: ({ node, ...props }) => <pre className="my-4" {...props} />,
-              blockquote: ({ node, ...props }) => (
-                <blockquote
-                  className="border-l-4 border-primary-500 dark:border-primary-400 bg-primary-50 dark:bg-primary-900/20 pl-6 pr-4 py-4 italic text-gray-700 dark:text-gray-300 my-5 rounded-r-lg"
-                  {...props}
-                />
-              ),
               a: ({ node, ...props }) => (
                 <a
                   className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 underline decoration-primary-300 dark:decoration-primary-600 hover:decoration-primary-500 dark:hover:decoration-primary-400 transition-colors"

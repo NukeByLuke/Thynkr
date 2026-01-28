@@ -14,8 +14,8 @@ export default function DashboardLayout() {
   return (
     <div className="h-screen w-full overflow-hidden bg-slate-50 dark:bg-slate-950 bg-grid-pattern flex relative">
       {/* Ambient Glow Orbs */}
-      <div className="fixed top-0 left-0 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="fixed bottom-0 right-0 w-96 h-96 bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="fixed top-0 left-0 w-96 h-96 bg-pink-500/10 dark:bg-cyan-500/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="fixed bottom-0 right-0 w-96 h-96 bg-fuchsia-500/10 dark:bg-violet-500/20 rounded-full blur-[120px] pointer-events-none" />
       
       {/* Desktop Sidebar - Hidden on mobile or when hideSidebar is true */}
       {!hideSidebar && (

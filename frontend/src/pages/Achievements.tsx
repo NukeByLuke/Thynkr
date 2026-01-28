@@ -347,7 +347,8 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
      currentTierCode = 'COPPER';
   }
   
-  const tier = TIER_CONFIG[currentTierCode];
+  // Safe fallback to COPPER if the tier code is invalid or config is missing
+  const tier = TIER_CONFIG[currentTierCode] || TIER_CONFIG.COPPER;
   const isLocked = !achievement.unlocked;
   const formattedDate = achievement.unlockedAt 
     ? new Date(achievement.unlockedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -693,7 +694,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                     displayTierConfig = TIER_CONFIG['COPPER']; // Use copper config for locked
                   } else if (achievement.currentTier && !isMastery) {
                     // Unlocked - use CURRENT tier color for the bar
-                    displayTierConfig = TIER_CONFIG[achievement.currentTier];
+                    displayTierConfig = TIER_CONFIG[achievement.currentTier] || TIER_CONFIG['COPPER'];
                     // Find next tier after current
                     const currentIndex = PROGRESS_ORDER.indexOf(achievement.currentTier);
                     if (currentIndex !== -1 && currentIndex < PROGRESS_ORDER.length - 1) {

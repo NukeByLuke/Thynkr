@@ -187,7 +187,7 @@ export default function ImmersiveStudy() {
           }}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded-lg transition-colors flex-shrink-0"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-pink-50 dark:hover:bg-cyan-900/20 rounded-lg transition-colors flex-shrink-0"
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="hidden sm:inline">Back</span>
@@ -195,9 +195,9 @@ export default function ImmersiveStudy() {
 
         {/* Center: File title with Zen badge */}
         <div className="flex items-center gap-3 min-w-0 flex-1 justify-center">
-          <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/20 rounded-full">
-            <Sparkles className="w-3 h-3 text-violet-500" />
-            <span className="text-xs font-medium text-violet-600 dark:text-violet-400">Zen Mode</span>
+          <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 bg-gradient-to-r from-fuchsia-500/10 to-pink-500/10 dark:from-violet-500/10 dark:to-cyan-500/10 border border-fuchsia-500/20 dark:border-violet-500/20 rounded-full">
+            <Sparkles className="w-3 h-3 text-fuchsia-600 dark:text-violet-400" />
+            <span className="text-xs font-medium text-fuchsia-600 dark:text-violet-400">Zen Mode</span>
           </div>
           <h2 className="text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs lg:max-w-md">
             {selectedFile.originalName}
@@ -218,14 +218,14 @@ export default function ImmersiveStudy() {
                 whileTap={{ scale: 0.98 }}
                 className={`relative px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-100 flex items-center gap-1.5 ${
                   isActive
-                    ? 'text-indigo-700 dark:text-white'
-                    : 'text-slate-700 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
+                    ? 'text-pink-700 dark:text-cyan-300'
+                    : 'text-slate-700 dark:text-slate-400 hover:bg-pink-50 dark:hover:bg-cyan-900/20 hover:text-pink-900 dark:hover:text-cyan-200'
                 }`}
               >
                 {isActive && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute inset-0 bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-500 dark:to-purple-500 rounded-lg shadow-lg shadow-indigo-200/50 dark:shadow-indigo-500/20"
+                    className="absolute inset-0 bg-gradient-to-r from-pink-100 to-fuchsia-100 dark:from-violet-500 dark:to-cyan-500 rounded-lg shadow-lg shadow-pink-200/50 dark:shadow-violet-500/20"
                     transition={{ type: 'spring', stiffness: 700, damping: 40 }}
                   />
                 )}
@@ -412,8 +412,8 @@ export default function ImmersiveStudy() {
           animate={{ opacity: 1, scale: 1 }}
           className="text-center"
         >
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center">
-            <FileText className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-pink-500/20 to-fuchsia-500/20 dark:from-cyan-500/20 dark:to-violet-500/20 flex items-center justify-center">
+            <FileText className="w-8 h-8 text-pink-600 dark:text-cyan-400" />
           </div>
           <p className="text-slate-600 dark:text-slate-400">Loading file...</p>
         </motion.div>
@@ -442,7 +442,7 @@ export default function ImmersiveStudy() {
             className="relative rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl shadow-slate-200/20 dark:shadow-slate-900/30 overflow-hidden"
           >
             {/* Subtle gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.02] via-transparent to-purple-500/[0.02] pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-br from-pink-500/[0.02] via-transparent to-fuchsia-500/[0.02] dark:from-cyan-500/[0.02] dark:via-transparent dark:to-violet-500/[0.02] pointer-events-none" />
 
             {/* Content */}
             <div className="relative z-10 p-6 sm:p-8">
@@ -532,9 +532,9 @@ function GeneratePrompt({ type, onGenerate, isGenerating, extraContent }: Genera
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.1 }}
-        className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 flex items-center justify-center"
+        className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-pink-500/10 to-fuchsia-500/10 dark:from-cyan-500/10 dark:to-violet-500/10 border border-pink-500/20 dark:border-cyan-500/20 flex items-center justify-center"
       >
-        <Icon className="w-10 h-10 text-indigo-600 dark:text-indigo-400" />
+        <Icon className="w-10 h-10 text-pink-600 dark:text-cyan-400" />
       </motion.div>
       
       <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">{config.title}</h3>
@@ -549,7 +549,7 @@ function GeneratePrompt({ type, onGenerate, isGenerating, extraContent }: Genera
         disabled={isGenerating}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30"
+        className="px-6 py-3 bg-gradient-to-r from-pink-600 to-fuchsia-600 hover:from-pink-700 hover:to-fuchsia-700 dark:from-cyan-500 dark:to-violet-500 dark:hover:from-cyan-600 dark:hover:to-violet-600 text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-pink-500/25 dark:shadow-cyan-500/25 hover:shadow-xl hover:shadow-pink-500/30 dark:hover:shadow-cyan-500/30"
       >
         <span className="flex items-center gap-2">
           <Sparkles className="w-4 h-4" />
