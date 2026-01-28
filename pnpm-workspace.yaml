@@ -1,3 +1,9 @@
 packages:
-  - 'backend'
-  - 'frontend'
+  - backend
+  - frontend
+
+ignoredBuiltDependencies:
+  - '@prisma/engines'
+  - core-js
+  - esbuild
+  - prisma
