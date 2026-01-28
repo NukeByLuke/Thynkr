@@ -32,7 +32,7 @@ interface LogoProps {
   /**
    * Size preset for quick sizing
    */
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
 export default function Logo({ 
@@ -59,9 +59,10 @@ export default function Logo({
     sm: { brain: 'h-6 w-6', wordmark: 'h-4', gap: 'gap-1.5' },
     md: { brain: 'h-8 w-8', wordmark: 'h-5', gap: 'gap-2' },
     lg: { brain: 'h-12 w-12', wordmark: 'h-7', gap: 'gap-3' },
+    xl: { brain: 'h-16 w-16', wordmark: 'h-8', gap: 'gap-3' },
   };
 
-  const sizes = sizeConfig[size];
+  const sizes = sizeConfig[size] || sizeConfig.md;
 
   // Animation variants
   const motionProps = animated ? {
