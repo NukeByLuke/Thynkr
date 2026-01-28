@@ -66,8 +66,8 @@ importers:
         specifier: ^3.6.0
         version: 3.6.0
       dotenv:
-        specifier: ^16.3.1
-        version: 16.6.1
+        specifier: ^17.2.3
+        version: 17.2.3
       fast-xml-parser:
         specifier: ^5.3.0
         version: 5.3.0
@@ -1888,8 +1888,8 @@ packages:
   dompurify@3.3.1:
     resolution: {integrity: sha512-qkdCKzLNtrgPFP1Vo+98FRzJnBRGe4ffyCea9IwHB1fyxPOeNTHpLKYGd4Uk9xvNoH0ZoOjwZxNptyMwqrId1Q==}
 
-  dotenv@16.6.1:
-    resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
+  dotenv@17.2.3:
+    resolution: {integrity: sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w==}
     engines: {node: '>=12'}
 
   duck@0.1.12:
@@ -5585,7 +5585,7 @@ snapshots:
       '@types/trusted-types': 2.0.7
     optional: true
 
-  dotenv@16.6.1: {}
+  dotenv@17.2.3: {}
 
   duck@0.1.12:
     dependencies:
