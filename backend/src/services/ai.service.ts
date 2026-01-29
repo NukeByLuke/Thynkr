@@ -328,7 +328,16 @@ ${preparedText}`;
   ): Promise<GeneratedQuiz> {
     const normalizedLanguage = this.normalizeLanguage(language);
     const preparedText = this.prepareText(text, 120000); // Gemini can handle much more
-    const cacheKey = `quiz_${normalizedLanguage}_${this.hashText(preparedText)}_${numQuestions}_${difficulty}`;
+    
+    // Estimate max questions based on content length (roughly 1 question per 200 chars of content)
+    const estimatedMaxQuestions = Math.max(10, Math.floor(preparedText.length / 200));
+    const adjustedNumQuestions = Math.min(numQuestions, estimatedMaxQuestions);
+    
+    if (adjustedNumQuestions < numQuestions) {
+      logger.info({ requested: numQuestions, adjusted: adjustedNumQuestions }, 'Reduced question count due to content length');
+    }
+    
+    const cacheKey = `quiz_${normalizedLanguage}_${this.hashText(preparedText)}_${adjustedNumQuestions}_${difficulty}`;
     const cached = cache.get<GeneratedQuiz>(cacheKey);
 
     if (cached) {
@@ -354,16 +363,17 @@ You must respond with valid JSON in this exact format:
 
 IMPORTANT: The "correctAnswer" field must contain the EXACT text of the correct option (not just a letter like "A").
 
-Create a quiz with exactly ${numQuestions} multiple-choice questions from the following text.
+Create a quiz with exactly ${adjustedNumQuestions} multiple-choice questions from the following text.
 
 Difficulty level: ${difficulty}
 ${difficultyInstructions[difficulty]}
 
 CRITICAL REQUIREMENTS:
 - **Questions**: Clear, unambiguous, and directly based on the text.
-- **Options**: exactly 4 options per question. ONE correct, THREE plausible distractors. Avoid "All of the above" or "None of the above" unless absolutely necessary.
+- **Options**: exactly 4 options per question. ONE correct, THREE plausible distractors. Avoid "All of the above" or "None of the above".
+- **OPTION LENGTH**: ALL four options MUST be similar in length and detail level. Do NOT make the correct answer longer or more detailed than the wrong answers. If the correct answer is a detailed explanation, make the wrong answers equally detailed. If the correct answer is brief, make wrong answers equally brief.
 - **Accuracy**: Verify every question and answer against the source text for 100% factual accuracy.
-- **Explanations**: Provide a clear, helpful explanation for the correct answer. Explain *why* it is correct and, if useful, briefly mention why distractors are incorrect.
+- **Explanations**: Provide a clear, helpful explanation for the correct answer.
 
 Make the quiz comprehensive and reflective of the material's core concepts.
 
