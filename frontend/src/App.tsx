@@ -7,9 +7,9 @@
 import { Suspense, useEffect, useState } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import { Toaster } from 'react-hot-toast';
+// Toaster removed - toast calls are now no-ops
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import { LayoutProvider, useLayout } from './contexts/LayoutContext';
 import { NotificationProvider } from './contexts/NotificationContext';
@@ -94,56 +94,12 @@ function AppContent() {
     return <LoadingSpinner fullScreen />;
   };
 
-  /**
-   * Theme-aware toast notification component
-   */
-  const ThemedToaster = () => {
-    const { theme } = useTheme();
-    const isDark = theme === 'dark';
-    return (
-      <Toaster
-        position="top-center"
-        containerStyle={{
-          top: 24,
-        }}
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: isDark ? '#1e293b' : '#FFFFFF',
-            color: isDark ? '#FFFFFF' : '#111827',
-            border: isDark ? '1px solid #475569' : '1px solid #E5E7EB',
-            borderRadius: '12px',
-            padding: '12px 16px',
-            boxShadow: isDark 
-              ? '0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3)'
-              : '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-          },
-          success: {
-            duration: 3000,
-            iconTheme: {
-              primary: '#10b981',
-              secondary: isDark ? '#1e293b' : '#FFFFFF',
-            },
-          },
-          error: {
-            duration: 4000,
-            iconTheme: {
-              primary: '#ef4444',
-              secondary: isDark ? '#1e293b' : '#FFFFFF',
-            },
-          },
-        }}
-      />
-    );
-  };
-
   return (
     <>
       {/* Global ambient background shapes */}
       <BackgroundShapes />
       
       <GlobalLoadingBar />
-      <ThemedToaster />
       <Suspense fallback={<LoadingSpinner fullScreen />}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
