@@ -404,10 +404,7 @@ ${sanitizedPrompt}`;
 
       cache.set(cacheKey, content);
 
-      logger.info('Custom content generated successfully', {
-        promptLength: sanitizedPrompt.length,
-        responseLength: content.length,
-      });
+      logger.info({ promptLength: sanitizedPrompt.length, responseLength: content.length }, 'Custom content generated successfully');
 
       return content;
     } catch (error: any) {

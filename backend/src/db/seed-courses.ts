@@ -504,7 +504,7 @@ async function seedCourses() {
 
     logger.info('✅ Course seed completed successfully');
   } catch (error) {
-    logger.error('❌ Course seed failed:', error);
+    logger.error({ err: error }, '❌ Course seed failed');
     throw error;
   } finally {
     await prisma.$disconnect();

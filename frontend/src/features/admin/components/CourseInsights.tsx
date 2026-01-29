@@ -546,15 +546,8 @@ const CourseInsightsTab = () => {
                       tick={{ fill: '#9ca3af', fontSize: 12 }}
                     />
                     <RechartsTooltip
-                      content={({
-                        active,
-                        payload,
-                        label,
-                      }: {
-                        active?: boolean;
-                        payload?: { value?: number }[];
-                        label?: string;
-                      }) => {
+                      content={(props) => {
+                        const { active, payload, label } = props as { active?: boolean; payload?: readonly { value?: number }[]; label?: string };
                         if (active && payload && payload.length) {
                           return (
                             <div className="bg-gray-900 dark:bg-gray-700 text-white px-3 py-2 rounded-lg shadow-lg text-sm">
@@ -593,15 +586,8 @@ const CourseInsightsTab = () => {
                       tick={{ fill: '#9ca3af', fontSize: 12 }}
                     />
                     <RechartsTooltip
-                      content={({
-                        active,
-                        payload,
-                        label,
-                      }: {
-                        active?: boolean;
-                        payload?: { value?: number }[];
-                        label?: string;
-                      }) => {
+                      content={(props) => {
+                        const { active, payload, label } = props as { active?: boolean; payload?: readonly { value?: number }[]; label?: string };
                         if (active && payload && payload.length) {
                           return (
                             <div className="bg-gray-900 dark:bg-gray-700 text-white px-3 py-2 rounded-lg shadow-lg text-sm">
@@ -650,13 +636,8 @@ const CourseInsightsTab = () => {
                   ))}
                 </Pie>
                 <RechartsTooltip
-                  content={({
-                    active,
-                    payload,
-                  }: {
-                    active?: boolean;
-                    payload?: { name?: string; value?: number }[];
-                  }) => {
+                  content={(props) => {
+                    const { active, payload } = props as { active?: boolean; payload?: readonly { name?: string; value?: number }[] };
                     if (active && payload && payload.length) {
                       return (
                         <div className="bg-gray-900 dark:bg-gray-700 text-white px-3 py-2 rounded-lg shadow-lg text-sm">

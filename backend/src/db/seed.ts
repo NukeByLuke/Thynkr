@@ -597,7 +597,7 @@ async function seed() {
     console.log('\n');
 
   } catch (error) {
-    logger.error('❌ Database seed failed:', error);
+    logger.error({ err: error }, '❌ Database seed failed');
     throw error;
   } finally {
     await prisma.$disconnect();

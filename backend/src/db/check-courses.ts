@@ -36,7 +36,7 @@ async function checkCourses() {
       }
     }
   } catch (error) {
-    logger.error('Error checking courses:', error);
+    logger.error({ err: error }, 'Error checking courses');
   } finally {
     await prisma.$disconnect();
   }
