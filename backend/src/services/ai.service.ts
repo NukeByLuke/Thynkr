@@ -14,8 +14,8 @@ const cache = new NodeCache({ stdTTL: 3600 });
 
 const MAX_INPUT_CHARS = 200000; // Gemini has much higher token limits
 
-// Model Selection: Gemini 2.5 Flash - newest, fastest model
-const MODEL = 'gemini-2.5-flash';
+// Model Selection: Gemini 2.0 Flash - latest stable fast model
+const MODEL = 'gemini-2.0-flash';
 
 /**
  * Prompt injection detection patterns for security validation
@@ -94,15 +94,15 @@ export class AIService {
         temperature: 0.7,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 8192,
+        maxOutputTokens: 16384, // Increased to prevent truncation
       },
     });
 
-    logger.info('Google Gemini AI Service initialized with Gemini 2.0 Flash');
+    logger.info(`Google Gemini AI Service initialized with ${MODEL}`);
   }
 
   /**
-   * Clean JSON response from Gemini - removes markdown code fences
+   * Clean JSON response from Gemini - removes markdown code fences and attempts to fix truncated JSON
    */
   private cleanJsonResponse(text: string): string {
     // Remove markdown code fences if present
@@ -115,7 +115,31 @@ export class AIService {
     if (cleaned.endsWith('```')) {
       cleaned = cleaned.replace(/\n```\s*$/, '');
     }
-    return cleaned.trim();
+    cleaned = cleaned.trim();
+    
+    // Attempt to fix truncated JSON by closing open brackets/braces
+    if (!cleaned.endsWith('}') && !cleaned.endsWith(']')) {
+      // Count open brackets
+      const openBraces = (cleaned.match(/{/g) || []).length;
+      const closeBraces = (cleaned.match(/}/g) || []).length;
+      const openBrackets = (cleaned.match(/\[/g) || []).length;
+      const closeBrackets = (cleaned.match(/]/g) || []).length;
+      
+      // Try to close truncated strings first
+      if (cleaned.match(/"[^"]*$/)) {
+        cleaned += '"';
+      }
+      
+      // Close arrays and objects
+      for (let i = 0; i < openBrackets - closeBrackets; i++) {
+        cleaned += ']';
+      }
+      for (let i = 0; i < openBraces - closeBraces; i++) {
+        cleaned += '}';
+      }
+    }
+    
+    return cleaned;
   }
 
   /**
