@@ -108,15 +108,21 @@ export class AIService {
     // Remove markdown code fences if present
     let cleaned = text.trim();
     if (cleaned.startsWith('```json')) {
-      cleaned = cleaned.replace(/^```json\s*\n/, '');
+      cleaned = cleaned.replace(/^```json\s*\n?/, '');
     } else if (cleaned.startsWith('```')) {
-      cleaned = cleaned.replace(/^```\s*\n/, '');
+      cleaned = cleaned.replace(/^```\s*\n?/, '');
     }
     if (cleaned.endsWith('```')) {
-      cleaned = cleaned.replace(/\n```\s*$/, '');
+      cleaned = cleaned.replace(/\n?```\s*$/, '');
     }
     cleaned = cleaned.trim();
-
+    
+    // Try to extract JSON object/array from response
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+    if (jsonMatch) {
+      cleaned = jsonMatch[0];
+    }
+    
     // Attempt to fix truncated JSON by closing open brackets/braces
     if (!cleaned.endsWith('}') && !cleaned.endsWith(']')) {
       // Count open brackets
@@ -140,6 +146,34 @@ export class AIService {
     }
 
     return cleaned;
+  }
+
+  /**
+   * Safely parse JSON with fallback extraction
+   */
+  private safeParseJson<T>(text: string, fallbackExtractor?: (text: string) => T): T {
+    const cleaned = this.cleanJsonResponse(text);
+    
+    try {
+      return JSON.parse(cleaned) as T;
+    } catch (firstError) {
+      // Try to fix common JSON issues
+      let fixed = cleaned
+        .replace(/,\s*}/g, '}')  // Remove trailing commas in objects
+        .replace(/,\s*]/g, ']')  // Remove trailing commas in arrays
+        .replace(/([{,])\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":')  // Quote unquoted keys
+        .replace(/:\s*'([^']*)'/g, ':"$1"');  // Replace single quotes with double
+      
+      try {
+        return JSON.parse(fixed) as T;
+      } catch (secondError) {
+        // If fallback extractor provided, use it
+        if (fallbackExtractor) {
+          return fallbackExtractor(text);
+        }
+        throw firstError;
+      }
+    }
   }
 
   /**
@@ -202,14 +236,37 @@ ${preparedText}`;
       const result = await this.model.generateContent(prompt);
       const response = result.response;
       const content = response.text();
-      const cleanedContent = this.cleanJsonResponse(content);
-      const parsed = JSON.parse(cleanedContent) as GeneratedSummary;
+      
+      // Use safe JSON parsing with fallback
+      const parsed = this.safeParseJson<GeneratedSummary>(content, (rawText) => {
+        // Fallback: try to extract content field from raw response
+        const cleaned = rawText.replace(/```json\n?|```\n?/g, '').trim();
+        
+        // Try to extract just the content value if it looks like JSON
+        const contentMatch = cleaned.match(/"content"\s*:\s*"([\s\S]*?)(?:"\s*}|"$)/);
+        if (contentMatch) {
+          // Unescape the content string
+          const extractedContent = contentMatch[1]
+            .replace(/\\n/g, '\n')
+            .replace(/\\"/g, '"')
+            .replace(/\\\\/g, '\\');
+          return { content: extractedContent };
+        }
+        
+        // If it doesn't look like JSON at all, use the raw text as content
+        if (!cleaned.startsWith('{')) {
+          return { content: cleaned };
+        }
+        
+        // Last resort: strip the JSON wrapper manually
+        return { content: cleaned.replace(/^\s*\{\s*"content"\s*:\s*"|"\s*\}\s*$/g, '') };
+      });
 
       cache.set(cacheKey, parsed);
       return parsed;
     } catch (error: any) {
       logger.error({ error: error.message }, 'Failed to generate summary');
-      throw new Error(error.message || 'Failed to generate summary. Please try again.');
+      throw new Error('Failed to generate summary. Please try again.');
     }
   }
 
@@ -262,14 +319,18 @@ ${preparedText}`;
       const result = await this.model.generateContent(prompt);
       const response = result.response;
       const content = response.text();
-      const cleanedContent = this.cleanJsonResponse(content);
-      const parsed = JSON.parse(cleanedContent) as GeneratedNotes;
+      
+      // Use safe JSON parsing with fallback
+      const parsed = this.safeParseJson<GeneratedNotes>(content, (rawText) => {
+        const cleaned = rawText.replace(/```json\n?|```\n?/g, '').trim();
+        return { keyPoints: [], detailed: cleaned };
+      });
 
       cache.set(cacheKey, parsed);
       return parsed;
     } catch (error: any) {
       logger.error({ error: error.message }, 'Failed to generate notes');
-      throw new Error(error.message || 'Failed to generate notes. Please try again.');
+      throw new Error('Failed to generate notes. Please try again.');
     }
   }
 
@@ -291,7 +352,16 @@ ${preparedText}`;
 
     const normalizedLanguage = this.normalizeLanguage(language);
     const preparedText = this.prepareText(text, 120000); // Gemini can handle much more
-    const cacheKey = `quiz_${normalizedLanguage}_${this.hashText(preparedText)}_${numQuestions}_${difficulty}`;
+    
+    // Estimate max questions based on content length (roughly 1 question per 200 chars of content)
+    const estimatedMaxQuestions = Math.max(10, Math.floor(preparedText.length / 200));
+    const adjustedNumQuestions = Math.min(numQuestions, estimatedMaxQuestions);
+    
+    if (adjustedNumQuestions < numQuestions) {
+      logger.info({ requested: numQuestions, adjusted: adjustedNumQuestions }, 'Reduced question count due to content length');
+    }
+    
+    const cacheKey = `quiz_${normalizedLanguage}_${this.hashText(preparedText)}_${adjustedNumQuestions}_${difficulty}`;
     const cached = cache.get<GeneratedQuiz>(cacheKey);
 
     if (cached) {
@@ -318,16 +388,17 @@ You must respond with valid JSON in this exact format:
 
 IMPORTANT: The "correctAnswer" field must contain the EXACT text of the correct option (not just a letter like "A").
 
-Create a quiz with exactly ${numQuestions} multiple-choice questions from the following text.
+Create a quiz with exactly ${adjustedNumQuestions} multiple-choice questions from the following text.
 
 Difficulty level: ${difficulty}
 ${difficultyInstructions[difficulty]}
 
 CRITICAL REQUIREMENTS:
 - **Questions**: Clear, unambiguous, and directly based on the text.
-- **Options**: exactly 4 options per question. ONE correct, THREE plausible distractors. Avoid "All of the above" or "None of the above" unless absolutely necessary.
+- **Options**: exactly 4 options per question. ONE correct, THREE plausible distractors. Avoid "All of the above" or "None of the above".
+- **OPTION LENGTH**: ALL four options MUST be similar in length and detail level. Do NOT make the correct answer longer or more detailed than the wrong answers. If the correct answer is a detailed explanation, make the wrong answers equally detailed. If the correct answer is brief, make wrong answers equally brief.
 - **Accuracy**: Verify every question and answer against the source text for 100% factual accuracy.
-- **Explanations**: Provide a clear, helpful explanation for the correct answer. Explain *why* it is correct and, if useful, briefly mention why distractors are incorrect.
+- **Explanations**: Provide a clear, helpful explanation for the correct answer.
 
 Make the quiz comprehensive and reflective of the material's core concepts.
 
@@ -337,8 +408,9 @@ ${preparedText}`;
       const result = await this.model.generateContent(prompt);
       const response = result.response;
       const content = response.text();
-      const cleanedContent = this.cleanJsonResponse(content);
-      const parsed = JSON.parse(cleanedContent) as GeneratedQuiz;
+      
+      // Use safe JSON parsing
+      const parsed = this.safeParseJson<GeneratedQuiz>(content);
 
       // Process questions: handle correctAnswer and shuffle options
       if (parsed.questions) {
@@ -361,7 +433,7 @@ ${preparedText}`;
       return parsed;
     } catch (error: any) {
       logger.error({ error: error.message }, 'Failed to generate quiz');
-      throw new Error(error.message || 'Failed to generate quiz. Please try again.');
+      throw new Error('Failed to generate quiz. Please try again.');
     }
   }
 
@@ -415,14 +487,18 @@ ${preparedText}`;
       const result = await this.model.generateContent(prompt);
       const response = result.response;
       const content = response.text();
-      const cleanedContent = this.cleanJsonResponse(content);
-      const parsed = JSON.parse(cleanedContent) as GeneratedFlashcards;
+      
+      // Use safe JSON parsing with fallback
+      const parsed = this.safeParseJson<GeneratedFlashcards>(content, (rawText) => {
+        const cleaned = rawText.replace(/```json\n?|```\n?/g, '').trim();
+        return { title: 'Flashcards', cards: [{ front: 'Error', back: cleaned }] };
+      });
 
       cache.set(cacheKey, parsed);
       return parsed;
     } catch (error: any) {
       logger.error({ error: error.message }, 'Failed to generate flashcards');
-      throw new Error(error.message || 'Failed to generate flashcards. Please try again.');
+      throw new Error('Failed to generate flashcards. Please try again.');
     }
   }
 

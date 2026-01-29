@@ -16,25 +16,12 @@ import { FileProcessorService } from '../services/file-processor.service';
 import { AIService } from '../services/ai.service';
 import prisma from '../db/client';
 import fs from 'fs/promises';
-import path from 'path';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { GoogleAIFileManager } from '@google/generative-ai/server';
-import { config } from '../config';
-import { YoutubeTranscript } from 'youtube-transcript';
 import { normalizeFileForLanguage, resolveUserLanguage } from '../utils/language.utils';
 import { canUploadFile, getUserUsageStats } from '../lib/tier-limits';
-
-const execPromise = promisify(exec);
+import { GoogleGenAI } from '@google/genai';
 
 const fileProcessor = new FileProcessorService();
 const aiService = new AIService();
-
-// Initialize Gemini for multimodal audio processing
-const geminiApiKey = config.gemini.apiKey || process.env.GEMINI_API_KEY || '';
-const genAI = new GoogleGenerativeAI(geminiApiKey);
-const fileManager = new GoogleAIFileManager(geminiApiKey);
 
 /**
  * Track user study activity and update streaks
@@ -430,51 +417,24 @@ export default async function studyRoutes(server: FastifyInstance) {
           videoId = match ? match[1] : '';
         }
 
-        // Fetch video metadata using yt-dlp (more reliable than ytdl-core)
+        // Fetch video metadata using oEmbed API (reliable, doesn't get blocked)
         let videoTitle = `YouTube Video ${videoId}`;
         let videoDescription = '';
 
         try {
-          server.log.info({ videoId }, 'Fetching YouTube video metadata with yt-dlp...');
-
-          // Use yt-dlp to extract metadata as JSON
-          const { stdout } = await execPromise(`yt-dlp --dump-json --no-download "${url}"`, {
-            timeout: 30000,
-          });
-
-          const metadata = JSON.parse(stdout);
-          videoTitle = metadata.title || videoTitle;
-          videoDescription = metadata.description || '';
-
-          server.log.info(
-            {
-              videoId,
-              title: videoTitle,
-              descLength: videoDescription.length,
-            },
-            'Video metadata fetched successfully'
+          server.log.info({ videoId }, 'Fetching YouTube video metadata via oEmbed...');
+          
+          const oembedResponse = await fetch(
+            `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`
           );
-        } catch (error: any) {
-          server.log.warn(
-            {
-              error: error.message,
-              videoId,
-            },
-            'Failed to fetch video metadata with yt-dlp, trying oEmbed fallback'
-          );
-
-          // Fallback to oEmbed API for title only
-          try {
-            const oembedResponse = await fetch(
-              `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`
-            );
-            if (oembedResponse.ok) {
-              const oembedData = (await oembedResponse.json()) as { title?: string };
-              videoTitle = oembedData.title || videoTitle;
-            }
-          } catch (oembedError) {
-            server.log.warn({ error: oembedError, videoId }, 'oEmbed fallback also failed');
+          if (oembedResponse.ok) {
+            const oembedData = (await oembedResponse.json()) as { title?: string; author_name?: string };
+            videoTitle = oembedData.title || videoTitle;
+            videoDescription = oembedData.author_name ? `By ${oembedData.author_name}` : '';
+            server.log.info({ videoId, title: videoTitle }, 'Video metadata fetched successfully');
           }
+        } catch (oembedError) {
+          server.log.warn({ error: oembedError, videoId }, 'oEmbed API failed, using default title');
         }
 
         // Build content with title and description as baseline
@@ -489,229 +449,63 @@ export default async function studyRoutes(server: FastifyInstance) {
           contentParts.push(`\nDescription:\n${truncatedDescription}`);
         }
 
-        // Attempt to fetch transcript
+        // Track extraction method and results
         let hasTranscript = false;
         let transcriptText = '';
+        let extractionMethod = 'metadata-only';
 
+        // ===== Gemini Direct YouTube URL (Processes Video Natively) =====
+        // Uses gemini-3-flash-preview which supports YouTube URLs directly
+        // Limitations: 8hr/day free tier, public videos only, up to 10 videos per request
         try {
-          server.log.info({ videoId }, 'Attempting to fetch YouTube captions...');
-          const transcriptItems = await YoutubeTranscript.fetchTranscript(videoId);
-          transcriptText = transcriptItems.map((item: any) => item.text).join(' ');
-
-          if (transcriptText && transcriptText.trim().length > 0) {
+          server.log.info({ videoId }, 'Processing YouTube video with Gemini 3 Flash...');
+          
+          const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+          
+          // Use the correct format from official docs: https://ai.google.dev/gemini-api/docs/video-understanding
+          const contents = [
+            {
+              fileData: {
+                fileUri: url,
+              },
+            },
+            { 
+              text: 'Please provide a complete transcript of this video. Include all spoken dialogue, narration, and important visual descriptions. Format it as a clean, readable transcript without timestamps.' 
+            }
+          ];
+          
+          // 3 minute timeout for longer videos
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error('Gemini request timed out after 3 minutes')), 180000);
+          });
+          
+          const geminiPromise = genai.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: contents,
+          });
+          
+          const response = await Promise.race([geminiPromise, timeoutPromise]);
+          
+          const geminiTranscript = response.text;
+          if (geminiTranscript && geminiTranscript.trim().length > 50) {
+            transcriptText = geminiTranscript;
             hasTranscript = true;
-            server.log.info(
-              { videoId, length: transcriptText.length },
-              'Captions fetched successfully'
-            );
+            extractionMethod = 'gemini-youtube-direct';
+            server.log.info({ videoId, length: transcriptText.length }, 'Gemini YouTube processing successful');
+          } else {
+            server.log.warn({ videoId }, 'Gemini returned empty or insufficient transcript');
           }
-        } catch (error) {
-          server.log.warn(
-            { error, videoId },
-            'No captions available, will try Whisper transcription'
-          );
+        } catch (geminiError) {
+          const errorMsg = geminiError instanceof Error ? geminiError.message : String(geminiError);
+          server.log.error({ error: errorMsg, videoId }, 'Gemini YouTube URL processing failed');
+          throw new Error(`Failed to process YouTube video: ${errorMsg}`);
         }
 
-        // Fallback to Gemini multimodal audio analysis if no captions
-        if (!hasTranscript) {
-          try {
-            server.log.info({ videoId }, 'Starting Gemini multimodal audio analysis...');
-
-            // Create temp directory if it doesn't exist
-            const tempDir = path.join(process.cwd(), 'uploads', 'temp');
-            await fs.mkdir(tempDir, { recursive: true });
-
-            const tempAudioPath = path.join(tempDir, `${videoId}.mp3`);
-
-            // Download audio using yt-dlp (low bitrate for efficiency)
-            server.log.info({ videoId, path: tempAudioPath }, 'Downloading audio with yt-dlp...');
-
-            try {
-              // yt-dlp command: extract audio, convert to mp3, optimize for Gemini
-              const ytdlpCmd = `yt-dlp -f "bestaudio[filesize<50M]/worst" --extract-audio --audio-format mp3 --audio-quality 128K -o "${tempAudioPath}" "${url}"`;
-
-              const { stdout, stderr } = await execPromise(ytdlpCmd, {
-                timeout: 180000, // 3 minute timeout
-              });
-
-              server.log.info({ videoId, stdout, stderr }, 'yt-dlp download completed');
-            } catch (downloadError: any) {
-              server.log.error(
-                {
-                  error: downloadError.message,
-                  stderr: downloadError.stderr,
-                  stdout: downloadError.stdout,
-                  videoId,
-                },
-                'yt-dlp download failed'
-              );
-              throw new Error(`Failed to download audio: ${downloadError.message}`);
-            }
-
-            // Check if file exists and get size
-            const stats = await fs.stat(tempAudioPath);
-            const fileSizeMB = stats.size / (1024 * 1024);
-            server.log.info({ videoId, fileSizeMB: fileSizeMB.toFixed(2) }, 'Audio file size');
-
-            if (fileSizeMB < 0.01) {
-              server.log.warn({ videoId, fileSizeMB }, 'Audio file too small, likely failed');
-              throw new Error('Audio download produced invalid file');
-            }
-
-            // Upload audio to Google's File Manager for processing
-            server.log.info({ videoId }, 'Uploading audio to Google File Manager...');
-
-            const uploadResult = await fileManager.uploadFile(tempAudioPath, {
-              mimeType: 'audio/mpeg',
-              displayName: `youtube_${videoId}.mp3`,
-            });
-
-            server.log.info(
-              {
-                videoId,
-                fileUri: uploadResult.file.uri,
-                state: uploadResult.file.state,
-              },
-              'Audio uploaded to Google File Manager'
-            );
-
-            // Wait for file processing if needed
-            let file = uploadResult.file;
-            while (file.state === 'PROCESSING') {
-              server.log.info({ videoId }, 'Waiting for file processing...');
-              await new Promise((resolve) => setTimeout(resolve, 2000));
-              const getResult = await fileManager.getFile(file.name);
-              file = getResult;
-            }
-
-            if (file.state === 'FAILED') {
-              throw new Error('Google File Manager failed to process audio file');
-            }
-
-            // Use Gemini 2.5 Flash Lite for audio analysis (better rate limits)
-            server.log.info({ videoId }, 'Analyzing audio with Gemini 2.5 Flash Lite...');
-
-            const model = genAI.getGenerativeModel({
-              model: 'gemini-2.5-flash-lite',
-              generationConfig: {
-                temperature: 0.5,
-                maxOutputTokens: 8000,
-              },
-            });
-
-            const prompt = `Listen to this audio file deeply and comprehensively. Ignore any lack of metadata.
-
-Your task is to:
-1. Generate a COMPLETE and ACCURATE transcript of everything being said in the audio
-2. Create a comprehensive, easy-to-read educational summary
-3. Extract all key concepts, topics, and important points discussed
-
-IMPORTANT: 
-- Focus on educational value and accuracy
-- Be thorough - capture all significant content
-- Structure your response clearly
-
-Provide your response in this exact JSON format:
-{
-  "transcript": "Complete transcript of the audio content...",
-  "summary": "Comprehensive educational summary covering all main points...",
-  "keyConcepts": ["key concept 1", "key concept 2", "key concept 3", ...]
-}`;
-
-            const result = await model.generateContent([
-              {
-                fileData: {
-                  mimeType: file.mimeType || 'audio/mpeg',
-                  fileUri: file.uri,
-                },
-              },
-              { text: prompt },
-            ]);
-
-            const responseText = result.response.text();
-
-            // Parse the JSON response
-            let parsedResponse: { transcript: string; summary: string; keyConcepts: string[] };
-            try {
-              // Extract JSON from potential markdown code blocks
-              const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/) ||
-                responseText.match(/```\s*([\s\S]*?)\s*```/) || [null, responseText];
-              parsedResponse = JSON.parse(jsonMatch[1] || responseText);
-            } catch (parseError) {
-              server.log.warn({ videoId, parseError }, 'Failed to parse JSON, using raw response');
-              parsedResponse = {
-                transcript: responseText,
-                summary: '',
-                keyConcepts: [],
-              };
-            }
-
-            transcriptText = parsedResponse.transcript || responseText;
-            hasTranscript = true;
-
-            // Enhance content with Gemini's analysis
-            if (parsedResponse.summary) {
-              contentParts.push(`\nAI Summary:\n${parsedResponse.summary}`);
-            }
-            if (parsedResponse.keyConcepts && parsedResponse.keyConcepts.length > 0) {
-              contentParts.push(`\nKey Concepts:\n• ${parsedResponse.keyConcepts.join('\n• ')}`);
-            }
-
-            server.log.info(
-              {
-                videoId,
-                transcriptLength: transcriptText.length,
-                hasAnalysis: !!parsedResponse.summary,
-              },
-              'Gemini audio analysis completed successfully'
-            );
-
-            // Clean up: delete from Google File Manager
-            try {
-              await fileManager.deleteFile(file.name);
-              server.log.info({ videoId }, 'Deleted file from Google File Manager');
-            } catch (deleteError) {
-              server.log.warn(
-                { videoId, deleteError },
-                'Failed to delete from Google File Manager'
-              );
-            }
-
-            // Clean up temp file
-            try {
-              await fs.unlink(tempAudioPath);
-              server.log.info({ videoId }, 'Temp audio file deleted');
-            } catch (cleanupError) {
-              server.log.warn(
-                {
-                  error:
-                    cleanupError instanceof Error ? cleanupError.message : String(cleanupError),
-                  videoId,
-                },
-                'Failed to delete temp audio file'
-              );
-            }
-          } catch (geminiError) {
-            const errorMessage =
-              geminiError instanceof Error ? geminiError.message : String(geminiError);
-            const errorStack = geminiError instanceof Error ? geminiError.stack : undefined;
-            server.log.error(
-              {
-                error: errorMessage,
-                stack: errorStack,
-                videoId,
-              },
-              'Gemini audio analysis failed'
-            );
-            // Continue with metadata only
-          }
-        }
-
-        // Add transcript or note if unavailable
+        // Add transcript to content
         if (hasTranscript && transcriptText) {
           contentParts.push(`\nTranscript:\n${transcriptText}`);
-        } else {
-          contentParts.push('\n(Transcript unavailable. Summary based on video metadata.)');
+          server.log.info({ videoId, extractionMethod, transcriptLength: transcriptText.length }, 
+            'Video content extracted successfully');
         }
 
         const extractedText = contentParts.join('\n');

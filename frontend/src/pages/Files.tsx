@@ -262,12 +262,17 @@ export default function Files() {
 
   const handleUploadYouTube = async (url: string) => {
     setShowUploadModal(false);
+    const loadingToast = toast.loading('Processing YouTube video... This may take 1-2 minutes');
     try {
-      await api.post('/study/upload-youtube', { url, folderId: currentFolderId });
-      queryClient.invalidateQueries({ queryKey: ['study-files'] });
-      queryClient.invalidateQueries({ queryKey: ['folders'] });
-      toast.success('YouTube video added successfully');
+      const response = await api.post('/study/upload-youtube', { url, folderId: currentFolderId });
+      toast.dismiss(loadingToast);
+      toast.success('YouTube video ready!');
+      // Navigate to immersive study page with full refresh
+      if (response.data?.file?.id) {
+        window.location.href = `/study/${response.data.file.id}`;
+      }
     } catch (error) {
+      toast.dismiss(loadingToast);
       console.error('YouTube upload error:', error);
       toast.error('Failed to add YouTube video');
     }
