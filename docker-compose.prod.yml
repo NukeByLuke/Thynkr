@@ -30,7 +30,7 @@ services:
       - thynkr-network
 
   backend:
-    image: nukebyluke/thynkr-backend:latest
+    image: ghcr.io/nukebyluke/thynkr/backend:latest
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -72,7 +72,7 @@ services:
       - thynkr-network
 
   frontend:
-    image: nukebyluke/thynkr-frontend:latest
+    image: ghcr.io/nukebyluke/thynkr/frontend:latest
     restart: unless-stopped
     depends_on:
       backend:
