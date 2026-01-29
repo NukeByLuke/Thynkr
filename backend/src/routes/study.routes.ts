@@ -1,7 +1,7 @@
 /**
  * Study Routes
  * Handles file uploads, AI-generated study materials (summaries, notes, quizzes, flashcards), and folders.
- * 
+ *
  * TODO: This file is 1300+ lines. Consider splitting into:
  * - study/files.controller.ts (upload, list, delete)
  * - study/ai-content.controller.ts (summaries, notes, flashcards)
@@ -32,18 +32,13 @@ const aiService = new AIService();
  */
 async function trackStudyActivity(
   userId: string,
-  activityType:
-    | 'FILE_UPLOAD'
-    | 'SUMMARY_VIEW'
-    | 'NOTES_VIEW'
-    | 'QUIZ_ATTEMPT'
-    | 'FLASHCARD_STUDY',
+  activityType: 'FILE_UPLOAD' | 'SUMMARY_VIEW' | 'NOTES_VIEW' | 'QUIZ_ATTEMPT' | 'FLASHCARD_STUDY',
   fileId?: string,
   durationMinutes: number = 1
 ) {
   try {
     const now = new Date();
-    
+
     // Convert to EST for time-based achievements
     const estTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
     const hourEST = estTime.getHours();
@@ -79,7 +74,7 @@ async function trackStudyActivity(
           totalMinutes: durationMinutes,
         },
       });
-      
+
       // Track first day of streak
       await checkAchievements(userId, 'study_streak', 1);
     } else {
@@ -113,25 +108,26 @@ async function trackStudyActivity(
           totalMinutes: streak.totalMinutes + durationMinutes,
         },
       });
-      
+
       // Track streak only on new days
       if (isNewDay) {
         await checkAchievements(userId, 'study_streak', newCurrentStreak);
       }
     }
-    
+
     // Track study hours (convert minutes to hours)
     const hoursToAdd = durationMinutes / 60;
     await checkAchievements(userId, 'study_hours', hoursToAdd);
-    
+
     // Track time-based achievements (only once per session)
-    if (durationMinutes >= 5) { // Only count sessions 5+ minutes
+    if (durationMinutes >= 5) {
+      // Only count sessions 5+ minutes
       if (hourEST >= 5 && hourEST < 8) {
         await checkAchievements(userId, 'early_study', 1);
       } else if (hourEST >= 22 || hourEST < 3) {
         await checkAchievements(userId, 'night_study', 1);
       }
-      
+
       // Track long session achievement (2+ hours)
       if (durationMinutes >= 120) {
         await checkAchievements(userId, 'long_session', 1);
@@ -150,7 +146,7 @@ async function trackStudyActivity(
 async function trackLanguageUsage(userId: string, language: string): Promise<void> {
   try {
     const { checkAchievements } = await import('../services/gamification.service');
-    
+
     // Check if user has any content in this language
     const [summaryCount, notesCount, flashcardCount, quizCount] = await Promise.all([
       prisma.fileSummary.count({ where: { file: { userId }, language } }),
@@ -174,7 +170,7 @@ async function trackLanguageUsage(userId: string, language: string): Promise<voi
           SELECT language FROM quizzes WHERE file_id IN (SELECT id FROM uploaded_files WHERE user_id = ${userId})
         ) AS languages
       `;
-      
+
       const languageCount = Number(uniqueLanguages[0]?.count || 0);
       await checkAchievements(userId, 'language_used', languageCount);
     }
@@ -326,9 +322,15 @@ export default async function studyRoutes(server: FastifyInstance) {
                     status: 'COMPLETED',
                   },
                 });
-                server.log.info({ fileId: uploadedFile.id, fileName: file.originalname }, 'Text extraction completed');
+                server.log.info(
+                  { fileId: uploadedFile.id, fileName: file.originalname },
+                  'Text extraction completed'
+                );
               } catch (error: any) {
-                server.log.error({ error, fileId: uploadedFile.id, file: file.originalname }, 'Failed to extract text in background');
+                server.log.error(
+                  { error, fileId: uploadedFile.id, file: file.originalname },
+                  'Failed to extract text in background'
+                );
                 await prisma.uploadedFile.update({
                   where: { id: uploadedFile.id },
                   data: { status: 'FAILED' },
@@ -371,15 +373,16 @@ export default async function studyRoutes(server: FastifyInstance) {
         const userId = request.user!.userId;
 
         // Validate YouTube URL
-        const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}(&[\w=]*)?$/;
+        const youtubeRegex =
+          /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}(&[\w=]*)?$/;
         if (!youtubeRegex.test(url)) {
           return reply.code(400).send({ error: 'Invalid YouTube URL' });
         }
 
         // Check user existence
-        const user = await prisma.user.findUnique({ 
+        const user = await prisma.user.findUnique({
           where: { id: userId },
-          select: { id: true, role: true }
+          select: { id: true, role: true },
         });
         if (!user) {
           return reply.code(404).send({ error: 'User not found' });
@@ -417,7 +420,7 @@ export default async function studyRoutes(server: FastifyInstance) {
         // Fetch video metadata using oEmbed API (reliable, doesn't get blocked)
         let videoTitle = `YouTube Video ${videoId}`;
         let videoDescription = '';
-        
+
         try {
           server.log.info({ videoId }, 'Fetching YouTube video metadata via oEmbed...');
           
@@ -436,12 +439,13 @@ export default async function studyRoutes(server: FastifyInstance) {
 
         // Build content with title and description as baseline
         const contentParts = [`Title: ${videoTitle}`];
-        
+
         if (videoDescription && videoDescription.trim().length > 0) {
           // Limit description to first 2000 characters to avoid overly long text
-          const truncatedDescription = videoDescription.length > 2000 
-            ? videoDescription.substring(0, 2000) + '...' 
-            : videoDescription;
+          const truncatedDescription =
+            videoDescription.length > 2000
+              ? videoDescription.substring(0, 2000) + '...'
+              : videoDescription;
           contentParts.push(`\nDescription:\n${truncatedDescription}`);
         }
 
@@ -700,9 +704,13 @@ export default async function studyRoutes(server: FastifyInstance) {
 
         // Track achievement for summary generation
         const { checkAchievements } = await import('../services/gamification.service');
-        const achievementResult = await checkAchievements(request.user!.userId, 'summary_created', 1);
+        const achievementResult = await checkAchievements(
+          request.user!.userId,
+          'summary_created',
+          1
+        );
         const notifications: any[] = [];
-        
+
         if (achievementResult.tierUnlocked) {
           notifications.push({
             type: 'achievement',
@@ -710,13 +718,28 @@ export default async function studyRoutes(server: FastifyInstance) {
           });
         }
 
-        return reply.send({ 
+        return reply.send({
           summary,
-          ...(notifications.length > 0 && { notifications })
+          ...(notifications.length > 0 && { notifications }),
         });
       } catch (error: any) {
-        server.log.error({ error, fileId: id }, 'Failed to generate summary');
-        return reply.code(500).send({ error: 'Failed to generate summary' });
+        server.log.error(
+          {
+            error: error.message,
+            stack: error.stack,
+            fileId: id,
+            language,
+          },
+          'Failed to generate summary'
+        );
+
+        // Return more specific error message
+        const errorMessage =
+          error.message?.includes('API key') || error.message?.includes('invalid')
+            ? 'AI service is not configured properly. Please contact support.'
+            : 'Failed to generate summary. Please try again.';
+
+        return reply.code(500).send({ error: errorMessage, details: error.message });
       }
     }
   );
@@ -796,7 +819,7 @@ export default async function studyRoutes(server: FastifyInstance) {
         const { checkAchievements } = await import('../services/gamification.service');
         const achievementResult = await checkAchievements(request.user!.userId, 'notes_created', 1);
         const notifications: any[] = [];
-        
+
         if (achievementResult.tierUnlocked) {
           notifications.push({
             type: 'achievement',
@@ -804,9 +827,9 @@ export default async function studyRoutes(server: FastifyInstance) {
           });
         }
 
-        return reply.send({ 
+        return reply.send({
           notes,
-          ...(notifications.length > 0 && { notifications })
+          ...(notifications.length > 0 && { notifications }),
         });
       } catch (error: any) {
         server.log.error({ error, fileId: id }, 'Failed to generate notes');
@@ -970,9 +993,13 @@ export default async function studyRoutes(server: FastifyInstance) {
 
         // Track achievement for flashcard generation/completion
         const { checkAchievements } = await import('../services/gamification.service');
-        const achievementResult = await checkAchievements(request.user!.userId, 'flashcard_completed', 1);
+        const achievementResult = await checkAchievements(
+          request.user!.userId,
+          'flashcard_completed',
+          1
+        );
         const notifications: any[] = [];
-        
+
         if (achievementResult.tierUnlocked) {
           notifications.push({
             type: 'achievement',
@@ -980,9 +1007,9 @@ export default async function studyRoutes(server: FastifyInstance) {
           });
         }
 
-        return reply.send({ 
+        return reply.send({
           flashcardSet,
-          ...(notifications.length > 0 && { notifications })
+          ...(notifications.length > 0 && { notifications }),
         });
       } catch (error: any) {
         server.log.error({ error, fileId: id }, 'Failed to generate flashcards');
@@ -999,7 +1026,7 @@ export default async function studyRoutes(server: FastifyInstance) {
     },
     async (request: AuthenticatedRequest, reply) => {
       const { id } = request.params as { id: string };
-      const { answers, timeSpentSeconds, questionTimings } = request.body as { 
+      const { answers, timeSpentSeconds, questionTimings } = request.body as {
         answers: Record<string, string>;
         timeSpentSeconds?: number;
         questionTimings?: Record<string, number>;
@@ -1030,14 +1057,17 @@ export default async function studyRoutes(server: FastifyInstance) {
 
       // Anti-cheat: Check if time spent is suspiciously low
       if (timeSpentSeconds !== undefined && timeSpentSeconds < quiz.questions.length * 2) {
-        server.log.warn({ 
-          userId: request.user!.userId, 
-          quizId: id, 
-          timeSpent: timeSpentSeconds,
-          questions: quiz.questions.length 
-        }, 'Suspicious quiz submission - time too low');
-        return reply.code(400).send({ 
-          error: 'Quiz submission too fast. Please take time to read each question carefully.' 
+        server.log.warn(
+          {
+            userId: request.user!.userId,
+            quizId: id,
+            timeSpent: timeSpentSeconds,
+            questions: quiz.questions.length,
+          },
+          'Suspicious quiz submission - time too low'
+        );
+        return reply.code(400).send({
+          error: 'Quiz submission too fast. Please take time to read each question carefully.',
         });
       }
 
@@ -1053,12 +1083,15 @@ export default async function studyRoutes(server: FastifyInstance) {
       });
 
       if (recentAttempt) {
-        server.log.warn({ 
-          userId: request.user!.userId, 
-          quizId: id 
-        }, 'Duplicate quiz submission attempt');
-        return reply.code(429).send({ 
-          error: 'Please wait before submitting another attempt.' 
+        server.log.warn(
+          {
+            userId: request.user!.userId,
+            quizId: id,
+          },
+          'Duplicate quiz submission attempt'
+        );
+        return reply.code(429).send({
+          error: 'Please wait before submitting another attempt.',
         });
       }
 
@@ -1085,16 +1118,19 @@ export default async function studyRoutes(server: FastifyInstance) {
       // Normalize difficulty to uppercase for case-insensitive comparison
       const isHardDifficulty = quiz.difficulty?.toUpperCase() === 'HARD';
 
-      server.log.info({
-        quizId: quiz.id,
-        difficulty: quiz.difficulty,
-        difficultyUpperCase: quiz.difficulty?.toUpperCase(),
-        isHardDifficulty,
-        scorePercentage,
-        isPerfectScore,
-        correctCount,
-        totalQuestions: quiz.questions.length,
-      }, 'Quiz submission details');
+      server.log.info(
+        {
+          quizId: quiz.id,
+          difficulty: quiz.difficulty,
+          difficultyUpperCase: quiz.difficulty?.toUpperCase(),
+          isHardDifficulty,
+          scorePercentage,
+          isPerfectScore,
+          correctCount,
+          totalQuestions: quiz.questions.length,
+        },
+        'Quiz submission details'
+      );
 
       // Save attempt
       const attempt = await prisma.quizAttempt.create({
@@ -1124,22 +1160,32 @@ export default async function studyRoutes(server: FastifyInstance) {
 
         // 2. Perfectionist achievement (hard difficulty + perfect score)
         if (isHardDifficulty && isPerfectScore) {
-          server.log.info({
-            userId: request.user!.userId,
-            attemptingPerfectionist: true,
-            difficulty: quiz.difficulty,
-            score: scorePercentage
-          }, 'Checking Perfectionist achievement');
-          
-          const perfectionistResult = await checkAchievements(request.user!.userId, 'hard_quiz_perfect', 1);
-          
-          server.log.info({ 
-            userId: request.user!.userId,
-            perfectionistResult, 
-            tierUnlocked: perfectionistResult.tierUnlocked,
-            newTier: perfectionistResult.newTier
-          }, 'Perfectionist achievement check completed');
-          
+          server.log.info(
+            {
+              userId: request.user!.userId,
+              attemptingPerfectionist: true,
+              difficulty: quiz.difficulty,
+              score: scorePercentage,
+            },
+            'Checking Perfectionist achievement'
+          );
+
+          const perfectionistResult = await checkAchievements(
+            request.user!.userId,
+            'hard_quiz_perfect',
+            1
+          );
+
+          server.log.info(
+            {
+              userId: request.user!.userId,
+              perfectionistResult,
+              tierUnlocked: perfectionistResult.tierUnlocked,
+              newTier: perfectionistResult.newTier,
+            },
+            'Perfectionist achievement check completed'
+          );
+
           if (perfectionistResult.tierUnlocked) {
             unlockedAchievements.push(perfectionistResult);
           }
@@ -1149,7 +1195,7 @@ export default async function studyRoutes(server: FastifyInstance) {
         // Award points based on individual question speed
         if (questionTimings && Object.keys(questionTimings).length > 0) {
           let pointsToAward = 0;
-          
+
           // Evaluate each question individually
           Object.entries(questionTimings).forEach(([questionId, timeInSeconds]) => {
             // Award 1 point if answered in under 5 seconds
@@ -1164,12 +1210,16 @@ export default async function studyRoutes(server: FastifyInstance) {
               }
             }
           });
-          
+
           // Round down to whole number
           pointsToAward = Math.floor(pointsToAward);
-          
+
           if (pointsToAward > 0) {
-            const speedDemonResult = await checkAchievements(request.user!.userId, 'quick_answer', pointsToAward);
+            const speedDemonResult = await checkAchievements(
+              request.user!.userId,
+              'quick_answer',
+              pointsToAward
+            );
             if (speedDemonResult.tierUnlocked) {
               unlockedAchievements.push(speedDemonResult);
             }
@@ -1179,8 +1229,13 @@ export default async function studyRoutes(server: FastifyInstance) {
         // 4. Scholar achievement (add study time in hours)
         if (timeSpentSeconds) {
           const hoursSpent = timeSpentSeconds / 3600;
-          if (hoursSpent > 0.01) { // Only count if > ~36 seconds
-            const scholarResult = await checkAchievements(request.user!.userId, 'study_hours', hoursSpent);
+          if (hoursSpent > 0.01) {
+            // Only count if > ~36 seconds
+            const scholarResult = await checkAchievements(
+              request.user!.userId,
+              'study_hours',
+              hoursSpent
+            );
             if (scholarResult.tierUnlocked) {
               unlockedAchievements.push(scholarResult);
             }
@@ -1194,7 +1249,7 @@ export default async function studyRoutes(server: FastifyInstance) {
       await trackStudyActivity(request.user!.userId, 'QUIZ_ATTEMPT', file.id);
 
       // Map achievements to notifications format for frontend interceptor
-      const notifications = unlockedAchievements.map(ach => ({
+      const notifications = unlockedAchievements.map((ach) => ({
         type: 'achievement' as const,
         achievementId: ach.achievementId,
         achievementName: ach.achievementName || 'Achievement Unlocked',

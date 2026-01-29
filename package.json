@@ -39,12 +39,16 @@
     "pnpm": ">=8.0.0"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "prettier --write",
-      "eslint --fix"
+    "frontend/**/*.{ts,tsx}": [
+      "pnpm exec prettier --write",
+      "pnpm --filter frontend exec eslint --fix"
+    ],
+    "backend/**/*.{ts,js}": [
+      "pnpm exec prettier --write",
+      "pnpm --filter backend exec eslint --fix"
     ],
     "*.{json,md}": [
-      "prettier --write"
+      "pnpm exec prettier --write"
     ]
   }
 }
