@@ -94,11 +94,18 @@ export default function Study() {
 
   const handleUploadYouTube = async (url: string) => {
     setShowUploadModal(false);
+    const loadingToast = toast.loading('Processing YouTube video... This may take 1-2 minutes');
     try {
-      await api.post('/study/upload-youtube', { url });
+      const response = await api.post('/study/upload-youtube', { url });
+      toast.dismiss(loadingToast);
       await queryClient.invalidateQueries({ queryKey: ['study-files'] });
-      toast.success('YouTube video added successfully');
+      toast.success('YouTube video ready!');
+      // Navigate to immersive study page
+      if (response.data?.file?.id) {
+        navigate(`/study/${response.data.file.id}`);
+      }
     } catch (error) {
+      toast.dismiss(loadingToast);
       toast.error('Failed to add YouTube video');
     }
   };
