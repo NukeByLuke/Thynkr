@@ -260,7 +260,7 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onR
 
               {/* Back */}
               <div
-                className="absolute w-full h-full bg-gradient-to-br from-brand-600 to-accent-600 dark:from-brand-700 dark:to-accent-700 rounded-2xl shadow-2xl flex items-center justify-center p-6 sm:p-10 overflow-y-auto"
+                className="absolute w-full h-full bg-gradient-to-br from-pink-500 via-fuchsia-500 to-orange-400 dark:from-violet-600 dark:via-indigo-600 dark:to-cyan-500 rounded-2xl shadow-2xl flex items-center justify-center p-6 sm:p-10 overflow-y-auto"
                 style={{
                   backfaceVisibility: 'hidden',
                   WebkitBackfaceVisibility: 'hidden',
