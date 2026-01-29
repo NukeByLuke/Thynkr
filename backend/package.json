@@ -28,7 +28,7 @@
     "@fastify/rate-limit": "^10.3.0",
     "@fastify/static": "^9.0.0",
     "@google/generative-ai": "^0.24.1",
-    "@prisma/client": "^7.3.0",
+    "@prisma/client": "^5.22.0",
     "@types/multer": "^2.0.0",
     "@types/pdf-parse": "^1.1.5",
     "bcryptjs": "^3.0.3",
@@ -61,7 +61,7 @@
     "@typescript-eslint/parser": "^8.54.0",
     "@vitest/coverage-v8": "^4.0.18",
     "eslint": "^9.39.2",
-    "prisma": "^7.3.0",
+    "prisma": "^5.22.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
