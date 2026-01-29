@@ -229,9 +229,27 @@ ${preparedText}`;
       
       // Use safe JSON parsing with fallback
       const parsed = this.safeParseJson<GeneratedSummary>(content, (rawText) => {
-        // Fallback: extract content from raw response
+        // Fallback: try to extract content field from raw response
         const cleaned = rawText.replace(/```json\n?|```\n?/g, '').trim();
-        return { content: cleaned };
+        
+        // Try to extract just the content value if it looks like JSON
+        const contentMatch = cleaned.match(/"content"\s*:\s*"([\s\S]*?)(?:"\s*}|"$)/);
+        if (contentMatch) {
+          // Unescape the content string
+          const extractedContent = contentMatch[1]
+            .replace(/\\n/g, '\n')
+            .replace(/\\"/g, '"')
+            .replace(/\\\\/g, '\\');
+          return { content: extractedContent };
+        }
+        
+        // If it doesn't look like JSON at all, use the raw text as content
+        if (!cleaned.startsWith('{')) {
+          return { content: cleaned };
+        }
+        
+        // Last resort: strip the JSON wrapper manually
+        return { content: cleaned.replace(/^\s*\{\s*"content"\s*:\s*"|"\s*\}\s*$/g, '') };
       });
 
       cache.set(cacheKey, parsed);
