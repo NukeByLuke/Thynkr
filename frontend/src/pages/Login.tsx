@@ -37,7 +37,7 @@ export default function Login() {
       return undefined;
     } catch (err) {
       if (err instanceof z.ZodError) {
-        return err.errors[0]?.message;
+        return err.issues[0]?.message;
       }
       return undefined;
     }
@@ -73,10 +73,10 @@ export default function Login() {
     
     if (!result.success) {
       const fieldErrors: FormErrors = {};
-      result.error.errors.forEach((err) => {
-        const field = err.path[0] as keyof LoginFormData;
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0] as keyof LoginFormData;
         if (!fieldErrors[field]) {
-          fieldErrors[field] = err.message;
+          fieldErrors[field] = issue.message;
         }
       });
       setErrors(fieldErrors);
