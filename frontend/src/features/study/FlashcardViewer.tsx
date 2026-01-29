@@ -136,7 +136,7 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onR
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-0">
       <div className="mb-6 sm:mb-8 text-center">
-        <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-transparent">{title}</h3>
+        <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-500 via-fuchsia-500 to-orange-400 dark:from-violet-400 dark:via-indigo-400 dark:to-cyan-400 bg-clip-text text-transparent">{title}</h3>
         <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-3">
           Card {currentIndex + 1} of {displayCards.length}
           {shuffledCards && <span className="ml-2 text-brand-600 dark:text-brand-400 font-semibold">(Shuffled)</span>}
