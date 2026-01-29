@@ -98,11 +98,10 @@ export default function Study() {
     try {
       const response = await api.post('/study/upload-youtube', { url });
       toast.dismiss(loadingToast);
-      await queryClient.invalidateQueries({ queryKey: ['study-files'] });
       toast.success('YouTube video ready!');
-      // Navigate to immersive study page
+      // Navigate to immersive study page with full refresh
       if (response.data?.file?.id) {
-        navigate(`/study/${response.data.file.id}`);
+        window.location.href = `/study/${response.data.file.id}`;
       }
     } catch (error) {
       toast.dismiss(loadingToast);
