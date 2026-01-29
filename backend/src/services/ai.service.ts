@@ -14,8 +14,8 @@ const cache = new NodeCache({ stdTTL: 3600 });
 
 const MAX_INPUT_CHARS = 200000; // Gemini has much higher token limits
 
-// Model Selection: Gemini 2.0 Flash - latest stable fast model
-const MODEL = 'gemini-2.0-flash';
+// Model Selection: Gemini 2.5 Flash - latest stable fast model with improved accuracy
+const MODEL = 'gemini-2.5-flash';
 
 /**
  * Prompt injection detection patterns for security validation
@@ -108,14 +108,20 @@ export class AIService {
     // Remove markdown code fences if present
     let cleaned = text.trim();
     if (cleaned.startsWith('```json')) {
-      cleaned = cleaned.replace(/^```json\s*\n/, '');
+      cleaned = cleaned.replace(/^```json\s*\n?/, '');
     } else if (cleaned.startsWith('```')) {
-      cleaned = cleaned.replace(/^```\s*\n/, '');
+      cleaned = cleaned.replace(/^```\s*\n?/, '');
     }
     if (cleaned.endsWith('```')) {
-      cleaned = cleaned.replace(/\n```\s*$/, '');
+      cleaned = cleaned.replace(/\n?```\s*$/, '');
     }
     cleaned = cleaned.trim();
+    
+    // Try to extract JSON object/array from response
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+    if (jsonMatch) {
+      cleaned = jsonMatch[0];
+    }
     
     // Attempt to fix truncated JSON by closing open brackets/braces
     if (!cleaned.endsWith('}') && !cleaned.endsWith(']')) {
@@ -140,6 +146,34 @@ export class AIService {
     }
     
     return cleaned;
+  }
+
+  /**
+   * Safely parse JSON with fallback extraction
+   */
+  private safeParseJson<T>(text: string, fallbackExtractor?: (text: string) => T): T {
+    const cleaned = this.cleanJsonResponse(text);
+    
+    try {
+      return JSON.parse(cleaned) as T;
+    } catch (firstError) {
+      // Try to fix common JSON issues
+      let fixed = cleaned
+        .replace(/,\s*}/g, '}')  // Remove trailing commas in objects
+        .replace(/,\s*]/g, ']')  // Remove trailing commas in arrays
+        .replace(/([{,])\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":')  // Quote unquoted keys
+        .replace(/:\s*'([^']*)'/g, ':"$1"');  // Replace single quotes with double
+      
+      try {
+        return JSON.parse(fixed) as T;
+      } catch (secondError) {
+        // If fallback extractor provided, use it
+        if (fallbackExtractor) {
+          return fallbackExtractor(text);
+        }
+        throw firstError;
+      }
+    }
   }
 
   /**
@@ -192,14 +226,19 @@ ${preparedText}`;
       const result = await this.model.generateContent(prompt);
       const response = result.response;
       const content = response.text();
-      const cleanedContent = this.cleanJsonResponse(content);
-      const parsed = JSON.parse(cleanedContent) as GeneratedSummary;
+      
+      // Use safe JSON parsing with fallback
+      const parsed = this.safeParseJson<GeneratedSummary>(content, (rawText) => {
+        // Fallback: extract content from raw response
+        const cleaned = rawText.replace(/```json\n?|```\n?/g, '').trim();
+        return { content: cleaned };
+      });
 
       cache.set(cacheKey, parsed);
       return parsed;
     } catch (error: any) {
       logger.error({ error: error.message }, 'Failed to generate summary');
-      throw new Error(error.message || 'Failed to generate summary. Please try again.');
+      throw new Error('Failed to generate summary. Please try again.');
     }
   }
 
@@ -245,14 +284,18 @@ ${preparedText}`;
       const result = await this.model.generateContent(prompt);
       const response = result.response;
       const content = response.text();
-      const cleanedContent = this.cleanJsonResponse(content);
-      const parsed = JSON.parse(cleanedContent) as GeneratedNotes;
+      
+      // Use safe JSON parsing with fallback
+      const parsed = this.safeParseJson<GeneratedNotes>(content, (rawText) => {
+        const cleaned = rawText.replace(/```json\n?|```\n?/g, '').trim();
+        return { keyPoints: [], detailed: cleaned };
+      });
 
       cache.set(cacheKey, parsed);
       return parsed;
     } catch (error: any) {
       logger.error({ error: error.message }, 'Failed to generate notes');
-      throw new Error(error.message || 'Failed to generate notes. Please try again.');
+      throw new Error('Failed to generate notes. Please try again.');
     }
   }
 
@@ -312,8 +355,9 @@ ${preparedText}`;
       const result = await this.model.generateContent(prompt);
       const response = result.response;
       const content = response.text();
-      const cleanedContent = this.cleanJsonResponse(content);
-      const parsed = JSON.parse(cleanedContent) as GeneratedQuiz;
+      
+      // Use safe JSON parsing
+      const parsed = this.safeParseJson<GeneratedQuiz>(content);
 
       // Process questions: handle correctAnswer and shuffle options
       if (parsed.questions) {
@@ -336,7 +380,7 @@ ${preparedText}`;
       return parsed;
     } catch (error: any) {
       logger.error({ error: error.message }, 'Failed to generate quiz');
-      throw new Error(error.message || 'Failed to generate quiz. Please try again.');
+      throw new Error('Failed to generate quiz. Please try again.');
     }
   }
 
@@ -383,14 +427,18 @@ ${preparedText}`;
       const result = await this.model.generateContent(prompt);
       const response = result.response;
       const content = response.text();
-      const cleanedContent = this.cleanJsonResponse(content);
-      const parsed = JSON.parse(cleanedContent) as GeneratedFlashcards;
+      
+      // Use safe JSON parsing with fallback
+      const parsed = this.safeParseJson<GeneratedFlashcards>(content, (rawText) => {
+        const cleaned = rawText.replace(/```json\n?|```\n?/g, '').trim();
+        return { title: 'Flashcards', cards: [{ front: 'Error', back: cleaned }] };
+      });
 
       cache.set(cacheKey, parsed);
       return parsed;
     } catch (error: any) {
       logger.error({ error: error.message }, 'Failed to generate flashcards');
-      throw new Error(error.message || 'Failed to generate flashcards. Please try again.');
+      throw new Error('Failed to generate flashcards. Please try again.');
     }
   }
 

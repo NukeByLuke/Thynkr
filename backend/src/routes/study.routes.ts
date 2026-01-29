@@ -16,7 +16,6 @@ import { FileProcessorService } from '../services/file-processor.service';
 import { AIService } from '../services/ai.service';
 import prisma from '../db/client';
 import fs from 'fs/promises';
-import { YoutubeTranscript } from 'youtube-transcript';
 import { normalizeFileForLanguage, resolveUserLanguage } from '../utils/language.utils';
 import { canUploadFile, getUserUsageStats } from '../lib/tier-limits';
 import { GoogleGenAI } from '@google/genai';
@@ -451,86 +450,58 @@ export default async function studyRoutes(server: FastifyInstance) {
         let transcriptText = '';
         let extractionMethod = 'metadata-only';
 
-        // ===== METHOD 1: Gemini Direct YouTube URL (NEW - Processes Video Natively) =====
+        // ===== Gemini Direct YouTube URL (Processes Video Natively) =====
+        // Uses gemini-3-flash-preview which supports YouTube URLs directly
+        // Limitations: 8hr/day free tier, public videos only, up to 10 videos per request
         try {
-          server.log.info({ videoId }, 'Attempting Gemini direct YouTube URL processing...');
+          server.log.info({ videoId }, 'Processing YouTube video with Gemini 3 Flash...');
           
           const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
           
-          // Create an AbortController with 120 second timeout
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 120000);
-          
-          try {
-            const response = await genai.models.generateContent({
-              model: 'gemini-2.5-flash',
-              contents: [
-                {
-                  role: 'user',
-                  parts: [
-                    {
-                      fileData: {
-                        fileUri: url,
-                      }
-                    },
-                    {
-                      text: 'Please provide a complete transcript of this video. Include all spoken dialogue, narration, and important visual descriptions. Format it as a clean, readable transcript without timestamps.'
-                    }
-                  ]
-                }
-              ],
-            });
-            
-            clearTimeout(timeoutId);
-            
-            const geminiTranscript = response.text;
-            if (geminiTranscript && geminiTranscript.trim().length > 100) {
-              transcriptText = geminiTranscript;
-              hasTranscript = true;
-              extractionMethod = 'gemini-youtube-direct';
-              server.log.info({ videoId, length: transcriptText.length }, 'Gemini YouTube processing successful');
+          // Use the correct format from official docs: https://ai.google.dev/gemini-api/docs/video-understanding
+          const contents = [
+            {
+              fileData: {
+                fileUri: url,
+              },
+            },
+            { 
+              text: 'Please provide a complete transcript of this video. Include all spoken dialogue, narration, and important visual descriptions. Format it as a clean, readable transcript without timestamps.' 
             }
-          } catch (innerError: any) {
-            clearTimeout(timeoutId);
-            throw innerError;
+          ];
+          
+          // 3 minute timeout for longer videos
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error('Gemini request timed out after 3 minutes')), 180000);
+          });
+          
+          const geminiPromise = genai.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: contents,
+          });
+          
+          const response = await Promise.race([geminiPromise, timeoutPromise]);
+          
+          const geminiTranscript = response.text;
+          if (geminiTranscript && geminiTranscript.trim().length > 50) {
+            transcriptText = geminiTranscript;
+            hasTranscript = true;
+            extractionMethod = 'gemini-youtube-direct';
+            server.log.info({ videoId, length: transcriptText.length }, 'Gemini YouTube processing successful');
+          } else {
+            server.log.warn({ videoId }, 'Gemini returned empty or insufficient transcript');
           }
         } catch (geminiError) {
           const errorMsg = geminiError instanceof Error ? geminiError.message : String(geminiError);
-          server.log.warn({ error: errorMsg, videoId }, 'Gemini direct YouTube URL failed');
-        }
-        
-        // ===== METHOD 2: YouTube Transcript API (Fallback) =====
-        if (!hasTranscript) {
-          try {
-            server.log.info({ videoId }, 'Attempting YouTube transcript API as fallback...');
-            const transcriptItems = await YoutubeTranscript.fetchTranscript(videoId);
-            const rawTranscript = transcriptItems.map((item: any) => item.text).join(' ');
-            
-            if (rawTranscript && rawTranscript.trim().length > 100) {
-              transcriptText = rawTranscript;
-              hasTranscript = true;
-              extractionMethod = 'youtube-captions';
-              server.log.info({ videoId, length: transcriptText.length }, 'YouTube captions fetched successfully');
-            }
-          } catch (transcriptError) {
-            const errorMsg = transcriptError instanceof Error ? transcriptError.message : String(transcriptError);
-            server.log.warn({ error: errorMsg, videoId }, 'YouTube transcript API failed');
-          }
+          server.log.error({ error: errorMsg, videoId }, 'Gemini YouTube URL processing failed');
+          throw new Error(`Failed to process YouTube video: ${errorMsg}`);
         }
 
-        // If no transcript, the video will still be saved with title/description
-        // which Gemini can use to generate study materials
-        if (!hasTranscript) {
-          server.log.info({ videoId }, 'No transcript available - video saved with metadata only');
-        }
-
-        // Add transcript or note if unavailable
+        // Add transcript to content
         if (hasTranscript && transcriptText) {
           contentParts.push(`\nTranscript:\n${transcriptText}`);
           server.log.info({ videoId, extractionMethod, transcriptLength: transcriptText.length }, 
             'Video content extracted successfully');
-        } else {
-          contentParts.push('\n(No transcript available. AI will generate study materials based on title and description.)');
         }
 
         const extractedText = contentParts.join('\n');
