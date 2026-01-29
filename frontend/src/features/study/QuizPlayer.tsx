@@ -256,7 +256,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
           {/* Difficulty Setting */}
           <div className="mb-4">
             <label className="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white mb-2">
-              <Zap className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+              <Zap className="w-4 h-4 text-brand-500 dark:text-accent-400" />
               Difficulty Level
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -269,8 +269,8 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                   disabled={isGenerating}
                   className={`py-2.5 px-4 rounded-xl font-bold text-sm transition-[background-color,border-color,box-shadow,transform] duration-200 border ${
                     settings.difficulty === level
-                      ? 'bg-gradient-to-r from-blue-600 to-violet-600 border-blue-500 text-white shadow-lg shadow-blue-500/50'
-                      : 'bg-slate-100 dark:bg-zinc-900 border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-blue-500/50 hover:bg-slate-200 dark:hover:bg-zinc-800'
+                      ? 'bg-gradient-to-r from-brand-500 to-brand-600 dark:from-accent-500 dark:to-accent-600 border-brand-400 dark:border-accent-400 text-white shadow-lg shadow-brand-500/50 dark:shadow-accent-500/50'
+                      : 'bg-slate-100 dark:bg-zinc-900 border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-brand-500/50 dark:hover:border-accent-500/50 hover:bg-slate-200 dark:hover:bg-zinc-800'
                   } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {level.charAt(0).toUpperCase() + level.slice(1)}
@@ -311,8 +311,8 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                   disabled={isGenerating}
                   className={`py-2.5 px-4 rounded-xl font-bold text-sm transition-[background-color,border-color,box-shadow,transform] duration-200 border ${
                     settings.timeLimit === time
-                      ? 'bg-gradient-to-r from-blue-600 to-violet-600 border-violet-500 text-white shadow-lg shadow-violet-500/50'
-                      : 'bg-slate-100 dark:bg-zinc-900 border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-violet-500/50 hover:bg-slate-200 dark:hover:bg-zinc-800'
+                      ? 'bg-gradient-to-r from-brand-500 to-brand-600 dark:from-accent-500 dark:to-accent-600 border-brand-400 dark:border-accent-400 text-white shadow-lg shadow-brand-500/50 dark:shadow-accent-500/50'
+                      : 'bg-slate-100 dark:bg-zinc-900 border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-brand-500/50 dark:hover:border-accent-500/50 hover:bg-slate-200 dark:hover:bg-zinc-800'
                   } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {time === 'endless' ? 'Endless' : time}
@@ -327,7 +327,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             whileTap={{ scale: isGenerating ? 1 : 0.95 }}
             onClick={handleStartQuiz}
             disabled={isGenerating}
-            className="w-full py-3 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white rounded-xl font-bold text-lg transition-[background-image,box-shadow,transform] duration-200 shadow-2xl shadow-blue-500/50 hover:shadow-blue-500/70 border border-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-blue-600 disabled:hover:to-violet-600"
+            className="w-full py-3 bg-gradient-to-r from-brand-500 to-brand-600 dark:from-accent-500 dark:to-accent-600 hover:from-brand-600 hover:to-brand-700 dark:hover:from-accent-600 dark:hover:to-accent-700 text-white rounded-xl font-bold text-lg transition-[background-image,box-shadow,transform] duration-200 shadow-2xl shadow-brand-500/50 dark:shadow-accent-500/50 hover:shadow-brand-500/70 dark:hover:shadow-accent-500/70 border border-brand-400/50 dark:border-accent-400/50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isGenerating ? (
               <span className="flex items-center justify-center gap-2">
@@ -414,7 +414,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
               onClick={handleRestart}
-              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-lg text-sm font-medium transition-all shadow-lg shadow-indigo-500/25"
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-brand-500 to-brand-600 dark:from-accent-500 dark:to-accent-600 hover:from-brand-600 hover:to-brand-700 dark:hover:from-accent-600 dark:hover:to-accent-700 text-white rounded-lg text-sm font-medium transition-all shadow-lg shadow-brand-500/25 dark:shadow-accent-500/25"
             >
               Continue
             </motion.button>
@@ -440,7 +440,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                   ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                   : timeRemaining < 180
                   ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
-                  : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                  : 'bg-brand-100 dark:bg-accent-900/30 text-brand-700 dark:text-accent-400'
               }`}
             >
               <Clock className="w-4 h-4" />
@@ -449,7 +449,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
           )}
         </div>
         <div className="flex items-center justify-between text-xs sm:text-sm text-slate-400 dark:text-slate-400 font-medium mb-2">
-          <span className="px-3 py-1 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-lg text-cyan-300 font-bold">
+          <span className="px-3 py-1 bg-gradient-to-r from-brand-500/10 to-accent-500/10 border border-brand-500/30 dark:border-accent-500/30 rounded-lg text-brand-600 dark:text-accent-300 font-bold">
             Question {currentIndex + 1} of {questions.length}
           </span>
           <span>
@@ -459,7 +459,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
         {/* Progress bar - Enhanced with glow */}
         <div className="mt-1 w-full bg-slate-200 dark:bg-zinc-900/80 rounded-full h-3 border border-slate-300 dark:border-zinc-700">
           <div
-            className="bg-gradient-to-r from-cyan-500 via-blue-500 to-blue-600 h-3 rounded-full transition-[width] duration-150 shadow-lg shadow-cyan-500/50"
+            className="bg-gradient-to-r from-brand-500 via-brand-600 to-accent-600 h-3 rounded-full transition-[width] duration-150 shadow-lg shadow-brand-500/50 dark:shadow-accent-500/50"
             style={{
               width: `${((currentIndex + 1) / questions.length) * 100}%`,
             }}
@@ -478,7 +478,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             transition={{ duration: 0.15 }}
             className="relative mb-4">
             {/* Ambient Spotlight Glow */}
-            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-blue-500/5 to-violet-500/5 blur-3xl -z-10 rounded-3xl" />
+            <div className="absolute inset-0 bg-gradient-to-br from-brand-500/5 via-brand-600/5 to-accent-500/5 blur-3xl -z-10 rounded-3xl" />
             
             <div className="bg-white/80 dark:bg-zinc-950/40 backdrop-blur-xl rounded-3xl border border-slate-200 dark:border-white/10 p-6 shadow-2xl">
               <div className="flex items-start gap-3">
@@ -493,16 +493,16 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                       h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 text-balance" {...props} />,
                       h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2 text-balance" {...props} />,
                       h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2" {...props} />,
-                      strong: ({ node, ...props }) => <strong className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-300 dark:to-blue-400" {...props} />,
+                      strong: ({ node, ...props }) => <strong className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-accent-600 dark:from-brand-400 dark:to-accent-400" {...props} />,
                       em: ({ node, ...props }) => <em className="italic text-slate-700 dark:text-slate-300" {...props} />,
-                      ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-2 text-slate-700 dark:text-slate-300 marker:text-cyan-500 dark:marker:text-cyan-400 text-lg" {...props} />,
-                      ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-2 text-slate-700 dark:text-slate-300 marker:text-cyan-500 dark:marker:text-cyan-400 text-lg" {...props} />,
+                      ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-2 text-slate-700 dark:text-slate-300 marker:text-brand-500 dark:marker:text-accent-400 text-lg" {...props} />,
+                      ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-2 text-slate-700 dark:text-slate-300 marker:text-brand-500 dark:marker:text-accent-400 text-lg" {...props} />,
                       li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
                       code: ({ node, className, children, ...props }) => {
                         const isInline = !className;
                         return isInline ? (
                           <code
-                            className="bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 px-1.5 py-0.5 rounded-md text-base font-mono border border-cyan-200 dark:border-cyan-800"
+                            className="bg-brand-50 dark:bg-accent-900/30 text-brand-700 dark:text-accent-300 px-1.5 py-0.5 rounded-md text-base font-mono border border-brand-200 dark:border-accent-800"
                             {...props}
                           >
                             {children}
@@ -518,7 +518,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                       },
                       blockquote: ({ node, ...props }) => (
                         <blockquote
-                          className="border-l-4 border-cyan-500 dark:border-cyan-400 bg-cyan-50 dark:bg-cyan-900/10 p-4 rounded-r-lg italic text-slate-700 dark:text-slate-300 my-4 shadow-sm"
+                          className="border-l-4 border-brand-500 dark:border-accent-400 bg-brand-50 dark:bg-accent-900/10 p-4 rounded-r-lg italic text-slate-700 dark:text-slate-300 my-4 shadow-sm"
                           {...props}
                         />
                       ),
@@ -586,14 +586,14 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                     : showSubmittedWrong || isWrong
                       ? 'border-red-500 bg-red-500/20 text-red-900 dark:text-white shadow-2xl shadow-red-500/30'
                       : isSelected && !isRevealed
-                        ? 'border-transparent bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-slate-900 dark:text-white shadow-2xl shadow-blue-500/40 before:absolute before:inset-0 before:rounded-2xl before:p-[2px] before:bg-gradient-to-br before:from-blue-500 before:to-violet-500 before:-z-10'
+                        ? 'border-transparent bg-brand-500/20 dark:bg-accent-500/20 text-slate-900 dark:text-white shadow-2xl shadow-brand-500/40 dark:shadow-accent-500/40 before:absolute before:inset-0 before:rounded-2xl before:p-[2px] before:bg-gradient-to-br before:from-brand-400 before:to-brand-600 dark:before:from-accent-400 dark:before:to-accent-600 before:-z-10'
                         : 'border-slate-200 dark:border-zinc-700 hover:border-slate-300 dark:hover:border-zinc-600 bg-white/80 dark:bg-zinc-900/50 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-zinc-800/60 hover:shadow-lg'
                 } ${isSubmitted || isRevealed ? 'cursor-not-allowed' : 'cursor-pointer'}`}
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 flex-1 pointer-events-none">
                     {/* Keyboard Shortcut Keycap */}
-                    <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-slate-200 to-slate-300 dark:from-zinc-700 dark:to-zinc-800 text-slate-700 dark:text-white font-bold text-sm border-2 border-slate-300 dark:border-zinc-600 shadow-lg group-hover:from-cyan-600 group-hover:to-blue-600 group-hover:border-cyan-500 group-hover:text-white transition-all duration-200">
+                    <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-slate-200 to-slate-300 dark:from-zinc-700 dark:to-zinc-800 text-slate-700 dark:text-white font-bold text-sm border-2 border-slate-300 dark:border-zinc-600 shadow-lg group-hover:from-brand-500 group-hover:to-brand-600 dark:group-hover:from-accent-500 dark:group-hover:to-accent-600 group-hover:border-brand-400 dark:group-hover:border-accent-400 group-hover:text-white transition-all duration-200">
                       {keyLabel}
                     </span>
                     <div className="font-semibold flex-1 text-base">
@@ -602,10 +602,10 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                         rehypePlugins={[rehypeHighlight]}
                         components={{
                           p: ({ node, ...props }) => <span className="inline" {...props} />,
-                          strong: ({ node, ...props }) => <strong className="font-bold text-cyan-600 dark:text-cyan-300" {...props} />,
+                          strong: ({ node, ...props }) => <strong className="font-bold text-brand-600 dark:text-accent-300" {...props} />,
                           em: ({ node, ...props }) => <em className="italic" {...props} />,
                           code: ({ node, ...props }) => (
-                            <code className="bg-slate-200/50 dark:bg-zinc-700/50 text-cyan-700 dark:text-cyan-300 px-2 py-0.5 rounded text-sm font-mono border border-slate-300 dark:border-zinc-600" {...props} />
+                            <code className="bg-slate-200/50 dark:bg-zinc-700/50 text-brand-700 dark:text-accent-300 px-2 py-0.5 rounded text-sm font-mono border border-slate-300 dark:border-zinc-600" {...props} />
                           ),
                         }}
                       >
@@ -684,11 +684,11 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="p-3 bg-gradient-to-br from-blue-50 to-accent-50/50 dark:from-blue-900/20 dark:to-violet-900/20 rounded-xl border-2 border-blue-300 dark:border-blue-700 shadow-lg"
+              className="p-3 bg-gradient-to-br from-brand-50 to-accent-50/50 dark:from-brand-900/20 dark:to-accent-900/20 rounded-xl border-2 border-brand-300 dark:border-accent-700 shadow-lg"
             >
               <div className="flex items-start">
                 <svg
-                  className="w-4 h-4 text-blue-600 mt-0.5 mr-2 flex-shrink-0"
+                  className="w-4 h-4 text-brand-600 dark:text-accent-400 mt-0.5 mr-2 flex-shrink-0"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -699,27 +699,27 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                   />
                 </svg>
                 <div className="flex-1">
-                  <p className="font-bold text-blue-900 dark:text-blue-300 mb-1.5 text-sm">Explanation</p>
+                  <p className="font-bold text-brand-900 dark:text-accent-300 mb-1.5 text-sm">Explanation</p>
                   <div className="prose prose-sm dark:prose-invert max-w-none">
                     <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     rehypePlugins={[rehypeHighlight]}
                     components={{
                       p: ({ node, ...props }) => (
-                        <p className="text-blue-800 dark:text-blue-200 text-sm leading-relaxed mb-2" {...props} />
+                        <p className="text-brand-800 dark:text-accent-200 text-sm leading-relaxed mb-2" {...props} />
                       ),
                       strong: ({ node, ...props }) => (
-                        <strong className="font-bold text-blue-900 dark:text-blue-100" {...props} />
+                        <strong className="font-bold text-brand-900 dark:text-accent-100" {...props} />
                       ),
                       em: ({ node, ...props }) => <em className="italic" {...props} />,
-                      ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-1.5 text-blue-800 dark:text-blue-200 marker:text-blue-500" {...props} />,
-                      ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-1.5 text-blue-800 dark:text-blue-200 marker:text-blue-500" {...props} />,
+                      ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-1.5 text-brand-800 dark:text-accent-200 marker:text-brand-500 dark:marker:text-accent-500" {...props} />,
+                      ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-1.5 text-brand-800 dark:text-accent-200 marker:text-brand-500 dark:marker:text-accent-500" {...props} />,
                       li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
                       code: ({ node, className, children, ...props }) => {
                         const isInline = !className;
                         return isInline ? (
                           <code
-                            className="bg-blue-100 dark:bg-blue-900/40 text-blue-900 dark:text-blue-200 px-1.5 py-0.5 rounded-lg text-xs font-mono border border-blue-200 dark:border-blue-800"
+                            className="bg-brand-100 dark:bg-accent-900/40 text-brand-900 dark:text-accent-200 px-1.5 py-0.5 rounded-lg text-xs font-mono border border-brand-200 dark:border-accent-800"
                             {...props}
                           >
                             {children}
@@ -763,7 +763,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               animate={{ scale: [1, 1.03, 1] }}
               transition={{ repeat: Infinity, duration: 1.2, ease: [0.25, 0.1, 0.25, 1.0] }}
               onClick={() => setIsRevealed(true)}
-              className="px-8 sm:px-10 py-3.5 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-150 shadow-2xl shadow-blue-500/50 border-2 border-blue-500/50 text-base sm:text-lg"
+              className="px-8 sm:px-10 py-3.5 bg-gradient-to-r from-brand-500 to-brand-600 dark:from-accent-500 dark:to-accent-600 hover:from-brand-600 hover:to-brand-700 dark:hover:from-accent-600 dark:hover:to-accent-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-150 shadow-2xl shadow-brand-500/50 dark:shadow-accent-500/50 border-2 border-brand-400/50 dark:border-accent-400/50 text-base sm:text-lg"
             >
               Reveal Answer
             </motion.button>
@@ -777,7 +777,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               animate={{ scale: [1, 1.03, 1] }}
               transition={{ repeat: Infinity, duration: 1.2, ease: [0.25, 0.1, 0.25, 1.0] }}
               onClick={handleNext}
-              className="px-8 sm:px-10 py-3.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-150 shadow-2xl shadow-violet-500/50 border-2 border-violet-500/50 text-base sm:text-lg"
+              className="px-8 sm:px-10 py-3.5 bg-gradient-to-r from-brand-500 to-brand-600 dark:from-accent-500 dark:to-accent-600 hover:from-brand-600 hover:to-brand-700 dark:hover:from-accent-600 dark:hover:to-accent-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-150 shadow-2xl shadow-brand-500/50 dark:shadow-accent-500/50 border-2 border-brand-400/50 dark:border-accent-400/50 text-base sm:text-lg"
             >
               Next Question →
             </motion.button>
@@ -821,7 +821,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setReviewMode(false)}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-200 shadow-xl shadow-blue-500/50 border border-blue-500/50 text-base active:scale-95"
+                className="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-600 dark:from-accent-500 dark:to-accent-600 hover:from-brand-600 hover:to-brand-700 dark:hover:from-accent-600 dark:hover:to-accent-700 text-white rounded-xl font-bold transition-[background-image,box-shadow,transform] duration-200 shadow-xl shadow-brand-500/50 dark:shadow-accent-500/50 border border-brand-400/50 dark:border-accent-400/50 text-base active:scale-95"
               >
                 Back to Results
               </motion.button>
