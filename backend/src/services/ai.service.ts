@@ -14,8 +14,8 @@ const cache = new NodeCache({ stdTTL: 3600 });
 
 const MAX_INPUT_CHARS = 200000; // Gemini has much higher token limits
 
-// Model Selection: Gemini 2.0 Flash - latest stable fast model
-const MODEL = 'gemini-2.0-flash';
+// Model Selection: Gemini 2.5 Flash Lite - latest stable fast model
+const MODEL = 'gemini-2.5-flash-lite';
 
 /**
  * Prompt injection detection patterns for security validation
@@ -88,7 +88,7 @@ export class AIService {
     }
 
     this.gemini = new GoogleGenerativeAI(apiKey);
-    this.model = this.gemini.getGenerativeModel({ 
+    this.model = this.gemini.getGenerativeModel({
       model: MODEL,
       generationConfig: {
         temperature: 0.7,
@@ -116,7 +116,7 @@ export class AIService {
       cleaned = cleaned.replace(/\n```\s*$/, '');
     }
     cleaned = cleaned.trim();
-    
+
     // Attempt to fix truncated JSON by closing open brackets/braces
     if (!cleaned.endsWith('}') && !cleaned.endsWith(']')) {
       // Count open brackets
@@ -124,12 +124,12 @@ export class AIService {
       const closeBraces = (cleaned.match(/}/g) || []).length;
       const openBrackets = (cleaned.match(/\[/g) || []).length;
       const closeBrackets = (cleaned.match(/]/g) || []).length;
-      
+
       // Try to close truncated strings first
       if (cleaned.match(/"[^"]*$/)) {
         cleaned += '"';
       }
-      
+
       // Close arrays and objects
       for (let i = 0; i < openBrackets - closeBrackets; i++) {
         cleaned += ']';
@@ -138,7 +138,7 @@ export class AIService {
         cleaned += '}';
       }
     }
-    
+
     return cleaned;
   }
 
@@ -155,9 +155,12 @@ export class AIService {
   }
 
   /**
-   * Generate a comprehensive summary using Gemini 2.0 Flash
+   * Generate a comprehensive summary using Gemini 2.5 Flash Lite
    */
-  async generateSummary(text: string, language: string = DEFAULT_LANGUAGE): Promise<GeneratedSummary> {
+  async generateSummary(
+    text: string,
+    language: string = DEFAULT_LANGUAGE
+  ): Promise<GeneratedSummary> {
     const normalizedLanguage = this.normalizeLanguage(language);
     const preparedText = this.prepareText(text);
     const cacheKey = `summary_${normalizedLanguage}_${this.hashText(preparedText)}`;
@@ -204,7 +207,7 @@ ${preparedText}`;
   }
 
   /**
-   * Generate structured study notes using Gemini 2.0 Flash
+   * Generate structured study notes using Gemini 2.5 Flash Lite
    */
   async generateNotes(text: string, language: string = DEFAULT_LANGUAGE): Promise<GeneratedNotes> {
     const normalizedLanguage = this.normalizeLanguage(language);
@@ -257,7 +260,7 @@ ${preparedText}`;
   }
 
   /**
-   * Generate a quiz with multiple-choice questions using Gemini 2.0 Flash
+   * Generate a quiz with multiple-choice questions using Gemini 2.5 Flash Lite
    */
   async generateQuiz(
     text: string,
@@ -277,7 +280,8 @@ ${preparedText}`;
 
     const difficultyInstructions: Record<QuizDifficulty, string> = {
       EASY: 'Create straightforward questions testing basic recall and understanding of key facts.',
-      MEDIUM: 'Create questions requiring understanding of concepts and ability to apply knowledge.',
+      MEDIUM:
+        'Create questions requiring understanding of concepts and ability to apply knowledge.',
       HARD: 'Create challenging questions requiring deep analysis, synthesis, and critical thinking.',
     };
 
@@ -324,7 +328,7 @@ ${preparedText}`;
             if (letterIndex !== -1 && question.options[letterIndex]) {
               question.correctAnswer = question.options[letterIndex];
             }
-            
+
             // Shuffle options after fixing correctAnswer reference
             question.options = this.shuffleArray(question.options);
           }
@@ -341,7 +345,7 @@ ${preparedText}`;
   }
 
   /**
-   * Generate flashcards from the text using Gemini 2.0 Flash
+   * Generate flashcards from the text using Gemini 2.5 Flash Lite
    */
   async generateFlashcards(
     text: string,
@@ -428,7 +432,10 @@ ${sanitizedPrompt}`;
 
       cache.set(cacheKey, content);
 
-      logger.info({ promptLength: sanitizedPrompt.length, responseLength: content.length }, 'Custom content generated successfully');
+      logger.info(
+        { promptLength: sanitizedPrompt.length, responseLength: content.length },
+        'Custom content generated successfully'
+      );
 
       return content;
     } catch (error: any) {
@@ -448,7 +455,9 @@ ${sanitizedPrompt}`;
   ): Promise<{ transcript: string; summary: string; title: string; keyConcepts: string[] }> {
     try {
       logger.warn('Audio transcription requested but Gemini does not support audio-to-text yet');
-      throw new Error('Audio transcription is not supported with Gemini. Please ensure YouTube videos have captions available.');
+      throw new Error(
+        'Audio transcription is not supported with Gemini. Please ensure YouTube videos have captions available.'
+      );
     } catch (error: any) {
       logger.error({ error: error.message }, 'Failed to generate content from audio');
       throw new Error(error.message || 'Failed to process audio content');
@@ -494,45 +503,45 @@ ${sanitizedPrompt}`;
    */
   private getLanguageName(languageCode: string): string {
     const languageMap: Record<string, string> = {
-      'en': 'English',
-      'es': 'Spanish',
-      'fr': 'French',
-      'de': 'German',
-      'it': 'Italian',
-      'pt': 'Portuguese',
+      en: 'English',
+      es: 'Spanish',
+      fr: 'French',
+      de: 'German',
+      it: 'Italian',
+      pt: 'Portuguese',
       'pt-br': 'Brazilian Portuguese',
       'pt-pt': 'European Portuguese',
-      'zh': 'Chinese',
+      zh: 'Chinese',
       'zh-cn': 'Simplified Chinese',
       'zh-tw': 'Traditional Chinese',
-      'ja': 'Japanese',
-      'ko': 'Korean',
-      'vi': 'Vietnamese',
-      'th': 'Thai',
-      'id': 'Indonesian',
-      'ms': 'Malay',
-      'hi': 'Hindi',
-      'pa': 'Punjabi',
-      'ar': 'Arabic',
-      'he': 'Hebrew',
-      'tr': 'Turkish',
-      'ru': 'Russian',
-      'pl': 'Polish',
-      'cs': 'Czech',
-      'hu': 'Hungarian',
-      'ro': 'Romanian',
-      'uk': 'Ukrainian',
-      'bg': 'Bulgarian',
-      'sv': 'Swedish',
-      'no': 'Norwegian',
-      'da': 'Danish',
-      'fi': 'Finnish',
-      'nl': 'Dutch',
-      'el': 'Greek',
-      'ca': 'Catalan',
-      'sk': 'Slovak',
-      'hr': 'Croatian',
-      'sr': 'Serbian',
+      ja: 'Japanese',
+      ko: 'Korean',
+      vi: 'Vietnamese',
+      th: 'Thai',
+      id: 'Indonesian',
+      ms: 'Malay',
+      hi: 'Hindi',
+      pa: 'Punjabi',
+      ar: 'Arabic',
+      he: 'Hebrew',
+      tr: 'Turkish',
+      ru: 'Russian',
+      pl: 'Polish',
+      cs: 'Czech',
+      hu: 'Hungarian',
+      ro: 'Romanian',
+      uk: 'Ukrainian',
+      bg: 'Bulgarian',
+      sv: 'Swedish',
+      no: 'Norwegian',
+      da: 'Danish',
+      fi: 'Finnish',
+      nl: 'Dutch',
+      el: 'Greek',
+      ca: 'Catalan',
+      sk: 'Slovak',
+      hr: 'Croatian',
+      sr: 'Serbian',
     };
     return languageMap[languageCode.toLowerCase()] || languageCode;
   }
@@ -582,6 +591,7 @@ ${sanitizedPrompt}`;
     });
 
     // Remove control characters
+    // eslint-disable-next-line no-control-regex
     sanitized = sanitized.replace(new RegExp('[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]', 'g'), '');
 
     // Limit repeated characters

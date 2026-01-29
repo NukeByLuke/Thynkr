@@ -1,7 +1,7 @@
 /**
  * Study Routes
  * Handles file uploads, AI-generated study materials (summaries, notes, quizzes, flashcards), and folders.
- * 
+ *
  * TODO: This file is 1300+ lines. Consider splitting into:
  * - study/files.controller.ts (upload, list, delete)
  * - study/ai-content.controller.ts (summaries, notes, flashcards)
@@ -45,18 +45,13 @@ const fileManager = new GoogleAIFileManager(geminiApiKey);
  */
 async function trackStudyActivity(
   userId: string,
-  activityType:
-    | 'FILE_UPLOAD'
-    | 'SUMMARY_VIEW'
-    | 'NOTES_VIEW'
-    | 'QUIZ_ATTEMPT'
-    | 'FLASHCARD_STUDY',
+  activityType: 'FILE_UPLOAD' | 'SUMMARY_VIEW' | 'NOTES_VIEW' | 'QUIZ_ATTEMPT' | 'FLASHCARD_STUDY',
   fileId?: string,
   durationMinutes: number = 1
 ) {
   try {
     const now = new Date();
-    
+
     // Convert to EST for time-based achievements
     const estTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
     const hourEST = estTime.getHours();
@@ -92,7 +87,7 @@ async function trackStudyActivity(
           totalMinutes: durationMinutes,
         },
       });
-      
+
       // Track first day of streak
       await checkAchievements(userId, 'study_streak', 1);
     } else {
@@ -126,25 +121,26 @@ async function trackStudyActivity(
           totalMinutes: streak.totalMinutes + durationMinutes,
         },
       });
-      
+
       // Track streak only on new days
       if (isNewDay) {
         await checkAchievements(userId, 'study_streak', newCurrentStreak);
       }
     }
-    
+
     // Track study hours (convert minutes to hours)
     const hoursToAdd = durationMinutes / 60;
     await checkAchievements(userId, 'study_hours', hoursToAdd);
-    
+
     // Track time-based achievements (only once per session)
-    if (durationMinutes >= 5) { // Only count sessions 5+ minutes
+    if (durationMinutes >= 5) {
+      // Only count sessions 5+ minutes
       if (hourEST >= 5 && hourEST < 8) {
         await checkAchievements(userId, 'early_study', 1);
       } else if (hourEST >= 22 || hourEST < 3) {
         await checkAchievements(userId, 'night_study', 1);
       }
-      
+
       // Track long session achievement (2+ hours)
       if (durationMinutes >= 120) {
         await checkAchievements(userId, 'long_session', 1);
@@ -163,7 +159,7 @@ async function trackStudyActivity(
 async function trackLanguageUsage(userId: string, language: string): Promise<void> {
   try {
     const { checkAchievements } = await import('../services/gamification.service');
-    
+
     // Check if user has any content in this language
     const [summaryCount, notesCount, flashcardCount, quizCount] = await Promise.all([
       prisma.fileSummary.count({ where: { file: { userId }, language } }),
@@ -187,7 +183,7 @@ async function trackLanguageUsage(userId: string, language: string): Promise<voi
           SELECT language FROM quizzes WHERE file_id IN (SELECT id FROM uploaded_files WHERE user_id = ${userId})
         ) AS languages
       `;
-      
+
       const languageCount = Number(uniqueLanguages[0]?.count || 0);
       await checkAchievements(userId, 'language_used', languageCount);
     }
@@ -339,9 +335,15 @@ export default async function studyRoutes(server: FastifyInstance) {
                     status: 'COMPLETED',
                   },
                 });
-                server.log.info({ fileId: uploadedFile.id, fileName: file.originalname }, 'Text extraction completed');
+                server.log.info(
+                  { fileId: uploadedFile.id, fileName: file.originalname },
+                  'Text extraction completed'
+                );
               } catch (error: any) {
-                server.log.error({ error, fileId: uploadedFile.id, file: file.originalname }, 'Failed to extract text in background');
+                server.log.error(
+                  { error, fileId: uploadedFile.id, file: file.originalname },
+                  'Failed to extract text in background'
+                );
                 await prisma.uploadedFile.update({
                   where: { id: uploadedFile.id },
                   data: { status: 'FAILED' },
@@ -384,15 +386,16 @@ export default async function studyRoutes(server: FastifyInstance) {
         const userId = request.user!.userId;
 
         // Validate YouTube URL
-        const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}(&[\w=]*)?$/;
+        const youtubeRegex =
+          /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}(&[\w=]*)?$/;
         if (!youtubeRegex.test(url)) {
           return reply.code(400).send({ error: 'Invalid YouTube URL' });
         }
 
         // Check user existence
-        const user = await prisma.user.findUnique({ 
+        const user = await prisma.user.findUnique({
           where: { id: userId },
-          select: { id: true, role: true }
+          select: { id: true, role: true },
         });
         if (!user) {
           return reply.code(404).send({ error: 'User not found' });
@@ -430,31 +433,36 @@ export default async function studyRoutes(server: FastifyInstance) {
         // Fetch video metadata using yt-dlp (more reliable than ytdl-core)
         let videoTitle = `YouTube Video ${videoId}`;
         let videoDescription = '';
-        
+
         try {
           server.log.info({ videoId }, 'Fetching YouTube video metadata with yt-dlp...');
-          
+
           // Use yt-dlp to extract metadata as JSON
-          const { stdout } = await execPromise(
-            `yt-dlp --dump-json --no-download "${url}"`,
-            { timeout: 30000 }
-          );
-          
+          const { stdout } = await execPromise(`yt-dlp --dump-json --no-download "${url}"`, {
+            timeout: 30000,
+          });
+
           const metadata = JSON.parse(stdout);
           videoTitle = metadata.title || videoTitle;
           videoDescription = metadata.description || '';
-          
-          server.log.info({ 
-            videoId, 
-            title: videoTitle,
-            descLength: videoDescription.length 
-          }, 'Video metadata fetched successfully');
+
+          server.log.info(
+            {
+              videoId,
+              title: videoTitle,
+              descLength: videoDescription.length,
+            },
+            'Video metadata fetched successfully'
+          );
         } catch (error: any) {
-          server.log.warn({ 
-            error: error.message,
-            videoId 
-          }, 'Failed to fetch video metadata with yt-dlp, trying oEmbed fallback');
-          
+          server.log.warn(
+            {
+              error: error.message,
+              videoId,
+            },
+            'Failed to fetch video metadata with yt-dlp, trying oEmbed fallback'
+          );
+
           // Fallback to oEmbed API for title only
           try {
             const oembedResponse = await fetch(
@@ -471,62 +479,72 @@ export default async function studyRoutes(server: FastifyInstance) {
 
         // Build content with title and description as baseline
         const contentParts = [`Title: ${videoTitle}`];
-        
+
         if (videoDescription && videoDescription.trim().length > 0) {
           // Limit description to first 2000 characters to avoid overly long text
-          const truncatedDescription = videoDescription.length > 2000 
-            ? videoDescription.substring(0, 2000) + '...' 
-            : videoDescription;
+          const truncatedDescription =
+            videoDescription.length > 2000
+              ? videoDescription.substring(0, 2000) + '...'
+              : videoDescription;
           contentParts.push(`\nDescription:\n${truncatedDescription}`);
         }
 
         // Attempt to fetch transcript
         let hasTranscript = false;
         let transcriptText = '';
-        
+
         try {
           server.log.info({ videoId }, 'Attempting to fetch YouTube captions...');
           const transcriptItems = await YoutubeTranscript.fetchTranscript(videoId);
           transcriptText = transcriptItems.map((item: any) => item.text).join(' ');
-          
+
           if (transcriptText && transcriptText.trim().length > 0) {
             hasTranscript = true;
-            server.log.info({ videoId, length: transcriptText.length }, 'Captions fetched successfully');
+            server.log.info(
+              { videoId, length: transcriptText.length },
+              'Captions fetched successfully'
+            );
           }
         } catch (error) {
-          server.log.warn({ error, videoId }, 'No captions available, will try Whisper transcription');
+          server.log.warn(
+            { error, videoId },
+            'No captions available, will try Whisper transcription'
+          );
         }
 
         // Fallback to Gemini multimodal audio analysis if no captions
         if (!hasTranscript) {
           try {
             server.log.info({ videoId }, 'Starting Gemini multimodal audio analysis...');
-            
+
             // Create temp directory if it doesn't exist
             const tempDir = path.join(process.cwd(), 'uploads', 'temp');
             await fs.mkdir(tempDir, { recursive: true });
-            
+
             const tempAudioPath = path.join(tempDir, `${videoId}.mp3`);
-            
+
             // Download audio using yt-dlp (low bitrate for efficiency)
             server.log.info({ videoId, path: tempAudioPath }, 'Downloading audio with yt-dlp...');
-            
+
             try {
               // yt-dlp command: extract audio, convert to mp3, optimize for Gemini
               const ytdlpCmd = `yt-dlp -f "bestaudio[filesize<50M]/worst" --extract-audio --audio-format mp3 --audio-quality 128K -o "${tempAudioPath}" "${url}"`;
-              
+
               const { stdout, stderr } = await execPromise(ytdlpCmd, {
-                timeout: 180000 // 3 minute timeout
+                timeout: 180000, // 3 minute timeout
               });
-              
+
               server.log.info({ videoId, stdout, stderr }, 'yt-dlp download completed');
             } catch (downloadError: any) {
-              server.log.error({ 
-                error: downloadError.message,
-                stderr: downloadError.stderr,
-                stdout: downloadError.stdout,
-                videoId 
-              }, 'yt-dlp download failed');
+              server.log.error(
+                {
+                  error: downloadError.message,
+                  stderr: downloadError.stderr,
+                  stdout: downloadError.stdout,
+                  videoId,
+                },
+                'yt-dlp download failed'
+              );
               throw new Error(`Failed to download audio: ${downloadError.message}`);
             }
 
@@ -542,23 +560,26 @@ export default async function studyRoutes(server: FastifyInstance) {
 
             // Upload audio to Google's File Manager for processing
             server.log.info({ videoId }, 'Uploading audio to Google File Manager...');
-            
+
             const uploadResult = await fileManager.uploadFile(tempAudioPath, {
               mimeType: 'audio/mpeg',
               displayName: `youtube_${videoId}.mp3`,
             });
 
-            server.log.info({ 
-              videoId, 
-              fileUri: uploadResult.file.uri,
-              state: uploadResult.file.state 
-            }, 'Audio uploaded to Google File Manager');
+            server.log.info(
+              {
+                videoId,
+                fileUri: uploadResult.file.uri,
+                state: uploadResult.file.state,
+              },
+              'Audio uploaded to Google File Manager'
+            );
 
             // Wait for file processing if needed
             let file = uploadResult.file;
             while (file.state === 'PROCESSING') {
               server.log.info({ videoId }, 'Waiting for file processing...');
-              await new Promise(resolve => setTimeout(resolve, 2000));
+              await new Promise((resolve) => setTimeout(resolve, 2000));
               const getResult = await fileManager.getFile(file.name);
               file = getResult;
             }
@@ -567,11 +588,11 @@ export default async function studyRoutes(server: FastifyInstance) {
               throw new Error('Google File Manager failed to process audio file');
             }
 
-            // Use Gemini 2.0 Flash for audio analysis (better rate limits)
-            server.log.info({ videoId }, 'Analyzing audio with Gemini 2.0 Flash...');
-            
-            const model = genAI.getGenerativeModel({ 
-              model: 'gemini-2.0-flash',
+            // Use Gemini 2.5 Flash Lite for audio analysis (better rate limits)
+            server.log.info({ videoId }, 'Analyzing audio with Gemini 2.5 Flash Lite...');
+
+            const model = genAI.getGenerativeModel({
+              model: 'gemini-2.5-flash-lite',
               generationConfig: {
                 temperature: 0.5,
                 maxOutputTokens: 8000,
@@ -608,14 +629,13 @@ Provide your response in this exact JSON format:
             ]);
 
             const responseText = result.response.text();
-            
+
             // Parse the JSON response
             let parsedResponse: { transcript: string; summary: string; keyConcepts: string[] };
             try {
               // Extract JSON from potential markdown code blocks
-              const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/) || 
-                              responseText.match(/```\s*([\s\S]*?)\s*```/) ||
-                              [null, responseText];
+              const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/) ||
+                responseText.match(/```\s*([\s\S]*?)\s*```/) || [null, responseText];
               parsedResponse = JSON.parse(jsonMatch[1] || responseText);
             } catch (parseError) {
               server.log.warn({ videoId, parseError }, 'Failed to parse JSON, using raw response');
@@ -628,7 +648,7 @@ Provide your response in this exact JSON format:
 
             transcriptText = parsedResponse.transcript || responseText;
             hasTranscript = true;
-            
+
             // Enhance content with Gemini's analysis
             if (parsedResponse.summary) {
               contentParts.push(`\nAI Summary:\n${parsedResponse.summary}`);
@@ -636,19 +656,25 @@ Provide your response in this exact JSON format:
             if (parsedResponse.keyConcepts && parsedResponse.keyConcepts.length > 0) {
               contentParts.push(`\nKey Concepts:\n• ${parsedResponse.keyConcepts.join('\n• ')}`);
             }
-            
-            server.log.info({ 
-              videoId, 
-              transcriptLength: transcriptText.length,
-              hasAnalysis: !!parsedResponse.summary
-            }, 'Gemini audio analysis completed successfully');
+
+            server.log.info(
+              {
+                videoId,
+                transcriptLength: transcriptText.length,
+                hasAnalysis: !!parsedResponse.summary,
+              },
+              'Gemini audio analysis completed successfully'
+            );
 
             // Clean up: delete from Google File Manager
             try {
               await fileManager.deleteFile(file.name);
               server.log.info({ videoId }, 'Deleted file from Google File Manager');
             } catch (deleteError) {
-              server.log.warn({ videoId, deleteError }, 'Failed to delete from Google File Manager');
+              server.log.warn(
+                { videoId, deleteError },
+                'Failed to delete from Google File Manager'
+              );
             }
 
             // Clean up temp file
@@ -656,20 +682,27 @@ Provide your response in this exact JSON format:
               await fs.unlink(tempAudioPath);
               server.log.info({ videoId }, 'Temp audio file deleted');
             } catch (cleanupError) {
-              server.log.warn({ 
-                error: cleanupError instanceof Error ? cleanupError.message : String(cleanupError),
-                videoId 
-              }, 'Failed to delete temp audio file');
+              server.log.warn(
+                {
+                  error:
+                    cleanupError instanceof Error ? cleanupError.message : String(cleanupError),
+                  videoId,
+                },
+                'Failed to delete temp audio file'
+              );
             }
-
           } catch (geminiError) {
-            const errorMessage = geminiError instanceof Error ? geminiError.message : String(geminiError);
+            const errorMessage =
+              geminiError instanceof Error ? geminiError.message : String(geminiError);
             const errorStack = geminiError instanceof Error ? geminiError.stack : undefined;
-            server.log.error({ 
-              error: errorMessage,
-              stack: errorStack,
-              videoId 
-            }, 'Gemini audio analysis failed');
+            server.log.error(
+              {
+                error: errorMessage,
+                stack: errorStack,
+                videoId,
+              },
+              'Gemini audio analysis failed'
+            );
             // Continue with metadata only
           }
         }
@@ -877,9 +910,13 @@ Provide your response in this exact JSON format:
 
         // Track achievement for summary generation
         const { checkAchievements } = await import('../services/gamification.service');
-        const achievementResult = await checkAchievements(request.user!.userId, 'summary_created', 1);
+        const achievementResult = await checkAchievements(
+          request.user!.userId,
+          'summary_created',
+          1
+        );
         const notifications: any[] = [];
-        
+
         if (achievementResult.tierUnlocked) {
           notifications.push({
             type: 'achievement',
@@ -887,9 +924,9 @@ Provide your response in this exact JSON format:
           });
         }
 
-        return reply.send({ 
+        return reply.send({
           summary,
-          ...(notifications.length > 0 && { notifications })
+          ...(notifications.length > 0 && { notifications }),
         });
       } catch (error: any) {
         server.log.error({ error, fileId: id }, 'Failed to generate summary');
@@ -973,7 +1010,7 @@ Provide your response in this exact JSON format:
         const { checkAchievements } = await import('../services/gamification.service');
         const achievementResult = await checkAchievements(request.user!.userId, 'notes_created', 1);
         const notifications: any[] = [];
-        
+
         if (achievementResult.tierUnlocked) {
           notifications.push({
             type: 'achievement',
@@ -981,9 +1018,9 @@ Provide your response in this exact JSON format:
           });
         }
 
-        return reply.send({ 
+        return reply.send({
           notes,
-          ...(notifications.length > 0 && { notifications })
+          ...(notifications.length > 0 && { notifications }),
         });
       } catch (error: any) {
         server.log.error({ error, fileId: id }, 'Failed to generate notes');
@@ -1147,9 +1184,13 @@ Provide your response in this exact JSON format:
 
         // Track achievement for flashcard generation/completion
         const { checkAchievements } = await import('../services/gamification.service');
-        const achievementResult = await checkAchievements(request.user!.userId, 'flashcard_completed', 1);
+        const achievementResult = await checkAchievements(
+          request.user!.userId,
+          'flashcard_completed',
+          1
+        );
         const notifications: any[] = [];
-        
+
         if (achievementResult.tierUnlocked) {
           notifications.push({
             type: 'achievement',
@@ -1157,9 +1198,9 @@ Provide your response in this exact JSON format:
           });
         }
 
-        return reply.send({ 
+        return reply.send({
           flashcardSet,
-          ...(notifications.length > 0 && { notifications })
+          ...(notifications.length > 0 && { notifications }),
         });
       } catch (error: any) {
         server.log.error({ error, fileId: id }, 'Failed to generate flashcards');
@@ -1176,7 +1217,7 @@ Provide your response in this exact JSON format:
     },
     async (request: AuthenticatedRequest, reply) => {
       const { id } = request.params as { id: string };
-      const { answers, timeSpentSeconds, questionTimings } = request.body as { 
+      const { answers, timeSpentSeconds, questionTimings } = request.body as {
         answers: Record<string, string>;
         timeSpentSeconds?: number;
         questionTimings?: Record<string, number>;
@@ -1207,14 +1248,17 @@ Provide your response in this exact JSON format:
 
       // Anti-cheat: Check if time spent is suspiciously low
       if (timeSpentSeconds !== undefined && timeSpentSeconds < quiz.questions.length * 2) {
-        server.log.warn({ 
-          userId: request.user!.userId, 
-          quizId: id, 
-          timeSpent: timeSpentSeconds,
-          questions: quiz.questions.length 
-        }, 'Suspicious quiz submission - time too low');
-        return reply.code(400).send({ 
-          error: 'Quiz submission too fast. Please take time to read each question carefully.' 
+        server.log.warn(
+          {
+            userId: request.user!.userId,
+            quizId: id,
+            timeSpent: timeSpentSeconds,
+            questions: quiz.questions.length,
+          },
+          'Suspicious quiz submission - time too low'
+        );
+        return reply.code(400).send({
+          error: 'Quiz submission too fast. Please take time to read each question carefully.',
         });
       }
 
@@ -1230,12 +1274,15 @@ Provide your response in this exact JSON format:
       });
 
       if (recentAttempt) {
-        server.log.warn({ 
-          userId: request.user!.userId, 
-          quizId: id 
-        }, 'Duplicate quiz submission attempt');
-        return reply.code(429).send({ 
-          error: 'Please wait before submitting another attempt.' 
+        server.log.warn(
+          {
+            userId: request.user!.userId,
+            quizId: id,
+          },
+          'Duplicate quiz submission attempt'
+        );
+        return reply.code(429).send({
+          error: 'Please wait before submitting another attempt.',
         });
       }
 
@@ -1262,16 +1309,19 @@ Provide your response in this exact JSON format:
       // Normalize difficulty to uppercase for case-insensitive comparison
       const isHardDifficulty = quiz.difficulty?.toUpperCase() === 'HARD';
 
-      server.log.info({
-        quizId: quiz.id,
-        difficulty: quiz.difficulty,
-        difficultyUpperCase: quiz.difficulty?.toUpperCase(),
-        isHardDifficulty,
-        scorePercentage,
-        isPerfectScore,
-        correctCount,
-        totalQuestions: quiz.questions.length,
-      }, 'Quiz submission details');
+      server.log.info(
+        {
+          quizId: quiz.id,
+          difficulty: quiz.difficulty,
+          difficultyUpperCase: quiz.difficulty?.toUpperCase(),
+          isHardDifficulty,
+          scorePercentage,
+          isPerfectScore,
+          correctCount,
+          totalQuestions: quiz.questions.length,
+        },
+        'Quiz submission details'
+      );
 
       // Save attempt
       const attempt = await prisma.quizAttempt.create({
@@ -1301,22 +1351,32 @@ Provide your response in this exact JSON format:
 
         // 2. Perfectionist achievement (hard difficulty + perfect score)
         if (isHardDifficulty && isPerfectScore) {
-          server.log.info({
-            userId: request.user!.userId,
-            attemptingPerfectionist: true,
-            difficulty: quiz.difficulty,
-            score: scorePercentage
-          }, 'Checking Perfectionist achievement');
-          
-          const perfectionistResult = await checkAchievements(request.user!.userId, 'hard_quiz_perfect', 1);
-          
-          server.log.info({ 
-            userId: request.user!.userId,
-            perfectionistResult, 
-            tierUnlocked: perfectionistResult.tierUnlocked,
-            newTier: perfectionistResult.newTier
-          }, 'Perfectionist achievement check completed');
-          
+          server.log.info(
+            {
+              userId: request.user!.userId,
+              attemptingPerfectionist: true,
+              difficulty: quiz.difficulty,
+              score: scorePercentage,
+            },
+            'Checking Perfectionist achievement'
+          );
+
+          const perfectionistResult = await checkAchievements(
+            request.user!.userId,
+            'hard_quiz_perfect',
+            1
+          );
+
+          server.log.info(
+            {
+              userId: request.user!.userId,
+              perfectionistResult,
+              tierUnlocked: perfectionistResult.tierUnlocked,
+              newTier: perfectionistResult.newTier,
+            },
+            'Perfectionist achievement check completed'
+          );
+
           if (perfectionistResult.tierUnlocked) {
             unlockedAchievements.push(perfectionistResult);
           }
@@ -1326,7 +1386,7 @@ Provide your response in this exact JSON format:
         // Award points based on individual question speed
         if (questionTimings && Object.keys(questionTimings).length > 0) {
           let pointsToAward = 0;
-          
+
           // Evaluate each question individually
           Object.entries(questionTimings).forEach(([questionId, timeInSeconds]) => {
             // Award 1 point if answered in under 5 seconds
@@ -1341,12 +1401,16 @@ Provide your response in this exact JSON format:
               }
             }
           });
-          
+
           // Round down to whole number
           pointsToAward = Math.floor(pointsToAward);
-          
+
           if (pointsToAward > 0) {
-            const speedDemonResult = await checkAchievements(request.user!.userId, 'quick_answer', pointsToAward);
+            const speedDemonResult = await checkAchievements(
+              request.user!.userId,
+              'quick_answer',
+              pointsToAward
+            );
             if (speedDemonResult.tierUnlocked) {
               unlockedAchievements.push(speedDemonResult);
             }
@@ -1356,8 +1420,13 @@ Provide your response in this exact JSON format:
         // 4. Scholar achievement (add study time in hours)
         if (timeSpentSeconds) {
           const hoursSpent = timeSpentSeconds / 3600;
-          if (hoursSpent > 0.01) { // Only count if > ~36 seconds
-            const scholarResult = await checkAchievements(request.user!.userId, 'study_hours', hoursSpent);
+          if (hoursSpent > 0.01) {
+            // Only count if > ~36 seconds
+            const scholarResult = await checkAchievements(
+              request.user!.userId,
+              'study_hours',
+              hoursSpent
+            );
             if (scholarResult.tierUnlocked) {
               unlockedAchievements.push(scholarResult);
             }
@@ -1371,7 +1440,7 @@ Provide your response in this exact JSON format:
       await trackStudyActivity(request.user!.userId, 'QUIZ_ATTEMPT', file.id);
 
       // Map achievements to notifications format for frontend interceptor
-      const notifications = unlockedAchievements.map(ach => ({
+      const notifications = unlockedAchievements.map((ach) => ({
         type: 'achievement' as const,
         achievementId: ach.achievementId,
         achievementName: ach.achievementName || 'Achievement Unlocked',
