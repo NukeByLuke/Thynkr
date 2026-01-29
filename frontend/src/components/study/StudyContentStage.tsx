@@ -240,16 +240,27 @@ export const StudyContentStage: React.FC<StudyContentStageProps> = ({
                     <div className="max-w-xs mx-auto space-y-4 mb-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Questions: {numQuestions}
+                          Questions
                         </label>
-                        <input
-                          type="range"
-                          min="1"
-                          max="20"
-                          value={numQuestions}
-                          onChange={(e) => onSetNumQuestions(Number(e.target.value))}
-                          className="w-full"
-                        />
+                        <div className="flex items-center justify-center gap-3">
+                          <button
+                            onClick={() => onSetNumQuestions(Math.max(10, numQuestions - 5))}
+                            disabled={numQuestions <= 10}
+                            className="w-10 h-10 rounded-lg font-bold text-lg bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                          >
+                            −
+                          </button>
+                          <span className="w-12 text-center text-xl font-bold text-gray-900 dark:text-white">
+                            {numQuestions}
+                          </span>
+                          <button
+                            onClick={() => onSetNumQuestions(numQuestions + 5)}
+                            className="w-10 h-10 rounded-lg font-bold text-lg bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                          >
+                            +
+                          </button>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-1">Min 10</p>
                       </div>
                       <select
                         value={quizDifficulty}
@@ -289,16 +300,27 @@ export const StudyContentStage: React.FC<StudyContentStageProps> = ({
                 <div className="max-w-xs mx-auto space-y-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Questions: {numQuestions}
+                      Questions
                     </label>
-                    <input
-                      type="range"
-                      min="1"
-                      max="20"
-                      value={numQuestions}
-                      onChange={(e) => onSetNumQuestions(Number(e.target.value))}
-                      className="w-full"
-                    />
+                    <div className="flex items-center justify-center gap-3">
+                      <button
+                        onClick={() => onSetNumQuestions(Math.max(10, numQuestions - 5))}
+                        disabled={numQuestions <= 10}
+                        className="w-10 h-10 rounded-lg font-bold text-lg bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      >
+                        −
+                      </button>
+                      <span className="w-12 text-center text-xl font-bold text-gray-900 dark:text-white">
+                        {numQuestions}
+                      </span>
+                      <button
+                        onClick={() => onSetNumQuestions(numQuestions + 5)}
+                        className="w-10 h-10 rounded-lg font-bold text-lg bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-1">Min 10</p>
                   </div>
                   <select
                     value={quizDifficulty}

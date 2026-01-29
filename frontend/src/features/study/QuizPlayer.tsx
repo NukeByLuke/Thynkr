@@ -48,7 +48,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
     difficulty: 'medium',
     timeLimit: 'endless',
   });
-  const [numQuestions, setNumQuestions] = useState(1);
+  const [numQuestions, setNumQuestions] = useState(10);
 
   // Quiz state
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -282,17 +282,32 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
           {/* Number of Questions */}
           <div className="mb-4">
             <label className="block text-sm font-bold text-gray-900 dark:text-white mb-2">
-              Questions: {numQuestions}
+              Questions
             </label>
-            <input
-              type="range"
-              min="1"
-              max="20"
-              value={numQuestions}
-              onChange={(e) => setNumQuestions(Number(e.target.value))}
-              disabled={isGenerating}
-              className="w-full disabled:opacity-50 disabled:cursor-not-allowed"
-            />
+            <div className="flex items-center justify-center gap-3">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setNumQuestions(Math.max(10, numQuestions - 5))}
+                disabled={isGenerating || numQuestions <= 10}
+                className="w-12 h-12 rounded-xl font-bold text-xl bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                −
+              </motion.button>
+              <span className="w-16 text-center text-2xl font-bold text-gray-900 dark:text-white">
+                {numQuestions}
+              </span>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setNumQuestions(numQuestions + 5)}
+                disabled={isGenerating}
+                className="w-12 h-12 rounded-xl font-bold text-xl bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                +
+              </motion.button>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-1">Minimum 10 questions</p>
           </div>
 
           {/* Time Limit Setting */}
