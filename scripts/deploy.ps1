@@ -16,8 +16,7 @@ param(
 # Configuration
 $ErrorActionPreference = "Stop"
 $SERVER = "root@138.197.208.81"
-$GITHUB_REPO = "nukebyluke/thynkr"
-$REGISTRY = "ghcr.io"
+$DOCKER_USER = "nukebyluke"
 $PROJECT_ROOT = Split-Path -Parent $PSScriptRoot
 $TIMESTAMP = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
 
@@ -133,7 +132,7 @@ if (-not $SkipBuild) {
     if ($Component -in 'all', 'backend') {
         Write-Step "Building backend Docker image..."
         try {
-            $backendImage = "$REGISTRY/$GITHUB_REPO/backend:latest"
+            $backendImage = "$DOCKER_USER/thynkr-backend:latest"
             
             if ($NoCache) {
                 docker build --no-cache -t $backendImage ./backend
@@ -146,7 +145,7 @@ if (-not $SkipBuild) {
             }
             Write-Success "Backend image built"
             
-            Write-Info "Pushing backend image to GitHub Container Registry..."
+            Write-Info "Pushing backend image to Docker Hub..."
             docker push $backendImage
             if ($LASTEXITCODE -ne 0) { 
                 throw "Backend push failed" 
@@ -162,7 +161,7 @@ if (-not $SkipBuild) {
     if ($Component -in 'all', 'frontend') {
         Write-Step "Building frontend Docker image..."
         try {
-            $frontendImage = "$REGISTRY/$GITHUB_REPO/frontend:latest"
+            $frontendImage = "$DOCKER_USER/thynkr-frontend:latest"
             
             if ($NoCache) {
                 docker build --no-cache -t $frontendImage ./frontend
@@ -175,7 +174,7 @@ if (-not $SkipBuild) {
             }
             Write-Success "Frontend image built"
             
-            Write-Info "Pushing frontend image to GitHub Container Registry..."
+            Write-Info "Pushing frontend image to Docker Hub..."
             docker push $frontendImage
             if ($LASTEXITCODE -ne 0) { 
                 throw "Frontend push failed" 
