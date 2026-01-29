@@ -11,7 +11,6 @@ import { logger } from '../lib/logger';
 import fs from 'fs/promises';
 import { createReadStream } from 'fs';
 import path from 'path';
-import { Readable } from 'stream';
 
 // Supported voices
 const VOICES = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'] as const;
@@ -328,19 +327,14 @@ export default async function ttsRoutes(server: FastifyInstance) {
           response_format: 'mp3',
         });
 
-        if (!response.body) {
-          throw new Error('No response body from OpenAI');
-        }
-
         // Set headers for streaming
         reply.header('Content-Type', 'audio/mpeg');
         reply.header('X-TTS-Quality', model);
         
-        // Convert ReadableStream to Node Stream
-        // @ts-ignore
-        const nodeStream = Readable.fromWeb(response.body);
-        
-        return reply.send(nodeStream);
+        // OpenAI SDK 4.x - pipe the response body directly as a stream
+        // The SDK returns a Response-like object with a Node-compatible body
+        const nodeReadable = response.body as unknown as NodeJS.ReadableStream;
+        return reply.send(nodeReadable);
 
       } catch (error: any) {
         logger.error({ error: error.message, userId }, 'Stream generation failed');
