@@ -929,8 +929,23 @@ Provide your response in this exact JSON format:
           ...(notifications.length > 0 && { notifications }),
         });
       } catch (error: any) {
-        server.log.error({ error, fileId: id }, 'Failed to generate summary');
-        return reply.code(500).send({ error: 'Failed to generate summary' });
+        server.log.error(
+          {
+            error: error.message,
+            stack: error.stack,
+            fileId: id,
+            language,
+          },
+          'Failed to generate summary'
+        );
+
+        // Return more specific error message
+        const errorMessage =
+          error.message?.includes('API key') || error.message?.includes('invalid')
+            ? 'AI service is not configured properly. Please contact support.'
+            : 'Failed to generate summary. Please try again.';
+
+        return reply.code(500).send({ error: errorMessage, details: error.message });
       }
     }
   );

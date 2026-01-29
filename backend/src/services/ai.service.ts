@@ -161,6 +161,13 @@ export class AIService {
     text: string,
     language: string = DEFAULT_LANGUAGE
   ): Promise<GeneratedSummary> {
+    const apiKey = config.gemini?.apiKey || process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === 'dummy-key') {
+      throw new Error(
+        'Gemini API key is not configured. Please set GEMINI_API_KEY environment variable.'
+      );
+    }
+
     const normalizedLanguage = this.normalizeLanguage(language);
     const preparedText = this.prepareText(text);
     const cacheKey = `summary_${normalizedLanguage}_${this.hashText(preparedText)}`;
@@ -210,6 +217,13 @@ ${preparedText}`;
    * Generate structured study notes using Gemini 2.5 Flash Lite
    */
   async generateNotes(text: string, language: string = DEFAULT_LANGUAGE): Promise<GeneratedNotes> {
+    const apiKey = config.gemini?.apiKey || process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === 'dummy-key') {
+      throw new Error(
+        'Gemini API key is not configured. Please set GEMINI_API_KEY environment variable.'
+      );
+    }
+
     const normalizedLanguage = this.normalizeLanguage(language);
     const preparedText = this.prepareText(text);
     const cacheKey = `notes_${normalizedLanguage}_${this.hashText(preparedText)}`;
@@ -268,6 +282,13 @@ ${preparedText}`;
     difficulty: QuizDifficulty,
     language: string = DEFAULT_LANGUAGE
   ): Promise<GeneratedQuiz> {
+    const apiKey = config.gemini?.apiKey || process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === 'dummy-key') {
+      throw new Error(
+        'Gemini API key is not configured. Please set GEMINI_API_KEY environment variable.'
+      );
+    }
+
     const normalizedLanguage = this.normalizeLanguage(language);
     const preparedText = this.prepareText(text, 120000); // Gemini can handle much more
     const cacheKey = `quiz_${normalizedLanguage}_${this.hashText(preparedText)}_${numQuestions}_${difficulty}`;
@@ -352,6 +373,13 @@ ${preparedText}`;
     numCards: number,
     language: string = DEFAULT_LANGUAGE
   ): Promise<GeneratedFlashcards> {
+    const apiKey = config.gemini?.apiKey || process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === 'dummy-key') {
+      throw new Error(
+        'Gemini API key is not configured. Please set GEMINI_API_KEY environment variable.'
+      );
+    }
+
     const normalizedLanguage = this.normalizeLanguage(language);
     const preparedText = this.prepareText(text, 100000);
     const cacheKey = `flashcards_${normalizedLanguage}_${this.hashText(preparedText)}_${numCards}`;
