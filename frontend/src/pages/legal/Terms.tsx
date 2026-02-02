@@ -2,7 +2,6 @@ import { Helmet } from 'react-helmet-async';
 import { Scale } from 'lucide-react';
 import PageContainer from '@/components/layout/PageContainer';
 import Card from '@/components/ui/Card';
-import GradientText from '@/components/ui/GradientText';
 
 export default function Terms() {
   return (
