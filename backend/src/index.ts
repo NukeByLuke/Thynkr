@@ -148,6 +148,23 @@ async function start() {
     await server.register(contentRoutes, { prefix: '/api/content' });
     await server.register(adminRoutes, { prefix: '/api/admin' });
     await server.register(stripeRoutes, { prefix: '/api/stripe' });
+    
+    // Register Stripe routes again at /api/webhooks for webhook endpoint
+    // This makes /webhook available at /api/webhooks/stripe
+    await server.register(async (instance) => {
+      instance.post('/stripe', {
+        config: { rawBody: true }
+      }, async (request) => {
+        // Forward to the stripe webhook handler
+        return server.inject({
+          method: 'POST',
+          url: '/api/stripe/webhook',
+          headers: request.headers,
+          payload: (request as any).rawBody
+        });
+      });
+    }, { prefix: '/api/webhooks' });
+    
     await server.register(studyRoutes, { prefix: '/api/study' });
     await server.register(userCoursesRoutes, { prefix: '/api' });
     await server.register(progressRoutes, { prefix: '/api/progress' });

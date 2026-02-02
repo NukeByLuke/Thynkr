@@ -13,6 +13,7 @@ import {
   PasswordResetRequestInput,
   PasswordResetInput,
 } from '../schemas/validation.schemas';
+import { sendVerificationEmail, sendPasswordResetEmail } from './email.service';
 
 /**
  * AuthService - Manages authentication and user account operations
@@ -80,10 +81,19 @@ export class AuthService {
       },
     });
 
-    // TODO: Send verification email
-    // if (config.features.emailVerification) {
-    //   await sendVerificationEmail(user.email, user.emailVerifyToken);
-    // }
+    // Send verification email
+    try {
+      const token = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { emailVerifyToken: true },
+      });
+      if (token?.emailVerifyToken) {
+        await sendVerificationEmail(user.email, token.emailVerifyToken);
+      }
+    } catch (error) {
+      // Log but don't fail registration if email fails
+      console.error('Failed to send verification email:', error);
+    }
 
     return user;
   }
@@ -216,8 +226,13 @@ export class AuthService {
       },
     });
 
-    // TODO: Send reset email
-    // await sendPasswordResetEmail(user.email, resetToken);
+    // Send reset email
+    try {
+      await sendPasswordResetEmail(user.email, resetToken);
+    } catch (error) {
+      // Log but don't reveal if email failed
+      console.error('Failed to send password reset email:', error);
+    }
 
     return { message: 'If the email exists, a reset link has been sent' };
   }

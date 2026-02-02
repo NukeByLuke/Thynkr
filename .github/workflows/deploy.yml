@@ -58,6 +58,10 @@ jobs:
           build-args: |
             VITE_API_URL=${{ secrets.VITE_API_URL }}
             VITE_PREVIEW_PASSWORD=${{ secrets.VITE_PREVIEW_PASSWORD }}
+            VITE_STRIPE_PRICE_STANDARD_MONTHLY=${{ secrets.VITE_STRIPE_PRICE_STANDARD_MONTHLY }}
+            VITE_STRIPE_PRICE_STANDARD_YEARLY=${{ secrets.VITE_STRIPE_PRICE_STANDARD_YEARLY }}
+            VITE_STRIPE_PRICE_PREMIUM_MONTHLY=${{ secrets.VITE_STRIPE_PRICE_PREMIUM_MONTHLY }}
+            VITE_STRIPE_PRICE_PREMIUM_YEARLY=${{ secrets.VITE_STRIPE_PRICE_PREMIUM_YEARLY }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
