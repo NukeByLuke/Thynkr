@@ -425,7 +425,7 @@ export default function Files() {
               </p>
             </div>
             
-            <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
               {/* Search Bar - Integrated Design */}
               <div className="relative flex-1 sm:w-80">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -443,9 +443,9 @@ export default function Files() {
                 onClick={() => setShowUploadModal(true)}
                 className="group relative px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 active:scale-95 will-change-transform"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                   <Upload className="w-5 h-5" />
-                  <span className="hidden sm:inline whitespace-nowrap">Upload</span>
+                  <span className="whitespace-nowrap">Upload</span>
                 </div>
               </button>
             </div>
@@ -528,8 +528,8 @@ export default function Files() {
           {/* Files List - Modern Table Design */}
           {(isLoading || filteredFiles.length > 0) && (
             <div className="bg-white dark:bg-slate-900/60 backdrop-blur-md border-2 border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden min-h-[400px] shadow-lg">
-              {/* Table Header - Sticky */}
-              <div className="grid grid-cols-[40px_40px_1fr_120px_120px_80px_40px] gap-4 px-6 py-4 border-b-2 border-slate-200 dark:border-white/10 text-xs uppercase tracking-wider font-semibold text-slate-700 dark:text-slate-400 sticky top-0 bg-slate-50 dark:bg-slate-900/95 backdrop-blur-md z-10">
+              {/* Table Header - Sticky (Hidden on mobile) */}
+              <div className="hidden md:grid grid-cols-[40px_40px_1fr_120px_120px_80px_40px] gap-4 px-6 py-4 border-b-2 border-slate-200 dark:border-white/10 text-xs uppercase tracking-wider font-semibold text-slate-700 dark:text-slate-400 sticky top-0 bg-slate-50 dark:bg-slate-900/95 backdrop-blur-md z-10">
                 <div className="flex items-center justify-center">
                   <input
                     type="checkbox"
@@ -550,13 +550,13 @@ export default function Files() {
               {isLoading ? (
                 <div className="divide-y divide-slate-200/50 dark:divide-white/5">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="grid grid-cols-[40px_40px_1fr_120px_120px_80px_40px] gap-4 items-center px-6 py-4 animate-pulse min-h-[64px]">
+                    <div key={i} className="grid grid-cols-[40px_40px_1fr_40px] md:grid-cols-[40px_40px_1fr_120px_120px_80px_40px] gap-3 md:gap-4 items-center px-4 md:px-6 py-3 md:py-4 animate-pulse min-h-[64px]">
                       <div className="flex justify-center"><div className="w-5 h-5 bg-slate-200 dark:bg-slate-800 rounded" /></div>
                       <div className="flex justify-center"><div className="w-5 h-5 bg-slate-200 dark:bg-slate-800 rounded" /></div>
                       <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-3/4" />
-                      <div className="flex justify-center"><div className="w-20 h-6 bg-slate-200 dark:bg-slate-800 rounded-full" /></div>
-                      <div className="flex justify-center"><div className="w-24 h-4 bg-slate-200 dark:bg-slate-800 rounded" /></div>
-                      <div className="flex justify-end"><div className="w-16 h-4 bg-slate-200 dark:bg-slate-800 rounded" /></div>
+                      <div className="hidden md:flex justify-center"><div className="w-20 h-6 bg-slate-200 dark:bg-slate-800 rounded-full" /></div>
+                      <div className="hidden md:flex justify-center"><div className="w-24 h-4 bg-slate-200 dark:bg-slate-800 rounded" /></div>
+                      <div className="hidden md:flex justify-end"><div className="w-16 h-4 bg-slate-200 dark:bg-slate-800 rounded" /></div>
                       <div className="flex justify-center"><div className="w-6 h-6 bg-slate-200 dark:bg-slate-800 rounded" /></div>
                     </div>
                   ))}
@@ -577,7 +577,7 @@ export default function Files() {
                           transition={{ delay: index * 0.02, duration: 0.15 }}
                           onDoubleClick={() => handleFileDoubleClick(file.id)}
                           onContextMenu={(e) => handleContextMenu(e, 'file', file.id, file.originalName)}
-                          className={`group grid grid-cols-[40px_40px_1fr_120px_120px_80px_40px] gap-4 items-center px-6 py-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-all duration-150 cursor-pointer min-h-[64px] will-change-transform active:scale-[0.99] border-b border-slate-100 dark:border-white/5 last:border-0 ${isSelected ? 'bg-blue-50 dark:bg-blue-500/10' : ''}`}
+                          className={`group grid grid-cols-[40px_40px_1fr_40px] md:grid-cols-[40px_40px_1fr_120px_120px_80px_40px] gap-3 md:gap-4 items-center px-4 md:px-6 py-3 md:py-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-all duration-150 cursor-pointer min-h-[64px] will-change-transform active:scale-[0.99] border-b border-slate-100 dark:border-white/5 last:border-0 ${isSelected ? 'bg-blue-50 dark:bg-blue-500/10' : ''}`}
                         >
                           {/* Checkbox */}
                           <div className="flex items-center justify-center">
@@ -600,26 +600,33 @@ export default function Files() {
                             <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
                               {file.originalName}
                             </p>
+                            {/* Show type and size on mobile below name */}
+                            <div className="flex md:hidden items-center gap-2 mt-1">
+                              <FileTypeBadge mimeType={file.fileType} fileName={file.originalName} />
+                              <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                                {formatFileSize(file.fileSize)}
+                              </span>
+                            </div>
                           </div>
 
-                          {/* Type Badge */}
-                          <div className="flex justify-center">
+                          {/* Type Badge (Hidden on mobile) */}
+                          <div className="hidden md:flex justify-center">
                             <FileTypeBadge mimeType={file.fileType} fileName={file.originalName} />
                           </div>
 
-                          {/* Date */}
-                          <div className="flex items-center justify-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                          {/* Date (Hidden on mobile) */}
+                          <div className="hidden md:flex items-center justify-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                             <Calendar className="w-3.5 h-3.5" />
                             <span>{formatDate(file.createdAt)}</span>
                           </div>
 
-                          {/* Size */}
-                          <div className="text-right text-sm font-mono text-slate-600 dark:text-slate-400">
+                          {/* Size (Hidden on mobile) */}
+                          <div className="hidden md:block text-right text-sm font-mono text-slate-600 dark:text-slate-400">
                             {formatFileSize(file.fileSize)}
                           </div>
 
                           {/* Actions */}
-                          <div className="flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                          <div className="flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-150">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();

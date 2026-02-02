@@ -60,7 +60,7 @@ const StudySidebarComponent: React.FC<StudySidebarProps> = ({
 
   return (
     <aside
-      className={`h-screen bg-white/80 dark:bg-slate-900/80 border-r border-slate-200/50 dark:border-slate-700/50 flex flex-col transition-all duration-150 ease-out ${
+      className={`hidden lg:flex h-screen bg-white/80 dark:bg-slate-900/80 border-r border-slate-200/50 dark:border-slate-700/50 flex-col transition-all duration-150 ease-out ${
         isCollapsed ? 'w-16' : 'w-64'
       }`}
     >
