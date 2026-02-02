@@ -41,7 +41,7 @@ export default function Footer() {
               Terms
             </Link>
             <a
-              href="mailto:contact@thynkr.ca"
+              href="mailto:support@thynkr.ca"
               className="text-sm text-[#6B7280] dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
               Contact
