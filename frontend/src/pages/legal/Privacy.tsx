@@ -19,14 +19,14 @@ export default function Privacy() {
         <div className="py-12 max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                <Shield className="w-8 h-8 text-white" />
               </div>
-              <GradientText as="h1" className="text-4xl md:text-5xl">
-                Privacy Policy
-              </GradientText>
             </div>
+            <GradientText as="h1" className="text-4xl md:text-5xl mb-4">
+              Privacy Policy
+            </GradientText>
             <p className="text-lg text-slate-600 dark:text-slate-400">
               Last updated: February 2, 2026
             </p>
@@ -228,10 +228,10 @@ export default function Privacy() {
               <p>
                 To exercise these rights, please contact us at{' '}
                 <a
-                  href="mailto:privacy@thynkr.ca"
+                  href="mailto:support@thynkr.ca"
                   className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                 >
-                  privacy@thynkr.ca
+                  support@thynkr.ca
                 </a>
                 .
               </p>
@@ -281,10 +281,10 @@ export default function Privacy() {
                 <li>
                   Email:{' '}
                   <a
-                    href="mailto:privacy@thynkr.ca"
+                    href="mailto:support@thynkr.ca"
                     className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                   >
-                    privacy@thynkr.ca
+                    support@thynkr.ca
                   </a>
                 </li>
                 <li>

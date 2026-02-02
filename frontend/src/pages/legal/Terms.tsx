@@ -19,14 +19,14 @@ export default function Terms() {
         <div className="py-12 max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <Scale className="w-6 h-6 text-white" />
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                <Scale className="w-8 h-8 text-white" />
               </div>
-              <GradientText as="h1" className="text-4xl md:text-5xl">
-                Terms of Service
-              </GradientText>
             </div>
+            <GradientText as="h1" className="text-4xl md:text-5xl mb-4">
+              Terms of Service
+            </GradientText>
             <p className="text-lg text-slate-600 dark:text-slate-400">
               Last updated: February 2, 2026
             </p>
@@ -243,10 +243,10 @@ export default function Terms() {
                 We respect intellectual property rights and expect our users to do the same. If you
                 believe that content on Thynkr infringes your copyright, please contact us at{' '}
                 <a
-                  href="mailto:dmca@thynkr.ca"
+                  href="mailto:support@thynkr.ca"
                   className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                 >
-                  dmca@thynkr.ca
+                  support@thynkr.ca
                 </a>{' '}
                 with the following information:
               </p>
@@ -346,10 +346,10 @@ export default function Terms() {
                 <li>
                   Email:{' '}
                   <a
-                    href="mailto:legal@thynkr.ca"
+                    href="mailto:support@thynkr.ca"
                     className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                   >
-                    legal@thynkr.ca
+                    support@thynkr.ca
                   </a>
                 </li>
                 <li>
