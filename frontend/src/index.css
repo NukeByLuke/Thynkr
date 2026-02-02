@@ -321,7 +321,6 @@
     caret-color: #F9FAFB !important;
   }
 
-@layer base {
   html {
     overflow-x: hidden;
     width: 100%;
