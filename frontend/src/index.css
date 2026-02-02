@@ -321,6 +321,12 @@
     caret-color: #F9FAFB !important;
   }
 
+@layer base {
+  html {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
   body {
     font-family: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     transition: background-color var(--transition-theme), color var(--transition-theme);
@@ -329,6 +335,12 @@
     font-weight: 400;
     font-size: 15px;
     position: relative;
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  #root {
+    isolation: isolate;
   }
 
   /* Sunrise background */

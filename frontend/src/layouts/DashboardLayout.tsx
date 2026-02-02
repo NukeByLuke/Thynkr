@@ -26,8 +26,8 @@ export default function DashboardLayout() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Header Bar - Visible on all screens */}
-        <header className="h-14 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-white/5 flex items-center justify-between px-4 lg:px-6 relative z-50">
+        {/* Top Header Bar - Sticky on all screens */}
+        <header className="sticky top-0 h-14 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-white/5 flex items-center justify-between px-4 lg:px-6 relative z-50">
           {/* Left: Mobile menu button + Logo OR custom header content */}
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {!customHeaderContent ? (
@@ -60,8 +60,8 @@ export default function DashboardLayout() {
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className={`flex-1 overflow-y-auto bg-transparent ${hideSidebar ? 'p-0' : 'p-4 lg:p-6'}`}>
+        {/* Main Content - Extra bottom padding on mobile for bottom nav */}
+        <main className={`flex-1 overflow-y-auto bg-transparent ${hideSidebar ? 'p-0 pb-20 lg:pb-0' : 'p-4 pb-24 lg:p-6 lg:pb-6'}`}>
           <Outlet />
         </main>
       </div>

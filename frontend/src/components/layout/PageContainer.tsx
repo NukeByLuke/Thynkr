@@ -59,7 +59,7 @@ export default function PageContainer({
 }: PageContainerProps) {
   const containerClasses = `
     ${fluid ? 'w-full' : 'max-w-6xl mx-auto'}
-    ${noPadding ? '' : 'px-8 lg:px-16 py-6'}
+    ${noPadding ? '' : 'px-4 sm:px-6 lg:px-8 py-6'}
     ${className}
   `.trim();
 
@@ -92,7 +92,7 @@ export default function PageContainer({
  */
 function Header({ children, className = '', subtitle, actions }: HeaderProps) {
   return (
-    <header className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ${className}`}>
+    <header className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 ${className}`}>
       <div>
         <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white tracking-tight">
           {children}
