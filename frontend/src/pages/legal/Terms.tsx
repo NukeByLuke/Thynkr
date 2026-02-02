@@ -18,16 +18,18 @@ export default function Terms() {
       <PageContainer>
         <div className="py-12 max-w-4xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-16">
             <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <Scale className="w-8 h-8 text-white" />
+              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                <Scale className="w-10 h-10 text-white" />
               </div>
             </div>
-            <GradientText as="h1" className="text-4xl md:text-5xl mb-4">
-              Terms of Service
-            </GradientText>
-            <p className="text-lg text-slate-600 dark:text-slate-400">
+            <h1 className="text-4xl md:text-6xl font-bold mb-4">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 dark:from-purple-400 dark:via-pink-400 dark:to-purple-400">
+                Terms of Service
+              </span>
+            </h1>
+            <p className="text-base text-slate-500 dark:text-slate-400">
               Last updated: February 2, 2026
             </p>
           </div>

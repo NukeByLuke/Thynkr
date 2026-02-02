@@ -20,14 +20,16 @@ export default function Cookies() {
           {/* Header */}
           <div className="text-center mb-12">
             <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
-                <Cookie className="w-8 h-8 text-white" />
+              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg">
+                <Cookie className="w-10 h-10 text-white" />
               </div>
             </div>
-            <GradientText as="h1" className="text-4xl md:text-5xl mb-4">
-              Cookie Policy
-            </GradientText>
-            <p className="text-lg text-slate-600 dark:text-slate-400">
+            <h1 className="text-4xl md:text-6xl font-bold mb-4">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-600 via-amber-600 to-orange-600 dark:from-orange-400 dark:via-amber-400 dark:to-orange-400">
+                Cookie Policy
+              </span>
+            </h1>
+            <p className="text-base text-slate-500 dark:text-slate-400">
               Last updated: February 2, 2026
             </p>
           </div>
