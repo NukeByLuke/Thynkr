@@ -15,8 +15,8 @@ export default function Terms() {
         />
       </Helmet>
 
-      <PageContainer maxWidth="4xl">
-        <div className="py-12">
+      <PageContainer>
+        <div className="py-12 max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-3 mb-4">
