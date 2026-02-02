@@ -21,9 +21,11 @@ import PreviewGate from '@/features/courses/PreviewGate';
 import GlobalLoadingBar from '@/components/ui/GlobalLoadingBar';
 import BackgroundShapes from '@/components/ui/BackgroundShapes';
 import {
-  Login, Register, AuthCallback, OAuthCallback, Pricing, Account, Admin,
-  Study, ImmersiveStudy, Files, Settings, Courses, MyCourseDetail,
-  StudyModePage, Achievements, PublicAchievements, NotFound
+  Login, Register, AuthCallback, OAuthCallback, ForgotPassword, VerifyEmail, 
+  ResetPassword, Pricing, Account, Admin, Study, ImmersiveStudy, Files, 
+  Settings, Courses, MyCourseDetail, StudyModePage, Achievements, 
+  PublicAchievements, NotFound, Privacy, Terms, Cookies, About, Contact, 
+  Testimonials
 } from './routes';
 
 /**
@@ -111,11 +113,24 @@ function AppContent() {
             <Route path="/register" element={<Register />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/oauth-callback" element={<OAuthCallback />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             {/* Public routes with PublicLayout (navbar) */}
             <Route element={<PublicLayout />}>
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/u/:username" element={<PublicAchievements />} />
+              
+              {/* Legal pages */}
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/cookies" element={<Cookies />} />
+              
+              {/* Public marketing pages */}
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/testimonials" element={<Testimonials />} />
             </Route>
 
           <Route

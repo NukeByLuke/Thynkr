@@ -18,6 +18,7 @@ import prisma from '../db/client';
 import fs from 'fs/promises';
 import { normalizeFileForLanguage, resolveUserLanguage } from '../utils/language.utils';
 import { canUploadFile, getUserUsageStats } from '../lib/tier-limits';
+import { checkAIRateLimit, recordAIUsage } from '../middleware/ai-rate-limit.middleware';
 import { GoogleGenAI } from '@google/genai';
 
 const fileProcessor = new FileProcessorService();
@@ -365,7 +366,7 @@ export default async function studyRoutes(server: FastifyInstance) {
   server.post(
     '/upload-youtube',
     {
-      preHandler: [authenticate],
+      preHandler: [authenticate, checkAIRateLimit],
     },
     async (request: AuthenticatedRequest, reply) => {
       try {
@@ -386,6 +387,16 @@ export default async function studyRoutes(server: FastifyInstance) {
         });
         if (!user) {
           return reply.code(404).send({ error: 'User not found' });
+        }
+
+        // Check if user tier allows YouTube processing (paid plans only)
+        const { getTierLimits } = await import('../lib/tier-limits');
+        const limits = getTierLimits(user.role);
+        if (!limits.canProcessYouTube) {
+          return reply.code(403).send({
+            error: 'YouTube video processing is only available for Standard and Premium plans',
+            upgradeRequired: true,
+          });
         }
 
         // Check upload limits (temporarily disabled for development)
@@ -455,10 +466,10 @@ export default async function studyRoutes(server: FastifyInstance) {
         let extractionMethod = 'metadata-only';
 
         // ===== Gemini Direct YouTube URL (Processes Video Natively) =====
-        // Uses gemini-3-flash-preview which supports YouTube URLs directly
-        // Limitations: 8hr/day free tier, public videos only, up to 10 videos per request
+        // Uses gemini-2.5-flash-lite for cost efficiency
+        // Limitations: public videos only, up to 10 videos per request
         try {
-          server.log.info({ videoId }, 'Processing YouTube video with Gemini 3 Flash...');
+          server.log.info({ videoId }, 'Processing YouTube video with Gemini 2.5 Flash Lite...');
           
           const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
           
@@ -480,7 +491,7 @@ export default async function studyRoutes(server: FastifyInstance) {
           });
           
           const geminiPromise = genai.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-2.5-flash-lite',
             contents: contents,
           });
           
@@ -527,6 +538,14 @@ export default async function studyRoutes(server: FastifyInstance) {
 
         // Track activity
         await trackStudyActivity(userId, 'FILE_UPLOAD', uploadedFile.id);
+
+        // Record AI usage for YouTube transcription (uses Gemini tokens)
+        if (hasTranscript) {
+          await recordAIUsage(userId, 'SUMMARY_VIEW', {
+            fileId: uploadedFile.id,
+            tokensUsed: Math.ceil(transcriptText.length / 4), // Approximate token count
+          });
+        }
 
         return reply.code(201).send({ file: uploadedFile });
       } catch (error: any) {

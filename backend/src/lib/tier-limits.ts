@@ -10,30 +10,33 @@ export interface TierLimits {
   canCreatePrivateCourses: boolean;
   canCreatePublicCourses: boolean;
   canUseTutor: boolean;
+  canProcessYouTube: boolean;
   hasEmailSupport: boolean;
   hasPrioritySupport: boolean;
 }
 
 export const TIER_LIMITS: Record<string, TierLimits> = {
   BASIC: {
-    uploadsPerMonth: -1, // unlimited for testing
-    aiRequestsPerMonth: -1, // unlimited for testing
-    ttsMaxCharactersPerRequest: -1, // unlimited for testing
-    ttsMaxRequestsPerDay: -1, // unlimited for testing
+    uploadsPerMonth: 10,
+    aiRequestsPerMonth: 50,
+    ttsMaxCharactersPerRequest: 5000,
+    ttsMaxRequestsPerDay: 10,
     canCreatePrivateCourses: false,
     canCreatePublicCourses: false,
     canUseTutor: false,
+    canProcessYouTube: false,
     hasEmailSupport: false,
     hasPrioritySupport: false,
   },
   STANDARD: {
-    uploadsPerMonth: -1, // unlimited for testing
-    aiRequestsPerMonth: -1, // unlimited for testing
-    ttsMaxCharactersPerRequest: -1, // unlimited for testing
-    ttsMaxRequestsPerDay: -1, // unlimited for testing
+    uploadsPerMonth: 100,
+    aiRequestsPerMonth: 500,
+    ttsMaxCharactersPerRequest: 10000,
+    ttsMaxRequestsPerDay: 100,
     canCreatePrivateCourses: true,
     canCreatePublicCourses: false,
     canUseTutor: false,
+    canProcessYouTube: true,
     hasEmailSupport: true,
     hasPrioritySupport: false,
   },
@@ -45,6 +48,7 @@ export const TIER_LIMITS: Record<string, TierLimits> = {
     canCreatePrivateCourses: true,
     canCreatePublicCourses: true,
     canUseTutor: true,
+    canProcessYouTube: true,
     hasEmailSupport: true,
     hasPrioritySupport: true,
   },
@@ -56,6 +60,7 @@ export const TIER_LIMITS: Record<string, TierLimits> = {
     canCreatePrivateCourses: true,
     canCreatePublicCourses: true,
     canUseTutor: true,
+    canProcessYouTube: true,
     hasEmailSupport: true,
     hasPrioritySupport: true,
   },

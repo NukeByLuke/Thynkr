@@ -58,8 +58,8 @@ const Sidebar = () => {
       className="relative h-screen bg-stone-50/80 dark:bg-slate-950/95 backdrop-blur-xl border-r border-stone-200/50 dark:border-midnight-blue/30 flex flex-col shadow-xl shadow-stone-200/20 dark:shadow-black/40"
     >
       {/* Header */}
-      <div className="h-16 px-4 flex items-center justify-between border-b border-stone-200/50 dark:border-midnight-blue/30">
-        <Link to="/study" className="flex items-center gap-0.5 overflow-hidden">
+      <div className={`h-16 px-4 flex items-center ${isExpanded ? 'justify-between' : 'justify-center'} border-b border-stone-200/50 dark:border-midnight-blue/30`}>
+        <Link to="/study" className={`flex items-center gap-0.5 overflow-hidden ${!isExpanded ? 'justify-center' : ''}`}>
           <Logo variant="icon" size="xl" animated={false} className="flex-shrink-0" />
           <AnimatePresence mode="wait">
             {isExpanded && (
@@ -98,16 +98,22 @@ const Sidebar = () => {
               to={link.to}
               onMouseEnter={() => link.component?.preload()}
               className={`
-                relative flex items-center gap-3 px-3 py-2.5 rounded-xl
-                transition-all duration-150 group
+                relative flex items-center gap-3 rounded-xl transition-all duration-150 group
+                ${isExpanded ? 'px-3 py-2.5' : 'justify-center p-2 mx-auto aspect-square w-10'}
                 ${isLinkActive
-                  ? 'text-sunrise-fuchsia dark:text-white bg-gradient-to-r from-sunrise-pink/20 to-sunrise-peach/20 dark:from-midnight-purple/30 dark:to-midnight-blue-light/30 shadow-lg shadow-sunrise-pink/20 dark:shadow-midnight-purple/25 font-semibold border border-sunrise-pink/30 dark:border-midnight-purple/30'
+                  ? isExpanded
+                    ? 'text-sunrise-fuchsia dark:text-white bg-gradient-to-r from-sunrise-pink/20 to-sunrise-peach/20 dark:from-midnight-purple/30 dark:to-midnight-blue-light/30 shadow-lg shadow-sunrise-pink/20 dark:shadow-midnight-purple/25 font-semibold border border-sunrise-pink/30 dark:border-midnight-purple/30'
+                    : 'text-white bg-gradient-to-br from-sunrise-pink to-sunrise-orange dark:from-midnight-violet dark:to-midnight-cyan shadow-lg'
                   : 'text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/5 hover:scale-[1.02]'
                 }
               `}
             >
               <Icon className={`w-5 h-5 flex-shrink-0 transition-all ${
-                isLinkActive ? 'text-sunrise-pink dark:text-white dark:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]' : ''
+                isLinkActive 
+                  ? isExpanded 
+                    ? 'text-sunrise-pink dark:text-white dark:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]'
+                    : 'text-white'
+                  : ''
               }`} />
 
               {isExpanded && (
@@ -129,17 +135,17 @@ const Sidebar = () => {
 
       {/* Upgrade CTA */}
       {!isPremium && isExpanded && (
-        <div className="mx-3 mb-2 p-4 rounded-xl bg-gradient-to-br from-sunrise-pink/20 to-sunrise-orange/30 dark:from-midnight-violet dark:to-midnight-cyan shadow-lg relative overflow-hidden group flex-shrink-0">
+        <div className="mx-3 mb-2 p-4 rounded-xl bg-gradient-to-br from-sunrise-pink/20 to-sunrise-orange/30 dark:from-midnight-violet/20 dark:to-midnight-cyan/20 border border-sunrise-pink/20 dark:border-midnight-cyan/30 shadow-lg relative overflow-hidden group flex-shrink-0">
           <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-            <Sparkles className="w-16 h-16 transform rotate-12" />
+            <Sparkles className="w-16 h-16 transform rotate-12 text-sunrise-fuchsia dark:text-midnight-cyan" />
           </div>
-          <h3 className="font-semibold text-sm mb-1 relative z-10 text-sunrise-fuchsia dark:text-white">Upgrade to Pro</h3>
-          <p className="text-[10px] text-sunrise-pink dark:text-midnight-blue mb-3 relative z-10 leading-tight">
+          <h3 className="font-semibold text-sm mb-1 relative z-10 text-sunrise-fuchsia dark:text-midnight-cyan">Upgrade to Pro</h3>
+          <p className="text-[10px] text-sunrise-pink dark:text-slate-300 mb-3 relative z-10 leading-tight">
             Unlock unlimited AI tutoring and advanced analytics.
           </p>
           <Link
             to="/pricing"
-            className="block w-full py-1.5 bg-gradient-to-r from-sunrise-pink to-sunrise-orange dark:from-white dark:to-white text-white dark:text-midnight-violet text-xs font-bold text-center rounded-lg hover:from-sunrise-fuchsia hover:to-sunrise-pink dark:hover:bg-stone-100 transition-all relative z-10"
+            className="block w-full py-1.5 bg-gradient-to-r from-sunrise-pink to-sunrise-orange dark:from-midnight-cyan dark:to-midnight-violet text-white text-xs font-bold text-center rounded-lg hover:from-sunrise-fuchsia hover:to-sunrise-pink dark:hover:from-midnight-violet dark:hover:to-midnight-cyan transition-all relative z-10 shadow-md"
           >
             Get Pro Access
           </Link>
@@ -157,16 +163,22 @@ const Sidebar = () => {
               key={link.to}
               to={link.to}
               className={`
-                flex items-center gap-3 px-3 py-2.5 rounded-xl
-                transition-all duration-150 group
+                relative flex items-center gap-3 rounded-xl transition-all duration-150 group
+                ${isExpanded ? 'px-3 py-2.5' : 'justify-center p-2 mx-auto aspect-square w-10'}
                 ${isLinkActive
-                  ? 'text-indigo-700 dark:text-white bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-500 dark:to-purple-500 shadow-lg shadow-indigo-200/50 dark:shadow-indigo-500/25 font-semibold'
+                  ? isExpanded
+                    ? 'text-indigo-700 dark:text-white bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-500 dark:to-purple-500 shadow-lg shadow-indigo-200/50 dark:shadow-indigo-500/25 font-semibold'
+                    : 'text-white bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg'
                   : 'text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/5 hover:scale-[1.02]'
                 }
               `}
             >
               <Icon className={`w-5 h-5 flex-shrink-0 transition-all ${
-                isLinkActive ? 'text-sunrise-pink dark:text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]' : ''
+                isLinkActive 
+                  ? isExpanded
+                    ? 'text-sunrise-pink dark:text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]'
+                    : 'text-white'
+                  : ''
               }`} />
               {isExpanded && (
                 <span className="text-sm font-medium whitespace-nowrap">
@@ -187,7 +199,10 @@ const Sidebar = () => {
         {/* Logout Button */}
         <button
           onClick={logout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-stone-700 dark:text-stone-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-200 group"
+          className={`
+            relative flex items-center gap-3 rounded-xl text-stone-700 dark:text-stone-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-200 group
+            ${isExpanded ? 'w-full px-3 py-2.5' : 'justify-center p-2 mx-auto aspect-square w-10'}
+          `}
         >
           <LogOut className="w-5 h-5 flex-shrink-0" />
           {isExpanded && (

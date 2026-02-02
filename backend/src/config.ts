@@ -44,6 +44,16 @@ export const config = {
     from: process.env.EMAIL_FROM || 'noreply@thynkr.com',
   },
 
+  resend: {
+    apiKey: process.env.RESEND_API_KEY || '',
+    fromEmail: process.env.RESEND_FROM_EMAIL || 'Thynkr <onboarding@resend.dev>',
+    enabled: process.env.RESEND_ENABLED === 'true',
+  },
+
+  app: {
+    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
+  },
+
   features: {
     emailVerification: process.env.ENABLE_EMAIL_VERIFICATION === 'true',
     analytics: process.env.ENABLE_ANALYTICS === 'true',

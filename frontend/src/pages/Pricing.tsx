@@ -41,6 +41,18 @@ const STRIPE_PRICES = {
   },
 };
 
+// Debug logging
+console.log('Stripe Price IDs:', {
+  standard: {
+    monthly: import.meta.env.VITE_STRIPE_PRICE_STANDARD_MONTHLY,
+    yearly: import.meta.env.VITE_STRIPE_PRICE_STANDARD_YEARLY,
+  },
+  premium: {
+    monthly: import.meta.env.VITE_STRIPE_PRICE_PREMIUM_MONTHLY,
+    yearly: import.meta.env.VITE_STRIPE_PRICE_PREMIUM_YEARLY,
+  },
+});
+
 export default function Pricing() {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
   const [isLoading, setIsLoading] = useState<string | null>(null);
@@ -60,8 +72,10 @@ export default function Pricing() {
         { text: 'AI-generated summaries', included: true },
         { text: 'Smart flashcards', included: true },
         { text: 'Basic notes & quizzes', included: true },
-        { text: '5 file uploads per month', included: true },
+        { text: 'Text-to-speech narration', included: true },
         { text: '50 AI requests per month', included: true },
+        { text: '10 file uploads per month', included: true },
+        { text: 'YouTube video processing', included: false },
         { text: 'Private courses', included: false },
         { text: 'Public course publishing', included: false },
         { text: 'Priority support', included: false },
@@ -80,9 +94,11 @@ export default function Pricing() {
       stripePriceYearly: STRIPE_PRICES.standard.yearly,
       features: [
         { text: 'Everything in Basic', included: true, highlight: true },
+        { text: '900% more AI requests', included: true, highlight: true },
+        { text: '900% more file uploads', included: true, highlight: true },
+        { text: 'YouTube video processing', included: true, highlight: true },
         { text: 'Private courses with share links', included: true },
-        { text: '50 file uploads per month', included: true },
-        { text: '500 AI requests per month', included: true },
+        { text: 'Enhanced text-to-speech limits', included: true },
         { text: 'Faster AI processing', included: true },
         { text: 'Email support', included: true },
         { text: 'Public course publishing', included: false },
@@ -102,13 +118,14 @@ export default function Pricing() {
       stripePriceYearly: STRIPE_PRICES.premium.yearly,
       features: [
         { text: 'Everything in Standard', included: true, highlight: true },
+        { text: 'Unlimited AI requests', included: true, highlight: true },
+        { text: 'Unlimited file uploads', included: true, highlight: true },
+        { text: 'Unlimited YouTube processing', included: true, highlight: true },
+        { text: 'Unlimited text-to-speech', included: true, highlight: true },
         { text: 'Public course publishing', included: true },
-        { text: 'Unlimited file uploads', included: true },
-        { text: 'Unlimited AI requests', included: true },
+        { text: 'AI Tutor conversations', included: true },
         { text: 'Priority support', included: true },
         { text: 'Early access to new features', included: true },
-        { text: 'Advanced study analytics', included: true },
-        { text: 'Custom course branding', included: true },
       ],
       cta: 'Go Premium',
       highlighted: false,

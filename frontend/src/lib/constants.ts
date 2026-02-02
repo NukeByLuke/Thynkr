@@ -15,15 +15,15 @@ export const APP_VERSION = '1.0.0';
 // Feature Limits by Role
 export const ROLE_LIMITS = {
   BASIC: {
-    maxUploads: 5,
+    maxUploads: 10,
     maxFileSize: 10 * 1024 * 1024, // 10MB
-    aiGenerationsPerDay: 3,
+    aiGenerationsPerDay: 50,
     tutorMessagesPerDay: 10,
   },
   STANDARD: {
-    maxUploads: 50,
+    maxUploads: 100,
     maxFileSize: 50 * 1024 * 1024, // 50MB
-    aiGenerationsPerDay: 25,
+    aiGenerationsPerDay: 500,
     tutorMessagesPerDay: 100,
   },
   PREMIUM: {

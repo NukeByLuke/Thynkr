@@ -67,18 +67,29 @@ export default function GeneralSettings() {
     }
 
     try {
-      const response = await api.post('/tts', {
+      // Use the same negotiate+stream approach as AudioPlayer
+      const negotiateResponse = await api.post('/tts/negotiate', {
         text: 'Hello! This is how I sound. I can help you study by reading summaries and quiz questions aloud.',
         voice,
         speed: ttsSpeed,
-      }, { responseType: 'blob' });
+      });
 
-      const audioUrl = URL.createObjectURL(response.data);
+      if (!negotiateResponse.data.url) {
+        throw new Error('No stream URL returned');
+      }
+
+      // Construct full audio URL
+      let baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      if (baseURL.startsWith('/')) {
+        baseURL = `${window.location.origin}${baseURL}`;
+      }
+      baseURL = baseURL.replace(/\/$/, '');
+      const audioUrl = `${baseURL}${negotiateResponse.data.url}`.replace('/api/api/', '/api/');
+
       const audio = new Audio(audioUrl);
       setAudioPreview(audio);
       
       audio.onended = () => {
-        URL.revokeObjectURL(audioUrl);
         setAudioPreview(null);
       };
 
