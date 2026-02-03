@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router-dom';
+import Sidebar from '@/components/layout/Sidebar';
 import ProfileMenu from '@/components/layout/ProfileMenu';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import Logo from '@/components/Logo';
@@ -12,6 +13,13 @@ export default function DashboardLayout() {
       {/* Ambient Glow Orbs */}
       <div className="fixed top-0 left-0 w-96 h-96 bg-pink-500/10 dark:bg-cyan-500/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="fixed bottom-0 right-0 w-96 h-96 bg-fuchsia-500/10 dark:bg-violet-500/20 rounded-full blur-[120px] pointer-events-none" />
+      
+      {/* Desktop Sidebar - Hidden on mobile, visible on desktop */}
+      {!hideSidebar && (
+        <div className="hidden lg:block flex-shrink-0">
+          <Sidebar />
+        </div>
+      )}
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
@@ -42,7 +50,7 @@ export default function DashboardLayout() {
         </header>
 
         {/* Main Content - Extra bottom padding on mobile for bottom nav */}
-        <main className={`flex-1 overflow-y-auto bg-transparent ${hideSidebar ? 'p-0 pb-20' : 'p-4 pb-24 lg:p-6'}`}>
+        <main className={`flex-1 overflow-y-auto bg-transparent ${hideSidebar ? 'p-0 pb-20 lg:pb-0' : 'p-4 pb-24 lg:p-6 lg:pb-6'}`}>
           <Outlet />
         </main>
       </div>
