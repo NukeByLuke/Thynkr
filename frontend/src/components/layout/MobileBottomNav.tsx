@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Home, GraduationCap, BookOpen, FolderOpen, Menu as MenuIcon, Settings, User, LogOut } from 'lucide-react';
+import { GraduationCap, BookOpen, FolderOpen, Menu as MenuIcon, Settings, User, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, memo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
