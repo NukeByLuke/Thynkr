@@ -16,13 +16,6 @@ export default function DashboardLayout() {
       {/* Ambient Glow Orbs */}
       <div className="fixed top-0 left-0 w-96 h-96 bg-pink-500/10 dark:bg-cyan-500/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="fixed bottom-0 right-0 w-96 h-96 bg-fuchsia-500/10 dark:bg-violet-500/20 rounded-full blur-[120px] pointer-events-none" />
-      
-      {/* Desktop Sidebar - Hidden on mobile or when hideSidebar is true */}
-      {!hideSidebar && (
-        <div className="hidden lg:block flex-shrink-0">
-          <Sidebar />
-        </div>
-      )}
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
@@ -32,15 +25,7 @@ export default function DashboardLayout() {
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {!customHeaderContent ? (
               <>
-                {!hideSidebar && (
-                  <button
-                    onClick={() => setIsMobileMenuOpen(true)}
-                    className="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-                  >
-                    <Menu className="w-5 h-5 text-slate-700 dark:text-slate-300" />
-                  </button>
-                )}
-                <div className="lg:hidden flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <Logo variant="icon" animated={false} className="w-7 h-7" />
                   <span className="text-base font-semibold text-slate-900 dark:text-white">
                     Thynkr
@@ -61,25 +46,10 @@ export default function DashboardLayout() {
         </header>
 
         {/* Main Content - Extra bottom padding on mobile for bottom nav */}
-        <main className={`flex-1 overflow-y-auto bg-transparent ${hideSidebar ? 'p-0 pb-20 lg:pb-0' : 'p-4 pb-24 lg:p-6 lg:pb-6'}`}>
+        <main className={`flex-1 overflow-y-auto bg-transparent ${hideSidebar ? 'p-0 pb-20' : 'p-4 pb-24 lg:p-6'}`}>
           <Outlet />
         </main>
       </div>
-
-      {/* Mobile Sidebar Overlay */}
-      {isMobileMenuOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-md z-40"
-          />
-          {/* Slide-in Sidebar */}
-          <div className="lg:hidden fixed left-0 top-0 bottom-0 w-64 z-50 transform transition-transform">
-            <Sidebar />
-          </div>
-        </>
-      )}
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav />

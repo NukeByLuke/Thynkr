@@ -131,9 +131,9 @@ const MobileBottomNav = memo(() => {
         initial={{ y: 0 }}
         animate={{ y: isVisible ? 0 : 100 }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-t border-slate-200/50 dark:border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)] pb-safe"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 shadow-[0_-2px_16px_rgba(0,0,0,0.05)] dark:shadow-[0_-2px_16px_rgba(0,0,0,0.3)] pb-safe"
       >
-        <div className="flex items-center justify-around px-2 pt-2 pb-2">
+        <div className="flex items-center justify-around px-4 py-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
@@ -143,26 +143,30 @@ const MobileBottomNav = memo(() => {
                 <button
                   key={item.path}
                   onClick={item.action}
-                  className="relative flex flex-col items-center justify-center group min-w-[60px]"
+                  className="relative flex flex-col items-center justify-center group py-1 px-3 rounded-xl transition-all"
                 >
                   <motion.div
-                    whileTap={{ scale: 0.85 }}
+                    whileTap={{ scale: 0.9 }}
                     className="relative"
                   >
                     <div
-                      className={`relative flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-150 ${
+                      className={`relative flex items-center justify-center w-11 h-11 rounded-2xl transition-all duration-200 ${
                         isMenuOpen
-                          ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
-                          : 'bg-transparent text-slate-600 dark:text-slate-400 group-active:bg-slate-100 dark:group-active:bg-white/5'
+                          ? 'bg-gradient-to-br from-pink-500 to-orange-500 dark:from-cyan-500 dark:to-blue-600 text-white scale-105'
+                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                       }`}
                     >
-                      <Icon className="w-6 h-6" strokeWidth={2} />
+                      <Icon className={`w-5 h-5 ${
+                        isMenuOpen ? 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]' : ''
+                      }`} strokeWidth={isMenuOpen ? 2.5 : 2} />
                     </div>
                   </motion.div>
 
                   <span
-                    className={`mt-1 text-[10px] font-medium transition-colors text-center ${
-                      isMenuOpen ? 'text-pink-600 dark:text-cyan-400' : 'text-slate-600 dark:text-slate-400'
+                    className={`mt-1.5 text-[11px] font-semibold transition-all ${
+                      isMenuOpen 
+                        ? 'text-pink-600 dark:text-cyan-400 scale-105' 
+                        : 'text-slate-500 dark:text-slate-500'
                     }`}
                   >
                     {item.label}
@@ -175,43 +179,30 @@ const MobileBottomNav = memo(() => {
               <NavLink
                 key={item.path}
                 to={item.path}
-                className="relative flex flex-col items-center justify-center group min-w-[60px]"
+                className="relative flex flex-col items-center justify-center group py-1 px-3 rounded-xl transition-all"
               >
-                {/* Active indicator line at top */}
-                {active && (
-                  <motion.div
-                    layoutId="mobileActiveIndicator"
-                    className="absolute -top-1 left-1/2 -translate-x-1/2 w-10 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 rounded-full"
-                    style={{
-                      boxShadow: '0 0 12px rgba(124, 58, 237, 0.8), 0 0 24px rgba(124, 58, 237, 0.4)',
-                    }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  />
-                )}
-
                 <motion.div
-                  whileTap={{ scale: 0.85 }}
+                  whileTap={{ scale: 0.9 }}
                   className="relative"
                 >
-                  {/* Active gradient glow behind icon */}
-                  {active && (
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl blur-lg opacity-40" />
-                  )}
-
                   <div
-                    className={`relative flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-150 ${
+                    className={`relative flex items-center justify-center w-11 h-11 rounded-2xl transition-all duration-200 ${
                       active
-                        ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
-                        : 'bg-transparent text-slate-600 dark:text-slate-400 group-active:bg-slate-100 dark:group-active:bg-white/5'
+                        ? 'bg-gradient-to-br from-pink-500 to-orange-500 dark:from-cyan-500 dark:to-blue-600 text-white scale-105'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                     }`}
                   >
-                    <Icon className="w-6 h-6" strokeWidth={2} />
+                    <Icon className={`w-5 h-5 ${
+                      active ? 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]' : ''
+                    }`} strokeWidth={active ? 2.5 : 2} />
                   </div>
                 </motion.div>
 
                 <span
-                  className={`mt-1 text-[10px] font-medium transition-colors text-center ${
-                    active ? 'text-pink-600 dark:text-cyan-400' : 'text-slate-600 dark:text-slate-400'
+                  className={`mt-1.5 text-[11px] font-semibold transition-all ${
+                    active 
+                      ? 'text-pink-600 dark:text-cyan-400 scale-105' 
+                      : 'text-slate-500 dark:text-slate-500'
                   }`}
                 >
                   {item.label}
