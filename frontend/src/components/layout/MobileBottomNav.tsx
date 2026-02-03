@@ -36,7 +36,6 @@ const MobileBottomNav = memo(() => {
   };
 
   const navItems = [
-    { icon: Home, label: 'Home', path: '/dashboard' },
     { icon: GraduationCap, label: 'Study', path: '/study' },
     { icon: BookOpen, label: 'Courses', path: '/courses' },
     { icon: FolderOpen, label: 'Files', path: '/files' },
