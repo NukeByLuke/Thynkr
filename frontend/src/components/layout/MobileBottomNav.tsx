@@ -125,12 +125,12 @@ const MobileBottomNav = memo(() => {
         )}
       </AnimatePresence>
 
-      {/* Bottom Navigation */}
+      {/* Bottom Navigation - Mobile only */}
       <motion.nav
         initial={{ y: 0 }}
         animate={{ y: isVisible ? 0 : 100 }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 shadow-[0_-2px_16px_rgba(0,0,0,0.05)] dark:shadow-[0_-2px_16px_rgba(0,0,0,0.3)] pb-safe"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 shadow-[0_-2px_16px_rgba(0,0,0,0.05)] dark:shadow-[0_-2px_16px_rgba(0,0,0,0.3)] pb-safe"
       >
         <div className="flex items-center justify-around px-4 py-2">
           {navItems.map((item) => {
