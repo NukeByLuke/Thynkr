@@ -62,9 +62,9 @@ export default function Contact() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {/* Contact Form */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 order-1">
             <Card padding="lg">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 rounded-lg bg-gradient-to-br from-pink-500 to-orange-500 text-white">
@@ -135,7 +135,7 @@ export default function Contact() {
           </div>
 
           {/* Contact Info Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-6 order-2">
             <Card padding="lg" variant="glass">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 text-white">
