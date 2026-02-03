@@ -1,14 +1,10 @@
 import { Outlet } from 'react-router-dom';
-import { useState } from 'react';
-import Sidebar from '@/components/layout/Sidebar';
 import ProfileMenu from '@/components/layout/ProfileMenu';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
-import { Menu } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { useLayout } from '@/contexts/LayoutContext';
 
 export default function DashboardLayout() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { hideSidebar, customHeaderContent } = useLayout();
 
   return (
