@@ -67,8 +67,8 @@ const TTS_MODEL = 'gemini-2.5-flash-preview-tts';
 // Fallback model if primary fails (also supports audio)
 const TTS_FALLBACK_MODEL = 'gemini-2.0-flash-exp';
 
-// Timeout for TTS API calls (20 seconds - faster model allows shorter timeout)
-const TTS_TIMEOUT_MS = 20000;
+// Timeout for TTS API calls (45 seconds - allow for slow generation)
+const TTS_TIMEOUT_MS = 45000;
 
 /**
  * Wrap a promise with a timeout
@@ -578,8 +578,9 @@ export default async function ttsRoutes(server: FastifyInstance) {
         return reply.status(404).send({ error: 'Invalid or expired stream token' });
       }
 
-      // Delete token immediately - one-time use for security
-      streamTokens.delete(token);
+      // Mark token as used but keep it for 30s to handle browser retries
+      // After 30s the periodic cleanup will remove it
+      data.expiresAt = Date.now() + 30000;
 
       const { text, voice, userId } = data;
 
