@@ -44,12 +44,33 @@ interface TTSPreferences {
 let globalAudioInstance: HTMLAudioElement | null = null;
 let globalStopCallback: (() => void) | null = null;
 
-// In-memory cache for audio blobs
+// In-memory cache for streaming URLs (not blobs)
 const audioCache = new Map<string, string>();
 
 function generateCacheKey(text: string, voice: TTSVoice): string {
   // We only cache by text and voice since speed is now client-side
   return `${text.slice(0, 100)}:${voice}`;
+}
+
+/**
+ * Build full backend URL for streaming
+ */
+function buildStreamUrl(path: string): string {
+  let baseURL = import.meta.env.VITE_API_URL || '/api';
+  
+  // If baseURL is relative, prepend origin
+  if (baseURL.startsWith('/')) {
+    baseURL = `${window.location.origin}${baseURL}`;
+  }
+  
+  // Remove trailing slash
+  baseURL = baseURL.replace(/\/$/, '');
+  
+  // Construct URL and fix potential double-api issue
+  let url = `${baseURL}${path}`;
+  url = url.replace('/api/api/', '/api/');
+  
+  return url;
 }
 
 function stopGlobalAudio() {
@@ -255,6 +276,7 @@ export default function AudioPlayer({
     // Stop any global audio first
     stopGlobalAudio();
 
+    // Loading state only during negotiation, not entire playback
     setIsLoading(true);
 
     try {
@@ -264,41 +286,35 @@ export default function AudioPlayer({
 
       if (audioCache.has(cacheKey)) {
         audioUrl = audioCache.get(cacheKey)!;
+        // Skip loading state for cached URLs
+        setIsLoading(false);
       } else {
         abortControllerRef.current = new AbortController();
 
-        // Negotiate for streaming URL
+        // Negotiate for streaming URL (fast - just returns a token)
         const response = await api.post(
           '/tts/negotiate',
           { text, voice, speed: 1 }, 
           { signal: abortControllerRef.current.signal }
         );
 
-        if (response.data.url) {
-            // Need the full URL for Audio src. 
-            // Handle double /api/api issue if VITE_API_URL includes /api
-            let baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-            
-            // If baseURL is relative (e.g. "/api"), prepend origin
-            if (baseURL.startsWith('/')) {
-              baseURL = `${window.location.origin}${baseURL}`;
-            }
-            
-            // Remove trailing slash
-            baseURL = baseURL.replace(/\/$/, '');
-            
-            // Construct URL and fix potential double-api issue
-            audioUrl = `${baseURL}${response.data.url}`;
-            audioUrl = audioUrl.replace('/api/api/', '/api/'); 
-            
-            // NOTE: We don't cache locally for streaming URLs as they expire
-        } else {
-            throw new Error('No stream URL returned');
+        if (!response.data.url) {
+          throw new Error('No stream URL returned');
         }
+
+        // Build full streaming URL
+        audioUrl = buildStreamUrl(response.data.url);
+        
+        // Cache the URL for voice change resume
+        audioCache.set(cacheKey, audioUrl);
+        
+        // Negotiation complete - clear loading state before playback starts
+        setIsLoading(false);
       }
 
       if (!audioRef.current) {
         audioRef.current = new Audio();
+        audioRef.current.preload = 'auto'; // Optimize for instant streaming
       }
 
       const audio = audioRef.current;
@@ -312,6 +328,8 @@ export default function AudioPlayer({
       audio.onerror = () => {
         setIsPlaying(false);
         setIsLoading(false);
+        // Remove failed URL from cache so it can be re-negotiated
+        audioCache.delete(cacheKey);
         toast.error('Failed to play audio');
       };
       

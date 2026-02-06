@@ -29,14 +29,36 @@ interface UseTTSReturn {
 let globalAudioInstance: HTMLAudioElement | null = null;
 let globalStopCallback: (() => void) | null = null;
 
-// In-memory cache for audio blobs (session-based)
-const audioCache = new Map<string, string>(); // key: hash, value: blob URL
+// In-memory cache for streaming URLs (session-based)
+// Note: These are backend stream URLs, not blob URLs
+const audioCache = new Map<string, string>(); // key: hash, value: stream URL
 
 /**
- * Generate cache key from text + voice + speed
+ * Generate cache key from text + voice (speed is client-side)
  */
-function generateCacheKey(text: string, voice: TTSVoice, speed: number): string {
-  return `${text}:${voice}:${speed.toFixed(2)}`;
+function generateCacheKey(text: string, voice: TTSVoice): string {
+  return `${text.slice(0, 100)}:${voice}`;
+}
+
+/**
+ * Build full backend URL for streaming
+ */
+function buildStreamUrl(path: string): string {
+  let baseURL = import.meta.env.VITE_API_URL || '/api';
+  
+  // If baseURL is relative, prepend origin
+  if (baseURL.startsWith('/')) {
+    baseURL = `${window.location.origin}${baseURL}`;
+  }
+  
+  // Remove trailing slash
+  baseURL = baseURL.replace(/\/$/, '');
+  
+  // Construct URL and fix potential double-api issue
+  let url = `${baseURL}${path}`;
+  url = url.replace('/api/api/', '/api/');
+  
+  return url;
 }
 
 /**
@@ -86,7 +108,7 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
   }, [options]);
 
   /**
-   * Play audio from text
+   * Play audio from text using streaming negotiation
    */
   const play = useCallback(async (text: string) => {
     if (!text?.trim()) {
@@ -103,46 +125,54 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
     try {
       const voice = options.voice || 'alloy';
       const speed = options.speed || 1.0;
-      const cacheKey = generateCacheKey(text, voice, speed);
+      const cacheKey = generateCacheKey(text, voice);
 
       let audioUrl: string;
 
-      // Check cache first
+      // Check cache first (cached URLs may have expired, but browser handles that)
       if (audioCache.has(cacheKey)) {
         audioUrl = audioCache.get(cacheKey)!;
       } else {
-        // Fetch from API
+        // Negotiate for streaming URL (fast - just returns a token)
         abortControllerRef.current = new AbortController();
         
         const response = await api.post(
-          '/tts',
-          { text, voice, speed },
-          {
-            responseType: 'blob',
-            signal: abortControllerRef.current.signal,
-          }
+          '/tts/negotiate',
+          { text, voice, speed: 1 }, // speed=1 since it's handled client-side
+          { signal: abortControllerRef.current.signal }
         );
 
-        const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
-        audioUrl = URL.createObjectURL(audioBlob);
+        if (!response.data.url) {
+          throw new Error('No stream URL returned');
+        }
 
-        // Cache the URL (will be cleaned up when page unloads)
+        // Build full streaming URL
+        audioUrl = buildStreamUrl(response.data.url);
+
+        // Cache the URL for reuse (tokens expire in 1 min but cached audio persists)
         audioCache.set(cacheKey, audioUrl);
       }
 
-      // Create or reuse audio element
+      // Create or reuse audio element with preload for instant start
       if (!audioRef.current) {
         audioRef.current = new Audio();
+        audioRef.current.preload = 'auto';
       }
 
       const audio = audioRef.current;
       audio.src = audioUrl;
+      audio.playbackRate = speed; // Apply client-side speed
 
       // Set as global audio for exclusive playback
       globalAudioInstance = audio;
       globalStopCallback = stop;
 
       // Setup event handlers
+      audio.oncanplaythrough = () => {
+        // Audio is ready to play without buffering
+        setIsLoading(false);
+      };
+
       audio.onended = () => {
         setIsPlaying(false);
         options.onPlayEnd?.();
@@ -152,16 +182,20 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
         }
       };
 
-      audio.onerror = () => {
+      audio.onerror = (e) => {
         setIsPlaying(false);
+        setIsLoading(false);
+        // Remove failed URL from cache so it can be re-negotiated
+        audioCache.delete(cacheKey);
         setError('Failed to play audio');
         toast.error('Failed to play audio');
-        setIsLoading(false);
       };
 
-      // Start playback
+      // Start playback immediately - audio will stream in
+      // Loading state will clear when canplaythrough fires
       await audio.play();
       setIsPlaying(true);
+      // Clear loading immediately after play starts (streaming)
       setIsLoading(false);
       options.onPlayStart?.();
     } catch (err: any) {
