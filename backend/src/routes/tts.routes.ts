@@ -61,9 +61,8 @@ setInterval(() => {
 
 // Gemini AI client for TTS
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-// Use gemini-2.0-flash-exp for fastest, most cost-effective TTS
-// Falls back to gemini-2.5-flash-preview-tts if needed
-const TTS_MODEL = 'gemini-2.0-flash-exp';
+// Use Gemini 2.5 Flash Lite for optimal balance of speed and cost
+const TTS_MODEL = 'gemini-2.5-flash-lite';
 
 // Timeout for TTS API calls (20 seconds - faster model allows shorter timeout)
 const TTS_TIMEOUT_MS = 20000;
@@ -81,12 +80,12 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation: strin
 }
 
 // Chunk size target for streaming
-// First chunk is smaller (~500 chars) for faster time-to-first-byte
-// Subsequent chunks are larger (~1500 chars) for efficiency
-const FIRST_CHUNK_TARGET_SIZE = 500;
-const CHUNK_TARGET_SIZE = 1500;
+// First chunk is smaller (~200 chars) for near-instant playback
+// Subsequent chunks are larger (~2000 chars) for efficiency
+const FIRST_CHUNK_TARGET_SIZE = 200;
+const CHUNK_TARGET_SIZE = 2000;
 // Minimum chunk size to avoid very short audio clips
-const CHUNK_MIN_SIZE = 300;
+const CHUNK_MIN_SIZE = 150;
 
 /**
  * Split text into speakable chunks at sentence boundaries
@@ -109,9 +108,9 @@ function splitTextIntoChunks(text: string): string[] {
     const trimmed = sentence.trim();
     if (!trimmed) continue;
 
-    // Use smaller target for first chunk (faster initial playback)
+    // Use smaller target for first chunk (near-instant playback)
     const targetSize = isFirstChunk ? FIRST_CHUNK_TARGET_SIZE : CHUNK_TARGET_SIZE;
-    const minSize = isFirstChunk ? 200 : CHUNK_MIN_SIZE;
+    const minSize = isFirstChunk ? 100 : CHUNK_MIN_SIZE;
 
     // If adding this sentence would exceed target and we already have content
     if (currentChunk.length > 0 && currentChunk.length + trimmed.length > targetSize) {
