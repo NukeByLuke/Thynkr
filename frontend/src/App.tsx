@@ -7,7 +7,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-// Toaster removed - toast calls are now no-ops
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { NavigationProvider } from './contexts/NavigationContext';
@@ -218,6 +218,16 @@ function App() {
         <ThemeProvider>
           <NotificationProvider>
             <LayoutProvider>
+              <Toaster 
+                position="top-center"
+                toastOptions={{
+                  duration: 3000,
+                  style: {
+                    background: 'var(--toast-bg, #333)',
+                    color: 'var(--toast-color, #fff)',
+                  },
+                }}
+              />
               {!gatePassed && previewPassword ? (
                 <PreviewGate onSuccess={() => setGatePassed(true)} />
               ) : (

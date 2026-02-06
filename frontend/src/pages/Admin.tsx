@@ -132,22 +132,22 @@ export default function Admin() {
   };
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 dark:from-slate-950 dark:via-midnight-violet/20 dark:to-slate-950">
       {/* Header with Glass */}
-      <div className="max-w-6xl mx-auto px-8 lg:px-16 py-8">
-        <div className="bg-zinc-900/40 dark:bg-zinc-950/40 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-lg">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+        <div className="bg-white/5 dark:bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white">Admin Dashboard</h1>
-              <p className="text-slate-400 mt-1">Manage your platform and monitor activity</p>
+              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-600 bg-clip-text text-transparent">Admin Dashboard</h1>
+              <p className="text-slate-300 mt-2">Manage your platform and monitor activity</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-8 lg:px-16 mt-8">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 mt-8">
         {/* Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             title="Total Users"
             value={stats?.users.total ?? '-'}
@@ -155,7 +155,7 @@ export default function Admin() {
             trend="up"
             trendValue="+12%"
             tooltip="Total registered users on the platform"
-            gradient="bg-gradient-to-br from-blue-500 to-blue-600"
+            gradient="bg-gradient-to-br from-cyan-500 via-blue-500 to-blue-600"
           />
           <StatCard
             title="Premium Users"
@@ -164,7 +164,7 @@ export default function Admin() {
             trend="up"
             trendValue="+8%"
             tooltip="Users with premium subscriptions"
-            gradient="bg-gradient-to-br from-amber-500 to-orange-600"
+            gradient="bg-gradient-to-br from-amber-500 via-orange-500 to-orange-600"
           />
           <StatCard
             title="Standard Users"
@@ -173,7 +173,7 @@ export default function Admin() {
             trend="neutral"
             trendValue="0%"
             tooltip="Users with standard tier access"
-            gradient="bg-gradient-to-br from-emerald-500 to-teal-600"
+            gradient="bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600"
           />
           <StatCard
             title="Basic Users"
@@ -182,13 +182,13 @@ export default function Admin() {
             trend="down"
             trendValue="-3%"
             tooltip="Free tier users"
-            gradient="bg-gradient-to-br from-gray-500 to-gray-600"
+            gradient="bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-600"
           />
         </div>
 
         {/* Tabs Navigation */}
-        <div className="bg-zinc-900/40 dark:bg-zinc-950/40 backdrop-blur-md border border-white/10 rounded-2xl p-1.5 mb-6 overflow-x-auto shadow-lg">
-          <div className="flex gap-1 min-w-max relative">
+        <div className="bg-white/5 dark:bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-2 mb-6 overflow-x-auto shadow-xl">
+          <div className="flex gap-2 min-w-max relative">
             <TabButton
               active={activeTab === 'users'}
               icon={Users}
@@ -223,7 +223,7 @@ export default function Admin() {
         </div>
 
         {/* Tab Content */}
-        <div className="bg-zinc-900/40 dark:bg-zinc-950/40 backdrop-blur-md border border-white/10 rounded-2xl shadow-lg overflow-hidden">
+        <div className="bg-white/5 dark:bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
           <Suspense
             fallback={
               <div className="flex items-center justify-center py-20">

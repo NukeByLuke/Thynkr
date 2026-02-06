@@ -404,9 +404,9 @@ export default function Files() {
       >
         {/* Drag and Drop Overlay */}
         {isDragging && (
-          <div className="fixed inset-0 bg-blue-500/20 backdrop-blur-sm z-40 flex items-center justify-center">
-            <div className="bg-white dark:bg-slate-900 border-4 border-dashed border-blue-500 rounded-3xl p-12 text-center">
-              <Upload className="w-20 h-20 text-blue-500 mx-auto mb-4" />
+          <div className="fixed inset-0 bg-pink-500/20 dark:bg-cyan-500/20 backdrop-blur-sm z-40 flex items-center justify-center">
+            <div className="bg-white dark:bg-slate-900 border-4 border-dashed border-pink-500 dark:border-cyan-500 rounded-3xl p-12 text-center">
+              <Upload className="w-20 h-20 text-pink-600 dark:text-cyan-500 mx-auto mb-4" />
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Drop files here</h3>
               <p className="text-slate-600 dark:text-slate-400">Release to upload</p>
             </div>
@@ -434,14 +434,14 @@ export default function Files() {
                   placeholder="Search files and folders..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 rounded-full bg-white dark:bg-slate-900/80 backdrop-blur-md border-2 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-md hover:shadow-lg"
+                  className="w-full pl-11 pr-4 py-3 rounded-full bg-white dark:bg-slate-900/80 backdrop-blur-md border-2 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-cyan-500 focus:border-pink-500 dark:focus:border-cyan-500 transition-all duration-200 shadow-md hover:shadow-lg"
                 />
               </div>
 
               {/* Upload Button - Premium Design */}
               <button
                 onClick={() => setShowUploadModal(true)}
-                className="group relative px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 active:scale-95 will-change-transform"
+                className="group relative px-6 py-3 rounded-full bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 hover:shadow-xl text-white font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 active:scale-95 will-change-transform"
               >
                 <div className="flex items-center justify-center gap-2">
                   <Upload className="w-5 h-5" />
@@ -464,7 +464,7 @@ export default function Files() {
                 <div className="w-px h-6 bg-white/20 dark:bg-slate-900/20" />
                 <button
                   onClick={handleSelectAll}
-                  className="text-sm hover:text-blue-300 dark:hover:text-blue-600 transition-colors"
+                  className="text-sm hover:text-pink-300 dark:hover:text-cyan-400 transition-colors"
                 >
                   {selectedItems.size === filteredFiles.length + filteredFolders.length ? 'Deselect All' : 'Select All'}
                 </button>
@@ -478,7 +478,7 @@ export default function Files() {
                 </button>
                 <button
                   onClick={() => setSelectedItems(new Set())}
-                  className="text-sm hover:text-blue-300 dark:hover:text-blue-600 transition-colors"
+                  className="text-sm hover:text-pink-300 dark:hover:text-cyan-400 transition-colors"
                 >
                   Clear
                 </button>
@@ -535,7 +535,7 @@ export default function Files() {
                     type="checkbox"
                     checked={selectedItems.size > 0 && selectedItems.size === filteredFiles.length}
                     onChange={handleSelectAll}
-                    className="w-5 h-5 rounded border-2 border-slate-300 dark:border-slate-600 checked:bg-blue-600 checked:border-blue-600 cursor-pointer"
+                    className="w-5 h-5 rounded border-2 border-slate-300 dark:border-slate-600 checked:bg-pink-600 dark:checked:bg-cyan-500 checked:border-pink-600 dark:checked:border-cyan-500 cursor-pointer"
                   />
                 </div>
                 <div></div>
@@ -577,7 +577,7 @@ export default function Files() {
                           transition={{ delay: index * 0.02, duration: 0.15 }}
                           onDoubleClick={() => handleFileDoubleClick(file.id)}
                           onContextMenu={(e) => handleContextMenu(e, 'file', file.id, file.originalName)}
-                          className={`group grid grid-cols-[40px_40px_1fr_40px] md:grid-cols-[40px_40px_1fr_120px_120px_80px_40px] gap-3 md:gap-4 items-center px-4 md:px-6 py-3 md:py-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-all duration-150 cursor-pointer min-h-[64px] will-change-transform active:scale-[0.99] border-b border-slate-100 dark:border-white/5 last:border-0 ${isSelected ? 'bg-blue-50 dark:bg-blue-500/10' : ''}`}
+                          className={`group grid grid-cols-[40px_40px_1fr_40px] md:grid-cols-[40px_40px_1fr_120px_120px_80px_40px] gap-3 md:gap-4 items-center px-4 md:px-6 py-3 md:py-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-all duration-150 cursor-pointer min-h-[64px] will-change-transform active:scale-[0.99] border-b border-slate-100 dark:border-white/5 last:border-0 ${isSelected ? 'bg-pink-50 dark:bg-cyan-500/10' : ''}`}
                         >
                           {/* Checkbox */}
                           <div className="flex items-center justify-center">
@@ -585,7 +585,7 @@ export default function Files() {
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => toggleSelection(`file-${file.id}`)}
-                              className="w-5 h-5 rounded border-2 border-slate-300 dark:border-slate-600 checked:bg-blue-600 checked:border-blue-600 cursor-pointer"
+                              className="w-5 h-5 rounded border-2 border-slate-300 dark:border-slate-600 checked:bg-pink-600 dark:checked:bg-cyan-500 checked:border-pink-600 dark:checked:border-cyan-500 cursor-pointer"
                               onClick={(e) => e.stopPropagation()}
                             />
                           </div>
@@ -702,7 +702,7 @@ export default function Files() {
                 type="text"
                 value={renameValue}
                 onChange={(e) => setRenameValue(e.target.value)}
-                className="w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-4"
+                className="w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-cyan-500 focus:border-pink-500 dark:focus:border-cyan-500 mb-4"
                 autoFocus
               />
               <div className="flex gap-3 justify-end">
@@ -726,7 +726,7 @@ export default function Files() {
                     }
                   }}
                   disabled={!renameValue.trim() || renameMutation.isPending}
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed font-medium active:scale-95 shadow-sm"
+                  className="px-6 py-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 hover:shadow-xl text-white rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed font-medium active:scale-95 shadow-sm"
                 >
                   {renameMutation.isPending ? 'Saving...' : 'Save'}
                 </button>
@@ -752,7 +752,7 @@ export default function Files() {
                 value={newFolderName}
                 onChange={(e) => setNewFolderName(e.target.value)}
                 placeholder="Folder name"
-                className="w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-4"
+                className="w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-cyan-500 focus:border-pink-500 dark:focus:border-cyan-500 mb-4"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && newFolderName.trim()) {
@@ -777,7 +777,7 @@ export default function Files() {
                     }
                   }}
                   disabled={!newFolderName.trim() || createFolderMutation.isPending}
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed font-medium active:scale-95 shadow-sm"
+                  className="px-6 py-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 hover:shadow-xl text-white rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed font-medium active:scale-95 shadow-sm"
                 >
                   {createFolderMutation.isPending ? 'Creating...' : 'Create'}
                 </button>

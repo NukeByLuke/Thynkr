@@ -49,9 +49,9 @@ const Navbar = memo(() => {
     <nav className="bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/10 sticky top-0 z-50 theme-transition">
       <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
         <div className="flex justify-between h-14">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Logo variant="full" animated={true} />
+          {/* Logo - Always visible */}
+          <div className="flex items-center flex-shrink-0">
+            <Logo variant="full" animated={true} size="md" />
           </div>
 
           {/* Desktop Navigation */}
@@ -63,8 +63,8 @@ const Navbar = memo(() => {
                   className={({ isActive }) =>
                     `text-sm font-semibold px-4 py-2 rounded-2xl transition-all duration-150 flex items-center gap-1.5 ${
                       isActive
-                        ? 'text-white dark:text-white drop-shadow-md bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5'
+                        ? 'text-white dark:text-white drop-shadow-md bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 shadow-lg'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-white/50 dark:hover:bg-white/5'
                     }`
                   }
                 >
@@ -77,8 +77,8 @@ const Navbar = memo(() => {
                   className={({ isActive }) =>
                     `text-sm font-semibold px-4 py-2 rounded-2xl transition-all duration-150 flex items-center gap-1.5 ${
                       isActive || location.pathname.startsWith('/courses/')
-                        ? 'text-white dark:text-white drop-shadow-md bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5'
+                        ? 'text-white dark:text-white drop-shadow-md bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 shadow-lg'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-white/50 dark:hover:bg-white/5'
                     }`
                   }
                 >
@@ -91,8 +91,8 @@ const Navbar = memo(() => {
                   className={({ isActive }) =>
                     `text-sm font-semibold px-4 py-2 rounded-2xl transition-all duration-150 flex items-center gap-1.5 ${
                       isActive
-                        ? 'text-white dark:text-white drop-shadow-md bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5'
+                        ? 'text-white dark:text-white drop-shadow-md bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 shadow-lg'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-white/50 dark:hover:bg-white/5'
                     }`
                   }
                 >
@@ -194,7 +194,7 @@ const Navbar = memo(() => {
                   variant="primary"
                   size="sm"
                   onClick={() => navigate('/register')}
-                  className="rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/30 transition-all duration-150"
+                  className="rounded-2xl bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 hover:shadow-xl transition-all duration-150"
                 >
                   Get Started
                 </Button>
@@ -225,8 +225,8 @@ const Navbar = memo(() => {
                   to="/study"
                   className={`flex items-center px-3 py-2 rounded-xl text-base font-medium transition-all duration-150 ${
                     isActive('/study')
-                      ? 'text-white dark:text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30'
-                      : 'text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5'
+                      ? 'text-white dark:text-white bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 shadow-lg'
+                      : 'text-slate-700 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-white/50 dark:hover:bg-white/5'
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -237,8 +237,8 @@ const Navbar = memo(() => {
                   to="/courses"
                   className={`flex items-center px-3 py-2 rounded-xl text-base font-medium transition-all duration-150 ${
                     isActive('/courses') || location.pathname.startsWith('/courses/')
-                      ? 'text-white dark:text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30'
-                      : 'text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5'
+                      ? 'text-white dark:text-white bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 shadow-lg'
+                      : 'text-slate-700 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-white/50 dark:hover:bg-white/5'
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -249,8 +249,8 @@ const Navbar = memo(() => {
                   to="/progress"
                   className={`flex items-center px-3 py-2 rounded-xl text-base font-medium transition-all duration-150 ${
                     isActive('/progress')
-                      ? 'text-white dark:text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/30'
-                      : 'text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5'
+                      ? 'text-white dark:text-white bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 shadow-lg'
+                      : 'text-slate-700 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-white/50 dark:hover:bg-white/5'
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -315,14 +315,14 @@ const Navbar = memo(() => {
               <>
                 <Link
                   to="/login"
-                  className="block px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-150"
+                  className="block px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-150"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="block px-3 py-2 rounded-xl text-base font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/30 transition-all duration-150"
+                  className="block px-3 py-2 rounded-xl text-base font-medium text-white bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 hover:shadow-xl transition-all duration-150"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Get Started

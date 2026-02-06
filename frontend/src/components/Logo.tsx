@@ -1,11 +1,10 @@
 /**
  * Thynkr Unified Logo Component
  * Single source of truth for all logo usage throughout the app
- * Uses official brand assets from /public/brand/ with Framer Motion animations
+ * Uses official brand assets from /public/brand/ with instant loading
  */
 
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { clsx } from 'clsx';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -38,7 +37,6 @@ interface LogoProps {
 export default function Logo({ 
   variant = 'full', 
   className, 
-  animated = true,
   theme: themeOverride,
   size = 'md',
 }: LogoProps) {
@@ -64,21 +62,17 @@ export default function Logo({
 
   const sizes = sizeConfig[size] || sizeConfig.md;
 
-  // Animation variants
-  const motionProps = animated ? {
-    whileHover: { scale: 1.02 },
-    whileTap: { scale: 0.98 },
-  } : {};
-
   // Symbol variant - just the brain icon, no wrapper
   if (variant === 'symbol') {
     return (
       <div className={clsx('flex items-center justify-center', sizes.brain, className)}>
-        <motion.img
+        <img
           src={brainSrc}
           alt="THYNKR"
+          loading="eager"
+          fetchPriority="high"
           className={clsx('w-full h-full object-contain', effectiveTheme === 'light' && 'scale-105')}
-          {...motionProps}
+          style={{ opacity: 1 }}
         />
       </div>
     );
@@ -93,11 +87,13 @@ export default function Logo({
         aria-label="THYNKR Home"
       >
         <div className={clsx('flex items-center justify-center flex-shrink-0', sizes.brain)}>
-          <motion.img
+          <img
             src={brainSrc}
             alt="THYNKR"
+            loading="eager"
+            fetchPriority="high"
             className={clsx('w-full h-full object-contain', effectiveTheme === 'light' && 'scale-105')}
-            {...motionProps}
+            style={{ opacity: 1 }}
           />
         </div>
       </Link>
@@ -112,18 +108,22 @@ export default function Logo({
       aria-label="THYNKR Home"
     >
       <div className={clsx('flex items-center justify-center flex-shrink-0', sizes.brain)}>
-        <motion.img
+        <img
           src={brainSrc}
           alt="THYNKR Brain"
+          loading="eager"
+          fetchPriority="high"
           className={clsx('w-full h-full object-contain', effectiveTheme === 'light' && 'scale-105')}
-          {...motionProps}
+          style={{ opacity: 1 }}
         />
       </div>
-      <motion.img
+      <img
         src={wordmarkSrc}
         alt="THYNKR"
+        loading="eager"
+        fetchPriority="high"
         className={clsx('object-contain flex-shrink-0', sizes.wordmark)}
-        {...motionProps}
+        style={{ opacity: 1 }}
       />
     </Link>
   );

@@ -18,20 +18,20 @@ const illustrations = {
       <rect x="60" y="80" width="40" height="60" rx="4" fill="url(#grad1)" opacity="0.9" />
       <rect x="75" y="70" width="40" height="60" rx="4" fill="url(#grad2)" opacity="0.9" />
       <rect x="90" y="60" width="40" height="60" rx="4" fill="url(#grad3)" opacity="0.9" />
-      <circle cx="100" cy="40" r="15" fill="#22D3EE" opacity="0.7" />
+      <circle cx="100" cy="40" r="15" fill="#F59E0B" opacity="0.7" />
       <path d="M100 30 L105 40 L95 40 Z" fill="white" />
       <defs>
         <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#6366F1" />
-          <stop offset="100%" stopColor="#4F46E5" />
+          <stop offset="0%" stopColor="#C026D3" />
+          <stop offset="100%" stopColor="#EC4899" />
         </linearGradient>
         <linearGradient id="grad2" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#8B5CF6" />
-          <stop offset="100%" stopColor="#6366F1" />
+          <stop offset="0%" stopColor="#EC4899" />
+          <stop offset="100%" stopColor="#F59E0B" />
         </linearGradient>
         <linearGradient id="grad3" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#22D3EE" />
-          <stop offset="100%" stopColor="#38BDF8" />
+          <stop offset="0%" stopColor="#F59E0B" />
+          <stop offset="100%" stopColor="#EAB308" />
         </linearGradient>
       </defs>
     </svg>
@@ -46,21 +46,21 @@ const illustrations = {
       <circle cx="100" cy="60" r="25" fill="url(#studyGrad2)" />
       <path
         d="M95 50 Q95 45 100 45 Q105 45 105 50"
-        stroke="#22D3EE"
+        stroke="#F59E0B"
         strokeWidth="3"
         fill="none"
         strokeLinecap="round"
       />
-      <circle cx="92" cy="75" r="2" fill="#22D3EE" />
-      <circle cx="108" cy="75" r="2" fill="#22D3EE" />
+      <circle cx="92" cy="75" r="2" fill="#F59E0B" />
+      <circle cx="108" cy="75" r="2" fill="#F59E0B" />
       <defs>
         <linearGradient id="studyGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#A5B4FC" />
-          <stop offset="100%" stopColor="#6366F1" />
+          <stop offset="0%" stopColor="#EC4899" />
+          <stop offset="100%" stopColor="#C026D3" />
         </linearGradient>
         <linearGradient id="studyGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#6366F1" />
-          <stop offset="100%" stopColor="#4F46E5" />
+          <stop offset="0%" stopColor="#C026D3" />
+          <stop offset="100%" stopColor="#EC4899" />
         </linearGradient>
       </defs>
     </svg>
@@ -78,12 +78,12 @@ const illustrations = {
       <rect x="75" y="125" width="35" height="2" rx="1" fill="white" opacity="0.5" />
       <defs>
         <linearGradient id="fileGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#8B5CF6" />
-          <stop offset="100%" stopColor="#6366F1" />
+          <stop offset="0%" stopColor="#C026D3" />
+          <stop offset="100%" stopColor="#EC4899" />
         </linearGradient>
         <linearGradient id="fileGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#A5B4FC" />
-          <stop offset="100%" stopColor="#8B5CF6" />
+          <stop offset="0%" stopColor="#EC4899" />
+          <stop offset="100%" stopColor="#F59E0B" />
         </linearGradient>
       </defs>
     </svg>
@@ -94,7 +94,7 @@ const illustrations = {
       <rect x="50" y="120" width="25" height="40" rx="4" fill="url(#progGrad1)" opacity="0.9" />
       <rect x="82" y="100" width="25" height="60" rx="4" fill="url(#progGrad2)" opacity="0.9" />
       <rect x="114" y="80" width="25" height="80" rx="4" fill="url(#progGrad3)" opacity="0.9" />
-      <circle cx="130" cy="60" r="8" fill="#22D3EE" />
+      <circle cx="130" cy="60" r="8" fill="#F59E0B" />
       <path
         d="M125 60 L128 63 L135 56"
         stroke="white"
@@ -105,16 +105,16 @@ const illustrations = {
       />
       <defs>
         <linearGradient id="progGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#A5B4FC" />
-          <stop offset="100%" stopColor="#6366F1" />
+          <stop offset="0%" stopColor="#EC4899" />
+          <stop offset="100%" stopColor="#C026D3" />
         </linearGradient>
         <linearGradient id="progGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#6366F1" />
-          <stop offset="100%" stopColor="#4F46E5" />
+          <stop offset="0%" stopColor="#C026D3" />
+          <stop offset="100%" stopColor="#EC4899" />
         </linearGradient>
         <linearGradient id="progGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#22D3EE" />
-          <stop offset="100%" stopColor="#38BDF8" />
+          <stop offset="0%" stopColor="#F59E0B" />
+          <stop offset="100%" stopColor="#EAB308" />
         </linearGradient>
       </defs>
     </svg>

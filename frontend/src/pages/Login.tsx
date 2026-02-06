@@ -91,7 +91,22 @@ export default function Login() {
       toast.success('Welcome back!', { duration: 2000 });
       navigate('/study');
     } catch (err: any) {
-      toast.error('Invalid credentials. Please try again.', { duration: 4000 });
+      // Extract error message from various possible locations
+      const errorMessage = 
+        err?.response?.data?.error ||  // Axios error response
+        err?.response?.data?.message || // Alternative format
+        err?.message ||                 // Direct error message
+        'Login failed';
+      
+      if (errorMessage.includes('Invalid credentials')) {
+        toast.error('Invalid email or password. Please check your credentials and try again.', { duration: 4000 });
+      } else if (errorMessage.includes('OAuth') || errorMessage.includes('Google')) {
+        toast.error('This account uses Google Sign-In. Please click "Continue with Google" above.', { duration: 5000 });
+      } else if (errorMessage.includes('User not found') || errorMessage.includes('not found')) {
+        toast.error('No account found with this email. Please check your email or sign up.', { duration: 4000 });
+      } else {
+        toast.error(errorMessage, { duration: 4000 });
+      }
     } finally {
       setIsLoading(false);
     }
