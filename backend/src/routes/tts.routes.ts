@@ -61,10 +61,12 @@ setInterval(() => {
 
 // Gemini AI client for TTS
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const TTS_MODEL = 'gemini-2.5-flash-preview-tts';
+// Use gemini-2.0-flash-exp for fastest, most cost-effective TTS
+// Falls back to gemini-2.5-flash-preview-tts if needed
+const TTS_MODEL = 'gemini-2.0-flash-exp';
 
-// Timeout for TTS API calls (25 seconds per chunk to allow for slower voices)
-const TTS_TIMEOUT_MS = 25000;
+// Timeout for TTS API calls (20 seconds - faster model allows shorter timeout)
+const TTS_TIMEOUT_MS = 20000;
 
 /**
  * Wrap a promise with a timeout
@@ -79,23 +81,26 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation: strin
 }
 
 // Chunk size target for streaming
-// Using very large chunks to minimize API calls and stay within Gemini's rate limits
-// ~2000 chars = ~8-10 sentences, keeps most summaries to 1-2 chunks for fast generation
-const CHUNK_TARGET_SIZE = 2000;
+// First chunk is smaller (~500 chars) for faster time-to-first-byte
+// Subsequent chunks are larger (~1500 chars) for efficiency
+const FIRST_CHUNK_TARGET_SIZE = 500;
+const CHUNK_TARGET_SIZE = 1500;
 // Minimum chunk size to avoid very short audio clips
-const CHUNK_MIN_SIZE = 800;
+const CHUNK_MIN_SIZE = 300;
 
 /**
  * Split text into speakable chunks at sentence boundaries
+ * First chunk is smaller for faster time-to-first-byte
  */
 function splitTextIntoChunks(text: string): string[] {
   // For short texts, return as-is
-  if (text.length <= CHUNK_TARGET_SIZE) {
+  if (text.length <= FIRST_CHUNK_TARGET_SIZE) {
     return [text.trim()];
   }
 
   const chunks: string[] = [];
   let currentChunk = '';
+  let isFirstChunk = true;
 
   // Split by sentences (period, exclamation, question mark followed by space or end)
   const sentences = text.split(/(?<=[.!?])\s+/);
@@ -104,12 +109,17 @@ function splitTextIntoChunks(text: string): string[] {
     const trimmed = sentence.trim();
     if (!trimmed) continue;
 
+    // Use smaller target for first chunk (faster initial playback)
+    const targetSize = isFirstChunk ? FIRST_CHUNK_TARGET_SIZE : CHUNK_TARGET_SIZE;
+    const minSize = isFirstChunk ? 200 : CHUNK_MIN_SIZE;
+
     // If adding this sentence would exceed target and we already have content
-    if (currentChunk.length > 0 && currentChunk.length + trimmed.length > CHUNK_TARGET_SIZE) {
+    if (currentChunk.length > 0 && currentChunk.length + trimmed.length > targetSize) {
       // Only push if chunk meets minimum size
-      if (currentChunk.length >= CHUNK_MIN_SIZE) {
+      if (currentChunk.length >= minSize) {
         chunks.push(currentChunk.trim());
         currentChunk = trimmed;
+        isFirstChunk = false;
       } else {
         // Chunk is too small, keep adding
         currentChunk += ' ' + trimmed;
@@ -547,6 +557,9 @@ export default async function ttsRoutes(server: FastifyInstance) {
         return reply.status(404).send({ error: 'Invalid or expired stream token' });
       }
 
+      // Delete token immediately - one-time use for security
+      streamTokens.delete(token);
+
       const { text, voice, userId } = data;
 
       // 1. Check disk cache first (for the full text)
@@ -560,7 +573,9 @@ export default async function ttsRoutes(server: FastifyInstance) {
         
         reply.header('Content-Type', 'audio/wav');
         reply.header('Content-Length', stat.size);
+        reply.header('Cache-Control', 'private, max-age=3600');
         reply.header('X-TTS-Cached', 'true');
+        reply.header('X-TTS-Provider', 'gemini');
         
         const fileStream = createReadStream(cachePath);
         return reply.send(fileStream); 
@@ -569,7 +584,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
       }
 
       // 2. For short texts, generate all at once (faster than chunking overhead)
-      if (text.length <= CHUNK_TARGET_SIZE) {
+      if (text.length <= FIRST_CHUNK_TARGET_SIZE * 2) {
         try {
           logger.info({ userId, textLength: text.length, voice }, 'Generating short TTS audio');
           
