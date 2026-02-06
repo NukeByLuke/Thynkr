@@ -61,10 +61,10 @@ setInterval(() => {
 
 // Gemini AI client for TTS
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-// Use Gemini 2.0 Flash Exp - supports audio and has good quota
-const TTS_MODEL = 'gemini-2.0-flash-exp';
-// Fallback model if primary fails
-const TTS_FALLBACK_MODEL = 'gemini-2.0-flash-exp';
+// Use Gemini 2.0 Flash for TTS
+const TTS_MODEL = 'gemini-2.0-flash';
+// Fallback model
+const TTS_FALLBACK_MODEL = 'gemini-1.5-flash';
 
 // Timeout for TTS API calls (45 seconds - allow for slow generation)
 const TTS_TIMEOUT_MS = 45000;
