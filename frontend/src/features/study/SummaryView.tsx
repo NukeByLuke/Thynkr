@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import { RefreshCw, Play, AlertTriangle } from 'lucide-react';
 import AudioPlayer from '@/components/audio/AudioPlayer';
-import TypewriterText from '@/components/ui/TypewriterText';
+import ReactMarkdown from 'react-markdown';
 
 interface SummaryViewProps {
   content: string;
@@ -13,17 +13,6 @@ interface SummaryViewProps {
 
 export default function SummaryView({ content, onRegenerate, isRegenerating, error }: SummaryViewProps) {
   const [showAudioPlayer, setShowAudioPlayer] = useState(false);
-  const [shouldAnimate, setShouldAnimate] = useState(false);
-  const prevRegeneratingRef = useRef(isRegenerating);
-
-  // Trigger typewriter effect when regeneration completes
-  useEffect(() => {
-    if (prevRegeneratingRef.current && !isRegenerating && content) {
-      // Just finished regenerating - trigger animation
-      setShouldAnimate(true);
-    }
-    prevRegeneratingRef.current = isRegenerating;
-  }, [isRegenerating, content]);
 
   // Clean text for TTS (strip markdown formatting)
   const cleanTextForTTS = useMemo(() => {
@@ -106,11 +95,7 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
           </div>
         </div>
         <div className="prose prose-lg dark:prose-invert max-w-none">
-          <TypewriterText
-            content={content}
-            speed={12}
-            isGenerating={shouldAnimate}
-            onComplete={() => setShouldAnimate(false)}
+          <ReactMarkdown
             components={{
               h1: ({ node, ...props }: any) => (
                 <h1
@@ -225,7 +210,9 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
                 <hr className="my-8 border-t-2 border-gray-300 dark:border-gray-700" {...props} />
               ),
             }}
-          />
+          >
+            {content}
+          </ReactMarkdown>
         </div>
       </div>
     </div>
