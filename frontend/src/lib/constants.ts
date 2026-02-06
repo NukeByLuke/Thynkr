@@ -62,14 +62,14 @@ export const MAX_FILE_NAME_LENGTH = 255;
 export const DEFAULT_PAGE_SIZE = 10;
 export const MAX_PAGE_SIZE = 100;
 
-// TTS Configuration (Gemini TTS voices)
+// TTS Configuration (6 distinct voices via Gemini TTS)
 export const TTS_VOICES = [
-  { id: 'alloy', name: 'Kore', description: 'Firm and balanced' },
-  { id: 'echo', name: 'Charon', description: 'Warm and informative' },
-  { id: 'fable', name: 'Puck', description: 'Upbeat and expressive' },
-  { id: 'onyx', name: 'Orus', description: 'Deep and authoritative' },
-  { id: 'nova', name: 'Zephyr', description: 'Bright and friendly' },
-  { id: 'shimmer', name: 'Aoede', description: 'Breezy and clear' },
+  { id: 'alloy', name: 'Alloy', description: 'Informative — Clear and neutral' },
+  { id: 'echo', name: 'Echo', description: 'Firm — Professional and authoritative' },
+  { id: 'fable', name: 'Fable', description: 'Breezy — Light and casual' },
+  { id: 'onyx', name: 'Onyx', description: 'Deep — Strong and commanding' },
+  { id: 'nova', name: 'Nova', description: 'Energetic — Lively and expressive' },
+  { id: 'shimmer', name: 'Shimmer', description: 'Upbeat — Cheerful and bright' },
 ] as const;
 
 export const TTS_SPEED_RANGE = { min: 0.25, max: 4.0, default: 1.0 };
