@@ -82,7 +82,7 @@ const MobileBottomNav = memo(() => {
                 {/* User Profile Section */}
                 {user && (
                   <div className="flex items-center gap-3 pb-4 border-b border-slate-200/50 dark:border-white/10">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white font-semibold text-lg">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 flex items-center justify-center text-white font-semibold text-lg">
                       {user.username?.charAt(0).toUpperCase()}
                     </div>
                     <div>

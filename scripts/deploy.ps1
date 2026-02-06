@@ -231,7 +231,7 @@ try {
 # Start containers
 Write-Step "Starting containers..."
 try {
-    ssh $SERVER 'cd /root ; docker compose -f docker-compose.prod.yml up -d --remove-orphans'
+    ssh $SERVER 'cd /root ; docker compose -f docker-compose.prod.yml up -d --force-recreate --remove-orphans'
     if ($LASTEXITCODE -ne 0) { 
         throw "Failed to start containers" 
     }

@@ -58,8 +58,6 @@ services:
       DATABASE_URL: postgresql://thynkr:thynkr_dev_password@postgres:5432/thynkr_db
       REDIS_URL: redis://redis:6379
       FRONTEND_URL: http://localhost:5175
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-dummy}
-      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       # JWT secrets - use your values from .env
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}

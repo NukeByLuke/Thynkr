@@ -31,6 +31,13 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+    
+    <!-- Preload ALL brand assets so logo appears instantly regardless of theme -->
+    <link rel="preload" as="image" href="/brand/brain-light.png" fetchpriority="high" />
+    <link rel="preload" as="image" href="/brand/brain-dark.png" fetchpriority="high" />
+    <link rel="preload" as="image" href="/brand/wordmark-light.png" fetchpriority="high" />
+    <link rel="preload" as="image" href="/brand/wordmark-dark.png" fetchpriority="high" />
+    
     <title>Thynkr</title>
     <!-- Lottie - loaded async to not block rendering -->
     <script src="https://unpkg.com/@lottiefiles/lottie-player@2.0.3/dist/lottie-player.js" async></script>

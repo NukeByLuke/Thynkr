@@ -109,7 +109,7 @@ export function getCleanFileType(mimeType: string, fileName?: string): FileTypeI
     const label = type.includes('youtube') || type.includes('youtu.be') ? 'YouTube' : 'Video';
     return {
       label,
-      color: 'text-purple-600 dark:text-purple-400 bg-purple-600/10 border-purple-600/20',
+      color: 'text-pink-600 dark:text-cyan-400 bg-pink-600/10 dark:bg-cyan-400/10 border-pink-600/20 dark:border-cyan-400/20',
       icon: Video,
     };
   }

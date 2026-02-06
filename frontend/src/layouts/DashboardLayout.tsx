@@ -29,7 +29,8 @@ export default function DashboardLayout() {
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {!customHeaderContent ? (
               <>
-                <div className="flex items-center gap-2">
+                {/* Only show logo in header on mobile (sidebar hidden) */}
+                <div className="flex items-center gap-2 lg:hidden">
                   <Logo variant="icon" animated={false} className="w-7 h-7" />
                   <span className="text-base font-semibold text-slate-900 dark:text-white">
                     Thynkr

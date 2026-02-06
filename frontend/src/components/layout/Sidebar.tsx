@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   BookOpen,
   GraduationCap,
@@ -60,29 +60,27 @@ const Sidebar = () => {
       {/* Header */}
       <div className={`h-16 px-4 flex items-center ${isExpanded ? 'justify-between' : 'justify-center'} border-b border-stone-200/50 dark:border-midnight-blue/30`}>
         <Link to="/study" className={`flex items-center gap-0.5 overflow-hidden ${!isExpanded ? 'justify-center' : ''}`}>
-          <Logo variant="icon" size="xl" animated={false} className="flex-shrink-0" />
-          <AnimatePresence mode="wait">
-            {isExpanded && (
-              <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.2 }}
-                className="flex flex-col overflow-hidden items-start"
-              >
-                <img
-                  src="/brand/wordmark-light.png"
-                  alt="THYNKR"
-                  className="h-6 object-contain dark:hidden"
-                />
-                <img
-                  src="/brand/wordmark-dark.png"
-                  alt="THYNKR"
-                  className="h-6 object-contain hidden dark:block"
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <Logo variant="icon" size="xl" className="flex-shrink-0" />
+          {isExpanded && (
+            <div className="flex flex-col overflow-hidden items-start">
+              <img
+                src="/brand/wordmark-light.png"
+                alt="THYNKR"
+                loading="eager"
+                fetchPriority="high"
+                className="h-6 object-contain dark:hidden"
+                style={{ opacity: 1 }}
+              />
+              <img
+                src="/brand/wordmark-dark.png"
+                alt="THYNKR"
+                loading="eager"
+                fetchPriority="high"
+                className="h-6 object-contain hidden dark:block"
+                style={{ opacity: 1 }}
+              />
+            </div>
+          )}
         </Link>
       </div>
 

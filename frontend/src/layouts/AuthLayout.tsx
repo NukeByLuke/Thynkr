@@ -44,7 +44,9 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
         <div className="mb-8 transform hover:scale-105 transition-transform duration-500">
           <img
             src={isDark ? '/brand/brain-dark.png' : '/brand/brain-light.png'}
-            alt="Thynkr"
+            alt="THYNKR"
+            loading="eager"
+            fetchPriority="high"
             className={`w-80 h-80 object-contain ${
               isDark 
                 ? 'drop-shadow-[0_0_30px_rgba(124,58,237,0.5)]' 
@@ -57,6 +59,8 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
         <img
           src={isDark ? '/brand/wordmark-dark.png' : '/brand/wordmark-light.png'}
           alt="THYNKR"
+          loading="eager"
+          fetchPriority="high"
           className="h-16 object-contain"
         />
       </div>

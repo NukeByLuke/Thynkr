@@ -484,13 +484,13 @@ export default function AudioPlayer({
                   <button 
                     onClick={() => setActiveSetting(activeSetting === 'voice' ? null : 'voice')}
                     className={clsx(
-                      "px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors uppercase", 
+                      "px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors", 
                       activeSetting === 'voice' 
                         ? "bg-fuchsia-100 dark:bg-fuchsia-900/40 text-fuchsia-700 dark:text-fuchsia-300 ring-2 ring-fuchsia-500 ring-opacity-50" 
                         : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
                     )}
                   >
-                    {voice}
+                    {TTS_VOICES.find(v => v.id === voice)?.name || voice}
                   </button>
                </div>
 
