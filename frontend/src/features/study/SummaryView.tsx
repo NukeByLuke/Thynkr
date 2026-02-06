@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useMemo } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeHighlight from 'rehype-highlight';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { RefreshCw, Play, AlertTriangle } from 'lucide-react';
 import AudioPlayer from '@/components/audio/AudioPlayer';
+import TypewriterText from '@/components/ui/TypewriterText';
 
 interface SummaryViewProps {
   content: string;
@@ -15,6 +13,17 @@ interface SummaryViewProps {
 
 export default function SummaryView({ content, onRegenerate, isRegenerating, error }: SummaryViewProps) {
   const [showAudioPlayer, setShowAudioPlayer] = useState(false);
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+  const prevRegeneratingRef = useRef(isRegenerating);
+
+  // Trigger typewriter effect when regeneration completes
+  useEffect(() => {
+    if (prevRegeneratingRef.current && !isRegenerating && content) {
+      // Just finished regenerating - trigger animation
+      setShouldAnimate(true);
+    }
+    prevRegeneratingRef.current = isRegenerating;
+  }, [isRegenerating, content]);
 
   // Clean text for TTS (strip markdown formatting)
   const cleanTextForTTS = useMemo(() => {
@@ -97,63 +106,65 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
           </div>
         </div>
         <div className="prose prose-lg dark:prose-invert max-w-none">
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeHighlight]}
+          <TypewriterText
+            content={content}
+            speed={12}
+            isGenerating={shouldAnimate}
+            onComplete={() => setShouldAnimate(false)}
             components={{
-              h1: ({ node, ...props }) => (
+              h1: ({ node, ...props }: any) => (
                 <h1
                   className="text-4xl font-extrabold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mt-8 mb-6 pb-4 border-b-4 border-brand-500/20"
                   {...props}
                 />
               ),
-              h2: ({ node, ...props }) => (
+              h2: ({ node, ...props }: any) => (
                 <h2
                   className="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-8 mb-4 pl-4 border-l-4 border-pink-500 dark:border-cyan-500"
                   {...props}
                 />
               ),
-              h3: ({ node, ...props }) => (
+              h3: ({ node, ...props }: any) => (
                 <h3
                   className="text-xl font-bold text-gray-800 dark:text-gray-200 mt-6 mb-3 flex items-center gap-2"
                   {...props}
                 />
               ),
-              h4: ({ node, ...props }) => (
+              h4: ({ node, ...props }: any) => (
                 <h4
                   className="text-lg font-semibold text-brand-700 dark:text-brand-300 mt-5 mb-2"
                   {...props}
                 />
               ),
-              strong: ({ node, ...props }) => (
+              strong: ({ node, ...props }: any) => (
                 <strong className="font-bold text-brand-700 dark:text-brand-300" {...props} />
               ),
-              blockquote: ({ node, ...props }) => (
+              blockquote: ({ node, ...props }: any) => (
                 <blockquote
                   className="border-l-4 border-brand-300 dark:border-brand-700 bg-brand-50 dark:bg-brand-900/10 p-4 rounded-r-lg italic text-gray-700 dark:text-gray-300 my-4 shadow-sm"
                   {...props}
                 />
               ),
-              p: ({ node, ...props }) => (
+              p: ({ node, ...props }: any) => (
                 <p
                   className="text-gray-700 dark:text-gray-300 leading-loose mb-6 text-lg"
                   {...props}
                 />
               ),
-              ul: ({ node, ...props }) => (
+              ul: ({ node, ...props }: any) => (
                 <ul
                   className="list-disc ml-7 space-y-3 mb-6 text-gray-700 dark:text-gray-300 marker:text-brand-500 dark:marker:text-brand-400"
                   {...props}
                 />
               ),
-              ol: ({ node, ...props }) => (
+              ol: ({ node, ...props }: any) => (
                 <ol
                   className="list-decimal ml-7 space-y-3 mb-6 text-gray-700 dark:text-gray-300 marker:text-brand-500 dark:marker:text-brand-400"
                   {...props}
                 />
               ),
-              li: ({ node, ...props }) => <li className="leading-loose pl-2" {...props} />,
-              code: ({ node, className, children, ...props }) => {
+              li: ({ node, ...props }: any) => <li className="leading-loose pl-2" {...props} />,
+              code: ({ node, className, children, ...props }: any) => {
                 const isInline = !className;
                 return isInline ? (
                   <code
@@ -171,14 +182,14 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
                   </code>
                 );
               },
-              pre: ({ node, ...props }) => <pre className="my-4" {...props} />,
-              a: ({ node, ...props }) => (
+              pre: ({ node, ...props }: any) => <pre className="my-4" {...props} />,
+              a: ({ node, ...props }: any) => (
                 <a
                   className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 underline decoration-primary-300 dark:decoration-primary-600 hover:decoration-primary-500 dark:hover:decoration-primary-400 transition-colors"
                   {...props}
                 />
               ),
-              table: ({ node, ...props }) => (
+              table: ({ node, ...props }: any) => (
                 <div className="overflow-x-auto my-5">
                   <table
                     className="min-w-full divide-y divide-gray-300 dark:divide-gray-700 border border-gray-300 dark:border-gray-700 rounded-lg"
@@ -186,37 +197,35 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
                   />
                 </div>
               ),
-              thead: ({ node, ...props }) => (
+              thead: ({ node, ...props }: any) => (
                 <thead className="bg-gray-100 dark:bg-gray-800" {...props} />
               ),
-              tbody: ({ node, ...props }) => (
+              tbody: ({ node, ...props }: any) => (
                 <tbody
                   className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900"
                   {...props}
                 />
               ),
-              tr: ({ node, ...props }) => (
+              tr: ({ node, ...props }: any) => (
                 <tr
                   className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   {...props}
                 />
               ),
-              th: ({ node, ...props }) => (
+              th: ({ node, ...props }: any) => (
                 <th
                   className="px-4 py-3 text-left text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider"
                   {...props}
                 />
               ),
-              td: ({ node, ...props }) => (
+              td: ({ node, ...props }: any) => (
                 <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300" {...props} />
               ),
-              hr: ({ node, ...props }) => (
+              hr: ({ node, ...props }: any) => (
                 <hr className="my-8 border-t-2 border-gray-300 dark:border-gray-700" {...props} />
               ),
             }}
-          >
-            {content}
-          </ReactMarkdown>
+          />
         </div>
       </div>
     </div>
