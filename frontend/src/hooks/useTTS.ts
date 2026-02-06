@@ -182,7 +182,7 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
         }
       };
 
-      audio.onerror = (e) => {
+      audio.onerror = () => {
         setIsPlaying(false);
         setIsLoading(false);
         // Remove failed URL from cache so it can be re-negotiated
