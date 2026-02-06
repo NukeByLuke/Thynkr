@@ -61,8 +61,11 @@ setInterval(() => {
 
 // Gemini AI client for TTS
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-// Use Gemini 2.5 Flash Lite for optimal balance of speed and cost
-const TTS_MODEL = 'gemini-2.5-flash-lite';
+// Use Gemini 2.5 Flash Lite TTS variant for optimal balance of speed and cost
+// Note: Standard models don't support audio generation - must use -tts suffix
+const TTS_MODEL = 'gemini-2.5-flash-lite-preview-tts';
+// Fallback model if primary fails (404/500 errors)
+const TTS_FALLBACK_MODEL = 'gemini-2.0-flash';
 
 // Timeout for TTS API calls (20 seconds - faster model allows shorter timeout)
 const TTS_TIMEOUT_MS = 20000;
@@ -172,18 +175,19 @@ function pcmToWav(pcmData: Buffer): Buffer {
 
 /**
  * Generate TTS audio using Gemini's native TTS model
- * Includes retry logic and fallback to Charon if voice fails
+ * Includes retry logic, model fallback, and voice fallback to Charon
  */
-async function generateGeminiTTS(text: string, voice: Voice, retries = 2, useFallback = true): Promise<Buffer> {
+async function generateGeminiTTS(text: string, voice: Voice, retries = 2, useFallback = true, useModelFallback = true): Promise<Buffer> {
   const geminiVoice = VOICE_MAP[voice];
+  const currentModel = useModelFallback ? TTS_MODEL : TTS_FALLBACK_MODEL;
   
-  logger.info({ voice, geminiVoice, textLength: text.length, retries }, 'Starting TTS generation');
+  logger.info({ voice, geminiVoice, model: currentModel, textLength: text.length, retries }, 'Starting TTS generation');
 
   try {
     const startTime = Date.now();
     const response = await withTimeout(
       ai.models.generateContent({
-        model: TTS_MODEL,
+        model: currentModel,
         contents: text,
         config: {
           responseModalities: [Modality.AUDIO],
@@ -201,7 +205,7 @@ async function generateGeminiTTS(text: string, voice: Voice, retries = 2, useFal
     );
     
     const elapsed = Date.now() - startTime;
-    logger.info({ voice, geminiVoice, elapsed }, 'TTS generation completed');
+    logger.info({ voice, geminiVoice, model: currentModel, elapsed }, 'TTS generation completed');
 
     const candidate = response.candidates?.[0];
     const part = candidate?.content?.parts?.[0];
@@ -218,16 +222,23 @@ async function generateGeminiTTS(text: string, voice: Voice, retries = 2, useFal
     const errorMsg = error?.message || '';
     const isRateLimit = errorMsg.includes('429') || errorMsg.includes('RESOURCE_EXHAUSTED');
     const isInternalError = errorMsg.includes('500') || errorMsg.includes('INTERNAL');
+    const isNotFound = errorMsg.includes('404') || errorMsg.includes('NOT_FOUND');
     const isTimeout = errorMsg.includes('TIMEOUT');
     
-    logger.error({ voice, geminiVoice, error: errorMsg, isRateLimit, isInternalError, isTimeout }, 'TTS generation failed');
+    logger.error({ voice, geminiVoice, model: currentModel, error: errorMsg, fullError: error, isRateLimit, isInternalError, isNotFound, isTimeout }, 'TTS generation failed');
+    
+    // If primary model fails with 404 or 500, try fallback model immediately
+    if ((isNotFound || isInternalError) && useModelFallback) {
+      logger.warn({ primaryModel: TTS_MODEL, fallback: TTS_FALLBACK_MODEL }, 'TTS Primary model failed, using fallback');
+      return generateGeminiTTS(text, voice, retries, useFallback, false);
+    }
     
     // Handle rate limiting with retry
     if (isRateLimit && retries > 0) {
       const waitTime = (3 - retries) * 5000;
       logger.warn({ voice, geminiVoice, retries, waitTime }, 'TTS rate limited, retrying');
       await new Promise(resolve => setTimeout(resolve, waitTime));
-      return generateGeminiTTS(text, voice, retries - 1, useFallback);
+      return generateGeminiTTS(text, voice, retries - 1, useFallback, useModelFallback);
     }
     
     // Handle internal errors or timeouts - retry then fallback to Charon (alloy)
@@ -235,13 +246,13 @@ async function generateGeminiTTS(text: string, voice: Voice, retries = 2, useFal
       if (retries > 0) {
         logger.warn({ voice, geminiVoice, retries, isTimeout }, 'TTS error, retrying');
         await new Promise(resolve => setTimeout(resolve, 2000));
-        return generateGeminiTTS(text, voice, retries - 1, useFallback);
+        return generateGeminiTTS(text, voice, retries - 1, useFallback, useModelFallback);
       }
       
       // Fall back to Charon (alloy) if not already using it - most stable voice
       if (useFallback && voice !== 'alloy') {
         logger.warn({ originalVoice: voice, fallbackVoice: 'alloy', reason: isTimeout ? 'timeout' : 'internal_error' }, 'TTS voice failed, falling back to Charon');
-        return generateGeminiTTS(text, 'alloy', 2, false);
+        return generateGeminiTTS(text, 'alloy', 2, false, useModelFallback);
       }
     }
     
@@ -254,14 +265,16 @@ async function generateGeminiTTS(text: string, voice: Voice, retries = 2, useFal
  * Used for chunked generation where we concatenate PCM data before adding header
  * Includes retry logic for rate limit (429), internal (500) errors, and timeouts
  * Falls back to Charon voice if other voices fail (most stable voice)
+ * Falls back to gemini-2.0-flash if primary model fails with 404/500
  */
-async function generateGeminiPCM(text: string, voice: Voice, retries = 2, useFallback = true): Promise<Buffer> {
+async function generateGeminiPCM(text: string, voice: Voice, retries = 2, useFallback = true, useModelFallback = true): Promise<Buffer> {
   const geminiVoice = VOICE_MAP[voice];
+  const currentModel = useModelFallback ? TTS_MODEL : TTS_FALLBACK_MODEL;
 
   try {
     const response = await withTimeout(
       ai.models.generateContent({
-        model: TTS_MODEL,
+        model: currentModel,
         contents: text,
         config: {
           responseModalities: [Modality.AUDIO],
@@ -292,14 +305,23 @@ async function generateGeminiPCM(text: string, voice: Voice, retries = 2, useFal
     const errorMsg = error?.message || '';
     const isRateLimit = errorMsg.includes('429') || errorMsg.includes('RESOURCE_EXHAUSTED');
     const isInternalError = errorMsg.includes('500') || errorMsg.includes('INTERNAL');
+    const isNotFound = errorMsg.includes('404') || errorMsg.includes('NOT_FOUND');
     const isTimeout = errorMsg.includes('TIMEOUT');
+    
+    logger.error({ voice, geminiVoice, model: currentModel, error: errorMsg, fullError: error, isRateLimit, isInternalError, isNotFound, isTimeout }, 'TTS PCM generation failed');
+    
+    // If primary model fails with 404 or 500, try fallback model immediately
+    if ((isNotFound || isInternalError) && useModelFallback) {
+      logger.warn({ primaryModel: TTS_MODEL, fallback: TTS_FALLBACK_MODEL }, 'TTS Primary model failed, using fallback');
+      return generateGeminiPCM(text, voice, retries, useFallback, false);
+    }
     
     // Handle rate limiting with retry
     if (isRateLimit && retries > 0) {
       const waitTime = (3 - retries) * 7000;
       logger.warn({ voice, geminiVoice, retries, waitTime }, 'TTS rate limited, waiting to retry');
       await new Promise(resolve => setTimeout(resolve, waitTime));
-      return generateGeminiPCM(text, voice, retries - 1, useFallback);
+      return generateGeminiPCM(text, voice, retries - 1, useFallback, useModelFallback);
     }
     
     // Handle internal errors or timeouts - retry once then fallback to Charon (alloy)
@@ -307,13 +329,13 @@ async function generateGeminiPCM(text: string, voice: Voice, retries = 2, useFal
       if (retries > 0) {
         logger.warn({ voice, geminiVoice, retries, isTimeout }, 'TTS error, retrying');
         await new Promise(resolve => setTimeout(resolve, 2000));
-        return generateGeminiPCM(text, voice, retries - 1, useFallback);
+        return generateGeminiPCM(text, voice, retries - 1, useFallback, useModelFallback);
       }
       
       // If not already using alloy (Charon), fall back to it as most stable voice
       if (useFallback && voice !== 'alloy') {
         logger.warn({ originalVoice: voice, fallbackVoice: 'alloy', reason: isTimeout ? 'timeout' : 'internal_error' }, 'TTS voice failed, falling back to Charon');
-        return generateGeminiPCM(text, 'alloy', 2, false);
+        return generateGeminiPCM(text, 'alloy', 2, false, useModelFallback);
       }
     }
     
