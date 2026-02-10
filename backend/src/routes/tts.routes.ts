@@ -3,7 +3,7 @@ import { authenticate, AuthenticatedRequest } from '../middleware/auth.middlewar
 import { checkAIRateLimit, recordAIUsage } from '../middleware/ai-rate-limit.middleware';
 import { ttsRateLimit } from '../middleware/tts-rate-limit.middleware';
 import { canUseTTS } from '../lib/tier-limits';
-import { GoogleGenAI, Modality } from '@google/genai';
+// import { GoogleGenAI, Modality } from '@google/genai';
 import { createHash, randomBytes } from 'crypto';
 import prisma from '../db/client';
 import { logger } from '../lib/logger';
@@ -15,22 +15,15 @@ import path from 'path';
 const VOICES = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'] as const;
 type Voice = (typeof VOICES)[number];
 
-// Map frontend voice IDs to Gemini TTS prebuilt voice names
-// Using stable-sounding Gemini voices with distinct characteristics:
-// - Charon: Informative (most stable based on testing)
-// - Kore: Firm
-// - Orus: Firm  
-// - Fenrir: Excitable
-// - Aoede: Breezy
-// - Puck: Upbeat
-// All of these are official Gemini TTS voices from the 30 available
+// Map frontend voice IDs to Google Cloud TTS Neural2 voices
+// Neural2 provides "Amazing" quality and human-like intonation (Paid tier, reliable)
 const VOICE_MAP: Record<Voice, string> = {
-  alloy: 'Charon',   // Informative - stable, neutral
-  echo: 'Kore',      // Firm - professional  
-  fable: 'Aoede',    // Breezy - light, casual
-  onyx: 'Orus',      // Firm - deep, authoritative
-  nova: 'Fenrir',    // Excitable - energetic
-  shimmer: 'Puck',   // Upbeat - cheerful
+  alloy: 'en-US-Neural2-D',    // Male, trustworthy
+  echo: 'en-US-Neural2-J',     // Male, firm
+  fable: 'en-GB-Neural2-B',    // Male, British accent (Breezy/Story)
+  onyx: 'en-US-Neural2-A',     // Male, deep/authoritative
+  nova: 'en-US-Neural2-F',     // Female, energetic
+  shimmer: 'en-US-Neural2-H',  // Female, upbeat
 };
 
 // Supported speeds (handled client-side via playbackRate, kept for API compat)
@@ -60,14 +53,13 @@ setInterval(() => {
 }, 60000);
 
 // Gemini AI client for TTS
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-// Use Gemini 2.0 Flash for TTS
-const TTS_MODEL = 'gemini-2.0-flash';
-// Fallback model
-const TTS_FALLBACK_MODEL = 'gemini-1.5-flash';
+// const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }); 
+// Using Google Cloud TTS via REST API for reliability and quality
+const API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+const GOOGLE_TTS_URL = 'https://texttospeech.googleapis.com/v1/text:synthesize';
 
-// Timeout for TTS API calls (45 seconds - allow for slow generation)
-const TTS_TIMEOUT_MS = 45000;
+// Timeout for TTS API calls (20 seconds - fast API)
+const TTS_TIMEOUT_MS = 20000;
 
 /**
  * Wrap a promise with a timeout
@@ -173,171 +165,99 @@ function pcmToWav(pcmData: Buffer): Buffer {
 }
 
 /**
- * Generate TTS audio using Gemini's native TTS model
- * Includes retry logic, model fallback, and voice fallback to Charon
+ * Shared helper to call Google Cloud TTS REST API
  */
-async function generateGeminiTTS(text: string, voice: Voice, retries = 2, useFallback = true, useModelFallback = true): Promise<Buffer> {
-  const geminiVoice = VOICE_MAP[voice];
-  const currentModel = useModelFallback ? TTS_MODEL : TTS_FALLBACK_MODEL;
-  
-  logger.info({ voice, geminiVoice, model: currentModel, textLength: text.length, retries }, 'Starting TTS generation');
+async function callGoogleTTS(text: string, voiceName: string): Promise<Buffer> {
+  if (!API_KEY) {
+    throw new Error('Missing Google Cloud/Gemini API key');
+  }
+
+  // Extract language code from voice name (e.g. "en-US" from "en-US-Neural2-D")
+  const languageCode = voiceName.split('-').slice(0, 2).join('-');
+
+  const response = await fetch(`${GOOGLE_TTS_URL}?key=${API_KEY}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      input: { text },
+      voice: { 
+        languageCode, 
+        name: voiceName,
+      },
+      audioConfig: {
+        audioEncoding: 'LINEAR16', // Raw PCM for streaming/concatenation
+        sampleRateHertz: 24000,    // High quality standard
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`Google TTS API Error (${response.status}): ${errorBody}`);
+  }
+
+  const data = await response.json() as { audioContent: string };
+  if (!data.audioContent) {
+    throw new Error('No audio content received from Google TTS');
+  }
+
+  return Buffer.from(data.audioContent, 'base64');
+}
+
+/**
+ * Generate WAV audio using Google Cloud TTS
+ */
+async function generateGoogleTTS(text: string, voice: Voice, retries = 2): Promise<Buffer> {
+  const googleVoice = VOICE_MAP[voice];
+  logger.info({ voice, googleVoice, textLength: text.length }, 'Starting Google TTS generation');
 
   try {
     const startTime = Date.now();
-    const response = await withTimeout(
-      ai.models.generateContent({
-        model: currentModel,
-        contents: text,
-        config: {
-          responseModalities: [Modality.AUDIO],
-          speechConfig: {
-            voiceConfig: {
-              prebuiltVoiceConfig: {
-                voiceName: geminiVoice,
-              },
-            },
-          },
-        },
-      }),
-      TTS_TIMEOUT_MS,
-      `TTS generation for voice ${geminiVoice}`
-    );
     
+    // Call API with timeout
+    const pcmBuffer = await withTimeout(
+      callGoogleTTS(text, googleVoice),
+      TTS_TIMEOUT_MS,
+      `TTS generation for ${googleVoice}`
+    );
+     
     const elapsed = Date.now() - startTime;
-    logger.info({ voice, geminiVoice, model: currentModel, elapsed }, 'TTS generation completed');
+    logger.info({ voice, googleVoice, elapsed }, 'TTS generation completed');
 
-    const candidate = response.candidates?.[0];
-    const part = candidate?.content?.parts?.[0];
-    const audioData = part?.inlineData?.data;
-
-    if (!audioData) {
-      throw new Error('No audio data returned from Gemini TTS');
-    }
-
-    // Gemini returns base64-encoded raw PCM audio (24kHz, 16-bit, mono)
-    const pcmBuffer = Buffer.from(audioData, 'base64');
     return pcmToWav(pcmBuffer);
   } catch (error: any) {
-    const errorMsg = error?.message || '';
-    const isRateLimit = errorMsg.includes('429') || errorMsg.includes('RESOURCE_EXHAUSTED');
-    const isInternalError = errorMsg.includes('500') || errorMsg.includes('INTERNAL');
-    const isNotFound = errorMsg.includes('404') || errorMsg.includes('NOT_FOUND');
-    const isTimeout = errorMsg.includes('TIMEOUT');
+    logger.error({ voice, googleVoice, error: error.message }, 'TTS generation failed');
     
-    logger.error({ voice, geminiVoice, model: currentModel, error: errorMsg, fullError: error, isRateLimit, isInternalError, isNotFound, isTimeout }, 'TTS generation failed');
-    
-    // If primary model fails with 404 or 500, try fallback model immediately
-    if ((isNotFound || isInternalError) && useModelFallback) {
-      logger.warn({ primaryModel: TTS_MODEL, fallback: TTS_FALLBACK_MODEL }, 'TTS Primary model failed, using fallback');
-      return generateGeminiTTS(text, voice, retries, useFallback, false);
+    // Simple retry logic
+    if (retries > 0) {
+      await new Promise(r => setTimeout(r, 1000));
+      return generateGoogleTTS(text, voice, retries - 1);
     }
-    
-    // Handle rate limiting with retry
-    if (isRateLimit && retries > 0) {
-      const waitTime = (3 - retries) * 5000;
-      logger.warn({ voice, geminiVoice, retries, waitTime }, 'TTS rate limited, retrying');
-      await new Promise(resolve => setTimeout(resolve, waitTime));
-      return generateGeminiTTS(text, voice, retries - 1, useFallback, useModelFallback);
-    }
-    
-    // Handle internal errors or timeouts - retry then fallback to Charon (alloy)
-    if (isInternalError || isTimeout) {
-      if (retries > 0) {
-        logger.warn({ voice, geminiVoice, retries, isTimeout }, 'TTS error, retrying');
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        return generateGeminiTTS(text, voice, retries - 1, useFallback, useModelFallback);
-      }
-      
-      // Fall back to Charon (alloy) if not already using it - most stable voice
-      if (useFallback && voice !== 'alloy') {
-        logger.warn({ originalVoice: voice, fallbackVoice: 'alloy', reason: isTimeout ? 'timeout' : 'internal_error' }, 'TTS voice failed, falling back to Charon');
-        return generateGeminiTTS(text, 'alloy', 2, false, useModelFallback);
-      }
-    }
-    
     throw error;
   }
 }
 
 /**
- * Generate raw PCM audio using Gemini's native TTS model (no WAV header)
- * Used for chunked generation where we concatenate PCM data before adding header
- * Includes retry logic for rate limit (429), internal (500) errors, and timeouts
- * Falls back to Charon voice if other voices fail (most stable voice)
- * Falls back to gemini-2.0-flash if primary model fails with 404/500
+ * Generate raw PCM audio using Google Cloud TTS (for chunked streaming)
  */
-async function generateGeminiPCM(text: string, voice: Voice, retries = 2, useFallback = true, useModelFallback = true): Promise<Buffer> {
-  const geminiVoice = VOICE_MAP[voice];
-  const currentModel = useModelFallback ? TTS_MODEL : TTS_FALLBACK_MODEL;
+async function generateGooglePCM(text: string, voice: Voice, retries = 2): Promise<Buffer> {
+  const googleVoice = VOICE_MAP[voice];
 
   try {
-    const response = await withTimeout(
-      ai.models.generateContent({
-        model: currentModel,
-        contents: text,
-        config: {
-          responseModalities: [Modality.AUDIO],
-          speechConfig: {
-            voiceConfig: {
-              prebuiltVoiceConfig: {
-                voiceName: geminiVoice,
-              },
-            },
-          },
-        },
-      }),
+    return await withTimeout(
+      callGoogleTTS(text, googleVoice),
       TTS_TIMEOUT_MS,
-      `TTS PCM generation for voice ${geminiVoice}`
+      `TTS PCM generation for ${googleVoice}`
     );
-
-    const candidate = response.candidates?.[0];
-    const part = candidate?.content?.parts?.[0];
-    const audioData = part?.inlineData?.data;
-
-    if (!audioData) {
-      throw new Error('No audio data returned from Gemini TTS');
-    }
-
-    // Gemini returns base64-encoded raw PCM audio (24kHz, 16-bit, mono)
-    return Buffer.from(audioData, 'base64');
   } catch (error: any) {
-    const errorMsg = error?.message || '';
-    const isRateLimit = errorMsg.includes('429') || errorMsg.includes('RESOURCE_EXHAUSTED');
-    const isInternalError = errorMsg.includes('500') || errorMsg.includes('INTERNAL');
-    const isNotFound = errorMsg.includes('404') || errorMsg.includes('NOT_FOUND');
-    const isTimeout = errorMsg.includes('TIMEOUT');
+    logger.error({ voice, googleVoice, error: error.message }, 'TTS PCM generation failed');
     
-    logger.error({ voice, geminiVoice, model: currentModel, error: errorMsg, fullError: error, isRateLimit, isInternalError, isNotFound, isTimeout }, 'TTS PCM generation failed');
-    
-    // If primary model fails with 404 or 500, try fallback model immediately
-    if ((isNotFound || isInternalError) && useModelFallback) {
-      logger.warn({ primaryModel: TTS_MODEL, fallback: TTS_FALLBACK_MODEL }, 'TTS Primary model failed, using fallback');
-      return generateGeminiPCM(text, voice, retries, useFallback, false);
+    if (retries > 0) {
+      await new Promise(r => setTimeout(r, 1000));
+      return generateGooglePCM(text, voice, retries - 1);
     }
-    
-    // Handle rate limiting with retry
-    if (isRateLimit && retries > 0) {
-      const waitTime = (3 - retries) * 7000;
-      logger.warn({ voice, geminiVoice, retries, waitTime }, 'TTS rate limited, waiting to retry');
-      await new Promise(resolve => setTimeout(resolve, waitTime));
-      return generateGeminiPCM(text, voice, retries - 1, useFallback, useModelFallback);
-    }
-    
-    // Handle internal errors or timeouts - retry once then fallback to Charon (alloy)
-    if (isInternalError || isTimeout) {
-      if (retries > 0) {
-        logger.warn({ voice, geminiVoice, retries, isTimeout }, 'TTS error, retrying');
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        return generateGeminiPCM(text, voice, retries - 1, useFallback, useModelFallback);
-      }
-      
-      // If not already using alloy (Charon), fall back to it as most stable voice
-      if (useFallback && voice !== 'alloy') {
-        logger.warn({ originalVoice: voice, fallbackVoice: 'alloy', reason: isTimeout ? 'timeout' : 'internal_error' }, 'TTS voice failed, falling back to Charon');
-        return generateGeminiPCM(text, 'alloy', 2, false, useModelFallback);
-      }
-    }
-    
     throw error;
   }
 }
@@ -609,7 +529,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
         try {
           logger.info({ userId, textLength: text.length, voice }, 'Generating short TTS audio');
           
-          const buffer = await generateGeminiTTS(text, voice);
+          const buffer = await generateGoogleTTS(text, voice);
 
           // Cache in background
           cacheAudio(cacheHash, buffer).catch((err) => {
@@ -618,7 +538,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
 
           reply.header('Content-Type', 'audio/wav');
           reply.header('Content-Length', buffer.length);
-          reply.header('X-TTS-Provider', 'gemini');
+          reply.header('X-TTS-Provider', 'google-cloud');
           reply.header('X-TTS-Cached', 'false');
           return reply.send(buffer);
         } catch (error: any) {
@@ -632,9 +552,9 @@ export default async function ttsRoutes(server: FastifyInstance) {
       logger.info({ userId, textLength: text.length, voice, chunkCount: chunks.length }, 'Starting chunked TTS generation');
 
       try {
-        // Generate chunks with limited parallelism to balance speed vs rate limits
-        // Gemini free tier: 10 requests/minute, so we can do 2-3 concurrent safely
-        const MAX_CONCURRENT = 2;
+        // Generate chunks - Google Cloud TTS has much higher rate limits than Gemini
+        // We can process more chunks in parallel (e.g., 5-6 concurrent requests)
+        const MAX_CONCURRENT = 5;
         const pcmBuffers: (Buffer | null)[] = new Array(chunks.length).fill(null);
         
         // Process chunks in batches of MAX_CONCURRENT
@@ -644,7 +564,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
           
           for (let i = batchStart; i < batchEnd; i++) {
             batchPromises.push(
-              generateGeminiPCM(chunks[i], voice).then(pcm => {
+              generateGooglePCM(chunks[i], voice).then(pcm => {
                 pcmBuffers[i] = pcm;
               })
             );
@@ -653,10 +573,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
           // Wait for current batch to complete
           await Promise.all(batchPromises);
           
-          // Small delay between batches to avoid rate limits (except after last batch)
-          if (batchEnd < chunks.length) {
-            await new Promise(resolve => setTimeout(resolve, 200));
-          }
+          // No delay needed for Cloud TTS usually
         }
 
         // Concatenate all PCM data and convert to WAV (filter out any nulls just in case)
@@ -673,7 +590,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
 
         reply.header('Content-Type', 'audio/wav');
         reply.header('Content-Length', wavBuffer.length);
-        reply.header('X-TTS-Provider', 'gemini');
+        reply.header('X-TTS-Provider', 'google-cloud');
         reply.header('X-TTS-Cached', 'false');
         reply.header('X-TTS-Chunks', chunks.length.toString());
         return reply.send(wavBuffer);
@@ -762,7 +679,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
         reply.header('Content-Disposition', 'inline');
         reply.header('Cache-Control', 'public, max-age=86400, s-maxage=604800');
         reply.header('X-TTS-Cached', 'true');
-        reply.header('X-TTS-Provider', 'gemini');
+        reply.header('X-TTS-Provider', 'google-cloud');
         return reply.send(cachedAudio);
       }
 
@@ -772,9 +689,9 @@ export default async function ttsRoutes(server: FastifyInstance) {
           textLength: text.length, 
           voice, 
           userId 
-        }, 'Generating TTS audio via Gemini');
+        }, 'Generating TTS audio via Google Cloud');
 
-        const buffer = await generateGeminiTTS(text, voice);
+        const buffer = await generateGoogleTTS(text, voice);
 
         const durationMs = Date.now() - startTime;
 
@@ -793,7 +710,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
         reply.header('Content-Disposition', 'inline');
         reply.header('Cache-Control', 'public, max-age=3600, s-maxage=86400');
         reply.header('X-TTS-Cached', 'false');
-        reply.header('X-TTS-Provider', 'gemini');
+        reply.header('X-TTS-Provider', 'google-cloud');
         reply.header('X-TTS-Duration-Ms', durationMs.toString());
         
         return reply.send(buffer);
@@ -876,17 +793,17 @@ export default async function ttsRoutes(server: FastifyInstance) {
         reply.header('Content-Disposition', 'inline');
         reply.header('Cache-Control', 'public, max-age=86400');
         reply.header('X-TTS-Cached', 'true');
-        reply.header('X-TTS-Provider', 'gemini');
+        reply.header('X-TTS-Provider', 'google-cloud');
         return reply.send(cachedAudio);
       }
 
       try {
         logger.info(
           { packId: id, pageNum, textLength: textToRead.length, voice },
-          'Generating study pack page TTS via Gemini'
+          'Generating study pack page TTS via Google Cloud'
         );
 
-        const buffer = await generateGeminiTTS(textToRead.slice(0, 4096), voice);
+        const buffer = await generateGoogleTTS(textToRead.slice(0, 4096), voice);
 
         await cacheAudio(hash, buffer);
 
@@ -894,7 +811,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
         reply.header('Content-Disposition', 'inline');
         reply.header('Cache-Control', 'public, max-age=86400');
         reply.header('X-TTS-Cached', 'false');
-        reply.header('X-TTS-Provider', 'gemini');
+        reply.header('X-TTS-Provider', 'google-cloud');
         return reply.send(buffer);
       } catch (error: any) {
         logger.error(
