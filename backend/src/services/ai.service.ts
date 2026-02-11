@@ -4,7 +4,7 @@
  * Handles summaries, notes, quizzes, and flashcards with caching and security validation.
  */
 
-import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
+import { GoogleAuth, AuthClient } from 'google-auth-library';
 import NodeCache from 'node-cache';
 import { logger } from '../lib/logger';
 import { config } from '../config';
@@ -73,32 +73,61 @@ export interface GeneratedFlashcards {
  * AIService - Main service class for Google Gemini-powered educational content generation
  */
 export class AIService {
-  private gemini: GoogleGenerativeAI;
-  private model: GenerativeModel;
+  private auth: GoogleAuth;
+  private authClient: AuthClient | null = null;
 
   constructor() {
-    const apiKey = config.gemini?.apiKey || process.env.GEMINI_API_KEY;
+    const credPath = process.env.GEMINI_APPLICATION_CREDENTIALS || '/app/gemini-credentials.json';
+    this.auth = new GoogleAuth({
+      keyFilename: credPath,
+      scopes: ['https://www.googleapis.com/auth/generative-language'],
+    });
+    logger.info(`Google Gemini AI Service initialized with ${MODEL} (service account REST API)`);
+  }
 
-    if (!apiKey) {
-      logger.warn('GEMINI_API_KEY not provided - AI features will be limited to OpenAI only');
-      // Initialize with a dummy key to prevent crashes - requests will fail gracefully
-      this.gemini = new GoogleGenerativeAI('dummy-key');
-      this.model = this.gemini.getGenerativeModel({ model: MODEL });
-      return;
+  /**
+   * Call Gemini API directly via REST using service account auth
+   */
+  private async callGemini(prompt: string): Promise<string> {
+    if (!this.authClient) {
+      this.authClient = await this.auth.getClient();
+    }
+    const tokenResponse = await this.authClient.getAccessToken();
+    if (!tokenResponse.token) {
+      throw new Error('Failed to obtain access token for Gemini API');
     }
 
-    this.gemini = new GoogleGenerativeAI(apiKey);
-    this.model = this.gemini.getGenerativeModel({
-      model: MODEL,
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+    const requestBody = {
+      contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
         temperature: 0.7,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 16384, // Increased to prevent truncation
+        maxOutputTokens: 16384,
       },
+    };
+
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${tokenResponse.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
     });
 
-    logger.info(`Google Gemini AI Service initialized with ${MODEL}`);
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`Gemini API error ${response.status}: ${errorBody}`);
+    }
+
+    const data = await response.json() as any;
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) {
+      throw new Error('Empty response from Gemini API');
+    }
+    return text;
   }
 
   /**
@@ -195,13 +224,6 @@ export class AIService {
     text: string,
     language: string = DEFAULT_LANGUAGE
   ): Promise<GeneratedSummary> {
-    const apiKey = config.gemini?.apiKey || process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey === 'dummy-key') {
-      throw new Error(
-        'Gemini API key is not configured. Please set GEMINI_API_KEY environment variable.'
-      );
-    }
-
     const normalizedLanguage = this.normalizeLanguage(language);
     const preparedText = this.prepareText(text);
     const cacheKey = `summary_${normalizedLanguage}_${this.hashText(preparedText)}`;
@@ -233,9 +255,7 @@ Create a comprehensive, visually engaging, and well-structured summary of the fo
 Text:
 ${preparedText}`;
 
-      const result = await this.model.generateContent(prompt);
-      const response = result.response;
-      const content = response.text();
+      const content = await this.callGemini(prompt);
       
       // Use safe JSON parsing with fallback
       const parsed = this.safeParseJson<GeneratedSummary>(content, (rawText) => {
@@ -274,13 +294,6 @@ ${preparedText}`;
    * Generate structured study notes using Gemini 2.5 Flash Lite
    */
   async generateNotes(text: string, language: string = DEFAULT_LANGUAGE): Promise<GeneratedNotes> {
-    const apiKey = config.gemini?.apiKey || process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey === 'dummy-key') {
-      throw new Error(
-        'Gemini API key is not configured. Please set GEMINI_API_KEY environment variable.'
-      );
-    }
-
     const normalizedLanguage = this.normalizeLanguage(language);
     const preparedText = this.prepareText(text);
     const cacheKey = `notes_${normalizedLanguage}_${this.hashText(preparedText)}`;
@@ -316,9 +329,7 @@ Create detailed study notes from the following text. Includes:
 Text:
 ${preparedText}`;
 
-      const result = await this.model.generateContent(prompt);
-      const response = result.response;
-      const content = response.text();
+      const content = await this.callGemini(prompt);
       
       // Use safe JSON parsing with fallback
       const parsed = this.safeParseJson<GeneratedNotes>(content, (rawText) => {
@@ -343,13 +354,6 @@ ${preparedText}`;
     difficulty: QuizDifficulty,
     language: string = DEFAULT_LANGUAGE
   ): Promise<GeneratedQuiz> {
-    const apiKey = config.gemini?.apiKey || process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey === 'dummy-key') {
-      throw new Error(
-        'Gemini API key is not configured. Please set GEMINI_API_KEY environment variable.'
-      );
-    }
-
     const normalizedLanguage = this.normalizeLanguage(language);
     const preparedText = this.prepareText(text, 120000); // Gemini can handle much more
     
@@ -405,9 +409,7 @@ Make the quiz comprehensive and reflective of the material's core concepts.
 Text:
 ${preparedText}`;
 
-      const result = await this.model.generateContent(prompt);
-      const response = result.response;
-      const content = response.text();
+      const content = await this.callGemini(prompt);
       
       // Use safe JSON parsing
       const parsed = this.safeParseJson<GeneratedQuiz>(content);
@@ -445,13 +447,6 @@ ${preparedText}`;
     numCards: number,
     language: string = DEFAULT_LANGUAGE
   ): Promise<GeneratedFlashcards> {
-    const apiKey = config.gemini?.apiKey || process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey === 'dummy-key') {
-      throw new Error(
-        'Gemini API key is not configured. Please set GEMINI_API_KEY environment variable.'
-      );
-    }
-
     const normalizedLanguage = this.normalizeLanguage(language);
     const preparedText = this.prepareText(text, 100000);
     const cacheKey = `flashcards_${normalizedLanguage}_${this.hashText(preparedText)}_${numCards}`;
@@ -484,9 +479,7 @@ IMPORTANT: Verify all facts against the provided source material. Ensure the con
 Text:
 ${preparedText}`;
 
-      const result = await this.model.generateContent(prompt);
-      const response = result.response;
-      const content = response.text();
+      const content = await this.callGemini(prompt);
       
       // Use safe JSON parsing with fallback
       const parsed = this.safeParseJson<GeneratedFlashcards>(content, (rawText) => {
@@ -526,9 +519,7 @@ ${preparedText}`;
 
 ${sanitizedPrompt}`;
 
-      const result = await this.model.generateContent(fullPrompt);
-      const response = result.response;
-      const content = response.text().trim();
+      const content = (await this.callGemini(fullPrompt)).trim();
 
       if (!content) {
         throw new Error('Empty response from Gemini');
