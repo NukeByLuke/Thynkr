@@ -55,7 +55,8 @@ setInterval(() => {
 // Gemini AI client for TTS
 // const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }); 
 // Using Google Cloud TTS via REST API for reliability and quality
-const API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+// Prefer GOOGLE_API_KEY (Cloud Console key with TTS enabled) over GEMINI_API_KEY (AI Studio)
+const API_KEY = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
 const GOOGLE_TTS_URL = 'https://texttospeech.googleapis.com/v1/text:synthesize';
 
 // Timeout for TTS API calls (20 seconds - fast API)
