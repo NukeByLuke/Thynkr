@@ -20,7 +20,6 @@ import { normalizeFileForLanguage, resolveUserLanguage } from '../utils/language
 import { canUploadFile, getUserUsageStats } from '../lib/tier-limits';
 import { checkAIRateLimit, recordAIUsage } from '../middleware/ai-rate-limit.middleware';
 import { GoogleGenAI } from '@google/genai';
-import { GoogleAuth } from 'google-auth-library';
 
 const fileProcessor = new FileProcessorService();
 const aiService = new AIService();
@@ -473,12 +472,13 @@ export default async function studyRoutes(server: FastifyInstance) {
           server.log.info({ videoId }, 'Processing YouTube video with Gemini 2.5 Flash Lite...');
           
           // Initialize Gemini with service account auth (similar to TTS setup)
-          const auth = new GoogleAuth({
-            keyFilename: process.env.GEMINI_APPLICATION_CREDENTIALS || '/app/gemini-credentials.json',
-            scopes: ['https://www.googleapis.com/auth/generative-language']
+          const credPath = process.env.GEMINI_APPLICATION_CREDENTIALS || '/app/gemini-credentials.json';
+          const genai = new GoogleGenAI({
+            googleAuthOptions: {
+              keyFilename: credPath,
+              scopes: ['https://www.googleapis.com/auth/generative-language'],
+            },
           });
-          const authClient = await auth.getClient();
-          const genai = new GoogleGenAI({ authClient });
           
           // Use the correct format from official docs: https://ai.google.dev/gemini-api/docs/video-understanding
           const contents = [
