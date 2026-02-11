@@ -600,7 +600,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
         logger.error({ error: error.message, userId, chunkCount: chunks.length }, 'Chunked TTS generation failed');
         return reply.status(500).send({ 
           error: 'Generation failed', 
-          details: config.nodeEnv === 'development' || true ? error.message : undefined 
+          details: error.message 
         });
       }
     }
