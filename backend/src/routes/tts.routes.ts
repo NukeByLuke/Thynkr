@@ -11,21 +11,37 @@ import fs from 'fs/promises';
 import { createReadStream } from 'fs';
 import path from 'path';
 
-// Supported voices (frontend IDs kept stable, mapped to Cloud TTS voices on the backend)
-const VOICES = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'] as const;
+// Supported Chirp 3: HD voices (LLM-powered, studio-quality, natural human intonation)
+const VOICES = ['charon', 'fenrir', 'puck', 'enceladus', 'aoede', 'kore'] as const;
 type Voice = (typeof VOICES)[number];
 
-// Map frontend voice IDs to Google Cloud TTS Chirp 3: HD voices
-// Chirp 3: HD = LLM-powered, studio-quality, natural human intonation
-// Same voices as Gemini TTS (Charon, Kore, etc.) via the stable Cloud TTS API
+// Map voice IDs to Google Cloud TTS Chirp 3: HD voice names
 const VOICE_MAP: Record<Voice, string> = {
-  alloy: 'en-US-Chirp3-HD-Charon',      // Male, warm & trustworthy
-  echo: 'en-US-Chirp3-HD-Fenrir',       // Male, firm & authoritative
-  fable: 'en-US-Chirp3-HD-Puck',        // Male, breezy & storytelling
-  onyx: 'en-US-Chirp3-HD-Enceladus',    // Male, deep & commanding
-  nova: 'en-US-Chirp3-HD-Aoede',        // Female, energetic & expressive
-  shimmer: 'en-US-Chirp3-HD-Kore',      // Female, upbeat & bright
+  charon: 'en-US-Chirp3-HD-Charon',       // Male, warm & trustworthy
+  fenrir: 'en-US-Chirp3-HD-Fenrir',       // Male, firm & authoritative
+  puck: 'en-US-Chirp3-HD-Puck',           // Male, breezy & storytelling
+  enceladus: 'en-US-Chirp3-HD-Enceladus', // Male, deep & commanding
+  aoede: 'en-US-Chirp3-HD-Aoede',         // Female, energetic & expressive
+  kore: 'en-US-Chirp3-HD-Kore',           // Female, upbeat & bright
 };
+
+// Map old OpenAI voice IDs to new Chirp 3: HD voices (backward compat for DB preferences)
+const LEGACY_VOICE_MAP: Record<string, Voice> = {
+  alloy: 'charon',
+  echo: 'fenrir',
+  fable: 'puck',
+  onyx: 'enceladus',
+  nova: 'aoede',
+  shimmer: 'kore',
+};
+
+/** Resolve a voice ID, handling legacy OpenAI names gracefully */
+function resolveVoice(raw: string | undefined | null): Voice {
+  if (!raw) return 'charon';
+  if (VOICES.includes(raw as Voice)) return raw as Voice;
+  if (raw in LEGACY_VOICE_MAP) return LEGACY_VOICE_MAP[raw];
+  return 'charon';
+}
 
 // Supported speeds (handled client-side via playbackRate, kept for API compat)
 const MIN_SPEED = 0.25;
@@ -212,10 +228,30 @@ async function callGoogleTTS(text: string, voiceName: string): Promise<Buffer> {
   }
 
   // audioContent can be Uint8Array or string (base64)
+  let buffer: Buffer;
   if (typeof response.audioContent === 'string') {
-    return Buffer.from(response.audioContent, 'base64');
+    buffer = Buffer.from(response.audioContent, 'base64');
+  } else {
+    buffer = Buffer.from(response.audioContent);
   }
-  return Buffer.from(response.audioContent);
+
+  // LINEAR16 responses include a WAV header — strip it to return raw PCM
+  // This prevents double-header issues when we wrap in our own WAV header later
+  if (buffer.length > 44 && buffer.toString('ascii', 0, 4) === 'RIFF') {
+    let offset = 12; // Skip 'RIFF' + size + 'WAVE'
+    while (offset < buffer.length - 8) {
+      const chunkId = buffer.toString('ascii', offset, offset + 4);
+      const chunkSize = buffer.readUInt32LE(offset + 4);
+      if (chunkId === 'data') {
+        return buffer.subarray(offset + 8);
+      }
+      offset += 8 + chunkSize;
+    }
+    // Fallback: standard 44-byte header
+    return buffer.subarray(44);
+  }
+
+  return buffer;
 }
 
 /**
@@ -429,12 +465,12 @@ export default async function ttsRoutes(server: FastifyInstance) {
    */
   server.get('/tts/voices', async (_request, reply: FastifyReply) => {
     const availableVoices = [
-      { id: 'alloy', name: 'Alloy', description: 'Informative — Clear and neutral' },
-      { id: 'echo', name: 'Echo', description: 'Firm — Professional and authoritative' },
-      { id: 'fable', name: 'Fable', description: 'Breezy — Light and casual' },
-      { id: 'onyx', name: 'Onyx', description: 'Deep — Strong and commanding' },
-      { id: 'nova', name: 'Nova', description: 'Energetic — Lively and expressive' },
-      { id: 'shimmer', name: 'Shimmer', description: 'Upbeat — Cheerful and bright' },
+      { id: 'charon', name: 'Charon', description: 'Warm — Trustworthy and clear', gender: 'male' },
+      { id: 'fenrir', name: 'Fenrir', description: 'Firm — Professional and authoritative', gender: 'male' },
+      { id: 'puck', name: 'Puck', description: 'Breezy — Light and storytelling', gender: 'male' },
+      { id: 'enceladus', name: 'Enceladus', description: 'Deep — Strong and commanding', gender: 'male' },
+      { id: 'aoede', name: 'Aoede', description: 'Energetic — Lively and expressive', gender: 'female' },
+      { id: 'kore', name: 'Kore', description: 'Upbeat — Cheerful and bright', gender: 'female' },
     ];
     return reply.send({ voices: availableVoices });
   });
@@ -473,11 +509,11 @@ export default async function ttsRoutes(server: FastifyInstance) {
              select: { ttsVoice: true, ttsSpeed: true }
           });
           if (user) {
-             voice = voice || (user.ttsVoice as Voice);
+             voice = voice || resolveVoice(user.ttsVoice);
              speed = speed !== undefined ? speed : user.ttsSpeed;
           }
       }
-      voice = voice || 'alloy';
+      voice = resolveVoice(voice);
       speed = speed !== undefined ? Math.max(MIN_SPEED, Math.min(MAX_SPEED, speed)) : 1.0;
 
       // Generate token
@@ -646,7 +682,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
           });
 
           if (user) {
-            voice = user.ttsVoice as Voice;
+            voice = resolveVoice(user.ttsVoice);
           }
         } catch (error) {
           logger.warn({ error, userId }, 'Failed to fetch user preferences, using defaults');
@@ -654,7 +690,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
       }
 
       // Apply defaults if still not set
-      voice = voice || 'alloy';
+      voice = resolveVoice(voice);
 
       // Validate voice
       if (!VOICES.includes(voice)) {
@@ -794,7 +830,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
       const voice =
         body?.voice && VOICES.includes(body.voice)
           ? body.voice
-          : (user?.ttsVoice as Voice) || 'alloy';
+          : resolveVoice(user?.ttsVoice);
 
       // Speed is handled client-side via playbackRate
 

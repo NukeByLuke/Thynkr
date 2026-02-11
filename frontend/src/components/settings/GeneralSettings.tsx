@@ -16,7 +16,7 @@ export default function GeneralSettings() {
   const currentLanguage = user?.preferredLanguage || 'en';
 
   // TTS preferences state
-  const [ttsVoice, setTtsVoice] = useState<string>('alloy');
+  const [ttsVoice, setTtsVoice] = useState<string>('charon');
   const [ttsSpeed, setTtsSpeed] = useState<number>(1.0);
   const [isSavingTTS, setIsSavingTTS] = useState(false);
   const [audioPreview, setAudioPreview] = useState<HTMLAudioElement | null>(null);
@@ -26,7 +26,7 @@ export default function GeneralSettings() {
     const loadPreferences = async () => {
       try {
         const response = await api.get('/tts/preferences');
-        setTtsVoice(response.data.voice || 'alloy');
+        setTtsVoice(response.data.voice || 'charon');
         setTtsSpeed(response.data.speed || 1.0);
       } catch (error) {
         console.error('Failed to load TTS preferences:', error);

@@ -163,7 +163,7 @@ export default function About() {
                   </h4>
                   <p className="text-sm text-slate-600 dark:text-slate-400">
                     Listen to your notes on the go with high-quality text-to-speech powered by
-                    OpenAI, complete with speed controls and OS media integration.
+                    Google Cloud, complete with speed controls and OS media integration.
                   </p>
                 </div>
               </div>
