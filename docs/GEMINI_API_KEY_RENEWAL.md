@@ -1,61 +1,88 @@
-# Gemini API Key Renewal Guide
+# Gemini Service Account Setup (COMPLETED)
 
-## Issue
-The current Gemini API key has expired, causing YouTube video processing to fail with 500 errors.
+## ✅ Migration Complete
 
-## Log Evidence
+As of **February 10, 2026**, Thynkr now uses **Google Cloud service account authentication** for Gemini, eliminating API key expiration issues.
+
+### Current Setup
+- **Authentication Method**: Service account JSON credentials (same as TTS)
+- **Credentials File**: `/root/gemini-credentials.json` (mounted into Docker at `/app/gemini-credentials.json`)
+- **Service Account**: `thynkr-gemini@gen-lang-client-0140949948.iam.gserviceaccount.com`
+- **Permissions**: Generative Language User
+- **Benefits**: No expiration, transparent billing, better monitoring
+
+### Previous Issue (Resolved)
+~~The Gemini API key was expiring periodically, causing YouTube video processing failures.~~
+
+**Fixed:** Service accounts never expire and provide production-grade reliability.
+
+## How It Works Now
+
+### Backend
+```typescript
+// Uses GoogleAuth with service account JSON file
+const auth = new GoogleAuth({
+  keyFilename: process.env.GEMINI_APPLICATION_CREDENTIALS,
+  scopes: ['https://www.googleapis.com/auth/generative-language']
+});
+const genai = new GoogleGenAI({ authClient: await auth.getClient() });
 ```
-{"error":{"code":400,"message":"API key expired. Please renew the API key.","status":"INVALID_ARGUMENT"}}
+
+### Docker Configuration
+```yaml
+volumes:
+  - /root/gemini-credentials.json:/app/gemini-credentials.json:ro
+environment:
+  GEMINI_APPLICATION_CREDENTIALS: /app/gemini-credentials.json
 ```
 
-## Fix Steps
+## If You Need to Regenerate Credentials
 
-### 1. Get a New API Key
-1. Go to [Google AI Studio](https://aistudio.google.com/apikey)
-2. Sign in with your Google account
-3. Click **"Create API Key"** or **"Get API Key"**
-4. Copy the new API key (starts with `AIza...`)
+### 1. Go to Service Accounts
+1. Visit [Google Cloud Console](https://console.cloud.google.com)
+2. Navigate to **IAM & Admin** → **Service Accounts**
+3. Find `thynkr-gemini@...`
 
-### 2. Update Server Environment
-SSH into the server and update the `.env` file:
+### 2. Create New Key
+1. Click the service account
+2. Go to **KEYS** tab
+3. Click **ADD KEY** → **Create new key** → **JSON**
+4. Download the new JSON file
 
+### 3. Upload to Server
 ```powershell
-ssh root@138.197.208.81
-nano /root/.env
+scp path\to\new-credentials.json root@138.197.208.81:/root/gemini-credentials.json
+ssh root@138.197.208.81 "chmod 600 /root/gemini-credentials.json"
 ```
 
-Find the line:
-```
-GEMINI_API_KEY=AIzaSyAm5Kj_e-M8Jxop72KpKOP-JgvvY7KMur8
-```
-
-Replace it with your new key:
-```
-GEMINI_API_KEY=YOUR_NEW_KEY_HERE
-```
-
-Save and exit (`Ctrl+X`, then `Y`, then `Enter`).
-
-### 3. Restart Backend Container
+### 4. Restart Backend
 ```bash
 cd /root
 docker compose -f docker-compose.prod.yml restart backend
 ```
 
-### 4. Verify
-Test a YouTube upload at https://thynkr.ca to confirm it works.
+## Cost Monitoring
 
-## Current Setup
-- **GEMINI_API_KEY**: Used for YouTube video transcription (Gemini 2.5 Flash Lite)
-- **GOOGLE_API_KEY**: Used for TTS (Google Cloud Text-to-Speech)
-- Both are configured in `/root/.env` and mounted into the backend container
+**Gemini 2.0 Flash Pricing:**
+- Input: $0.075 per 1M tokens
+- Output: $0.30 per 1M tokens
+- Video: $0.075 per 1M tokens
 
-## Notes
-- Gemini API keys from Google AI Studio are free tier but may have expiration/rate limits
-- For production, consider using a service account with Cloud billing for better reliability
-- The improved error handling (deployed 2026-02-10) now shows user-friendly messages instead of 500 errors
+**View usage:**
+- [Google Cloud Console](https://console.cloud.google.com) → **Billing** → **Reports**
+- Filter by: "Generative Language API"
+
+**Set budget alerts:**
+- **Billing** → **Budgets & alerts** → **CREATE BUDGET**
+- Recommended: Alert at $5/month threshold
 
 ## Related Files
-- Backend YouTube handler: [backend/src/routes/study.routes.ts](../backend/src/routes/study.routes.ts#L464)
+- Backend YouTube handler: [backend/src/routes/study.routes.ts](../backend/src/routes/study.routes.ts#L473)
 - Docker config: [docker-compose.prod.yml](../docker-compose.prod.yml)
-- Server env vars: `/root/.env` (on DigitalOcean droplet)
+- Credentials: `/root/gemini-credentials.json` (on DigitalOcean droplet)
+
+## Migration History
+- **Before**: Free API keys (`GEMINI_API_KEY`) that expired periodically
+- **After**: Service account credentials (billing-based, never expires)
+- **Deploy Date**: February 10, 2026
+- **Commit**: [3dd4796]
