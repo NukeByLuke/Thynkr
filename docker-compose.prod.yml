@@ -53,6 +53,7 @@ services:
       GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
       GOOGLE_TTS_CREDENTIALS: ${GOOGLE_TTS_CREDENTIALS:-}
       GOOGLE_APPLICATION_CREDENTIALS: /app/google-tts-credentials.json
+      GEMINI_APPLICATION_CREDENTIALS: /app/gemini-credentials.json
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-}
       RESEND_ENABLED: ${RESEND_ENABLED:-false}
@@ -68,6 +69,7 @@ services:
     volumes:
       - ./backend/uploads:/app/uploads
       - /root/google-tts-credentials.json:/app/google-tts-credentials.json:ro
+      - /root/gemini-credentials.json:/app/gemini-credentials.json:ro
     healthcheck:
       test: ['CMD-SHELL', 'wget -qO- http://localhost:3001/health || exit 1']
       interval: 10s
