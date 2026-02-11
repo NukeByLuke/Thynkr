@@ -31,6 +31,9 @@ services:
 
   backend:
     image: nukebyluke/thynkr-backend:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     restart: unless-stopped
     environment:
       NODE_ENV: production
