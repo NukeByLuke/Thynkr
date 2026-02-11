@@ -7,7 +7,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
 
-export type TTSVoice = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
+export type TTSVoice = 'charon' | 'fenrir' | 'puck' | 'enceladus' | 'aoede' | 'kore';
 
 interface UseTTSOptions {
   voice?: TTSVoice;
@@ -123,7 +123,7 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
     setIsLoading(true);
 
     try {
-      const voice = options.voice || 'alloy';
+      const voice = options.voice || 'charon';
       const speed = options.speed || 1.0;
       const cacheKey = generateCacheKey(text, voice);
 
@@ -262,12 +262,12 @@ export function useTTSVoices() {
         console.error('Failed to fetch TTS voices:', error);
         // Fallback to default voice objects
         setVoices([
-          { id: 'alloy', name: 'Alloy', description: 'Neutral, balanced voice' },
-          { id: 'echo', name: 'Echo', description: 'Warm, conversational voice' },
-          { id: 'fable', name: 'Fable', description: 'Expressive, narrative voice' },
-          { id: 'onyx', name: 'Onyx', description: 'Deep, authoritative voice' },
-          { id: 'nova', name: 'Nova', description: 'Friendly, energetic voice' },
-          { id: 'shimmer', name: 'Shimmer', description: 'Clear, pleasant voice' },
+          { id: 'charon', name: 'Charon', description: 'Warm, trustworthy voice' },
+          { id: 'fenrir', name: 'Fenrir', description: 'Firm, authoritative voice' },
+          { id: 'puck', name: 'Puck', description: 'Breezy, storytelling voice' },
+          { id: 'enceladus', name: 'Enceladus', description: 'Deep, commanding voice' },
+          { id: 'aoede', name: 'Aoede', description: 'Energetic, expressive voice' },
+          { id: 'kore', name: 'Kore', description: 'Upbeat, cheerful voice' },
         ]);
       } finally {
         setIsLoading(false);

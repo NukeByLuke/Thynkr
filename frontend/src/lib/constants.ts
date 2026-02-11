@@ -62,14 +62,14 @@ export const MAX_FILE_NAME_LENGTH = 255;
 export const DEFAULT_PAGE_SIZE = 10;
 export const MAX_PAGE_SIZE = 100;
 
-// TTS Configuration (6 distinct voices via Gemini TTS)
+// TTS Configuration (6 Chirp 3: HD voices via Google Cloud TTS)
 export const TTS_VOICES = [
-  { id: 'alloy', name: 'Alloy', description: 'Informative — Clear and neutral' },
-  { id: 'echo', name: 'Echo', description: 'Firm — Professional and authoritative' },
-  { id: 'fable', name: 'Fable', description: 'Breezy — Light and casual' },
-  { id: 'onyx', name: 'Onyx', description: 'Deep — Strong and commanding' },
-  { id: 'nova', name: 'Nova', description: 'Energetic — Lively and expressive' },
-  { id: 'shimmer', name: 'Shimmer', description: 'Upbeat — Cheerful and bright' },
+  { id: 'charon', name: 'Charon', description: 'Warm — Trustworthy and clear' },
+  { id: 'fenrir', name: 'Fenrir', description: 'Firm — Professional and authoritative' },
+  { id: 'puck', name: 'Puck', description: 'Breezy — Light and storytelling' },
+  { id: 'enceladus', name: 'Enceladus', description: 'Deep — Strong and commanding' },
+  { id: 'aoede', name: 'Aoede', description: 'Energetic — Lively and expressive' },
+  { id: 'kore', name: 'Kore', description: 'Upbeat — Cheerful and bright' },
 ] as const;
 
 export const TTS_SPEED_RANGE = { min: 0.25, max: 4.0, default: 1.0 };

@@ -23,7 +23,7 @@ import { TTS_VOICES } from '@/lib/constants';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
-export type TTSVoice = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
+export type TTSVoice = 'charon' | 'fenrir' | 'puck' | 'enceladus' | 'aoede' | 'kore';
 
 interface AudioPlayerProps {
   text: string;
@@ -109,7 +109,7 @@ export default function AudioPlayer({
 
   // Settings state
   const [activeSetting, setActiveSetting] = useState<'voice' | 'speed' | null>(null);
-  const [voice, setVoice] = useState<TTSVoice>('alloy');
+  const [voice, setVoice] = useState<TTSVoice>('charon');
   const [speed, setSpeed] = useState(1.0);
   const [estimatedDuration, setEstimatedDuration] = useState(0);
 
