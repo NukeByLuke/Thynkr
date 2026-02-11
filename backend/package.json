@@ -27,6 +27,7 @@
     "@fastify/helmet": "^13.0.2",
     "@fastify/rate-limit": "^10.3.0",
     "@fastify/static": "^9.0.0",
+    "@google-cloud/text-to-speech": "^6.4.0",
     "@google/genai": "^1.40.0",
     "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^5.22.0",
