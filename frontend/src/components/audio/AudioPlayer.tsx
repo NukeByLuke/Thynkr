@@ -111,7 +111,6 @@ export default function AudioPlayer({
   const [activeSetting, setActiveSetting] = useState<'voice' | 'speed' | null>(null);
   const [voice, setVoice] = useState<TTSVoice>('charon');
   const [speed, setSpeed] = useState(1.0);
-  const [estimatedDuration, setEstimatedDuration] = useState(0);
 
   // Refs
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -119,6 +118,7 @@ export default function AudioPlayer({
   const abortControllerRef = useRef<AbortController | null>(null);
   const resumeTimeRef = useRef<number | null>(null);
   const isChangingVoiceRef = useRef(false);
+  const rafRef = useRef<number | null>(null);
 
   // Load user preferences on mount
   useEffect(() => {
@@ -134,15 +134,47 @@ export default function AudioPlayer({
     loadPreferences();
   }, []);
 
-  // Estimate duration based on text length (rough approximation for streaming)
+  // Smooth 60fps progress updates using requestAnimationFrame
   useEffect(() => {
-    // Avg 15 chars per second for normal speech speed
-    // This provides a fallback duration while streaming
-    // Adjust for playback speed
-    if (text) {
-        setEstimatedDuration((text.length / 15) / speed);
+    if (!isPlaying) {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      return;
     }
-  }, [text, speed]);
+
+    let lastUpdate = 0;
+    const update = (timestamp: number) => {
+      // Throttle to ~30fps to avoid excessive re-renders while staying smooth
+      if (timestamp - lastUpdate >= 33) {
+        const audio = audioRef.current;
+        if (audio) {
+          setCurrentTime(audio.currentTime);
+          // Update Media Session position state
+          if ('mediaSession' in navigator && audio.duration && Number.isFinite(audio.duration)) {
+            try {
+              navigator.mediaSession.setPositionState({
+                duration: audio.duration,
+                playbackRate: audio.playbackRate,
+                position: Math.min(audio.currentTime, audio.duration),
+              });
+            } catch (_) { /* ignore */ }
+          }
+        }
+        lastUpdate = timestamp;
+      }
+      rafRef.current = requestAnimationFrame(update);
+    };
+    rafRef.current = requestAnimationFrame(update);
+
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+  }, [isPlaying]);
 
   // Save preferences when changed
   const savePreferences = useCallback(async (newVoice?: TTSVoice, newSpeed?: number) => {
@@ -165,26 +197,22 @@ export default function AudioPlayer({
     const audio = audioRef.current;
 
     const handleTimeUpdate = () => {
+      // RAF handles smooth updates; this is a fallback for edge cases
       setCurrentTime(audio.currentTime);
-      
-      // Update Media Session Position
-      if ('mediaSession' in navigator && estimatedDuration > 0) {
-          const effectiveDuration = (audio.duration && Number.isFinite(audio.duration) && audio.duration > 0) ? audio.duration : estimatedDuration;
-          if (effectiveDuration > 0 && audio.currentTime <= effectiveDuration) {
-               try {
-                  navigator.mediaSession.setPositionState({
-                      duration: effectiveDuration,
-                      playbackRate: audio.playbackRate,
-                      position: audio.currentTime
-                  });
-               } catch (e) {
-                   // ignore errors
-               }
-          }
+    };
+
+    const handleLoadedMetadata = () => {
+      if (audio.duration && Number.isFinite(audio.duration)) {
+        setDuration(audio.duration);
+      }
+    };
+    
+    const handleDurationChange = () => {
+      if (audio.duration && Number.isFinite(audio.duration)) {
+        setDuration(audio.duration);
       }
     };
 
-    const handleLoadedMetadata = () => setDuration(audio.duration);
     const handleEnded = () => {
       setIsPlaying(false);
       setCurrentTime(0);
@@ -197,14 +225,16 @@ export default function AudioPlayer({
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('durationchange', handleDurationChange);
     audio.addEventListener('ended', handleEnded);
 
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('durationchange', handleDurationChange);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [onPlayEnd, estimatedDuration]);
+  }, [onPlayEnd]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -254,18 +284,19 @@ export default function AudioPlayer({
       });
       navigator.mediaSession.setActionHandler('seekto', (details) => {
         if (audioRef.current && details.seekTime !== undefined) {
-             const effectiveDuration = (audioRef.current.duration && Number.isFinite(audioRef.current.duration)) ? audioRef.current.duration : estimatedDuration;
-             // Clamp seek time
-             const targetTime = Math.min(details.seekTime, effectiveDuration);
-             audioRef.current.currentTime = targetTime;
-             setCurrentTime(targetTime);
+             const dur = audioRef.current.duration;
+             if (dur && Number.isFinite(dur)) {
+               const targetTime = Math.min(details.seekTime, dur);
+               audioRef.current.currentTime = targetTime;
+               setCurrentTime(targetTime);
+             }
         }
       });
       navigator.mediaSession.setActionHandler('stop', () => {
          stop();
       });
     }
-  }, [estimatedDuration, stop, setIsPlaying]);
+  }, [stop, setIsPlaying]);
 
   const play = useCallback(async () => {
     if (!text?.trim()) {
@@ -286,12 +317,10 @@ export default function AudioPlayer({
 
       if (audioCache.has(cacheKey)) {
         audioUrl = audioCache.get(cacheKey)!;
-        // Skip loading state for cached URLs
-        setIsLoading(false);
       } else {
         abortControllerRef.current = new AbortController();
 
-        // Negotiate for streaming URL (fast - just returns a token)
+        // Negotiate for streaming URL (fast — server starts generation immediately)
         const response = await api.post(
           '/tts/negotiate',
           { text, voice, speed: 1 }, 
@@ -307,9 +336,6 @@ export default function AudioPlayer({
         
         // Cache the URL for voice change resume
         audioCache.set(cacheKey, audioUrl);
-        
-        // Negotiation complete - clear loading state before playback starts
-        setIsLoading(false);
       }
 
       if (!audioRef.current) {
@@ -320,7 +346,7 @@ export default function AudioPlayer({
       const audio = audioRef.current;
       audio.src = audioUrl;
       audio.volume = isMuted ? 0 : volume;
-      audio.playbackRate = speed; // Apply client-side speed
+      audio.playbackRate = speed;
 
       globalAudioInstance = audio;
       globalStopCallback = stop;
@@ -328,7 +354,6 @@ export default function AudioPlayer({
       audio.onerror = () => {
         setIsPlaying(false);
         setIsLoading(false);
-        // Remove failed URL from cache so it can be re-negotiated
         audioCache.delete(cacheKey);
         toast.error('Failed to play audio');
       };
@@ -341,7 +366,7 @@ export default function AudioPlayer({
 
       await audio.play();
       setIsPlaying(true);
-      setIsLoading(false);
+      setIsLoading(false); // Only clear loading AFTER playback actually starts
       onPlayStart?.();
     } catch (err: any) {
       if (err.name === 'AbortError') return;
@@ -370,18 +395,16 @@ export default function AudioPlayer({
   }, [isPlaying, currentTime, play]);
 
   const handleProgressClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const effectiveDuration = (duration && isFinite(duration) && duration > 0) ? duration : estimatedDuration;
-    
-    if (!progressRef.current || !audioRef.current || !effectiveDuration) return;
+    if (!progressRef.current || !audioRef.current || !duration || !Number.isFinite(duration)) return;
 
     const rect = progressRef.current.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
-    const percentage = clickX / rect.width;
-    const newTime = percentage * effectiveDuration;
+    const percentage = Math.max(0, Math.min(1, clickX / rect.width));
+    const newTime = percentage * duration;
 
     audioRef.current.currentTime = newTime;
     setCurrentTime(newTime);
-  }, [duration, estimatedDuration]);
+  }, [duration]);
 
   const handleVolumeChange = useCallback((newVolume: number) => {
     setVolume(newVolume);
@@ -431,9 +454,10 @@ export default function AudioPlayer({
     }
   }, [voice]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Use real duration if available (e.g. fully buffered), otherwise use estimate
-  const effectiveDuration = (duration && Number.isFinite(duration) && duration > 0) ? duration : estimatedDuration;
-  const progress = effectiveDuration > 0 ? (currentTime / effectiveDuration) * 100 : 0;
+  // Use real duration (always available with Content-Length responses)
+  const progress = (duration > 0 && Number.isFinite(duration)) 
+    ? Math.min((currentTime / duration) * 100, 100) 
+    : 0;
 
   // --- DOCKED/FLOATING PLAYER LAYOUT ---
   if (docked) {
@@ -471,22 +495,26 @@ export default function AudioPlayer({
                     {isLoading ? 'Generating Audio...' : 'Audio Summary'}
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-                    {formatTime(currentTime)} / {formatTime(effectiveDuration)}
+                    {formatTime(currentTime)} / {formatTime(duration)}
                   </div>
                </div>
 
-               {/* Seek Bar - Thicker and interactive */}
+               {/* Seek Bar - Smooth CSS transitions */}
                <div
                   ref={progressRef}
                   onClick={handleProgressClick}
-                  className="relative h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer group"
+                  className="relative h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer group overflow-hidden"
                 >
-                  <motion.div
-                    className="absolute h-full rounded-full bg-gradient-to-r from-pink-500 to-fuchsia-600 dark:from-cyan-400 dark:to-violet-500"
+                  {/* Loading shimmer when generating audio */}
+                  {isLoading && (
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-fuchsia-400/40 dark:via-cyan-400/40 to-transparent animate-shimmer" />
+                  )}
+                  <div
+                    className="absolute h-full rounded-full bg-gradient-to-r from-pink-500 to-fuchsia-600 dark:from-cyan-400 dark:to-violet-500 transition-[width] duration-150 ease-linear"
                     style={{ width: `${progress}%` }}
                   />
                   {/* Seek Handle */}
-                  <motion.div 
+                  <div 
                      className="absolute top-1/2 -mt-2 w-4 h-4 bg-white dark:bg-gray-200 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
                      style={{ left: `calc(${progress}% - 8px)` }}
                   />
@@ -635,11 +663,11 @@ export default function AudioPlayer({
             <span>{formatTime(currentTime)}</span>
             <div className="w-20 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-fuchsia-500 dark:bg-violet-500 transition-all"
+                className="h-full bg-fuchsia-500 dark:bg-violet-500 transition-[width] duration-150 ease-linear"
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <span>{formatTime(effectiveDuration)}</span>
+            <span>{formatTime(duration)}</span>
           </div>
         )}
       </div>
@@ -652,15 +680,19 @@ export default function AudioPlayer({
       <div
         ref={progressRef}
         onClick={handleProgressClick}
-        className="relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer mb-4 group"
+        className="relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer mb-4 group overflow-hidden"
       >
+        {/* Loading shimmer */}
+        {isLoading && (
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-fuchsia-400/40 dark:via-cyan-400/40 to-transparent animate-shimmer" />
+        )}
         {/* Progress fill */}
-        <motion.div
-          className="absolute inset-y-0 left-0 bg-gradient-to-r from-pink-500 to-fuchsia-500 dark:from-cyan-500 dark:to-violet-500 rounded-full"
+        <div
+          className="absolute inset-y-0 left-0 bg-gradient-to-r from-pink-500 to-fuchsia-500 dark:from-cyan-500 dark:to-violet-500 rounded-full transition-[width] duration-150 ease-linear"
           style={{ width: `${progress}%` }}
         />
         {/* Seek handle */}
-        <motion.div
+        <div
           className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white dark:bg-gray-200 rounded-full shadow-lg border-2 border-fuchsia-500 dark:border-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity"
           style={{ left: `calc(${progress}% - 8px)` }}
         />

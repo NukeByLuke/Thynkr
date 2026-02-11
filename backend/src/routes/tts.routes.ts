@@ -8,7 +8,6 @@ import { createHash, randomBytes } from 'crypto';
 import prisma from '../db/client';
 import { logger } from '../lib/logger';
 import fs from 'fs/promises';
-import { createReadStream } from 'fs';
 import path from 'path';
 
 // Supported Chirp 3: HD voices (LLM-powered, studio-quality, natural human intonation)
@@ -65,9 +64,13 @@ setInterval(() => {
   for (const [token, data] of streamTokens.entries()) {
     if (data.expiresAt < now) {
       streamTokens.delete(token);
+      pendingGenerations.delete(token);
     }
   }
 }, 60000);
+
+// Pending audio generation promises (started during negotiate for faster stream delivery)
+const pendingGenerations = new Map<string, Promise<Buffer>>();
 
 // Google Cloud TTS client (uses service account credentials)
 // Pass credentials via GOOGLE_TTS_CREDENTIALS env var (JSON string) or GOOGLE_APPLICATION_CREDENTIALS file path
@@ -299,6 +302,52 @@ async function cacheAudio(hash: string, buffer: Buffer): Promise<void> {
   await fs.writeFile(filePath, buffer);
 }
 
+/**
+ * Generate or retrieve cached audio for a text+voice combination.
+ * For long texts, splits into chunks and generates all in parallel for speed.
+ * Returns a complete MP3 buffer ready to serve with Content-Length.
+ */
+async function generateOrGetCached(text: string, voice: Voice): Promise<Buffer> {
+  const hash = generateContentHash(text, voice);
+
+  // 1. Check disk cache first (instant)
+  const cached = await getCachedAudio(hash);
+  if (cached) {
+    logger.info({ hash, voice, fromCache: true, sizeKB: Math.round(cached.length / 1024) }, 'TTS cache hit');
+    return cached;
+  }
+
+  // 2. For short/medium texts (<=2000 chars), generate in a single API call
+  if (text.length <= 2000) {
+    const buffer = await generateGoogleTTS(text, voice);
+    cacheAudio(hash, buffer).catch(() => {});
+    return buffer;
+  }
+
+  // 3. For longer texts, split into chunks and generate ALL in parallel
+  const chunks = splitTextIntoChunks(text);
+  logger.info({ voice, textLength: text.length, chunkCount: chunks.length }, 'Generating TTS in parallel chunks');
+
+  const MAX_PARALLEL = 8;
+  const chunkBuffers: Buffer[] = new Array(chunks.length);
+
+  for (let i = 0; i < chunks.length; i += MAX_PARALLEL) {
+    const batchEnd = Math.min(i + MAX_PARALLEL, chunks.length);
+    await Promise.all(
+      chunks.slice(i, batchEnd).map((chunk, batchIdx) =>
+        generateGoogleChunk(chunk, voice).then(buf => {
+          chunkBuffers[i + batchIdx] = buf;
+        })
+      )
+    );
+  }
+
+  const combined = Buffer.concat(chunkBuffers);
+  cacheAudio(hash, combined).catch(() => {});
+  logger.info({ hash, voice, sizeKB: Math.round(combined.length / 1024), chunks: chunks.length }, 'Parallel TTS generation complete, cached');
+  return combined;
+}
+
 interface TTSRequestBody {
   text: string;
   voice?: Voice;
@@ -313,6 +362,14 @@ interface TTSPreferencesBody {
 export default async function ttsRoutes(server: FastifyInstance) {
   // Initialize cache directory
   await ensureCacheDir();
+
+  // Pre-warm TTS client on startup (avoids cold-start latency on first request)
+  try {
+    getTTSClient();
+    logger.info('TTS client pre-warmed successfully');
+  } catch (e: any) {
+    logger.warn({ error: e.message }, 'Failed to pre-warm TTS client (will retry on first request)');
+  }
 
   /**
    * GET /api/tts/preferences - Get user's saved TTS preferences
@@ -466,8 +523,9 @@ export default async function ttsRoutes(server: FastifyInstance) {
 
       // Generate token
       const token = randomBytes(16).toString('hex');
+      const trimmedText = body.text.slice(0, 4096);
       streamTokens.set(token, {
-        text: body.text.slice(0, 4096),
+        text: trimmedText,
         voice,
         speed,
         userId,
@@ -475,13 +533,22 @@ export default async function ttsRoutes(server: FastifyInstance) {
         expiresAt: Date.now() + 60000 // 1 minute to start stream
       });
 
+      // Kick off audio generation immediately (don't await — overlaps with client setup)
+      const genPromise = generateOrGetCached(trimmedText, voice);
+      pendingGenerations.set(token, genPromise);
+      // Auto-cleanup after 2 minutes
+      genPromise.finally(() => {
+        setTimeout(() => pendingGenerations.delete(token), 120000);
+      });
+
       return reply.send({ token, url: `/api/tts/stream/${token}` });
     }
   );
 
   /**
-   * GET /api/tts/stream/:token - Stream the audio with chunked generation
-   * Uses the token to retrieve parameters and generates audio in chunks for faster start
+   * GET /api/tts/stream/:token - Serve generated audio
+   * Audio generation starts eagerly during negotiate for minimal latency.
+   * Always serves complete buffer with Content-Length for reliable duration/seeking.
    */
   server.get(
     '/tts/stream/:token',
@@ -493,131 +560,34 @@ export default async function ttsRoutes(server: FastifyInstance) {
         return reply.status(404).send({ error: 'Invalid or expired stream token' });
       }
 
-      // Mark token as used but keep it for 30s to handle browser retries
-      // After 30s the periodic cleanup will remove it
+      // Extend expiry for browser retries
       data.expiresAt = Date.now() + 30000;
+      const { userId } = data;
 
-      const { text, voice, userId } = data;
-
-      // 1. Check disk cache first (for the full text)
-      const cacheHash = generateContentHash(text, voice);
-      const cachePath = getCacheFilePath(cacheHash);
-      
       try {
-        await fs.access(cachePath);
-        // Serve from disk if exists
-        const stat = await fs.stat(cachePath);
-        
+        // Await the generation that was kicked off during negotiate
+        const pending = pendingGenerations.get(token);
+        let buffer: Buffer;
+
+        if (pending) {
+          buffer = await pending;
+        } else {
+          // Fallback: generate now (shouldn't normally happen)
+          logger.warn({ token, userId }, 'No pending generation found, generating on demand');
+          buffer = await generateOrGetCached(data.text, data.voice);
+        }
+
+        // Serve complete buffer with Content-Length — browser knows exact duration
         reply.header('Content-Type', 'audio/mpeg');
-        reply.header('Content-Length', stat.size);
+        reply.header('Content-Length', buffer.length);
         reply.header('Cache-Control', 'private, max-age=3600');
-        reply.header('X-TTS-Cached', 'true');
+        reply.header('Accept-Ranges', 'bytes');
         reply.header('X-TTS-Provider', 'google-cloud');
-        
-        const fileStream = createReadStream(cachePath);
-        return reply.send(fileStream); 
-      } catch (e) {
-        // Not in cache, generate fresh
-      }
-
-      // 2. For short texts, generate all at once (faster than chunking overhead)
-      if (text.length <= FIRST_CHUNK_TARGET_SIZE * 2) {
-        try {
-          logger.info({ userId, textLength: text.length, voice }, 'Generating short TTS audio');
-          
-          const buffer = await generateGoogleTTS(text, voice);
-
-          // Cache in background
-          cacheAudio(cacheHash, buffer).catch((err) => {
-            logger.warn({ error: err.message, hash: cacheHash }, 'Failed to cache TTS audio');
-          });
-
-          reply.header('Content-Type', 'audio/mpeg');
-          reply.header('Content-Length', buffer.length);
-          reply.header('X-TTS-Provider', 'google-cloud');
-          reply.header('X-TTS-Cached', 'false');
-          return reply.send(buffer);
-        } catch (error: any) {
-          logger.error({ error: error.message, userId }, 'Short TTS generation failed');
-          return reply.status(500).send({ error: 'Generation failed' });
-        }
-      }
-
-      // 3. For longer texts, stream MP3 chunks progressively
-      // Browser can start playing as soon as the first chunk arrives
-      const chunks = splitTextIntoChunks(text);
-      logger.info({ userId, textLength: text.length, voice, chunkCount: chunks.length }, 'Starting streamed TTS generation');
-
-      try {
-        // Hijack the response so Fastify doesn't try to manage it
-        reply.hijack();
-
-        // Set up chunked transfer encoding for progressive streaming
-        reply.raw.writeHead(200, {
-          'Content-Type': 'audio/mpeg',
-          'Transfer-Encoding': 'chunked',
-          'X-TTS-Provider': 'google-cloud',
-          'X-TTS-Cached': 'false',
-          'X-TTS-Chunks': chunks.length.toString(),
-          'Cache-Control': 'no-cache',
-        });
-
-        const allMp3Buffers: Buffer[] = [];
-
-        // Generate and stream chunks — first chunk solo for fastest TTFB, then batch the rest
-        const firstMp3 = await generateGoogleChunk(chunks[0], voice);
-        reply.raw.write(firstMp3);
-        allMp3Buffers.push(firstMp3);
-
-        // Process remaining chunks in parallel batches and flush each batch immediately
-        const MAX_CONCURRENT = 5;
-        for (let batchStart = 1; batchStart < chunks.length; batchStart += MAX_CONCURRENT) {
-          const batchEnd = Math.min(batchStart + MAX_CONCURRENT, chunks.length);
-          const batchResults: { index: number; buffer: Buffer }[] = [];
-          
-          const batchPromises = [];
-          for (let i = batchStart; i < batchEnd; i++) {
-            batchPromises.push(
-              generateGoogleChunk(chunks[i], voice).then(mp3 => {
-                batchResults.push({ index: i, buffer: mp3 });
-              })
-            );
-          }
-          await Promise.all(batchPromises);
-
-          // Write batch results in order
-          batchResults.sort((a, b) => a.index - b.index);
-          for (const result of batchResults) {
-            reply.raw.write(result.buffer);
-            allMp3Buffers.push(result.buffer);
-          }
-        }
-
-        // End the response stream
-        reply.raw.end();
-
-        // Cache the complete audio in the background
-        const combinedMp3 = Buffer.concat(allMp3Buffers);
-        cacheAudio(cacheHash, combinedMp3).then(() => {
-          logger.info({ hash: cacheHash, userId, sizeKB: Math.round(combinedMp3.length / 1024), chunks: chunks.length }, 'Streamed TTS audio cached');
-        }).catch((err) => {
-          logger.warn({ error: err.message, hash: cacheHash }, 'Failed to cache streamed TTS audio');
-        });
-
-        // Tell Fastify we already handled the response
-        return;
-
+        return reply.send(buffer);
       } catch (error: any) {
-        logger.error({ error: error.message, userId, chunkCount: chunks.length }, 'Streamed TTS generation failed');
-        // If we've already started writing to the raw response, just close it
-        if (reply.raw.headersSent) {
-          reply.raw.end();
-          return;
-        }
-        return reply.status(500).send({ 
-          error: 'Generation failed', 
-          details: error.message 
-        });
+        logger.error({ error: error.message, userId }, 'TTS stream generation failed');
+        pendingGenerations.delete(token);
+        return reply.status(500).send({ error: 'Generation failed' });
       }
     }
   );
