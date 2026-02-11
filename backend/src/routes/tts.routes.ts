@@ -3,7 +3,7 @@ import { authenticate, AuthenticatedRequest } from '../middleware/auth.middlewar
 import { checkAIRateLimit, recordAIUsage } from '../middleware/ai-rate-limit.middleware';
 import { ttsRateLimit } from '../middleware/tts-rate-limit.middleware';
 import { canUseTTS } from '../lib/tier-limits';
-// import { GoogleGenAI, Modality } from '@google/genai';
+import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 import { createHash, randomBytes } from 'crypto';
 import prisma from '../db/client';
 import { logger } from '../lib/logger';
@@ -52,12 +52,31 @@ setInterval(() => {
   }
 }, 60000);
 
-// Gemini AI client for TTS
-// const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }); 
-// Using Google Cloud TTS via REST API for reliability and quality
-// Prefer GOOGLE_API_KEY (Cloud Console key with TTS enabled) over GEMINI_API_KEY (AI Studio)
-const API_KEY = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
-const GOOGLE_TTS_URL = 'https://texttospeech.googleapis.com/v1/text:synthesize';
+// Google Cloud TTS client (uses service account credentials)
+// Pass credentials via GOOGLE_TTS_CREDENTIALS env var (JSON string) or GOOGLE_APPLICATION_CREDENTIALS file path
+let ttsClient: TextToSpeechClient;
+
+function getTTSClient(): TextToSpeechClient {
+  if (!ttsClient) {
+    const credsJson = process.env.GOOGLE_TTS_CREDENTIALS;
+    if (credsJson) {
+      try {
+        const credentials = JSON.parse(credsJson);
+        ttsClient = new TextToSpeechClient({ credentials });
+        logger.info('Google Cloud TTS client initialized with GOOGLE_TTS_CREDENTIALS');
+      } catch (e: any) {
+        logger.error({ error: e.message }, 'Failed to parse GOOGLE_TTS_CREDENTIALS JSON');
+        throw new Error('Invalid GOOGLE_TTS_CREDENTIALS JSON');
+      }
+    } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+      ttsClient = new TextToSpeechClient();
+      logger.info('Google Cloud TTS client initialized with GOOGLE_APPLICATION_CREDENTIALS file');
+    } else {
+      throw new Error('No Google Cloud TTS credentials configured. Set GOOGLE_TTS_CREDENTIALS or GOOGLE_APPLICATION_CREDENTIALS.');
+    }
+  }
+  return ttsClient;
+}
 
 // Timeout for TTS API calls (20 seconds - fast API)
 const TTS_TIMEOUT_MS = 20000;
@@ -166,45 +185,36 @@ function pcmToWav(pcmData: Buffer): Buffer {
 }
 
 /**
- * Shared helper to call Google Cloud TTS REST API
+ * Shared helper to call Google Cloud TTS via the official client library
+ * Uses service account credentials (handles OAuth2 automatically)
  */
 async function callGoogleTTS(text: string, voiceName: string): Promise<Buffer> {
-  if (!API_KEY) {
-    throw new Error('Missing Google Cloud/Gemini API key');
-  }
+  const client = getTTSClient();
 
   // Extract language code from voice name (e.g. "en-US" from "en-US-Neural2-D")
   const languageCode = voiceName.split('-').slice(0, 2).join('-');
 
-  const response = await fetch(`${GOOGLE_TTS_URL}?key=${API_KEY}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
+  const [response] = await client.synthesizeSpeech({
+    input: { text },
+    voice: {
+      languageCode,
+      name: voiceName,
     },
-    body: JSON.stringify({
-      input: { text },
-      voice: { 
-        languageCode, 
-        name: voiceName,
-      },
-      audioConfig: {
-        audioEncoding: 'LINEAR16', // Raw PCM for streaming/concatenation
-        sampleRateHertz: 24000,    // High quality standard
-      },
-    }),
+    audioConfig: {
+      audioEncoding: 'LINEAR16' as const,
+      sampleRateHertz: 24000,
+    },
   });
 
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(`Google TTS API Error (${response.status}): ${errorBody}`);
+  if (!response.audioContent) {
+    throw new Error('No audio content received from Google Cloud TTS');
   }
 
-  const data = await response.json() as { audioContent: string };
-  if (!data.audioContent) {
-    throw new Error('No audio content received from Google TTS');
+  // audioContent can be Uint8Array or string (base64)
+  if (typeof response.audioContent === 'string') {
+    return Buffer.from(response.audioContent, 'base64');
   }
-
-  return Buffer.from(data.audioContent, 'base64');
+  return Buffer.from(response.audioContent);
 }
 
 /**
