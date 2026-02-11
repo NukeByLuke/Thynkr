@@ -14,9 +14,19 @@ interface SummaryViewProps {
 export default function SummaryView({ content, onRegenerate, isRegenerating, error }: SummaryViewProps) {
   const [showAudioPlayer, setShowAudioPlayer] = useState(false);
 
+  // Normalize AI-generated heading markers like "H1:", "H2:", "H3:" into real Markdown
+  const normalizedContent = useMemo(() => {
+    return content
+      // Convert lines starting with H{1-6}: Title -> #{1-6} Title
+      .replace(/(^|\n)H([1-6])\s*:\s*(.+)/gm, (_m, p1, lvl, txt) => `${p1}${'#'.repeat(Number(lvl))} ${String(txt).trim()}`)
+      // Also handle forms like "H3 Title" without a colon
+      .replace(/(^|\n)\s*H([1-6])\s+(.+)/gm, (_m, p1, lvl, txt) => `${p1}${'#'.repeat(Number(lvl))} ${String(txt).trim()}`);
+  }, [content]);
+
   // Clean text for TTS (strip markdown formatting)
   const cleanTextForTTS = useMemo(() => {
-    return content
+    return normalizedContent
+      .replace(/(^|\n)H([1-6])\s*:\s*/gm, '$1') // Remove any residual Hx: markers
       .replace(/#{1,6}\s/g, '') // Remove headers
       .replace(/\*\*/g, '') // Remove bold
       .replace(/\*/g, '') // Remove italic
@@ -24,7 +34,7 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links but keep text
       .replace(/\n{3,}/g, '\n\n') // Normalize multiple newlines
       .trim();
-  }, [content]);
+  }, [normalizedContent]);
 
   // Show error alert if generation failed
   if (error) {
@@ -99,19 +109,19 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
             components={{
               h1: ({ node, ...props }: any) => (
                 <h1
-                  className="text-4xl font-extrabold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mt-8 mb-6 pb-4 border-b-4 border-brand-500/20"
+                  className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-pink-600 via-fuchsia-600 to-orange-500 dark:from-cyan-400 dark:via-violet-500 dark:to-blue-500 bg-clip-text text-transparent mt-6 mb-4 pb-2 border-b-2 border-pink-200/60 dark:border-violet-500/30"
                   {...props}
                 />
               ),
               h2: ({ node, ...props }: any) => (
                 <h2
-                  className="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-8 mb-4 pl-4 border-l-4 border-pink-500 dark:border-cyan-500"
+                  className="text-xl md:text-2xl font-bold text-brand-700 dark:text-brand-200 mt-6 mb-3 pl-3 border-l-4 border-pink-500 dark:border-cyan-500"
                   {...props}
                 />
               ),
               h3: ({ node, ...props }: any) => (
                 <h3
-                  className="text-xl font-bold text-gray-800 dark:text-gray-200 mt-6 mb-3 flex items-center gap-2"
+                  className="text-lg md:text-xl font-semibold text-brand-700 dark:text-brand-300 mt-5 mb-2 flex items-center gap-2"
                   {...props}
                 />
               ),
