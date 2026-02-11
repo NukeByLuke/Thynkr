@@ -65,3 +65,25 @@ Always adhere to the following rules, styles, and workflows.
 - **Commit Messages**: Follow Conventional Commits (e.g., `feat:`, `fix:`, `chore:`, `docs:`).
 - **Templates**: Use the provided Issue and PR templates in `.github/` for structured reporting.
 - **Branching**: Use `feature/` or `fix/` branches for new work.
+
+## 9. Terminal Management (CRITICAL)
+
+- **ALWAYS reuse the existing terminal** for sequential commands. DO NOT spawn multiple terminals unnecessarily.
+- **Use `isBackground=false` by default** - only use `isBackground=true` for long-running processes like dev servers, watchers, or Docker builds that take >30 seconds.
+- **One terminal is enough** for most workflows (git, scp, ssh, quick commands).
+- **Only open a new background terminal when**:
+  - Starting a dev server that needs to stay running
+  - Running a Docker build/deploy that will take >1 minute
+  - Running parallel operations that truly cannot be sequential
+- **Chain commands with semicolons** (`;`) in PowerShell instead of opening multiple terminals.
+- **Example of GOOD terminal usage**:
+  - Terminal 1: All git/scp/quick ssh commands (reused throughout session)
+  - Terminal 2 (background): `pnpm dev` server running
+- **Example of BAD terminal usage**:
+  - Terminal 1: git add
+  - Terminal 2: git commit
+  - Terminal 3: git push
+  - Terminal 4: scp file
+  - Terminal 5: ssh command
+  - (This is wasteful and creates clutter - should be ONE terminal)
+- **The user HATES hidden terminals** - minimize terminal count to reduce cognitive load.
