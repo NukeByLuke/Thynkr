@@ -11,19 +11,20 @@ import fs from 'fs/promises';
 import { createReadStream } from 'fs';
 import path from 'path';
 
-// Supported voices (frontend IDs kept stable, mapped to Gemini voices on the backend)
+// Supported voices (frontend IDs kept stable, mapped to Cloud TTS voices on the backend)
 const VOICES = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'] as const;
 type Voice = (typeof VOICES)[number];
 
-// Map frontend voice IDs to Google Cloud TTS Neural2 voices
-// Neural2 provides "Amazing" quality and human-like intonation (Paid tier, reliable)
+// Map frontend voice IDs to Google Cloud TTS Chirp 3: HD voices
+// Chirp 3: HD = LLM-powered, studio-quality, natural human intonation
+// Same voices as Gemini TTS (Charon, Kore, etc.) via the stable Cloud TTS API
 const VOICE_MAP: Record<Voice, string> = {
-  alloy: 'en-US-Neural2-D',    // Male, trustworthy
-  echo: 'en-US-Neural2-J',     // Male, firm
-  fable: 'en-GB-Neural2-B',    // Male, British accent (Breezy/Story)
-  onyx: 'en-US-Neural2-A',     // Male, deep/authoritative
-  nova: 'en-US-Neural2-F',     // Female, energetic
-  shimmer: 'en-US-Neural2-H',  // Female, upbeat
+  alloy: 'en-US-Chirp3-HD-Charon',      // Male, warm & trustworthy
+  echo: 'en-US-Chirp3-HD-Fenrir',       // Male, firm & authoritative
+  fable: 'en-US-Chirp3-HD-Puck',        // Male, breezy & storytelling
+  onyx: 'en-US-Chirp3-HD-Enceladus',    // Male, deep & commanding
+  nova: 'en-US-Chirp3-HD-Aoede',        // Female, energetic & expressive
+  shimmer: 'en-US-Chirp3-HD-Kore',      // Female, upbeat & bright
 };
 
 // Supported speeds (handled client-side via playbackRate, kept for API compat)
