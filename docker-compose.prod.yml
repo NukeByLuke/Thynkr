@@ -52,8 +52,6 @@ services:
       STRIPE_PRICE_PRO_YEARLY: ${STRIPE_PRICE_PRO_YEARLY:-price_test_pro_yearly}
       STRIPE_PRICE_PREMIUM_MONTHLY: ${STRIPE_PRICE_PREMIUM_MONTHLY:-price_test_premium_monthly}
       STRIPE_PRICE_PREMIUM_YEARLY: ${STRIPE_PRICE_PREMIUM_YEARLY:-price_test_premium_yearly}
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
-      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
       GOOGLE_TTS_CREDENTIALS: ${GOOGLE_TTS_CREDENTIALS:-}
       GOOGLE_APPLICATION_CREDENTIALS: /app/google-tts-credentials.json
       GEMINI_APPLICATION_CREDENTIALS: /app/gemini-credentials.json
