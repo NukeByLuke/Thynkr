@@ -506,10 +506,31 @@ export default async function studyRoutes(server: FastifyInstance) {
           } else {
             server.log.warn({ videoId }, 'Gemini returned empty or insufficient transcript');
           }
-        } catch (geminiError) {
+        } catch (geminiError: any) {
           const errorMsg = geminiError instanceof Error ? geminiError.message : String(geminiError);
-          server.log.error({ error: errorMsg, videoId }, 'Gemini YouTube URL processing failed');
-          throw new Error(`Failed to process YouTube video: ${errorMsg}`);
+          server.log.error({ error: geminiError, videoId }, 'Gemini YouTube URL processing failed');
+          
+          // Parse Gemini API errors for better user feedback
+          if (geminiError?.error?.code === 400) {
+            const details = geminiError.error;
+            if (details.message?.includes('API key expired') || details.message?.includes('API_KEY_INVALID')) {
+              return reply.code(503).send({ 
+                error: 'YouTube processing is temporarily unavailable. Please try again later or contact support.',
+                technical: 'AI service configuration issue'
+              });
+            }
+            if (details.message?.includes('Video not found') || details.message?.includes('private')) {
+              return reply.code(400).send({ 
+                error: 'This video cannot be processed. It may be private, age-restricted, or unavailable.',
+              });
+            }
+          }
+          
+          // Generic Gemini failure - still return a user-friendly error
+          return reply.code(503).send({ 
+            error: 'Unable to process this YouTube video at the moment. Please try again later.',
+            technical: errorMsg
+          });
         }
 
         // Add transcript to content
