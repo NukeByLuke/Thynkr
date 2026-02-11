@@ -19,7 +19,7 @@ import fs from 'fs/promises';
 import { normalizeFileForLanguage, resolveUserLanguage } from '../utils/language.utils';
 import { canUploadFile, getUserUsageStats } from '../lib/tier-limits';
 import { checkAIRateLimit, recordAIUsage } from '../middleware/ai-rate-limit.middleware';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleAuth } from 'google-auth-library';
 
 const fileProcessor = new FileProcessorService();
 const aiService = new AIService();
@@ -471,40 +471,47 @@ export default async function studyRoutes(server: FastifyInstance) {
         try {
           server.log.info({ videoId }, 'Processing YouTube video with Gemini 2.5 Flash Lite...');
           
-          // Initialize Gemini with service account auth (similar to TTS setup)
+          // Use service account auth with direct REST API (SDK doesn't support service account for Gemini API)
           const credPath = process.env.GEMINI_APPLICATION_CREDENTIALS || '/app/gemini-credentials.json';
-          const genai = new GoogleGenAI({
-            googleAuthOptions: {
-              keyFilename: credPath,
-              scopes: ['https://www.googleapis.com/auth/generative-language'],
-            },
+          const auth = new GoogleAuth({
+            keyFilename: credPath,
+            scopes: ['https://www.googleapis.com/auth/generative-language'],
           });
+          const client = await auth.getClient();
+          const tokenResponse = await client.getAccessToken();
           
-          // Use the correct format from official docs: https://ai.google.dev/gemini-api/docs/video-understanding
-          const contents = [
-            {
-              fileData: {
-                fileUri: url,
-              },
-            },
-            { 
-              text: 'Please provide a complete transcript of this video. Include all spoken dialogue, narration, and important visual descriptions. Format it as a clean, readable transcript without timestamps.' 
-            }
-          ];
+          const geminiApiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
+          const requestBody = {
+            contents: [{
+              parts: [
+                { fileData: { fileUri: url } },
+                { text: 'Please provide a complete transcript of this video. Include all spoken dialogue, narration, and important visual descriptions. Format it as a clean, readable transcript without timestamps.' }
+              ]
+            }]
+          };
           
           // 3 minute timeout for longer videos
-          const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error('Gemini request timed out after 3 minutes')), 180000);
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 180000);
+          
+          const geminiResponse = await fetch(geminiApiUrl, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${tokenResponse.token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody),
+            signal: controller.signal,
           });
+          clearTimeout(timeout);
           
-          const geminiPromise = genai.models.generateContent({
-            model: 'gemini-2.5-flash-lite',
-            contents: contents,
-          });
+          if (!geminiResponse.ok) {
+            const errorBody = await geminiResponse.text();
+            throw new Error(`Gemini API error ${geminiResponse.status}: ${errorBody}`);
+          }
           
-          const response = await Promise.race([geminiPromise, timeoutPromise]);
-          
-          const geminiTranscript = response.text;
+          const geminiData = await geminiResponse.json() as any;
+          const geminiTranscript = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text;
           if (geminiTranscript && geminiTranscript.trim().length > 50) {
             transcriptText = geminiTranscript;
             hasTranscript = true;
@@ -515,10 +522,11 @@ export default async function studyRoutes(server: FastifyInstance) {
           }
         } catch (geminiError: any) {
           // Log full error structure for debugging
+          const errMsg = geminiError instanceof Error ? geminiError.message : String(geminiError);
           server.log.error({ 
-            error: geminiError, 
-            errorKeys: geminiError ? Object.keys(geminiError) : [],
-            errorType: typeof geminiError,
+            errorMessage: errMsg,
+            errorName: geminiError?.name,
+            errorStack: geminiError?.stack?.split('\n').slice(0, 3).join(' | '),
             videoId 
           }, 'Gemini YouTube URL processing failed');
           
