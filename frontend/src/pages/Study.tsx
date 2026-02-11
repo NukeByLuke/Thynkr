@@ -13,6 +13,7 @@ import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { FileTypeBadge } from '@/lib/fileTypeUtils';
 import UploadModal from '@/components/UploadModal';
+import YouTubeProcessingOverlay from '@/components/YouTubeProcessingOverlay';
 import api from '@/lib/api';
 
 interface UploadedFile {
@@ -30,6 +31,8 @@ export default function Study() {
   const { setHideSidebar, setCustomHeaderContent } = useLayout();
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [isProcessingYouTube, setIsProcessingYouTube] = useState(false);
+  const [processingVideoTitle, setProcessingVideoTitle] = useState<string | undefined>();
 
   // CRITICAL: Reset layout on mount
   useEffect(() => {
@@ -94,19 +97,30 @@ export default function Study() {
 
   const handleUploadYouTube = async (url: string) => {
     setShowUploadModal(false);
-    const loadingToast = toast.loading('Processing YouTube video... This may take 1-2 minutes');
+    setIsProcessingYouTube(true);
+    setProcessingVideoTitle(undefined);
+    
     try {
       const response = await api.post('/study/upload-youtube', { url });
-      toast.dismiss(loadingToast);
+      setIsProcessingYouTube(false);
       toast.success('YouTube video ready!');
-      // Navigate to immersive study page with full refresh
+      // Invalidate queries and navigate using React Router
+      await queryClient.invalidateQueries({ queryKey: ['study-files'] });
       if (response.data?.file?.id) {
-        window.location.href = `/study/${response.data.file.id}`;
+        navigate(`/study/${response.data.file.id}`);
       }
-    } catch (error) {
-      toast.dismiss(loadingToast);
-      toast.error('Failed to add YouTube video');
+    } catch (error: any) {
+      setIsProcessingYouTube(false);
+      const message = error?.response?.data?.error || 'Failed to add YouTube video';
+      toast.error(message);
     }
+  };
+
+  const handleCancelYouTubeProcessing = () => {
+    // Note: We can't actually cancel the API call, but we can hide the overlay
+    // The request will complete in the background
+    setIsProcessingYouTube(false);
+    toast('Processing cancelled - the video may still be added', { icon: '⚠️' });
   };
 
   const formatFileSize = (bytes: number) => {
@@ -292,6 +306,13 @@ export default function Study() {
         onUploadFiles={handleUploadFiles}
         onUploadYouTube={handleUploadYouTube}
         isUploading={uploadMutation.isPending}
+      />
+
+      {/* YouTube Processing Overlay */}
+      <YouTubeProcessingOverlay
+        isOpen={isProcessingYouTube}
+        onCancel={handleCancelYouTubeProcessing}
+        videoTitle={processingVideoTitle}
       />
     </div>
   );

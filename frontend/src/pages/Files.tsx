@@ -16,6 +16,7 @@ import {
 import toast from 'react-hot-toast';
 import { FileTypeBadge, getFileIcon } from '@/lib/fileTypeUtils';
 import UploadModal from '@/components/UploadModal';
+import YouTubeProcessingOverlay from '@/components/YouTubeProcessingOverlay';
 import { useLayout } from '@/contexts/LayoutContext';
 import api from '@/lib/api';
 
@@ -47,6 +48,8 @@ export default function Files() {
   const navigate = useNavigate();
   const { setHideSidebar, setCustomHeaderContent } = useLayout();
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [isProcessingYouTube, setIsProcessingYouTube] = useState(false);
+  const [processingVideoTitle, setProcessingVideoTitle] = useState<string | undefined>();
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [contextMenu, setContextMenu] = useState<{
@@ -262,20 +265,29 @@ export default function Files() {
 
   const handleUploadYouTube = async (url: string) => {
     setShowUploadModal(false);
-    const loadingToast = toast.loading('Processing YouTube video... This may take 1-2 minutes');
+    setIsProcessingYouTube(true);
+    setProcessingVideoTitle(undefined);
+    
     try {
       const response = await api.post('/study/upload-youtube', { url, folderId: currentFolderId });
-      toast.dismiss(loadingToast);
+      setIsProcessingYouTube(false);
       toast.success('YouTube video ready!');
-      // Navigate to immersive study page with full refresh
+      // Invalidate queries and navigate using React Router
+      await queryClient.invalidateQueries({ queryKey: ['study-files'] });
+      await queryClient.invalidateQueries({ queryKey: ['folders'] });
       if (response.data?.file?.id) {
-        window.location.href = `/study/${response.data.file.id}`;
+        navigate(`/study/${response.data.file.id}`);
       }
-    } catch (error) {
-      toast.dismiss(loadingToast);
-      console.error('YouTube upload error:', error);
-      toast.error('Failed to add YouTube video');
+    } catch (error: any) {
+      setIsProcessingYouTube(false);
+      const message = error?.response?.data?.error || 'Failed to add YouTube video';
+      toast.error(message);
     }
+  };
+
+  const handleCancelYouTubeProcessing = () => {
+    setIsProcessingYouTube(false);
+    toast('Processing cancelled - the video may still be added', { icon: '⚠️' });
   };
 
   const handleContextMenu = (
@@ -794,6 +806,13 @@ export default function Files() {
           onUploadYouTube={handleUploadYouTube}
           isUploading={uploadMutation.isPending}
           currentFolderId={currentFolderId}
+        />
+
+        {/* YouTube Processing Overlay */}
+        <YouTubeProcessingOverlay
+          isOpen={isProcessingYouTube}
+          onCancel={handleCancelYouTubeProcessing}
+          videoTitle={processingVideoTitle}
         />
       </div>
     </>
