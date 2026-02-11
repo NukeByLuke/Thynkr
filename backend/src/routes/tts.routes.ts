@@ -543,53 +543,77 @@ export default async function ttsRoutes(server: FastifyInstance) {
         }
       }
 
-      // 3. For longer texts, use chunked generation
+      // 3. For longer texts, stream MP3 chunks progressively
+      // Browser can start playing as soon as the first chunk arrives
       const chunks = splitTextIntoChunks(text);
-      logger.info({ userId, textLength: text.length, voice, chunkCount: chunks.length }, 'Starting chunked TTS generation');
+      logger.info({ userId, textLength: text.length, voice, chunkCount: chunks.length }, 'Starting streamed TTS generation');
 
       try {
-        // Generate chunks - Google Cloud TTS has much higher rate limits than Gemini
-        // We can process more chunks in parallel (e.g., 5-6 concurrent requests)
+        // Hijack the response so Fastify doesn't try to manage it
+        reply.hijack();
+
+        // Set up chunked transfer encoding for progressive streaming
+        reply.raw.writeHead(200, {
+          'Content-Type': 'audio/mpeg',
+          'Transfer-Encoding': 'chunked',
+          'X-TTS-Provider': 'google-cloud',
+          'X-TTS-Cached': 'false',
+          'X-TTS-Chunks': chunks.length.toString(),
+          'Cache-Control': 'no-cache',
+        });
+
+        const allMp3Buffers: Buffer[] = [];
+
+        // Generate and stream chunks — first chunk solo for fastest TTFB, then batch the rest
+        const firstMp3 = await generateGoogleChunk(chunks[0], voice);
+        reply.raw.write(firstMp3);
+        allMp3Buffers.push(firstMp3);
+
+        // Process remaining chunks in parallel batches and flush each batch immediately
         const MAX_CONCURRENT = 5;
-        const mp3Buffers: (Buffer | null)[] = new Array(chunks.length).fill(null);
-        
-        // Process chunks in batches of MAX_CONCURRENT
-        for (let batchStart = 0; batchStart < chunks.length; batchStart += MAX_CONCURRENT) {
+        for (let batchStart = 1; batchStart < chunks.length; batchStart += MAX_CONCURRENT) {
           const batchEnd = Math.min(batchStart + MAX_CONCURRENT, chunks.length);
-          const batchPromises: Promise<void>[] = [];
+          const batchResults: { index: number; buffer: Buffer }[] = [];
           
+          const batchPromises = [];
           for (let i = batchStart; i < batchEnd; i++) {
             batchPromises.push(
               generateGoogleChunk(chunks[i], voice).then(mp3 => {
-                mp3Buffers[i] = mp3;
+                batchResults.push({ index: i, buffer: mp3 });
               })
             );
           }
-          
-          // Wait for current batch to complete
           await Promise.all(batchPromises);
+
+          // Write batch results in order
+          batchResults.sort((a, b) => a.index - b.index);
+          for (const result of batchResults) {
+            reply.raw.write(result.buffer);
+            allMp3Buffers.push(result.buffer);
+          }
         }
 
-        // Concatenate all MP3 chunks (MP3 is frame-based, concatenation works natively)
-        const validBuffers = mp3Buffers.filter((b): b is Buffer => b !== null);
-        const combinedMp3 = Buffer.concat(validBuffers);
+        // End the response stream
+        reply.raw.end();
 
-        // Cache the complete audio in background
+        // Cache the complete audio in the background
+        const combinedMp3 = Buffer.concat(allMp3Buffers);
         cacheAudio(cacheHash, combinedMp3).then(() => {
-          logger.info({ hash: cacheHash, userId, sizeKB: Math.round(combinedMp3.length / 1024), chunks: chunks.length }, 'Chunked TTS audio cached');
+          logger.info({ hash: cacheHash, userId, sizeKB: Math.round(combinedMp3.length / 1024), chunks: chunks.length }, 'Streamed TTS audio cached');
         }).catch((err) => {
-          logger.warn({ error: err.message, hash: cacheHash }, 'Failed to cache chunked TTS audio');
+          logger.warn({ error: err.message, hash: cacheHash }, 'Failed to cache streamed TTS audio');
         });
 
-        reply.header('Content-Type', 'audio/mpeg');
-        reply.header('Content-Length', combinedMp3.length);
-        reply.header('X-TTS-Provider', 'google-cloud');
-        reply.header('X-TTS-Cached', 'false');
-        reply.header('X-TTS-Chunks', chunks.length.toString());
-        return reply.send(combinedMp3);
+        // Tell Fastify we already handled the response
+        return;
 
       } catch (error: any) {
-        logger.error({ error: error.message, userId, chunkCount: chunks.length }, 'Chunked TTS generation failed');
+        logger.error({ error: error.message, userId, chunkCount: chunks.length }, 'Streamed TTS generation failed');
+        // If we've already started writing to the raw response, just close it
+        if (reply.raw.headersSent) {
+          reply.raw.end();
+          return;
+        }
         return reply.status(500).send({ 
           error: 'Generation failed', 
           details: error.message 
