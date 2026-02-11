@@ -30,7 +30,7 @@ Write-Host "  3. Push to Docker Hub"
 Write-Host "  4. Deploy to your DigitalOcean server"
 Write-Host ""
 
-$confirm = Read-Host "Continue? (y/n)"
+$confirm = "y" # Read-Host "Continue? (y/n)"
 if ($confirm -ne "y") {
     Write-Host "Cancelled." -ForegroundColor Yellow
     exit 0
@@ -75,8 +75,10 @@ Write-Host ""
 Write-Host "[5/5] Deploying to DigitalOcean..." -ForegroundColor Cyan
 Write-Host ""
 
-$dropletIp = Read-Host "DigitalOcean Droplet IP"
-$domain = Read-Host "Domain (e.g., thynkr.ca)"
+# $dropletIp = Read-Host "DigitalOcean Droplet IP"
+# $domain = Read-Host "Domain (e.g., thynkr.ca)"
+$dropletIp = "138.197.208.81"
+$domain = "thynkr.ca"
 
 Write-Host ""
 Write-Host "Connecting to server and updating..." -ForegroundColor Yellow

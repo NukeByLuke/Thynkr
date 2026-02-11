@@ -72,14 +72,17 @@ export default function YouTubeProcessingOverlay({
           className="fixed inset-0 z-[100] flex items-center justify-center"
         >
           {/* Gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-pink-900/95 via-purple-900/95 to-violet-900/95 dark:from-slate-950/98 dark:via-cyan-950/95 dark:to-violet-950/95 backdrop-blur-xl" />
+          <div className="absolute inset-0 bg-bg-light/95 dark:bg-bg-dark/95 backdrop-blur-xl transition-colors duration-500" />
+          
+          {/* Subtle gradient overlay for extra flavor */}
+          <div className="absolute inset-0 opacity-30 bg-gradient-to-br from-sunrise-fuchsia/20 via-sunrise-pink/20 to-sunrise-orange/20 dark:from-midnight-violet/20 dark:via-midnight-blue/20 dark:to-midnight-cyan/20" />
 
           {/* Animated background particles */}
-          <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
             {[...Array(20)].map((_, i) => (
               <motion.div
                 key={i}
-                className="absolute w-2 h-2 bg-white/10 rounded-full"
+                className="absolute w-2 h-2 rounded-full bg-sunrise-fuchsia/20 dark:bg-white/10"
                 initial={{
                   x: Math.random() * window.innerWidth,
                   y: Math.random() * window.innerHeight,
@@ -104,10 +107,10 @@ export default function YouTubeProcessingOverlay({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
               onClick={onCancel}
-              className="absolute top-6 right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors group"
+              className="absolute top-6 right-6 p-2 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 transition-colors group z-50"
               title="Cancel processing"
             >
-              <X className="w-6 h-6 text-white/70 group-hover:text-white" />
+              <X className="w-6 h-6 text-text-primary-light/70 dark:text-white/70 group-hover:text-text-primary-light dark:group-hover:text-white" />
             </motion.button>
           )}
 
@@ -130,9 +133,9 @@ export default function YouTubeProcessingOverlay({
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
-              className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-500/30 to-violet-500/30 dark:from-cyan-500/30 dark:to-violet-500/30 flex items-center justify-center"
+              className="w-24 h-24 rounded-full bg-gradient-to-br from-sunrise-pink/20 to-sunrise-fuchsia/20 dark:from-midnight-cyan/20 dark:to-midnight-violet/20 flex items-center justify-center border border-sunrise-pink/10 dark:border-midnight-cyan/10"
             >
-              <Brain className="w-12 h-12 text-white/80" />
+              <Brain className="w-12 h-12 text-sunrise-fuchsia dark:text-midnight-cyan" />
             </motion.div>
           </motion.div>
 
@@ -141,7 +144,7 @@ export default function YouTubeProcessingOverlay({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-2xl font-bold text-white mb-2"
+              className="text-2xl font-bold text-text-primary-light dark:text-white mb-2"
             >
               Processing Your Video
             </motion.h2>
@@ -152,7 +155,7 @@ export default function YouTubeProcessingOverlay({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="text-white/60 text-sm mb-4 line-clamp-1 max-w-full"
+                className="text-text-secondary-light dark:text-white/60 text-sm mb-4 line-clamp-1 max-w-full"
               >
                 "{videoTitle}"
               </motion.p>
@@ -163,7 +166,7 @@ export default function YouTubeProcessingOverlay({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="flex items-center gap-2 text-white/50 text-sm mb-8"
+              className="flex items-center gap-2 text-text-secondary-light dark:text-white/50 text-sm mb-8 font-medium"
             >
               <Clock className="w-4 h-4" />
               <span>{formatTime(elapsedSeconds)}</span>
@@ -176,10 +179,10 @@ export default function YouTubeProcessingOverlay({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
-              className="flex items-center gap-3 bg-white/10 rounded-xl px-5 py-3"
+              className="flex items-center gap-3 bg-white/60 dark:bg-white/10 backdrop-blur-md rounded-xl px-5 py-4 border border-sunrise-pink/10 dark:border-white/5 shadow-sm"
             >
-              <CurrentTipIcon className="w-5 h-5 text-cyan-400 dark:text-cyan-300 flex-shrink-0" />
-              <span className="text-white/80 text-sm">{PROCESSING_TIPS[tipIndex].text}</span>
+              <CurrentTipIcon className="w-5 h-5 text-sunrise-fuchsia dark:text-midnight-cyan flex-shrink-0" />
+              <span className="text-text-primary-light/90 dark:text-white/90 text-sm font-medium">{PROCESSING_TIPS[tipIndex].text}</span>
             </motion.div>
 
             {/* Progress dots */}
@@ -192,7 +195,7 @@ export default function YouTubeProcessingOverlay({
               {[0, 1, 2].map((i) => (
                 <motion.div
                   key={i}
-                  className="w-2 h-2 rounded-full bg-white/40"
+                  className="w-2 h-2 rounded-full bg-sunrise-fuchsia/40 dark:bg-white/40"
                   animate={{
                     scale: [1, 1.5, 1],
                     opacity: [0.4, 1, 0.4],
@@ -211,7 +214,7 @@ export default function YouTubeProcessingOverlay({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="text-white/40 text-xs mt-8"
+              className="text-text-secondary-light/60 dark:text-white/40 text-xs mt-8"
             >
               This usually takes 30-90 seconds depending on video length
             </motion.p>
