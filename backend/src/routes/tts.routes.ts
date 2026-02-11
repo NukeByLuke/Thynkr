@@ -276,7 +276,7 @@ async function ensureCacheDir() {
 
 // Generate content hash for caching (voice-only, speed is handled client-side)
 function generateContentHash(text: string, voice: Voice): string {
-  const content = `gemini:${text}:${voice}`;
+  const content = `google:${text}:${voice}`;
   return createHash('sha256').update(content).digest('hex').substring(0, 32);
 }
 
@@ -516,7 +516,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
         reply.header('Content-Length', stat.size);
         reply.header('Cache-Control', 'private, max-age=3600');
         reply.header('X-TTS-Cached', 'true');
-        reply.header('X-TTS-Provider', 'gemini');
+        reply.header('X-TTS-Provider', 'google-cloud');
         
         const fileStream = createReadStream(cachePath);
         return reply.send(fileStream); 
@@ -597,7 +597,10 @@ export default async function ttsRoutes(server: FastifyInstance) {
 
       } catch (error: any) {
         logger.error({ error: error.message, userId, chunkCount: chunks.length }, 'Chunked TTS generation failed');
-        return reply.status(500).send({ error: 'Generation failed' });
+        return reply.status(500).send({ 
+          error: 'Generation failed', 
+          details: config.nodeEnv === 'development' || true ? error.message : undefined 
+        });
       }
     }
   );
