@@ -168,38 +168,7 @@ function splitTextIntoChunks(text: string): string[] {
   return chunks.length > 0 ? chunks : [text.trim()];
 }
 
-/**
- * Convert raw PCM audio (16-bit, 24kHz, mono) to a WAV buffer
- */
-function pcmToWav(pcmData: Buffer): Buffer {
-  const numChannels = 1;
-  const sampleRate = 24000;
-  const bitsPerSample = 16;
-  const byteRate = sampleRate * numChannels * (bitsPerSample / 8);
-  const blockAlign = numChannels * (bitsPerSample / 8);
-  const dataSize = pcmData.length;
-  const headerSize = 44;
-
-  const header = Buffer.alloc(headerSize);
-  // RIFF header
-  header.write('RIFF', 0);
-  header.writeUInt32LE(dataSize + headerSize - 8, 4);
-  header.write('WAVE', 8);
-  // fmt sub-chunk
-  header.write('fmt ', 12);
-  header.writeUInt32LE(16, 16); // PCM sub-chunk size
-  header.writeUInt16LE(1, 20);  // PCM format
-  header.writeUInt16LE(numChannels, 22);
-  header.writeUInt32LE(sampleRate, 24);
-  header.writeUInt32LE(byteRate, 28);
-  header.writeUInt16LE(blockAlign, 32);
-  header.writeUInt16LE(bitsPerSample, 34);
-  // data sub-chunk
-  header.write('data', 36);
-  header.writeUInt32LE(dataSize, 40);
-
-  return Buffer.concat([header, pcmData]);
-}
+// No pcmToWav needed — we use MP3 output directly from Google Cloud TTS
 
 /**
  * Shared helper to call Google Cloud TTS via the official client library
@@ -208,7 +177,7 @@ function pcmToWav(pcmData: Buffer): Buffer {
 async function callGoogleTTS(text: string, voiceName: string): Promise<Buffer> {
   const client = getTTSClient();
 
-  // Extract language code from voice name (e.g. "en-US" from "en-US-Neural2-D")
+  // Extract language code from voice name (e.g. "en-US" from "en-US-Chirp3-HD-Charon")
   const languageCode = voiceName.split('-').slice(0, 2).join('-');
 
   const [response] = await client.synthesizeSpeech({
@@ -218,8 +187,7 @@ async function callGoogleTTS(text: string, voiceName: string): Promise<Buffer> {
       name: voiceName,
     },
     audioConfig: {
-      audioEncoding: 'LINEAR16' as const,
-      sampleRateHertz: 24000,
+      audioEncoding: 'MP3' as const,
     },
   });
 
@@ -228,30 +196,10 @@ async function callGoogleTTS(text: string, voiceName: string): Promise<Buffer> {
   }
 
   // audioContent can be Uint8Array or string (base64)
-  let buffer: Buffer;
   if (typeof response.audioContent === 'string') {
-    buffer = Buffer.from(response.audioContent, 'base64');
-  } else {
-    buffer = Buffer.from(response.audioContent);
+    return Buffer.from(response.audioContent, 'base64');
   }
-
-  // LINEAR16 responses include a WAV header — strip it to return raw PCM
-  // This prevents double-header issues when we wrap in our own WAV header later
-  if (buffer.length > 44 && buffer.toString('ascii', 0, 4) === 'RIFF') {
-    let offset = 12; // Skip 'RIFF' + size + 'WAVE'
-    while (offset < buffer.length - 8) {
-      const chunkId = buffer.toString('ascii', offset, offset + 4);
-      const chunkSize = buffer.readUInt32LE(offset + 4);
-      if (chunkId === 'data') {
-        return buffer.subarray(offset + 8);
-      }
-      offset += 8 + chunkSize;
-    }
-    // Fallback: standard 44-byte header
-    return buffer.subarray(44);
-  }
-
-  return buffer;
+  return Buffer.from(response.audioContent);
 }
 
 /**
@@ -264,17 +212,17 @@ async function generateGoogleTTS(text: string, voice: Voice, retries = 2): Promi
   try {
     const startTime = Date.now();
     
-    // Call API with timeout
-    const pcmBuffer = await withTimeout(
+    // Call API with timeout — returns MP3 directly
+    const mp3Buffer = await withTimeout(
       callGoogleTTS(text, googleVoice),
       TTS_TIMEOUT_MS,
       `TTS generation for ${googleVoice}`
     );
      
     const elapsed = Date.now() - startTime;
-    logger.info({ voice, googleVoice, elapsed }, 'TTS generation completed');
+    logger.info({ voice, googleVoice, elapsed, sizeKB: Math.round(mp3Buffer.length / 1024) }, 'TTS generation completed');
 
-    return pcmToWav(pcmBuffer);
+    return mp3Buffer;
   } catch (error: any) {
     logger.error({ voice, googleVoice, error: error.message }, 'TTS generation failed');
     
@@ -288,23 +236,23 @@ async function generateGoogleTTS(text: string, voice: Voice, retries = 2): Promi
 }
 
 /**
- * Generate raw PCM audio using Google Cloud TTS (for chunked streaming)
+ * Generate MP3 audio chunk using Google Cloud TTS (for chunked streaming)
  */
-async function generateGooglePCM(text: string, voice: Voice, retries = 2): Promise<Buffer> {
+async function generateGoogleChunk(text: string, voice: Voice, retries = 2): Promise<Buffer> {
   const googleVoice = VOICE_MAP[voice];
 
   try {
     return await withTimeout(
       callGoogleTTS(text, googleVoice),
       TTS_TIMEOUT_MS,
-      `TTS PCM generation for ${googleVoice}`
+      `TTS chunk generation for ${googleVoice}`
     );
   } catch (error: any) {
-    logger.error({ voice, googleVoice, error: error.message }, 'TTS PCM generation failed');
+    logger.error({ voice, googleVoice, error: error.message }, 'TTS chunk generation failed');
     
     if (retries > 0) {
       await new Promise(r => setTimeout(r, 1000));
-      return generateGooglePCM(text, voice, retries - 1);
+      return generateGoogleChunk(text, voice, retries - 1);
     }
     throw error;
   }
@@ -330,7 +278,7 @@ function generateContentHash(text: string, voice: Voice): string {
 
 // Get cached audio file path
 function getCacheFilePath(hash: string): string {
-  return path.join(TTS_CACHE_DIR, `${hash}.wav`);
+  return path.join(TTS_CACHE_DIR, `${hash}.mp3`);
 }
 
 // Check if cached audio exists
@@ -560,7 +508,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
         // Serve from disk if exists
         const stat = await fs.stat(cachePath);
         
-        reply.header('Content-Type', 'audio/wav');
+        reply.header('Content-Type', 'audio/mpeg');
         reply.header('Content-Length', stat.size);
         reply.header('Cache-Control', 'private, max-age=3600');
         reply.header('X-TTS-Cached', 'true');
@@ -569,7 +517,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
         const fileStream = createReadStream(cachePath);
         return reply.send(fileStream); 
       } catch (e) {
-        // Not in cache, generate with Gemini TTS
+        // Not in cache, generate fresh
       }
 
       // 2. For short texts, generate all at once (faster than chunking overhead)
@@ -584,7 +532,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
             logger.warn({ error: err.message, hash: cacheHash }, 'Failed to cache TTS audio');
           });
 
-          reply.header('Content-Type', 'audio/wav');
+          reply.header('Content-Type', 'audio/mpeg');
           reply.header('Content-Length', buffer.length);
           reply.header('X-TTS-Provider', 'google-cloud');
           reply.header('X-TTS-Cached', 'false');
@@ -603,7 +551,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
         // Generate chunks - Google Cloud TTS has much higher rate limits than Gemini
         // We can process more chunks in parallel (e.g., 5-6 concurrent requests)
         const MAX_CONCURRENT = 5;
-        const pcmBuffers: (Buffer | null)[] = new Array(chunks.length).fill(null);
+        const mp3Buffers: (Buffer | null)[] = new Array(chunks.length).fill(null);
         
         // Process chunks in batches of MAX_CONCURRENT
         for (let batchStart = 0; batchStart < chunks.length; batchStart += MAX_CONCURRENT) {
@@ -612,36 +560,33 @@ export default async function ttsRoutes(server: FastifyInstance) {
           
           for (let i = batchStart; i < batchEnd; i++) {
             batchPromises.push(
-              generateGooglePCM(chunks[i], voice).then(pcm => {
-                pcmBuffers[i] = pcm;
+              generateGoogleChunk(chunks[i], voice).then(mp3 => {
+                mp3Buffers[i] = mp3;
               })
             );
           }
           
           // Wait for current batch to complete
           await Promise.all(batchPromises);
-          
-          // No delay needed for Cloud TTS usually
         }
 
-        // Concatenate all PCM data and convert to WAV (filter out any nulls just in case)
-        const validBuffers = pcmBuffers.filter((b): b is Buffer => b !== null);
-        const combinedPcm = Buffer.concat(validBuffers);
-        const wavBuffer = pcmToWav(combinedPcm);
+        // Concatenate all MP3 chunks (MP3 is frame-based, concatenation works natively)
+        const validBuffers = mp3Buffers.filter((b): b is Buffer => b !== null);
+        const combinedMp3 = Buffer.concat(validBuffers);
 
         // Cache the complete audio in background
-        cacheAudio(cacheHash, wavBuffer).then(() => {
-          logger.info({ hash: cacheHash, userId, size: wavBuffer.length, chunks: chunks.length }, 'Chunked TTS audio cached');
+        cacheAudio(cacheHash, combinedMp3).then(() => {
+          logger.info({ hash: cacheHash, userId, sizeKB: Math.round(combinedMp3.length / 1024), chunks: chunks.length }, 'Chunked TTS audio cached');
         }).catch((err) => {
           logger.warn({ error: err.message, hash: cacheHash }, 'Failed to cache chunked TTS audio');
         });
 
-        reply.header('Content-Type', 'audio/wav');
-        reply.header('Content-Length', wavBuffer.length);
+        reply.header('Content-Type', 'audio/mpeg');
+        reply.header('Content-Length', combinedMp3.length);
         reply.header('X-TTS-Provider', 'google-cloud');
         reply.header('X-TTS-Cached', 'false');
         reply.header('X-TTS-Chunks', chunks.length.toString());
-        return reply.send(wavBuffer);
+        return reply.send(combinedMp3);
 
       } catch (error: any) {
         logger.error({ error: error.message, userId, chunkCount: chunks.length }, 'Chunked TTS generation failed');
@@ -726,7 +671,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
         }, 'Serving cached TTS audio');
 
         // Send cached audio with edge caching headers
-        reply.header('Content-Type', 'audio/wav');
+        reply.header('Content-Type', 'audio/mpeg');
         reply.header('Content-Disposition', 'inline');
         reply.header('Cache-Control', 'public, max-age=86400, s-maxage=604800');
         reply.header('X-TTS-Cached', 'true');
@@ -757,7 +702,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
         await recordAIUsage(userId, 'TTS_GENERATE', { durationMs });
 
         // Send response with edge caching headers for browser/CDN
-        reply.header('Content-Type', 'audio/wav');
+        reply.header('Content-Type', 'audio/mpeg');
         reply.header('Content-Disposition', 'inline');
         reply.header('Cache-Control', 'public, max-age=3600, s-maxage=86400');
         reply.header('X-TTS-Cached', 'false');
@@ -840,7 +785,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
 
       if (cachedAudio) {
         logger.info({ hash, packId: id, pageNum }, 'Serving cached study pack page TTS');
-        reply.header('Content-Type', 'audio/wav');
+        reply.header('Content-Type', 'audio/mpeg');
         reply.header('Content-Disposition', 'inline');
         reply.header('Cache-Control', 'public, max-age=86400');
         reply.header('X-TTS-Cached', 'true');
@@ -858,7 +803,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
 
         await cacheAudio(hash, buffer);
 
-        reply.header('Content-Type', 'audio/wav');
+        reply.header('Content-Type', 'audio/mpeg');
         reply.header('Content-Disposition', 'inline');
         reply.header('Cache-Control', 'public, max-age=86400');
         reply.header('X-TTS-Cached', 'false');
