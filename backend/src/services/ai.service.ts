@@ -7,7 +7,6 @@
 import { GoogleAuth, AuthClient } from 'google-auth-library';
 import NodeCache from 'node-cache';
 import { logger } from '../lib/logger';
-import { config } from '../config';
 import { DEFAULT_LANGUAGE } from '../constants/language.constants';
 
 const cache = new NodeCache({ stdTTL: 3600 });
