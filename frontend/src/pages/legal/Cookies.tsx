@@ -428,10 +428,10 @@ export default function Cookies() {
                 <li>
                   Email:{' '}
                   <a
-                    href="mailto:support@thynkr.ca"
+                    href="mailto:support@thynkr.study"
                     className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                   >
-                    support@thynkr.ca
+                    support@thynkr.study
                   </a>
                 </li>
                 <li>
