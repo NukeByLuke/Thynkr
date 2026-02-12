@@ -383,7 +383,7 @@ export default function StudyModePage() {
 
           {/* Main Study Area */}
           <main className="flex-1 flex flex-col overflow-hidden">
-            {/* Tabs */}
+            {/* Study Mode Tabs - Quizlet Style */}
             <LayoutGroup>
               <div className="flex border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 overflow-x-auto scrollbar-hide">
                 {TABS.map((tab) => {
@@ -393,22 +393,29 @@ export default function StudyModePage() {
                       key={tab.id}
                       onClick={() => handleTabChange(tab.id)}
                       disabled={selectedFileIds.size === 0}
-                      whileHover={selectedFileIds.size > 0 ? { y: -1 } : {}}
-                      whileTap={selectedFileIds.size > 0 ? { scale: 0.98 } : {}}
-                      className={`relative flex items-center gap-2 px-4 sm:px-6 py-3.5 text-sm font-semibold transition-all whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed ${
+                      whileHover={selectedFileIds.size > 0 ? { y: -2 } : {}}
+                      whileTap={selectedFileIds.size > 0 ? { scale: 0.97 } : {}}
+                      className={`relative flex items-center gap-2 px-5 sm:px-8 py-4 text-sm font-bold transition-all whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed ${
                         isActive
-                          ? 'text-indigo-600 dark:text-indigo-400'
-                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                          ? 'text-slate-900 dark:text-white'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                       }`}
                     >
                       {isActive && (
                         <motion.div
                           layoutId="studyActiveTab"
-                          className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500"
-                          transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                          className="absolute inset-x-2 bottom-0 h-1 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-violet-500 dark:from-cyan-400 dark:via-violet-500 dark:to-fuchsia-500 rounded-full"
+                          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                         />
                       )}
-                      <tab.icon className={`h-4 w-4 transition-colors ${isActive ? 'text-indigo-500' : 'text-slate-400'}`} />
+                      {isActive && (
+                        <motion.div
+                          layoutId="studyActiveTabBg"
+                          className="absolute inset-1 bg-slate-100/80 dark:bg-slate-800/80 rounded-lg -z-10"
+                          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                        />
+                      )}
+                      <tab.icon className={`h-4 w-4 transition-colors ${isActive ? tab.color : 'text-slate-400'}`} />
                       <span className="hidden sm:inline">{tab.label}</span>
                     </motion.button>
                   );
