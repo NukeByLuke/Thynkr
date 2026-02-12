@@ -47,7 +47,7 @@ export default function Footer() {
               Roadmap
             </Link>
             <a
-              href="mailto:support@thynkr.ca"
+              href="mailto:support@thynkr.study"
               className="text-sm text-[#6B7280] dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
               Contact

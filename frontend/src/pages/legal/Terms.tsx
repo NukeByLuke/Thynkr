@@ -312,10 +312,10 @@ export default function Terms() {
               </p>
               <p className="ml-6 font-semibold">
                 <a
-                  href="mailto:copyright@thynkr.ca"
+                  href="mailto:copyright@thynkr.study"
                   className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                 >
-                  copyright@thynkr.ca
+                  copyright@thynkr.study
                 </a>
               </p>
               
@@ -370,10 +370,10 @@ export default function Terms() {
                 If you believe content you uploaded was removed in error, you may submit a
                 counter-notification to{' '}
                 <a
-                  href="mailto:copyright@thynkr.ca"
+                  href="mailto:copyright@thynkr.study"
                   className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                 >
-                  copyright@thynkr.ca
+                  copyright@thynkr.study
                 </a>
                 {' '}explaining why the content does not infringe copyright. We will review
                 counter-notifications in accordance with applicable law.
@@ -466,10 +466,10 @@ export default function Terms() {
                 <li>
                   Email:{' '}
                   <a
-                    href="mailto:support@thynkr.ca"
+                    href="mailto:support@thynkr.study"
                     className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                   >
-                    support@thynkr.ca
+                    support@thynkr.study
                   </a>
                 </li>
                 <li>
