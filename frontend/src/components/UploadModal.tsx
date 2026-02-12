@@ -43,6 +43,7 @@ export default function UploadModal({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [textTitle, setTextTitle] = useState('');
   const [textContent, setTextContent] = useState('');
+  const [hasAgreed, setHasAgreed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Reset state when modal closes
@@ -52,6 +53,7 @@ export default function UploadModal({
     setSelectedFiles([]);
     setTextTitle('');
     setTextContent('');
+    setHasAgreed(false);
     setIsDragging(false);
     onClose();
   };
@@ -491,6 +493,21 @@ export default function UploadModal({
             )}
           </div>
 
+          {/* Content Policy Agreement */}
+          <div className="px-6 py-4 border-t border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-900/50">
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={hasAgreed}
+                onChange={(e) => setHasAgreed(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-sunrise-pink dark:text-midnight-cyan focus:ring-2 focus:ring-sunrise-pink/20 dark:focus:ring-midnight-cyan/20 transition-colors cursor-pointer"
+              />
+              <span className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
+                I confirm that I have the right to upload this content and it does not violate any academic integrity policies or copyright laws.
+              </span>
+            </label>
+          </div>
+
           {/* Footer */}
           <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-white/10">
             <button
@@ -510,6 +527,7 @@ export default function UploadModal({
               }
               disabled={
                 isUploading ||
+                !hasAgreed ||
                 (activeTab === 'files'
                   ? selectedFiles.length === 0
                   : activeTab === 'youtube'
