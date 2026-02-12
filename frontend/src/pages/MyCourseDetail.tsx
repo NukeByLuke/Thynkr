@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileTypeBadge } from '@/lib/fileTypeUtils';
 import {
@@ -126,6 +126,8 @@ function formatDate(dateString: string) {
 
 export default function MyCourseDetail() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const shareToken = searchParams.get('token');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -157,9 +159,12 @@ export default function MyCourseDetail() {
   const isPremium = canCreatePublicCourses(user?.role);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['user-course', id],
+    queryKey: ['user-course', id, shareToken],
     queryFn: async () => {
-      const response = await api.get(`/user-courses/${id}`);
+      const url = shareToken
+        ? `/user-courses/${id}?token=${shareToken}`
+        : `/user-courses/${id}`;
+      const response = await api.get(url);
       return response.data;
     },
     enabled: !!id,
@@ -397,10 +402,21 @@ export default function MyCourseDetail() {
   }
 
   if (error || !course) {
+    const status = (error as any)?.response?.status;
+    const isAccessDenied = status === 403;
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <p className="text-red-600 dark:text-red-400">Course not found</p>
+          <p className="text-red-600 dark:text-red-400">
+            {isAccessDenied
+              ? 'You don\'t have access to this course'
+              : 'Course not found'}
+          </p>
+          {isAccessDenied && (
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              Ask the course owner to share it with you.
+            </p>
+          )}
           <Link
             to="/courses"
             className="text-brand-600 dark:text-brand-400 hover:underline mt-2 inline-block"
