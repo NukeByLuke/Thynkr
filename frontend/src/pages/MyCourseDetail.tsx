@@ -86,74 +86,19 @@ const CATEGORIES = [
   { value: 'OTHER', label: 'Other' },
 ];
 
-// Category-specific gradient themes
-const CATEGORY_GRADIENTS: Record<string, { light: string; dark: string; orb1: string; orb2: string }> = {
-  MATHEMATICS: {
-    light: 'from-blue-600 via-indigo-600 to-violet-600',
-    dark: 'dark:from-blue-900 dark:via-indigo-900 dark:to-violet-900',
-    orb1: 'bg-indigo-400/30 dark:bg-indigo-500/20',
-    orb2: 'bg-blue-400/30 dark:bg-blue-500/20',
-  },
-  SCIENCE: {
-    light: 'from-emerald-600 via-teal-600 to-cyan-600',
-    dark: 'dark:from-emerald-900 dark:via-teal-900 dark:to-cyan-900',
-    orb1: 'bg-teal-400/30 dark:bg-teal-500/20',
-    orb2: 'bg-emerald-400/30 dark:bg-emerald-500/20',
-  },
-  TECHNOLOGY: {
-    light: 'from-cyan-600 via-blue-600 to-indigo-600',
-    dark: 'dark:from-cyan-900 dark:via-blue-900 dark:to-indigo-900',
-    orb1: 'bg-blue-400/30 dark:bg-blue-500/20',
-    orb2: 'bg-cyan-400/30 dark:bg-cyan-500/20',
-  },
-  ENGINEERING: {
-    light: 'from-orange-600 via-amber-600 to-yellow-600',
-    dark: 'dark:from-orange-900 dark:via-amber-900 dark:to-yellow-900',
-    orb1: 'bg-amber-400/30 dark:bg-amber-500/20',
-    orb2: 'bg-orange-400/30 dark:bg-orange-500/20',
-  },
-  LANGUAGES: {
-    light: 'from-rose-600 via-pink-600 to-fuchsia-600',
-    dark: 'dark:from-rose-900 dark:via-pink-900 dark:to-fuchsia-900',
-    orb1: 'bg-pink-400/30 dark:bg-pink-500/20',
-    orb2: 'bg-rose-400/30 dark:bg-rose-500/20',
-  },
-  HUMANITIES: {
-    light: 'from-violet-600 via-purple-600 to-fuchsia-600',
-    dark: 'dark:from-violet-900 dark:via-purple-900 dark:to-fuchsia-900',
-    orb1: 'bg-purple-400/30 dark:bg-purple-500/20',
-    orb2: 'bg-violet-400/30 dark:bg-violet-500/20',
-  },
-  BUSINESS: {
-    light: 'from-slate-700 via-zinc-600 to-neutral-600',
-    dark: 'dark:from-slate-900 dark:via-zinc-800 dark:to-neutral-900',
-    orb1: 'bg-zinc-400/30 dark:bg-zinc-500/20',
-    orb2: 'bg-slate-400/30 dark:bg-slate-500/20',
-  },
-  ARTS: {
-    light: 'from-pink-600 via-rose-500 to-orange-500',
-    dark: 'dark:from-pink-900 dark:via-rose-900 dark:to-orange-900',
-    orb1: 'bg-rose-400/30 dark:bg-rose-500/20',
-    orb2: 'bg-pink-400/30 dark:bg-pink-500/20',
-  },
-  HEALTH: {
-    light: 'from-green-600 via-emerald-600 to-teal-600',
-    dark: 'dark:from-green-900 dark:via-emerald-900 dark:to-teal-900',
-    orb1: 'bg-emerald-400/30 dark:bg-emerald-500/20',
-    orb2: 'bg-green-400/30 dark:bg-green-500/20',
-  },
-  LAW: {
-    light: 'from-amber-700 via-yellow-700 to-orange-700',
-    dark: 'dark:from-amber-900 dark:via-yellow-900 dark:to-orange-900',
-    orb1: 'bg-yellow-400/30 dark:bg-yellow-500/20',
-    orb2: 'bg-amber-400/30 dark:bg-amber-500/20',
-  },
-  OTHER: {
-    light: 'from-indigo-600 via-purple-600 to-pink-600',
-    dark: 'dark:from-indigo-900 dark:via-purple-900 dark:to-pink-900',
-    orb1: 'bg-purple-400/30 dark:bg-purple-500/20',
-    orb2: 'bg-indigo-400/30 dark:bg-indigo-500/20',
-  },
+// Category accent colors (subtle, for small badges only)
+const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  MATHEMATICS: { bg: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-700 dark:text-blue-300', border: 'border-blue-200 dark:border-blue-800' },
+  SCIENCE: { bg: 'bg-emerald-50 dark:bg-emerald-900/20', text: 'text-emerald-700 dark:text-emerald-300', border: 'border-emerald-200 dark:border-emerald-800' },
+  TECHNOLOGY: { bg: 'bg-cyan-50 dark:bg-cyan-900/20', text: 'text-cyan-700 dark:text-cyan-300', border: 'border-cyan-200 dark:border-cyan-800' },
+  ENGINEERING: { bg: 'bg-orange-50 dark:bg-orange-900/20', text: 'text-orange-700 dark:text-orange-300', border: 'border-orange-200 dark:border-orange-800' },
+  LANGUAGES: { bg: 'bg-rose-50 dark:bg-rose-900/20', text: 'text-rose-700 dark:text-rose-300', border: 'border-rose-200 dark:border-rose-800' },
+  HUMANITIES: { bg: 'bg-violet-50 dark:bg-violet-900/20', text: 'text-violet-700 dark:text-violet-300', border: 'border-violet-200 dark:border-violet-800' },
+  BUSINESS: { bg: 'bg-slate-100 dark:bg-slate-800/40', text: 'text-slate-700 dark:text-slate-300', border: 'border-slate-200 dark:border-slate-700' },
+  ARTS: { bg: 'bg-pink-50 dark:bg-pink-900/20', text: 'text-pink-700 dark:text-pink-300', border: 'border-pink-200 dark:border-pink-800' },
+  HEALTH: { bg: 'bg-green-50 dark:bg-green-900/20', text: 'text-green-700 dark:text-green-300', border: 'border-green-200 dark:border-green-800' },
+  LAW: { bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-700 dark:text-amber-300', border: 'border-amber-200 dark:border-amber-800' },
+  OTHER: { bg: 'bg-gray-50 dark:bg-gray-800/40', text: 'text-gray-700 dark:text-gray-300', border: 'border-gray-200 dark:border-gray-700' },
 };
 
 function getFileIcon(fileType: string) {
@@ -472,140 +417,119 @@ export default function MyCourseDetail() {
     ? `${window.location.origin}/courses/${course.id}?token=${course.shareToken}`
     : `${window.location.origin}/courses/${course.id}`;
 
-  const gradient = CATEGORY_GRADIENTS[course.category] || CATEGORY_GRADIENTS.OTHER;
+  const catColor = CATEGORY_COLORS[course.category] || CATEGORY_COLORS.OTHER;
 
   return (
     <div className="h-full">
-      {/* Enhanced Header Banner - Category-aware gradient */}
-      <div className={`relative overflow-hidden bg-gradient-to-br ${gradient.light} ${gradient.dark}`}>
-        {/* Dot-grid pattern overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-            backgroundSize: '20px 20px',
-          }}
-        />
-
-        {/* Animated Background Gradient Orbs */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className={`absolute -top-40 -right-40 w-80 h-80 ${gradient.orb1} rounded-full blur-3xl animate-pulse`} />
-          <div className={`absolute -bottom-40 -left-40 w-80 h-80 ${gradient.orb2} rounded-full blur-3xl animate-pulse`} style={{ animationDelay: '1s' }} />
-        </div>
-
-        {/* Content Container */}
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Back Navigation - Improved */}
-          <div className="pt-6 pb-4">
+      {/* Clean Header */}
+      <div className="border-b border-slate-200/70 dark:border-white/[0.06] bg-white/60 dark:bg-zinc-950/60 backdrop-blur-xl">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Breadcrumb */}
+          <div className="pt-5 pb-3">
             <Link
               to="/courses"
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-lg transition-all duration-200 border border-white/20 hover:border-white/30 active:scale-95"
+              className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
             >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Courses</span>
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Courses
             </Link>
           </div>
 
-          {/* Course Header Info */}
-          <div className="pb-8">
-            <div className="flex flex-col md:flex-row md:items-start gap-6">
-              {/* Banner Image (enhanced) */}
-              {course.bannerImage && (
-                <div className="relative w-full md:w-56 h-36 md:h-32 rounded-xl overflow-hidden flex-shrink-0 border-2 border-white/20 shadow-2xl group">
-                  <img src={course.bannerImage} alt="" loading="lazy" className="w-full h-full object-cover" />
-                  {course.isOwner && (
-                    <>
-                      <input
-                        type="file"
-                        ref={bannerInputRef}
-                        onChange={handleBannerUpload}
-                        accept="image/*"
-                        className="hidden"
-                      />
-                      <button
-                        onClick={() => bannerInputRef.current?.click()}
-                        disabled={uploadingBanner}
-                        className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
-                      >
-                        <div className="flex flex-col items-center gap-2">
-                          <ImagePlus className="h-6 w-6 text-white" />
-                          <span className="text-xs text-white font-medium">Change Image</span>
-                        </div>
-                      </button>
-                    </>
+          {/* Title Row */}
+          <div className="flex items-start justify-between gap-4 pb-5">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <span className={`px-2.5 py-1 text-[11px] font-semibold rounded-md border ${catColor.bg} ${catColor.text} ${catColor.border}`}>
+                  {course.category.replace('_', ' ')}
+                </span>
+                <span
+                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold border ${
+                    course.visibility === 'PUBLIC'
+                      ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                      : 'bg-slate-100 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                  }`}
+                >
+                  {course.visibility === 'PUBLIC' ? (
+                    <Globe className="h-3 w-3" />
+                  ) : (
+                    <Lock className="h-3 w-3" />
                   )}
-                </div>
-              )}
-
-              {/* Title and Meta - Enhanced */}
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <span className="px-3 py-1.5 text-xs font-bold rounded-lg bg-white/20 text-white backdrop-blur-md border border-white/30">
-                    {course.category.replace('_', ' ')}
-                  </span>
-                  <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold backdrop-blur-md border ${
-                      course.visibility === 'PUBLIC'
-                        ? 'bg-emerald-500/30 text-white border-emerald-400/50'
-                        : 'bg-white/20 text-white border-white/30'
-                    }`}
-                  >
-                    {course.visibility === 'PUBLIC' ? (
-                      <Globe className="h-3.5 w-3.5" />
-                    ) : (
-                      <Lock className="h-3.5 w-3.5" />
-                    )}
-                    {course.visibility}
-                  </span>
-                </div>
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">
-                  {course.title}
-                </h1>
-                <div className="flex flex-wrap items-center gap-5 text-sm text-white/90">
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg">
-                    <User className="h-4 w-4" />
-                    <span className="font-medium">{course.creator.name}</span>
-                  </div>
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg">
-                    <Calendar className="h-4 w-4" />
-                    <span>{formatDate(course.createdAt)}</span>
-                  </div>
-                </div>
+                  {course.visibility}
+                </span>
               </div>
-
-              {/* Banner Upload Button (if no banner) - Glass hover style */}
-              {course.isOwner && !course.bannerImage && (
-                <div className="md:self-start group/banner">
-                  <input
-                    type="file"
-                    ref={bannerInputRef}
-                    onChange={handleBannerUpload}
-                    accept="image/*"
-                    className="hidden"
-                  />
-                  <button
-                    onClick={() => bannerInputRef.current?.click()}
-                    disabled={uploadingBanner}
-                    className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white/70 hover:text-white bg-white/10 hover:bg-white/20 border border-dashed border-white/20 hover:border-white/40 rounded-xl transition-all duration-300 backdrop-blur-md active:scale-95 shadow-lg hover:shadow-xl"
-                  >
-                    <ImagePlus className="h-4 w-4" />
-                    {uploadingBanner ? 'Uploading...' : 'Add Banner'}
-                  </button>
-                </div>
-              )}
+              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+                {course.title}
+              </h1>
+              <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-slate-500 dark:text-slate-400">
+                <span className="flex items-center gap-1.5">
+                  <User className="h-3.5 w-3.5" />
+                  {course.creator.name}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="h-3.5 w-3.5" />
+                  {formatDate(course.createdAt)}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <FileText className="h-3.5 w-3.5" />
+                  {course.files.length} file{course.files.length !== 1 ? 's' : ''}
+                </span>
+              </div>
             </div>
+
+            {/* Banner Image or Upload */}
+            {course.bannerImage ? (
+              <div className="hidden sm:block relative w-40 h-24 rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-black/10 dark:ring-white/10 group">
+                <img src={course.bannerImage} alt="" loading="lazy" className="w-full h-full object-cover" />
+                {course.isOwner && (
+                  <>
+                    <input
+                      type="file"
+                      ref={bannerInputRef}
+                      onChange={handleBannerUpload}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => bannerInputRef.current?.click()}
+                      disabled={uploadingBanner}
+                      className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <ImagePlus className="h-5 w-5 text-white" />
+                    </button>
+                  </>
+                )}
+              </div>
+            ) : course.isOwner ? (
+              <div className="hidden sm:block flex-shrink-0">
+                <input
+                  type="file"
+                  ref={bannerInputRef}
+                  onChange={handleBannerUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <button
+                  onClick={() => bannerInputRef.current?.click()}
+                  disabled={uploadingBanner}
+                  className="w-40 h-24 rounded-xl border-2 border-dashed border-slate-200 dark:border-white/10 hover:border-slate-400 dark:hover:border-white/20 flex flex-col items-center justify-center gap-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-all"
+                >
+                  <ImagePlus className="h-5 w-5" />
+                  <span className="text-[11px] font-medium">{uploadingBanner ? 'Uploading...' : 'Add image'}</span>
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Files */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-5">
             {/* Description Card */}
             {(course.description || isEditing) && (
-              <div className="bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border border-slate-200 dark:border-slate-800/50 rounded-xl shadow-lg p-6">
+              <div className="rounded-xl border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 p-5">
                 {isEditing ? (
                   <form
                     onSubmit={(e) => {
@@ -676,30 +600,30 @@ export default function MyCourseDetail() {
                         </select>
                       </div>
                     </div>
-                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-200/50 dark:border-white/10">
+                    <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-white/[0.06]">
                       <button
                         type="button"
                         onClick={() => setIsEditing(false)}
-                        className="px-5 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 transition-[background-color,transform] duration-200 active:scale-95 font-semibold"
+                        className="px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04] rounded-lg border border-slate-200 dark:border-white/10 transition-colors font-medium"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         disabled={updateCourseMutation.isPending}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:from-blue-700 hover:to-violet-700 disabled:opacity-50 transition-[background-image,box-shadow,transform] duration-200 active:scale-95 shadow-lg shadow-blue-500/30 font-semibold"
+                        className="flex items-center gap-1.5 px-4 py-2 text-sm bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 transition-colors font-medium"
                       >
-                        <Save className="h-4 w-4" />
-                        {updateCourseMutation.isPending ? 'Saving...' : 'Save Changes'}
+                        <Save className="h-3.5 w-3.5" />
+                        {updateCourseMutation.isPending ? 'Saving...' : 'Save'}
                       </button>
                     </div>
                   </form>
                 ) : (
                   <>
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">
-                      About this course
+                    <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                      About
                     </h3>
-                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                    <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
                       {course.description || 'No description provided.'}
                     </p>
                   </>
@@ -708,25 +632,25 @@ export default function MyCourseDetail() {
             )}
 
             {/* Files Section */}
-            <div className="bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border border-slate-200 dark:border-slate-800/50 rounded-xl shadow-lg overflow-hidden">
-              <div className="p-5 border-b border-slate-200/50 dark:border-white/10 flex items-center justify-between">
+            <div className="rounded-xl border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 overflow-hidden">
+              <div className="p-4 border-b border-slate-100 dark:border-white/[0.06] flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-                    Course Files
+                  <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
+                    Files
                   </h2>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     {course.files.length} file{course.files.length !== 1 ? 's' : ''} in this course
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {/* Study Button - Always show if there are AI-compatible files */}
+                  {/* Study Button */}
                   {course.files.some(
                     (f: CourseFile) =>
                       f.fileType === 'application/pdf' || f.fileType.startsWith('image/')
                   ) && (
                     <button
                       onClick={() => navigate(`/courses/${id}/study`)}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:from-blue-700 hover:to-violet-700 transition-all shadow-lg shadow-blue-500/30 font-semibold"
+                      className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
                     >
                       <GraduationCap className="h-4 w-4" />
                       Study
@@ -736,7 +660,7 @@ export default function MyCourseDetail() {
                     <button
                       onClick={() => setShowUploadModal(true)}
                       disabled={uploading}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900 rounded-lg hover:bg-slate-900 dark:hover:bg-white disabled:opacity-50 transition-all shadow-md border border-slate-700 dark:border-slate-200 font-semibold"
+                      className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 disabled:opacity-50 transition-colors"
                     >
                       <Upload className="h-4 w-4" />
                       {uploading ? `${Math.round(uploadProgress)}%` : 'Upload'}
@@ -746,15 +670,15 @@ export default function MyCourseDetail() {
               </div>
 
               {uploading && (
-                <div className="px-5 py-3 bg-primary-50 dark:bg-primary-900/20 border-b border-primary-100 dark:border-primary-800">
+                <div className="px-4 py-2.5 bg-blue-50/50 dark:bg-blue-900/10 border-b border-blue-100 dark:border-blue-800/30">
                   <div className="flex items-center gap-3">
-                    <div className="flex-1 bg-slate-200 dark:bg-slate-700 rounded-lg h-2 overflow-hidden">
+                    <div className="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
                       <div
-                        className="bg-gradient-to-r from-blue-600 to-violet-600 h-2 rounded-lg transition-all duration-150"
+                        className="bg-blue-600 dark:bg-blue-400 h-1.5 rounded-full transition-all duration-150"
                         style={{ width: `${uploadProgress}%` }}
                       />
                     </div>
-                    <span className="text-sm font-medium text-primary-700 dark:text-primary-300">
+                    <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
                       {Math.round(uploadProgress)}%
                     </span>
                   </div>
@@ -762,30 +686,30 @@ export default function MyCourseDetail() {
               )}
 
               {course.files.length === 0 ? (
-                <div className="p-12 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700">
-                    <FileText className="h-8 w-8 text-slate-400" />
+                <div className="p-10 text-center">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                    <FileText className="h-6 w-6 text-slate-400" />
                   </div>
-                  <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">
+                  <h3 className="text-sm font-medium text-slate-900 dark:text-white mb-1">
                     No files yet
                   </h3>
-                  <p className="text-slate-500 dark:text-slate-400 mb-6 max-w-sm mx-auto">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 max-w-xs mx-auto">
                     {course.isOwner
-                      ? 'Upload PDFs, images, videos, or other learning materials to your course'
+                      ? 'Upload PDFs, documents, or images to study with AI'
                       : 'No files have been added to this course yet'}
                   </p>
                   {course.isOwner && (
                     <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg shadow-purple-500/20"
+                      onClick={() => setShowUploadModal(true)}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
                     >
                       <Upload className="h-4 w-4" />
-                      Upload your first file
+                      Upload file
                     </button>
                   )}
                 </div>
               ) : (
-                <div className="divide-y divide-slate-200/50 dark:divide-white/10">
+                <div className="divide-y divide-slate-100 dark:divide-white/[0.04]">
                   {course.files.map((file, index) => (
                     <div
                       key={file.id}
@@ -794,15 +718,15 @@ export default function MyCourseDetail() {
                       onDragOver={(e) => handleDragOver(e, file.id)}
                       onDragEnd={handleDragEnd}
                       onDrop={() => handleDrop(file.id)}
-                      className={`p-4 flex items-center gap-4 transition-all ${
+                      className={`px-4 py-3 flex items-center gap-3 transition-colors ${
                         course.isOwner ? 'cursor-grab active:cursor-grabbing' : ''
                       } ${
-                        draggedFileId === file.id ? 'opacity-50 bg-white/50 dark:bg-white/5' : ''
+                        draggedFileId === file.id ? 'opacity-50' : ''
                       } ${
                         dragOverFileId === file.id
-                          ? 'bg-primary-50 dark:bg-primary-900/20 border-t-2 border-primary-500'
+                          ? 'bg-blue-50/50 dark:bg-blue-900/10 border-t-2 border-blue-500'
                           : ''
-                      } hover:bg-white/30 dark:hover:bg-white/5`}
+                      } hover:bg-slate-50 dark:hover:bg-white/[0.02]`}
                     >
                       {course.isOwner && (
                         <div className="flex flex-col items-center gap-0.5">
@@ -824,7 +748,7 @@ export default function MyCourseDetail() {
                         </div>
                       )}
 
-                      <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800">
+                      <div className="p-2 rounded-lg bg-slate-50 dark:bg-white/[0.04]">
                         {getFileIcon(file.fileType)}
                       </div>
 
@@ -932,16 +856,16 @@ export default function MyCourseDetail() {
           </div>
 
           {/* Right Column - Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-5">
             {/* Author Card */}
-            <div className="bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border border-slate-200 dark:border-slate-800/50 rounded-xl shadow-lg p-6">
-              <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
+            <div className="rounded-xl border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 p-5">
+              <h3 className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
                 Course Info
               </h3>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 font-semibold border border-slate-300 dark:border-slate-700">
+                  <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-white/[0.06] flex items-center justify-center text-sm text-slate-600 dark:text-slate-300 font-semibold">
                     {course.creator.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
@@ -954,13 +878,13 @@ export default function MyCourseDetail() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
-                  <Calendar className="h-4 w-4 text-slate-400" />
+                <div className="flex items-center gap-2.5 text-xs text-slate-500 dark:text-slate-400">
+                  <Calendar className="h-3.5 w-3.5" />
                   <span>Created {formatDate(course.createdAt)}</span>
                 </div>
 
-                <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
-                  <FileText className="h-4 w-4 text-slate-400" />
+                <div className="flex items-center gap-2.5 text-xs text-slate-500 dark:text-slate-400">
+                  <FileText className="h-3.5 w-3.5" />
                   <span>
                     {course.files.length} file{course.files.length !== 1 ? 's' : ''}
                   </span>
@@ -970,12 +894,12 @@ export default function MyCourseDetail() {
 
             {/* Actions Card (Owner only) */}
             {course.isOwner && (
-              <div className="bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border border-slate-200 dark:border-slate-800/50 rounded-xl shadow-lg p-6">
-                <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
+              <div className="rounded-xl border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 p-5">
+                <h3 className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
                   Actions
                 </h3>
 
-                <div className="space-y-3">
+                <div className="space-y-1.5">
                   {/* Visibility Toggle */}
                   <button
                     onClick={() => {
@@ -988,28 +912,28 @@ export default function MyCourseDetail() {
                       );
                     }}
                     disabled={toggleVisibilityMutation.isPending}
-                    className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200/50 dark:border-white/10 hover:bg-white/50 dark:hover:bg-white/5 transition-colors"
+                    className="w-full flex items-center justify-between p-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                       {course.visibility === 'PUBLIC' ? (
-                        <Eye className="h-5 w-5 text-green-400" />
+                        <Eye className="h-4 w-4 text-emerald-500" />
                       ) : (
-                        <EyeOff className="h-5 w-5 text-slate-400" />
+                        <EyeOff className="h-4 w-4 text-slate-400" />
                       )}
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      <span className="text-sm text-slate-700 dark:text-slate-300">
                         {course.visibility === 'PUBLIC' ? 'Public' : 'Private'}
                       </span>
                     </div>
                     <div
-                      className={`relative w-11 h-6 rounded-lg transition-colors ${
+                      className={`relative w-10 h-5 rounded-full transition-colors ${
                         course.visibility === 'PUBLIC'
-                          ? 'bg-green-500'
-                          : 'bg-gray-200 dark:bg-gray-600'
+                          ? 'bg-emerald-500'
+                          : 'bg-slate-200 dark:bg-slate-600'
                       }`}
                     >
                       <div
-                        className={`absolute top-1 w-4 h-4 rounded bg-white shadow transition-transform ${
-                          course.visibility === 'PUBLIC' ? 'translate-x-6' : 'translate-x-1'
+                        className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${
+                          course.visibility === 'PUBLIC' ? 'translate-x-5' : 'translate-x-0.5'
                         }`}
                       />
                     </div>
@@ -1026,10 +950,10 @@ export default function MyCourseDetail() {
                       });
                       setIsEditing(true);
                     }}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200/50 dark:border-white/10 hover:bg-white/50 dark:hover:bg-white/5 transition-colors"
+                    className="w-full flex items-center gap-2.5 p-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors"
                   >
-                    <Edit2 className="h-5 w-5 text-slate-400" />
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <Edit2 className="h-4 w-4 text-slate-400" />
+                    <span className="text-sm text-slate-700 dark:text-slate-300">
                       Edit Details
                     </span>
                   </button>
@@ -1037,10 +961,10 @@ export default function MyCourseDetail() {
                   {/* Share Button */}
                   <button
                     onClick={() => setShowShareModal(true)}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200/50 dark:border-white/10 hover:bg-white/50 dark:hover:bg-white/5 transition-colors"
+                    className="w-full flex items-center gap-2.5 p-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors"
                   >
-                    <Share2 className="h-5 w-5 text-slate-400" />
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <Share2 className="h-4 w-4 text-slate-400" />
+                    <span className="text-sm text-slate-700 dark:text-slate-300">
                       Share Course
                     </span>
                   </button>
@@ -1053,44 +977,39 @@ export default function MyCourseDetail() {
 
       {/* Share Modal */}
       {showShareModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border border-slate-200 dark:border-slate-800/50 rounded-xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/[0.08] rounded-xl shadow-2xl w-full max-w-md p-5">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                  <Share2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Share Course</h2>
-              </div>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Share Course</h2>
               <button
                 onClick={() => setShowShareModal(false)}
-                className="p-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors"
+                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04] rounded-lg transition-colors"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
               {course.visibility === 'PUBLIC'
-                ? 'This course is public and visible to all Premium users in the course browser.'
-                : 'Share this private link to give others access to your course.'}
+                ? 'This course is public and visible to all Premium users.'
+                : 'Share this private link to give others access.'}
             </p>
 
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-3">
               <input
                 type="text"
                 value={shareUrl}
                 readOnly
-                className="flex-1 px-4 py-3 text-sm border border-slate-300/50 dark:border-white/10 rounded-xl bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-white font-mono"
+                className="flex-1 px-3 py-2 text-sm border border-slate-200 dark:border-white/10 rounded-lg bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white font-mono"
               />
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(shareUrl);
                   toast.success('Link copied!');
                 }}
-                className="p-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 rounded-xl transition-all shadow-lg shadow-purple-500/20"
+                className="p-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
               >
-                <Copy className="h-5 w-5" />
+                <Copy className="h-4 w-4" />
               </button>
             </div>
 
@@ -1112,24 +1031,24 @@ export default function MyCourseDetail() {
 
       {/* File Viewer Modal */}
       {viewingFile && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="relative w-full max-w-5xl max-h-[90vh] bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border border-slate-200 dark:border-slate-800/50 rounded-xl shadow-2xl overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="relative w-full max-w-5xl max-h-[90vh] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/[0.08] rounded-xl shadow-2xl overflow-hidden flex flex-col">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b border-slate-200/50 dark:border-white/10">
+            <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-white/[0.06]">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800">
+                <div className="p-1.5 rounded-lg bg-slate-50 dark:bg-white/[0.04]">
                   {getFileIcon(viewingFile.fileType)}
                 </div>
                 <div>
-                  <h3 className="font-medium text-slate-900 dark:text-white">{viewingFile.name}</h3>
+                  <h3 className="text-sm font-medium text-slate-900 dark:text-white">{viewingFile.name}</h3>
                   <p className="text-xs text-slate-500">{formatFileSize(viewingFile.fileSize)}</p>
                 </div>
               </div>
               <button
                 onClick={() => setViewingFile(null)}
-                className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors"
+                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04] rounded-lg transition-colors"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
