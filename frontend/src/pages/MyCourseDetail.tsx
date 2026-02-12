@@ -129,7 +129,6 @@ export default function MyCourseDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const [isEditing, setIsEditing] = useState(false);
