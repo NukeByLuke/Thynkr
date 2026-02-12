@@ -271,7 +271,15 @@ export default function Files() {
     try {
       const response = await api.post('/study/upload-youtube', { url, folderId: currentFolderId });
       setIsProcessingYouTube(false);
-      toast.success('YouTube video ready!');
+      
+      // Check if there's a warning about limited transcript extraction
+      if (response.data?.warning) {
+        toast.success('Video added!', { duration: 2000 });
+        toast.error(response.data.warning, { duration: 8000 });
+      } else {
+        toast.success('YouTube video ready!');
+      }
+      
       // Invalidate queries and navigate using React Router
       await queryClient.invalidateQueries({ queryKey: ['study-files'] });
       await queryClient.invalidateQueries({ queryKey: ['folders'] });

@@ -543,6 +543,11 @@ export default async function studyRoutes(server: FastifyInstance) {
                                      errorStr.includes('private') ||
                                      errorStr.includes('age-restricted');
           
+          const isTimeout = errMsg.includes('aborted') || errMsg.includes('timeout');
+          
+          // FALLBACK STRATEGY: If video is unavailable or API key expired, fail completely.
+          // But if it's a timeout or generic error, allow fallback to metadata-only mode.
+          
           if (isKeyExpired) {
             return reply.code(503).send({ 
               error: 'YouTube processing is temporarily unavailable. Please try again later or contact support.',
@@ -556,11 +561,11 @@ export default async function studyRoutes(server: FastifyInstance) {
             });
           }
           
-          // Generic Gemini failure - return user-friendly error
-          return reply.code(503).send({ 
-            error: 'Unable to process this YouTube video at the moment. Please try again later.',
-            technical: errorMsg
-          });
+          // For timeout or generic errors, log but continue with metadata-only mode
+          server.log.warn({ videoId, error: errMsg }, 
+            'Gemini processing failed, proceeding with metadata-only mode'
+          );
+          extractionMethod = 'metadata-only-fallback';
         }
 
         // Add transcript to content
@@ -598,7 +603,14 @@ export default async function studyRoutes(server: FastifyInstance) {
           });
         }
 
-        return reply.code(201).send({ file: uploadedFile });
+        // Prepare response with warning if transcript was not extracted
+        const response: any = { file: uploadedFile };
+        if (!hasTranscript && extractionMethod === 'metadata-only-fallback') {
+          response.warning = 'Video added but transcript could not be extracted. Try regenerating study materials or use a shorter video.';
+          response.limitedFeatures = true;
+        }
+
+        return reply.code(201).send(response);
       } catch (error: any) {
         server.log.error({ error }, 'YouTube upload error');
         return reply.code(500).send({ error: 'Failed to add YouTube link' });
