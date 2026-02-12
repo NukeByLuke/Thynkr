@@ -543,8 +543,6 @@ export default async function studyRoutes(server: FastifyInstance) {
                                      errorStr.includes('private') ||
                                      errorStr.includes('age-restricted');
           
-          const isTimeout = errMsg.includes('aborted') || errMsg.includes('timeout');
-          
           // FALLBACK STRATEGY: If video is unavailable or API key expired, fail completely.
           // But if it's a timeout or generic error, allow fallback to metadata-only mode.
           
