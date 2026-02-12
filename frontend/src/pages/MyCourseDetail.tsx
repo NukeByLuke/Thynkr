@@ -1085,6 +1085,7 @@ export default function MyCourseDetail() {
         onUploadFiles={handleFileUpload}
         onUploadYouTube={handleUploadYouTube}
         isUploading={uploading}
+        requireContentAgreement={true}
       />
     </div>
   );
