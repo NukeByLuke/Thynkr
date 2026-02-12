@@ -37,6 +37,14 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
       <div className={`absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 ${
         isDark ? 'bg-midnight-blue/10' : 'bg-sunrise-fuchsia/15'
       }`} />
+      {/* Subtle dot-grid overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage: `radial-gradient(circle, ${isDark ? 'white' : 'black'} 1px, transparent 1px)`,
+          backgroundSize: '16px 16px',
+        }}
+      />
 
       {/* Logo and Brand */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center">
@@ -63,6 +71,20 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
           fetchPriority="high"
           className="h-16 object-contain"
         />
+
+        {/* Testimonial Quote */}
+        <blockquote className={`mt-8 text-center max-w-[280px] ${
+          isDark ? 'text-stone-400' : 'text-stone-500'
+        }`}>
+          <p className="text-sm italic leading-relaxed">
+            "Thynkr completely transformed how I study. AI-generated flashcards save me hours."
+          </p>
+          <footer className={`mt-3 text-xs font-medium ${
+            isDark ? 'text-stone-500' : 'text-stone-400'
+          }`}>
+            — A happy student
+          </footer>
+        </blockquote>
       </div>
 
       {/* Footer Links */}
@@ -114,7 +136,11 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       </div>
 
       {/* Two-Panel Container */}
-      <div className="flex rounded-3xl overflow-hidden shadow-2xl max-w-[900px] w-full">
+      <div className={`flex rounded-3xl overflow-hidden max-w-[900px] w-full ${
+        isDark
+          ? 'shadow-[0_25px_60px_-12px_rgba(0,0,0,0.5)] ring-1 ring-white/10'
+          : 'shadow-[0_25px_60px_-12px_rgba(0,0,0,0.15)] ring-1 ring-black/5'
+      }`}>
         {/* Left Panel - Branding */}
         <BrandingPanel isDark={isDark} />
 

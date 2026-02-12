@@ -47,6 +47,22 @@ export default function FileCard({
     return 'rgba(148, 163, 184, 0.15)';
   };
 
+  // Get border glow color for hover state
+  const getHoverGlowColor = () => {
+    if (fileTypeInfo.label === 'PDF') return 'hover:border-red-400/40 dark:hover:border-red-400/30';
+    if (fileTypeInfo.label === 'Word Doc') return 'hover:border-blue-400/40 dark:hover:border-blue-400/30';
+    if (fileTypeInfo.label === 'PowerPoint') return 'hover:border-orange-400/40 dark:hover:border-orange-400/30';
+    return 'hover:border-slate-300 dark:hover:border-white/20';
+  };
+
+  // Get shadow glow color for hover state
+  const getHoverShadowColor = () => {
+    if (fileTypeInfo.label === 'PDF') return 'rgba(248,113,113,0.12)';
+    if (fileTypeInfo.label === 'Word Doc') return 'rgba(96,165,250,0.12)';
+    if (fileTypeInfo.label === 'PowerPoint') return 'rgba(251,146,60,0.12)';
+    return 'rgba(100,116,139,0.08)';
+  };
+
   // Get status badge
   const getStatusBadge = () => {
     switch (status) {
@@ -89,13 +105,13 @@ export default function FileCard({
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -3, boxShadow: `0 20px 40px -8px ${getHoverShadowColor()}` }}
       whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.15, ease: 'easeOut' }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
       className={`relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer group transition-all duration-200 will-change-transform ${
         isSelected
           ? 'bg-white dark:bg-zinc-900/80 backdrop-blur-md border-2 border-blue-500/50 shadow-lg shadow-blue-500/20'
-          : 'bg-white dark:bg-zinc-900/60 backdrop-blur-md border-2 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 shadow-lg hover:shadow-xl'
+          : `bg-white dark:bg-zinc-900/60 backdrop-blur-md border-2 border-slate-200 dark:border-white/10 ${getHoverGlowColor()} shadow-lg`
       }`}
       onClick={onClick}
     >

@@ -32,11 +32,11 @@
       rel="stylesheet"
     />
     
-    <!-- Preload ALL brand assets so logo appears instantly regardless of theme -->
-    <link rel="preload" as="image" href="/brand/brain-light.png" fetchpriority="high" />
-    <link rel="preload" as="image" href="/brand/brain-dark.png" fetchpriority="high" />
-    <link rel="preload" as="image" href="/brand/wordmark-light.png" fetchpriority="high" />
-    <link rel="preload" as="image" href="/brand/wordmark-dark.png" fetchpriority="high" />
+    <!-- Preload brand assets matching the current theme so logo appears instantly -->
+    <link rel="preload" as="image" href="/brand/brain-light.png" fetchpriority="high" media="(prefers-color-scheme: light)" />
+    <link rel="preload" as="image" href="/brand/brain-dark.png" fetchpriority="high" media="(prefers-color-scheme: dark)" />
+    <link rel="preload" as="image" href="/brand/wordmark-light.png" fetchpriority="high" media="(prefers-color-scheme: light)" />
+    <link rel="preload" as="image" href="/brand/wordmark-dark.png" fetchpriority="high" media="(prefers-color-scheme: dark)" />
     
     <title>Thynkr</title>
     <!-- Lottie - loaded async to not block rendering -->

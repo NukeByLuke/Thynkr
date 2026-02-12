@@ -86,6 +86,76 @@ const CATEGORIES = [
   { value: 'OTHER', label: 'Other' },
 ];
 
+// Category-specific gradient themes
+const CATEGORY_GRADIENTS: Record<string, { light: string; dark: string; orb1: string; orb2: string }> = {
+  MATHEMATICS: {
+    light: 'from-blue-600 via-indigo-600 to-violet-600',
+    dark: 'dark:from-blue-900 dark:via-indigo-900 dark:to-violet-900',
+    orb1: 'bg-indigo-400/30 dark:bg-indigo-500/20',
+    orb2: 'bg-blue-400/30 dark:bg-blue-500/20',
+  },
+  SCIENCE: {
+    light: 'from-emerald-600 via-teal-600 to-cyan-600',
+    dark: 'dark:from-emerald-900 dark:via-teal-900 dark:to-cyan-900',
+    orb1: 'bg-teal-400/30 dark:bg-teal-500/20',
+    orb2: 'bg-emerald-400/30 dark:bg-emerald-500/20',
+  },
+  TECHNOLOGY: {
+    light: 'from-cyan-600 via-blue-600 to-indigo-600',
+    dark: 'dark:from-cyan-900 dark:via-blue-900 dark:to-indigo-900',
+    orb1: 'bg-blue-400/30 dark:bg-blue-500/20',
+    orb2: 'bg-cyan-400/30 dark:bg-cyan-500/20',
+  },
+  ENGINEERING: {
+    light: 'from-orange-600 via-amber-600 to-yellow-600',
+    dark: 'dark:from-orange-900 dark:via-amber-900 dark:to-yellow-900',
+    orb1: 'bg-amber-400/30 dark:bg-amber-500/20',
+    orb2: 'bg-orange-400/30 dark:bg-orange-500/20',
+  },
+  LANGUAGES: {
+    light: 'from-rose-600 via-pink-600 to-fuchsia-600',
+    dark: 'dark:from-rose-900 dark:via-pink-900 dark:to-fuchsia-900',
+    orb1: 'bg-pink-400/30 dark:bg-pink-500/20',
+    orb2: 'bg-rose-400/30 dark:bg-rose-500/20',
+  },
+  HUMANITIES: {
+    light: 'from-violet-600 via-purple-600 to-fuchsia-600',
+    dark: 'dark:from-violet-900 dark:via-purple-900 dark:to-fuchsia-900',
+    orb1: 'bg-purple-400/30 dark:bg-purple-500/20',
+    orb2: 'bg-violet-400/30 dark:bg-violet-500/20',
+  },
+  BUSINESS: {
+    light: 'from-slate-700 via-zinc-600 to-neutral-600',
+    dark: 'dark:from-slate-900 dark:via-zinc-800 dark:to-neutral-900',
+    orb1: 'bg-zinc-400/30 dark:bg-zinc-500/20',
+    orb2: 'bg-slate-400/30 dark:bg-slate-500/20',
+  },
+  ARTS: {
+    light: 'from-pink-600 via-rose-500 to-orange-500',
+    dark: 'dark:from-pink-900 dark:via-rose-900 dark:to-orange-900',
+    orb1: 'bg-rose-400/30 dark:bg-rose-500/20',
+    orb2: 'bg-pink-400/30 dark:bg-pink-500/20',
+  },
+  HEALTH: {
+    light: 'from-green-600 via-emerald-600 to-teal-600',
+    dark: 'dark:from-green-900 dark:via-emerald-900 dark:to-teal-900',
+    orb1: 'bg-emerald-400/30 dark:bg-emerald-500/20',
+    orb2: 'bg-green-400/30 dark:bg-green-500/20',
+  },
+  LAW: {
+    light: 'from-amber-700 via-yellow-700 to-orange-700',
+    dark: 'dark:from-amber-900 dark:via-yellow-900 dark:to-orange-900',
+    orb1: 'bg-yellow-400/30 dark:bg-yellow-500/20',
+    orb2: 'bg-amber-400/30 dark:bg-amber-500/20',
+  },
+  OTHER: {
+    light: 'from-indigo-600 via-purple-600 to-pink-600',
+    dark: 'dark:from-indigo-900 dark:via-purple-900 dark:to-pink-900',
+    orb1: 'bg-purple-400/30 dark:bg-purple-500/20',
+    orb2: 'bg-indigo-400/30 dark:bg-indigo-500/20',
+  },
+};
+
 function getFileIcon(fileType: string) {
   if (fileType.startsWith('image/')) return <Image className="h-5 w-5 text-green-500" />;
   if (fileType.startsWith('video/')) return <Video className="h-5 w-5 text-brand-500" />;
@@ -402,14 +472,25 @@ export default function MyCourseDetail() {
     ? `${window.location.origin}/courses/${course.id}?token=${course.shareToken}`
     : `${window.location.origin}/courses/${course.id}`;
 
+  const gradient = CATEGORY_GRADIENTS[course.category] || CATEGORY_GRADIENTS.OTHER;
+
   return (
     <div className="h-full">
-      {/* Enhanced Header Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-900 dark:via-purple-900 dark:to-pink-900">
+      {/* Enhanced Header Banner - Category-aware gradient */}
+      <div className={`relative overflow-hidden bg-gradient-to-br ${gradient.light} ${gradient.dark}`}>
+        {/* Dot-grid pattern overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+            backgroundSize: '20px 20px',
+          }}
+        />
+
         {/* Animated Background Gradient Orbs */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-400/30 dark:bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-400/30 dark:bg-indigo-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className={`absolute -top-40 -right-40 w-80 h-80 ${gradient.orb1} rounded-full blur-3xl animate-pulse`} />
+          <div className={`absolute -bottom-40 -left-40 w-80 h-80 ${gradient.orb2} rounded-full blur-3xl animate-pulse`} style={{ animationDelay: '1s' }} />
         </div>
 
         {/* Content Container */}
@@ -492,9 +573,9 @@ export default function MyCourseDetail() {
                 </div>
               </div>
 
-              {/* Banner Upload Button (if no banner) - Enhanced */}
+              {/* Banner Upload Button (if no banner) - Glass hover style */}
               {course.isOwner && !course.bannerImage && (
-                <div className="md:self-start">
+                <div className="md:self-start group/banner">
                   <input
                     type="file"
                     ref={bannerInputRef}
@@ -505,7 +586,7 @@ export default function MyCourseDetail() {
                   <button
                     onClick={() => bannerInputRef.current?.click()}
                     disabled={uploadingBanner}
-                    className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-white/20 hover:bg-white/30 border-2 border-white/30 hover:border-white/40 rounded-xl transition-all duration-200 backdrop-blur-md active:scale-95 shadow-lg"
+                    className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white/70 hover:text-white bg-white/10 hover:bg-white/20 border border-dashed border-white/20 hover:border-white/40 rounded-xl transition-all duration-300 backdrop-blur-md active:scale-95 shadow-lg hover:shadow-xl"
                   >
                     <ImagePlus className="h-4 w-4" />
                     {uploadingBanner ? 'Uploading...' : 'Add Banner'}
