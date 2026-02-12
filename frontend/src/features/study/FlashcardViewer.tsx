@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, RotateCcw, Shuffle, AlertTriangle, RefreshCw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RotateCcw, Shuffle, AlertTriangle, RefreshCw, Check } from 'lucide-react';
 
 interface Flashcard {
   id: string;
@@ -42,10 +42,12 @@ const slideVariants = {
   }),
 };
 
-// Optimized flip transition - aggressive easeOut for 60fps snappy feel
+// Spring physics for tactile, snappy flip animation
 const flipTransition = {
-  duration: 0.15,
-  ease: [0.25, 0.1, 0.25, 1.0] as [number, number, number, number],
+  type: 'spring' as const,
+  stiffness: 300,
+  damping: 25,
+  mass: 0.8,
 };
 
 const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onRegenerate, isRegenerating }: FlashcardViewerProps) {
@@ -53,9 +55,11 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onR
   const [isFlipped, setIsFlipped] = useState(false);
   const [shuffledCards, setShuffledCards] = useState<Flashcard[] | null>(null);
   const [direction, setDirection] = useState(0);
+  const [masteredCards, setMasteredCards] = useState<Set<string>>(new Set());
 
   const displayCards = shuffledCards || cards;
   const currentCard = displayCards[currentIndex];
+  const progressPercentage = (masteredCards.size / displayCards.length) * 100;
 
   // Show error alert if generation failed
   if (error) {
@@ -106,24 +110,51 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onR
     setShuffledCards(shuffled);
     setCurrentIndex(0);
     setIsFlipped(false);
+    setMasteredCards(new Set());
   }, [cards]);
 
   const handleReset = useCallback(() => {
     setShuffledCards(null);
     setCurrentIndex(0);
     setIsFlipped(false);
+    setMasteredCards(new Set());
   }, []);
 
+  const handleMarkMastered = useCallback(() => {
+    if (currentCard) {
+      setMasteredCards(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(currentCard.id)) {
+          newSet.delete(currentCard.id);
+        } else {
+          newSet.add(currentCard.id);
+        }
+        return newSet;
+      });
+    }
+  }, [currentCard]);
+
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
+    // Prevent if user is typing in an input
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+      return;
+    }
+
     if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
       handleFlip();
     } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
       handlePrevious();
     } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
       handleNext();
+    } else if (e.key === 'm' || e.key === 'M') {
+      e.preventDefault();
+      handleMarkMastered();
     }
-  }, [handleFlip, handlePrevious, handleNext]);
+  }, [handleFlip, handlePrevious, handleNext, handleMarkMastered]);
 
   if (!cards || cards.length === 0) {
     return (
@@ -134,17 +165,50 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onR
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-0">
-      <div className="mb-6 sm:mb-8 text-center">
-        <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-500 via-fuchsia-500 to-orange-400 dark:from-violet-400 dark:via-indigo-400 dark:to-cyan-400 bg-clip-text text-transparent">{title}</h3>
-        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-3">
+    <div className="max-w-5xl mx-auto px-4 sm:px-0">
+      {/* Progress Bar - Quizlet Style */}
+      <div className="mb-6">
+        <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+          <motion.div
+            className="h-full bg-gradient-to-r from-green-500 to-emerald-500"
+            initial={{ width: 0 }}
+            animate={{ width: `${progressPercentage}%` }}
+            transition={{ type: 'spring', stiffness: 100, damping: 15 }}
+          />
+        </div>
+        <div className="flex justify-between items-center mt-2 text-xs font-medium">
+          <span className="text-slate-600 dark:text-slate-400">
+            {masteredCards.size} mastered
+          </span>
+          <span className="text-slate-600 dark:text-slate-400">
+            {displayCards.length - masteredCards.size} remaining
+          </span>
+        </div>
+      </div>
+
+      <div className="mb-4 sm:mb-6 text-center">
+        <h3 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-pink-500 via-fuchsia-500 to-orange-400 dark:from-violet-400 dark:via-indigo-400 dark:to-cyan-400 bg-clip-text text-transparent">{title}</h3>
+        <p className="text-sm sm:text-lg text-gray-600 dark:text-gray-400 mt-3 font-medium">
           Card {currentIndex + 1} of {displayCards.length}
           {shuffledCards && <span className="ml-2 text-brand-600 dark:text-brand-400 font-semibold">(Shuffled)</span>}
         </p>
       </div>
 
       {/* Shuffle & Reset Controls */}
-      <div className="flex justify-center gap-3 mb-6">
+      <div className="flex justify-center gap-3 mb-6 flex-wrap">
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={handleMarkMastered}
+          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-150 shadow-sm hover:shadow-md ${
+            currentCard && masteredCards.has(currentCard.id)
+              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700'
+          }`}
+        >
+          <Check className="w-4 h-4" />
+          {currentCard && masteredCards.has(currentCard.id) ? 'Mastered' : 'Mark Mastered'}
+        </motion.button>
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -167,10 +231,10 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onR
         )}
       </div>
 
-      {/* Flashcard with Animation */}
+      {/* Flashcard with Animation - Larger Hero Card */}
       <div
-        className="relative w-full h-[60vh] md:h-96 cursor-pointer"
-        style={{ perspective: '1500px' }}
+        className="relative w-full h-[70vh] md:h-[32rem] cursor-pointer"
+        style={{ perspective: '2000px' }}
         onClick={handleFlip}
         onKeyDown={handleKeyPress}
         tabIndex={0}
@@ -199,7 +263,7 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onR
             >
               {/* Front */}
               <div
-                className="absolute w-full h-full bg-gradient-to-br from-white to-brand-50/50 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-2xl border-2 border-brand-100/50 dark:border-gray-700 flex items-center justify-center p-6 sm:p-10 overflow-y-auto"
+                className="absolute w-full h-full bg-gradient-to-br from-white to-brand-50/50 dark:from-gray-800 dark:to-gray-800 rounded-3xl shadow-2xl border-2 border-brand-100/50 dark:border-gray-700 flex items-center justify-center p-8 sm:p-12 overflow-y-auto"
                 style={{ 
                   backfaceVisibility: 'hidden',
                   WebkitBackfaceVisibility: 'hidden',
@@ -207,10 +271,10 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onR
                 }}
               >
                 <div className="text-center w-full">
-                  <p className="text-sm sm:text-base text-brand-600 dark:text-brand-400 mb-3 sm:mb-5 uppercase tracking-wide font-bold">
+                  <p className="text-base sm:text-lg text-brand-600 dark:text-brand-400 mb-4 sm:mb-6 uppercase tracking-wide font-bold">
                     Question
                   </p>
-                  <div className="prose prose-sm sm:prose-xl dark:prose-invert max-w-none">
+                  <div className="prose prose-lg sm:prose-2xl dark:prose-invert max-w-none">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       rehypePlugins={[rehypeHighlight]}
@@ -252,7 +316,7 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onR
                       {currentCard.front}
                     </ReactMarkdown>
                   </div>
-                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-5 sm:mt-8 font-medium">
+                  <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-6 sm:mt-10 font-medium">
                     💡 Click or press Space to flip
                   </p>
                 </div>
@@ -260,7 +324,7 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onR
 
               {/* Back */}
               <div
-                className="absolute w-full h-full bg-gradient-to-br from-pink-500 via-fuchsia-500 to-orange-400 dark:from-violet-600 dark:via-indigo-600 dark:to-cyan-500 rounded-2xl shadow-2xl flex items-center justify-center p-6 sm:p-10 overflow-y-auto"
+                className="absolute w-full h-full bg-gradient-to-br from-pink-500 via-fuchsia-500 to-orange-400 dark:from-violet-600 dark:via-indigo-600 dark:to-cyan-500 rounded-3xl shadow-2xl flex items-center justify-center p-8 sm:p-12 overflow-y-auto"
                 style={{
                   backfaceVisibility: 'hidden',
                   WebkitBackfaceVisibility: 'hidden',
@@ -268,20 +332,20 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onR
                 }}
               >
                 <div className="text-center w-full">
-                  <p className="text-sm sm:text-base text-white/90 mb-3 sm:mb-5 uppercase tracking-wide font-bold">
+                  <p className="text-base sm:text-lg text-white/90 mb-4 sm:mb-6 uppercase tracking-wide font-bold">
                     Answer
                   </p>
-                  <div className="prose prose-sm sm:prose-xl prose-invert max-w-none">
+                  <div className="prose prose-lg sm:prose-2xl prose-invert max-w-none">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       rehypePlugins={[rehypeHighlight]}
                       components={{
                         p: ({ node, ...props }) => (
-                          <p className="text-lg sm:text-3xl font-bold text-white mb-4" {...props} />
+                          <p className="text-xl sm:text-4xl font-bold text-white mb-5" {...props} />
                         ),
-                        h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-white mb-4" {...props} />,
-                        h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-white mb-3" {...props} />,
-                        h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-white mb-2" {...props} />,
+                        h1: ({ node, ...props }) => <h1 className="text-3xl font-bold text-white mb-5" {...props} />,
+                        h2: ({ node, ...props }) => <h2 className="text-2xl font-bold text-white mb-4" {...props} />,
+                        h3: ({ node, ...props }) => <h3 className="text-xl font-semibold text-white mb-3" {...props} />,
                         strong: ({ node, ...props }) => <strong className="font-bold text-white" {...props} />,
                         em: ({ node, ...props }) => <em className="italic text-white/90" {...props} />,
                         ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-2 text-left marker:text-white/70" {...props} />,
@@ -435,11 +499,6 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onR
           <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded font-mono">→</kbd> to
           navigate,{' '}
           <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded font-mono">Space</kbd> to
-          flip
-        </p>
-      </div>
-    </div>
-  );
-});
-
-export default FlashcardViewer;
+          flip,{' '}
+          <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded font-mono">M</kbd> to
+          mark mastered
