@@ -186,7 +186,7 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
               ),
             }}
           >
-            {content}
+            {normalizedContent}
           </ReactMarkdown>
         </div>
       </div>
