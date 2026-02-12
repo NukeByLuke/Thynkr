@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useMemo } from 'react';
-import { RefreshCw, Play, AlertTriangle } from 'lucide-react';
-import AudioPlayer from '@/components/audio/AudioPlayer';
+import { useMemo } from 'react';
+import { RefreshCw, AlertTriangle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 interface SummaryViewProps {
@@ -12,8 +10,6 @@ interface SummaryViewProps {
 }
 
 export default function SummaryView({ content, onRegenerate, isRegenerating, error }: SummaryViewProps) {
-  const [showAudioPlayer, setShowAudioPlayer] = useState(false);
-
   // Normalize AI-generated heading markers like "H1:", "H2:", "H3:" into real Markdown
   const normalizedContent = useMemo(() => {
     return content
@@ -22,19 +18,6 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
       // Also handle forms like "H3 Title" without a colon
       .replace(/(^|\n)\s*H([1-6])\s+(.+)/gm, (_m, p1, lvl, txt) => `${p1}${'#'.repeat(Number(lvl))} ${String(txt).trim()}`);
   }, [content]);
-
-  // Clean text for TTS (strip markdown formatting)
-  const cleanTextForTTS = useMemo(() => {
-    return normalizedContent
-      .replace(/(^|\n)H([1-6])\s*:\s*/gm, '$1') // Remove any residual Hx: markers
-      .replace(/#{1,6}\s/g, '') // Remove headers
-      .replace(/\*\*/g, '') // Remove bold
-      .replace(/\*/g, '') // Remove italic
-      .replace(/`/g, '') // Remove code
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links but keep text
-      .replace(/\n{3,}/g, '\n\n') // Normalize multiple newlines
-      .trim();
-  }, [normalizedContent]);
 
   // Show error alert if generation failed
   if (error) {
@@ -61,16 +44,6 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
 
   return (
     <div className="max-w-none animate-fade-in space-y-6">
-      {/* Docked Audio Player */}
-      {showAudioPlayer && (
-        <AudioPlayer 
-          text={cleanTextForTTS} 
-          docked 
-          onClose={() => setShowAudioPlayer(false)}
-          onPlayStart={() => {}} 
-        />
-      )}
-
       {/* Summary Content */}
       <div className="bg-gradient-to-br from-white to-brand-50/50 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-lg border border-brand-100/50 dark:border-gray-700 p-10">
         <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-brand-200/50 dark:border-gray-700">
@@ -83,14 +56,6 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
             </span>
           </h3>
           <div className="flex items-center gap-3">
-             <button
-              onClick={() => setShowAudioPlayer(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-pink-600 to-fuchsia-600 dark:from-cyan-500 dark:to-violet-600 hover:opacity-90 rounded-xl transition-all shadow-md hover:shadow-lg"
-            >
-              <Play className="w-4 h-4 fill-current" />
-              Play Audio
-            </button>
-
             {onRegenerate && (
               <button
                 onClick={onRegenerate}

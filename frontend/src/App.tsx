@@ -25,7 +25,7 @@ import {
   ResetPassword, Pricing, Account, Admin, Study, ImmersiveStudy, Files, 
   Settings, Courses, MyCourseDetail, StudyModePage, Achievements, 
   PublicAchievements, NotFound, Privacy, Terms, Cookies, About, Contact, 
-  Testimonials
+  Testimonials, Roadmap
 } from './routes';
 
 /**
@@ -131,6 +131,7 @@ function AppContent() {
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/testimonials" element={<Testimonials />} />
+              <Route path="/roadmap" element={<Roadmap />} />
             </Route>
 
           <Route
