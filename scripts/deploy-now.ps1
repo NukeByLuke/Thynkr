@@ -100,7 +100,10 @@ docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 echo "Waiting for services to start..."
 sleep 10
-'@ + "curl https://$domain/api/health"
+'@ + "`ncurl https://$domain/api/health"
+
+# Fix formatting for Linux
+$deployScript = $deployScript -replace "\r\n", "`n"
 
 ssh root@$dropletIp $deployScript
 
