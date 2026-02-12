@@ -29,7 +29,7 @@ export default function Terms() {
               </span>
             </h1>
             <p className="text-base text-slate-500 dark:text-slate-400">
-              Last updated: February 2, 2026
+              Last updated: February 12, 2026
             </p>
           </div>
 
@@ -216,7 +216,64 @@ export default function Terms() {
                 any part of the Service without our express written permission.
               </p>
 
-              <h2>7. Acceptable Use Policy</h2>
+              <h2>7. Academic Integrity</h2>
+              <p>
+                Thynkr is designed to support legitimate educational activities and study. You agree
+                to use the Service in a manner that respects academic integrity principles and complies
+                with your educational institution's policies.
+              </p>
+              
+              <h3>7.1 Prohibited Academic Content</h3>
+              <p>You explicitly agree not to upload or process:</p>
+              <ul>
+                <li>
+                  <strong>Exam answer keys or solutions</strong> - Current or past examination materials
+                  with solutions
+                </li>
+                <li>
+                  <strong>Instructor-only materials</strong> - Solution manuals, test banks, or content
+                  designated for instructors only
+                </li>
+                <li>
+                  <strong>Proprietary course content</strong> - Materials explicitly marked as
+                  confidential or restricted by your institution
+                </li>
+                <li>
+                  <strong>Content facilitating cheating</strong> - Any material intended to circumvent
+                  academic integrity requirements or assessment protocols
+                </li>
+              </ul>
+
+              <h3>7.2 Cooperation with Educational Institutions</h3>
+              <p>
+                We take academic integrity seriously. If we receive a valid inquiry from an educational
+                institution regarding potential violations of academic policies:
+              </p>
+              <ul>
+                <li>We will promptly investigate the reported content</li>
+                <li>We may remove content that violates academic integrity principles</li>
+                <li>We will cooperate with institutional investigations as required by law</li>
+                <li>Repeated violations may result in permanent account termination</li>
+              </ul>
+              <p>
+                Educational institutions may contact us at{' '}
+                <a
+                  href="mailto:academic@thynkr.ca"
+                  className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
+                >
+                  academic@thynkr.ca
+                </a>{' '}
+                with concerns about content that may violate academic integrity policies.
+              </p>
+
+              <h3>7.3 Your Responsibility</h3>
+              <p>
+                You are solely responsible for ensuring your use of Thynkr complies with your
+                institution's academic integrity policies, honor codes, and course-specific rules.
+                Thynkr is not liable for any academic consequences resulting from your use of the Service.
+              </p>
+
+              <h2>8. Acceptable Use Policy</h2>
               <p>You agree not to:</p>
               <ul>
                 <li>Upload content that infringes on others' intellectual property rights</li>
@@ -239,44 +296,106 @@ export default function Terms() {
                 termination of your account.
               </p>
 
-              <h2>8. Copyright and DMCA</h2>
+              <h2>9. Content Ownership, Copyright & Takedown Requests</h2>
+              
+              <h3>9.1 Respect for Intellectual Property</h3>
               <p>
-                We respect intellectual property rights and expect our users to do the same. If you
-                believe that content on Thynkr infringes your copyright, please contact us at{' '}
+                We respect intellectual property rights and comply with the Digital Millennium Copyright
+                Act (DMCA) and applicable Canadian copyright laws. Users must not upload content that
+                infringes on the intellectual property rights of others.
+              </p>
+
+              <h3>9.2 Copyright Takedown Procedure</h3>
+              <p>
+                If you believe that content on Thynkr infringes your copyright or other intellectual
+                property rights, please submit a takedown notice to our designated copyright agent at:
+              </p>
+              <p className="ml-6 font-semibold">
                 <a
-                  href="mailto:support@thynkr.ca"
+                  href="mailto:copyright@thynkr.ca"
                   className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                 >
-                  support@thynkr.ca
-                </a>{' '}
-                with the following information:
+                  copyright@thynkr.ca
+                </a>
               </p>
+              
+              <h3>9.3 Required Information for Takedown Notices</h3>
+              <p>Your takedown notice must include:</p>
               <ul>
-                <li>Identification of the copyrighted work claimed to be infringed</li>
-                <li>Location of the allegedly infringing material</li>
-                <li>Your contact information</li>
-                <li>A statement of good faith belief that use is not authorized</li>
-                <li>A statement of accuracy under penalty of perjury</li>
-                <li>Your physical or electronic signature</li>
+                <li>
+                  <strong>Description of the copyrighted work:</strong> A clear description or copy of
+                  the original work you claim is being infringed
+                </li>
+                <li>
+                  <strong>Location of infringing content:</strong> The specific URL, file name, or
+                  location on Thynkr where the infringing material appears
+                </li>
+                <li>
+                  <strong>Your contact information:</strong> Your name, address, telephone number, and
+                  email address
+                </li>
+                <li>
+                  <strong>Good faith statement:</strong> A statement that you have a good faith belief
+                  that the use of the material is not authorized by the copyright owner, its agent, or
+                  the law
+                </li>
+                <li>
+                  <strong>Accuracy statement:</strong> A statement, made under penalty of perjury, that
+                  the information in your notice is accurate and that you are the copyright owner or
+                  authorized to act on the owner's behalf
+                </li>
+                <li>
+                  <strong>Signature:</strong> Your physical or electronic signature
+                </li>
               </ul>
 
-              <h2>9. Disclaimers and Limitations of Liability</h2>
+              <h3>9.4 Our Response to Valid Notices</h3>
+              <p>Upon receiving a valid takedown notice, we will:</p>
+              <ul>
+                <li>Promptly investigate the reported content (typically within 48-72 hours)</li>
+                <li>Remove or disable access to infringing content if the claim is substantiated</li>
+                <li>Notify the user who uploaded the content of the removal</li>
+                <li>Maintain records of takedown requests as required by law</li>
+              </ul>
+
+              <h3>9.5 Repeat Infringer Policy</h3>
+              <p>
+                We maintain a policy of terminating accounts of users who repeatedly infringe on
+                intellectual property rights. Users who receive multiple validated copyright complaints
+                will have their accounts permanently suspended.
+              </p>
+
+              <h3>9.6 Counter-Notifications</h3>
+              <p>
+                If you believe content you uploaded was removed in error, you may submit a
+                counter-notification to{' '}
+                <a
+                  href="mailto:copyright@thynkr.ca"
+                  className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
+                >
+                  copyright@thynkr.ca
+                </a>
+                {' '}explaining why the content does not infringe copyright. We will review
+                counter-notifications in accordance with applicable law.
+              </p>
+
+              <h2>10. Disclaimers and Limitations of Liability</h2>
               
-              <h3>9.1 Service "As Is"</h3>
+              <h3>10.1 Service "As Is"</h3>
               <p>
                 THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND,
                 EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
                 FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
               </p>
 
-              <h3>9.2 Educational Use Only</h3>
+              <h3>10.2 Educational Use Only</h3>
               <p>
                 Thynkr is designed for educational and learning purposes. AI-generated content should
                 not be relied upon as professional advice, medical information, legal guidance, or
                 financial recommendations.
               </p>
 
-              <h3>9.3 Limitation of Liability</h3>
+              <h3>10.3 Limitation of Liability</h3>
               <p>
                 TO THE MAXIMUM EXTENT PERMITTED BY LAW, THYNKR SHALL NOT BE LIABLE FOR ANY INDIRECT,
                 INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO
@@ -290,13 +409,13 @@ export default function Terms() {
                 <li>Any other matter relating to the Service</li>
               </ul>
 
-              <h3>9.4 Maximum Liability</h3>
+              <h3>10.4 Maximum Liability</h3>
               <p>
                 Our total liability to you for all claims arising from your use of the Service shall
                 not exceed the amount you paid us in the twelve (12) months preceding the claim.
               </p>
 
-              <h2>10. Indemnification</h2>
+              <h2>11. Indemnification</h2>
               <p>
                 You agree to indemnify, defend, and hold harmless Thynkr and its officers, directors,
                 employees, and agents from any claims, liabilities, damages, losses, and expenses
@@ -309,7 +428,7 @@ export default function Terms() {
                 <li>Your Content uploaded to the Service</li>
               </ul>
 
-              <h2>11. Governing Law and Dispute Resolution</h2>
+              <h2>12. Governing Law and Dispute Resolution</h2>
               <p>
                 These Terms are governed by the laws of Canada and the Province of Ontario, without
                 regard to conflict of law principles. Any disputes arising from these Terms or your use
@@ -317,7 +436,7 @@ export default function Terms() {
                 rules of the Arbitration Act (Ontario).
               </p>
 
-              <h2>12. Changes to Terms</h2>
+              <h2>13. Changes to Terms</h2>
               <p>
                 We reserve the right to modify these Terms at any time. We will notify users of
                 material changes by email or through a prominent notice on the Service. Your continued
@@ -325,21 +444,21 @@ export default function Terms() {
                 modified Terms.
               </p>
 
-              <h2>13. Severability</h2>
+              <h2>14. Severability</h2>
               <p>
                 If any provision of these Terms is found to be invalid or unenforceable, that provision
                 shall be limited or eliminated to the minimum extent necessary, and the remaining
                 provisions shall remain in full force and effect.
               </p>
 
-              <h2>14. Entire Agreement</h2>
+              <h2>15. Entire Agreement</h2>
               <p>
                 These Terms, together with our Privacy Policy and Cookie Policy, constitute the entire
                 agreement between you and Thynkr regarding the Service and supersede all prior
                 agreements and understandings.
               </p>
 
-              <h2>15. Contact Information</h2>
+              <h2>16. Contact Information</h2>
               <p>
                 If you have any questions about these Terms, please contact us:
               </p>
