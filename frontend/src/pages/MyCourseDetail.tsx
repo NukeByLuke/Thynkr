@@ -466,7 +466,7 @@ export default function MyCourseDetail() {
 
       {/* Header */}
       <div className="border-b border-slate-200/70 dark:border-white/[0.06] bg-white/60 dark:bg-zinc-950/60 backdrop-blur-xl">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Breadcrumb */}
           <div className="pt-5 pb-3">
             <Link
@@ -521,7 +521,7 @@ export default function MyCourseDetail() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Files */}
           <div className="lg:col-span-2 space-y-5">
@@ -1030,7 +1030,7 @@ export default function MyCourseDetail() {
       {/* File Viewer Modal */}
       {viewingFile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="relative w-full max-w-5xl max-h-[90vh] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/[0.08] rounded-xl shadow-2xl overflow-hidden flex flex-col">
+          <div className="relative w-full max-w-6xl max-h-[90vh] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/[0.08] rounded-xl shadow-2xl overflow-hidden flex flex-col">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-white/[0.06]">
               <div className="flex items-center gap-3">
