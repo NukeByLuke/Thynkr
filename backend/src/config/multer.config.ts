@@ -38,14 +38,14 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: multer.FileFilterCallback,
 ) => {
-  // Allow images for avatar uploads, documents for other uploads
+  // Allow images for avatar/banner uploads, documents for other uploads
   const imageMimes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
 
-  if (file.fieldname === 'avatar') {
+  if (file.fieldname === 'avatar' || file.fieldname === 'banner') {
     if (imageMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid image type. Only PNG, JPG, GIF, and WEBP are allowed for avatars.'));
+      cb(new Error('Invalid image type. Only PNG, JPG, GIF, and WEBP are allowed.'));
     }
     return;
   }

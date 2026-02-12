@@ -85,9 +85,25 @@ export class AIService {
   }
 
   /**
-   * Call Gemini API directly via REST using service account auth
+   * Delay helper for retry logic
    */
-  private async callGemini(prompt: string): Promise<string> {
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Check if an error is retryable (transient failures)
+   */
+  private isRetryableError(status: number): boolean {
+    // 429 = Rate limited, 500/502/503/504 = Server errors (transient)
+    return status === 429 || status >= 500;
+  }
+
+  /**
+   * Call Gemini API directly via REST using service account auth
+   * Includes retry logic with exponential backoff for transient failures
+   */
+  private async callGemini(prompt: string, maxRetries: number = 3): Promise<string> {
     if (!this.authClient) {
       this.authClient = await this.auth.getClient();
     }
@@ -107,26 +123,63 @@ export class AIService {
       },
     };
 
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${tokenResponse.token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-    });
+    let lastError: Error | null = null;
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${tokenResponse.token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+        });
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(`Gemini API error ${response.status}: ${errorBody}`);
-    }
+        if (!response.ok) {
+          const errorBody = await response.text();
+          
+          // Check if this is a retryable error
+          if (this.isRetryableError(response.status) && attempt < maxRetries) {
+            const backoffMs = Math.min(1000 * Math.pow(2, attempt), 8000); // 1s, 2s, 4s, max 8s
+            logger.warn(
+              { status: response.status, attempt: attempt + 1, backoffMs },
+              `Gemini API transient error, retrying after ${backoffMs}ms...`
+            );
+            await this.delay(backoffMs);
+            continue;
+          }
+          
+          // Non-retryable error or max retries reached
+          throw new Error(`Gemini API error ${response.status}: ${errorBody}`);
+        }
 
-    const data = await response.json() as any;
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) {
-      throw new Error('Empty response from Gemini API');
+        const data = await response.json() as any;
+        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!text) {
+          throw new Error('Empty response from Gemini API');
+        }
+        return text;
+      } catch (error: any) {
+        lastError = error;
+        
+        // If it's a network error and we have retries left, retry
+        if (attempt < maxRetries && !error.message?.includes('Gemini API error')) {
+          const backoffMs = Math.min(1000 * Math.pow(2, attempt), 8000);
+          logger.warn(
+            { error: error.message, attempt: attempt + 1, backoffMs },
+            `Network error calling Gemini, retrying after ${backoffMs}ms...`
+          );
+          await this.delay(backoffMs);
+          continue;
+        }
+        
+        throw error;
+      }
     }
-    return text;
+    
+    // Should not reach here, but just in case
+    throw lastError || new Error('Failed to call Gemini API after retries');
   }
 
   /**

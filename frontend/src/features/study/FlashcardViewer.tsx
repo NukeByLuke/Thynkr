@@ -50,7 +50,7 @@ const flipTransition = {
   mass: 0.8,
 };
 
-const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onRegenerate, isRegenerating }: FlashcardViewerProps) {
+const FlashcardViewer = memo(function FlashcardViewer({ cards, title: _title, error, onRegenerate, isRegenerating }: FlashcardViewerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [shuffledCards, setShuffledCards] = useState<Flashcard[] | null>(null);
@@ -166,56 +166,37 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onR
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-0">
-      {/* Progress Bar - Quizlet Style */}
-      <div className="mb-6">
-        <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-          <motion.div
-            className="h-full bg-gradient-to-r from-green-500 to-emerald-500"
-            initial={{ width: 0 }}
-            animate={{ width: `${progressPercentage}%` }}
-            transition={{ type: 'spring', stiffness: 100, damping: 15 }}
-          />
+      {/* Header Row: Title + Card Count + Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 whitespace-nowrap">
+            Card {currentIndex + 1} of {displayCards.length}
+            {shuffledCards && <span className="ml-1.5 text-brand-600 dark:text-brand-400">(Shuffled)</span>}
+          </p>
         </div>
-        <div className="flex justify-between items-center mt-2 text-xs font-medium">
-          <span className="text-slate-600 dark:text-slate-400">
-            {masteredCards.size} mastered
-          </span>
-          <span className="text-slate-600 dark:text-slate-400">
-            {displayCards.length - masteredCards.size} remaining
-          </span>
-        </div>
-      </div>
 
-      <div className="mb-4 sm:mb-6 text-center">
-        <h3 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-pink-500 via-fuchsia-500 to-orange-400 dark:from-violet-400 dark:via-indigo-400 dark:to-cyan-400 bg-clip-text text-transparent">{title}</h3>
-        <p className="text-sm sm:text-lg text-gray-600 dark:text-gray-400 mt-3 font-medium">
-          Card {currentIndex + 1} of {displayCards.length}
-          {shuffledCards && <span className="ml-2 text-brand-600 dark:text-brand-400 font-semibold">(Shuffled)</span>}
-        </p>
-      </div>
-
-      {/* Shuffle & Reset Controls */}
-      <div className="flex justify-center gap-3 mb-6 flex-wrap">
+        {/* Shuffle & Reset Controls */}
+        <div className="flex items-center gap-2 flex-shrink-0">
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={handleMarkMastered}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-150 shadow-sm hover:shadow-md ${
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 shadow-sm hover:shadow-md ${
             currentCard && masteredCards.has(currentCard.id)
               ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700'
           }`}
         >
-          <Check className="w-4 h-4" />
+          <Check className="w-3.5 h-3.5" />
           {currentCard && masteredCards.has(currentCard.id) ? 'Mastered' : 'Mark Mastered'}
         </motion.button>
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={handleShuffle}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-xl transition-all duration-150 shadow-sm hover:shadow-md"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-lg transition-all duration-150 shadow-sm hover:shadow-md"
         >
-          <Shuffle className="w-4 h-4" />
+          <Shuffle className="w-3.5 h-3.5" />
           Shuffle
         </motion.button>
         {shuffledCards && (
@@ -223,17 +204,38 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onR
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleReset}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-xl transition-all duration-150 shadow-sm hover:shadow-md"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-lg transition-all duration-150 shadow-sm hover:shadow-md"
           >
-            <RotateCcw className="w-4 h-4" />
-            Reset Order
+            <RotateCcw className="w-3.5 h-3.5" />
+            Reset
           </motion.button>
         )}
+        </div>
+      </div>
+
+      {/* Progress Bar - Compact */}
+      <div className="mb-3">
+        <div className="h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+          <motion.div
+            className="h-full bg-gradient-to-r from-green-500 to-emerald-500"
+            initial={{ width: 0 }}
+            animate={{ width: `${progressPercentage}%` }}
+            transition={{ type: 'spring', stiffness: 100, damping: 15 }}
+          />
+        </div>
+        <div className="flex justify-between items-center mt-1 text-xs font-medium">
+          <span className="text-slate-500 dark:text-slate-500">
+            {masteredCards.size} mastered
+          </span>
+          <span className="text-slate-500 dark:text-slate-500">
+            {displayCards.length - masteredCards.size} remaining
+          </span>
+        </div>
       </div>
 
       {/* Flashcard with Animation - Larger Hero Card */}
       <div
-        className="relative w-full h-[70vh] md:h-[32rem] cursor-pointer"
+        className="relative w-full h-[55vh] sm:h-[60vh] md:h-[28rem] cursor-pointer"
         style={{ perspective: '2000px' }}
         onClick={handleFlip}
         onKeyDown={handleKeyPress}
@@ -443,8 +445,8 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onR
                 />
               ))
             ) : (
-              // Show indicator with current position for many cards
-              <>
+              // Show indicator with +5/-5 navigation for many cards
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
                     setDirection(-1);
@@ -452,10 +454,12 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onR
                     setIsFlipped(false);
                   }}
                   disabled={currentIndex === 0}
-                  className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 disabled:opacity-30"
-                  aria-label="Jump back"
-                />
-                <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 px-2 whitespace-nowrap font-medium">
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-brand-100 dark:hover:bg-brand-900/30 hover:text-brand-700 dark:hover:text-brand-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Jump back 5"
+                >
+                  −5
+                </button>
+                <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 px-1 whitespace-nowrap font-semibold tabular-nums min-w-[4rem] text-center">
                   {currentIndex + 1} / {displayCards.length}
                 </span>
                 <button
@@ -465,10 +469,12 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onR
                     setIsFlipped(false);
                   }}
                   disabled={currentIndex === displayCards.length - 1}
-                  className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 disabled:opacity-30"
-                  aria-label="Jump forward"
-                />
-              </>
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-brand-100 dark:hover:bg-brand-900/30 hover:text-brand-700 dark:hover:text-brand-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Jump forward 5"
+                >
+                  +5
+                </button>
+              </div>
             )}
           </div>
 
@@ -493,12 +499,16 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title, error, onR
       </div>
 
       {/* Keyboard shortcuts hint */}
-      <div className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
+      <div className="mt-2 sm:mt-3 text-center text-xs text-gray-500 dark:text-gray-500 hidden sm:block">
         <p>
-          Use <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded font-mono">←</kbd> and{' '}
-          <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded font-mono">→</kbd> to
-          navigate,{' '}
-          <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded font-mono">Space</kbd> to
-          flip,{' '}
-          <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded font-mono">M</kbd> to
-          mark mastered
+          <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-[10px] font-mono">←</kbd>{' '}
+          <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-[10px] font-mono">→</kbd> navigate{' · '}
+          <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-[10px] font-mono">Space</kbd> flip{' · '}
+          <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-[10px] font-mono">M</kbd> master
+        </p>
+      </div>
+    </div>
+  );
+});
+
+export default FlashcardViewer;

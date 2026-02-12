@@ -17,7 +17,7 @@ import api from '@/lib/api';
 import { useAuth } from './AuthContext';
 
 export type NotificationType = 'achievement' | 'levelup' | 'info' | 'success';
-export type AchievementTier = 'BRONZE' | 'GOLD' | 'RUBY' | 'DIAMOND' | 'AMETHYST';
+export type AchievementTier = 'BRONZE' | 'COPPER' | 'GOLD' | 'RUBY' | 'DIAMOND' | 'AMETHYST' | 'MASTERY';
 
 export interface Notification {
   id: string;
@@ -282,6 +282,20 @@ const TIER_THEMES: Record<AchievementTier, {
     text: 'text-purple-400',
     glow: 'shadow-purple-500/20',
   },
+  COPPER: {
+    gradient: 'from-orange-400 to-amber-500',
+    bg: 'bg-gradient-to-br from-orange-400/10 to-amber-500/10',
+    border: 'border-orange-400/30',
+    text: 'text-orange-400',
+    glow: 'shadow-orange-400/20',
+  },
+  MASTERY: {
+    gradient: 'from-rose-500 via-pink-500 to-fuchsia-500',
+    bg: 'bg-gradient-to-br from-rose-500/10 via-pink-500/10 to-fuchsia-500/10',
+    border: 'border-pink-500/30',
+    text: 'text-pink-400',
+    glow: 'shadow-pink-500/20',
+  },
 };
 
 // macOS-style notification in top-right corner (only 1 at a time)
@@ -317,7 +331,7 @@ const NotificationCard: React.FC<{
 }> = ({ notification, onDismiss, onSnooze, persist }) => {
   const navigate = useNavigate();
   const tier = notification.tier || 'BRONZE';
-  const theme = TIER_THEMES[tier];
+  const theme = TIER_THEMES[tier] || TIER_THEMES.BRONZE;
 
   const getIcon = () => {
     switch (notification.type) {

@@ -274,7 +274,7 @@ export default function Pricing() {
           </div>
 
           {/* Pricing Cards */}
-          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-16">
+          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-16 pt-4 items-stretch">
             {plans.map((plan) => {
               const price =
                 billingCycle === 'monthly' ? plan.monthlyPrice : plan.yearlyMonthlyPrice;
@@ -299,7 +299,8 @@ export default function Pricing() {
                   return 'ring-2 ring-emerald-500/50 bg-white dark:bg-slate-800 shadow-lg';
                 }
                 if (plan.id === 'standard') {
-                  return 'ring-2 ring-violet-500/50 bg-white dark:bg-slate-800 shadow-xl md:scale-[1.02] z-10';
+                  // Use shadow/ring emphasis instead of scale to avoid layout shift
+                  return 'ring-2 ring-violet-500/50 bg-white dark:bg-slate-800 shadow-2xl z-10';
                 }
                 return 'bg-white dark:bg-slate-800 shadow-md hover:shadow-lg';
               };
