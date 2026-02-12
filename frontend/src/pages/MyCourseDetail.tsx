@@ -420,7 +420,51 @@ export default function MyCourseDetail() {
 
   return (
     <div className="h-full">
-      {/* Clean Header */}
+      {/* Cover Banner */}
+      {course.bannerImage ? (
+        <div className="relative w-full h-40 sm:h-48 bg-slate-100 dark:bg-zinc-900 group">
+          <img src={course.bannerImage} alt="" loading="lazy" className="w-full h-full object-cover" />
+          {course.isOwner && (
+            <>
+              <input
+                type="file"
+                ref={bannerInputRef}
+                onChange={handleBannerUpload}
+                accept="image/*"
+                className="hidden"
+              />
+              <button
+                onClick={() => bannerInputRef.current?.click()}
+                disabled={uploadingBanner}
+                className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <ImagePlus className="h-3.5 w-3.5" />
+                Change cover
+              </button>
+            </>
+          )}
+        </div>
+      ) : course.isOwner ? (
+        <div className="w-full group">
+          <input
+            type="file"
+            ref={bannerInputRef}
+            onChange={handleBannerUpload}
+            accept="image/*"
+            className="hidden"
+          />
+          <button
+            onClick={() => bannerInputRef.current?.click()}
+            disabled={uploadingBanner}
+            className="w-full h-12 flex items-center justify-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.02] border-b border-slate-200/70 dark:border-white/[0.06] opacity-0 hover:opacity-100 transition-all"
+          >
+            <ImagePlus className="h-3.5 w-3.5" />
+            {uploadingBanner ? 'Uploading...' : 'Add a cover image'}
+          </button>
+        </div>
+      ) : null}
+
+      {/* Header */}
       <div className="border-b border-slate-200/70 dark:border-white/[0.06] bg-white/60 dark:bg-zinc-950/60 backdrop-blur-xl">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Breadcrumb */}
@@ -435,88 +479,43 @@ export default function MyCourseDetail() {
           </div>
 
           {/* Title Row */}
-          <div className="flex items-start justify-between gap-4 pb-5">
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2 mb-2">
-                <span className={`px-2.5 py-1 text-[11px] font-semibold rounded-md border ${catColor.bg} ${catColor.text} ${catColor.border}`}>
-                  {course.category.replace('_', ' ')}
-                </span>
-                <span
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold border ${
-                    course.visibility === 'PUBLIC'
-                      ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
-                      : 'bg-slate-100 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
-                  }`}
-                >
-                  {course.visibility === 'PUBLIC' ? (
-                    <Globe className="h-3 w-3" />
-                  ) : (
-                    <Lock className="h-3 w-3" />
-                  )}
-                  {course.visibility}
-                </span>
-              </div>
-              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-                {course.title}
-              </h1>
-              <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-slate-500 dark:text-slate-400">
-                <span className="flex items-center gap-1.5">
-                  <User className="h-3.5 w-3.5" />
-                  {course.creator.name}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="h-3.5 w-3.5" />
-                  {formatDate(course.createdAt)}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <FileText className="h-3.5 w-3.5" />
-                  {course.files.length} file{course.files.length !== 1 ? 's' : ''}
-                </span>
-              </div>
-            </div>
-
-            {/* Banner Image or Upload */}
-            {course.bannerImage ? (
-              <div className="hidden sm:block relative w-40 h-24 rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-black/10 dark:ring-white/10 group">
-                <img src={course.bannerImage} alt="" loading="lazy" className="w-full h-full object-cover" />
-                {course.isOwner && (
-                  <>
-                    <input
-                      type="file"
-                      ref={bannerInputRef}
-                      onChange={handleBannerUpload}
-                      accept="image/*"
-                      className="hidden"
-                    />
-                    <button
-                      onClick={() => bannerInputRef.current?.click()}
-                      disabled={uploadingBanner}
-                      className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <ImagePlus className="h-5 w-5 text-white" />
-                    </button>
-                  </>
+          <div className="pb-5">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <span className={`px-2.5 py-1 text-[11px] font-semibold rounded-md border ${catColor.bg} ${catColor.text} ${catColor.border}`}>
+                {course.category.replace('_', ' ')}
+              </span>
+              <span
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold border ${
+                  course.visibility === 'PUBLIC'
+                    ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                    : 'bg-slate-100 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                }`}
+              >
+                {course.visibility === 'PUBLIC' ? (
+                  <Globe className="h-3 w-3" />
+                ) : (
+                  <Lock className="h-3 w-3" />
                 )}
-              </div>
-            ) : course.isOwner ? (
-              <div className="hidden sm:block flex-shrink-0">
-                <input
-                  type="file"
-                  ref={bannerInputRef}
-                  onChange={handleBannerUpload}
-                  accept="image/*"
-                  className="hidden"
-                />
-                <button
-                  onClick={() => bannerInputRef.current?.click()}
-                  disabled={uploadingBanner}
-                  className="w-40 h-24 rounded-xl border-2 border-dashed border-slate-200 dark:border-white/10 hover:border-slate-400 dark:hover:border-white/20 flex flex-col items-center justify-center gap-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-all"
-                >
-                  <ImagePlus className="h-5 w-5" />
-                  <span className="text-[11px] font-medium">{uploadingBanner ? 'Uploading...' : 'Add image'}</span>
-                </button>
-              </div>
-            ) : null}
+                {course.visibility}
+              </span>
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+              {course.title}
+            </h1>
+            <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-slate-500 dark:text-slate-400">
+              <span className="flex items-center gap-1.5">
+                <User className="h-3.5 w-3.5" />
+                {course.creator.name}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5" />
+                {formatDate(course.createdAt)}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <FileText className="h-3.5 w-3.5" />
+                {course.files.length} file{course.files.length !== 1 ? 's' : ''}
+              </span>
+            </div>
           </div>
         </div>
       </div>
