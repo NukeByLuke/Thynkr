@@ -132,25 +132,29 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
       onClose={onClose} 
       title="Share Your Profile" 
       size="xl"
-      className="max-w-4xl w-full"
+      className="max-w-3xl w-full"
     >
-      <div className="flex flex-col gap-6">
-        <div className="text-slate-300 text-base leading-relaxed">
-          Show off your progress! Download your player card or share your public profile link.
-        </div>
+      <div className="flex flex-col gap-5">
+        <p className="text-slate-500 dark:text-slate-400 text-sm">
+          Download your player card or share your profile link.
+        </p>
 
-        {/* Card Preview Area - scales 1200x630 card to fit modal */}
-        <div className="flex justify-center bg-slate-900/80 rounded-xl border border-slate-700/50 p-4 overflow-hidden">
+        {/* Card Preview - responsive scaling */}
+        <div className="flex justify-center bg-slate-100 dark:bg-slate-900 rounded-lg p-3 overflow-hidden">
           <div 
             className="relative w-full"
             style={{ 
-              maxWidth: '800px',
+              maxWidth: '720px',
               aspectRatio: '1200 / 630'
             }}
           >
             <div 
-              className="absolute top-0 left-0 w-[1200px] h-[630px] origin-top-left"
-              style={{ transform: 'scale(0.667)' }}
+              className="absolute top-0 left-0 origin-top-left"
+              style={{ 
+                width: '1200px', 
+                height: '630px',
+                transform: 'scale(0.6)'
+              }}
             >
               <PlayerCardExport
                 ref={cardRef}
@@ -163,20 +167,32 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Button variant="secondary" onClick={handleCopyLink} className="flex gap-2.5 items-center justify-center h-12 font-semibold transition-all hover:scale-[1.02]">
-            {copyingLink ? <Check size={20} className="text-green-500" /> : <LinkIcon size={20} />}
-            <span className="text-base">{copyingLink ? 'Copied!' : 'Copy Link'}</span>
+        <div className="grid grid-cols-3 gap-3">
+          <Button 
+            variant="secondary" 
+            onClick={handleCopyLink} 
+            className="flex gap-2 items-center justify-center h-11"
+          >
+            {copyingLink ? <Check size={18} className="text-green-500" /> : <LinkIcon size={18} />}
+            {copyingLink ? 'Copied!' : 'Copy Link'}
           </Button>
           
-          <Button variant="secondary" onClick={handleCopyImage} className="flex gap-2.5 items-center justify-center h-12 font-semibold transition-all hover:scale-[1.02]">
-            <ImageIcon size={20} />
-            <span className="text-base">Copy Image</span>
+          <Button 
+            variant="secondary" 
+            onClick={handleCopyImage} 
+            className="flex gap-2 items-center justify-center h-11"
+          >
+            <ImageIcon size={18} />
+            Copy Image
           </Button>
           
-          <Button variant="primary" onClick={handleDownloadImage} className="flex gap-2.5 items-center justify-center h-12 font-semibold bg-gradient-to-r from-pink-600 via-fuchsia-600 to-orange-500 hover:from-pink-500 hover:via-fuchsia-500 hover:to-orange-400 transition-all hover:scale-[1.02] shadow-lg">
-            <Download size={20} />
-            <span className="text-base">Download PNG</span>
+          <Button 
+            variant="primary" 
+            onClick={handleDownloadImage} 
+            className="flex gap-2 items-center justify-center h-11 !bg-gradient-to-r !from-pink-500 !via-fuchsia-500 !to-orange-500 hover:!from-pink-400 hover:!via-fuchsia-400 hover:!to-orange-400"
+          >
+            <Download size={18} />
+            Download
           </Button>
         </div>
       </div>
