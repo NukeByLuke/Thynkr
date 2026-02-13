@@ -286,7 +286,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                     border: '1px solid rgba(234, 179, 8, 0.3)',
                     borderRadius: '100px',
                     width: 'fit-content',
-                    marginTop: '4px',
+                    marginTop: '10px',
                   }}
                 >
                   <Star size={14} fill="#fbbf24" stroke="#d97706" />
@@ -297,6 +297,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                       color: '#d97706',
                       textTransform: 'uppercase',
                       letterSpacing: '0.05em',
+                      marginTop: '-2px',
                     }}
                   >
                     Thynkr Scholar
@@ -377,7 +378,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                   textTransform: 'uppercase',
                   letterSpacing: '0.1em',
                   color: colors.textMuted,
-                  marginTop: '-4px',
+                  marginTop: '-6px',
                 }}
               >
                 Top Achievements
@@ -529,7 +530,8 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                fontSize: '14px', 
                fontWeight: 700, 
                color: colors.text,
-               letterSpacing: '-0.02em'
+               letterSpacing: '-0.02em',
+               marginTop: '-4px'
            }}>
              thynkr.study
            </span>
