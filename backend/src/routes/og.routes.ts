@@ -213,6 +213,8 @@ export default async function ogRoutes(server: FastifyInstance) {
         }));
       } catch (err) {
         server.log.error(err, 'OG route error for course');
+        const frontendUrl = getFrontendUrl(request);
+        const defaultImage = `${frontendUrl}/brand/og-default.png`;
         return reply.type('text/html').send(buildOgHtml({
           title: 'Thynkr — AI-Powered Study Platform',
           description: 'Transform your learning with intelligent study tools and AI tutoring.',
@@ -268,6 +270,8 @@ export default async function ogRoutes(server: FastifyInstance) {
         }));
       } catch (err) {
         server.log.error(err, 'OG route error for study');
+        const frontendUrl = getFrontendUrl(request);
+        const defaultImage = `${frontendUrl}/brand/og-default.png`;
         return reply.type('text/html').send(buildOgHtml({
           title: 'AI Study Mode — Thynkr',
           description: 'Study with AI-powered summaries, flashcards, quizzes & notes.',
