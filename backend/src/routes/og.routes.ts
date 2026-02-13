@@ -119,7 +119,7 @@ export default async function ogRoutes(server: FastifyInstance) {
             category: true,
             visibility: true,
             shareToken: true,
-            creator: { select: { displayName: true } },
+            creator: { select: { username: true } },
             files: { select: { id: true } },
           },
         });
@@ -146,8 +146,8 @@ export default async function ogRoutes(server: FastifyInstance) {
         }
 
         const cat = CATEGORY_META[course.category] || CATEGORY_META.OTHER;
-        const fileCount = course.files.length;
-        const creatorName = course.creator?.displayName || 'Unknown';
+        const fileCount = course.files?.length || 0;
+        const creatorName = course.creator?.username || 'Unknown';
 
         // Build description
         let desc = course.description
