@@ -24,11 +24,11 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
   
   const unlockedCount = achievements.filter(a => a.unlocked).length;
   
-  // Create stats for the card
+  // Create stats for the card - using Thynkr brand colors (fuchsia/pink)
   const stats = [
     { label: 'Current Level', value: user.level, icon: Star, color: 'text-amber-400' },
-    { label: 'Total XP', value: user.xp >= 1000 ? `${(user.xp / 1000).toFixed(1)}k` : user.xp, icon: Zap, color: 'text-blue-400' },
-    { label: 'Achievements', value: unlockedCount, icon: Trophy, color: 'text-purple-400' },
+    { label: 'Total XP', value: user.xp >= 1000 ? `${(user.xp / 1000).toFixed(1)}k` : user.xp, icon: Zap, color: 'text-fuchsia-400' },
+    { label: 'Achievements', value: unlockedCount, icon: Trophy, color: 'text-pink-400' },
   ];
 
   const handleCopyLink = async () => {
@@ -162,19 +162,19 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
           </div>
         </div>
 
-        {/* Enhanced Action Buttons */}
+        {/* Action Buttons */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Button variant="secondary" onClick={handleCopyLink} className="flex gap-2.5 items-center justify-center h-14 font-semibold transition-all hover:scale-105">
+          <Button variant="secondary" onClick={handleCopyLink} className="flex gap-2.5 items-center justify-center h-12 font-semibold transition-all hover:scale-[1.02]">
             {copyingLink ? <Check size={20} className="text-green-500" /> : <LinkIcon size={20} />}
             <span className="text-base">{copyingLink ? 'Copied!' : 'Copy Link'}</span>
           </Button>
           
-          <Button variant="secondary" onClick={handleCopyImage} className="flex gap-2.5 items-center justify-center h-14 font-semibold transition-all hover:scale-105">
+          <Button variant="secondary" onClick={handleCopyImage} className="flex gap-2.5 items-center justify-center h-12 font-semibold transition-all hover:scale-[1.02]">
             <ImageIcon size={20} />
             <span className="text-base">Copy Image</span>
           </Button>
           
-          <Button variant="primary" onClick={handleDownloadImage} className="flex gap-2.5 items-center justify-center h-14 font-semibold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:via-indigo-500 hover:to-purple-500 transition-all hover:scale-105 shadow-lg hover:shadow-xl">
+          <Button variant="primary" onClick={handleDownloadImage} className="flex gap-2.5 items-center justify-center h-12 font-semibold bg-gradient-to-r from-pink-600 via-fuchsia-600 to-orange-500 hover:from-pink-500 hover:via-fuchsia-500 hover:to-orange-400 transition-all hover:scale-[1.02] shadow-lg">
             <Download size={20} />
             <span className="text-base">Download PNG</span>
           </Button>
