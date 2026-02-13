@@ -3,7 +3,6 @@ import type { LucideIcon } from 'lucide-react';
 import {
   Trophy,
   Star,
-  Zap,
   Flame,
   BookOpen,
   Target,
@@ -46,7 +45,6 @@ const iconMap: Record<string, LucideIcon> = {
   flame: Flame,
   book: BookOpen,
   target: Target,
-  zap: Zap,
   award: Award,
   crown: Crown,
   rocket: Rocket,
@@ -67,14 +65,14 @@ const iconMap: Record<string, LucideIcon> = {
   'share-2': Share2,
 };
 
-// Tier colors (hex for inline styles)
+// Tier colors (hex for inline styles) - slightly lower opacity for glassier feel
 const tierColors: Record<AchievementTier, { border: string; bg: string; text: string }> = {
-  COPPER: { border: '#d97706', bg: 'rgba(217, 119, 6, 0.12)', text: '#d97706' },
-  GOLD: { border: '#eab308', bg: 'rgba(234, 179, 8, 0.12)', text: '#eab308' },
-  RUBY: { border: '#ef4444', bg: 'rgba(239, 68, 68, 0.12)', text: '#ef4444' },
-  DIAMOND: { border: '#06b6d4', bg: 'rgba(6, 182, 212, 0.12)', text: '#06b6d4' },
-  AMETHYST: { border: '#a855f7', bg: 'rgba(168, 85, 247, 0.12)', text: '#a855f7' },
-  MASTERY: { border: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.12)', text: '#8b5cf6' },
+  COPPER: { border: '#d97706', bg: 'rgba(217, 119, 6, 0.08)', text: '#d97706' },
+  GOLD: { border: '#eab308', bg: 'rgba(234, 179, 8, 0.08)', text: '#eab308' },
+  RUBY: { border: '#ef4444', bg: 'rgba(239, 68, 68, 0.08)', text: '#ef4444' },
+  DIAMOND: { border: '#06b6d4', bg: 'rgba(6, 182, 212, 0.08)', text: '#06b6d4' },
+  AMETHYST: { border: '#a855f7', bg: 'rgba(168, 85, 247, 0.08)', text: '#a855f7' },
+  MASTERY: { border: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.08)', text: '#8b5cf6' },
 };
 
 const tierLabels: Record<AchievementTier, string> = {
@@ -108,9 +106,9 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
         : 'linear-gradient(90deg, rgba(236, 72, 153, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)',
       badgeBorder: isDark ? 'rgba(236, 72, 153, 0.3)' : 'rgba(236, 72, 153, 0.4)',
       badgeText: isDark ? '#f0abfc' : '#c026d3',
-      emptyBg: isDark ? 'rgba(30, 41, 59, 0.4)' : 'rgba(226, 232, 240, 0.5)',
-      emptyBorder: isDark ? 'rgba(71, 85, 105, 0.5)' : 'rgba(148, 163, 184, 0.5)',
-      emptyText: isDark ? 'rgba(71, 85, 105, 0.7)' : 'rgba(100, 116, 139, 0.7)',
+      emptyBg: isDark ? 'rgba(30, 41, 59, 0.3)' : 'rgba(226, 232, 240, 0.4)',
+      emptyBorder: isDark ? 'rgba(71, 85, 105, 0.4)' : 'rgba(148, 163, 184, 0.4)',
+      emptyText: isDark ? 'rgba(71, 85, 105, 0.6)' : 'rgba(100, 116, 139, 0.6)',
       blobPink: isDark ? 'rgba(236, 72, 153, 0.12)' : 'rgba(236, 72, 153, 0.08)',
       blobPurple: isDark ? 'rgba(168, 85, 247, 0.10)' : 'rgba(168, 85, 247, 0.06)',
     };
@@ -187,7 +185,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
           }}
         >
           {/* Header Row - Avatar + Name + Stats */}
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '28px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
             {/* Avatar */}
             <div
               style={{
@@ -197,7 +195,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                 borderRadius: '50%',
                 background: 'linear-gradient(135deg, #ec4899 0%, #a855f7 100%)',
                 padding: '3px',
-                marginRight: '24px',
+                marginRight: '20px',
                 boxSizing: 'border-box',
               }}
             >
@@ -243,7 +241,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                   fontWeight: 800,
                   color: colors.text,
                   margin: 0,
-                  marginBottom: '8px',
+                  marginBottom: '4px',
                   letterSpacing: '-1.5px',
                   lineHeight: 1.1,
                 }}
@@ -256,97 +254,73 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                   alignItems: 'center',
                   background: colors.badgeBg,
                   border: `1px solid ${colors.badgeBorder}`,
-                  borderRadius: '14px',
-                  padding: '5px 14px',
+                  borderRadius: '10px',
+                  padding: '3px 10px',
                   width: 'fit-content',
                 }}
               >
-                <Star size={14} color="#fbbf24" fill="#fbbf24" style={{ marginRight: '6px' }} />
+                <Star size={11} color="#fbbf24" fill="#fbbf24" style={{ marginRight: '4px' }} />
                 <span
-                  style={{ fontSize: '13px', fontWeight: 600, color: colors.badgeText, lineHeight: 1.4 }}
+                  style={{ fontSize: '11px', fontWeight: 600, color: colors.badgeText, lineHeight: 1.4 }}
                 >
                   Thynkr Scholar
                 </span>
               </div>
             </div>
 
-            {/* Stats on the right */}
-            <div style={{ marginLeft: 'auto', display: 'flex' }}>
-              <div style={{ textAlign: 'center', marginRight: '36px' }}>
-                <div
+            {/* Stats on the right - editorial style without icons */}
+            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'baseline' }}>
+              <div style={{ textAlign: 'center', marginRight: '48px' }}>
+                <span
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: '4px',
+                    display: 'block',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: colors.textMuted,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                    marginBottom: '6px',
                   }}
                 >
-                  <Star size={16} color="#fbbf24" fill="#fbbf24" style={{ marginRight: '5px' }} />
-                  <span
-                    style={{
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      color: colors.textMuted,
-                      textTransform: 'uppercase',
-                      letterSpacing: '1px',
-                    }}
-                  >
-                    Level
-                  </span>
-                </div>
-                <span style={{ fontSize: '36px', fontWeight: 800, color: colors.text, lineHeight: 1 }}>
+                  Level
+                </span>
+                <span style={{ fontSize: '42px', fontWeight: 800, color: colors.text, lineHeight: 1 }}>
                   {user.level}
                 </span>
               </div>
-              <div style={{ textAlign: 'center', marginRight: '36px' }}>
-                <div
+              <div style={{ textAlign: 'center', marginRight: '48px' }}>
+                <span
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: '4px',
+                    display: 'block',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: colors.textMuted,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                    marginBottom: '6px',
                   }}
                 >
-                  <Zap size={16} color="#a855f7" fill="#a855f7" style={{ marginRight: '5px' }} />
-                  <span
-                    style={{
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      color: colors.textMuted,
-                      textTransform: 'uppercase',
-                      letterSpacing: '1px',
-                    }}
-                  >
-                    XP
-                  </span>
-                </div>
-                <span style={{ fontSize: '36px', fontWeight: 800, color: colors.text, lineHeight: 1 }}>
+                  XP
+                </span>
+                <span style={{ fontSize: '42px', fontWeight: 800, color: colors.text, lineHeight: 1 }}>
                   {formatXP(user.xp)}
                 </span>
               </div>
               <div style={{ textAlign: 'center' }}>
-                <div
+                <span
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: '4px',
+                    display: 'block',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: colors.textMuted,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                    marginBottom: '6px',
                   }}
                 >
-                  <Trophy size={16} color="#ec4899" style={{ marginRight: '5px' }} />
-                  <span
-                    style={{
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      color: colors.textMuted,
-                      textTransform: 'uppercase',
-                      letterSpacing: '1px',
-                    }}
-                  >
-                    Unlocked
-                  </span>
-                </div>
-                <span style={{ fontSize: '36px', fontWeight: 800, color: colors.text, lineHeight: 1 }}>
+                  Unlocked
+                </span>
+                <span style={{ fontSize: '42px', fontWeight: 800, color: colors.text, lineHeight: 1 }}>
                   {totalUnlocked}
                 </span>
               </div>
@@ -359,32 +333,33 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
               background: colors.cardBg,
               borderRadius: '16px',
               border: `1px solid ${colors.cardBorder}`,
-              padding: '20px 24px',
+              padding: '32px',
               flex: 1,
               boxSizing: 'border-box',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-              <Award size={18} color={isDark ? '#f0abfc' : '#c026d3'} style={{ marginRight: '8px' }} />
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
+              <Award size={16} color={isDark ? '#f0abfc' : '#c026d3'} style={{ marginRight: '8px' }} />
               <span
                 style={{
-                  fontSize: '13px',
+                  fontSize: '12px',
                   fontWeight: 700,
                   color: colors.textMuted,
                   textTransform: 'uppercase',
-                  letterSpacing: '1.5px',
+                  letterSpacing: '0.1em',
                 }}
               >
                 Latest Unlocks
               </span>
             </div>
 
-            {/* Achievement Grid - 6 square cards */}
+            {/* Achievement Grid - 6 square cards with refined styling */}
             <div
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(6, 1fr)',
-                gap: '20px',
+                gap: '24px',
+                maxWidth: '100%',
               }}
             >
               {unlockedAchievements.map((achievement) => {
@@ -400,7 +375,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                       width: '100%',
                       aspectRatio: '1 / 1',
                       borderRadius: '12px',
-                      border: `3px solid ${tier.border}`,
+                      border: `2px solid ${tier.border}`,
                       background: tier.bg,
                       display: 'flex',
                       flexDirection: 'column',
@@ -411,15 +386,15 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                     }}
                   >
                     {/* Icon */}
-                    <IconComponent size={40} color={tier.text} style={{ marginBottom: '8px' }} />
+                    <IconComponent size={32} color={tier.text} style={{ marginBottom: '8px' }} />
                     {/* Tier Label */}
                     <span
                       style={{
-                        fontSize: '10px',
+                        fontSize: '11px',
                         fontWeight: 700,
                         color: tier.text,
                         textTransform: 'uppercase',
-                        letterSpacing: '1px',
+                        letterSpacing: '0.05em',
                       }}
                     >
                       {label}
@@ -436,7 +411,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                     width: '100%',
                     aspectRatio: '1 / 1',
                     borderRadius: '12px',
-                    border: `3px dashed ${colors.emptyBorder}`,
+                    border: `2px dashed ${colors.emptyBorder}`,
                     background: colors.emptyBg,
                     display: 'flex',
                     flexDirection: 'column',
@@ -446,14 +421,14 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                     padding: '12px',
                   }}
                 >
-                  <Trophy size={40} color={colors.emptyText} style={{ marginBottom: '8px' }} />
+                  <Trophy size={32} color={colors.emptyText} style={{ marginBottom: '8px' }} />
                   <span
                     style={{
-                      fontSize: '10px',
+                      fontSize: '11px',
                       fontWeight: 700,
                       color: colors.emptyText,
                       textTransform: 'uppercase',
-                      letterSpacing: '1px',
+                      letterSpacing: '0.05em',
                     }}
                   >
                     Locked
@@ -468,7 +443,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
             style={{
               position: 'absolute',
               bottom: '16px',
-              right: '28px',
+              right: '48px',
               display: 'flex',
               alignItems: 'center',
               zIndex: 20,
@@ -476,11 +451,11 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
           >
             <div
               style={{
-                width: '7px',
-                height: '7px',
+                width: '6px',
+                height: '6px',
                 borderRadius: '50%',
                 background: '#ec4899',
-                marginRight: '7px',
+                marginRight: '6px',
               }}
             />
             <span
@@ -488,7 +463,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                 fontSize: '11px',
                 fontWeight: 600,
                 color: colors.textSubtle,
-                letterSpacing: '1.5px',
+                letterSpacing: '0.1em',
                 textTransform: 'uppercase',
               }}
             >
