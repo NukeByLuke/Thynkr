@@ -111,8 +111,28 @@ function buildOgHtml(opts: {
 }
 
 export default async function ogRoutes(server: FastifyInstance) {
-  const frontendUrl = config.app.frontendUrl || 'https://thynkr.study';
-  const defaultImage = `${frontendUrl}/brand/og-default.png`;
+  const configuredFrontendUrl = config.app.frontendUrl || 'https://thynkr.study';
+
+  /**
+   * Get the frontend URL based on the request's Host header.
+   * This ensures OG tags work for both thynkr.ca and thynkr.study.
+   */
+  function getFrontendUrl(request: any): string {
+    const host = request.headers.host;
+    if (host) {
+      // Extract domain from host (remove port if present)
+      const domain = host.split(':')[0];
+      // If accessing via thynkr.ca or thynkr.study, use that
+      if (domain === 'thynkr.ca' || domain === 'www.thynkr.ca') {
+        return 'https://thynkr.ca';
+      }
+      if (domain === 'thynkr.study' || domain === 'www.thynkr.study') {
+        return 'https://thynkr.study';
+      }
+    }
+    // Fallback to configured URL
+    return configuredFrontendUrl;
+  }
 
   // ===== Course Detail OG =====
   server.get<{ Params: { id: string }; Querystring: { token?: string } }>(
@@ -121,6 +141,8 @@ export default async function ogRoutes(server: FastifyInstance) {
       try {
         const { id } = request.params;
         const { token } = request.query;
+        const frontendUrl = getFrontendUrl(request);
+        const defaultImage = `${frontendUrl}/brand/og-default.png`;
 
         const course = await db.course.findUnique({
           where: { id },
@@ -207,6 +229,8 @@ export default async function ogRoutes(server: FastifyInstance) {
     async (request, reply) => {
       try {
         const { id } = request.params;
+        const frontendUrl = getFrontendUrl(request);
+        const defaultImage = `${frontendUrl}/brand/og-default.png`;
         const { token } = request.query;
 
         const course = await db.course.findUnique({
@@ -256,7 +280,9 @@ export default async function ogRoutes(server: FastifyInstance) {
 
   // ===== Generic Pages OG =====
   // Pricing
-  server.get('/pricing', async (_request, reply) => {
+  server.get('/pricing', async (request, reply) => {
+    const frontendUrl = getFrontendUrl(request);
+    const defaultImage = `${frontendUrl}/brand/og-default.png`;
     return reply.type('text/html').send(buildOgHtml({
       title: 'Pricing — Thynkr',
       description: 'Choose your plan. Free tier available. Upgrade for AI study tools, YouTube processing, and unlimited courses.',
@@ -266,7 +292,9 @@ export default async function ogRoutes(server: FastifyInstance) {
   });
 
   // About
-  server.get('/about', async (_request, reply) => {
+  server.get('/about', async (request, reply) => {
+    const frontendUrl = getFrontendUrl(request);
+    const defaultImage = `${frontendUrl}/brand/og-default.png`;
     return reply.type('text/html').send(buildOgHtml({
       title: 'About — Thynkr',
       description: 'Thynkr is an AI-powered study platform that transforms your learning with intelligent study tools and personalized learning paths.',
@@ -276,7 +304,9 @@ export default async function ogRoutes(server: FastifyInstance) {
   });
 
   // Roadmap
-  server.get('/roadmap', async (_request, reply) => {
+  server.get('/roadmap', async (request, reply) => {
+    const frontendUrl = getFrontendUrl(request);
+    const defaultImage = `${frontendUrl}/brand/og-default.png`;
     return reply.type('text/html').send(buildOgHtml({
       title: 'Roadmap — Thynkr',
       description: 'See what\'s coming next for Thynkr. Track upcoming features, vote on ideas, and follow our development progress.',
@@ -286,7 +316,9 @@ export default async function ogRoutes(server: FastifyInstance) {
   });
 
   // Login / Register
-  server.get('/login', async (_request, reply) => {
+  server.get('/login', async (request, reply) => {
+    const frontendUrl = getFrontendUrl(request);
+    const defaultImage = `${frontendUrl}/brand/og-default.png`;
     return reply.type('text/html').send(buildOgHtml({
       title: 'Sign In — Thynkr',
       description: 'Sign in to Thynkr to access your AI-powered study tools, courses, and learning dashboard.',
@@ -295,7 +327,9 @@ export default async function ogRoutes(server: FastifyInstance) {
     }));
   });
 
-  server.get('/register', async (_request, reply) => {
+  server.get('/register', async (request, reply) => {
+    const frontendUrl = getFrontendUrl(request);
+    const defaultImage = `${frontendUrl}/brand/og-default.png`;
     return reply.type('text/html').send(buildOgHtml({
       title: 'Create Account — Thynkr',
       description: 'Join Thynkr for free. Get AI-powered summaries, flashcards, quizzes, and more for your study materials.',
@@ -307,6 +341,8 @@ export default async function ogRoutes(server: FastifyInstance) {
   // Catch-all fallback for any other page
   server.get('/*', async (request, reply) => {
     const path = (request.params as Record<string, string>)['*'] || '';
+    const frontendUrl = getFrontendUrl(request);
+    const defaultImage = `${frontendUrl}/brand/og-default.png`;
     return reply.type('text/html').send(buildOgHtml({
       title: 'Thynkr — AI-Powered Study Platform',
       description: 'Transform your learning with intelligent study tools, AI tutoring, and personalized learning paths.',
