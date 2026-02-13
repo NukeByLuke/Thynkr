@@ -2,9 +2,10 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { PlayerCardExport } from './PlayerCardExport';
-import { Download, Image as ImageIcon, Check, Link as LinkIcon } from 'lucide-react';
+import { Download, Image as ImageIcon, Check, Link as LinkIcon, Loader2 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import toast from 'react-hot-toast';
+import type { UserAchievement } from './gamification.utils';
 
 interface ShareProfileModalProps {
   isOpen: boolean;
@@ -15,35 +16,62 @@ interface ShareProfileModalProps {
     xp: number;
     level: number;
   };
-  achievements: any[];
+  achievements: UserAchievement[];
 }
 
 export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, onClose, user, achievements }) => {
   const cardRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const [copyingLink, setCopyingLink] = useState(false);
-  const [scale, setScale] = useState(0.5);
-  
-  const unlockedCount = achievements.filter(a => a.unlocked).length;
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  // Calculate scale based on container width
-  const calculateScale = useCallback(() => {
-    if (containerRef.current) {
-      const containerWidth = containerRef.current.clientWidth;
-      const newScale = Math.min(containerWidth / 1200, 0.6); // Cap at 0.6 to prevent too large
-      setScale(newScale);
+  // Generate preview when modal opens
+  const generatePreview = useCallback(async () => {
+    if (!cardRef.current) return;
+    
+    setIsGenerating(true);
+    try {
+      // Wait for DOM to settle and images to load
+      await new Promise(resolve => setTimeout(resolve, 150));
+      
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: '#020617',
+        scale: 2, // High res
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        width: 1200,
+        height: 630,
+      });
+      
+      // Generate data URL for preview
+      const dataUrl = canvas.toDataURL('image/png', 1.0);
+      setPreviewUrl(dataUrl);
+      
+      // Generate blob for copy/download
+      canvas.toBlob((blob) => {
+        if (blob) setPreviewBlob(blob);
+      }, 'image/png', 1.0);
+      
+    } catch (e) {
+      console.error('Preview generation error:', e);
+      toast.error('Failed to generate preview');
+    } finally {
+      setIsGenerating(false);
     }
   }, []);
 
-  // Recalculate on mount, resize, and modal open
+  // Regenerate preview when modal opens
   useEffect(() => {
     if (isOpen) {
-      // Small delay to ensure modal is rendered
-      setTimeout(calculateScale, 50);
-      window.addEventListener('resize', calculateScale);
-      return () => window.removeEventListener('resize', calculateScale);
+      setPreviewUrl(null);
+      setPreviewBlob(null);
+      // Small delay for off-screen DOM to render
+      const timer = setTimeout(generatePreview, 100);
+      return () => clearTimeout(timer);
     }
-  }, [isOpen, calculateScale]);
+  }, [isOpen, generatePreview]);
 
   const handleCopyLink = async () => {
     const url = `${window.location.protocol}//${window.location.host}/u/${user.username}`;
@@ -57,69 +85,33 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
     }
   };
 
-  // Shared html2canvas config - crucial: onclone resets all transforms
-  const getHtml2CanvasConfig = () => ({
-    backgroundColor: '#020617',
-    scale: 2, // High res output
-    useCORS: true,
-    allowTaint: true,
-    logging: false,
-    width: 1200,
-    height: 630,
-    onclone: (documentClone: Document) => {
-      const element = documentClone.getElementById('player-card-export');
-      if (element) {
-        // Reset all transform/scaling artifacts from preview
-        element.style.transform = 'none';
-        element.style.margin = '0';
-        element.style.borderRadius = '0';
-        element.style.width = '1200px';
-        element.style.height = '630px';
-      }
-    }
-  });
-
   const handleDownloadImage = async () => {
-    if (!cardRef.current) return;
-    const toastId = toast.loading('Generating image...');
-    try {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      const canvas = await html2canvas(cardRef.current, getHtml2CanvasConfig());
-      const link = document.createElement('a');
-      link.download = `thynkr-${user.username}-card.png`;
-      link.href = canvas.toDataURL('image/png', 1.0);
-      link.click();
-      toast.success('Image downloaded!', { id: toastId });
-    } catch (e) {
-      console.error('Download error:', e);
-      toast.error('Failed to generate image', { id: toastId });
+    if (!previewUrl) {
+      toast.error('Image not ready yet');
+      return;
     }
+    
+    const link = document.createElement('a');
+    link.download = `thynkr-${user.username}-card.png`;
+    link.href = previewUrl;
+    link.click();
+    toast.success('Image downloaded!');
   };
   
   const handleCopyImage = async () => {
-    if (!cardRef.current) return;
-    const toastId = toast.loading('Generating image...');
+    if (!previewBlob) {
+      toast.error('Image not ready yet');
+      return;
+    }
+    
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      const canvas = await html2canvas(cardRef.current, getHtml2CanvasConfig());
-      canvas.toBlob(async (blob) => {
-        if (!blob) {
-          toast.error('Failed to create blob', { id: toastId });
-          return;
-        }
-        try {
-          await navigator.clipboard.write([
-            new ClipboardItem({ 'image/png': blob })
-          ]);
-          toast.success('Image copied to clipboard!', { id: toastId });
-        } catch (err) {
-          console.error('Copy error:', err);
-          toast.error('Browser does not support copying images', { id: toastId });
-        }
-      }, 'image/png', 1.0);
-    } catch (e) {
-      console.error('Generate error:', e);
-      toast.error('Failed to generate image', { id: toastId });
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': previewBlob })
+      ]);
+      toast.success('Image copied to clipboard!');
+    } catch (err) {
+      console.error('Copy error:', err);
+      toast.error('Browser does not support copying images');
     }
   };
 
@@ -136,29 +128,24 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
           Download your player card or share your profile link.
         </p>
 
-        {/* Card Preview - dynamic scaling */}
-        <div 
-          ref={containerRef}
-          className="bg-slate-100 dark:bg-slate-900 rounded-lg p-4 overflow-hidden"
-        >
-          {/* Height reservation container */}
-          <div style={{ height: 630 * scale, overflow: 'hidden' }}>
-            {/* Scaled card container */}
-            <div
-              style={{
-                width: '1200px',
-                height: '630px',
-                transform: `scale(${scale})`,
-                transformOrigin: 'top left',
-              }}
-            >
-              <PlayerCardExport
-                ref={cardRef}
-                user={user}
-                totalAchievements={unlockedCount}
-              />
+        {/* Preview Area */}
+        <div className="bg-slate-100 dark:bg-slate-900 rounded-lg p-4 overflow-hidden">
+          {isGenerating ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 size={32} className="animate-spin text-fuchsia-500 mb-3" />
+              <span className="text-slate-500 dark:text-slate-400 text-sm">Generating preview...</span>
             </div>
-          </div>
+          ) : previewUrl ? (
+            <img 
+              src={previewUrl} 
+              alt="Profile Card Preview" 
+              style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+            />
+          ) : (
+            <div className="flex items-center justify-center py-20">
+              <span className="text-slate-500 dark:text-slate-400 text-sm">Loading...</span>
+            </div>
+          )}
         </div>
 
         {/* Action Buttons */}
@@ -175,6 +162,7 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
           <Button 
             variant="secondary" 
             onClick={handleCopyImage} 
+            disabled={!previewBlob}
             className="flex gap-2 items-center justify-center h-11"
           >
             <ImageIcon size={18} />
@@ -183,13 +171,23 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
           
           <Button 
             variant="primary" 
-            onClick={handleDownloadImage} 
+            onClick={handleDownloadImage}
+            disabled={!previewUrl}
             className="flex gap-2 items-center justify-center h-11 !bg-gradient-to-r !from-pink-500 !via-fuchsia-500 !to-orange-500 hover:!from-pink-400 hover:!via-fuchsia-400 hover:!to-orange-400"
           >
             <Download size={18} />
             Download
           </Button>
         </div>
+      </div>
+
+      {/* Off-screen rendering container - hidden from view */}
+      <div style={{ position: 'fixed', left: '-9999px', top: 0, pointerEvents: 'none' }}>
+        <PlayerCardExport
+          ref={cardRef}
+          user={user}
+          achievements={achievements}
+        />
       </div>
     </Modal>
   );
