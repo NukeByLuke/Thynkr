@@ -196,7 +196,7 @@ export default function StudyModePage() {
       </div>
     );
     return () => setCustomHeaderContent(null);
-  }, [courseId, shareToken, course?.title, showSidebar, setCustomHeaderContent]);}
+  }, [courseId, shareToken, course?.title, showSidebar, setCustomHeaderContent]);
 
   // Generate study content mutation (with share token)
   const generateMutation = useMutation({
