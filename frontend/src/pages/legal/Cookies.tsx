@@ -437,10 +437,10 @@ export default function Cookies() {
                 <li>
                   Website:{' '}
                   <a
-                    href="https://thynkr.ca"
+                    href="https://thynkr.study"
                     className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                   >
-                    https://thynkr.ca
+                    https://thynkr.study
                   </a>
                 </li>
               </ul>

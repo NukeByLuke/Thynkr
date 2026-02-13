@@ -1,14 +1,14 @@
-#!/usr/bin/env pwsh
+﻿#!/usr/bin/env pwsh
 <#
 .SYNOPSIS
     Renew SSL certificate on DigitalOcean server
 .DESCRIPTION
-    SSH into production server and renew Let's Encrypt SSL certificate for thynkr.ca
+    SSH into production server and renew Let's Encrypt SSL certificate for thynkr.study
 #>
 
-$SERVER = "root@thynkr.ca"
+$SERVER = "root@thynkr.study"
 
-Write-Host "🔐 Renewing SSL Certificate for thynkr.ca..." -ForegroundColor Cyan
+Write-Host "ðŸ” Renewing SSL Certificate for thynkr.study..." -ForegroundColor Cyan
 Write-Host ""
 
 # Check if we can connect
@@ -16,11 +16,11 @@ Write-Host "Connecting to $SERVER..." -ForegroundColor Yellow
 $connected = ssh -o ConnectTimeout=5 -o BatchMode=yes $SERVER "echo 'Connected'" 2>$null
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "❌ Failed to connect to server. Check your SSH access." -ForegroundColor Red
+    Write-Host "âŒ Failed to connect to server. Check your SSH access." -ForegroundColor Red
     exit 1
 }
 
-Write-Host "✅ Connected to server" -ForegroundColor Green
+Write-Host "âœ… Connected to server" -ForegroundColor Green
 Write-Host ""
 
 # Run certificate renewal commands
@@ -38,9 +38,9 @@ certbot renew --force-renewal
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host ""
-    Write-Host "⚠️  Auto-renewal failed. Trying standalone mode..." -ForegroundColor Yellow
+    Write-Host "âš ï¸  Auto-renewal failed. Trying standalone mode..." -ForegroundColor Yellow
     ssh $SERVER @"
-certbot certonly --standalone --force-renewal -d thynkr.ca -d www.thynkr.ca --non-interactive --agree-tos -m admin@thynkr.ca
+certbot certonly --standalone --force-renewal -d thynkr.study -d www.thynkr.study -d thynkr.ca -d www.thynkr.ca --non-interactive --agree-tos -m admin@thynkr.study
 "@
 }
 
@@ -52,7 +52,7 @@ docker-compose -f docker-compose.prod.yml up -d nginx
 "@
 
 Write-Host ""
-Write-Host "✅ SSL Certificate renewal complete!" -ForegroundColor Green
+Write-Host "âœ… SSL Certificate renewal complete!" -ForegroundColor Green
 Write-Host ""
 Write-Host "Verifying certificate..." -ForegroundColor Yellow
 ssh $SERVER @"
@@ -60,4 +60,4 @@ certbot certificates
 "@
 
 Write-Host ""
-Write-Host "✅ Done! Visit https://thynkr.ca to verify." -ForegroundColor Green
+Write-Host "âœ… Done! Visit https://thynkr.study to verify." -ForegroundColor Green

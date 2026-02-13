@@ -268,7 +268,7 @@ export default function ProfileSettings() {
              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Username</label>
              <div className="flex">
                <span className="inline-flex items-center px-4 rounded-l-xl border border-r-0 border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-sm">
-                 thynkr.ca/u/
+                 thynkr.study/u/
                </span>
                <input
                  name="username"

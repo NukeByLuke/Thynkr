@@ -1,6 +1,6 @@
-# Stripe DigitalOcean Test Setup - Summary
+﻿# Stripe DigitalOcean Test Setup - Summary
 
-## ✅ What Was Done
+## âœ… What Was Done
 
 I've set up everything you need to configure Stripe test mode on your DigitalOcean deployment. Here's what changed:
 
@@ -25,12 +25,12 @@ I've set up everything you need to configure Stripe test mode on your DigitalOce
 
 ---
 
-## 🚀 Next Steps (What You Need To Do)
+## ðŸš€ Next Steps (What You Need To Do)
 
 ### Step 1: Create Stripe Test Products (5 min)
 1. Go to https://dashboard.stripe.com
 2. Toggle to **TEST mode** (top right)
-3. Go to Products → Create two products:
+3. Go to Products â†’ Create two products:
    - **Thynkr Pro**: $9.99/mo and $99.99/yr
    - **Thynkr Premium**: $19.99/mo and $199.99/yr
 4. Copy all 4 price IDs (they start with `price_`)
@@ -44,7 +44,7 @@ I've set up everything you need to configure Stripe test mode on your DigitalOce
 ### Step 3: Set Up Webhook (3 min)
 1. Go to https://dashboard.stripe.com/test/webhooks
 2. Click "Add endpoint"
-3. URL: `https://thynkr.ca/api/webhooks/stripe` (or your domain)
+3. URL: `https://thynkr.study/api/webhooks/stripe` (or your domain)
 4. Select these events:
    - `checkout.session.completed`
    - `customer.subscription.created`
@@ -70,7 +70,7 @@ This will:
 - Save everything to a file for reference
 
 ### Step 5: Update GitHub Secrets (3 min)
-1. Go to your repo: **Settings** → **Secrets and variables** → **Actions**
+1. Go to your repo: **Settings** â†’ **Secrets and variables** â†’ **Actions**
 2. Add/update these 4 secrets:
    - `VITE_STRIPE_PRICE_STANDARD_MONTHLY`
    - `VITE_STRIPE_PRICE_STANDARD_YEARLY`
@@ -103,12 +103,12 @@ docker compose -f docker-compose.prod.yml restart backend
 ```
 
 ### Step 7: Deploy Frontend (2 min)
-1. Go to GitHub → **Actions** tab
+1. Go to GitHub â†’ **Actions** tab
 2. Run **"Deploy to Production"** workflow
 3. Wait for deployment to complete (~3-5 minutes)
 
 ### Step 8: Test! (5 min)
-1. Go to your site (e.g., `https://thynkr.ca`)
+1. Go to your site (e.g., `https://thynkr.study`)
 2. Sign up or login
 3. Go to Pricing page
 4. Click "Upgrade to Pro"
@@ -125,7 +125,7 @@ Check webhook delivery in Stripe Dashboard.
 
 ---
 
-## 🎯 Why This Approach?
+## ðŸŽ¯ Why This Approach?
 
 **Local Development:**
 - Stripe CLI forwards webhooks from Stripe to your laptop
@@ -146,7 +146,7 @@ Check webhook delivery in Stripe Dashboard.
 
 ---
 
-## 📊 Environment Variables Overview
+## ðŸ“Š Environment Variables Overview
 
 ### Backend (Runtime - from `.env` file)
 These are read when the backend starts:
@@ -176,7 +176,7 @@ VITE_STRIPE_PRICE_PREMIUM_YEARLY=price_...
 
 ---
 
-## 🔄 Switching to Live Mode Later
+## ðŸ”„ Switching to Live Mode Later
 
 When ready to accept real payments:
 
@@ -190,7 +190,7 @@ When ready to accept real payments:
 
 ---
 
-## 📞 Need Help?
+## ðŸ“ž Need Help?
 
 - **Complete Guide**: [STRIPE_DIGITALOCEAN_TEST_SETUP.md](./STRIPE_DIGITALOCEAN_TEST_SETUP.md)
 - **Quick Reference**: [STRIPE_DIGITALOCEAN_QUICK_REF.md](./STRIPE_DIGITALOCEAN_QUICK_REF.md)
@@ -199,11 +199,11 @@ When ready to accept real payments:
 
 ---
 
-## ⏱️ Total Time: ~30 minutes
+## â±ï¸ Total Time: ~30 minutes
 
 - Stripe setup: 10 min
 - Script + SSH: 10 min
 - Deployment: 5 min
 - Testing: 5 min
 
-Good luck! 🚀
+Good luck! ðŸš€

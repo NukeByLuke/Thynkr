@@ -408,6 +408,7 @@ export default async function courseStudyRoutes(server: FastifyInstance) {
             id: true,
             visibility: true,
             createdBy: true,
+            shareToken: true,
             files: {
               select: {
                 id: true,

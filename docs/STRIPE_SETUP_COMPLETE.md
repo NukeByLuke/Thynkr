@@ -1,8 +1,8 @@
-# ✅ Stripe Setup Complete for Thynkr
+﻿# âœ… Stripe Setup Complete for Thynkr
 
-## 🎉 What's Been Done
+## ðŸŽ‰ What's Been Done
 
-### Local Development (TEST MODE) ✅
+### Local Development (TEST MODE) âœ…
 Your local environment is fully configured and ready to test:
 
 **Products Created:**
@@ -27,7 +27,7 @@ Premium Yearly:  price_1SbTpvFLpibl0I1eMwaex7YR  ($199.99/yr)
 
 ---
 
-## 🧪 Test Locally RIGHT NOW
+## ðŸ§ª Test Locally RIGHT NOW
 
 1. **Start your backend** (if not running):
    ```powershell
@@ -58,23 +58,23 @@ Premium Yearly:  price_1SbTpvFLpibl0I1eMwaex7YR  ($199.99/yr)
 
 ---
 
-## 🚀 Deploy to Production (thynkr.ca)
+## ðŸš€ Deploy to Production (thynkr.study)
 
 ### Step 1: Create LIVE Stripe Products
 
 Go to https://dashboard.stripe.com (toggle to **LIVE mode**):
 
-1. **Products → Add Product**
+1. **Products â†’ Add Product**
    - Create "Thynkr Pro" with monthly ($9.99) and yearly ($99.99) prices
    - Create "Thynkr Premium" with monthly ($19.99) and yearly ($199.99) prices
    - Copy all 4 Price IDs (start with `price_`)
 
-2. **API Keys → Reveal live key**
+2. **API Keys â†’ Reveal live key**
    - Copy Publishable key (`pk_live_...`)
    - Copy Secret key (`sk_live_...`)
 
-3. **Webhooks → Add endpoint**
-   - URL: `https://thynkr.ca/api/webhooks/stripe`
+3. **Webhooks â†’ Add endpoint**
+   - URL: `https://thynkr.study/api/webhooks/stripe`
    - Events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_succeeded`, `invoice.payment_failed`
    - Copy Signing secret (`whsec_...`)
 
@@ -102,7 +102,7 @@ STRIPE_PRICE_PRO_YEARLY=price_YOUR_ID
 STRIPE_PRICE_PREMIUM_MONTHLY=price_YOUR_ID
 STRIPE_PRICE_PREMIUM_YEARLY=price_YOUR_ID
 
-FRONTEND_URL=https://thynkr.ca
+FRONTEND_URL=https://thynkr.study
 ```
 
 Also create/update `frontend/.env.production`:
@@ -132,7 +132,7 @@ docker-compose -f docker-compose.prod.yml logs -f backend
 
 ### Step 4: Test Production
 
-1. Go to https://thynkr.ca
+1. Go to https://thynkr.study
 2. Sign up / Login
 3. Try to subscribe (use a real card - you'll be charged!)
 4. Verify in Stripe Dashboard: https://dashboard.stripe.com/payments
@@ -140,7 +140,7 @@ docker-compose -f docker-compose.prod.yml logs -f backend
 
 ---
 
-## 📚 Documentation
+## ðŸ“š Documentation
 
 I've created three guides for you:
 
@@ -162,7 +162,7 @@ I've created three guides for you:
 
 ---
 
-## 🔑 Key URLs
+## ðŸ”‘ Key URLs
 
 **Local Development:**
 - Frontend: http://localhost:5173
@@ -171,10 +171,10 @@ I've created three guides for you:
 - Webhook Endpoint: http://localhost:3001/api/webhooks/stripe
 
 **Production:**
-- Frontend: https://thynkr.ca
-- Backend: https://thynkr.ca/api
-- Backend Health: https://thynkr.ca/api/health
-- Webhook Endpoint: https://thynkr.ca/api/webhooks/stripe
+- Frontend: https://thynkr.study
+- Backend: https://thynkr.study/api
+- Backend Health: https://thynkr.study/api/health
+- Webhook Endpoint: https://thynkr.study/api/webhooks/stripe
 
 **Stripe Dashboard:**
 - Test Mode: https://dashboard.stripe.com/test/dashboard
@@ -185,7 +185,7 @@ I've created three guides for you:
 
 ---
 
-## ⚠️ Important Notes
+## âš ï¸ Important Notes
 
 1. **Webhook Listener** (Local Dev):
    - Keep this running while testing locally: `.\stripe-cli\stripe.exe listen --forward-to localhost:3001/api/webhooks/stripe`
@@ -206,7 +206,7 @@ I've created three guides for you:
 
 ---
 
-## ✅ Success Checklist
+## âœ… Success Checklist
 
 **Local (Test Mode):**
 - [x] Stripe CLI installed and authenticated
@@ -235,7 +235,7 @@ I've created three guides for you:
 
 ---
 
-## 🎯 Next Steps
+## ðŸŽ¯ Next Steps
 
 1. **Test Locally First** - Make sure everything works in test mode
 2. **Create Live Products** - Set up real products in Stripe Dashboard (live mode)

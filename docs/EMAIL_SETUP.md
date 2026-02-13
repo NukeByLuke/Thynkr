@@ -1,4 +1,4 @@
-# Email Setup Guide (Resend)
+﻿# Email Setup Guide (Resend)
 
 ## Overview
 Thynkr uses **Resend** for transactional emails (email verification, password reset).
@@ -19,11 +19,11 @@ Thynkr uses **Resend** for transactional emails (email verification, password re
 4. Copy the key (starts with `re_`)
 
 ### 3. Configure Domain (Optional but Recommended)
-For production, you should verify your domain to send from `@thynkr.ca`:
+For production, you should verify your domain to send from `@thynkr.study`:
 
 1. In Resend dashboard, go to **Domains**
 2. Click **Add Domain**
-3. Enter: `thynkr.ca`
+3. Enter: `thynkr.study`
 4. Add the DNS records they provide to your DigitalOcean DNS
 5. Wait for verification (usually < 5 minutes)
 
@@ -35,18 +35,18 @@ For production, you should verify your domain to send from `@thynkr.ca`:
 ```bash
 # Resend Email Service
 RESEND_API_KEY=re_your_api_key_here
-RESEND_FROM_EMAIL=Thynkr <noreply@thynkr.ca>
+RESEND_FROM_EMAIL=Thynkr <noreply@thynkr.study>
 RESEND_ENABLED=true
 
 # Frontend URL (for email links)
-FRONTEND_URL=https://thynkr.ca
+FRONTEND_URL=https://thynkr.study
 ```
 
 #### DigitalOcean Server
 SSH into your server and add to `/root/.env`:
 ```bash
 echo 'RESEND_API_KEY=re_your_key_here' >> /root/.env
-echo 'RESEND_FROM_EMAIL=Thynkr <noreply@thynkr.ca>' >> /root/.env
+echo 'RESEND_FROM_EMAIL=Thynkr <noreply@thynkr.study>' >> /root/.env
 echo 'RESEND_ENABLED=true' >> /root/.env
 ```
 
@@ -85,13 +85,13 @@ ssh root@138.197.208.81 "cd /root && docker compose -f docker-compose.prod.yml p
 
 ### Email Verification
 - **When**: Sent immediately on user registration
-- **Link**: `https://thynkr.ca/verify-email?token=...`
+- **Link**: `https://thynkr.study/verify-email?token=...`
 - **Expires**: Never (token stored until used)
 - **Design**: Gradient brand colors with THYNKR logo
 
 ### Password Reset
 - **When**: User clicks "Forgot Password" on login page
-- **Link**: `https://thynkr.ca/reset-password?token=...`
+- **Link**: `https://thynkr.study/reset-password?token=...`
 - **Expires**: 1 hour
 - **Security**: Doesn't reveal if email exists
 - **Design**: Includes expiration warning
@@ -99,13 +99,13 @@ ssh root@138.197.208.81 "cd /root && docker compose -f docker-compose.prod.yml p
 ## Testing
 
 ### Test Email Verification
-1. Create new account at `https://thynkr.ca/register`
+1. Create new account at `https://thynkr.study/register`
 2. Check email inbox
 3. Click "Verify Email Address"
 4. Should redirect to login with success message
 
 ### Test Password Reset
-1. Go to `https://thynkr.ca/forgot-password`
+1. Go to `https://thynkr.study/forgot-password`
 2. Enter your email
 3. Check email inbox
 4. Click "Reset Password"
@@ -152,8 +152,8 @@ With current user growth:
 
 ## Security Notes
 
-- ✅ Email tokens are cryptographically random (32 bytes)
-- ✅ Password reset tokens expire in 1 hour
-- ✅ Email verification tokens are single-use
-- ✅ No user enumeration (same message whether email exists or not)
-- ✅ All tokens invalidated on password reset
+- âœ… Email tokens are cryptographically random (32 bytes)
+- âœ… Password reset tokens expire in 1 hour
+- âœ… Email verification tokens are single-use
+- âœ… No user enumeration (same message whether email exists or not)
+- âœ… All tokens invalidated on password reset

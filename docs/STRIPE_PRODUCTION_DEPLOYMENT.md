@@ -1,11 +1,11 @@
-# Stripe Production Deployment Guide for thynkr.ca
+﻿# Stripe Production Deployment Guide for thynkr.study
 
-## 🔧 Step 1: Create Production Stripe Products & Prices
+## ðŸ”§ Step 1: Create Production Stripe Products & Prices
 
 You need to create **LIVE** products in Stripe (not test mode):
 
 1. Go to https://dashboard.stripe.com and **toggle to LIVE mode** (top right)
-2. Navigate to Products → Click "Add product"
+2. Navigate to Products â†’ Click "Add product"
 3. Create two products:
 
 ### Product 1: Thynkr Pro
@@ -24,7 +24,7 @@ You need to create **LIVE** products in Stripe (not test mode):
 
 After creating, copy the **Price IDs** (they start with `price_`).
 
-## 🔑 Step 2: Get Production API Keys
+## ðŸ”‘ Step 2: Get Production API Keys
 
 1. Go to https://dashboard.stripe.com/apikeys
 2. Make sure you're in **LIVE mode**
@@ -32,11 +32,11 @@ After creating, copy the **Price IDs** (they start with `price_`).
    - Publishable key (starts with `pk_live_`)
    - Secret key (starts with `sk_live_`) - Click "Reveal live key token"
 
-## 🪝 Step 3: Set Up Production Webhook
+## ðŸª Step 3: Set Up Production Webhook
 
 1. Go to https://dashboard.stripe.com/webhooks
 2. Click "Add endpoint"
-3. Endpoint URL: `https://thynkr.ca/api/webhooks/stripe`
+3. Endpoint URL: `https://thynkr.study/api/webhooks/stripe`
 4. Events to listen to:
    - `checkout.session.completed`
    - `customer.subscription.updated`
@@ -46,7 +46,7 @@ After creating, copy the **Price IDs** (they start with `price_`).
 5. Click "Add endpoint"
 6. Copy the **Signing secret** (starts with `whsec_`)
 
-## 🖥️ Step 4: Update Server Environment
+## ðŸ–¥ï¸ Step 4: Update Server Environment
 
 SSH into your server and update the `.env` file:
 
@@ -69,10 +69,10 @@ STRIPE_PRICE_PREMIUM_MONTHLY=price_YOUR_ACTUAL_ID
 STRIPE_PRICE_PREMIUM_YEARLY=price_YOUR_ACTUAL_ID
 
 # Set production URL
-FRONTEND_URL=https://thynkr.ca
+FRONTEND_URL=https://thynkr.study
 ```
 
-## 🚀 Step 5: Deploy Updated Code & Restart Services
+## ðŸš€ Step 5: Deploy Updated Code & Restart Services
 
 ```bash
 # Pull latest code
@@ -86,15 +86,15 @@ docker-compose -f docker-compose.prod.yml up -d --build
 docker-compose -f docker-compose.prod.yml logs -f backend
 ```
 
-## ✅ Step 6: Test the Integration
+## âœ… Step 6: Test the Integration
 
 ### Test 1: Check Health
 ```bash
-curl https://thynkr.ca/api/health
+curl https://thynkr.study/api/health
 ```
 
 ### Test 2: Test Subscription Flow
-1. Go to https://thynkr.ca
+1. Go to https://thynkr.study
 2. Sign in or create an account
 3. Navigate to Settings/Billing
 4. Click "Upgrade to Pro" or "Upgrade to Premium"
@@ -117,7 +117,7 @@ docker-compose -f docker-compose.prod.yml exec backend npx prisma studio
 3. Should open Stripe Customer Portal
 4. Try canceling/updating subscription
 
-## 🔍 Monitoring & Debugging
+## ðŸ” Monitoring & Debugging
 
 ### Check Backend Logs
 ```bash
@@ -125,7 +125,7 @@ docker-compose -f docker-compose.prod.yml logs backend | grep -i stripe
 ```
 
 ### Check Webhook Delivery in Stripe
-https://dashboard.stripe.com/webhooks → Click your endpoint → View attempts
+https://dashboard.stripe.com/webhooks â†’ Click your endpoint â†’ View attempts
 
 ### Common Issues
 
@@ -138,7 +138,7 @@ https://dashboard.stripe.com/webhooks → Click your endpoint → View attempts
 **Issue: Customer not created**
 - Solution: Check backend logs for errors, ensure `STRIPE_SECRET_KEY` is correct
 
-## 📊 What to Monitor
+## ðŸ“Š What to Monitor
 
 1. **Stripe Dashboard**: https://dashboard.stripe.com/payments
    - Check successful payments
@@ -156,7 +156,7 @@ https://dashboard.stripe.com/webhooks → Click your endpoint → View attempts
    - `stripePriceId`
    - `subscriptionStatus`
 
-## 🎉 Success Checklist
+## ðŸŽ‰ Success Checklist
 
 - [ ] Production products created in Stripe
 - [ ] Live API keys configured
@@ -170,7 +170,7 @@ https://dashboard.stripe.com/webhooks → Click your endpoint → View attempts
 
 ---
 
-## 🧪 Current Test Environment Setup
+## ðŸ§ª Current Test Environment Setup
 
 For reference, your **test mode** is already configured with:
 

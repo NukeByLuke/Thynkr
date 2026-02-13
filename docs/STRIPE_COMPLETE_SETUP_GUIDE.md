@@ -1,4 +1,4 @@
-# 🎯 Thynkr Stripe Payment Setup Guide
+﻿# ðŸŽ¯ Thynkr Stripe Payment Setup Guide
 
 ## Quick Start: Local Development Setup
 
@@ -146,7 +146,7 @@ stripe listen --forward-to localhost:3001/api/stripe/webhook
 
 ---
 
-## 🧪 Test Cards
+## ðŸ§ª Test Cards
 
 | Card Number         | Description       |
 |---------------------|-------------------|
@@ -159,7 +159,7 @@ Use any future date, any CVC, and any ZIP.
 
 ---
 
-## 🚀 Production Deployment
+## ðŸš€ Production Deployment
 
 ### Step 1: Create Production Products in Stripe
 
@@ -181,7 +181,7 @@ Use any future date, any CVC, and any ZIP.
 
 1. Go to [Webhooks (LIVE mode)](https://dashboard.stripe.com/webhooks)
 2. Click **"Add endpoint"**
-3. **Endpoint URL:** `https://thynkr.ca/api/stripe/webhook`
+3. **Endpoint URL:** `https://thynkr.study/api/stripe/webhook`
 4. **Events to listen to:**
    - `checkout.session.completed`
    - `customer.subscription.updated`
@@ -208,7 +208,7 @@ STRIPE_PRICE_PREMIUM_MONTHLY=price_YOUR_LIVE_ID
 STRIPE_PRICE_PREMIUM_YEARLY=price_YOUR_LIVE_ID
 
 # Production URL
-FRONTEND_URL=https://thynkr.ca
+FRONTEND_URL=https://thynkr.study
 ```
 
 Also update frontend production environment variables.
@@ -216,12 +216,12 @@ Also update frontend production environment variables.
 ### Step 5: Deploy & Test
 
 1. Deploy your updated code to production
-2. Test the full payment flow on https://thynkr.ca
+2. Test the full payment flow on https://thynkr.study
 3. Monitor the [Stripe Dashboard (LIVE mode)](https://dashboard.stripe.com/dashboard) for real payments
 
 ---
 
-## 📊 Monitoring & Troubleshooting
+## ðŸ“Š Monitoring & Troubleshooting
 
 ### Check Backend Logs
 ```powershell
@@ -265,7 +265,7 @@ stripe listen --forward-to localhost:3001/api/stripe/webhook
 
 ---
 
-## 🔐 Security Best Practices
+## ðŸ” Security Best Practices
 
 1. **Never commit `.env` files** to version control
 2. **Use different keys** for test and production
@@ -276,7 +276,7 @@ stripe listen --forward-to localhost:3001/api/stripe/webhook
 
 ---
 
-## 📚 Additional Resources
+## ðŸ“š Additional Resources
 
 - [Stripe API Documentation](https://stripe.com/docs/api)
 - [Stripe Testing Guide](https://stripe.com/docs/testing)
@@ -285,7 +285,7 @@ stripe listen --forward-to localhost:3001/api/stripe/webhook
 
 ---
 
-## ✅ Quick Checklist
+## âœ… Quick Checklist
 
 ### Local Development
 - [ ] Stripe CLI installed
@@ -301,7 +301,7 @@ stripe listen --forward-to localhost:3001/api/stripe/webhook
 ### Production Deployment
 - [ ] Products and prices created in LIVE mode
 - [ ] Live API keys configured
-- [ ] Webhook endpoint configured at `https://thynkr.ca/api/stripe/webhook`
+- [ ] Webhook endpoint configured at `https://thynkr.study/api/stripe/webhook`
 - [ ] All 5 webhook events selected
 - [ ] Webhook signing secret configured
 - [ ] Production deployment successful

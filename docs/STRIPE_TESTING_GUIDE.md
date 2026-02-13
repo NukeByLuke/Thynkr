@@ -1,6 +1,6 @@
-# Stripe Testing Guide - Local & Production
+﻿# Stripe Testing Guide - Local & Production
 
-## 🧪 LOCAL TESTING (Test Mode)
+## ðŸ§ª LOCAL TESTING (Test Mode)
 
 Your local environment is configured with Stripe test keys. Test it before deploying to production.
 
@@ -88,7 +88,7 @@ Should see:
 
 ---
 
-## 🚀 PRODUCTION TESTING (thynkr.ca)
+## ðŸš€ PRODUCTION TESTING (thynkr.study)
 
 After deploying to production with LIVE Stripe keys:
 
@@ -102,19 +102,19 @@ After deploying to production with LIVE Stripe keys:
 
 #### 1. Health Check
 ```powershell
-Invoke-WebRequest -Uri "https://thynkr.ca/api/health" -UseBasicParsing
+Invoke-WebRequest -Uri "https://thynkr.study/api/health" -UseBasicParsing
 ```
 
 #### 2. Test with Real Card (Small Amount)
-⚠️ **WARNING**: This will create a REAL charge!
+âš ï¸ **WARNING**: This will create a REAL charge!
 
-1. Go to https://thynkr.ca
+1. Go to https://thynkr.study
 2. Sign up/login
 3. Choose Pro Monthly ($9.99)
 4. Use a REAL credit card
 5. Complete purchase
 6. Immediately cancel subscription if you don't want recurring charges:
-   - Go to Settings → Billing → Manage Subscription
+   - Go to Settings â†’ Billing â†’ Manage Subscription
    - Cancel subscription
 
 #### 3. Verify in Stripe Dashboard
@@ -136,7 +136,7 @@ Invoke-WebRequest -Uri "https://thynkr.ca/api/health" -UseBasicParsing
 
 ---
 
-## 🔍 DEBUGGING TIPS
+## ðŸ” DEBUGGING TIPS
 
 ### If checkout doesn't work:
 1. Check browser console for errors
@@ -158,7 +158,7 @@ Invoke-WebRequest -Uri "https://thynkr.ca/api/health" -UseBasicParsing
 
 ---
 
-## 📋 CHECKLIST
+## ðŸ“‹ CHECKLIST
 
 ### Local Testing (Before Production)
 - [ ] Backend starts without errors
@@ -189,7 +189,7 @@ Invoke-WebRequest -Uri "https://thynkr.ca/api/health" -UseBasicParsing
 
 ---
 
-## 🎯 QUICK SMOKE TEST
+## ðŸŽ¯ QUICK SMOKE TEST
 
 Run these commands to verify everything is working:
 
@@ -205,18 +205,18 @@ Invoke-WebRequest -Uri "http://localhost:3001/health"
 ### Production
 ```powershell
 # 1. Check backend
-Invoke-WebRequest -Uri "https://thynkr.ca/api/health"
+Invoke-WebRequest -Uri "https://thynkr.study/api/health"
 
 # 2. Check frontend
-Invoke-WebRequest -Uri "https://thynkr.ca"
+Invoke-WebRequest -Uri "https://thynkr.study"
 
 # 3. Check webhook endpoint (should return 400 or 405, not 404)
-Invoke-WebRequest -Uri "https://thynkr.ca/api/webhooks/stripe" -Method POST
+Invoke-WebRequest -Uri "https://thynkr.study/api/webhooks/stripe" -Method POST
 ```
 
 ---
 
-## 📞 Need Help?
+## ðŸ“ž Need Help?
 
 If something's not working:
 1. Check the deployment guide: `STRIPE_PRODUCTION_DEPLOYMENT.md`

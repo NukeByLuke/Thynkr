@@ -1,4 +1,4 @@
-# Stripe DigitalOcean Deployment Script
+﻿# Stripe DigitalOcean Deployment Script
 # This script will help you deploy Stripe test configuration to DigitalOcean
 
 Write-Host "`n========================================" -ForegroundColor Cyan
@@ -17,13 +17,13 @@ $priceStandardYearly = "price_1SuJ8cJuKGUgkYW1XkO5aNjn"
 $pricePremiumMonthly = "price_1SuJ8zJuKGUgkYW1gMUNkfFa"
 $pricePremiumYearly = "price_1SuJ9DJuKGUgkYW10azzNYPK"
 
-Write-Host "✓ Loaded Stripe test keys" -ForegroundColor Green
-Write-Host "✓ Loaded 4 price IDs" -ForegroundColor Green
+Write-Host "âœ“ Loaded Stripe test keys" -ForegroundColor Green
+Write-Host "âœ“ Loaded 4 price IDs" -ForegroundColor Green
 
 # Get server details
 Write-Host "`nServer Configuration:" -ForegroundColor Yellow
 $dropletIp = Read-Host "Enter your DigitalOcean Droplet IP"
-$domain = Read-Host "Enter your domain (e.g., thynkr.ca)"
+$domain = Read-Host "Enter your domain (e.g., thynkr.study)"
 
 Write-Host "`n========================================" -ForegroundColor Cyan
 Write-Host " STEP 1: Update GitHub Secrets" -ForegroundColor Cyan
@@ -92,7 +92,7 @@ docker compose -f docker-compose.prod.yml logs -f backend
 "@
 
 $sshCommands | Out-File -FilePath "deploy-stripe-to-digitalocean.sh" -Encoding UTF8
-Write-Host "✓ SSH commands saved to: deploy-stripe-to-digitalocean.sh`n" -ForegroundColor Green
+Write-Host "âœ“ SSH commands saved to: deploy-stripe-to-digitalocean.sh`n" -ForegroundColor Green
 
 Write-Host "Copy and run these commands on your server:`n" -ForegroundColor Yellow
 Write-Host $sshCommands -ForegroundColor Gray
@@ -154,7 +154,7 @@ Droplet IP: $dropletIp
 
 Write-Host $summary
 $summary | Out-File -FilePath "stripe-config-summary.txt" -Encoding UTF8
-Write-Host "`n✓ Summary saved to: stripe-config-summary.txt" -ForegroundColor Green
+Write-Host "`nâœ“ Summary saved to: stripe-config-summary.txt" -ForegroundColor Green
 
 Write-Host "`n========================================" -ForegroundColor Cyan
 Write-Host " Next Steps Checklist" -ForegroundColor Cyan

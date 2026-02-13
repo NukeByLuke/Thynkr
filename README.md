@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
 
 # Thynkr
 
@@ -13,44 +13,44 @@
 
 **Thynkr transforms static study materials into interactive, gamified learning experiences using advanced AI.**
 
-[Features](#-features) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started) • [Workflow](#-development-workflow) • [Deployment](#-deployment)
+[Features](#-features) â€¢ [Tech Stack](#-tech-stack) â€¢ [Getting Started](#-getting-started) â€¢ [Workflow](#-development-workflow) â€¢ [Deployment](#-deployment)
 
 </div>
 
 ---
 
-## 🚀 Overview
+## ðŸš€ Overview
 
 Thynkr is an enterprise-grade EdTech platform that leverages OpenAI to parse PDFs, documents, and videos into structured study content. It features a **"Zen Mode"** immersive study interface, a comprehensive **gamification system** with tiered achievements, and a robust **subscription model** via Stripe.
 
-**Live Demo:** [https://thynkr.ca](https://thynkr.ca)
+**Live Demo:** [https://thynkr.study](https://thynkr.study)
 
 ---
 
-## ✨ Features
+## âœ¨ Features
 
-### 🧠 Intelligent Study Engine
+### ðŸ§  Intelligent Study Engine
 
 - **Smart Parsing:** Extracts text from PDFs, DOCX, PPTX, and YouTube videos
 - **AI Content Generation:** Automatically creates Summaries, Bulleted Notes, Interactive Quizzes, and Flashcards
 - **Immersive Mode:** A distraction-free "Zen Mode" interface with glassmorphic UI, keyboard navigation, and smooth transitions
 - **Text-to-Speech:** Neural audio playback with OpenAI TTS for studying on the go
 
-### 🏆 Gamification & Progression
+### ðŸ† Gamification & Progression
 
 - **XP System:** Earn experience points for studying, streaks, quiz performance, and content generation
-- **Tiered Achievements:** 6-tier system (Bronze → Silver → Gold → Ruby → Diamond → Mastery) for long-term engagement
+- **Tiered Achievements:** 6-tier system (Bronze â†’ Silver â†’ Gold â†’ Ruby â†’ Diamond â†’ Mastery) for long-term engagement
 - **Achievement Notifications:** Beautiful animated popups with tier-specific colors and sounds
 - **Study Streaks:** Daily activity tracking with visual indicators
 
-### 📚 Course Management
+### ðŸ“š Course Management
 
 - **Instructor Marketplace:** Premium users can access curated course content
 - **File Organization:** Drag-and-drop folders with batch operations
 - **Secure File Delivery:** Token-based secure streaming for video/audio content
 - **Progress Tracking:** Per-file and per-course completion analytics
 
-### 💎 Enterprise Architecture
+### ðŸ’Ž Enterprise Architecture
 
 - **SaaS Ready:** Full Stripe integration (Checkout, Customer Portal, Webhooks) with tiered access control
 - **Role-Based Access:** BASIC, STANDARD, PREMIUM, and ADMIN tiers with feature gating
@@ -59,7 +59,7 @@ Thynkr is an enterprise-grade EdTech platform that leverages OpenAI to parse PDF
 
 ---
 
-## 🛠 Tech Stack
+## ðŸ›  Tech Stack
 
 ### Frontend
 
@@ -96,7 +96,7 @@ Thynkr is an enterprise-grade EdTech platform that leverages OpenAI to parse PDF
 
 ---
 
-## 🏗 Architecture
+## ðŸ— Architecture
 
 ```mermaid
 graph TD
@@ -111,7 +111,7 @@ graph TD
 
 ---
 
-## 🚀 Getting Started
+## ðŸš€ Getting Started
 
 ### Prerequisites
 
@@ -127,7 +127,7 @@ git clone https://github.com/NukeByLuke/Thynkr.git
 cd Thynkr
 ```
 
-### 2. Automated Setup (Recommended) ⭐
+### 2. Automated Setup (Recommended) â­
 
 We provide setup scripts that handle database creation, migrations, and configuration automatically:
 
@@ -146,13 +146,13 @@ chmod +x setup.sh
 
 The setup script will:
 
-- ✅ Check prerequisites
-- ✅ Create environment files
-- ✅ Install dependencies
-- ✅ Start Docker services (PostgreSQL & Redis)
-- ✅ **Create the database** (fixes common setup errors)
-- ✅ Run Prisma migrations
-- ✅ Generate Prisma Client
+- âœ… Check prerequisites
+- âœ… Create environment files
+- âœ… Install dependencies
+- âœ… Start Docker services (PostgreSQL & Redis)
+- âœ… **Create the database** (fixes common setup errors)
+- âœ… Run Prisma migrations
+- âœ… Generate Prisma Client
 
 ### 3. Configure Environment
 
@@ -232,7 +232,7 @@ pnpm dev
 
 ---
 
-## 🔧 Development Workflow
+## ðŸ”§ Development Workflow
 
 Thynkr includes custom PowerShell scripts to streamline development. These are available as pnpm scripts at the root:
 
@@ -256,7 +256,7 @@ pnpm feature:merge
 ```bash
 pnpm release <version>
 # Example: pnpm release 1.2.0
-# Runs checks, merges develop → main, creates tag v1.2.0
+# Runs checks, merges develop â†’ main, creates tag v1.2.0
 ```
 
 ### Deploy to Production
@@ -284,30 +284,30 @@ pnpm release <version>
 
 ---
 
-## 📦 Deployment
+## ðŸ“¦ Deployment
 
 Thynkr is deployed on **DigitalOcean** using Docker containers with Nginx as a reverse proxy.
 
 ### Production Architecture
 
 ```
-┌─────────────────────────────────────────────────┐
-│                  DigitalOcean Droplet           │
-├─────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐              │
-│  │   Nginx     │──│  Frontend   │              │
-│  │  (SSL/Gzip) │  │  (React)    │              │
-│  └─────────────┘  └─────────────┘              │
-│         │                                       │
-│  ┌─────────────┐  ┌─────────────┐              │
-│  │   Backend   │──│  PostgreSQL │              │
-│  │  (Fastify)  │  │             │              │
-│  └─────────────┘  └─────────────┘              │
-│         │                                       │
-│  ┌─────────────┐                               │
-│  │    Redis    │                               │
-│  └─────────────┘                               │
-└─────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                  DigitalOcean Droplet           â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”              â”‚
+â”‚  â”‚   Nginx     â”‚â”€â”€â”‚  Frontend   â”‚              â”‚
+â”‚  â”‚  (SSL/Gzip) â”‚  â”‚  (React)    â”‚              â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜              â”‚
+â”‚         â”‚                                       â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”              â”‚
+â”‚  â”‚   Backend   â”‚â”€â”€â”‚  PostgreSQL â”‚              â”‚
+â”‚  â”‚  (Fastify)  â”‚  â”‚             â”‚              â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜              â”‚
+â”‚         â”‚                                       â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                               â”‚
+â”‚  â”‚    Redis    â”‚                               â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                               â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### Deployment Pipeline
@@ -321,37 +321,37 @@ Thynkr is deployed on **DigitalOcean** using Docker containers with Nginx as a r
 
 ---
 
-## 📁 Project Structure
+## ðŸ“ Project Structure
 
 ```
 thynkr/
-├── backend/
-│   ├── prisma/           # Database schema & migrations
-│   │   └── schema.prisma
-│   └── src/
-│       ├── config/       # Environment configuration
-│       ├── lib/          # Shared utilities (logger, auth)
-│       ├── middleware/   # Auth, rate limiting, validation
-│       ├── routes/       # API route handlers
-│       └── services/     # Business logic (AI, gamification)
-├── frontend/
-│   └── src/
-│       ├── components/   # Reusable UI components
-│       ├── contexts/     # React contexts (Auth, Theme, Layout)
-│       ├── features/     # Feature-specific modules
-│       ├── hooks/        # Custom React hooks
-│       ├── layouts/      # Page layouts (Dashboard, Public)
-│       ├── lib/          # Utilities (api client, helpers)
-│       └── pages/        # Route page components
-├── scripts/              # DevOps automation (PowerShell)
-├── docker-compose.yml    # Local development
-├── docker-compose.prod.yml
-└── nginx.prod.conf
+â”œâ”€â”€ backend/
+â”‚   â”œâ”€â”€ prisma/           # Database schema & migrations
+â”‚   â”‚   â””â”€â”€ schema.prisma
+â”‚   â””â”€â”€ src/
+â”‚       â”œâ”€â”€ config/       # Environment configuration
+â”‚       â”œâ”€â”€ lib/          # Shared utilities (logger, auth)
+â”‚       â”œâ”€â”€ middleware/   # Auth, rate limiting, validation
+â”‚       â”œâ”€â”€ routes/       # API route handlers
+â”‚       â””â”€â”€ services/     # Business logic (AI, gamification)
+â”œâ”€â”€ frontend/
+â”‚   â””â”€â”€ src/
+â”‚       â”œâ”€â”€ components/   # Reusable UI components
+â”‚       â”œâ”€â”€ contexts/     # React contexts (Auth, Theme, Layout)
+â”‚       â”œâ”€â”€ features/     # Feature-specific modules
+â”‚       â”œâ”€â”€ hooks/        # Custom React hooks
+â”‚       â”œâ”€â”€ layouts/      # Page layouts (Dashboard, Public)
+â”‚       â”œâ”€â”€ lib/          # Utilities (api client, helpers)
+â”‚       â””â”€â”€ pages/        # Route page components
+â”œâ”€â”€ scripts/              # DevOps automation (PowerShell)
+â”œâ”€â”€ docker-compose.yml    # Local development
+â”œâ”€â”€ docker-compose.prod.yml
+â””â”€â”€ nginx.prod.conf
 ```
 
 ---
 
-## 🤝 Contributing
+## ðŸ¤ Contributing
 
 Contributions are welcome! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
@@ -366,9 +366,9 @@ Contributions are welcome! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) fo
 
 ---
 
-## 👥 The DVLPR Team
+## ðŸ‘¥ The DVLPR Team
 
-Built with ❤️ by:
+Built with â¤ï¸ by:
 
 - **Luke** - Full Stack Development
 - **Ivan** - Backend Architecture
@@ -376,8 +376,8 @@ Built with ❤️ by:
 
 ---
 
-## 📄 License
+## ðŸ“„ License
 
-© 2025-2026 Thynkr. All rights reserved.
+Â© 2025-2026 Thynkr. All rights reserved.
 
 Licensed under the [MIT License](LICENSE).

@@ -34,6 +34,7 @@ import studyPackRoutes from './routes/study-pack.routes';
 import ttsRoutes from './routes/tts.routes';
 import courseStudyRoutes from './routes/course-study.routes';
 import oauthRoutes from './routes/oauth.routes';
+import ogRoutes from './routes/og.routes';
 import { errorHandler } from './middleware/error-handler';
 
 /**
@@ -101,6 +102,10 @@ async function start() {
     // CORS
     await server.register(cors, {
       origin: [
+        'https://thynkr.study',
+        'https://www.thynkr.study',
+        'http://thynkr.study',
+        'http://www.thynkr.study',
         'https://thynkr.ca',
         'https://www.thynkr.ca',
         'http://thynkr.ca',
@@ -172,6 +177,9 @@ async function start() {
     await server.register(studyPackRoutes, { prefix: '/api' });
     await server.register(ttsRoutes, { prefix: '/api' });
     await server.register(courseStudyRoutes, { prefix: '/api' });
+
+    // OG meta tag routes for social media crawlers (no /api prefix)
+    await server.register(ogRoutes, { prefix: '/og' });
 
     // Error handler
     server.setErrorHandler(errorHandler);

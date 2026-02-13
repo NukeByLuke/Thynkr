@@ -1,4 +1,4 @@
-#!/usr/bin/env pwsh
+﻿#!/usr/bin/env pwsh
 <#
 .SYNOPSIS
     Production deployment script for Thynkr to DigitalOcean
@@ -59,16 +59,16 @@ $PROJECT_ROOT = Split-Path -Parent $PSScriptRoot
 $TIMESTAMP = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
 
 # Color output functions
-function Write-Success { param($Message) Write-Host "✅ $Message" -ForegroundColor Green }
-function Write-Info { param($Message) Write-Host "ℹ️  $Message" -ForegroundColor Cyan }
-function Write-Warning { param($Message) Write-Host "⚠️  $Message" -ForegroundColor Yellow }
-function Write-ErrorMsg { param($Message) Write-Host "❌ $Message" -ForegroundColor Red }
-function Write-Step { param($Message) Write-Host "`n🔹 $Message" -ForegroundColor Blue }
+function Write-Success { param($Message) Write-Host "âœ… $Message" -ForegroundColor Green }
+function Write-Info { param($Message) Write-Host "â„¹ï¸  $Message" -ForegroundColor Cyan }
+function Write-Warning { param($Message) Write-Host "âš ï¸  $Message" -ForegroundColor Yellow }
+function Write-ErrorMsg { param($Message) Write-Host "âŒ $Message" -ForegroundColor Red }
+function Write-Step { param($Message) Write-Host "`nðŸ”¹ $Message" -ForegroundColor Blue }
 
 # Banner
-Write-Host "`n╔════════════════════════════════════════════════════════════╗" -ForegroundColor Magenta
-Write-Host "║         🚀 Thynkr Deployment to DigitalOcean               ║" -ForegroundColor Magenta
-Write-Host "╚════════════════════════════════════════════════════════════╝`n" -ForegroundColor Magenta
+Write-Host "`nâ•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—" -ForegroundColor Magenta
+Write-Host "â•‘         ðŸš€ Thynkr Deployment to DigitalOcean               â•‘" -ForegroundColor Magenta
+Write-Host "â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•`n" -ForegroundColor Magenta
 Write-Info "Timestamp: $TIMESTAMP"
 Write-Info "Component: $Component"
 Write-Info "Skip Build: $SkipBuild"
@@ -201,23 +201,23 @@ try {
 # Build deployment commands based on component
 $deployCommands = @(
     "cd /root",
-    "echo '📥 Pulling latest images...'",
+    "echo 'ðŸ“¥ Pulling latest images...'",
     "docker compose -f docker-compose.prod.yml pull $Component"
 )
 
 if ($Component -eq 'all') {
     $deployCommands += @(
-        "echo '🔄 Recreating all services...'",
+        "echo 'ðŸ”„ Recreating all services...'",
         "docker compose -f docker-compose.prod.yml down",
         "docker compose -f docker-compose.prod.yml up -d",
-        "echo '⏳ Waiting for services to start...'",
+        "echo 'â³ Waiting for services to start...'",
         "sleep 10"
     )
 } else {
     $deployCommands += @(
-        "echo '🔄 Recreating $Component service...'",
+        "echo 'ðŸ”„ Recreating $Component service...'",
         "docker compose -f docker-compose.prod.yml up -d --force-recreate $Component",
-        "echo '⏳ Waiting for service to start...'",
+        "echo 'â³ Waiting for service to start...'",
         "sleep 5"
     )
 }
@@ -225,17 +225,17 @@ if ($Component -eq 'all') {
 # Add migration step for backend
 if ($Component -in 'all', 'backend') {
     $deployCommands += @(
-        "echo '🗃️  Running database migrations...'",
+        "echo 'ðŸ—ƒï¸  Running database migrations...'",
         "docker compose -f docker-compose.prod.yml exec -T backend npx prisma migrate deploy"
     )
 }
 
 $deployCommands += @(
-    "echo '🧹 Cleaning up...'",
+    "echo 'ðŸ§¹ Cleaning up...'",
     "docker system prune -f",
-    "echo '📊 Service status:'",
+    "echo 'ðŸ“Š Service status:'",
     "docker compose -f docker-compose.prod.yml ps",
-    "echo '✅ Deployment complete!'"
+    "echo 'âœ… Deployment complete!'"
 )
 
 # Execute deployment
@@ -277,12 +277,12 @@ try {
 }
 
 # Final status
-Write-Host "`n╔════════════════════════════════════════════════════════════╗" -ForegroundColor Green
-Write-Host "║              ✅ DEPLOYMENT SUCCESSFUL                       ║" -ForegroundColor Green
-Write-Host "╚════════════════════════════════════════════════════════════╝`n" -ForegroundColor Green
+Write-Host "`nâ•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—" -ForegroundColor Green
+Write-Host "â•‘              âœ… DEPLOYMENT SUCCESSFUL                       â•‘" -ForegroundColor Green
+Write-Host "â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•`n" -ForegroundColor Green
 
 Write-Info "Your application should now be running at:"
-Write-Host "  🌐 https://thynkr.ca" -ForegroundColor Cyan
+Write-Host "  ðŸŒ https://thynkr.study" -ForegroundColor Cyan
 Write-Info "`nTo view logs:"
 Write-Host "  ssh $SERVER 'cd /root && docker compose -f docker-compose.prod.yml logs -f'" -ForegroundColor Gray
 Write-Info "`nTo rollback if needed:"

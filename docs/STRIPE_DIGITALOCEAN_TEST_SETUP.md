@@ -1,15 +1,15 @@
-# Stripe Test Mode Setup for DigitalOcean
+﻿# Stripe Test Mode Setup for DigitalOcean
 
 This guide will help you set up Stripe **test mode** on your DigitalOcean deployment, allowing you to test subscriptions in production environment without real charges.
 
-## 🎯 Why Use Test Mode on DigitalOcean?
+## ðŸŽ¯ Why Use Test Mode on DigitalOcean?
 
 - Test the full subscription flow in production environment
 - Verify webhook delivery to your live server
 - Debug issues without affecting real customers
 - Validate SSL/TLS certificate handling
 
-## ⚙️ Prerequisites
+## âš™ï¸ Prerequisites
 
 - DigitalOcean droplet running Thynkr
 - SSH access to your droplet
@@ -17,13 +17,13 @@ This guide will help you set up Stripe **test mode** on your DigitalOcean deploy
 
 ---
 
-## 📋 Step-by-Step Setup
+## ðŸ“‹ Step-by-Step Setup
 
 ### 1. Create Test Mode Products in Stripe
 
 1. Go to [Stripe Dashboard](https://dashboard.stripe.com)
 2. **Toggle to TEST mode** (top right - should show "Test mode" toggle)
-3. Navigate to **Products** → Click **"Add product"**
+3. Navigate to **Products** â†’ Click **"Add product"**
 
 #### Product 1: Thynkr Pro
 - **Name**: `Thynkr Pro`
@@ -59,19 +59,19 @@ This is the **critical step** that makes webhooks work without the CLI.
 2. Click **"Add endpoint"**
 3. **Endpoint URL**: 
    ```
-   https://thynkr.ca/api/webhooks/stripe
+   https://thynkr.study/api/webhooks/stripe
    ```
-   (Replace `thynkr.ca` with your actual domain)
+   (Replace `thynkr.study` with your actual domain)
 
 4. **Description**: `DigitalOcean Test Webhook`
 
 5. **Events to send** - Select these events:
-   - ✅ `checkout.session.completed`
-   - ✅ `customer.subscription.created`
-   - ✅ `customer.subscription.updated`
-   - ✅ `customer.subscription.deleted`
-   - ✅ `invoice.payment_succeeded`
-   - ✅ `invoice.payment_failed`
+   - âœ… `checkout.session.completed`
+   - âœ… `customer.subscription.created`
+   - âœ… `customer.subscription.updated`
+   - âœ… `customer.subscription.deleted`
+   - âœ… `invoice.payment_succeeded`
+   - âœ… `invoice.payment_failed`
 
 6. Click **"Add endpoint"**
 
@@ -112,9 +112,9 @@ STRIPE_PRICE_PREMIUM_MONTHLY=price_YOUR_PREMIUM_MONTHLY_ID
 STRIPE_PRICE_PREMIUM_YEARLY=price_YOUR_PREMIUM_YEARLY_ID
 
 # URLs (should already be set)
-FRONTEND_URL=https://thynkr.ca
-BACKEND_URL=https://thynkr.ca
-VITE_API_URL=https://thynkr.ca
+FRONTEND_URL=https://thynkr.study
+BACKEND_URL=https://thynkr.study
+VITE_API_URL=https://thynkr.study
 ```
 
 Save and exit (Ctrl+X, then Y, then Enter)
@@ -124,7 +124,7 @@ Save and exit (Ctrl+X, then Y, then Enter)
 The frontend needs Stripe price IDs at build time. Update these GitHub secrets:
 
 1. Go to your GitHub repository
-2. Navigate to **Settings** → **Secrets and variables** → **Actions**
+2. Navigate to **Settings** â†’ **Secrets and variables** â†’ **Actions**
 3. Update or create these secrets with your **TEST mode** values:
 
 | Secret Name | Value | Example |
@@ -137,7 +137,7 @@ The frontend needs Stripe price IDs at build time. Update these GitHub secrets:
 4. Trigger a new deployment:
    - Go to **Actions** tab
    - Click on **"Deploy to Production"** workflow
-   - Click **"Run workflow"** → **"Run workflow"**
+   - Click **"Run workflow"** â†’ **"Run workflow"**
 
 This will rebuild the frontend with the correct test price IDs baked in.
 
@@ -187,19 +187,19 @@ backend  | Received Stripe webhook: checkout.session.completed
 
 ---
 
-## ✅ Testing the Integration
+## âœ… Testing the Integration
 
 ### 1. Health Check
 
 ```bash
-curl https://thynkr.ca/api/health
+curl https://thynkr.study/api/health
 ```
 
 Should return: `{"status":"ok"}`
 
 ### 2. Test Subscription Flow
 
-1. Go to `https://thynkr.ca`
+1. Go to `https://thynkr.study`
 2. Create a new test account or login
 3. Navigate to **Pricing** or **Settings/Billing**
 4. Click **"Upgrade to Pro"** or **"Upgrade to Premium"**
@@ -251,20 +251,20 @@ This opens Prisma Studio in the browser. Check your user record:
 
 ---
 
-## 🧪 Additional Test Cards
+## ðŸ§ª Additional Test Cards
 
 Stripe provides several test cards for different scenarios:
 
 | Card Number | Scenario |
 |------------|----------|
-| `4242 4242 4242 4242` | ✅ Success |
-| `4000 0000 0000 0002` | ❌ Card declined |
-| `4000 0027 6000 3184` | 🔐 Requires 3D Secure authentication |
-| `4000 0000 0000 9995` | ❌ Insufficient funds |
+| `4242 4242 4242 4242` | âœ… Success |
+| `4000 0000 0000 0002` | âŒ Card declined |
+| `4000 0027 6000 3184` | ðŸ” Requires 3D Secure authentication |
+| `4000 0000 0000 9995` | âŒ Insufficient funds |
 
 ---
 
-## 🔄 Switching to Live Mode Later
+## ðŸ”„ Switching to Live Mode Later
 
 When you're ready to accept real payments:
 
@@ -277,7 +277,7 @@ When you're ready to accept real payments:
 
 ---
 
-## 🐛 Troubleshooting
+## ðŸ› Troubleshooting
 
 ### Webhooks Not Being Received
 
@@ -295,7 +295,7 @@ docker compose -f docker-compose.prod.yml logs backend | grep -i "webhook\|strip
 
 **Test webhook endpoint directly:**
 ```bash
-curl -X POST https://thynkr.ca/api/webhooks/stripe \
+curl -X POST https://thynkr.study/api/webhooks/stripe \
   -H "Content-Type: application/json" \
   -d '{"test": true}'
 ```
@@ -321,7 +321,7 @@ docker compose -f docker-compose.prod.yml up -d frontend
 
 ---
 
-## 📚 Related Documentation
+## ðŸ“š Related Documentation
 
 - [STRIPE_TESTING_GUIDE.md](./STRIPE_TESTING_GUIDE.md) - Local testing guide
 - [STRIPE_PRODUCTION_DEPLOYMENT.md](./STRIPE_PRODUCTION_DEPLOYMENT.md) - Live mode guide
@@ -329,7 +329,7 @@ docker compose -f docker-compose.prod.yml up -d frontend
 
 ---
 
-## ✅ Checklist
+## âœ… Checklist
 
 - [ ] Created test products in Stripe Dashboard
 - [ ] Copied all 4 price IDs
@@ -344,4 +344,4 @@ docker compose -f docker-compose.prod.yml up -d frontend
 - [ ] Verified subscription activated
 - [ ] Tested billing portal
 
-🎉 **You're all set!** You can now test Stripe subscriptions on DigitalOcean without affecting real customers.
+ðŸŽ‰ **You're all set!** You can now test Stripe subscriptions on DigitalOcean without affecting real customers.

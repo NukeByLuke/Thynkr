@@ -1,8 +1,8 @@
-# ✅ Stripe Payment Integration Checklist
+﻿# âœ… Stripe Payment Integration Checklist
 
 Use this checklist to ensure your Stripe payment system is fully set up and tested.
 
-## 📋 Pre-Setup Checklist
+## ðŸ“‹ Pre-Setup Checklist
 
 - [ ] Have a Stripe account ([Sign up here](https://dashboard.stripe.com/register))
 - [ ] Node.js and pnpm installed
@@ -11,13 +11,13 @@ Use this checklist to ensure your Stripe payment system is fully set up and test
 
 ---
 
-## 🔧 Setup Steps
+## ðŸ”§ Setup Steps
 
 ### 1. Environment Configuration
 
 #### Backend Environment (.env)
 - [ ] Created `backend/.env` file
-- [ ] Set `STRIPE_SECRET_KEY` (from [Stripe Dashboard → API Keys](https://dashboard.stripe.com/test/apikeys))
+- [ ] Set `STRIPE_SECRET_KEY` (from [Stripe Dashboard â†’ API Keys](https://dashboard.stripe.com/test/apikeys))
 - [ ] Set `STRIPE_PUBLISHABLE_KEY`
 - [ ] Set `STRIPE_WEBHOOK_SECRET` (from `stripe listen` output)
 - [ ] Set `STRIPE_PRICE_STANDARD_MONTHLY`
@@ -56,7 +56,7 @@ Use this checklist to ensure your Stripe payment system is fully set up and test
 
 ---
 
-## 🧪 Testing Checklist
+## ðŸ§ª Testing Checklist
 
 ### Local Testing Setup
 - [ ] Backend server running (`cd backend && pnpm dev`)
@@ -148,14 +148,14 @@ Use this checklist to ensure your Stripe payment system is fully set up and test
 
 ---
 
-## 🚀 Production Deployment Checklist
+## ðŸš€ Production Deployment Checklist
 
 ### Stripe Production Setup
 - [ ] Switched Stripe Dashboard to LIVE mode
 - [ ] Created products with LIVE prices
 - [ ] Copied LIVE Price IDs
 - [ ] Created LIVE webhook endpoint
-- [ ] Configured webhook URL: `https://thynkr.ca/api/stripe/webhook`
+- [ ] Configured webhook URL: `https://thynkr.study/api/stripe/webhook`
 - [ ] Added all 5 webhook events:
   - [ ] `checkout.session.completed`
   - [ ] `customer.subscription.updated`
@@ -169,7 +169,7 @@ Use this checklist to ensure your Stripe payment system is fully set up and test
 - [ ] Updated production backend `.env` with LIVE keys
 - [ ] Updated production frontend `.env` with LIVE publishable key
 - [ ] Updated all 4 price IDs to LIVE values
-- [ ] Set `FRONTEND_URL=https://thynkr.ca`
+- [ ] Set `FRONTEND_URL=https://thynkr.study`
 - [ ] Set `NODE_ENV=production`
 
 ### Production Deployment
@@ -180,7 +180,7 @@ Use this checklist to ensure your Stripe payment system is fully set up and test
 - [ ] SSL certificate valid and working
 
 ### Production Testing
-- [ ] Accessed https://thynkr.ca/pricing
+- [ ] Accessed https://thynkr.study/pricing
 - [ ] Completed test payment with real card
 - [ ] Received payment confirmation email
 - [ ] Subscription active in Stripe Dashboard
@@ -197,7 +197,7 @@ Use this checklist to ensure your Stripe payment system is fully set up and test
 
 ---
 
-## 🔍 Verification Commands
+## ðŸ” Verification Commands
 
 ### Check Environment Variables
 ```powershell
@@ -236,7 +236,7 @@ curl -X POST http://localhost:3001/api/stripe/create-checkout-session `
 
 ---
 
-## 🆘 Troubleshooting Guide
+## ðŸ†˜ Troubleshooting Guide
 
 ### "Configuration error: Price ID not found"
 **Solution:** Verify price IDs in both `.env` files match exactly what's in Stripe Dashboard
@@ -269,7 +269,7 @@ curl -X POST http://localhost:3001/api/stripe/create-checkout-session `
 
 ---
 
-## 📞 Support Resources
+## ðŸ“ž Support Resources
 
 - **Documentation:** `STRIPE_COMPLETE_SETUP_GUIDE.md`
 - **Quick Reference:** `STRIPE_QUICK_REFERENCE.md`
@@ -279,7 +279,7 @@ curl -X POST http://localhost:3001/api/stripe/create-checkout-session `
 
 ---
 
-## ✨ Post-Setup Recommendations
+## âœ¨ Post-Setup Recommendations
 
 - [ ] Review and test subscription cancellation flow
 - [ ] Set up email notifications for payment events
@@ -296,4 +296,4 @@ curl -X POST http://localhost:3001/api/stripe/create-checkout-session `
 
 **Last Updated:** January 2026
 
-**Status:** ✅ Ready for testing
+**Status:** âœ… Ready for testing
