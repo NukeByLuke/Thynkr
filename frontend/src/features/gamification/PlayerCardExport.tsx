@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { Trophy, Award, Star, Zap, LucideIcon } from 'lucide-react';
+import { Trophy, Star, Zap, LucideIcon } from 'lucide-react';
 
 interface PlayerCardExportProps {
   user: {
