@@ -221,27 +221,10 @@ export default function StudyModePage() {
     },
   });
 
-  // Query for cached content (with share token)
+  // Get cached content manually (no auto-fetch)
   const fileIdsKey = useMemo(() => Array.from(selectedFileIds).sort().join(','), [selectedFileIds]);
 
-  const {
-    data: studyContent,
-    isLoading: contentLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ['study-content', courseId, fileIdsKey, activeTab],
-    queryFn: async () => {
-      const url = tokenQuery ? `/ai/study?${tokenQuery}` : '/ai/study';
-      const response = await api.post(url, {
-        courseId,
-        fileIds: Array.from(selectedFileIds),
-        type: activeTab,
-      });
-      return response.data;
-    },
-    enabled: selectedFileIds.size > 0 && statusData?.canStudy === true,
-    staleTime: 5 * 60 * 1000,
-  });
+  const studyContent = queryClient.getQueryData<any>(['study-content', courseId, fileIdsKey, activeTab]);
 
   const handleRegenerate = () => {
     generateMutation.mutate({ type: activeTab, refresh: true });
@@ -302,7 +285,7 @@ export default function StudyModePage() {
     };
   }, [studyContent]);
 
-  const isGenerating = generateMutation.isPending || contentLoading;
+  const isGenerating = generateMutation.isPending;
   const isLoading = courseLoading || statusLoading;
 
   // Page title
@@ -546,26 +529,57 @@ export default function StudyModePage() {
                       Select Files
                     </button>
                   </motion.div>
-                ) : isGenerating ? (
+                ) : !studyContent?.result ? (
                   <motion.div
-                    key="loading"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className="flex flex-col items-center justify-center min-h-[60vh] p-8"
+                    key="generate-prompt"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center"
                   >
-                    <div className="relative mb-6">
-                      <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 rounded-full blur-xl opacity-30" />
-                      <Loader2 className="h-16 w-16 animate-spin text-indigo-600 relative z-10" />
-                    </div>
-                    <p className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
-                      Generating {activeTab}...
-                    </p>
-                    <p className="text-slate-500 dark:text-slate-400">
-                      This may take a moment for large files
-                    </p>
+                    {isGenerating ? (
+                      <>
+                        <div className="relative mb-6">
+                          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 rounded-full blur-xl opacity-30" />
+                          <Loader2 className="h-16 w-16 animate-spin text-indigo-600 relative z-10" />
+                        </div>
+                        <p className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+                          Generating {activeTab}...
+                        </p>
+                        <p className="text-slate-500 dark:text-slate-400">
+                          This may take a moment for large files
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl mb-5">
+                          {TABS.find(t => t.id === activeTab)?.icon && (
+                            <div className={TABS.find(t => t.id === activeTab)!.color}>
+                              {(() => {
+                                const Icon = TABS.find(t => t.id === activeTab)!.icon;
+                                return <Icon className="h-14 w-14" />;
+                              })()}
+                            </div>
+                          )}
+                        </div>
+                        <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+                          Ready to Generate {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+                        </h2>
+                        <p className="text-slate-600 dark:text-slate-400 max-w-sm mb-6">
+                          Click the button below to generate AI-powered {activeTab} from {selectedFileIds.size} selected file{selectedFileIds.size !== 1 ? 's' : ''}.
+                        </p>
+                        <button
+                          onClick={() => generateMutation.mutate({ type: activeTab, refresh: false })}
+                          disabled={isGenerating}
+                          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-600 to-fuchsia-600 dark:from-cyan-500 dark:to-violet-500 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-pink-500/30 dark:shadow-cyan-500/30"
+                        >
+                          <Sparkles className="h-5 w-5" />
+                          Generate {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+                        </button>
+                      </>
+                    )}
                   </motion.div>
-                ) : studyContent?.result ? (
+                ) : (
                   <motion.div
                     key={activeTab + '-content'}
                     initial={{ opacity: 0, y: 10 }}
@@ -729,32 +743,6 @@ export default function StudyModePage() {
                         <span>Exit</span>
                       </span>
                     </motion.div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="generate"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center"
-                  >
-                    <div className="p-5 bg-slate-100 dark:bg-slate-800 rounded-2xl mb-5">
-                      <AlertCircle className="h-14 w-14 text-slate-400" />
-                    </div>
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                      No Content Yet
-                    </h2>
-                    <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-sm">
-                      Click the button below to generate study materials.
-                    </p>
-                    <motion.button
-                      onClick={() => refetch()}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="px-6 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-shadow"
-                    >
-                      Generate {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
-                    </motion.button>
                   </motion.div>
                 )}
               </AnimatePresence>
