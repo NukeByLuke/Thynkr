@@ -6,6 +6,7 @@ import { Download, Image as ImageIcon, Check, Link as LinkIcon, Loader2 } from '
 import html2canvas from 'html2canvas';
 import toast from 'react-hot-toast';
 import type { UserAchievement } from './gamification.utils';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface ShareProfileModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const { theme } = useTheme();
 
   // Generate preview when modal opens
   const generatePreview = useCallback(async () => {
@@ -36,7 +38,7 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
       await new Promise(resolve => setTimeout(resolve, 150));
       
       const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: '#020617',
+        backgroundColor: theme === 'dark' ? '#020617' : '#fdfbf7',
         scale: 2, // High res
         useCORS: true,
         allowTaint: true,
@@ -60,9 +62,9 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
     } finally {
       setIsGenerating(false);
     }
-  }, []);
+  }, [theme]);
 
-  // Regenerate preview when modal opens
+  // Regenerate preview when modal opens or theme changes
   useEffect(() => {
     if (isOpen) {
       setPreviewUrl(null);
@@ -187,6 +189,7 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
           ref={cardRef}
           user={user}
           achievements={achievements}
+          theme={theme}
         />
       </div>
     </Modal>
