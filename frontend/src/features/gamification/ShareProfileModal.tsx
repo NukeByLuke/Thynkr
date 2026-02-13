@@ -1,8 +1,8 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { PlayerCardExport } from './PlayerCardExport';
-import { Download, Image as ImageIcon, Check, Link as LinkIcon, Trophy, Star, Zap } from 'lucide-react';
+import { Download, Image as ImageIcon, Check, Link as LinkIcon } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import toast from 'react-hot-toast';
 
@@ -15,32 +15,63 @@ interface ShareProfileModalProps {
     xp: number;
     level: number;
   };
-  achievements: any[]; // Using any to avoid complex type import chains for now
+  achievements: any[];
 }
 
 export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, onClose, user, achievements }) => {
   const cardRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [copyingLink, setCopyingLink] = useState(false);
+  const [scale, setScale] = useState(0.5);
   
   const unlockedCount = achievements.filter(a => a.unlocked).length;
-  
-  // Create stats for the card - using Thynkr brand colors (fuchsia/pink)
-  const stats = [
-    { label: 'Current Level', value: user.level, icon: Star, color: 'text-amber-400' },
-    { label: 'Total XP', value: user.xp >= 1000 ? `${(user.xp / 1000).toFixed(1)}k` : user.xp, icon: Zap, color: 'text-fuchsia-400' },
-    { label: 'Achievements', value: unlockedCount, icon: Trophy, color: 'text-pink-400' },
-  ];
+
+  // Calculate scale based on container width
+  const calculateScale = useCallback(() => {
+    if (containerRef.current) {
+      const containerWidth = containerRef.current.clientWidth;
+      const newScale = Math.min(containerWidth / 1200, 0.6); // Cap at 0.6 to prevent too large
+      setScale(newScale);
+    }
+  }, []);
+
+  // Recalculate on mount, resize, and modal open
+  useEffect(() => {
+    if (isOpen) {
+      // Small delay to ensure modal is rendered
+      setTimeout(calculateScale, 50);
+      window.addEventListener('resize', calculateScale);
+      return () => window.removeEventListener('resize', calculateScale);
+    }
+  }, [isOpen, calculateScale]);
 
   const handleCopyLink = async () => {
-    // Determine base URL, but for local dev it might differ
     const url = `${window.location.protocol}//${window.location.host}/u/${user.username}`;
     try {
       await navigator.clipboard.writeText(url);
       setCopyingLink(true);
       toast.success('Profile link copied!');
       setTimeout(() => setCopyingLink(false), 2000);
-    } catch (e) {
+    } catch {
       toast.error('Failed to copy link');
+    }
+  };
+
+  const html2canvasConfig = {
+    backgroundColor: '#020617',
+    scale: 2,
+    useCORS: true,
+    allowTaint: true,
+    logging: false,
+    windowWidth: 1200,
+    windowHeight: 630,
+    onclone: (clonedDoc: Document) => {
+      const clonedCard = clonedDoc.getElementById('player-card-export');
+      if (clonedCard) {
+        clonedCard.style.transform = 'none';
+        clonedCard.style.width = '1200px';
+        clonedCard.style.height = '630px';
+      }
     }
   };
 
@@ -48,27 +79,8 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
     if (!cardRef.current) return;
     const toastId = toast.loading('Generating image...');
     try {
-      // Wait for images to load
       await new Promise(resolve => setTimeout(resolve, 300));
-      
-      const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: '#020617', // slate-950
-        scale: 3, // Higher quality
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        windowWidth: 1200,
-        windowHeight: 630,
-        onclone: (clonedDoc) => {
-          const clonedCard = clonedDoc.getElementById('player-card-export');
-          if (clonedCard) {
-            clonedCard.style.transform = 'none';
-            clonedCard.style.width = '1200px';
-            clonedCard.style.height = '630px';
-          }
-        }
-      });
-      
+      const canvas = await html2canvas(cardRef.current, html2canvasConfig);
       const link = document.createElement('a');
       link.download = `thynkr-${user.username}-card.png`;
       link.href = canvas.toDataURL('image/png', 1.0);
@@ -84,31 +96,12 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
     if (!cardRef.current) return;
     const toastId = toast.loading('Generating image...');
     try {
-      // Wait for images to load
       await new Promise(resolve => setTimeout(resolve, 300));
-      
-      const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: '#020617',
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        windowWidth: 1200,
-        windowHeight: 630,
-        onclone: (clonedDoc) => {
-          const clonedCard = clonedDoc.getElementById('player-card-export');
-          if (clonedCard) {
-            clonedCard.style.transform = 'none';
-            clonedCard.style.width = '1200px';
-            clonedCard.style.height = '630px';
-          }
-        }
-      });
-      
+      const canvas = await html2canvas(cardRef.current, html2canvasConfig);
       canvas.toBlob(async (blob) => {
         if (!blob) {
-            toast.error('Failed to create blob', { id: toastId });
-            return;
+          toast.error('Failed to create blob', { id: toastId });
+          return;
         }
         try {
           await navigator.clipboard.write([
@@ -139,28 +132,26 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
           Download your player card or share your profile link.
         </p>
 
-        {/* Card Preview - responsive scaling */}
-        <div className="flex justify-center bg-slate-100 dark:bg-slate-900 rounded-lg p-3 overflow-hidden">
-          <div 
-            className="relative w-full"
-            style={{ 
-              maxWidth: '720px',
-              aspectRatio: '1200 / 630'
-            }}
-          >
-            <div 
-              className="absolute top-0 left-0 origin-top-left"
-              style={{ 
-                width: '1200px', 
+        {/* Card Preview - dynamic scaling */}
+        <div 
+          ref={containerRef}
+          className="bg-slate-100 dark:bg-slate-900 rounded-lg p-4 overflow-hidden"
+        >
+          {/* Height reservation container */}
+          <div style={{ height: 630 * scale, overflow: 'hidden' }}>
+            {/* Scaled card container */}
+            <div
+              style={{
+                width: '1200px',
                 height: '630px',
-                transform: 'scale(0.6)'
+                transform: `scale(${scale})`,
+                transformOrigin: 'top left',
               }}
             >
               <PlayerCardExport
                 ref={cardRef}
                 user={user}
                 totalAchievements={unlockedCount}
-                featuredStats={stats}
               />
             </div>
           </div>

@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { Trophy, Star, Zap, LucideIcon } from 'lucide-react';
+import { Trophy, Star, Zap } from 'lucide-react';
 
 interface PlayerCardExportProps {
   user: {
@@ -9,17 +9,16 @@ interface PlayerCardExportProps {
     level: number;
   };
   totalAchievements: number;
-  featuredStats?: {
-    label: string;
-    value: string | number;
-    icon: LucideIcon;
-    color?: string;
-  }[];
 }
 
-// Simple design optimized for html2canvas export
+// Premium "Midnight" design - all inline styles for html2canvas compatibility
 export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps>(
   ({ user, totalAchievements }, ref) => {
+    const formatXP = (xp: number) => {
+      if (xp >= 1000) return `${(xp / 1000).toFixed(1)}k`;
+      return xp.toString();
+    };
+
     return (
       <div
         ref={ref}
@@ -27,152 +26,233 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
         style={{
           width: '1200px',
           height: '630px',
-          background: '#0f172a',
-          fontFamily: 'Inter, -apple-system, sans-serif',
+          background: 'linear-gradient(135deg, #020617 0%, #172554 100%)',
+          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
           position: 'relative',
           overflow: 'hidden',
-          borderRadius: '24px',
-        }}
-      >
-        {/* Gradient accent bar at top */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '6px',
-          background: 'linear-gradient(90deg, #ec4899, #d946ef, #f97316)',
-        }} />
-
-        {/* Main content */}
-        <div style={{
-          padding: '60px 80px',
-          height: '100%',
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
-        }}>
-          {/* Top section - Avatar and info */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
-            {/* Avatar with border */}
-            <div style={{
-              width: '160px',
-              height: '160px',
-              borderRadius: '50%',
-              border: '5px solid #d946ef',
-              overflow: 'hidden',
-              flexShrink: 0,
-              background: '#1e293b',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              {user.avatarUrl ? (
-                <img 
-                  src={user.avatarUrl} 
-                  alt="" 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  crossOrigin="anonymous"
-                />
-              ) : (
-                <span style={{ fontSize: '72px', fontWeight: 700, color: '#d946ef' }}>
-                  {user.username.charAt(0).toUpperCase()}
-                </span>
-              )}
+        }}
+      >
+        {/* Background Decorative Blobs */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '-100px',
+            right: '-100px',
+            width: '400px',
+            height: '400px',
+            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.15) 0%, transparent 70%)',
+            borderRadius: '50%',
+            pointerEvents: 'none',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '-150px',
+            left: '-100px',
+            width: '500px',
+            height: '500px',
+            background: 'radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, transparent 70%)',
+            borderRadius: '50%',
+            pointerEvents: 'none',
+          }}
+        />
+
+        {/* Main Content */}
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            padding: '56px 64px',
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            boxSizing: 'border-box',
+          }}
+        >
+          {/* Top Section - User Info */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+            {/* Avatar with Gradient Border */}
+            <div
+              style={{
+                width: '188px',
+                height: '188px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #ec4899 0%, #a855f7 100%)',
+                padding: '4px',
+                flexShrink: 0,
+              }}
+            >
+              <div
+                style={{
+                  width: '180px',
+                  height: '180px',
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  background: '#1e293b',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {user.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt=""
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    crossOrigin="anonymous"
+                  />
+                ) : (
+                  <span style={{ fontSize: '80px', fontWeight: 700, color: '#a855f7' }}>
+                    {user.username.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
             </div>
 
-            {/* User info */}
-            <div>
-              <h1 style={{
-                fontSize: '64px',
-                fontWeight: 800,
-                color: '#ffffff',
-                margin: 0,
-                letterSpacing: '-2px',
-              }}>
+            {/* User Info */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <h1
+                style={{
+                  fontSize: '72px',
+                  fontWeight: 800,
+                  color: '#ffffff',
+                  margin: 0,
+                  letterSpacing: '-2px',
+                  lineHeight: 1,
+                }}
+              >
                 {user.username}
               </h1>
-              <p style={{
-                fontSize: '24px',
-                color: '#d946ef',
-                margin: '8px 0 0 0',
-                fontWeight: 600,
-              }}>
-                Thynkr Scholar
-              </p>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: 'linear-gradient(90deg, rgba(236, 72, 153, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%)',
+                  border: '1px solid rgba(236, 72, 153, 0.3)',
+                  borderRadius: '20px',
+                  padding: '8px 20px',
+                  marginTop: '8px',
+                  width: 'fit-content',
+                }}
+              >
+                <Star size={18} color="#fbbf24" fill="#fbbf24" />
+                <span style={{ fontSize: '16px', fontWeight: 600, color: '#f0abfc' }}>
+                  Thynkr Scholar
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Stats row */}
-          <div style={{
-            display: 'flex',
-            gap: '40px',
-            marginTop: 'auto',
-            paddingTop: '48px',
-            borderTop: '2px solid #334155',
-          }}>
+          {/* Bottom Section - Stats Grid */}
+          <div
+            style={{
+              marginTop: 'auto',
+              background: 'rgba(15, 23, 42, 0.5)',
+              borderRadius: '20px',
+              border: '1px solid rgba(148, 163, 184, 0.1)',
+              padding: '32px 40px',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '32px',
+            }}
+          >
             {/* Level */}
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                <Star size={28} color="#fbbf24" fill="#fbbf24" />
-                <span style={{ fontSize: '16px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '2px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Star size={24} color="#fbbf24" fill="#fbbf24" />
+                <span
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    color: '#94a3b8',
+                    textTransform: 'uppercase',
+                    letterSpacing: '2px',
+                  }}
+                >
                   Level
                 </span>
               </div>
-              <span style={{ fontSize: '72px', fontWeight: 800, color: '#ffffff' }}>
+              <span style={{ fontSize: '56px', fontWeight: 800, color: '#ffffff', lineHeight: 1 }}>
                 {user.level}
               </span>
             </div>
 
-            {/* XP */}
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                <Zap size={28} color="#d946ef" fill="#d946ef" />
-                <span style={{ fontSize: '16px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '2px' }}>
+            {/* Total XP */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Zap size={24} color="#a855f7" fill="#a855f7" />
+                <span
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    color: '#94a3b8',
+                    textTransform: 'uppercase',
+                    letterSpacing: '2px',
+                  }}
+                >
                   Total XP
                 </span>
               </div>
-              <span style={{ fontSize: '72px', fontWeight: 800, color: '#ffffff' }}>
-                {user.xp >= 1000 ? `${(user.xp / 1000).toFixed(1)}k` : user.xp}
+              <span style={{ fontSize: '56px', fontWeight: 800, color: '#ffffff', lineHeight: 1 }}>
+                {formatXP(user.xp)}
               </span>
             </div>
 
             {/* Achievements */}
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                <Trophy size={28} color="#ec4899" />
-                <span style={{ fontSize: '16px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '2px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Trophy size={24} color="#ec4899" />
+                <span
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    color: '#94a3b8',
+                    textTransform: 'uppercase',
+                    letterSpacing: '2px',
+                  }}
+                >
                   Achievements
                 </span>
               </div>
-              <span style={{ fontSize: '72px', fontWeight: 800, color: '#ffffff' }}>
+              <span style={{ fontSize: '56px', fontWeight: 800, color: '#ffffff', lineHeight: 1 }}>
                 {totalAchievements}
               </span>
             </div>
           </div>
 
-          {/* Footer branding */}
-          <div style={{
-            position: 'absolute',
-            bottom: '32px',
-            right: '48px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-          }}>
-            <div style={{
-              width: '10px',
-              height: '10px',
-              borderRadius: '50%',
-              background: '#d946ef',
-            }} />
-            <span style={{
-              fontSize: '14px',
-              fontWeight: 700,
-              color: '#64748b',
-              letterSpacing: '3px',
-              textTransform: 'uppercase',
-            }}>
+          {/* Branding */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '24px',
+              right: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            <div
+              style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                background: '#ec4899',
+              }}
+            />
+            <span
+              style={{
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#64748b',
+                letterSpacing: '2px',
+                textTransform: 'uppercase',
+              }}
+            >
               thynkr.study
             </span>
           </div>
