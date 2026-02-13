@@ -6,7 +6,7 @@ import Logo from '@/components/Logo';
 import { useLayout } from '@/contexts/LayoutContext';
 
 export default function DashboardLayout() {
-  const { hideSidebar, customHeaderContent } = useLayout();
+  const { hideSidebar, customHeaderContent, hideProfileMenu } = useLayout();
 
   return (
     <div className="h-screen w-full overflow-hidden bg-slate-50 dark:bg-slate-950 bg-grid-pattern flex relative">
@@ -44,10 +44,12 @@ export default function DashboardLayout() {
             )}
           </div>
 
-          {/* Right: Profile Menu */}
-          <div className="ml-auto flex-shrink-0">
-            <ProfileMenu />
-          </div>
+          {/* Right: Profile Menu (hidden in study mode) */}
+          {!hideProfileMenu && (
+            <div className="ml-auto flex-shrink-0">
+              <ProfileMenu />
+            </div>
+          )}
         </header>
 
         {/* Main Content - Extra bottom padding on mobile for bottom nav */}

@@ -11,11 +11,14 @@ interface LayoutContextType {
   setHideSidebar: (hide: boolean) => void;
   customHeaderContent: ReactNode | null;
   setCustomHeaderContent: (content: ReactNode | null) => void;
+  hideProfileMenu: boolean;
+  setHideProfileMenu: (hide: boolean) => void;
 }
 
 const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
 
 export function LayoutProvider({ children }: { children: ReactNode }) {
+  const [hideProfileMenu, setHideProfileMenu] = useState(false);
   const [hideSidebar, setHideSidebar] = useState(false);
   const [customHeaderContent, setCustomHeaderContent] = useState<ReactNode | null>(null);
 
@@ -26,6 +29,8 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
         setHideSidebar,
         customHeaderContent,
         setCustomHeaderContent,
+        hideProfileMenu,
+        setHideProfileMenu,
       }}
     >
       {children}
