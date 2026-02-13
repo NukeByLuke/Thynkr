@@ -271,11 +271,3 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
 );
 
 PlayerCardExport.displayName = 'PlayerCardExport';
-          </div>
-        </div>
-      </div>
-    );
-  }
-);
-
-PlayerCardExport.displayName = 'PlayerCardExport';
