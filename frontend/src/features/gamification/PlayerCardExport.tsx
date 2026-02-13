@@ -359,7 +359,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
               flex: 1,
               backgroundColor: colors.cardBg,
               borderRadius: '24px',
-              border: 1px solid $`{colors.cardBorder},
+              border: `1px solid ${colors.cardBorder}`,
               boxShadow: '0 20px 40px -10px rgba(0,0,0,0.1)',
               padding: '32px',
               display: 'flex',
