@@ -17,69 +17,177 @@ interface PlayerCardExportProps {
   }[];
 }
 
+// Note: Using inline styles for text because bg-clip-text doesn't work with html2canvas
 export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps>(
   ({ user, totalAchievements, featuredStats }, ref) => {
     return (
       <div
         ref={ref}
         id="player-card-export"
-        className="w-[1200px] h-[630px] bg-slate-950 text-white relative overflow-hidden flex flex-col shadow-2xl rounded-2xl"
         style={{
-          fontFamily: "'Inter', sans-serif",
+          width: '1200px',
+          height: '630px',
+          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+          position: 'relative',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: '16px',
+          background: 'linear-gradient(135deg, #0f172a 0%, #020617 50%, #0f172a 100%)',
         }}
       >
-        {/* Background with Thynkr brand colors (fuchsia/pink/orange) */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-fuchsia-900/25 via-transparent to-transparent" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-pink-900/20 via-transparent to-transparent" />
-        
-        {/* Decorative Orbs - Thynkr brand gradient */}
-        <div className="absolute top-[-150px] left-[-150px] w-[450px] h-[450px] bg-fuchsia-500/30 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-100px] right-[-100px] w-[500px] h-[500px] bg-pink-500/20 blur-[140px] rounded-full" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange-500/10 blur-[100px] rounded-full" />
-        
+        {/* Background orbs - using divs with background colors */}
+        <div style={{
+          position: 'absolute',
+          top: '-150px',
+          left: '-150px',
+          width: '450px',
+          height: '450px',
+          background: 'radial-gradient(circle, rgba(217,70,219,0.35) 0%, transparent 70%)',
+          borderRadius: '50%',
+        }} />
+        <div style={{
+          position: 'absolute',
+          bottom: '-100px',
+          right: '-100px',
+          width: '500px',
+          height: '500px',
+          background: 'radial-gradient(circle, rgba(236,72,153,0.25) 0%, transparent 70%)',
+          borderRadius: '50%',
+        }} />
+        <div style={{
+          position: 'absolute',
+          bottom: '0',
+          right: '200px',
+          width: '400px',
+          height: '400px',
+          background: 'radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%)',
+          borderRadius: '50%',
+        }} />
+
         {/* Content Container */}
-        <div className="relative z-10 flex flex-col h-full p-16 justify-between">
+        <div style={{
+          position: 'relative',
+          zIndex: 10,
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          padding: '48px 56px',
+          justifyContent: 'space-between',
+        }}>
           
           {/* Header Section */}
-          <div className="flex items-center gap-10">
-            {/* Avatar with Fuchsia Ring */}
-            <div className="relative group flex-shrink-0">
-               <div className="absolute -inset-1.5 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-orange-500 rounded-full blur-md opacity-90"></div>
-               <div className="relative w-36 h-36 rounded-full border-[3px] border-fuchsia-500/30 overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center shadow-2xl">
-                 {user.avatarUrl ? (
-                   <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" crossOrigin="anonymous" />
-                 ) : (
-                   <span className="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-fuchsia-300 to-pink-500">{user.username.charAt(0).toUpperCase()}</span>
-                 )}
-               </div>
-               
-               {/* Level Badge */}
-               <div className="absolute -bottom-2 -right-2 bg-slate-950 p-1.5 rounded-full shadow-xl">
-                 <div className="bg-gradient-to-r from-fuchsia-500 via-pink-500 to-orange-500 text-white font-bold px-5 py-2 rounded-full border-2 border-fuchsia-400/30 shadow-lg flex items-center gap-1.5">
-                   <span className="text-white text-base">LEVEL {user.level}</span>
-                 </div>
-               </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+            {/* Avatar */}
+            <div style={{ position: 'relative', flexShrink: 0 }}>
+              {/* Ring glow */}
+              <div style={{
+                position: 'absolute',
+                inset: '-6px',
+                background: 'linear-gradient(135deg, #ec4899 0%, #d946ef 50%, #f97316 100%)',
+                borderRadius: '50%',
+                filter: 'blur(8px)',
+                opacity: 0.8,
+              }} />
+              <div style={{
+                position: 'relative',
+                width: '140px',
+                height: '140px',
+                borderRadius: '50%',
+                border: '4px solid rgba(217,70,219,0.4)',
+                overflow: 'hidden',
+                background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                {user.avatarUrl ? (
+                  <img 
+                    src={user.avatarUrl} 
+                    alt={user.username} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                    crossOrigin="anonymous" 
+                  />
+                ) : (
+                  <span style={{ fontSize: '64px', fontWeight: 700, color: '#f0abfc' }}>
+                    {user.username.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              
+              {/* Level Badge */}
+              <div style={{
+                position: 'absolute',
+                bottom: '-8px',
+                right: '-8px',
+                background: '#020617',
+                padding: '4px',
+                borderRadius: '50px',
+              }}>
+                <div style={{
+                  background: 'linear-gradient(90deg, #d946ef 0%, #ec4899 50%, #f97316 100%)',
+                  color: 'white',
+                  fontWeight: 700,
+                  fontSize: '14px',
+                  padding: '8px 18px',
+                  borderRadius: '50px',
+                  letterSpacing: '0.5px',
+                }}>
+                  LEVEL {user.level}
+                </div>
+              </div>
             </div>
 
             {/* User Info */}
-            <div className="flex flex-col flex-1 gap-3">
-              <h1 className="text-6xl font-extrabold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-white via-fuchsia-100 to-pink-200 tracking-tight drop-shadow-lg leading-tight">
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: '8px' }}>
+              <h1 style={{
+                fontSize: '56px',
+                fontWeight: 800,
+                color: '#ffffff',
+                margin: 0,
+                letterSpacing: '-1px',
+                lineHeight: 1.1,
+              }}>
                 {user.username}
               </h1>
-              <p className="text-fuchsia-300/80 font-semibold text-xl flex items-center gap-2 mb-3">
+              <p style={{
+                fontSize: '20px',
+                fontWeight: 600,
+                color: '#f0abfc',
+                margin: '0 0 12px 0',
+              }}>
                 Thynkr Scholar
               </p>
 
               {/* Stat Badges */}
-              <div className="flex items-center gap-5">
-                <div className="px-6 py-3 rounded-xl bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-fuchsia-500/30 flex items-center gap-3 backdrop-blur-md shadow-lg">
-                   <Trophy size={22} className="text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
-                   <span className="text-base font-bold text-slate-200">{user.xp.toLocaleString()} XP</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{
+                  padding: '12px 20px',
+                  borderRadius: '12px',
+                  background: 'rgba(30,41,59,0.8)',
+                  border: '1px solid rgba(217,70,219,0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                }}>
+                  <Trophy size={20} color="#fbbf24" />
+                  <span style={{ fontSize: '15px', fontWeight: 700, color: '#e2e8f0' }}>
+                    {user.xp.toLocaleString()} XP
+                  </span>
                 </div>
-                <div className="px-6 py-3 rounded-xl bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-fuchsia-500/30 flex items-center gap-3 backdrop-blur-md shadow-lg">
-                   <Award size={22} className="text-fuchsia-400 drop-shadow-[0_0_8px_rgba(232,121,249,0.5)]" />
-                   <span className="text-base font-bold text-slate-200">{totalAchievements} Achievements</span>
+                <div style={{
+                  padding: '12px 20px',
+                  borderRadius: '12px',
+                  background: 'rgba(30,41,59,0.8)',
+                  border: '1px solid rgba(217,70,219,0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                }}>
+                  <Award size={20} color="#e879f9" />
+                  <span style={{ fontSize: '15px', fontWeight: 700, color: '#e2e8f0' }}>
+                    {totalAchievements} Achievements
+                  </span>
                 </div>
               </div>
             </div>
@@ -87,23 +195,66 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
 
           {/* Stats Grid */}
           {featuredStats && featuredStats.length > 0 && (
-            <div className="grid grid-cols-3 gap-8 border-t border-fuchsia-500/20 pt-10 mt-6">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '32px',
+              borderTop: '1px solid rgba(217,70,219,0.2)',
+              paddingTop: '32px',
+              marginTop: '24px',
+            }}>
               {featuredStats.map((stat, idx) => (
-                <div key={idx} className="flex flex-col gap-3 group">
-                  <div className="flex items-center gap-3 text-fuchsia-300/70 mb-2">
-                    <stat.icon size={24} className={`${stat.color} group-hover:scale-110 transition-transform drop-shadow-lg`} />
-                    <span className="text-base font-bold uppercase tracking-widest">{stat.label}</span>
+                <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+                    <stat.icon size={22} color={
+                      stat.color?.includes('amber') ? '#fbbf24' : 
+                      stat.color?.includes('fuchsia') ? '#e879f9' : 
+                      stat.color?.includes('pink') ? '#f472b6' : '#94a3b8'
+                    } />
+                    <span style={{ 
+                      fontSize: '13px', 
+                      fontWeight: 700, 
+                      color: '#cbd5e1',
+                      textTransform: 'uppercase',
+                      letterSpacing: '2px',
+                    }}>
+                      {stat.label}
+                    </span>
                   </div>
-                  <span className="text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-br from-white to-fuchsia-200">{stat.value}</span>
+                  <span style={{ 
+                    fontSize: '48px', 
+                    fontWeight: 800, 
+                    color: '#ffffff',
+                  }}>
+                    {stat.value}
+                  </span>
                 </div>
               ))}
             </div>
           )}
 
           {/* Branding Footer */}
-          <div className="absolute bottom-8 right-10 flex items-center gap-3 opacity-80">
-            <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-pink-500 to-fuchsia-500 shadow-[0_0_12px_rgba(236,72,153,0.8)]" />
-            <span className="text-sm font-bold tracking-[0.25em] text-fuchsia-200/70 uppercase">
+          <div style={{
+            position: 'absolute',
+            bottom: '24px',
+            right: '40px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+          }}>
+            <div style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              background: 'linear-gradient(90deg, #ec4899, #d946ef)',
+            }} />
+            <span style={{
+              fontSize: '12px',
+              fontWeight: 700,
+              letterSpacing: '3px',
+              color: '#a78bfa',
+              textTransform: 'uppercase',
+            }}>
               thynkr.study
             </span>
           </div>
