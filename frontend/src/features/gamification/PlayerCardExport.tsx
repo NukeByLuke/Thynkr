@@ -340,9 +340,10 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
+              alignItems: 'center',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '32px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
               <Award size={16} color={isDark ? '#f0abfc' : '#c026d3'} style={{ marginRight: '8px' }} />
               <span
                 style={{
