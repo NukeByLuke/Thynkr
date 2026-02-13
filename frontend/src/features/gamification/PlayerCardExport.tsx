@@ -261,7 +261,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
               </div>
 
               {/* Name & Badge */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <h1
                   style={{
                     fontSize: '48px',
@@ -286,6 +286,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                     border: '1px solid rgba(234, 179, 8, 0.3)',
                     borderRadius: '100px',
                     width: 'fit-content',
+                    marginTop: '4px',
                   }}
                 >
                   <Star size={14} fill="#fbbf24" stroke="#d97706" />
@@ -319,7 +320,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                     alignItems: 'center',
                     justifyContent: 'center',
                     minWidth: '100px',
-                    padding: '12px 20px',
+                    padding: '16px 24px 20px 24px',
                     backgroundColor: colors.statBg,
                     borderRadius: '16px',
                     border: `1px solid ${colors.cardBorder}`,
@@ -367,7 +368,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
             }}
           >
             {/* Section Header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '24px' }}>
               <Trophy size={20} color="#c026d3" />
               <span
                 style={{
@@ -376,6 +377,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                   textTransform: 'uppercase',
                   letterSpacing: '0.1em',
                   color: colors.textMuted,
+                  marginTop: '-4px',
                 }}
               >
                 Top Achievements
@@ -506,7 +508,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
         <div
           style={{
             position: 'absolute',
-            bottom: '24px',
+            bottom: '16px',
             right: '48px',
             display: 'flex',
             alignItems: 'center',
@@ -514,17 +516,15 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
             zIndex: 20,
           }}
         >
-           <div style={{
-              width: '24px', 
-              height: '24px', 
-              borderRadius: '6px', 
-              background: 'linear-gradient(135deg, #c026d3, #4f46e5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-           }}>
-              <Brain size={14} color="white" />
-           </div>
+           <img 
+              src={isDark ? '/brand/brain-dark.png' : '/brand/brain-light.png'}
+              alt="Thynkr"
+              style={{
+                width: '24px', 
+                height: '24px', 
+                objectFit: 'contain'
+              }}
+           />
            <span style={{ 
                fontSize: '14px', 
                fontWeight: 700, 
