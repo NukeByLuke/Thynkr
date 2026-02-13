@@ -57,30 +57,34 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
     }
   };
 
-  const html2canvasConfig = {
+  // Shared html2canvas config - crucial: onclone resets all transforms
+  const getHtml2CanvasConfig = () => ({
     backgroundColor: '#020617',
-    scale: 2,
+    scale: 2, // High res output
     useCORS: true,
     allowTaint: true,
     logging: false,
-    windowWidth: 1200,
-    windowHeight: 630,
-    onclone: (clonedDoc: Document) => {
-      const clonedCard = clonedDoc.getElementById('player-card-export');
-      if (clonedCard) {
-        clonedCard.style.transform = 'none';
-        clonedCard.style.width = '1200px';
-        clonedCard.style.height = '630px';
+    width: 1200,
+    height: 630,
+    onclone: (documentClone: Document) => {
+      const element = documentClone.getElementById('player-card-export');
+      if (element) {
+        // Reset all transform/scaling artifacts from preview
+        element.style.transform = 'none';
+        element.style.margin = '0';
+        element.style.borderRadius = '0';
+        element.style.width = '1200px';
+        element.style.height = '630px';
       }
     }
-  };
+  });
 
   const handleDownloadImage = async () => {
     if (!cardRef.current) return;
     const toastId = toast.loading('Generating image...');
     try {
       await new Promise(resolve => setTimeout(resolve, 300));
-      const canvas = await html2canvas(cardRef.current, html2canvasConfig);
+      const canvas = await html2canvas(cardRef.current, getHtml2CanvasConfig());
       const link = document.createElement('a');
       link.download = `thynkr-${user.username}-card.png`;
       link.href = canvas.toDataURL('image/png', 1.0);
@@ -97,7 +101,7 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
     const toastId = toast.loading('Generating image...');
     try {
       await new Promise(resolve => setTimeout(resolve, 300));
-      const canvas = await html2canvas(cardRef.current, html2canvasConfig);
+      const canvas = await html2canvas(cardRef.current, getHtml2CanvasConfig());
       canvas.toBlob(async (blob) => {
         if (!blob) {
           toast.error('Failed to create blob', { id: toastId });
