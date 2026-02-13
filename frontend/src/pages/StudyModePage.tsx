@@ -73,7 +73,7 @@ export default function StudyModePage() {
   const shareToken = searchParams.get('token');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { setHideSidebar } = useLayout();
+  const { setHideSidebar, setCustomHeaderContent } = useLayout();
 
   const [activeTab, setActiveTab] = useState<StudyTab>('summary');
   const [selectedFileIds, setSelectedFileIds] = useState<Set<string>>(new Set());
@@ -86,8 +86,56 @@ export default function StudyModePage() {
   // Hide the main app sidebar for immersive experience
   useEffect(() => {
     setHideSidebar(true);
-    return () => setHideSidebar(false);
-  }, [setHideSidebar]);
+    return () => {
+      setHideSidebar(false);
+      setCustomHeaderContent(null);
+    };
+  }, [setHideSidebar, setCustomHeaderContent]);
+
+  // Inject header content into DashboardLayout header (avoids double header)
+  useEffect(() => {
+    setCustomHeaderContent(
+      <div className="flex items-center justify-between w-full gap-4">
+        {/* Left: Back button */}
+        <Link
+          to={`/courses/${courseId}${shareToken ? `?token=${shareToken}` : ''}`}
+          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-pink-50 dark:hover:bg-cyan-900/20 rounded-lg transition-colors flex-shrink-0"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          <span className="hidden sm:inline">Back</span>
+        </Link>
+
+        {/* Center: Title with badge */}
+        <div className="flex items-center gap-3 min-w-0 flex-1 justify-center">
+          <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 bg-gradient-to-r from-fuchsia-500/10 to-pink-500/10 dark:from-violet-500/10 dark:to-cyan-500/10 border border-fuchsia-500/20 dark:border-violet-500/20 rounded-full">
+            <Sparkles className="w-3 h-3 text-fuchsia-600 dark:text-violet-400" />
+            <span className="text-xs font-medium text-fuchsia-600 dark:text-violet-400">AI Study Mode</span>
+          </div>
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs lg:max-w-md">
+            {course?.title || 'Study Mode'}
+          </h2>
+        </div>
+
+        {/* Right: Sidebar toggle */}
+        <div className="flex items-center gap-1 flex-shrink-0 mr-2">
+          <button
+            onClick={() => setShowSidebar(prev => !prev)}
+            className="hidden md:flex p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            title={showSidebar ? 'Hide files' : 'Show files'}
+          >
+            <Menu className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => setMobileSidebarOpen(true)}
+            className="md:hidden p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            <Menu className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    );
+    return () => setCustomHeaderContent(null);
+  }, [courseId, shareToken, course?.title, showSidebar, setCustomHeaderContent]);
 
   // Keyboard navigation (A/D for tabs, Esc to exit)
   useEffect(() => {
@@ -310,55 +358,7 @@ export default function StudyModePage() {
         <meta name="description" content={`AI-powered study mode for ${course?.title || 'your course'}`} />
       </Helmet>
 
-      <div className="h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
-        {/* Header */}
-        <header className="flex-shrink-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800">
-          <div className="flex items-center justify-between px-4 h-14">
-            {/* Left: Back button & Title */}
-            <div className="flex items-center gap-3">
-              <Link
-                to={`/courses/${courseId}${shareToken ? `?token=${shareToken}` : ''}`}
-                className="p-2 -ml-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </Link>
-              <div className="flex items-center gap-3">
-                <div className="hidden sm:flex p-2 bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-500 rounded-lg">
-                  <Sparkles className="h-4 w-4 text-white" />
-                </div>
-                <div>
-                  <h1 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">
-                    AI Study Mode
-                  </h1>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block truncate max-w-[200px]">
-                    {course?.title}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Right: Actions */}
-            <div className="flex items-center gap-2">
-              {/* Toggle sidebar (desktop) */}
-              <button
-                onClick={() => setShowSidebar(!showSidebar)}
-                className="hidden md:flex p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                title={showSidebar ? 'Hide files' : 'Show files'}
-              >
-                <Menu className="h-5 w-5" />
-              </button>
-              
-              {/* Mobile sidebar toggle */}
-              <button
-                onClick={() => setMobileSidebarOpen(true)}
-                className="md:hidden p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                <Menu className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-        </header>
-
+      <div className="h-full flex flex-col">
         {/* Main Content */}
         <div className="flex-1 flex overflow-hidden">
           {/* Sidebar - File Selection (Desktop) */}
@@ -438,7 +438,7 @@ export default function StudyModePage() {
           </AnimatePresence>
 
           {/* Main Study Area */}
-          <main className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 flex flex-col overflow-hidden">
             {/* Study Mode Tabs - Quizlet Style */}
             <LayoutGroup>
               <div className="flex border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 overflow-x-auto scrollbar-hide">
@@ -631,7 +631,7 @@ export default function StudyModePage() {
                 )}
               </AnimatePresence>
             </div>
-          </main>
+          </div>
         </div>
       </div>
     </>
