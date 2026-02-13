@@ -1,7 +1,7 @@
-# 🚨 Troubleshooting 502 Bad Gateway on thynkr.ca
+﻿# ðŸš¨ Troubleshooting 502 Bad Gateway on thynkr.study
 
 ## Problem
-Your frontend loads but the backend API at `https://thynkr.ca/api/auth/login` returns 502 Bad Gateway.
+Your frontend loads but the backend API at `https://thynkr.study/api/auth/login` returns 502 Bad Gateway.
 
 ## What 502 Means
 The nginx frontend can't reach the backend service. The backend is either:
@@ -12,7 +12,7 @@ The nginx frontend can't reach the backend service. The backend is either:
 
 ---
 
-## 🔍 Step 1: SSH to Your Server
+## ðŸ” Step 1: SSH to Your Server
 
 ```bash
 ssh your-server
@@ -21,7 +21,7 @@ cd /path/to/thynkr
 
 ---
 
-## 🔍 Step 2: Check Container Status
+## ðŸ” Step 2: Check Container Status
 
 ```bash
 docker-compose -f docker-compose.prod.yml ps
@@ -44,7 +44,7 @@ thynkr-redis-1               Up (healthy)
 
 ---
 
-## 🔍 Step 3: Check Backend Logs
+## ðŸ” Step 3: Check Backend Logs
 
 ```bash
 docker-compose -f docker-compose.prod.yml logs backend --tail=100
@@ -97,7 +97,7 @@ docker-compose -f docker-compose.prod.yml restart backend
 
 ---
 
-## 🔍 Step 4: Check Frontend Logs
+## ðŸ” Step 4: Check Frontend Logs
 
 ```bash
 docker-compose -f docker-compose.prod.yml logs frontend --tail=50
@@ -111,7 +111,7 @@ This confirms frontend can't reach backend.
 
 ---
 
-## 🔍 Step 5: Test Backend Health Directly
+## ðŸ” Step 5: Test Backend Health Directly
 
 ```bash
 # From your server, test backend directly
@@ -125,7 +125,7 @@ docker-compose -f docker-compose.prod.yml exec backend wget -qO- http://localhos
 
 ---
 
-## 🔍 Step 6: Verify Environment Variables
+## ðŸ” Step 6: Verify Environment Variables
 
 ```bash
 # Check if .env file exists
@@ -143,7 +143,7 @@ docker-compose -f docker-compose.prod.yml exec backend printenv | grep -E "(DATA
 
 ---
 
-## 🔍 Step 7: Check Docker Network
+## ðŸ” Step 7: Check Docker Network
 
 ```bash
 docker network ls
@@ -154,7 +154,7 @@ Backend should be in the same network as frontend.
 
 ---
 
-## ✅ Quick Fixes
+## âœ… Quick Fixes
 
 ### Fix 1: Restart Everything
 ```bash
@@ -206,7 +206,7 @@ OPENAI_API_KEY=your_openai_key
 OPENAI_MODEL=gpt-4o-mini
 
 # Frontend URL
-FRONTEND_URL=https://thynkr.ca
+FRONTEND_URL=https://thynkr.study
 ```
 
 ### Fix 4: Check Database Migration
@@ -218,7 +218,7 @@ docker-compose -f docker-compose.prod.yml exec backend npx prisma migrate deploy
 ### Fix 5: Check SSL Certificates
 ```bash
 # Verify Let's Encrypt certificates exist
-ls -la /etc/letsencrypt/live/thynkr.ca/
+ls -la /etc/letsencrypt/live/thynkr.study/
 
 # Should show:
 # fullchain.pem
@@ -227,7 +227,7 @@ ls -la /etc/letsencrypt/live/thynkr.ca/
 
 ---
 
-## 🎯 Most Common Solution
+## ðŸŽ¯ Most Common Solution
 
 **90% of the time, the issue is:**
 
@@ -238,7 +238,7 @@ ls -la /etc/letsencrypt/live/thynkr.ca/
 
 ---
 
-## 📞 Debug Checklist
+## ðŸ“ž Debug Checklist
 
 Run these commands and send me the output:
 
@@ -261,23 +261,23 @@ ls -la .env && echo "=== ENV FILE CONTENTS ===" && cat .env
 
 ---
 
-## 🚀 After Fixing
+## ðŸš€ After Fixing
 
 Once backend is running:
 
 1. Test health endpoint:
    ```bash
-   curl https://thynkr.ca/api/health
+   curl https://thynkr.study/api/health
    ```
    Should return: `{"status":"ok"}`
 
-2. Try logging in again at https://thynkr.ca
+2. Try logging in again at https://thynkr.study
 
 3. Check browser console - should work without 502 error
 
 ---
 
-## 💡 Pro Tips
+## ðŸ’¡ Pro Tips
 
 - Always check logs first: `docker-compose logs backend`
 - Test health endpoint: `/api/health` should always return 200

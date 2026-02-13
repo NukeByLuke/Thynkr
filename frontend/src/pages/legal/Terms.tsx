@@ -258,10 +258,10 @@ export default function Terms() {
               <p>
                 Educational institutions may contact us at{' '}
                 <a
-                  href="mailto:academic@thynkr.ca"
+                  href="mailto:academic@thynkr.study"
                   className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                 >
-                  academic@thynkr.ca
+                  academic@thynkr.study
                 </a>{' '}
                 with concerns about content that may violate academic integrity policies.
               </p>
@@ -475,10 +475,10 @@ export default function Terms() {
                 <li>
                   Website:{' '}
                   <a
-                    href="https://thynkr.ca"
+                    href="https://thynkr.study"
                     className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                   >
-                    https://thynkr.ca
+                    https://thynkr.study
                   </a>
                 </li>
               </ul>

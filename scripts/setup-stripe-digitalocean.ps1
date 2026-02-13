@@ -1,29 +1,29 @@
-# Stripe Test Mode Setup for DigitalOcean
+﻿# Stripe Test Mode Setup for DigitalOcean
 # This script helps you configure Stripe test keys on your DigitalOcean droplet
 
-Write-Host "🎯 Thynkr - DigitalOcean Stripe Test Setup" -ForegroundColor Cyan
+Write-Host "ðŸŽ¯ Thynkr - DigitalOcean Stripe Test Setup" -ForegroundColor Cyan
 Write-Host "==========================================`n"
 
 # Collect Stripe Test Keys
-Write-Host "📝 Please provide your Stripe TEST mode credentials:" -ForegroundColor Yellow
+Write-Host "ðŸ“ Please provide your Stripe TEST mode credentials:" -ForegroundColor Yellow
 Write-Host "(Find these at https://dashboard.stripe.com/test/apikeys)`n"
 
 $stripeSecretKey = Read-Host "Stripe Secret Key (sk_test_...)"
 $stripePublishableKey = Read-Host "Stripe Publishable Key (pk_test_...)"
 $stripeWebhookSecret = Read-Host "Stripe Webhook Secret (whsec_...)"
 
-Write-Host "`n📦 Price IDs from your Stripe products:"
+Write-Host "`nðŸ“¦ Price IDs from your Stripe products:"
 $priceProMonthly = Read-Host "Pro Monthly Price ID (price_...)"
 $priceProYearly = Read-Host "Pro Yearly Price ID (price_...)"
 $pricePremiumMonthly = Read-Host "Premium Monthly Price ID (price_...)"
 $pricePremiumYearly = Read-Host "Premium Yearly Price ID (price_...)"
 
-Write-Host "`n🌐 Server Configuration:"
+Write-Host "`nðŸŒ Server Configuration:"
 $dropletIp = Read-Host "DigitalOcean Droplet IP"
-$domain = Read-Host "Domain (e.g., thynkr.ca)" 
+$domain = Read-Host "Domain (e.g., thynkr.study)" 
 
 # Generate SSH command
-Write-Host "`n📋 Commands to run on your DigitalOcean server:" -ForegroundColor Green
+Write-Host "`nðŸ“‹ Commands to run on your DigitalOcean server:" -ForegroundColor Green
 Write-Host "============================================`n" -ForegroundColor Green
 
 $sshCommands = @"
@@ -70,10 +70,10 @@ Write-Host $sshCommands
 
 # Save to file
 $sshCommands | Out-File -FilePath "deploy-stripe-test.sh" -Encoding UTF8
-Write-Host "`n✅ Commands saved to: deploy-stripe-test.sh" -ForegroundColor Green
+Write-Host "`nâœ… Commands saved to: deploy-stripe-test.sh" -ForegroundColor Green
 
 # GitHub Secret Update Instructions
-Write-Host "`n🔑 GitHub Secrets to Update:" -ForegroundColor Magenta
+Write-Host "`nðŸ”‘ GitHub Secrets to Update:" -ForegroundColor Magenta
 Write-Host "============================`n"
 Write-Host "Go to: https://github.com/YOUR_USERNAME/Thynkr/settings/secrets/actions"
 Write-Host "Update or create these secrets:`n"
@@ -91,7 +91,7 @@ Write-Host "   - Run 'Deploy to Production' workflow"
 Write-Host "   OR push to main branch to auto-deploy`n"
 
 # Webhook Setup Reminder
-Write-Host "🔌 Webhook Configuration:" -ForegroundColor Yellow
+Write-Host "ðŸ”Œ Webhook Configuration:" -ForegroundColor Yellow
 Write-Host "========================`n"
 Write-Host "Set up webhook in Stripe Dashboard:"
 Write-Host "1. Go to: https://dashboard.stripe.com/test/webhooks"
@@ -108,12 +108,12 @@ Write-Host "5. Click 'Add endpoint'"
 Write-Host "6. Copy the signing secret (should match what you entered above)`n"
 
 # Test Card Reminder
-Write-Host "💳 Test Card for Testing:" -ForegroundColor Cyan
+Write-Host "ðŸ’³ Test Card for Testing:" -ForegroundColor Cyan
 Write-Host "========================"
 Write-Host "Card: 4242 4242 4242 4242"
 Write-Host "Expiry: Any future date (12/30)"
 Write-Host "CVC: Any 3 digits (123)"
 Write-Host "ZIP: Any 5 digits (12345)`n"
 
-Write-Host "📚 Full guide: docs\STRIPE_DIGITALOCEAN_TEST_SETUP.md`n" -ForegroundColor Green
-Write-Host "✨ Setup complete! Follow the commands above to deploy." -ForegroundColor Green
+Write-Host "ðŸ“š Full guide: docs\STRIPE_DIGITALOCEAN_TEST_SETUP.md`n" -ForegroundColor Green
+Write-Host "âœ¨ Setup complete! Follow the commands above to deploy." -ForegroundColor Green

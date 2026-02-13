@@ -1,4 +1,4 @@
-import bcrypt from 'bcryptjs';
+﻿import bcrypt from 'bcryptjs';
 import prisma from './client';
 import { logger } from '../lib/logger';
 import seedCoursesWithInternalFiles from './seed-courses-internal';
@@ -9,7 +9,7 @@ import { AchievementTier } from '@prisma/client';
  * Thynkr Database Seed Script
  * 
  * Seeds the database with clean sample data:
- * - 4 Users: basic, standard, premium, admin (all @thynkr.ca)
+ * - 4 Users: basic, standard, premium, admin (all @thynkr.study)
  * - 5+ Courses with realistic academic content
  * - Sample content articles
  * - User achievements with varied, realistic progress
@@ -48,7 +48,7 @@ function calculateLevel(xp: number): number {
 }
 
 async function clearDatabase() {
-  logger.info('🗑️  Wiping database completely...');
+  logger.info('ðŸ—‘ï¸  Wiping database completely...');
 
   // Clear in order respecting foreign key constraints
   // Most dependent tables first
@@ -91,15 +91,15 @@ async function clearDatabase() {
     }
   }
 
-  logger.info('   ✓ Database wiped completely');
+  logger.info('   âœ“ Database wiped completely');
 }
 
 async function seedUsers() {
-  logger.info('👥 Seeding users...');
+  logger.info('ðŸ‘¥ Seeding users...');
 
   const users = [
     {
-      email: 'basic@thynkr.ca',
+      email: 'basic@thynkr.study',
       username: 'basic',
       password: 'Password123!',
       firstName: 'Basic',
@@ -108,7 +108,7 @@ async function seedUsers() {
       emailVerified: true,
     },
     {
-      email: 'standard@thynkr.ca',
+      email: 'standard@thynkr.study',
       username: 'standard',
       password: 'Password123!',
       firstName: 'Standard',
@@ -117,7 +117,7 @@ async function seedUsers() {
       emailVerified: true,
     },
     {
-      email: 'premium@thynkr.ca',
+      email: 'premium@thynkr.study',
       username: 'premium',
       password: 'Password123!',
       firstName: 'Premium',
@@ -126,7 +126,7 @@ async function seedUsers() {
       emailVerified: true,
     },
     {
-      email: 'admin@thynkr.ca',
+      email: 'admin@thynkr.study',
       username: 'admin',
       password: 'Password123!',
       firstName: 'Admin',
@@ -149,15 +149,15 @@ async function seedUsers() {
     });
 
     createdUsers[userData.username] = user.id;
-    logger.info(`   ✓ ${userData.firstName} ${userData.lastName} (${userData.role})`);
+    logger.info(`   âœ“ ${userData.firstName} ${userData.lastName} (${userData.role})`);
   }
 
-  logger.info(`👥 Created ${users.length} users`);
+  logger.info(`ðŸ‘¥ Created ${users.length} users`);
   return createdUsers;
 }
 
 async function seedContent() {
-  logger.info('📝 Seeding sample content...');
+  logger.info('ðŸ“ Seeding sample content...');
 
   const sampleContent = [
     {
@@ -165,21 +165,21 @@ async function seedContent() {
       description: 'Get started with our AI-powered learning platform',
       content: `# Welcome to Thynkr
 
-Welcome to Thynkr — your intelligent study companion powered by AI.
+Welcome to Thynkr â€” your intelligent study companion powered by AI.
 
 ## What is Thynkr?
 
 Thynkr transforms how you learn by using artificial intelligence to:
 
-- 📚 **Generate summaries** from your course materials
-- 📝 **Create study notes** tailored to your content
-- ❓ **Build quizzes** to test your knowledge
-- 🃏 **Make flashcards** for spaced repetition
-- 🤖 **Chat with an AI tutor** that understands your materials
+- ðŸ“š **Generate summaries** from your course materials
+- ðŸ“ **Create study notes** tailored to your content
+- â“ **Build quizzes** to test your knowledge
+- ðŸƒ **Make flashcards** for spaced repetition
+- ðŸ¤– **Chat with an AI tutor** that understands your materials
 
 ## Getting Started
 
-1. **Upload your materials** — PDFs, documents, or text files
+1. **Upload your materials** â€” PDFs, documents, or text files
 2. **Let AI analyze** your content
 3. **Study smarter** with generated materials
 4. **Track your progress** with streaks and analytics
@@ -287,14 +287,14 @@ Upgrade to Premium to unlock Thynkr's most powerful features.
       data: contentData,
     });
 
-    logger.info(`   ✓ ${contentData.title}`);
+    logger.info(`   âœ“ ${contentData.title}`);
   }
 
-  logger.info(`📝 Created ${sampleContent.length} content articles`);
+  logger.info(`ðŸ“ Created ${sampleContent.length} content articles`);
 }
 
 async function seedAchievements(users: { [key: string]: string }) {
-  logger.info('🏆 Seeding user achievements...');
+  logger.info('ðŸ† Seeding user achievements...');
 
   // Define user personas with their achievement value generation strategies
   const userPersonas = [
@@ -427,15 +427,15 @@ async function seedAchievements(users: { [key: string]: string }) {
     });
 
     logger.info(
-      `   ✓ ${persona.name}: ${unlockedCount} unlocked, ${lockedCount} locked | ${userTotalXP} XP (Level ${level})`
+      `   âœ“ ${persona.name}: ${unlockedCount} unlocked, ${lockedCount} locked | ${userTotalXP} XP (Level ${level})`
     );
   }
 
-  logger.info(`🏆 Created ${totalCreated} achievement records across all users`);
+  logger.info(`ðŸ† Created ${totalCreated} achievement records across all users`);
 }
 
 async function seedStudyData(users: { [key: string]: string }) {
-  logger.info('📊 Seeding study sessions and streaks...');
+  logger.info('ðŸ“Š Seeding study sessions and streaks...');
 
   // Define study patterns for each user persona
   const studyPatterns = [
@@ -540,20 +540,20 @@ async function seedStudyData(users: { [key: string]: string }) {
     });
 
     logger.info(
-      `   ✓ ${pattern.name}: ${pattern.sessionCount} sessions, ${totalMinutes} total minutes, ${pattern.streakDays} day streak`
+      `   âœ“ ${pattern.name}: ${pattern.sessionCount} sessions, ${totalMinutes} total minutes, ${pattern.streakDays} day streak`
     );
   }
 
-  logger.info('📊 Study data seeded successfully');
+  logger.info('ðŸ“Š Study data seeded successfully');
 }
 
 async function seed() {
   const startTime = Date.now();
   
   console.log('\n');
-  logger.info('═══════════════════════════════════════════════════════════');
+  logger.info('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
   logger.info('              THYNKR DATABASE SEED                          ');
-  logger.info('═══════════════════════════════════════════════════════════');
+  logger.info('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
   console.log('\n');
 
   try {
@@ -578,26 +578,26 @@ async function seed() {
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
     console.log('\n');
-    logger.info('═══════════════════════════════════════════════════════════');
-    logger.info(`✅ DATABASE SEED COMPLETED in ${duration}s`);
-    logger.info('═══════════════════════════════════════════════════════════');
+    logger.info('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
+    logger.info(`âœ… DATABASE SEED COMPLETED in ${duration}s`);
+    logger.info('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
     console.log('\n');
-    logger.info('📋 Summary:');
-    logger.info('   • 4 Users (basic, standard, premium, admin)');
-    logger.info('   • 5 Courses with files');
-    logger.info('   • 3 Content articles');
-    logger.info(`   • ${Object.keys(ACHIEVEMENTS).length} Achievement types with realistic progress`);
-    logger.info('   • Study sessions and streaks for all users');
+    logger.info('ðŸ“‹ Summary:');
+    logger.info('   â€¢ 4 Users (basic, standard, premium, admin)');
+    logger.info('   â€¢ 5 Courses with files');
+    logger.info('   â€¢ 3 Content articles');
+    logger.info(`   â€¢ ${Object.keys(ACHIEVEMENTS).length} Achievement types with realistic progress`);
+    logger.info('   â€¢ Study sessions and streaks for all users');
     console.log('\n');
-    logger.info('🔑 Test Accounts (password: Password123!):');
-    logger.info('   • basic@thynkr.ca');
-    logger.info('   • standard@thynkr.ca');
-    logger.info('   • premium@thynkr.ca');
-    logger.info('   • admin@thynkr.ca');
+    logger.info('ðŸ”‘ Test Accounts (password: Password123!):');
+    logger.info('   â€¢ basic@thynkr.study');
+    logger.info('   â€¢ standard@thynkr.study');
+    logger.info('   â€¢ premium@thynkr.study');
+    logger.info('   â€¢ admin@thynkr.study');
     console.log('\n');
 
   } catch (error) {
-    logger.error({ err: error }, '❌ Database seed failed');
+    logger.error({ err: error }, 'âŒ Database seed failed');
     throw error;
   } finally {
     await prisma.$disconnect();

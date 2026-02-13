@@ -1,8 +1,8 @@
-# Scripts Directory
+﻿# Scripts Directory
 
 Automation scripts for Thynkr development and deployment workflows.
 
-## 📦 Deployment
+## ðŸ“¦ Deployment
 
 ### `deploy.ps1` - Main Deployment Script
 Deploy your application to DigitalOcean with full control over what gets deployed.
@@ -35,14 +35,14 @@ Deploy your application to DigitalOcean with full control over what gets deploye
 - `-NoCache`: Build Docker images without cache (fresh build)
 
 **What it does:**
-1. ✅ Checks prerequisites (Docker, SSH)
-2. 🧪 Runs tests (unless skipped)
-3. 🏗️ Builds Docker images
-4. 📤 Pushes images to Docker Hub
-5. 🚀 Deploys to DigitalOcean
-6. 🗃️ Runs database migrations (for backend)
-7. 🧹 Cleans up old images
-8. 💚 Performs health checks
+1. âœ… Checks prerequisites (Docker, SSH)
+2. ðŸ§ª Runs tests (unless skipped)
+3. ðŸ—ï¸ Builds Docker images
+4. ðŸ“¤ Pushes images to Docker Hub
+5. ðŸš€ Deploys to DigitalOcean
+6. ðŸ—ƒï¸ Runs database migrations (for backend)
+7. ðŸ§¹ Cleans up old images
+8. ðŸ’š Performs health checks
 
 ### `rollback-deployment.ps1` - Rollback Mechanism
 Quickly rollback to a previous deployment if something goes wrong.
@@ -52,7 +52,7 @@ Quickly rollback to a previous deployment if something goes wrong.
 .\scripts\rollback-deployment.ps1
 ```
 
-## 🔧 Development Workflow
+## ðŸ”§ Development Workflow
 
 ### `new-feature.ps1` - Create Feature Branch
 Start a new feature branch with proper naming convention.
@@ -84,12 +84,12 @@ Create a new release with proper versioning and tagging.
 
 # This will:
 # - Run all checks (lint, typecheck, build, tests)
-# - Merge develop → main
+# - Merge develop â†’ main
 # - Create git tag v1.2.0
 # - Push to origin
 ```
 
-## 💳 Configuration
+## ðŸ’³ Configuration
 
 ### `setup-stripe.ps1` - Stripe Setup
 Configure Stripe webhooks for your local or production environment.
@@ -99,7 +99,7 @@ Configure Stripe webhooks for your local or production environment.
 .\scripts\setup-stripe.ps1
 ```
 
-## 🎯 Quick Reference
+## ðŸŽ¯ Quick Reference
 
 ### Common Deployment Scenarios
 
@@ -147,7 +147,7 @@ Configure Stripe webhooks for your local or production environment.
    .\scripts\deploy.ps1
    ```
 
-## 🔐 Prerequisites
+## ðŸ” Prerequisites
 
 - **Docker**: Required for building images
 - **SSH Access**: Must have SSH key configured for DigitalOcean server
@@ -155,13 +155,13 @@ Configure Stripe webhooks for your local or production environment.
 - **Git**: For version control operations
 - **Node.js & pnpm**: For running tests and builds
 
-## 🌐 Server Details
+## ðŸŒ Server Details
 
 - **Server**: `root@138.197.208.81`
 - **Docker Hub**: `nukebyluke/thynkr-*`
-- **Production URL**: https://thynkr.ca
+- **Production URL**: https://thynkr.study
 
-## 📝 Notes
+## ðŸ“ Notes
 
 - All deployment scripts include error handling and rollback support
 - Scripts are Windows PowerShell compatible
@@ -169,7 +169,7 @@ Configure Stripe webhooks for your local or production environment.
 - Health checks run automatically after deployment
 - Database migrations run automatically for backend deployments
 
-## 🆘 Troubleshooting
+## ðŸ†˜ Troubleshooting
 
 **SSH Connection Failed:**
 ```powershell
@@ -198,7 +198,7 @@ ssh root@138.197.208.81 'cd /root && docker compose -f docker-compose.prod.yml l
 .\scripts\deploy.ps1 -SkipTests
 ```
 
-## 🔗 Related Files
+## ðŸ”— Related Files
 
 - `../docker-compose.prod.yml` - Production Docker Compose config
 - `../nginx.prod.conf` - Nginx configuration for production

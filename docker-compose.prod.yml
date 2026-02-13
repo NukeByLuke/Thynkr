@@ -40,9 +40,9 @@ services:
       PORT: 3001
       DATABASE_URL: postgresql://${POSTGRES_USER:-thynkr}:${POSTGRES_PASSWORD:-thynkr_dev_password}@postgres:5432/${POSTGRES_DB:-thynkr_db}
       REDIS_URL: redis://redis:6379
-      BACKEND_URL: ${BACKEND_URL:-https://thynkr.ca}
-      FRONTEND_URL: ${FRONTEND_URL:-https://thynkr.ca}
-      VITE_API_URL: ${VITE_API_URL:-https://thynkr.ca}
+      BACKEND_URL: ${BACKEND_URL:-https://thynkr.study}
+      FRONTEND_URL: ${FRONTEND_URL:-https://thynkr.study}
+      VITE_API_URL: ${VITE_API_URL:-https://thynkr.study}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}

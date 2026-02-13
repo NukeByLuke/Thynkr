@@ -391,6 +391,14 @@ export default function StudyModePage() {
       <Helmet>
         <title>{pageTitle} - Thynkr</title>
         <meta name="description" content={`AI-powered study mode for ${course?.title || 'your course'}`} />
+        <meta property="og:title" content={`Study: ${course?.title || 'AI Study Mode'} — Thynkr`} />
+        <meta property="og:description" content={`Study ${course?.title || 'your course'} with AI summaries, flashcards, quizzes & notes.`} />
+        <meta property="og:image" content={`${window.location.origin}/brand/og-default.png`} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`Study: ${course?.title || 'AI Study Mode'} — Thynkr`} />
+        <meta name="twitter:description" content={`Study ${course?.title || 'your course'} with AI summaries, flashcards, quizzes & notes.`} />
+        <meta name="twitter:image" content={`${window.location.origin}/brand/og-default.png`} />
       </Helmet>
 
       <div className="h-full flex flex-col">

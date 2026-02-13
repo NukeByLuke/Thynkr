@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Helmet } from 'react-helmet-async';
 import { FileTypeBadge } from '@/lib/fileTypeUtils';
 import {
   ArrowLeft,
@@ -436,6 +437,19 @@ export default function MyCourseDetail() {
 
   return (
     <div className="h-full">
+      <Helmet>
+        <title>{course.title} — Thynkr</title>
+        <meta name="description" content={course.description || `${course.title} on Thynkr — AI-powered study platform`} />
+        <meta property="og:title" content={`${course.title} — Thynkr`} />
+        <meta property="og:description" content={course.description || `Study ${course.title} with AI-powered summaries, flashcards, quizzes & notes.`} />
+        <meta property="og:image" content={course.bannerImage || `${window.location.origin}/brand/og-default.png`} />
+        <meta property="og:url" content={shareUrl} />
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${course.title} — Thynkr`} />
+        <meta name="twitter:description" content={course.description || `Study ${course.title} with AI-powered summaries, flashcards, quizzes & notes.`} />
+        <meta name="twitter:image" content={course.bannerImage || `${window.location.origin}/brand/og-default.png`} />
+      </Helmet>
       {/* Cover Banner */}
       {course.bannerImage ? (
         <div className="relative w-full h-40 sm:h-48 bg-slate-100 dark:bg-zinc-900 group">

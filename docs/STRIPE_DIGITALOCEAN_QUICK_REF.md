@@ -1,9 +1,9 @@
-# Quick Reference: Stripe Test Mode on DigitalOcean
+﻿# Quick Reference: Stripe Test Mode on DigitalOcean
 
-## 🎯 Goal
+## ðŸŽ¯ Goal
 Set up Stripe test mode on your DigitalOcean production environment to test subscriptions without real charges.
 
-## ⚡ Quick Setup (5 Steps)
+## âš¡ Quick Setup (5 Steps)
 
 ### 1. Create Stripe Test Products
 - Go to [Stripe Dashboard](https://dashboard.stripe.com) (TEST mode)
@@ -18,12 +18,12 @@ Set up Stripe test mode on your DigitalOcean production environment to test subs
 
 ### 3. Set Up Webhook
 - [Webhooks](https://dashboard.stripe.com/test/webhooks) (TEST mode)
-- Add endpoint: `https://thynkr.ca/api/webhooks/stripe`
+- Add endpoint: `https://thynkr.study/api/webhooks/stripe`
 - Select events: `checkout.session.completed`, `customer.subscription.*`, `invoice.payment_*`
 - Copy webhook secret (`whsec_...`)
 
 ### 4. Update GitHub Secrets
-Go to **Settings** → **Secrets and variables** → **Actions** and add:
+Go to **Settings** â†’ **Secrets and variables** â†’ **Actions** and add:
 
 ```
 VITE_STRIPE_PRICE_STANDARD_MONTHLY = price_... (Pro Monthly)
@@ -61,7 +61,7 @@ Deploy frontend via GitHub Actions.
 
 ---
 
-## 🧪 Testing
+## ðŸ§ª Testing
 
 **Test Card:** `4242 4242 4242 4242`
 - Expiry: Any future date
@@ -69,7 +69,7 @@ Deploy frontend via GitHub Actions.
 - ZIP: Any 5 digits
 
 **Test Flow:**
-1. Go to `https://thynkr.ca`
+1. Go to `https://thynkr.study`
 2. Sign up/login
 3. Navigate to Pricing
 4. Click "Upgrade to Pro"
@@ -82,12 +82,12 @@ docker compose -f docker-compose.prod.yml logs -f backend | grep -i stripe
 ```
 
 **Check Webhooks:**
-- Stripe Dashboard → Webhooks → Your endpoint
+- Stripe Dashboard â†’ Webhooks â†’ Your endpoint
 - Should see successful deliveries (HTTP 200)
 
 ---
 
-## 📚 Full Guides
+## ðŸ“š Full Guides
 
 - **Complete Setup:** [STRIPE_DIGITALOCEAN_TEST_SETUP.md](./STRIPE_DIGITALOCEAN_TEST_SETUP.md)
 - **Local Testing:** [STRIPE_TESTING_GUIDE.md](./STRIPE_TESTING_GUIDE.md)
@@ -95,7 +95,7 @@ docker compose -f docker-compose.prod.yml logs -f backend | grep -i stripe
 
 ---
 
-## 🔧 Helper Script
+## ðŸ”§ Helper Script
 
 Run the interactive setup script:
 ```powershell
@@ -106,7 +106,7 @@ This will guide you through collecting all the keys and generate the commands yo
 
 ---
 
-## ✅ Checklist
+## âœ… Checklist
 
 - [ ] Created 2 products (Pro & Premium) in Stripe TEST mode
 - [ ] Got 4 price IDs
@@ -123,7 +123,7 @@ This will guide you through collecting all the keys and generate the commands yo
 
 ---
 
-## 🐛 Common Issues
+## ðŸ› Common Issues
 
 **"Webhook signature failed"**
 - Check `STRIPE_WEBHOOK_SECRET` in server `.env` matches Stripe Dashboard
@@ -141,4 +141,4 @@ This will guide you through collecting all the keys and generate the commands yo
 **Can't connect to server**
 - Verify SSL certificate is valid
 - Check nginx is running: `docker compose -f docker-compose.prod.yml ps`
-- Check health: `curl https://thynkr.ca/api/health`
+- Check health: `curl https://thynkr.study/api/health`
