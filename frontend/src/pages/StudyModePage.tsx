@@ -2,11 +2,12 @@
  * Study Mode Page - Full-page AI Study Experience
  * 
  * A dedicated page for AI-powered study mode with summary, notes, quiz, and flashcards.
- * Provides an immersive study experience with file selection and content generation.
+ * Uses the same rich components as ImmersiveStudy (FlashcardViewer, QuizPlayer, SummaryView, NotesView).
+ * Supports share token forwarding so private shared courses can be studied.
  */
 
-import { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
@@ -28,9 +29,10 @@ import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useLayout } from '@/contexts/LayoutContext';
 import FileSelectionPane from '@/features/study/FileSelectionPane';
-import PaginatedReader from '@/features/study/PaginatedReader';
-import StudyFlashcards from '@/features/study/StudyFlashcards';
-import StudyQuiz from '@/features/study/StudyQuiz';
+import SummaryView from '@/features/study/SummaryView';
+import NotesView from '@/features/study/NotesView';
+import FlashcardViewer from '@/features/study/FlashcardViewer';
+import QuizPlayer from '@/features/study/QuizPlayer';
 
 type StudyTab = 'summary' | 'notes' | 'quiz' | 'flashcards';
 
@@ -67,6 +69,8 @@ const TABS: { id: StudyTab; label: string; icon: typeof FileText; color: string 
 
 export default function StudyModePage() {
   const { id: courseId } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const shareToken = searchParams.get('token');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { setHideSidebar } = useLayout();
@@ -76,31 +80,62 @@ export default function StudyModePage() {
   const [showSidebar, setShowSidebar] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
+  // Build query string helper for share token
+  const tokenQuery = shareToken ? `token=${shareToken}` : '';
+
   // Hide the main app sidebar for immersive experience
   useEffect(() => {
     setHideSidebar(true);
     return () => setHideSidebar(false);
   }, [setHideSidebar]);
 
-  // Fetch course details
+  // Keyboard navigation (A/D for tabs, Esc to exit)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const currentIndex = TABS.findIndex(t => t.id === activeTab);
+      const key = e.key.toLowerCase();
+
+      if (key === 'a' && currentIndex > 0) {
+        e.preventDefault();
+        handleTabChange(TABS[currentIndex - 1].id);
+      } else if (key === 'd' && currentIndex < TABS.length - 1) {
+        e.preventDefault();
+        handleTabChange(TABS[currentIndex + 1].id);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        navigate(`/courses/${courseId}${shareToken ? `?token=${shareToken}` : ''}`);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeTab, courseId, shareToken, navigate]);
+
+  // Fetch course details (with share token)
   const { data: course, isLoading: courseLoading } = useQuery<Course>({
-    queryKey: ['course', courseId],
+    queryKey: ['course', courseId, shareToken],
     queryFn: async () => {
-      const response = await api.get(`/user-courses/${courseId}`);
+      const url = shareToken
+        ? `/user-courses/${courseId}?token=${shareToken}`
+        : `/user-courses/${courseId}`;
+      const response = await api.get(url);
       return response.data.course;
     },
     enabled: !!courseId,
   });
 
-  // Fetch study access status
+  // Fetch study access status (with share token)
   const {
     data: statusData,
     isLoading: statusLoading,
     error: statusError,
   } = useQuery<StudyStatusResponse>({
-    queryKey: ['study-status', courseId],
+    queryKey: ['study-status', courseId, shareToken],
     queryFn: async () => {
-      const response = await api.get(`/ai/study/status/${courseId}`);
+      const url = shareToken
+        ? `/ai/study/status/${courseId}?token=${shareToken}`
+        : `/ai/study/status/${courseId}`;
+      const response = await api.get(url);
       return response.data;
     },
     enabled: !!courseId,
@@ -116,10 +151,12 @@ export default function StudyModePage() {
     }
   }, [statusData?.files]);
 
-  // Generate study content mutation
+  // Generate study content mutation (with share token)
   const generateMutation = useMutation({
     mutationFn: async ({ type, refresh = false }: { type: StudyTab; refresh?: boolean }) => {
-      const response = await api.post(`/ai/study${refresh ? '?refresh=true' : ''}`, {
+      const params = [refresh ? 'refresh=true' : '', tokenQuery].filter(Boolean).join('&');
+      const url = params ? `/ai/study?${params}` : '/ai/study';
+      const response = await api.post(url, {
         courseId,
         fileIds: Array.from(selectedFileIds),
         type,
@@ -137,7 +174,7 @@ export default function StudyModePage() {
     },
   });
 
-  // Query for cached content
+  // Query for cached content (with share token)
   const fileIdsKey = useMemo(() => Array.from(selectedFileIds).sort().join(','), [selectedFileIds]);
 
   const {
@@ -147,7 +184,8 @@ export default function StudyModePage() {
   } = useQuery({
     queryKey: ['study-content', courseId, fileIdsKey, activeTab],
     queryFn: async () => {
-      const response = await api.post('/ai/study', {
+      const url = tokenQuery ? `/ai/study?${tokenQuery}` : '/ai/study';
+      const response = await api.post(url, {
         courseId,
         fileIds: Array.from(selectedFileIds),
         type: activeTab,
@@ -162,9 +200,27 @@ export default function StudyModePage() {
     generateMutation.mutate({ type: activeTab, refresh: true });
   };
 
-  const handleTabChange = (tab: StudyTab) => {
+  const handleTabChange = useCallback((tab: StudyTab) => {
     setActiveTab(tab);
-  };
+  }, []);
+
+  // Quiz submit handler (score locally since course study has no quiz record)
+  const handleQuizSubmit = useCallback(async (
+    answers: Record<string, string>,
+    _timeSpentSeconds?: number,
+    _questionTimings?: Record<string, number>
+  ) => {
+    const questions = studyContent?.result?.questions || [];
+    let score = 0;
+    questions.forEach((q: any) => {
+      if (answers[q.id] === q.correctAnswer) score++;
+    });
+    return {
+      score,
+      total: questions.length,
+      percentage: questions.length > 0 ? Math.round((score / questions.length) * 100) : 0,
+    };
+  }, [studyContent]);
 
   const isGenerating = generateMutation.isPending || contentLoading;
   const isLoading = courseLoading || statusLoading;
@@ -235,7 +291,7 @@ export default function StudyModePage() {
               documents, or text files to get started.
             </p>
             <Link
-              to={`/courses/${courseId}`}
+              to={`/courses/${courseId}${shareToken ? `?token=${shareToken}` : ''}`}
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-medium hover:opacity-90 transition-opacity"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -261,7 +317,7 @@ export default function StudyModePage() {
             {/* Left: Back button & Title */}
             <div className="flex items-center gap-3">
               <Link
-                to={`/courses/${courseId}`}
+                to={`/courses/${courseId}${shareToken ? `?token=${shareToken}` : ''}`}
                 className="p-2 -ml-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
                 <ChevronLeft className="h-5 w-5" />
@@ -423,8 +479,8 @@ export default function StudyModePage() {
               </div>
             </LayoutGroup>
 
-            {/* Content Area */}
-            <div className="flex-1 overflow-hidden">
+            {/* Content Area - Single scrollable container */}
+            <div className="flex-1 overflow-y-auto">
               <AnimatePresence mode="wait">
                 {selectedFileIds.size === 0 ? (
                   <motion.div
@@ -432,7 +488,7 @@ export default function StudyModePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="flex flex-col items-center justify-center h-full p-8 text-center"
+                    className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center"
                   >
                     <div className="p-5 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl mb-5">
                       <Sparkles className="h-14 w-14 text-indigo-500" />
@@ -456,7 +512,7 @@ export default function StudyModePage() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="flex flex-col items-center justify-center h-full p-8"
+                    className="flex flex-col items-center justify-center min-h-[60vh] p-8"
                   >
                     <div className="relative mb-6">
                       <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 rounded-full blur-xl opacity-30" />
@@ -476,38 +532,75 @@ export default function StudyModePage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2, ease: 'easeOut' }}
-                    className="h-full"
                   >
-                    {activeTab === 'summary' && studyContent.result.pages && (
-                      <PaginatedReader
-                        type="summary"
-                        pages={studyContent.result.pages}
-                        onRegenerate={handleRegenerate}
-                        isRegenerating={generateMutation.isPending}
-                      />
-                    )}
-                    {activeTab === 'notes' && studyContent.result.pages && (
-                      <PaginatedReader
-                        type="notes"
-                        pages={studyContent.result.pages}
-                        onRegenerate={handleRegenerate}
-                        isRegenerating={generateMutation.isPending}
-                      />
-                    )}
-                    {activeTab === 'quiz' && studyContent.result.questions && (
-                      <StudyQuiz
-                        data={studyContent.result}
-                        onRegenerate={handleRegenerate}
-                        isRegenerating={generateMutation.isPending}
-                      />
-                    )}
-                    {activeTab === 'flashcards' && studyContent.result.cards && (
-                      <StudyFlashcards
-                        data={studyContent.result}
-                        onRegenerate={handleRegenerate}
-                        isRegenerating={generateMutation.isPending}
-                      />
-                    )}
+                    <div className="max-w-5xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+                      <div className="relative rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl shadow-slate-200/20 dark:shadow-slate-900/30 overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-pink-500/[0.02] via-transparent to-fuchsia-500/[0.02] dark:from-cyan-500/[0.02] dark:via-transparent dark:to-violet-500/[0.02] pointer-events-none" />
+                        <div className="relative z-10 p-6 sm:p-8">
+                          {activeTab === 'summary' && studyContent.result.pages && (
+                            <SummaryView
+                              content={studyContent.result.pages.map((p: any) => `## ${p.fileName}\n\n${p.content}`).join('\n\n---\n\n')}
+                              onRegenerate={handleRegenerate}
+                              isRegenerating={generateMutation.isPending}
+                            />
+                          )}
+                          {activeTab === 'notes' && studyContent.result.pages && (
+                            <NotesView
+                              keyPoints={studyContent.result.pages.flatMap((p: any) => p.keyPoints || [])}
+                              detailed={studyContent.result.pages.map((p: any) => `## ${p.fileName}\n\n${p.detailed || ''}`).join('\n\n---\n\n')}
+                              onRegenerate={handleRegenerate}
+                              isRegenerating={generateMutation.isPending}
+                            />
+                          )}
+                          {activeTab === 'quiz' && studyContent.result.questions && (
+                            <QuizPlayer
+                              quizId={`course-${courseId}-quiz`}
+                              title={course?.title || 'Course Quiz'}
+                              questions={studyContent.result.questions.map((q: any, i: number) => ({
+                                ...q,
+                                id: q.id || `q-${i}`,
+                                order: q.order ?? i,
+                              }))}
+                              onGenerateQuiz={(difficulty: string, numQuestions: number) => {
+                                generateMutation.mutate({ type: 'quiz', refresh: true });
+                              }}
+                              isGenerating={generateMutation.isPending}
+                              onSubmit={handleQuizSubmit}
+                            />
+                          )}
+                          {activeTab === 'flashcards' && studyContent.result.cards && (
+                            <FlashcardViewer
+                              cards={studyContent.result.cards.map((c: any, i: number) => ({
+                                ...c,
+                                id: c.id || `card-${i}`,
+                                order: c.order ?? i,
+                              }))}
+                              title={studyContent.result.title || 'Flashcards'}
+                              onRegenerate={handleRegenerate}
+                              isRegenerating={generateMutation.isPending}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Keyboard Hints */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                      className="hidden lg:flex items-center justify-center gap-4 pb-6 text-xs text-slate-500 dark:text-slate-500"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 font-mono">A</kbd>
+                        <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 font-mono">D</kbd>
+                        <span>Switch tabs</span>
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 font-mono">Esc</kbd>
+                        <span>Exit</span>
+                      </span>
+                    </motion.div>
                   </motion.div>
                 ) : (
                   <motion.div
@@ -515,7 +608,7 @@ export default function StudyModePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="flex flex-col items-center justify-center h-full p-8 text-center"
+                    className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center"
                   >
                     <div className="p-5 bg-slate-100 dark:bg-slate-800 rounded-2xl mb-5">
                       <AlertCircle className="h-14 w-14 text-slate-400" />

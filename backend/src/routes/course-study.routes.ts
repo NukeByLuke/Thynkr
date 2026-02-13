@@ -86,7 +86,8 @@ async function getUserLanguage(userId: string): Promise<string> {
 async function verifyCourseAccess(
   courseId: string,
   userId: string,
-  userRole: string
+  userRole: string,
+  shareToken?: string
 ): Promise<any> {
   const course = await db.course.findUnique({
     where: { id: courseId },
@@ -109,17 +110,18 @@ async function verifyCourseAccess(
 
   const isOwner = course.createdBy === userId;
   const isPublic = course.visibility === 'PUBLIC';
+  const hasValidToken = shareToken && course.shareToken === shareToken;
   const canViewPublic = userRole === 'PREMIUM' || userRole === 'ADMIN';
 
   // Role-based access:
   // - BASIC: No study access at all
-  // - STANDARD: Can study own courses
-  // - PREMIUM/ADMIN: Can study own + public courses
+  // - STANDARD: Can study own courses OR via valid share token
+  // - PREMIUM/ADMIN: Can study own + public courses OR via valid share token
   if (userRole === 'BASIC') {
     throw { statusCode: 403, message: 'Upgrade to Standard or higher to access AI study features' };
   }
 
-  if (!isOwner && !(isPublic && canViewPublic)) {
+  if (!isOwner && !hasValidToken && !(isPublic && canViewPublic)) {
     throw { statusCode: 403, message: 'You do not have access to study this course' };
   }
 
@@ -189,8 +191,9 @@ export default async function courseStudyRoutes(server: FastifyInstance) {
       }
 
       try {
-        // Verify course access
-        const course = await verifyCourseAccess(body.courseId, userId, userRole);
+        // Verify course access (share token passed via query param)
+        const { token: shareToken } = request.query as { token?: string };
+        const course = await verifyCourseAccess(body.courseId, userId, userRole, shareToken);
 
         // Validate file IDs belong to this course
         const courseFileIds = new Set(course.files.map((f: any) => f.id));
@@ -422,6 +425,8 @@ export default async function courseStudyRoutes(server: FastifyInstance) {
 
         const isOwner = course.createdBy === userId;
         const isPublic = course.visibility === 'PUBLIC';
+        const { token: shareToken } = request.query as { token?: string };
+        const hasValidToken = shareToken && course.shareToken === shareToken;
 
         // Determine access level
         let canStudy = false;
@@ -431,11 +436,11 @@ export default async function courseStudyRoutes(server: FastifyInstance) {
           canStudy = false;
           reason = 'Upgrade to Standard or higher to access AI study features';
         } else if (userRole === 'STANDARD') {
-          canStudy = isOwner;
-          reason = isOwner ? '' : 'Standard users can only study their own courses';
+          canStudy = isOwner || !!hasValidToken;
+          reason = canStudy ? '' : 'Standard users can only study their own courses';
         } else {
           // PREMIUM or ADMIN
-          canStudy = isOwner || isPublic;
+          canStudy = isOwner || isPublic || !!hasValidToken;
           reason = canStudy ? '' : 'This course is private';
         }
 
