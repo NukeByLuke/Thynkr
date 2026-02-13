@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+﻿import { forwardRef } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
   Trophy,
@@ -65,14 +65,56 @@ const iconMap: Record<string, LucideIcon> = {
   'share-2': Share2,
 };
 
-// Tier colors (hex for inline styles) - slightly lower opacity for glassier feel
-const tierColors: Record<AchievementTier, { border: string; bg: string; text: string }> = {
-  COPPER: { border: '#d97706', bg: 'rgba(217, 119, 6, 0.08)', text: '#d97706' },
-  GOLD: { border: '#eab308', bg: 'rgba(234, 179, 8, 0.08)', text: '#eab308' },
-  RUBY: { border: '#ef4444', bg: 'rgba(239, 68, 68, 0.08)', text: '#ef4444' },
-  DIAMOND: { border: '#06b6d4', bg: 'rgba(6, 182, 212, 0.08)', text: '#06b6d4' },
-  AMETHYST: { border: '#a855f7', bg: 'rgba(168, 85, 247, 0.08)', text: '#a855f7' },
-  MASTERY: { border: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.08)', text: '#8b5cf6' },
+// Tier styling configuration
+const tierStyles: Record<AchievementTier, { 
+  border: string; 
+  bg: string; 
+  text: string; 
+  gradient: string;
+  shadow: string; 
+}> = {
+  COPPER: { 
+    border: '#f59e0b', 
+    bg: 'rgba(251, 191, 36, 0.1)', 
+    text: '#d97706',
+    gradient: 'linear-gradient(135deg, #f59e0b, #d97706)',
+    shadow: '0 4px 12px rgba(245, 158, 11, 0.2)'
+  },
+  GOLD: { 
+    border: '#fbbf24', 
+    bg: 'rgba(251, 191, 36, 0.15)', 
+    text: '#b45309',
+    gradient: 'linear-gradient(135deg, #fcd34d, #f59e0b)',
+    shadow: '0 4px 12px rgba(251, 191, 36, 0.3)'
+  },
+  RUBY: { 
+    border: '#f43f5e', 
+    bg: 'rgba(244, 63, 94, 0.1)', 
+    text: '#e11d48',
+    gradient: 'linear-gradient(135deg, #fb7185, #e11d48)',
+    shadow: '0 4px 12px rgba(244, 63, 94, 0.2)'
+  },
+  DIAMOND: { 
+    border: '#06b6d4', 
+    bg: 'rgba(6, 182, 212, 0.1)', 
+    text: '#0891b2',
+    gradient: 'linear-gradient(135deg, #22d3ee, #0891b2)',
+    shadow: '0 4px 12px rgba(6, 182, 212, 0.2)'
+  },
+  AMETHYST: { 
+    border: '#a855f7', 
+    bg: 'rgba(168, 85, 247, 0.1)', 
+    text: '#9333ea',
+    gradient: 'linear-gradient(135deg, #c084fc, #9333ea)',
+    shadow: '0 4px 12px rgba(168, 85, 247, 0.2)'
+  },
+  MASTERY: { 
+    border: '#6366f1', 
+    bg: 'rgba(99, 102, 241, 0.1)', 
+    text: '#4f46e5',
+    gradient: 'linear-gradient(135deg, #818cf8, #4f46e5)',
+    shadow: '0 4px 12px rgba(99, 102, 241, 0.25)'
+  },
 };
 
 const tierLabels: Record<AchievementTier, string> = {
@@ -89,39 +131,32 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
   ({ user, achievements, theme }, ref) => {
     const isDark = theme === 'dark';
 
-    // Colors based on theme
+    // Theme palette
     const colors = {
-      bg: isDark
-        ? 'linear-gradient(135deg, #020617 0%, #172554 100%)'
-        : 'linear-gradient(135deg, #fdfbf7 0%, #fff1f2 100%)',
-      text: isDark ? '#ffffff' : '#1e293b',
+      bg: isDark ? '#0f172a' : '#f8fafc',
+      text: isDark ? '#f1f5f9' : '#0f172a',
       textMuted: isDark ? '#94a3b8' : '#64748b',
-      textSubtle: isDark ? '#64748b' : '#94a3b8',
-      cardBg: isDark ? 'rgba(15, 23, 42, 0.6)' : 'rgba(255, 255, 255, 0.8)',
-      cardBorder: isDark ? 'rgba(148, 163, 184, 0.15)' : 'rgba(148, 163, 184, 0.3)',
-      avatarBg: isDark ? '#1e293b' : '#f1f5f9',
-      avatarFallback: isDark ? '#a855f7' : '#ec4899',
-      badgeBg: isDark
-        ? 'linear-gradient(90deg, rgba(236, 72, 153, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%)'
-        : 'linear-gradient(90deg, rgba(236, 72, 153, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)',
-      badgeBorder: isDark ? 'rgba(236, 72, 153, 0.3)' : 'rgba(236, 72, 153, 0.4)',
-      badgeText: isDark ? '#f0abfc' : '#c026d3',
-      emptyBg: isDark ? 'rgba(30, 41, 59, 0.3)' : 'rgba(226, 232, 240, 0.4)',
-      emptyBorder: isDark ? 'rgba(71, 85, 105, 0.4)' : 'rgba(148, 163, 184, 0.4)',
-      emptyText: isDark ? 'rgba(71, 85, 105, 0.6)' : 'rgba(100, 116, 139, 0.6)',
-      blobPink: isDark ? 'rgba(236, 72, 153, 0.12)' : 'rgba(236, 72, 153, 0.08)',
-      blobPurple: isDark ? 'rgba(168, 85, 247, 0.10)' : 'rgba(168, 85, 247, 0.06)',
+      cardBg: isDark ? 'rgba(30, 41, 59, 0.7)' : 'rgba(255, 255, 255, 0.9)',
+      cardBorder: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(226, 232, 240, 0.8)',
+      statBg: isDark ? 'rgba(15, 23, 42, 0.5)' : 'rgba(241, 245, 249, 0.5)',
+      blob1: isDark ? '#4f46e5' : '#c084fc',
+      blob2: isDark ? '#ec4899' : '#818cf8',
     };
 
     const formatXP = (xp: number) => {
-      if (xp >= 1000) return `${(xp / 1000).toFixed(1)}k`;
+      if (xp >= 1000) return $`{(xp / 1000).toFixed(1)}k;
       return xp.toString();
     };
 
-    // Get top 6 unlocked achievements (most recent first)
+    // Get top 6 unlocked achievements
     const unlockedAchievements = achievements
       .filter((a) => a.unlocked)
       .sort((a, b) => {
+        // Prioritize tier value roughly for display, then date
+        const tierValue = { MASTERY: 6, DIAMOND: 5, AMETHYST: 4, RUBY: 3, GOLD: 2, COPPER: 1 };
+        const scoreA = tierValue[a.currentTier] || 0;
+        const scoreB = tierValue[b.currentTier] || 0;
+        if (scoreA !== scoreB) return scoreB - scoreA;
         const dateA = a.unlockedAt ? new Date(a.unlockedAt).getTime() : 0;
         const dateB = b.unlockedAt ? new Date(b.unlockedAt).getTime() : 0;
         return dateB - dateA;
@@ -138,342 +173,366 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
           width: '1200px',
           height: '630px',
           background: colors.bg,
-          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+          fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif",
           position: 'relative',
           overflow: 'hidden',
-          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
-        {/* Background Blobs */}
+        {/* === Background Ambient Effects === */}
         <div
           style={{
             position: 'absolute',
-            top: '-100px',
-            right: '-100px',
-            width: '400px',
-            height: '400px',
-            background: `radial-gradient(circle, ${colors.blobPink} 0%, transparent 70%)`,
+            top: '-20%',
+            left: '-10%',
+            width: '600px',
+            height: '600px',
+            background: colors.blob1,
+            filter: 'blur(120px)',
+            opacity: 0.15,
             borderRadius: '50%',
-            pointerEvents: 'none',
             zIndex: 0,
           }}
         />
         <div
           style={{
             position: 'absolute',
-            bottom: '-150px',
-            left: '-100px',
-            width: '500px',
-            height: '500px',
-            background: `radial-gradient(circle, ${colors.blobPurple} 0%, transparent 70%)`,
+            bottom: '-20%',
+            right: '-10%',
+            width: '700px',
+            height: '700px',
+            background: colors.blob2,
+            filter: 'blur(140px)',
+            opacity: 0.15,
             borderRadius: '50%',
-            pointerEvents: 'none',
             zIndex: 0,
           }}
         />
 
-        {/* Main Content */}
+        {/* === Main Container === */}
         <div
           style={{
             position: 'relative',
             zIndex: 10,
-            padding: '36px 48px',
-            height: '100%',
-            boxSizing: 'border-box',
+            flex: 1,
             display: 'flex',
             flexDirection: 'column',
+            padding: '48px',
+            gap: '32px',
           }}
         >
-          {/* Header Row - Avatar + Name + Stats */}
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
-            {/* Avatar */}
-            <div
-              style={{
-                width: '100px',
-                height: '100px',
-                minWidth: '100px',
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #ec4899 0%, #a855f7 100%)',
-                padding: '3px',
-                marginRight: '20px',
-                boxSizing: 'border-box',
-              }}
-            >
+          {/* === Header Section: Profile & Stats === */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            
+            {/* Left: User Profile */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+              {/* Avatar */}
               <div
                 style={{
-                  width: '94px',
-                  height: '94px',
+                  width: '110px',
+                  height: '110px',
+                  padding: '4px',
                   borderRadius: '50%',
-                  overflow: 'hidden',
-                  background: colors.avatarBg,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  background: 'linear-gradient(135deg, #c026d3, #4f46e5)',
+                  boxShadow: '0 10px 25px rgba(79, 70, 229, 0.2)',
                 }}
               >
-                {user.avatarUrl ? (
-                  <img
-                    src={user.avatarUrl}
-                    alt=""
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    crossOrigin="anonymous"
-                  />
-                ) : (
-                  <span
-                    style={{
-                      fontSize: '44px',
-                      fontWeight: 700,
-                      color: colors.avatarFallback,
-                      lineHeight: 1,
-                    }}
-                  >
-                    {user.username.charAt(0).toUpperCase()}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Name + Badge */}
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <h1
-                style={{
-                  fontSize: '48px',
-                  fontWeight: 800,
-                  color: colors.text,
-                  margin: 0,
-                  marginBottom: '8px',
-                  letterSpacing: '-1.5px',
-                  lineHeight: 1.1,
-                }}
-              >
-                {user.username}
-              </h1>
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  background: colors.badgeBg,
-                  border: `1px solid ${colors.badgeBorder}`,
-                  borderRadius: '10px',
-                  padding: '4px 12px',
-                  width: 'fit-content',
-                  margin: 0,
-                }}
-              >
-                <Star size={12} color="#fbbf24" fill="#fbbf24" style={{ marginRight: '5px' }} />
-                <span
-                  style={{ fontSize: '12px', fontWeight: 600, color: colors.badgeText, lineHeight: 1.4 }}
-                >
-                  Thynkr Scholar
-                </span>
-              </div>
-            </div>
-
-            {/* Stats on the right - editorial style without icons */}
-            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'baseline' }}>
-              <div style={{ textAlign: 'center', marginRight: '48px' }}>
-                <span
-                  style={{
-                    display: 'block',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    color: colors.textMuted,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.1em',
-                    marginBottom: '6px',
-                  }}
-                >
-                  Level
-                </span>
-                <span style={{ fontSize: '42px', fontWeight: 800, color: colors.text, lineHeight: 1 }}>
-                  {user.level}
-                </span>
-              </div>
-              <div style={{ textAlign: 'center', marginRight: '48px' }}>
-                <span
-                  style={{
-                    display: 'block',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    color: colors.textMuted,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.1em',
-                    marginBottom: '6px',
-                  }}
-                >
-                  XP
-                </span>
-                <span style={{ fontSize: '42px', fontWeight: 800, color: colors.text, lineHeight: 1 }}>
-                  {formatXP(user.xp)}
-                </span>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <span
-                  style={{
-                    display: 'block',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    color: colors.textMuted,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.1em',
-                    marginBottom: '6px',
-                  }}
-                >
-                  Unlocked
-                </span>
-                <span style={{ fontSize: '42px', fontWeight: 800, color: colors.text, lineHeight: 1 }}>
-                  {totalUnlocked}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Achievements Section */}
-          <div
-            style={{
-              background: colors.cardBg,
-              borderRadius: '16px',
-              border: `1px solid ${colors.cardBorder}`,
-              padding: '32px',
-              flex: 1,
-              boxSizing: 'border-box',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
-              <Award size={16} color={isDark ? '#f0abfc' : '#c026d3'} style={{ marginRight: '8px' }} />
-              <span
-                style={{
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  color: colors.textMuted,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                }}
-              >
-                Latest Unlocks
-              </span>
-            </div>
-
-            {/* Achievement Grid - 6 square cards with refined styling */}
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '24px',
-              }}
-            >
-              {unlockedAchievements.map((achievement) => {
-                const IconComponent =
-                  iconMap[achievement.definition.icon?.toLowerCase()] || Trophy;
-                const tier = tierColors[achievement.currentTier] || tierColors.COPPER;
-                const label = tierLabels[achievement.currentTier] || 'Copper';
-
-                return (
-                  <div
-                    key={achievement.id}
-                    style={{
-                      width: '120px',
-                      height: '120px',
-                      borderRadius: '16px',
-                      border: `2px solid ${tier.border}`,
-                      background: tier.bg,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxSizing: 'border-box',
-                      padding: '10px',
-                    }}
-                  >
-                    {/* Icon */}
-                    <IconComponent size={28} color={tier.text} style={{ marginBottom: '8px' }} />
-                    {/* Tier Label */}
-                    <span
-                      style={{
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        color: tier.text,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                      }}
-                    >
-                      {label}
-                    </span>
-                  </div>
-                );
-              })}
-
-              {/* Empty slots if less than 6 */}
-              {Array.from({ length: Math.max(0, 6 - unlockedAchievements.length) }).map((_, idx) => (
                 <div
-                  key={`empty-${idx}`}
                   style={{
-                    width: '120px',
-                    height: '120px',
-                    borderRadius: '16px',
-                    border: `2px dashed ${colors.emptyBorder}`,
-                    background: colors.emptyBg,
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    backgroundColor: colors.bg,
+                    backgroundImage: user.avatarUrl ? url($`{user.avatarUrl}) : 'none',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
                     display: 'flex',
-                    flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxSizing: 'border-box',
-                    padding: '10px',
+                    fontSize: '48px',
+                    fontWeight: 'bold',
+                    color: '#c026d3',
+                    textTransform: 'uppercase',
                   }}
                 >
-                  <Trophy size={28} color={colors.emptyText} style={{ marginBottom: '8px' }} />
+                  {!user.avatarUrl && user.username[0]}
+                </div>
+              </div>
+
+              {/* Name & Badge */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <h1
+                  style={{
+                    fontSize: '48px',
+                    fontWeight: 800,
+                    margin: 0,
+                    lineHeight: 1,
+                    color: colors.text,
+                    letterSpacing: '-0.02em',
+                  }}
+                >
+                  {user.username}
+                </h1>
+                
+                {/* Scholar Badge */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 12px',
+                    backgroundColor: isDark ? 'rgba(234, 179, 8, 0.1)' : '#fffbeb',
+                    border: '1px solid rgba(234, 179, 8, 0.3)',
+                    borderRadius: '100px',
+                    width: 'fit-content',
+                  }}
+                >
+                  <Star size={14} fill="#fbbf24" stroke="#d97706" />
                   <span
                     style={{
-                      fontSize: '11px',
+                      fontSize: '12px',
                       fontWeight: 700,
-                      color: colors.emptyText,
+                      color: '#d97706',
                       textTransform: 'uppercase',
                       letterSpacing: '0.05em',
                     }}
                   >
-                    Locked
+                    Thynkr Scholar
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Stats Cards */}
+            <div style={{ display: 'flex', gap: '16px' }}>
+              {[
+                { label: 'Level', value: user.level },
+                { label: 'Total XP', value: formatXP(user.xp) },
+                { label: 'Unlocked', value: totalUnlocked },
+              ].map((stat, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minWidth: '100px',
+                    padding: '12px 20px',
+                    backgroundColor: colors.statBg,
+                    borderRadius: '16px',
+                    border: 1px solid $`{colors.cardBorder},
+                    backdropFilter: 'blur(8px)',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      color: colors.textMuted,
+                      marginBottom: '4px',
+                      letterSpacing: '0.05em',
+                    }}
+                  >
+                    {stat.label}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '32px',
+                      fontWeight: 800,
+                      color: colors.text,
+                      lineHeight: 1,
+                    }}
+                  >
+                    {stat.value}
                   </span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Branding */}
+          {/* === Main Content: Achievements Showcase === */}
           <div
             style={{
-              position: 'absolute',
-              bottom: '16px',
-              right: '48px',
+              flex: 1,
+              backgroundColor: colors.cardBg,
+              borderRadius: '24px',
+              border: 1px solid $`{colors.cardBorder},
+              boxShadow: '0 20px 40px -10px rgba(0,0,0,0.1)',
+              padding: '32px',
               display: 'flex',
-              alignItems: 'center',
-              zIndex: 20,
+              flexDirection: 'column',
             }}
           >
+            {/* Section Header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+              <Trophy size={20} color="#c026d3" />
+              <span
+                style={{
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  color: colors.textMuted,
+                }}
+              >
+                Top Achievements
+              </span>
+            </div>
+
+            {/* Achievements Grid */}
             <div
               style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                background: '#ec4899',
-                marginRight: '6px',
-              }}
-            />
-            <span
-              style={{
-                fontSize: '11px',
-                fontWeight: 600,
-                color: colors.textSubtle,
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
+                display: 'flex',
+                gap: '24px',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flex: 1,
               }}
             >
-              thynkr.study
-            </span>
+              {unlockedAchievements.map((achievement) => {
+                const IconComponent = iconMap[achievement.definition.icon?.toLowerCase()] || Trophy;
+                const tier = tierStyles[achievement.currentTier] || tierStyles.COPPER;
+                const label = tierLabels[achievement.currentTier];
+
+                return (
+                  <div
+                    key={achievement.id}
+                    style={{
+                      width: '140px',
+                      height: '180px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '20px 12px',
+                      backgroundColor: tier.bg,
+                      border: 2px solid $`{tier.border},
+                      borderRadius: '16px',
+                      boxShadow: tier.shadow,
+                      boxSizing: 'border-box',
+                      textAlign: 'center',
+                      position: 'relative',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {/* Glass Shine */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: '40%',
+                        background: 'linear-gradient(to bottom, rgba(255,255,255,0.2), transparent)',
+                        pointerEvents: 'none',
+                      }}
+                    />
+
+                    {/* Icon */}
+                    <div
+                      style={{
+                        width: '56px',
+                        height: '56px',
+                        borderRadius: '50%',
+                        background: tier.gradient,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+                      }}
+                    >
+                      <IconComponent size={28} color="#ffffff" strokeWidth={2.5} />
+                    </div>
+
+                    {/* Text Details */}
+                    <div>
+                      <span
+                        style={{
+                          display: 'block',
+                          fontSize: '10px',
+                          fontWeight: 800,
+                          textTransform: 'uppercase',
+                          color: tier.text,
+                          opacity: 0.8,
+                          marginBottom: '4px',
+                          letterSpacing: '0.05em',
+                        }}
+                      >
+                        {label}
+                      </span>
+                      <span
+                        style={{
+                          display: 'block',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          color: colors.text,
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {achievement.definition.name}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Fill Empties if needed (optional styling for empties) */}
+              {Array.from({ length: Math.max(0, 6 - unlockedAchievements.length) }).map((_, i) => (
+                <div
+                  key={empty-$`{i}}
+                  style={{
+                    width: '140px',
+                    height: '180px',
+                    borderRadius: '16px',
+                    border: 2px dashed $`{colors.cardBorder},
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'transparent',
+                    opacity: 0.5,
+                  }}
+                >
+                  <Award size={32} color={colors.textMuted} />
+                </div>
+              ))}
+            </div>
           </div>
+        </div>
+
+        {/* === Footer: Branding === */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '24px',
+            right: '48px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            zIndex: 20,
+          }}
+        >
+           <div style={{
+              width: '24px', 
+              height: '24px', 
+              borderRadius: '6px', 
+              background: 'linear-gradient(135deg, #c026d3, #4f46e5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+           }}>
+              <Brain size={14} color="white" />
+           </div>
+           <span style={{ 
+               fontSize: '14px', 
+               fontWeight: 700, 
+               color: colors.text,
+               letterSpacing: '-0.02em'
+           }}>
+             thynkr.study
+           </span>
         </div>
       </div>
     );
