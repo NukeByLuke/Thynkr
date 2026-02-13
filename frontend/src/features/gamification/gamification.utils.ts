@@ -25,7 +25,7 @@ import {
   FileText,
 } from 'lucide-react';
 
-export type AchievementTier = 'BRONZE' | 'GOLD' | 'RUBY' | 'DIAMOND' | 'AMETHYST' | 'MASTERY';
+export type AchievementTier = 'COPPER' | 'GOLD' | 'RUBY' | 'DIAMOND' | 'AMETHYST' | 'MASTERY';
 
 export interface AchievementDefinition {
   id: string;
@@ -34,7 +34,7 @@ export interface AchievementDefinition {
   icon: string;
   category: 'study' | 'social' | 'skill' | 'streak' | 'content' | 'mastery';
   thresholds?: {
-    BRONZE: number;
+    COPPER: number;
     GOLD: number;
     RUBY: number;
     DIAMOND: number;
@@ -42,7 +42,7 @@ export interface AchievementDefinition {
     MASTERY?: number;
   };
   xpRewards?: {
-    BRONZE: number;
+    COPPER: number;
     GOLD: number;
     RUBY: number;
     DIAMOND: number;
@@ -68,10 +68,10 @@ export interface UserAchievement {
   unlocked: boolean;
 }
 
-export const TIER_ORDER: AchievementTier[] = ['MASTERY', 'AMETHYST', 'DIAMOND', 'RUBY', 'GOLD', 'BRONZE'];
+export const TIER_ORDER: AchievementTier[] = ['MASTERY', 'AMETHYST', 'DIAMOND', 'RUBY', 'GOLD', 'COPPER'];
 
 export const TIER_CONFIG = {
-  BRONZE: {
+  COPPER: {
     border: 'border-amber-700/60 dark:border-amber-600/40',
     borderHover: 'group-hover:border-amber-600/80 dark:group-hover:border-amber-500/60',
     bg: 'bg-orange-500/5 dark:bg-transparent',
@@ -79,7 +79,7 @@ export const TIER_CONFIG = {
     iconBg: 'bg-gradient-to-br from-amber-600 to-orange-700',
     glow: 'shadow-lg shadow-amber-600/20 hover:shadow-amber-600/40',
     gradient: 'from-amber-700 to-orange-600', 
-    label: 'Bronze',
+    label: 'Copper',
   },
   GOLD: {
     border: 'border-yellow-600/60 dark:border-yellow-500/40',

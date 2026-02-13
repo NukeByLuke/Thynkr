@@ -28,7 +28,7 @@ const iconMap: Record<string, LucideIcon> = {
 
 // Tier border colors (hex for inline styles)
 const tierColors: Record<AchievementTier, string> = {
-  BRONZE: '#b45309',    // amber-700
+  COPPER: '#b45309',    // amber-700
   GOLD: '#eab308',      // yellow-500
   RUBY: '#ef4444',      // red-500
   DIAMOND: '#22d3ee',   // cyan-400
@@ -172,7 +172,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
             <div style={{ display: 'flex', flexWrap: 'wrap' }}>
               {unlockedAchievements.map((achievement, idx) => {
                 const IconComponent = iconMap[achievement.definition.icon?.toLowerCase()] || Trophy;
-                const borderColor = tierColors[achievement.currentTier] || tierColors.BRONZE;
+                const borderColor = tierColors[achievement.currentTier] || tierColors.COPPER;
                 
                 return (
                   <div

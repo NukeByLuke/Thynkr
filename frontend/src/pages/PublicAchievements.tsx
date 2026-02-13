@@ -143,7 +143,7 @@ export default function PublicAchievements() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {list.map(achievement => {
                             const isLocked = !achievement.unlocked;
-                            const tier = isLocked ? TIER_CONFIG.BRONZE : TIER_CONFIG[achievement.currentTier];
+                            const tier = isLocked ? TIER_CONFIG.COPPER : TIER_CONFIG[achievement.currentTier];
                             const AchievementIcon = getIcon(achievement.definition.icon);
                             
                             return (
