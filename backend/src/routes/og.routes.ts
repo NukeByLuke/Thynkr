@@ -49,6 +49,9 @@ function buildOgHtml(opts: {
   type?: string;
   siteName?: string;
   themeColor?: string;
+  imageWidth?: number;
+  imageHeight?: number;
+  imageAlt?: string;
 }): string {
   const {
     title,
@@ -58,12 +61,16 @@ function buildOgHtml(opts: {
     type = 'website',
     siteName = 'Thynkr',
     themeColor = '#7c3aed',
+    imageWidth = 1200,
+    imageHeight = 630,
+    imageAlt,
   } = opts;
 
   const safeTitle = escapeHtml(title);
   const safeDesc = escapeHtml(description);
   const safeImage = escapeHtml(image);
   const safeUrl = escapeHtml(url);
+  const safeImageAlt = escapeHtml(imageAlt || title);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -79,6 +86,11 @@ function buildOgHtml(opts: {
   <meta property="og:title" content="${safeTitle}" />
   <meta property="og:description" content="${safeDesc}" />
   <meta property="og:image" content="${safeImage}" />
+  <meta property="og:image:secure_url" content="${safeImage}" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="${imageWidth}" />
+  <meta property="og:image:height" content="${imageHeight}" />
+  <meta property="og:image:alt" content="${safeImageAlt}" />
   <meta property="og:url" content="${safeUrl}" />
   <meta property="og:site_name" content="${siteName}" />
 
@@ -87,6 +99,7 @@ function buildOgHtml(opts: {
   <meta name="twitter:title" content="${safeTitle}" />
   <meta name="twitter:description" content="${safeDesc}" />
   <meta name="twitter:image" content="${safeImage}" />
+  <meta name="twitter:image:alt" content="${safeImageAlt}" />
 
   <!-- Redirect real users to the SPA -->
   <meta http-equiv="refresh" content="0;url=${safeUrl}" />
