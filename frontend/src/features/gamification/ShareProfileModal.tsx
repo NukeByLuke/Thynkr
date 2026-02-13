@@ -132,28 +132,33 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
       onClose={onClose} 
       title="Share Your Profile" 
       size="xl"
-      className="max-w-5xl"
+      className="max-w-4xl w-full"
     >
       <div className="flex flex-col gap-6">
         <div className="text-slate-300 text-base leading-relaxed">
           Show off your progress! Download your player card or share your public profile link.
         </div>
 
-        {/* Enhanced Card Preview Area */}
-        <div className="flex justify-center bg-gradient-to-br from-slate-900/60 to-slate-950/80 rounded-2xl border border-slate-700/50 overflow-hidden relative shadow-2xl">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-700/20 via-transparent to-transparent pointer-events-none" />
-          <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 blur-[80px] rounded-full" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 blur-[80px] rounded-full" />
-          
-          <div className="w-full flex justify-center items-center py-6 relative z-10">
-             <div className="origin-center transform scale-[0.7] transition-transform duration-200">
-                <PlayerCardExport
-                  ref={cardRef}
-                  user={user}
-                  totalAchievements={unlockedCount}
-                  featuredStats={stats}
-                />
-             </div>
+        {/* Card Preview Area - scales 1200x630 card to fit modal */}
+        <div className="flex justify-center bg-slate-900/80 rounded-xl border border-slate-700/50 p-4 overflow-hidden">
+          <div 
+            className="relative w-full"
+            style={{ 
+              maxWidth: '800px',
+              aspectRatio: '1200 / 630'
+            }}
+          >
+            <div 
+              className="absolute top-0 left-0 w-[1200px] h-[630px] origin-top-left"
+              style={{ transform: 'scale(0.667)' }}
+            >
+              <PlayerCardExport
+                ref={cardRef}
+                user={user}
+                totalAchievements={unlockedCount}
+                featuredStats={stats}
+              />
+            </div>
           </div>
         </div>
 
