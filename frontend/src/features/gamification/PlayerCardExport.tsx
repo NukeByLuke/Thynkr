@@ -144,7 +144,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
     };
 
     const formatXP = (xp: number) => {
-      if (xp >= 1000) return $`{(xp / 1000).toFixed(1)}k;
+      if (xp >= 1000) return `${(xp / 1000).toFixed(1)}k`;
       return xp.toString();
     };
 
@@ -244,7 +244,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                     height: '100%',
                     borderRadius: '50%',
                     backgroundColor: colors.bg,
-                    backgroundImage: user.avatarUrl ? url($`{user.avatarUrl}) : 'none',
+                    backgroundImage: user.avatarUrl ? `url(${user.avatarUrl})` : 'none',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     display: 'flex',
@@ -322,7 +322,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                     padding: '12px 20px',
                     backgroundColor: colors.statBg,
                     borderRadius: '16px',
-                    border: 1px solid $`{colors.cardBorder},
+                    border: `1px solid ${colors.cardBorder}`,
                     backdropFilter: 'blur(8px)',
                   }}
                 >
@@ -409,7 +409,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                       justifyContent: 'space-between',
                       padding: '20px 12px',
                       backgroundColor: tier.bg,
-                      border: 2px solid $`{tier.border},
+                      border: `2px solid ${tier.border}`,
                       borderRadius: '16px',
                       boxShadow: tier.shadow,
                       boxSizing: 'border-box',
@@ -482,12 +482,12 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
               {/* Fill Empties if needed (optional styling for empties) */}
               {Array.from({ length: Math.max(0, 6 - unlockedAchievements.length) }).map((_, i) => (
                 <div
-                  key={empty-$`{i}}
+                  key={`empty-${i}`}
                   style={{
                     width: '140px',
                     height: '180px',
                     borderRadius: '16px',
-                    border: 2px dashed $`{colors.cardBorder},
+                    border: `2px dashed ${colors.cardBorder}`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
