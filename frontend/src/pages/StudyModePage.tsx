@@ -561,7 +561,7 @@ export default function StudyModePage() {
                                 id: q.id || `q-${i}`,
                                 order: q.order ?? i,
                               }))}
-                              onGenerateQuiz={(difficulty: string, numQuestions: number) => {
+                              onGenerateQuiz={(_difficulty: string, _numQuestions: number) => {
                                 generateMutation.mutate({ type: 'quiz', refresh: true });
                               }}
                               isGenerating={generateMutation.isPending}
