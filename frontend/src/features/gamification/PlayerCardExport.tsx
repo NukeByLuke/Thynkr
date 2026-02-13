@@ -241,7 +241,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                   fontWeight: 800,
                   color: colors.text,
                   margin: 0,
-                  marginBottom: '4px',
+                  marginBottom: '10px',
                   letterSpacing: '-1.5px',
                   lineHeight: 1.1,
                 }}
@@ -255,13 +255,13 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                   background: colors.badgeBg,
                   border: `1px solid ${colors.badgeBorder}`,
                   borderRadius: '10px',
-                  padding: '3px 10px',
+                  padding: '4px 12px',
                   width: 'fit-content',
                 }}
               >
-                <Star size={11} color="#fbbf24" fill="#fbbf24" style={{ marginRight: '4px' }} />
+                <Star size={12} color="#fbbf24" fill="#fbbf24" style={{ marginRight: '5px' }} />
                 <span
-                  style={{ fontSize: '11px', fontWeight: 600, color: colors.badgeText, lineHeight: 1.4 }}
+                  style={{ fontSize: '12px', fontWeight: 600, color: colors.badgeText, lineHeight: 1.4 }}
                 >
                   Thynkr Scholar
                 </span>
@@ -357,9 +357,9 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(6, 1fr)',
-                gap: '24px',
-                maxWidth: '100%',
+                gridTemplateColumns: 'repeat(6, 90px)',
+                gap: '16px',
+                justifyContent: 'center',
               }}
             >
               {unlockedAchievements.map((achievement) => {
@@ -372,9 +372,9 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                   <div
                     key={achievement.id}
                     style={{
-                      width: '100%',
-                      aspectRatio: '1 / 1',
-                      borderRadius: '12px',
+                      width: '90px',
+                      height: '90px',
+                      borderRadius: '10px',
                       border: `2px solid ${tier.border}`,
                       background: tier.bg,
                       display: 'flex',
@@ -382,15 +382,15 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                       alignItems: 'center',
                       justifyContent: 'center',
                       boxSizing: 'border-box',
-                      padding: '12px',
+                      padding: '8px',
                     }}
                   >
                     {/* Icon */}
-                    <IconComponent size={32} color={tier.text} style={{ marginBottom: '8px' }} />
+                    <IconComponent size={24} color={tier.text} style={{ marginBottom: '6px' }} />
                     {/* Tier Label */}
                     <span
                       style={{
-                        fontSize: '11px',
+                        fontSize: '9px',
                         fontWeight: 700,
                         color: tier.text,
                         textTransform: 'uppercase',
@@ -408,9 +408,9 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                 <div
                   key={`empty-${idx}`}
                   style={{
-                    width: '100%',
-                    aspectRatio: '1 / 1',
-                    borderRadius: '12px',
+                    width: '90px',
+                    height: '90px',
+                    borderRadius: '10px',
                     border: `2px dashed ${colors.emptyBorder}`,
                     background: colors.emptyBg,
                     display: 'flex',
@@ -418,13 +418,13 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                     alignItems: 'center',
                     justifyContent: 'center',
                     boxSizing: 'border-box',
-                    padding: '12px',
+                    padding: '8px',
                   }}
                 >
-                  <Trophy size={32} color={colors.emptyText} style={{ marginBottom: '8px' }} />
+                  <Trophy size={24} color={colors.emptyText} style={{ marginBottom: '6px' }} />
                   <span
                     style={{
-                      fontSize: '11px',
+                      fontSize: '9px',
                       fontWeight: 700,
                       color: colors.emptyText,
                       textTransform: 'uppercase',
