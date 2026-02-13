@@ -22,6 +22,7 @@ import {
   Sparkles,
   ArrowLeft,
   ChevronLeft,
+  ChevronRight,
   Menu,
   X,
 } from 'lucide-react';
@@ -79,6 +80,7 @@ export default function StudyModePage() {
   const [selectedFileIds, setSelectedFileIds] = useState<Set<string>>(new Set());
   const [showSidebar, setShowSidebar] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
 
   // Build query string helper for share token
   const tokenQuery = shareToken ? `token=${shareToken}` : '';
@@ -250,7 +252,40 @@ export default function StudyModePage() {
 
   const handleTabChange = useCallback((tab: StudyTab) => {
     setActiveTab(tab);
+    setCurrentPage(0);
   }, []);
+
+  // Total pages for current content (summary/notes have per-file pages)
+  const totalPages = useMemo(() => {
+    if ((activeTab === 'summary' || activeTab === 'notes') && studyContent?.result?.pages) {
+      return studyContent.result.pages.length;
+    }
+    return 1;
+  }, [activeTab, studyContent]);
+
+  // Clamp currentPage when totalPages changes (e.g. fewer files selected)
+  useEffect(() => {
+    if (currentPage >= totalPages) {
+      setCurrentPage(Math.max(0, totalPages - 1));
+    }
+  }, [totalPages, currentPage]);
+
+  // Arrow key page flipping (←/→)
+  useEffect(() => {
+    if (totalPages <= 1) return;
+    const handlePageKeys = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === 'ArrowLeft' && currentPage > 0) {
+        e.preventDefault();
+        setCurrentPage(prev => prev - 1);
+      } else if (e.key === 'ArrowRight' && currentPage < totalPages - 1) {
+        e.preventDefault();
+        setCurrentPage(prev => prev + 1);
+      }
+    };
+    window.addEventListener('keydown', handlePageKeys);
+    return () => window.removeEventListener('keydown', handlePageKeys);
+  }, [totalPages, currentPage]);
 
   // Quiz submit handler (score locally since course study has no quiz record)
   const handleQuizSubmit = useCallback(async (
@@ -537,20 +572,101 @@ export default function StudyModePage() {
                       <div className="relative rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl shadow-slate-200/20 dark:shadow-slate-900/30 overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-br from-pink-500/[0.02] via-transparent to-fuchsia-500/[0.02] dark:from-cyan-500/[0.02] dark:via-transparent dark:to-violet-500/[0.02] pointer-events-none" />
                         <div className="relative z-10 p-6 sm:p-8">
+                          {/* Book-style page navigation for summary/notes */}
+                          {(activeTab === 'summary' || activeTab === 'notes') && studyContent.result.pages && studyContent.result.pages.length > 1 && (
+                            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/60 dark:border-slate-700/60">
+                              <button
+                                onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+                                disabled={currentPage === 0}
+                                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-pink-600 dark:hover:text-cyan-400"
+                              >
+                                <ChevronLeft className="w-4 h-4" />
+                                <span className="hidden sm:inline">Previous</span>
+                              </button>
+
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">
+                                  {studyContent.result.pages[currentPage]?.fileName || `File ${currentPage + 1}`}
+                                </span>
+                                <div className="flex items-center gap-1">
+                                  {studyContent.result.pages.map((_: any, idx: number) => (
+                                    <button
+                                      key={idx}
+                                      onClick={() => setCurrentPage(idx)}
+                                      className={`w-2 h-2 rounded-full transition-all ${
+                                        idx === currentPage
+                                          ? 'bg-pink-500 dark:bg-cyan-400 scale-125'
+                                          : 'bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-500'
+                                      }`}
+                                      title={studyContent.result.pages[idx]?.fileName}
+                                    />
+                                  ))}
+                                </div>
+                                <span className="text-xs text-slate-500 dark:text-slate-400 tabular-nums">
+                                  {currentPage + 1} / {studyContent.result.pages.length}
+                                </span>
+                              </div>
+
+                              <button
+                                onClick={() => setCurrentPage(p => Math.min(studyContent.result.pages.length - 1, p + 1))}
+                                disabled={currentPage === studyContent.result.pages.length - 1}
+                                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-pink-600 dark:hover:text-cyan-400"
+                              >
+                                <span className="hidden sm:inline">Next</span>
+                                <ChevronRight className="w-4 h-4" />
+                              </button>
+                            </div>
+                          )}
+
                           {activeTab === 'summary' && studyContent.result.pages && (
-                            <SummaryView
-                              content={studyContent.result.pages.map((p: any) => `## ${p.fileName}\n\n${p.content}`).join('\n\n---\n\n')}
-                              onRegenerate={handleRegenerate}
-                              isRegenerating={generateMutation.isPending}
-                            />
+                            <AnimatePresence mode="wait">
+                              <motion.div
+                                key={`summary-page-${currentPage}`}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                transition={{ duration: 0.2, ease: 'easeOut' }}
+                              >
+                                <SummaryView
+                                  content={(() => {
+                                    const pages = studyContent.result.pages;
+                                    if (pages.length === 1) return `## ${pages[0].fileName}\n\n${pages[0].content}`;
+                                    const page = pages[currentPage];
+                                    return page ? page.content : '';
+                                  })()}
+                                  onRegenerate={handleRegenerate}
+                                  isRegenerating={generateMutation.isPending}
+                                />
+                              </motion.div>
+                            </AnimatePresence>
                           )}
                           {activeTab === 'notes' && studyContent.result.pages && (
-                            <NotesView
-                              keyPoints={studyContent.result.pages.flatMap((p: any) => p.keyPoints || [])}
-                              detailed={studyContent.result.pages.map((p: any) => `## ${p.fileName}\n\n${p.detailed || ''}`).join('\n\n---\n\n')}
-                              onRegenerate={handleRegenerate}
-                              isRegenerating={generateMutation.isPending}
-                            />
+                            <AnimatePresence mode="wait">
+                              <motion.div
+                                key={`notes-page-${currentPage}`}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                transition={{ duration: 0.2, ease: 'easeOut' }}
+                              >
+                                <NotesView
+                                  keyPoints={(() => {
+                                    const pages = studyContent.result.pages;
+                                    if (pages.length === 1) return pages[0].keyPoints || [];
+                                    const page = pages[currentPage];
+                                    return page?.keyPoints || [];
+                                  })()}
+                                  detailed={(() => {
+                                    const pages = studyContent.result.pages;
+                                    if (pages.length === 1) return `## ${pages[0].fileName}\n\n${pages[0].detailed || ''}`;
+                                    const page = pages[currentPage];
+                                    return page?.detailed || '';
+                                  })()}
+                                  onRegenerate={handleRegenerate}
+                                  isRegenerating={generateMutation.isPending}
+                                />
+                              </motion.div>
+                            </AnimatePresence>
                           )}
                           {activeTab === 'quiz' && studyContent.result.questions && (
                             <QuizPlayer
@@ -596,6 +712,13 @@ export default function StudyModePage() {
                         <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 font-mono">D</kbd>
                         <span>Switch tabs</span>
                       </span>
+                      {totalPages > 1 && (
+                        <span className="flex items-center gap-1.5">
+                          <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 font-mono">&larr;</kbd>
+                          <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 font-mono">&rarr;</kbd>
+                          <span>Flip pages</span>
+                        </span>
+                      )}
                       <span className="flex items-center gap-1.5">
                         <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 font-mono">Esc</kbd>
                         <span>Exit</span>

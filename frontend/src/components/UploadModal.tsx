@@ -62,7 +62,7 @@ export default function UploadModal({
 
   // Validate YouTube URL
   const isValidYouTubeUrl = (url: string): boolean => {
-    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}(&[\w=]*)?$/;
+    const youtubeRegex = /^(https?:\/\/)?(www\.|m\.)?(youtube\.com\/(watch\?v=|shorts\/|embed\/|live\/)|youtu\.be\/)[\w-]{11}([?&][\w%=&.-]*)?$/;
     return youtubeRegex.test(url);
   };
 
@@ -432,7 +432,11 @@ export default function UploadModal({
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-slate-400">•</span>
-                      <span>https://youtu.be/dQw4w9WgXcQ</span>
+                      <span>https://youtu.be/dQw4w9WgXcQ?si=abc123</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-slate-400">•</span>
+                      <span>https://youtube.com/shorts/dQw4w9WgXcQ</span>
                     </li>
                   </ul>
                 </div>

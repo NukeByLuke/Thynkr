@@ -375,7 +375,7 @@ export default async function studyRoutes(server: FastifyInstance) {
 
         // Validate YouTube URL
         const youtubeRegex =
-          /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}(&[\w=]*)?$/;
+          /^(https?:\/\/)?(www\.|m\.)?(youtube\.com\/(watch\?v=|shorts\/|embed\/|live\/)|youtu\.be\/)[\w-]{11}([?&][\w%=&.-]*)?$/;
         if (!youtubeRegex.test(url)) {
           return reply.code(400).send({ error: 'Invalid YouTube URL' });
         }
@@ -421,10 +421,12 @@ export default async function studyRoutes(server: FastifyInstance) {
         // Extract video ID from URL
         let videoId = '';
         if (url.includes('youtube.com')) {
-          const match = url.match(/[?&]v=([^&]+)/);
-          videoId = match ? match[1] : '';
+          // Handle /watch?v=, /shorts/, /embed/, /live/ patterns
+          const watchMatch = url.match(/[?&]v=([^&]+)/);
+          const pathMatch = url.match(/\/(shorts|embed|live)\/([^?&/]+)/);
+          videoId = watchMatch ? watchMatch[1] : pathMatch ? pathMatch[2] : '';
         } else if (url.includes('youtu.be')) {
-          const match = url.match(/youtu\.be\/([^?]+)/);
+          const match = url.match(/youtu\.be\/([^?&]+)/);
           videoId = match ? match[1] : '';
         }
 
