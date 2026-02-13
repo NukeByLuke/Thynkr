@@ -241,7 +241,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                   fontWeight: 800,
                   color: colors.text,
                   margin: 0,
-                  marginBottom: '10px',
+                  marginBottom: '8px',
                   letterSpacing: '-1.5px',
                   lineHeight: 1.1,
                 }}
@@ -257,6 +257,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                   borderRadius: '10px',
                   padding: '4px 12px',
                   width: 'fit-content',
+                  margin: 0,
                 }}
               >
                 <Star size={12} color="#fbbf24" fill="#fbbf24" style={{ marginRight: '5px' }} />
@@ -336,9 +337,12 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
               padding: '32px',
               flex: 1,
               boxSizing: 'border-box',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '32px' }}>
               <Award size={16} color={isDark ? '#f0abfc' : '#c026d3'} style={{ marginRight: '8px' }} />
               <span
                 style={{
@@ -356,10 +360,9 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
             {/* Achievement Grid - 6 square cards with refined styling */}
             <div
               style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(6, 90px)',
-                gap: '16px',
+                display: 'flex',
                 justifyContent: 'center',
+                gap: '24px',
               }}
             >
               {unlockedAchievements.map((achievement) => {
@@ -372,9 +375,9 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                   <div
                     key={achievement.id}
                     style={{
-                      width: '90px',
-                      height: '90px',
-                      borderRadius: '10px',
+                      width: '120px',
+                      height: '120px',
+                      borderRadius: '16px',
                       border: `2px solid ${tier.border}`,
                       background: tier.bg,
                       display: 'flex',
@@ -382,15 +385,15 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                       alignItems: 'center',
                       justifyContent: 'center',
                       boxSizing: 'border-box',
-                      padding: '8px',
+                      padding: '10px',
                     }}
                   >
                     {/* Icon */}
-                    <IconComponent size={24} color={tier.text} style={{ marginBottom: '6px' }} />
+                    <IconComponent size={28} color={tier.text} style={{ marginBottom: '8px' }} />
                     {/* Tier Label */}
                     <span
                       style={{
-                        fontSize: '9px',
+                        fontSize: '11px',
                         fontWeight: 700,
                         color: tier.text,
                         textTransform: 'uppercase',
@@ -408,9 +411,9 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                 <div
                   key={`empty-${idx}`}
                   style={{
-                    width: '90px',
-                    height: '90px',
-                    borderRadius: '10px',
+                    width: '120px',
+                    height: '120px',
+                    borderRadius: '16px',
                     border: `2px dashed ${colors.emptyBorder}`,
                     background: colors.emptyBg,
                     display: 'flex',
@@ -418,13 +421,13 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                     alignItems: 'center',
                     justifyContent: 'center',
                     boxSizing: 'border-box',
-                    padding: '8px',
+                    padding: '10px',
                   }}
                 >
-                  <Trophy size={24} color={colors.emptyText} style={{ marginBottom: '6px' }} />
+                  <Trophy size={28} color={colors.emptyText} style={{ marginBottom: '8px' }} />
                   <span
                     style={{
-                      fontSize: '9px',
+                      fontSize: '11px',
                       fontWeight: 700,
                       color: colors.emptyText,
                       textTransform: 'uppercase',
