@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import { 
   Trophy, Star, Zap, Flame, BookOpen, Target, Award, Crown, 
   Rocket, Users, Brain, Sparkles, Clock, Sun, Moon, Calendar,
@@ -17,7 +18,7 @@ interface PlayerCardExportProps {
 }
 
 // Map icon names to components
-const iconMap: Record<string, React.ComponentType<{ size?: number; color?: string; fill?: string; style?: React.CSSProperties }>> = {
+const iconMap: Record<string, LucideIcon> = {
   trophy: Trophy, star: Star, flame: Flame, book: BookOpen, target: Target,
   zap: Zap, award: Award, crown: Crown, rocket: Rocket, users: Users,
   brain: Brain, sparkles: Sparkles, clock: Clock, sun: Sun, moon: Moon,
