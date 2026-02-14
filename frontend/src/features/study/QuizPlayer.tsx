@@ -300,14 +300,14 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setNumQuestions(numQuestions + 5)}
-                disabled={isGenerating}
+                onClick={() => setNumQuestions(Math.min(25, numQuestions + 5))}
+                disabled={isGenerating || numQuestions >= 25}
                 className="w-12 h-12 rounded-xl font-bold text-xl bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 +
               </motion.button>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-1">Minimum 10 questions</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-1">10–25 questions</p>
           </div>
 
           {/* Time Limit Setting */}

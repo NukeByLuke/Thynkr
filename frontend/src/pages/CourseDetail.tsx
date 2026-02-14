@@ -213,13 +213,14 @@ export default function CourseDetail() {
                         {numQuestions}
                       </span>
                       <button
-                        onClick={() => setNumQuestions(numQuestions + 5)}
-                        className="w-10 h-10 rounded-lg font-bold text-lg bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                        onClick={() => setNumQuestions(Math.min(25, numQuestions + 5))}
+                        disabled={numQuestions >= 25}
+                        className="w-10 h-10 rounded-lg font-bold text-lg bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                       >
                         +
                       </button>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-1">Min 10</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-1">10–25 questions</p>
                   </div>
                   <select
                     value={quizDifficulty}
@@ -244,6 +245,11 @@ export default function CourseDetail() {
                 >
                   {generateQuizMutation.isPending ? 'Generating...' : 'Generate Quiz'}
                 </button>
+                {generateQuizMutation.isError && (
+                  <p className="mt-3 text-red-500 dark:text-red-400 text-sm">
+                    {generateQuizMutation.error?.message || 'Failed to generate quiz. The file may not have enough content.'}
+                  </p>
+                )}
               </div>
             </div>
           );
@@ -269,13 +275,14 @@ export default function CourseDetail() {
                     {numQuestions}
                   </span>
                   <button
-                    onClick={() => setNumQuestions(numQuestions + 5)}
-                    className="w-10 h-10 rounded-lg font-bold text-lg bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                    onClick={() => setNumQuestions(Math.min(25, numQuestions + 5))}
+                    disabled={numQuestions >= 25}
+                    className="w-10 h-10 rounded-lg font-bold text-lg bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   >
                     +
                   </button>
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-1">Min 10</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-1">10–25 questions</p>
               </div>
               <select
                 value={quizDifficulty}
@@ -300,6 +307,11 @@ export default function CourseDetail() {
             >
               {generateQuizMutation.isPending ? 'Generating...' : 'Generate Quiz'}
             </button>
+            {generateQuizMutation.isError && (
+              <p className="mt-3 text-red-500 dark:text-red-400 text-sm">
+                {generateQuizMutation.error?.message || 'Failed to generate quiz. The file may not have enough content.'}
+              </p>
+            )}
           </div>
         );
     }
