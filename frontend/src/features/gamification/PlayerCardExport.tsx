@@ -278,18 +278,25 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                 {/* Scholar Badge */}
                 <div
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
                     padding: '6px 12px',
                     backgroundColor: isDark ? 'rgba(234, 179, 8, 0.1)' : '#fffbeb',
                     border: '1px solid rgba(234, 179, 8, 0.3)',
                     borderRadius: '100px',
-                    width: 'fit-content',
                     marginTop: '16px',
+                    display: 'inline-block',
                   }}
                 >
-                  <Star size={14} fill="#fbbf24" stroke="#d97706" style={{ flexShrink: 0 }} />
+                  <Star 
+                    size={14} 
+                    fill="#fbbf24" 
+                    stroke="#d97706" 
+                    style={{ 
+                      display: 'inline-block',
+                      verticalAlign: 'middle',
+                      marginRight: '6px',
+                      marginTop: '-2px'
+                    }} 
+                  />
                   <span
                     style={{
                       fontSize: '12px',
@@ -297,7 +304,8 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                       color: '#d97706',
                       textTransform: 'uppercase',
                       letterSpacing: '0.05em',
-                      lineHeight: 1,
+                      display: 'inline-block',
+                      verticalAlign: 'middle',
                     }}
                   >
                     Thynkr Scholar
@@ -370,8 +378,17 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
             }}
           >
             {/* Section Header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
-              <Trophy size={20} color="#c026d3" style={{ flexShrink: 0 }} />
+            <div style={{ marginBottom: '24px' }}>
+              <Trophy 
+                size={20} 
+                color="#c026d3" 
+                style={{ 
+                  display: 'inline-block',
+                  verticalAlign: 'middle',
+                  marginRight: '10px',
+                  marginTop: '-2px'
+                }} 
+              />
               <span
                 style={{
                   fontSize: '14px',
@@ -379,7 +396,8 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                   textTransform: 'uppercase',
                   letterSpacing: '0.1em',
                   color: colors.textMuted,
-                  lineHeight: 1,
+                  display: 'inline-block',
+                  verticalAlign: 'middle',
                 }}
               >
                 Top Achievements
@@ -512,9 +530,6 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
             position: 'absolute',
             bottom: '16px',
             right: '48px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
             zIndex: 20,
           }}
         >
@@ -525,7 +540,10 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                 width: '24px', 
                 height: '24px', 
                 objectFit: 'contain',
-                flexShrink: 0
+                display: 'inline-block',
+                verticalAlign: 'middle',
+                marginRight: '8px',
+                marginTop: '-2px'
               }}
            />
            <span style={{ 
@@ -533,7 +551,8 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                fontWeight: 700, 
                color: colors.text,
                letterSpacing: '-0.02em',
-               lineHeight: 1
+               display: 'inline-block',
+               verticalAlign: 'middle',
            }}>
              thynkr.study
            </span>
