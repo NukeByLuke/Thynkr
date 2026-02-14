@@ -31,6 +31,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
+import Button from '@/components/ui/Button';
+import toast from 'react-hot-toast';
 import { useLayout } from '@/contexts/LayoutContext';
 
 // --- Types ---
@@ -934,6 +936,12 @@ export default function Achievements() {
     <PageContainer>
       <PageContainer.Header
         subtitle={`${unlockedCount} of ${totalCount} achievements unlocked`}
+        actions={
+          <Button onClick={() => toast('Coming soon!', { icon: '🚀' })} className="gap-2" variant="primary">
+            <Share2 className="w-4 h-4" />
+            Share Profile
+          </Button>
+        }
       >
         Achievements
       </PageContainer.Header>
