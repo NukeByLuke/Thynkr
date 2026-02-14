@@ -10,7 +10,9 @@ import {
   TIER_ORDER, 
   UserAchievement 
 } from '@/features/gamification/gamification.utils';
-import { Trophy, Lock } from 'lucide-react';
+import { Trophy, Lock, Share2 } from 'lucide-react';
+import Button from '@/components/ui/Button';
+import toast from 'react-hot-toast';
 
 const PublicLevelBanner = ({ user }: { user: any }) => {
   return (
@@ -108,6 +110,11 @@ export default function PublicAchievements() {
     <PageContainer>
        <PageContainer.Header 
          subtitle={`${unlockedCount} Achievements Unlocked`}
+         actions={
+           <Button onClick={() => toast('Coming soon!', { icon: '🚀' })} variant="primary" className="gap-2">
+             <Share2 size={16} /> Share
+           </Button>
+         }
        >
          Player Profile
        </PageContainer.Header>
