@@ -286,7 +286,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                     border: '1px solid rgba(234, 179, 8, 0.3)',
                     borderRadius: '100px',
                     width: 'fit-content',
-                    marginTop: '10px',
+                    marginTop: '16px',
                   }}
                 >
                   <Star size={14} fill="#fbbf24" stroke="#d97706" />
@@ -297,7 +297,6 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                       color: '#d97706',
                       textTransform: 'uppercase',
                       letterSpacing: '0.05em',
-                      marginTop: '-4px',
                     }}
                   >
                     Thynkr Scholar
@@ -530,8 +529,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                fontSize: '14px', 
                fontWeight: 700, 
                color: colors.text,
-               letterSpacing: '-0.02em',
-               marginTop: '-1px'
+               letterSpacing: '-0.02em'
            }}>
              thynkr.study
            </span>
