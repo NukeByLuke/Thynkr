@@ -166,10 +166,10 @@ if (-not $SkipBuild) {
             # Stripe build args for frontend (baked into static build)
             $stripeBuildArgs = @(
                 "--build-arg", "VITE_STRIPE_PUBLISHABLE_KEY=pk_live_51SbRAIJuKGUgkYW1fGKyfbuypMfap97iQNoGhLoXBWbLsLVXUHMPqeyyZtLc3i3S7Nr5TieuF7JI2v9TRTjZG6pa00P13f3z3i",
-                "--build-arg", "VITE_STRIPE_PRICE_STANDARD_MONTHLY=price_1Sbc5BFLpibl0I1eunJydqtn",
-                "--build-arg", "VITE_STRIPE_PRICE_STANDARD_YEARLY=price_1Sbc5IFLpibl0I1e6HxWsX6Y",
-                "--build-arg", "VITE_STRIPE_PRICE_PREMIUM_MONTHLY=price_1Sbc5UFLpibl0I1e1vd6tTcH",
-                "--build-arg", "VITE_STRIPE_PRICE_PREMIUM_YEARLY=price_1Sbc5bFLpibl0I1eQ08uAmFZ"
+                "--build-arg", "VITE_STRIPE_PRICE_STANDARD_MONTHLY=price_1SbckrJuKGUgkYW1li8mzZsl",
+                "--build-arg", "VITE_STRIPE_PRICE_STANDARD_YEARLY=price_1SbckrJuKGUgkYW1xtzor4VE",
+                "--build-arg", "VITE_STRIPE_PRICE_PREMIUM_MONTHLY=price_1SbckrJuKGUgkYW1gAjSH1cE",
+                "--build-arg", "VITE_STRIPE_PRICE_PREMIUM_YEARLY=price_1SbcksJuKGUgkYW1k4cxrjI9"
             )
             
             if ($NoCache) {
