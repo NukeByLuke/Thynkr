@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import PageContainer from '@/components/layout/PageContainer';
@@ -10,9 +10,7 @@ import {
   TIER_ORDER, 
   UserAchievement 
 } from '@/features/gamification/gamification.utils';
-import { Trophy, Share2, Lock } from 'lucide-react';
-import Button from '@/components/ui/Button';
-import { ShareProfileModal } from '@/features/gamification/ShareProfileModal';
+import { Trophy, Lock } from 'lucide-react';
 
 const PublicLevelBanner = ({ user }: { user: any }) => {
   return (
@@ -39,7 +37,6 @@ const PublicLevelBanner = ({ user }: { user: any }) => {
 
 export default function PublicAchievements() {
   const { username } = useParams<{ username: string }>();
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const { data: profile, isLoading, error } = useQuery({
     queryKey: ['public-profile', username],
@@ -111,11 +108,6 @@ export default function PublicAchievements() {
     <PageContainer>
        <PageContainer.Header 
          subtitle={`${unlockedCount} Achievements Unlocked`}
-         actions={
-           <Button onClick={() => setIsShareModalOpen(true)} variant="primary" className="gap-2">
-             <Share2 size={16} /> Share
-           </Button>
-         }
        >
          Player Profile
        </PageContainer.Header>
@@ -177,13 +169,6 @@ export default function PublicAchievements() {
              })}
           </div>
        </PageContainer.Section>
-       
-       <ShareProfileModal 
-         isOpen={isShareModalOpen}
-         onClose={() => setIsShareModalOpen(false)}
-         user={user}
-         achievements={enrichedAchievements}
-       />
     </PageContainer>
   );
 }
