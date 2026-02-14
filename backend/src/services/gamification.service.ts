@@ -58,7 +58,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Total hours spent studying',
     icon: 'book',
     category: 'study',
-    thresholds: { COPPER: 10, GOLD: 50, RUBY: 100, DIAMOND: 500, AMETHYST: 1000 },
+    thresholds: { COPPER: 10, GOLD: 50, RUBY: 100, AMETHYST: 500, DIAMOND: 1000 },
     xpRewards: STD_XP,
   },
   streak_master: {
@@ -67,7 +67,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Consecutive days of studying',
     icon: 'flame',
     category: 'streak',
-    thresholds: { COPPER: 3, GOLD: 7, RUBY: 14, DIAMOND: 30, AMETHYST: 100 },
+    thresholds: { COPPER: 3, GOLD: 7, RUBY: 14, AMETHYST: 30, DIAMOND: 100 },
     xpRewards: STD_XP,
   },
   quiz_whiz: {
@@ -76,7 +76,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Perfect quiz scores achieved',
     icon: 'target',
     category: 'skill',
-    thresholds: { COPPER: 1, GOLD: 5, RUBY: 10, DIAMOND: 25, AMETHYST: 50 },
+    thresholds: { COPPER: 1, GOLD: 5, RUBY: 10, AMETHYST: 25, DIAMOND: 50 },
     xpRewards: STD_XP,
   },
   librarian: {
@@ -85,7 +85,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Study materials uploaded',
     icon: 'library',
     category: 'content',
-    thresholds: { COPPER: 5, GOLD: 20, RUBY: 50, DIAMOND: 150, AMETHYST: 500 },
+    thresholds: { COPPER: 5, GOLD: 20, RUBY: 50, AMETHYST: 150, DIAMOND: 500 },
     xpRewards: STD_XP,
   },
   socialite: {
@@ -94,7 +94,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Study sessions shared with others',
     icon: 'share-2',
     category: 'social',
-    thresholds: { COPPER: 3, GOLD: 10, RUBY: 25, DIAMOND: 75, AMETHYST: 200 },
+    thresholds: { COPPER: 3, GOLD: 10, RUBY: 25, AMETHYST: 75, DIAMOND: 200 },
     xpRewards: STD_XP,
   },
   speed_demon: {
@@ -103,7 +103,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Complete quizzes quickly (under 5-10 seconds per question)',
     icon: 'zap',
     category: 'skill',
-    thresholds: { COPPER: 10, GOLD: 50, RUBY: 150, DIAMOND: 500, AMETHYST: 1500 },
+    thresholds: { COPPER: 10, GOLD: 50, RUBY: 150, AMETHYST: 500, DIAMOND: 1500 },
     xpRewards: STD_XP,
   },
   note_taker: {
@@ -112,7 +112,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'AI-generated notes created',
     icon: 'file-text',
     category: 'content',
-    thresholds: { COPPER: 5, GOLD: 25, RUBY: 75, DIAMOND: 200, AMETHYST: 600 },
+    thresholds: { COPPER: 5, GOLD: 25, RUBY: 75, AMETHYST: 200, DIAMOND: 600 },
     xpRewards: STD_XP,
   },
   flashcard_master: {
@@ -121,7 +121,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Flashcard sets completed',
     icon: 'layers',
     category: 'study',
-    thresholds: { COPPER: 3, GOLD: 15, RUBY: 40, DIAMOND: 120, AMETHYST: 350 },
+    thresholds: { COPPER: 3, GOLD: 15, RUBY: 40, AMETHYST: 120, DIAMOND: 350 },
     xpRewards: STD_XP,
   },
 
@@ -131,7 +131,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Study sessions started before 8 AM',
     icon: 'sun',
     category: 'streak',
-    thresholds: { COPPER: 5, GOLD: 15, RUBY: 35, DIAMOND: 100, AMETHYST: 300 },
+    thresholds: { COPPER: 5, GOLD: 15, RUBY: 35, AMETHYST: 100, DIAMOND: 300 },
     xpRewards: STD_XP,
   },
   night_owl: {
@@ -140,7 +140,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Study sessions after 10 PM',
     icon: 'moon',
     category: 'streak',
-    thresholds: { COPPER: 5, GOLD: 15, RUBY: 35, DIAMOND: 100, AMETHYST: 300 },
+    thresholds: { COPPER: 5, GOLD: 15, RUBY: 35, AMETHYST: 100, DIAMOND: 300 },
     xpRewards: STD_XP,
   },
   perfectionist: {
@@ -149,7 +149,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Hard difficulty quizzes completed with 100% score',
     icon: 'award',
     category: 'skill',
-    thresholds: { COPPER: 1, GOLD: 3, RUBY: 8, DIAMOND: 20, AMETHYST: 50 },
+    thresholds: { COPPER: 1, GOLD: 3, RUBY: 8, AMETHYST: 20, DIAMOND: 50 },
     xpRewards: STD_XP,
   },
   course_creator: {
@@ -158,7 +158,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Study courses created',
     icon: 'graduation-cap',
     category: 'content',
-    thresholds: { COPPER: 1, GOLD: 3, RUBY: 8, DIAMOND: 20, AMETHYST: 50 },
+    thresholds: { COPPER: 1, GOLD: 3, RUBY: 8, AMETHYST: 20, DIAMOND: 50 },
     xpRewards: STD_XP,
   },
   marathon_runner: {
@@ -167,7 +167,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Single study sessions over 2 hours',
     icon: 'clock',
     category: 'study',
-    thresholds: { COPPER: 1, GOLD: 5, RUBY: 15, DIAMOND: 40, AMETHYST: 100 },
+    thresholds: { COPPER: 1, GOLD: 5, RUBY: 15, AMETHYST: 40, DIAMOND: 100 },
     xpRewards: STD_XP,
   },
   consistent_learner: {
@@ -176,7 +176,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Weeks with at least 5 study days',
     icon: 'calendar',
     category: 'streak',
-    thresholds: { COPPER: 2, GOLD: 6, RUBY: 15, DIAMOND: 35, AMETHYST: 80 },
+    thresholds: { COPPER: 2, GOLD: 6, RUBY: 15, AMETHYST: 35, DIAMOND: 80 },
     xpRewards: STD_XP,
   },
 
@@ -186,7 +186,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Unique topics studied',
     icon: 'search',
     category: 'study',
-    thresholds: { COPPER: 5, GOLD: 15, RUBY: 40, DIAMOND: 100, AMETHYST: 250 },
+    thresholds: { COPPER: 5, GOLD: 15, RUBY: 40, AMETHYST: 100, DIAMOND: 250 },
     xpRewards: STD_XP,
   },
   summary_specialist: {
@@ -195,7 +195,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'AI summaries generated',
     icon: 'file-text',
     category: 'content',
-    thresholds: { COPPER: 10, GOLD: 40, RUBY: 100, DIAMOND: 300, AMETHYST: 800 },
+    thresholds: { COPPER: 10, GOLD: 40, RUBY: 100, AMETHYST: 300, DIAMOND: 800 },
     xpRewards: STD_XP,
   },
   community_helper: {
@@ -204,7 +204,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Study packs shared publicly',
     icon: 'heart',
     category: 'social',
-    thresholds: { COPPER: 2, GOLD: 8, RUBY: 20, DIAMOND: 50, AMETHYST: 150 },
+    thresholds: { COPPER: 2, GOLD: 8, RUBY: 20, AMETHYST: 50, DIAMOND: 150 },
     xpRewards: STD_XP,
   },
   multilingual: {
@@ -213,7 +213,7 @@ export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
     description: 'Different languages used for study materials',
     icon: 'globe',
     category: 'skill',
-    thresholds: { COPPER: 2, GOLD: 3, RUBY: 5, DIAMOND: 8, AMETHYST: 12 },
+    thresholds: { COPPER: 2, GOLD: 3, RUBY: 5, AMETHYST: 8, DIAMOND: 12 },
     xpRewards: STD_XP,
   },
 
