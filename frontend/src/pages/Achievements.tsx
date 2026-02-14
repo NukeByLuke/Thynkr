@@ -11,7 +11,6 @@ import {
   Zap,
   Award,
   Crown,
-  Share2,
   Lock,
   Users,
   Brain,
@@ -28,13 +27,11 @@ import {
   GraduationCap,
   Library,
   FileText,
+  Share2,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import Button from '@/components/ui/Button';
 import { api } from '@/lib/api';
 import { useLayout } from '@/contexts/LayoutContext';
-
-import { ShareProfileModal } from '@/features/gamification/ShareProfileModal';
 
 // --- Types ---
 type AchievementTier = 'COPPER' | 'GOLD' | 'RUBY' | 'AMETHYST' | 'DIAMOND' | 'MASTERY';
@@ -823,7 +820,6 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
 export default function Achievements() {
   const { user } = useAuth();
   const { setHideSidebar, setCustomHeaderContent } = useLayout();
-  const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
 
   // CRITICAL: Clear custom header on mount
   useEffect(() => {
@@ -901,10 +897,6 @@ export default function Achievements() {
     return grouped;
   }, [enrichedAchievements]);
 
-  const handleShare = () => {
-    setIsShareModalOpen(true);
-  };
-
   const unlockedCount = enrichedAchievements.filter((a) => a.unlocked).length;
   const totalCount = enrichedAchievements.length;
 
@@ -942,12 +934,6 @@ export default function Achievements() {
     <PageContainer>
       <PageContainer.Header
         subtitle={`${unlockedCount} of ${totalCount} achievements unlocked`}
-        actions={
-          <Button onClick={handleShare} className="gap-2" variant="primary">
-            <Share2 className="w-4 h-4" />
-            Share Profile
-          </Button>
-        }
       >
         Achievements
       </PageContainer.Header>
@@ -1021,21 +1007,6 @@ export default function Achievements() {
           )}
         </div>
       </PageContainer.Section>
-
-      {/* Share Modal */}
-      {user && (
-        <ShareProfileModal 
-          isOpen={isShareModalOpen} 
-          onClose={() => setIsShareModalOpen(false)} 
-          user={{
-            username: user.username,
-            avatarUrl: user.avatarUrl,
-            xp: progressStats?.totalXp || 0,
-            level: progressStats?.level || 1
-          }}
-          achievements={enrichedAchievements} 
-        />
-      )}
     </PageContainer>
   );
 }
