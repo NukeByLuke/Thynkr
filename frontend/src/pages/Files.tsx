@@ -480,7 +480,7 @@ export default function Files() {
                 exit={{ opacity: 0, y: -20 }}
                 className="fixed top-20 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-4 rounded-full shadow-2xl z-30 flex items-center gap-4"
               >
-                <span className="font-semibold">{selectedItems.size} selected</span>
+                <span className="font-bold text-cyan-400 dark:text-cyan-600 text-lg">{selectedItems.size} selected</span>
                 <div className="w-px h-6 bg-white/20 dark:bg-slate-900/20" />
                 <button
                   onClick={handleSelectAll}
