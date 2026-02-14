@@ -289,7 +289,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                     marginTop: '16px',
                   }}
                 >
-                  <Star size={14} fill="#fbbf24" stroke="#d97706" />
+                  <Star size={14} fill="#fbbf24" stroke="#d97706" style={{ flexShrink: 0 }} />
                   <span
                     style={{
                       fontSize: '12px',
@@ -297,6 +297,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                       color: '#d97706',
                       textTransform: 'uppercase',
                       letterSpacing: '0.05em',
+                      lineHeight: 1,
                     }}
                   >
                     Thynkr Scholar
@@ -320,7 +321,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                     alignItems: 'center',
                     justifyContent: 'center',
                     minWidth: '100px',
-                    padding: '12px 24px 24px 24px',
+                    padding: '16px 24px 20px 24px',
                     backgroundColor: colors.statBg,
                     borderRadius: '16px',
                     border: `1px solid ${colors.cardBorder}`,
@@ -335,6 +336,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                       color: colors.textMuted,
                       marginBottom: '4px',
                       letterSpacing: '0.05em',
+                      lineHeight: 1,
                     }}
                   >
                     {stat.label}
@@ -368,8 +370,8 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
             }}
           >
             {/* Section Header */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '24px' }}>
-              <Trophy size={20} color="#c026d3" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+              <Trophy size={20} color="#c026d3" style={{ flexShrink: 0 }} />
               <span
                 style={{
                   fontSize: '14px',
@@ -377,7 +379,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                   textTransform: 'uppercase',
                   letterSpacing: '0.1em',
                   color: colors.textMuted,
-                  marginTop: '-7px',
+                  lineHeight: 1,
                 }}
               >
                 Top Achievements
@@ -522,14 +524,16 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
               style={{
                 width: '24px', 
                 height: '24px', 
-                objectFit: 'contain'
+                objectFit: 'contain',
+                flexShrink: 0
               }}
            />
            <span style={{ 
                fontSize: '14px', 
                fontWeight: 700, 
                color: colors.text,
-               letterSpacing: '-0.02em'
+               letterSpacing: '-0.02em',
+               lineHeight: 1
            }}>
              thynkr.study
            </span>
