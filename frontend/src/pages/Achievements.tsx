@@ -240,25 +240,24 @@ const LevelBanner = ({ level, currentXp, xpForNextLevel, totalXp }: LevelBannerP
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/80 dark:bg-zinc-950/40 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-lg mb-8"
+      className="bg-white/80 dark:bg-zinc-950/40 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-xl p-4 md:p-6 shadow-lg"
     >
-      <div className="flex flex-col md:flex-row md:items-center gap-6">
+      <div className="flex items-center gap-4">
         {/* Level Badge */}
         <div className="flex-shrink-0">
           <div className="relative">
-            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 p-1 shadow-lg shadow-blue-500/50">
-              <div className="w-full h-full rounded-xl bg-slate-900 flex items-center justify-center">
+            <div className="w-14 h-14 md:w-20 md:h-20 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-[3px] shadow-lg shadow-blue-500/40">
+              <div className="w-full h-full rounded-[10px] bg-slate-900 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-xs text-slate-400 uppercase tracking-wide">Level</div>
-                  <div className="text-3xl font-bold text-white">{level}</div>
+                  <div className="text-[9px] md:text-[10px] text-slate-400 uppercase tracking-wide">Lvl</div>
+                  <div className="text-xl md:text-3xl font-bold text-white leading-none">{level}</div>
                 </div>
               </div>
             </div>
-            {/* Animated ring */}
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-              className="absolute inset-0 rounded-2xl"
+              className="absolute inset-0 rounded-xl"
               style={{
                 background: 'conic-gradient(from 0deg, transparent, rgba(59, 130, 246, 0.5), transparent)',
                 mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
@@ -270,51 +269,44 @@ const LevelBanner = ({ level, currentXp, xpForNextLevel, totalXp }: LevelBannerP
         </div>
 
         {/* Progress Info */}
-        <div className="flex-1 space-y-3">
-          <div className="flex items-baseline justify-between">
+        <div className="flex-1 min-w-0 space-y-2">
+          <div className="flex items-baseline justify-between gap-2">
             <div>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Level {level}</h3>
-              <p className="text-slate-500 dark:text-slate-400 text-sm">
+              <h3 className="text-base md:text-xl font-bold text-slate-900 dark:text-white leading-tight">Level {level}</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-xs">
                 {Math.floor(currentXp).toLocaleString()} / {Math.floor(xpForNextLevel).toLocaleString()} XP
               </p>
             </div>
-            <div className="text-right">
-              <div className="text-sm text-slate-500 dark:text-slate-400">Total XP Earned</div>
-              <div className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-500 dark:from-blue-400 dark:to-indigo-400">
+            <div className="text-right flex-shrink-0">
+              <div className="text-[10px] text-slate-500 dark:text-slate-400">Total XP</div>
+              <div className="text-base md:text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-500 dark:from-blue-400 dark:to-indigo-400">
                 {Math.floor(totalXp).toLocaleString()}
               </div>
             </div>
           </div>
 
           {/* Progress Bar */}
-          <div className="relative h-4 bg-slate-200 dark:bg-zinc-800/50 rounded-full overflow-hidden border border-slate-300 dark:border-white/10">
+          <div className="relative h-3 bg-slate-200 dark:bg-zinc-800/50 rounded-full overflow-hidden border border-slate-300/50 dark:border-white/10">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 1, ease: 'easeOut' }}
-              className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-600 relative overflow-hidden shadow-lg shadow-blue-500/30"
+              className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-600 relative overflow-hidden"
             >
-              {/* Animated shine effect */}
               <motion.div
                 animate={{ x: ['-100%', '200%'] }}
                 transition={{ duration: 2, repeat: Infinity, ease: 'linear', repeatDelay: 1 }}
                 className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-12"
               />
             </motion.div>
-            {/* Progress text overlay */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-xs font-bold text-white drop-shadow-lg">
-                {Math.round(progress)}%
-              </span>
+              <span className="text-[10px] font-bold text-white drop-shadow-lg">{Math.round(progress)}%</span>
             </div>
           </div>
 
-          {/* Next level indicator */}
-          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-            <Zap className="w-3 h-3 text-yellow-500 dark:text-yellow-400" />
-            <span>
-              {Math.floor(xpForNextLevel - currentXp).toLocaleString()} XP until Level {level + 1}
-            </span>
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+            <Zap className="w-3 h-3 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />
+            <span>{Math.floor(xpForNextLevel - currentXp).toLocaleString()} XP until Level {level + 1}</span>
           </div>
         </div>
       </div>
@@ -499,16 +491,16 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
 
         {/* Achievement Icon */}
         <div
-          className={`w-12 h-12 rounded-lg flex items-center justify-center relative z-20 transition-all duration-150 ${
+          className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center relative z-20 transition-all duration-150 ${
             isLocked 
               ? 'bg-slate-300/50 dark:bg-slate-700/50 opacity-40' 
               : `${tier.iconBg} shadow-xl group-hover:scale-110`
           }`}
         >
           {isLocked ? (
-            <Lock className="w-6 h-6 text-slate-400 dark:text-slate-600" />
+            <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 dark:text-slate-600" />
           ) : (
-            <Icon className="w-6 h-6 text-white drop-shadow-lg" />
+            <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow-lg" />
           )}
         </div>
       </div>
@@ -947,7 +939,7 @@ export default function Achievements() {
       </PageContainer.Header>
 
       <PageContainer.Section>
-        <div className="space-y-8 pb-32">
+        <div className="space-y-4 pb-24">
           {/* Level Banner */}
           {progressStats && (
             <LevelBanner
@@ -960,7 +952,7 @@ export default function Achievements() {
 
           {/* Categorized Achievement Grids */}
           {Object.entries(achievementsByCategory).length > 0 ? (
-            <div className="space-y-12">
+            <div className="space-y-6 md:space-y-10">
               {Object.entries(achievementsByCategory).map(([category, categoryAchievements]) => {
                 const config = CATEGORY_CONFIG[category as keyof typeof CATEGORY_CONFIG];
                 const CategoryIcon = config?.icon || Trophy;
@@ -971,28 +963,28 @@ export default function Achievements() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
-                    className="space-y-4"
+                    className="space-y-3"
                   >
                     {/* Category Header */}
-                    <div className="flex items-center gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
-                      <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 flex items-center justify-center">
-                        <CategoryIcon className="w-5 h-5 text-slate-500 dark:text-slate-400" />
+                    <div className="flex items-center gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 flex items-center justify-center flex-shrink-0">
+                        <CategoryIcon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                       </div>
-                      <div className="flex-1">
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight">
                           {config?.title || category}
                         </h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
                           {config?.description || 'Achievement category'}
                         </p>
                       </div>
-                      <div className="text-sm text-slate-500 dark:text-slate-400">
-                        {categoryAchievements.filter((a) => a.unlocked).length} / {categoryAchievements.length} unlocked
+                      <div className="text-xs text-slate-500 dark:text-slate-400 flex-shrink-0">
+                        {categoryAchievements.filter((a) => a.unlocked).length}/{categoryAchievements.length}
                       </div>
                     </div>
 
                     {/* Achievement Grid */}
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-6">
+                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2 sm:gap-4">
                       {categoryAchievements.map((achievement) => (
                         <AchievementCard key={achievement.id} achievement={achievement} />
                       ))}
