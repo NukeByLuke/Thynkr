@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { GraduationCap, BookOpen, FolderOpen, Menu as MenuIcon, Settings, User, LogOut } from 'lucide-react';
+import { GraduationCap, BookOpen, FolderOpen, Menu as MenuIcon, Settings, User, LogOut, Trophy, TrendingUp, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, memo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,7 +14,6 @@ const MobileBottomNav = memo(() => {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-
       if (currentScrollY < 50) {
         setIsVisible(true);
       } else if (currentScrollY > lastScrollY) {
@@ -22,7 +21,6 @@ const MobileBottomNav = memo(() => {
       } else {
         setIsVisible(true);
       }
-
       setLastScrollY(currentScrollY);
     };
 
@@ -42,6 +40,13 @@ const MobileBottomNav = memo(() => {
     { icon: MenuIcon, label: 'Menu', path: '#menu', action: () => setIsMenuOpen(!isMenuOpen) },
   ];
 
+  const menuLinks = [
+    { icon: User, label: 'My Profile', path: '/account', gradient: 'from-violet-500 to-fuchsia-500 dark:from-violet-500 dark:to-fuchsia-500' },
+    { icon: TrendingUp, label: 'Progress', path: '/progress', gradient: 'from-emerald-400 to-cyan-500 dark:from-emerald-400 dark:to-cyan-500' },
+    { icon: Trophy, label: 'Achievements', path: '/achievements', gradient: 'from-amber-400 to-orange-500 dark:from-amber-400 dark:to-orange-500' },
+    { icon: Settings, label: 'Settings', path: '/settings', gradient: 'from-slate-400 to-slate-600 dark:from-slate-400 dark:to-slate-500' },
+  ];
+
   const isActive = (path: string) => {
     if (path === '#menu') return false;
     if (path === '/courses') {
@@ -50,165 +55,184 @@ const MobileBottomNav = memo(() => {
     return location.pathname === path;
   };
 
+  const NavItem = ({ icon: Icon, label, active, onClick, to }: {
+    icon: typeof GraduationCap;
+    label: string;
+    active: boolean;
+    onClick?: () => void;
+    to?: string;
+  }) => {
+    const content = (
+      <motion.div
+        whileTap={{ scale: 0.88 }}
+        className="flex flex-col items-center gap-1 py-2 px-3 min-w-[60px]"
+      >
+        <div className="relative flex items-center justify-center">
+          {active && (
+            <motion.div
+              layoutId="nav-active-bg"
+              className="absolute inset-0 -m-1.5 rounded-2xl bg-gradient-to-br from-fuchsia-500/15 to-pink-500/15 dark:from-cyan-500/15 dark:to-blue-500/15"
+              transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+            />
+          )}
+          <Icon
+            className={`w-[22px] h-[22px] transition-all duration-200 relative z-10 ${
+              active
+                ? 'text-fuchsia-600 dark:text-cyan-400'
+                : 'text-slate-500 dark:text-slate-500'
+            }`}
+            strokeWidth={active ? 2.5 : 1.75}
+          />
+        </div>
+        <span
+          className={`text-[10px] font-semibold tracking-wide transition-colors duration-200 ${
+            active
+              ? 'text-fuchsia-600 dark:text-cyan-400'
+              : 'text-slate-400 dark:text-slate-500'
+          }`}
+        >
+          {label}
+        </span>
+        {active && (
+          <motion.div
+            layoutId="nav-active-dot"
+            className="absolute bottom-1 w-1 h-1 rounded-full bg-gradient-to-r from-fuchsia-500 to-pink-500 dark:from-cyan-400 dark:to-blue-500"
+            transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+          />
+        )}
+      </motion.div>
+    );
+
+    if (to) {
+      return (
+        <NavLink to={to} className="relative flex items-center justify-center">
+          {content}
+        </NavLink>
+      );
+    }
+
+    return (
+      <button onClick={onClick} className="relative flex items-center justify-center">
+        {content}
+      </button>
+    );
+  };
+
   return (
     <>
       {/* Menu Drawer */}
       <AnimatePresence>
         {isMenuOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
               onClick={() => setIsMenuOpen(false)}
-              className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+              className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
             />
-            
-            {/* Drawer */}
+
             <motion.div
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="lg:hidden fixed bottom-0 left-0 right-0 z-[70] bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl rounded-t-3xl border-t border-slate-200/50 dark:border-white/10 shadow-2xl pb-safe"
+              transition={{ type: 'spring', stiffness: 350, damping: 32 }}
+              className="lg:hidden fixed bottom-0 left-0 right-0 z-[70] rounded-t-[28px] overflow-hidden pb-safe"
+              style={{ background: 'var(--drawer-bg, white)' }}
             >
-              <div className="px-6 py-6 space-y-2">
+              {/* Glass background */}
+              <div className="absolute inset-0 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl" />
+
+              {/* Gradient top accent */}
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-fuchsia-500 via-pink-500 to-orange-400 dark:from-cyan-400 dark:via-blue-500 dark:to-violet-500" />
+
+              <div className="relative px-5 pt-3 pb-5">
                 {/* Drag Handle */}
-                <div className="flex justify-center pb-2">
-                  <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full" />
+                <div className="flex justify-center mb-4">
+                  <div className="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full" />
                 </div>
 
-                {/* User Profile Section */}
+                {/* User Profile Card */}
                 {user && (
-                  <div className="flex items-center gap-3 pb-4 border-b border-slate-200/50 dark:border-white/10">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 flex items-center justify-center text-white font-semibold text-lg">
-                      {user.username?.charAt(0).toUpperCase()}
+                  <Link
+                    to="/account"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center gap-3.5 p-3.5 mb-4 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/80 dark:from-slate-800/60 dark:to-slate-900/60 border border-slate-200/60 dark:border-white/8 active:scale-[0.98] transition-transform"
+                  >
+                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-fuchsia-500 via-pink-500 to-orange-400 dark:from-cyan-400 dark:via-blue-500 dark:to-violet-600 flex items-center justify-center text-white font-bold text-base flex-shrink-0 shadow-md">
+                      {user.username?.charAt(0).toUpperCase() ?? user.email?.charAt(0).toUpperCase()}
                     </div>
-                    <div>
-                      <div className="font-semibold text-slate-900 dark:text-white">{user.username}</div>
-                      <div className="text-sm text-slate-500 dark:text-slate-400">{user.email}</div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-semibold text-slate-900 dark:text-white text-sm truncate">{user.username ?? user.email}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.email}</div>
                     </div>
-                  </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0" />
+                  </Link>
                 )}
 
-                {/* Menu Items */}
-                <Link
-                  to="/account"
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-pink-50/50 dark:hover:bg-cyan-900/10 transition-all duration-150"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <User className="w-5 h-5" />
-                  <span className="font-medium">My Profile</span>
-                </Link>
-                <Link
-                  to="/settings"
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-pink-50/50 dark:hover:bg-cyan-900/10 transition-all duration-150"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <Settings className="w-5 h-5" />
-                  <span className="font-medium">Settings</span>
-                </Link>
-                
-                <div className="my-2 border-t border-slate-200/50 dark:border-white/10" />
-                
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/30 transition-all duration-150 w-full"
-                >
-                  <LogOut className="w-5 h-5" />
-                  <span className="font-medium">Logout</span>
-                </button>
+                {/* Menu Items Grid */}
+                <div className="space-y-1">
+                  {menuLinks.map(({ icon: Icon, label, path, gradient }) => (
+                    <Link
+                      key={path}
+                      to={path}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-slate-700 dark:text-slate-200 active:bg-slate-100 dark:active:bg-white/5 transition-colors group"
+                    >
+                      <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                        <Icon className="w-[18px] h-[18px] text-white" strokeWidth={2} />
+                      </div>
+                      <span className="font-medium text-[15px]">{label}</span>
+                      <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600 ml-auto opacity-0 group-active:opacity-100 transition-opacity" />
+                    </Link>
+                  ))}
+                </div>
+
+                {/* Logout */}
+                <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/8">
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-red-500 dark:text-red-400 active:bg-red-50 dark:active:bg-red-950/30 transition-colors w-full"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <LogOut className="w-4 h-4 text-white" strokeWidth={2} />
+                    </div>
+                    <span className="font-medium text-[15px]">Log Out</span>
+                  </button>
+                </div>
               </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      {/* Bottom Navigation - Mobile only */}
+      {/* Bottom Navigation Bar - Mobile only */}
       <motion.nav
         initial={{ y: 0 }}
         animate={{ y: isVisible ? 0 : 100 }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 shadow-[0_-2px_16px_rgba(0,0,0,0.05)] dark:shadow-[0_-2px_16px_rgba(0,0,0,0.3)] pb-safe"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe"
       >
-        <div className="flex items-center justify-around px-4 py-2">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.path);
+        {/* Gradient border top */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-fuchsia-300/60 to-transparent dark:via-cyan-700/40" />
 
-            if (item.action) {
+        <div className="bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl shadow-[0_-8px_32px_rgba(0,0,0,0.08)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)]">
+          <div className="flex items-center justify-around px-2">
+            {navItems.map((item) => {
+              const active = isActive(item.path);
               return (
-                <button
+                <NavItem
                   key={item.path}
+                  icon={item.icon}
+                  label={item.label}
+                  active={item.action ? isMenuOpen : active}
                   onClick={item.action}
-                  className="relative flex flex-col items-center justify-center group py-1 px-3 rounded-xl transition-all"
-                >
-                  <motion.div
-                    whileTap={{ scale: 0.9 }}
-                    className="relative"
-                  >
-                    <div
-                      className={`relative flex items-center justify-center w-11 h-11 rounded-2xl transition-all duration-200 ${
-                        isMenuOpen
-                          ? 'bg-gradient-to-br from-pink-500 to-orange-500 dark:from-cyan-500 dark:to-blue-600 text-white scale-105'
-                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                      }`}
-                    >
-                      <Icon className={`w-5 h-5 ${
-                        isMenuOpen ? 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]' : ''
-                      }`} strokeWidth={isMenuOpen ? 2.5 : 2} />
-                    </div>
-                  </motion.div>
-
-                  <span
-                    className={`mt-1.5 text-[11px] font-semibold transition-all ${
-                      isMenuOpen 
-                        ? 'text-pink-600 dark:text-cyan-400 scale-105' 
-                        : 'text-slate-500 dark:text-slate-500'
-                    }`}
-                  >
-                    {item.label}
-                  </span>
-                </button>
+                  to={item.action ? undefined : item.path}
+                />
               );
-            }
-
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className="relative flex flex-col items-center justify-center group py-1 px-3 rounded-xl transition-all"
-              >
-                <motion.div
-                  whileTap={{ scale: 0.9 }}
-                  className="relative"
-                >
-                  <div
-                    className={`relative flex items-center justify-center w-11 h-11 rounded-2xl transition-all duration-200 ${
-                      active
-                        ? 'bg-gradient-to-br from-pink-500 to-orange-500 dark:from-cyan-500 dark:to-blue-600 text-white scale-105'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <Icon className={`w-5 h-5 ${
-                      active ? 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]' : ''
-                    }`} strokeWidth={active ? 2.5 : 2} />
-                  </div>
-                </motion.div>
-
-                <span
-                  className={`mt-1.5 text-[11px] font-semibold transition-all ${
-                    active 
-                      ? 'text-pink-600 dark:text-cyan-400 scale-105' 
-                      : 'text-slate-500 dark:text-slate-500'
-                  }`}
-                >
-                  {item.label}
-                </span>
-              </NavLink>
-            );
-          })}
+            })}
+          </div>
         </div>
       </motion.nav>
     </>
