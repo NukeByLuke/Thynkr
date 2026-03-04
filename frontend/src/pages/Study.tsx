@@ -8,8 +8,8 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useLayout } from '@/contexts/LayoutContext';
+import { AnimatePresence, motion } from 'framer-motion';
 import { UploadCloud, FolderOpen, FileText, Clock, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { FileTypeBadge } from '@/lib/fileTypeUtils';
 import UploadModal from '@/components/UploadModal';
@@ -33,6 +33,7 @@ export default function Study() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [isProcessingYouTube, setIsProcessingYouTube] = useState(false);
   const [processingVideoTitle, setProcessingVideoTitle] = useState<string | undefined>();
+  const [isDraggingToCreate, setIsDraggingToCreate] = useState(false);
 
   // CRITICAL: Reset layout on mount
   useEffect(() => {
@@ -87,16 +88,16 @@ export default function Study() {
   });
 
   const handleQuickUpload = () => {
+    setUploadError(null);
     setShowUploadModal(true);
   };
 
   const handleUploadFiles = (files: FileList) => {
+    setUploadError(null);
     uploadMutation.mutate(files);
-    setShowUploadModal(false);
   };
 
   const handleUploadYouTube = async (url: string) => {
-    setShowUploadModal(false);
     setIsProcessingYouTube(true);
     setProcessingVideoTitle(undefined);
     
@@ -131,6 +132,36 @@ export default function Study() {
     toast('Processing cancelled - the video may still be added', { icon: '⚠️' });
   };
 
+  const handlePageDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingToCreate(true);
+  };
+
+  const handlePageDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handlePageDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.currentTarget === e.target) {
+      setIsDraggingToCreate(false);
+    }
+  };
+
+  const handlePageDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingToCreate(false);
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleUploadFiles(files);
+    }
+  };
+
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -160,28 +191,40 @@ export default function Study() {
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div
+      className="h-full flex flex-col overflow-hidden"
+      onDragEnter={handlePageDragEnter}
+      onDragOver={handlePageDragOver}
+      onDragLeave={handlePageDragLeave}
+      onDrop={handlePageDrop}
+    >
+      <AnimatePresence>
+        {isDraggingToCreate && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 bg-violet-500/15 dark:bg-violet-400/20 backdrop-blur-sm flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 8 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 8 }}
+              className="rounded-3xl border-2 border-dashed border-violet-500 dark:border-violet-300 bg-white/95 dark:bg-black/90 px-10 py-12 text-center shadow-2xl"
+            >
+              <UploadCloud className="w-14 h-14 mx-auto mb-3 text-violet-600 dark:text-violet-300" />
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Drop to Create Study Set</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300">Release your files to start upload and processing</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Abstract Header - Elegant Aurora Theme */}
       <div className="relative overflow-hidden h-36 bg-gradient-to-br from-pink-100/90 via-fuchsia-100/80 via-30% to-orange-100/70 dark:from-cyan-900/60 dark:via-violet-900/70 dark:via-30% dark:to-blue-900/60">
-        {/* Floating Abstract Shapes - GPU optimized with transform3d */}
-        <motion.div
-          animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
-          transition={{ duration: 8, repeat: Infinity, ease: [0.25, 0.1, 0.25, 1.0] }}
-          className="absolute -top-24 -left-12 w-96 h-96 bg-gradient-to-br from-pink-400 to-fuchsia-500 dark:from-cyan-400 dark:to-violet-500 rounded-full blur-3xl opacity-25 dark:opacity-30"
-          style={{ transform: 'translateZ(0)', willChange: 'transform' }}
-        />
-        <motion.div
-          animate={{ y: [0, 20, 0], x: [0, -15, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: [0.25, 0.1, 0.25, 1.0] }}
-          className="absolute -bottom-24 -right-12 w-[32rem] h-[32rem] bg-gradient-to-br from-fuchsia-400 to-orange-500 dark:from-violet-400 dark:to-blue-500 rounded-full blur-3xl opacity-30 dark:opacity-35"
-          style={{ transform: 'translateZ(0)', willChange: 'transform' }}
-        />
-        <motion.div
-          animate={{ y: [0, -15, 0], scale: [1, 1.1, 1] }}
-          transition={{ duration: 7, repeat: Infinity, ease: [0.25, 0.1, 0.25, 1.0] }}
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-br from-orange-400 to-pink-500 dark:from-blue-400 dark:to-cyan-500 rounded-full blur-3xl opacity-20 dark:opacity-25"
-          style={{ transform: 'translateZ(0)', willChange: 'transform' }}
-        />
+        <div className="absolute -top-24 -left-12 w-96 h-96 bg-gradient-to-br from-pink-400 to-fuchsia-500 dark:from-cyan-400 dark:to-violet-500 rounded-full blur-3xl opacity-20 dark:opacity-25" />
+        <div className="absolute -bottom-24 -right-12 w-[32rem] h-[32rem] bg-gradient-to-br from-fuchsia-400 to-orange-500 dark:from-violet-400 dark:to-blue-500 rounded-full blur-3xl opacity-25 dark:opacity-30" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-br from-orange-400 to-pink-500 dark:from-blue-400 dark:to-cyan-500 rounded-full blur-3xl opacity-15 dark:opacity-20" />
 
         {/* Content */}
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
@@ -205,8 +248,57 @@ export default function Study() {
             </div>
           )}
 
+          {/* Premium Create New Study Set Hero */}
+          <motion.button
+            type="button"
+            onClick={handleQuickUpload}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDraggingToCreate(true);
+            }}
+            onDragLeave={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (e.currentTarget === e.target) {
+                setIsDraggingToCreate(false);
+              }
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDraggingToCreate(false);
+              const files = e.dataTransfer.files;
+              if (files.length > 0) {
+                handleUploadFiles(files);
+              }
+            }}
+            whileHover={{ scale: 1.005 }}
+            className="w-full mb-8 rounded-3xl border border-slate-200 dark:border-white/15 bg-white dark:bg-black p-6 sm:p-8 shadow-xl text-left relative overflow-hidden group"
+          >
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_12%_10%,rgba(236,72,153,0.15),transparent_35%),radial-gradient(circle_at_88%_12%,rgba(168,85,247,0.18),transparent_35%),radial-gradient(circle_at_50%_88%,rgba(59,130,246,0.16),transparent_40%)] dark:bg-[radial-gradient(circle_at_12%_10%,rgba(168,85,247,0.25),transparent_35%),radial-gradient(circle_at_88%_12%,rgba(59,130,246,0.25),transparent_35%),radial-gradient(circle_at_50%_88%,rgba(34,211,238,0.22),transparent_40%)]" />
+
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 dark:bg-violet-400/15 border border-violet-500/20 dark:border-violet-300/30 text-xs font-semibold text-violet-700 dark:text-violet-300 mb-3">
+                  <UploadCloud className="w-3.5 h-3.5" />
+                  Premium Upload
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Create New Study Set</h2>
+                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl">
+                  Drag files directly onto this page or click to open the Upload Hub with files, YouTube, and text import.
+                </p>
+              </div>
+
+              <div className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-violet-600 text-white font-semibold shadow-lg shadow-violet-500/30">
+                <UploadCloud className="w-5 h-5" />
+                Open Upload Hub
+              </div>
+            </div>
+          </motion.button>
+
           {/* Action Cards - Minimal */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+          <div className="grid grid-cols-1 gap-4 mb-10">
             {/* Card 1: Browse Library */}
             <button
               onClick={() => navigate('/files')}
@@ -227,28 +319,6 @@ export default function Study() {
                 <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-slate-700 dark:group-hover:text-white transition-colors flex-shrink-0" />
               </div>
             </button>
-
-            {/* Card 2: Quick Upload */}
-            <button
-              onClick={handleQuickUpload}
-              disabled={uploadMutation.isPending}
-              className="group card-hover p-5 text-left transition-[border-color,transform] duration-200 active:scale-95 hover:border-fuchsia-500 dark:hover:border-violet-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10 dark:from-violet-500/10 dark:to-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0 border border-fuchsia-500/20 dark:border-violet-500/20">
-                  <UploadCloud className="w-6 h-6 text-fuchsia-600 dark:text-violet-400" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold text-heading mb-1">
-                    {uploadMutation.isPending ? 'Uploading...' : 'Upload Material'}
-                  </h3>
-                  <p className="text-sm text-body">
-                    Upload files or add YouTube videos
-                  </p>
-                </div>
-                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-slate-700 dark:group-hover:text-white transition-colors flex-shrink-0" />
-              </div>
-            </button>
           </div>
 
           {/* Recent Files Section */}
@@ -262,12 +332,10 @@ export default function Study() {
               </div>
               <div className="space-y-3">
                 {recentFiles.map((file) => (
-                  <motion.button
+                  <button
                     key={file.id}
                     onClick={() => navigate(`/study/${file.id}`)}
-                    whileHover={{ x: 4 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full flex items-center gap-4 p-4 card-hover transition-[border-color,transform] duration-200 group hover:border-pink-500/50 dark:hover:border-violet-500/50"
+                    className="w-full flex items-center gap-4 p-4 card-hover transition-[border-color,transform] duration-150 group hover:border-pink-500/50 dark:hover:border-violet-500/50 hover:translate-x-1 active:scale-[0.99]"
                   >
                     <div className="w-12 h-12 bg-gradient-to-br from-pink-500/20 to-fuchsia-500/20 dark:from-violet-500/20 dark:to-cyan-500/20 rounded-xl flex items-center justify-center border border-pink-500/20 dark:border-violet-500/20">
                       <FileText className="w-6 h-6 text-pink-600 dark:text-violet-400" />
@@ -284,7 +352,7 @@ export default function Study() {
                       </div>
                     </div>
                     <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-pink-600 dark:group-hover:text-cyan-400 transition-colors" />
-                  </motion.button>
+                  </button>
                 ))}
               </div>
             </div>
@@ -314,6 +382,7 @@ export default function Study() {
         onUploadFiles={handleUploadFiles}
         onUploadYouTube={handleUploadYouTube}
         isUploading={uploadMutation.isPending}
+        uploadErrorMessage={uploadError}
       />
 
       {/* YouTube Processing Overlay */}

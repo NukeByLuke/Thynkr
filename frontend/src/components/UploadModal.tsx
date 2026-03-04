@@ -1,13 +1,18 @@
-/**
- * Multi-Source Upload Modal
- * Supports file uploads and YouTube links with glassmorphism styling
- */
-
-import { useState, useRef, DragEvent } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Upload, Youtube, File as FileIcon, Check, AlertCircle, FileText } from 'lucide-react';
+import { useEffect, useRef, useState, useMemo, DragEvent } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  X,
+  UploadCloud,
+  Youtube,
+  File as FileIcon,
+  Check,
+  AlertCircle,
+  FileText,
+  Sparkles,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import LoadingProgress from './ui/LoadingProgress';
+import SuccessAnimation from './ui/SuccessAnimation';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -17,9 +22,12 @@ interface UploadModalProps {
   isUploading?: boolean;
   currentFolderId?: string | null;
   requireContentAgreement?: boolean;
+  uploadErrorMessage?: string | null;
 }
 
 type TabType = 'files' | 'youtube' | 'text';
+type UploadStage = 'idle' | 'uploading' | 'processing' | 'success';
+type UploadContext = 'files' | 'text';
 
 const ACCEPTED_FILE_TYPES = '.pdf,.doc,.docx,.ppt,.pptx,.pps,.ppsx,.txt';
 const ACCEPTED_MIME_TYPES = [
@@ -31,13 +39,21 @@ const ACCEPTED_MIME_TYPES = [
   'text/plain',
 ];
 
+const TAB_CONFIG: Array<{ id: TabType; label: string; icon: typeof UploadCloud }> = [
+  { id: 'files', label: 'Upload Files', icon: UploadCloud },
+  { id: 'youtube', label: 'YouTube Link', icon: Youtube },
+  { id: 'text', label: 'Paste Text', icon: FileText },
+];
+
 export default function UploadModal({
   isOpen,
   onClose,
   onUploadFiles,
   onUploadYouTube,
   isUploading = false,
+  currentFolderId,
   requireContentAgreement = false,
+  uploadErrorMessage,
 }: UploadModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>('files');
   const [isDragging, setIsDragging] = useState(false);
@@ -46,10 +62,28 @@ export default function UploadModal({
   const [textTitle, setTextTitle] = useState('');
   const [textContent, setTextContent] = useState('');
   const [hasAgreed, setHasAgreed] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Reset state when modal closes
-  const handleClose = () => {
+  const [uploadStage, setUploadStage] = useState<UploadStage>('idle');
+  const [uploadContext, setUploadContext] = useState<UploadContext>('files');
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [hasObservedUpload, setHasObservedUpload] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const stageTimerRef = useRef<number | null>(null);
+  const successTimerRef = useRef<number | null>(null);
+
+  const clearTransitionTimers = () => {
+    if (stageTimerRef.current) {
+      window.clearTimeout(stageTimerRef.current);
+      stageTimerRef.current = null;
+    }
+    if (successTimerRef.current) {
+      window.clearTimeout(successTimerRef.current);
+      successTimerRef.current = null;
+    }
+  };
+
+  const resetFormState = () => {
     setActiveTab('files');
     setYoutubeUrl('');
     setSelectedFiles([]);
@@ -57,16 +91,31 @@ export default function UploadModal({
     setTextContent('');
     setHasAgreed(false);
     setIsDragging(false);
+  };
+
+  const resetUploadState = () => {
+    clearTransitionTimers();
+    setUploadStage('idle');
+    setUploadContext('files');
+    setHasSubmitted(false);
+    setHasObservedUpload(false);
+  };
+
+  const handleClose = () => {
+    if (isUploading || uploadStage === 'uploading' || uploadStage === 'processing') {
+      return;
+    }
+    resetUploadState();
+    resetFormState();
     onClose();
   };
 
-  // Validate YouTube URL
   const isValidYouTubeUrl = (url: string): boolean => {
-    const youtubeRegex = /^(https?:\/\/)?(www\.|m\.)?(youtube\.com\/(watch\?v=|shorts\/|embed\/|live\/)|youtu\.be\/)[\w-]{11}([?&][\w%=&.-]*)?$/;
+    const youtubeRegex =
+      /^(https?:\/\/)?(www\.|m\.)?(youtube\.com\/(watch\?v=|shorts\/|embed\/|live\/)|youtu\.be\/)[\w-]{11}([?&][\w%=&.-]*)?$/;
     return youtubeRegex.test(url);
   };
 
-  // Handle file selection
   const handleFileSelect = (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
@@ -86,11 +135,32 @@ export default function UploadModal({
     }
 
     if (validFiles.length > 0) {
-      setSelectedFiles((prev) => [...prev, ...validFiles]);
+      setSelectedFiles((prev) => {
+        const merged = [...prev];
+        validFiles.forEach((candidate) => {
+          const exists = merged.some(
+            (existing) =>
+              existing.name === candidate.name &&
+              existing.size === candidate.size &&
+              existing.lastModified === candidate.lastModified
+          );
+          if (!exists) {
+            merged.push(candidate);
+          }
+        });
+        return merged;
+      });
     }
   };
 
-  // Handle drag & drop
+  const beginTrackedUpload = (context: UploadContext, files: FileList) => {
+    setUploadContext(context);
+    setUploadStage('uploading');
+    setHasSubmitted(true);
+    setHasObservedUpload(false);
+    onUploadFiles(files);
+  };
+
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
@@ -107,41 +177,26 @@ export default function UploadModal({
     handleFileSelect(e.dataTransfer.files);
   };
 
-  // Remove selected file
   const handleRemoveFile = (index: number) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Submit files
   const handleSubmitFiles = () => {
     if (selectedFiles.length === 0) {
       toast.error('Please select at least one file');
       return;
     }
 
+    if (requireContentAgreement && !hasAgreed) {
+      toast.error('Please confirm the content agreement to continue');
+      return;
+    }
+
     const dataTransfer = new DataTransfer();
     selectedFiles.forEach((file) => dataTransfer.items.add(file));
-    onUploadFiles(dataTransfer.files);
-    handleClose();
+    beginTrackedUpload('files', dataTransfer.files);
   };
 
-  // Submit YouTube URL
-  const handleSubmitYouTube = () => {
-    if (!youtubeUrl.trim()) {
-      toast.error('Please enter a YouTube URL');
-      return;
-    }
-
-    if (!isValidYouTubeUrl(youtubeUrl)) {
-      toast.error('Please enter a valid YouTube URL');
-      return;
-    }
-
-    onUploadYouTube(youtubeUrl);
-    handleClose();
-  };
-
-  // Submit pasted text
   const handleSubmitText = () => {
     if (!textTitle.trim()) {
       toast.error('Please enter a title');
@@ -153,407 +208,518 @@ export default function UploadModal({
       return;
     }
 
-    // Create a File object from the text content
+    if (requireContentAgreement && !hasAgreed) {
+      toast.error('Please confirm the content agreement to continue');
+      return;
+    }
+
     const blob = new Blob([textContent], { type: 'text/plain' });
     const file = new (File as any)([blob], `${textTitle}.txt`, { type: 'text/plain' }) as File;
-    
-    // Use DataTransfer to create a FileList
     const dataTransfer = new DataTransfer();
     dataTransfer.items.add(file);
-    
-    onUploadFiles(dataTransfer.files);
+
+    beginTrackedUpload('text', dataTransfer.files);
+  };
+
+  const handleSubmitYouTube = () => {
+    if (!youtubeUrl.trim()) {
+      toast.error('Please enter a YouTube URL');
+      return;
+    }
+
+    if (!isValidYouTubeUrl(youtubeUrl)) {
+      toast.error('Please enter a valid YouTube URL');
+      return;
+    }
+
+    if (requireContentAgreement && !hasAgreed) {
+      toast.error('Please confirm the content agreement to continue');
+      return;
+    }
+
+    onUploadYouTube(youtubeUrl);
     handleClose();
   };
+
+  useEffect(() => {
+    if (!isOpen) {
+      resetUploadState();
+      resetFormState();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !hasSubmitted) return;
+
+    if (isUploading) {
+      setHasObservedUpload(true);
+      setUploadStage((prev) => (prev === 'processing' ? prev : 'uploading'));
+      if (stageTimerRef.current) {
+        window.clearTimeout(stageTimerRef.current);
+      }
+      stageTimerRef.current = window.setTimeout(() => {
+        setUploadStage('processing');
+      }, 900);
+      return;
+    }
+
+    if (hasObservedUpload) {
+      if (uploadErrorMessage) {
+        resetUploadState();
+        return;
+      }
+
+      setUploadStage('success');
+      if (successTimerRef.current) {
+        window.clearTimeout(successTimerRef.current);
+      }
+      successTimerRef.current = window.setTimeout(() => {
+        resetUploadState();
+        resetFormState();
+        onClose();
+      }, 1250);
+    }
+  }, [isOpen, hasSubmitted, hasObservedUpload, isUploading, uploadErrorMessage, onClose]);
+
+  useEffect(() => {
+    return () => {
+      clearTransitionTimers();
+    };
+  }, []);
+
+  const isLocked = isUploading || uploadStage === 'uploading' || uploadStage === 'processing';
+
+  const isSubmitDisabled =
+    isLocked ||
+    (requireContentAgreement && !hasAgreed) ||
+    (activeTab === 'files'
+      ? selectedFiles.length === 0
+      : activeTab === 'youtube'
+      ? !isValidYouTubeUrl(youtubeUrl)
+      : !textTitle.trim() || !textContent.trim());
+
+  const stageMessage = useMemo(() => {
+    if (uploadStage === 'uploading') {
+      return uploadContext === 'text'
+        ? 'Uploading generated text file...'
+        : `Uploading ${selectedFiles.length} file${selectedFiles.length !== 1 ? 's' : ''}...`;
+    }
+
+    if (uploadStage === 'processing') {
+      return uploadContext === 'text'
+        ? 'Converting text into notes, quizzes, and flashcards...'
+        : 'Extracting key ideas and preparing your study set...';
+    }
+
+    return '';
+  }, [uploadStage, uploadContext, selectedFiles.length]);
 
   if (!isOpen) return null;
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        {/* Backdrop */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
+          transition={{ duration: 0.18 }}
           onClick={handleClose}
-          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          className="absolute inset-0 bg-black/70 backdrop-blur-md"
         />
 
-        {/* Modal */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="relative w-full max-w-2xl max-h-[90vh] bg-white dark:bg-zinc-950 backdrop-blur-md border-2 border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden will-change-transform"
+          initial={{ opacity: 0, y: 24, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 24, scale: 0.96 }}
+          transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+          className="relative w-full max-w-4xl h-[min(90vh,820px)] rounded-3xl border border-white/20 dark:border-white/10 bg-white/95 dark:bg-black/90 backdrop-blur-2xl shadow-[0_20px_80px_rgba(0,0,0,0.45)] overflow-hidden"
         >
-          {/* Upload Loading Overlay */}
-          <AnimatePresence>
-            {isUploading && (
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(168,85,247,0.12),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.12),transparent_40%)]" />
+
+          <div className="relative z-10 flex h-full flex-col">
+            <div className="flex items-start justify-between px-6 sm:px-8 pt-6 pb-5 border-b border-slate-200/80 dark:border-white/10">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-700 dark:text-violet-300 text-xs font-semibold mb-3">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Premium Upload Hub
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Create New Study Set</h2>
+                <p className="text-sm text-slate-600 dark:text-slate-300 mt-1.5">
+                  Upload files, process a YouTube video, or convert text into structured study material.
+                </p>
+              </div>
+              <button
+                onClick={handleClose}
+                disabled={isLocked}
+                className="p-2.5 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-white/10 rounded-xl transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Close upload modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="px-6 sm:px-8 pt-5">
+              <div className="grid grid-cols-3 gap-2 p-1.5 rounded-2xl bg-slate-100/90 dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10">
+                {TAB_CONFIG.map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
+                      disabled={isLocked}
+                      className="relative px-3 py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="upload-tab-active-pill"
+                          className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500 to-violet-600 shadow-[0_8px_20px_rgba(79,70,229,0.35)]"
+                          transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                        />
+                      )}
+                      <span
+                        className={`relative z-10 inline-flex items-center justify-center gap-2 ${
+                          isActive
+                            ? 'text-white'
+                            : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        {tab.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 sm:px-8 pb-6 pt-5">
+              <AnimatePresence mode="wait" initial={false}>
+                {activeTab === 'files' ? (
+                  <motion.div
+                    key="tab-files"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-5"
+                  >
+                    <motion.div
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                      whileHover={{ scale: 1.005 }}
+                      animate={
+                        isDragging
+                          ? {
+                              scale: 1.02,
+                              boxShadow:
+                                '0 0 0 2px rgba(139,92,246,0.45), 0 20px 48px rgba(139,92,246,0.26)',
+                            }
+                          : {
+                              scale: 1,
+                              boxShadow: '0 10px 34px rgba(15,23,42,0.16)',
+                            }
+                      }
+                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                      className={`relative rounded-3xl border-2 border-dashed p-10 sm:p-12 text-center cursor-pointer bg-gradient-to-br from-slate-100 to-white dark:from-zinc-950 dark:to-black ${
+                        isDragging
+                          ? 'border-violet-500'
+                          : 'border-slate-300 dark:border-white/20 hover:border-violet-400 dark:hover:border-violet-400'
+                      }`}
+                    >
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        accept={ACCEPTED_FILE_TYPES}
+                        onChange={(e) => handleFileSelect(e.target.files)}
+                        className="hidden"
+                        disabled={isLocked}
+                      />
+
+                      <div className="mx-auto w-fit mb-4">
+                        <motion.div
+                          animate={
+                            isDragging
+                              ? { scale: [1, 1.12, 1], y: [0, -3, 0] }
+                              : { scale: 1, y: 0 }
+                          }
+                          transition={{ duration: 1, repeat: isDragging ? Infinity : 0 }}
+                          className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-600 text-white flex items-center justify-center shadow-lg"
+                        >
+                          <UploadCloud className="w-8 h-8" />
+                        </motion.div>
+                      </div>
+
+                      <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                        {isDragging ? 'Drop files to begin' : 'Drag files to build a study set'}
+                      </h3>
+                      <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-xl mx-auto mb-4">
+                        Upload lecture slides, notes, assignments, and text documents in one place.
+                      </p>
+
+                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-200/80 dark:bg-white/10 border border-slate-300/80 dark:border-white/20 text-xs font-medium text-slate-700 dark:text-slate-200">
+                        <FileIcon className="w-4 h-4" />
+                        PDF, DOCX, PPTX, TXT • Max 50MB each
+                      </div>
+
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-4">
+                        {currentFolderId
+                          ? 'Files will be added to your current folder.'
+                          : 'Files will be added to your root study library.'}
+                      </p>
+                    </motion.div>
+
+                    {selectedFiles.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-black/60 p-4"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                            Selected files ({selectedFiles.length})
+                          </p>
+                        </div>
+                        <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+                          <AnimatePresence initial={false}>
+                            {selectedFiles.map((file, index) => (
+                              <motion.div
+                                key={`${file.name}-${file.size}-${file.lastModified}`}
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -6 }}
+                                className="flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5"
+                              >
+                                <div className="min-w-0 flex items-center gap-3">
+                                  <div className="w-9 h-9 rounded-lg bg-slate-200 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                                    <FileIcon className="w-4 h-4 text-slate-700 dark:text-slate-200" />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{file.name}</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                      {(file.size / 1024 / 1024).toFixed(2)} MB
+                                    </p>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveFile(index);
+                                  }}
+                                  className="p-2 rounded-lg text-slate-500 hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                                  disabled={isLocked}
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </motion.div>
+                            ))}
+                          </AnimatePresence>
+                        </div>
+                      </motion.div>
+                    )}
+                  </motion.div>
+                ) : activeTab === 'youtube' ? (
+                  <motion.div
+                    key="tab-youtube"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-5"
+                  >
+                    <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-black/60 p-5">
+                      <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-3">
+                        YouTube URL
+                      </label>
+                      <div className="relative">
+                        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-red-500/15 flex items-center justify-center pointer-events-none">
+                          <Youtube className="w-5 h-5 text-red-500" />
+                        </div>
+                        <input
+                          type="url"
+                          value={youtubeUrl}
+                          onChange={(e) => setYoutubeUrl(e.target.value)}
+                          placeholder="https://www.youtube.com/watch?v=..."
+                          className={`w-full pl-14 pr-12 py-4 rounded-xl border-2 bg-white dark:bg-black text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
+                            youtubeUrl && isValidYouTubeUrl(youtubeUrl)
+                              ? 'border-emerald-500 focus:ring-emerald-500/30'
+                              : youtubeUrl && !isValidYouTubeUrl(youtubeUrl)
+                              ? 'border-red-500 focus:ring-red-500/30'
+                              : 'border-slate-200 dark:border-white/15 focus:ring-violet-500/30 focus:border-violet-500'
+                          }`}
+                          disabled={isLocked}
+                        />
+                        {youtubeUrl && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            {isValidYouTubeUrl(youtubeUrl) ? (
+                              <Check className="w-5 h-5 text-emerald-500" />
+                            ) : (
+                              <AlertCircle className="w-5 h-5 text-red-500" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mt-4 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-3">
+                        <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">Supported formats:</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 font-mono break-all">
+                          youtube.com/watch?v=..., youtu.be/..., /shorts/... and /embed/...
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="tab-text"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-5"
+                  >
+                    <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-black/60 p-5 space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">Title</label>
+                        <input
+                          type="text"
+                          value={textTitle}
+                          onChange={(e) => setTextTitle(e.target.value)}
+                          placeholder="e.g., Biology Chapter 4 Notes"
+                          maxLength={100}
+                          className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-white/15 bg-white dark:bg-black text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500"
+                          disabled={isLocked}
+                        />
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5">{textTitle.length}/100 characters</p>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">Content</label>
+                        <textarea
+                          value={textContent}
+                          onChange={(e) => setTextContent(e.target.value)}
+                          placeholder="Paste your notes, transcript, article excerpt, or summary text..."
+                          rows={11}
+                          className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-white/15 bg-white dark:bg-black text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 resize-none"
+                          disabled={isLocked}
+                        />
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5">
+                          {textContent.length.toLocaleString()} characters
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {requireContentAgreement && (
+              <div className="px-6 sm:px-8 py-3 border-t border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-zinc-900/60">
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={hasAgreed}
+                    onChange={(e) => setHasAgreed(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-600"
+                    disabled={isLocked}
+                  />
+                  <span className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
+                    I confirm this content is mine to upload and does not violate academic integrity or copyright policy.
+                  </span>
+                </label>
+              </div>
+            )}
+
+            <div className="px-6 sm:px-8 py-4 border-t border-slate-200 dark:border-white/10 flex items-center justify-between gap-3 bg-white/70 dark:bg-black/70">
+              <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
+                Tip: You can drag files directly into this modal for faster uploads.
+              </p>
+              <div className="flex items-center gap-3 ml-auto">
+                <button
+                  onClick={handleClose}
+                  disabled={isLocked}
+                  className="px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={
+                    activeTab === 'files'
+                      ? handleSubmitFiles
+                      : activeTab === 'youtube'
+                      ? handleSubmitYouTube
+                      : handleSubmitText
+                  }
+                  disabled={isSubmitDisabled}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white font-semibold shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  {activeTab === 'youtube'
+                    ? 'Process Video'
+                    : activeTab === 'text'
+                    ? 'Create from Text'
+                    : 'Upload and Build'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {uploadStage !== 'idle' && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="absolute inset-0 z-50 bg-white/90 dark:bg-zinc-950/95 backdrop-blur-sm flex items-center justify-center"
+                transition={{ duration: 0.2 }}
+                className="absolute inset-0 z-40 bg-white/75 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-6"
               >
-                <LoadingProgress
-                  message="Uploading"
-                  stage={
-                    activeTab === 'youtube'
-                      ? 'Processing YouTube link...'
-                      : activeTab === 'text'
-                      ? 'Processing text content...'
-                      : `Uploading ${selectedFiles.length} file${selectedFiles.length !== 1 ? 's' : ''}...`
-                  }
-                  variant="upload"
-                />
+                <AnimatePresence mode="wait">
+                  {uploadStage === 'success' ? (
+                    <motion.div
+                      key="upload-success"
+                      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                      transition={{ duration: 0.2 }}
+                      className="w-full max-w-md rounded-3xl border border-emerald-400/30 bg-white/95 dark:bg-black/90 p-8 text-center"
+                    >
+                      <div className="relative h-28 flex items-center justify-center">
+                        <SuccessAnimation
+                          show={uploadStage === 'success'}
+                          inline
+                          variant="check"
+                          message="Study set created"
+                        />
+                      </div>
+                      <p className="text-sm text-slate-600 dark:text-slate-300 mt-3">
+                        Your material is ready. Opening your refreshed workspace...
+                      </p>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="upload-loading"
+                      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                      transition={{ duration: 0.2 }}
+                      className="w-full max-w-md rounded-3xl border border-slate-200 dark:border-white/10 bg-white/95 dark:bg-black/90 p-6"
+                    >
+                      <LoadingProgress
+                        message={uploadStage === 'uploading' ? 'Uploading' : 'Processing'}
+                        stage={stageMessage}
+                        variant="upload"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             )}
           </AnimatePresence>
-
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200 dark:border-white/10">
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Upload Material</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Add files or YouTube videos to your library</p>
-            </div>
-            <button
-              onClick={handleClose}
-              className="p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-all duration-150 active:scale-95 will-change-transform"
-              disabled={isUploading}
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex border-b border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-900/50">
-            <button
-              onClick={() => setActiveTab('files')}
-              className={`flex-1 px-6 py-4 text-sm font-medium transition-all duration-150 relative active:scale-95 ${
-                activeTab === 'files'
-                  ? 'text-slate-900 dark:text-white'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Upload className="w-4 h-4" />
-                <span>Upload Files</span>
-              </div>
-              {activeTab === 'files' && (
-                <motion.div
-                  layoutId="activeTab"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-violet-500"
-                />
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('youtube')}
-              className={`flex-1 px-6 py-4 text-sm font-medium transition-all duration-150 relative active:scale-95 ${
-                activeTab === 'youtube'
-                  ? 'text-slate-900 dark:text-white'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Youtube className="w-4 h-4" />
-                <span>YouTube Link</span>
-              </div>
-              {activeTab === 'youtube' && (
-                <motion.div
-                  layoutId="activeTab"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-violet-500"
-                />
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('text')}
-              className={`flex-1 px-6 py-4 text-sm font-medium transition-all duration-150 relative active:scale-95 ${
-                activeTab === 'text'
-                  ? 'text-slate-900 dark:text-white'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <FileText className="w-4 h-4" />
-                <span>Paste Text</span>
-              </div>
-              {activeTab === 'text' && (
-                <motion.div
-                  layoutId="activeTab"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-violet-500"
-                />
-              )}
-            </button>
-          </div>
-
-          {/* Content */}
-          <div className="p-6 overflow-y-auto max-h-[calc(90vh-220px)]">
-            {activeTab === 'files' ? (
-              <div className="space-y-4">
-                {/* Drag & Drop Zone - Premium Design */}
-                <div
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`relative border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all duration-200 ${
-                    isDragging
-                      ? 'border-blue-500 bg-blue-500/10 scale-[1.02]'
-                      : 'border-slate-300 dark:border-white/20 hover:border-slate-400 dark:hover:border-white/30 hover:bg-slate-50 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    multiple
-                    accept={ACCEPTED_FILE_TYPES}
-                    onChange={(e) => handleFileSelect(e.target.files)}
-                    className="hidden"
-                  />
-                  
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-violet-500 rounded-2xl flex items-center justify-center shadow-lg">
-                      <Upload className="w-8 h-8 text-white" />
-                    </div>
-                    
-                    <div>
-                      <p className="text-lg font-semibold text-slate-900 dark:text-white mb-1">
-                        {isDragging ? 'Drop files here' : 'Drag and drop your files here'}
-                      </p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">
-                        or click to browse
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl">
-                      <FileIcon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                      <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
-                        PDF, DOCX, PPTX, TXT • Max 50MB
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Selected Files List */}
-                {selectedFiles.length > 0 && (
-                  <div className="space-y-3">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                      Selected Files ({selectedFiles.length})
-                    </p>
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {selectedFiles.map((file, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-10 h-10 bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 rounded-xl flex items-center justify-center flex-shrink-0">
-                              <FileIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{file.name}</p>
-                              <p className="text-xs text-slate-500 dark:text-slate-400">
-                                {(file.size / 1024 / 1024).toFixed(2)} MB
-                              </p>
-                            </div>
-                          </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemoveFile(index);
-                            }}
-                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all active:scale-95"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : activeTab === 'youtube' ? (
-              <div className="space-y-5">
-                {/* YouTube URL Input */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-3">
-                    YouTube Video URL
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center z-10 pointer-events-none">
-                      <Youtube className="w-5 h-5 text-red-500" />
-                    </div>
-                    <input
-                      type="url"
-                      value={youtubeUrl}
-                      onChange={(e) => setYoutubeUrl(e.target.value)}
-                      placeholder="https://www.youtube.com/watch?v=..."
-                      style={{ textIndent: '3rem' }}
-                      className={`relative z-0 w-full pl-4 pr-12 py-4 bg-white dark:bg-slate-800 border-2 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
-                        youtubeUrl && isValidYouTubeUrl(youtubeUrl)
-                          ? 'border-green-500 dark:border-green-500 focus:ring-green-500/30'
-                          : youtubeUrl && !isValidYouTubeUrl(youtubeUrl)
-                          ? 'border-red-500 dark:border-red-500 focus:ring-red-500/30'
-                          : 'border-slate-200 dark:border-slate-700 focus:ring-blue-500/30 focus:border-blue-500'
-                      }`}
-                    />
-                    {youtubeUrl && (
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                        {isValidYouTubeUrl(youtubeUrl) ? (
-                          <div className="w-8 h-8 bg-green-500/10 rounded-xl flex items-center justify-center">
-                            <Check className="w-5 h-5 text-green-500" />
-                          </div>
-                        ) : (
-                          <div className="w-8 h-8 bg-red-500/10 rounded-xl flex items-center justify-center">
-                            <AlertCircle className="w-5 h-5 text-red-500" />
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  {youtubeUrl && !isValidYouTubeUrl(youtubeUrl) && (
-                    <p className="text-xs text-red-500 dark:text-red-400 mt-2 flex items-center gap-1.5">
-                      <AlertCircle className="w-3.5 h-3.5" />
-                      Please enter a valid YouTube URL (youtube.com or youtu.be)
-                    </p>
-                  )}
-                </div>
-
-                {/* Example URLs */}
-                <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl p-4">
-                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2.5">Example formats:</p>
-                  <ul className="space-y-1.5 text-xs text-slate-600 dark:text-slate-400 font-mono">
-                    <li className="flex items-start gap-2">
-                      <span className="text-slate-400">•</span>
-                      <span>https://www.youtube.com/watch?v=dQw4w9WgXcQ</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-slate-400">•</span>
-                      <span>https://youtu.be/dQw4w9WgXcQ?si=abc123</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-slate-400">•</span>
-                      <span>https://youtube.com/shorts/dQw4w9WgXcQ</span>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Info Banner */}
-                <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-xl p-4">
-                  <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">
-                    The video will be processed and added to your library
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-5">
-                {/* Title Input */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-3">
-                    Title
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={textTitle}
-                      onChange={(e) => setTextTitle(e.target.value)}
-                      placeholder="Enter a title for your text..."
-                      className="w-full px-4 py-4 bg-white/5 dark:bg-white/5 backdrop-blur-sm border-2 border-slate-200 dark:border-white/20 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
-                      maxLength={100}
-                    />
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                    {textTitle.length}/100 characters
-                  </p>
-                </div>
-
-                {/* Content Textarea */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-3">
-                    Content
-                  </label>
-                  <div className="relative">
-                    <textarea
-                      value={textContent}
-                      onChange={(e) => setTextContent(e.target.value)}
-                      placeholder="Paste or type your content here...&#10;&#10;This could be lecture notes, study materials, or any text you want to process."
-                      rows={12}
-                      className="w-full px-4 py-4 bg-white/5 dark:bg-white/5 backdrop-blur-sm border-2 border-slate-200 dark:border-white/20 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all resize-none font-mono text-sm"
-                    />
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                    {textContent.length.toLocaleString()} characters
-                  </p>
-                </div>
-
-                {/* Info Banner */}
-                <div className="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 rounded-xl p-4">
-                  <p className="text-sm text-purple-700 dark:text-purple-300 font-medium">
-                    Your text will be saved and processed like a regular file
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Content Policy Agreement - Only for course uploads */}
-          {requireContentAgreement && (
-            <div className="px-6 py-4 border-t border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-900/50">
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={hasAgreed}
-                  onChange={(e) => setHasAgreed(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-sunrise-pink dark:text-midnight-cyan focus:ring-2 focus:ring-sunrise-pink/20 dark:focus:ring-midnight-cyan/20 transition-colors cursor-pointer"
-                />
-                <span className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
-                  I confirm that I have the right to upload this content and it does not violate any academic integrity policies or copyright laws.
-                </span>
-              </label>
-            </div>
-          )}
-
-          {/* Footer */}
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-white/10">
-            <button
-              onClick={handleClose}
-              disabled={isUploading}
-              className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors duration-150 disabled:opacity-50 active:scale-95"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={
-                activeTab === 'files'
-                  ? handleSubmitFiles
-                  : activeTab === 'youtube'
-                  ? handleSubmitYouTube
-                  : handleSubmitText
-              }
-              disabled={
-                isUploading ||
-                (requireContentAgreement && !hasAgreed) ||
-                (activeTab === 'files'
-                  ? selectedFiles.length === 0
-                  : activeTab === 'youtube'
-                  ? !isValidYouTubeUrl(youtubeUrl)
-                  : !textTitle.trim() || !textContent.trim())
-              }
-              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white font-medium rounded-lg shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-95 will-change-transform"
-            >
-              {isUploading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Uploading...</span>
-                </div>
-              ) : (
-                'Upload'
-              )}
-            </button>
-          </div>
         </motion.div>
       </div>
     </AnimatePresence>
