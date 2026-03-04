@@ -227,7 +227,7 @@ export default function ProfileSettings() {
       {/* Basic Info Section */}
       <section>
         <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">Personal Details</h2>
-        <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
+        <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">First Name</label>
@@ -298,18 +298,20 @@ export default function ProfileSettings() {
       {/* Password Section */}
       <section>
         <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">Password & Security</h2>
-        <form onSubmit={handlePasswordSubmit} className="space-y-6 max-w-2xl bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-200 dark:border-white/5">
+        <form onSubmit={handlePasswordSubmit} className="space-y-6 max-w-4xl bg-gradient-to-br from-slate-50/90 to-white dark:from-slate-800/70 dark:to-slate-900/70 p-6 md:p-7 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Current Password</label>
             <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                     type="password"
                     name="currentPassword"
                     value={passwordData.currentPassword}
                     onChange={handlePasswordChange}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                  style={{ paddingLeft: '3rem' }}
                     placeholder="Enter current password"
+                    required
                 />
             </div>
           </div>
@@ -322,8 +324,9 @@ export default function ProfileSettings() {
                         name="newPassword"
                         value={passwordData.newPassword}
                         onChange={handlePasswordChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
                         placeholder="New password"
+                        required
                     />
                 </div>
                 <div className="space-y-2">
@@ -333,16 +336,21 @@ export default function ProfileSettings() {
                         name="confirmPassword"
                         value={passwordData.confirmPassword}
                         onChange={handlePasswordChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
                         placeholder="Confirm new password"
+                        required
                     />
                 </div>
            </div>
 
+           <p className="text-xs text-slate-500 dark:text-slate-400 -mt-2">
+             Use at least 8 characters. A mix of letters, numbers, and symbols is recommended.
+           </p>
+
            <div className="pt-2">
              <Button 
                type="submit" 
-               variant="secondary"
+               variant="primary"
                disabled={!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
                isLoading={changePasswordMutation.isPending}
              >

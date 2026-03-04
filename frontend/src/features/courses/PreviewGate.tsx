@@ -17,7 +17,7 @@ export default function PreviewGate({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <div className="min-h-screen w-full bg-white dark:bg-gray-900 flex items-center justify-center p-6">
+    <div className="min-h-app w-full bg-white dark:bg-gray-900 flex items-center justify-center p-6">
       <div className="w-full max-w-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-6">
         <div className="flex items-center gap-2 mb-4">
           <Logo variant="symbol" size="md" className="h-8 w-8" />

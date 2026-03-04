@@ -132,7 +132,7 @@ export default function Admin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 dark:from-slate-950 dark:via-midnight-violet/20 dark:to-slate-950">
+    <div className="min-h-app bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 dark:from-slate-950 dark:via-midnight-violet/20 dark:to-slate-950">
       {/* Header with Glass */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
         <div className="bg-white/5 dark:bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">

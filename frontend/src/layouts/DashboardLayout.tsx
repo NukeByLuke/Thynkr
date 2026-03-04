@@ -1,4 +1,5 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
 import Sidebar from '@/components/layout/Sidebar';
 import ProfileMenu from '@/components/layout/ProfileMenu';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
@@ -7,15 +8,22 @@ import { useLayout } from '@/contexts/LayoutContext';
 
 export default function DashboardLayout() {
   const { hideSidebar, customHeaderContent, hideProfileMenu } = useLayout();
+  const location = useLocation();
+  const mainRef = useRef<HTMLElement | null>(null);
+
+  const effectiveHideSidebar = hideSidebar;
+
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTop = 0;
+    }
+  }, [location.pathname]);
 
   return (
-    <div className="h-screen w-full overflow-hidden bg-slate-50 dark:bg-slate-950 bg-grid-pattern flex relative">
-      {/* Ambient Glow Orbs */}
-      <div className="fixed top-0 left-0 w-96 h-96 bg-pink-500/10 dark:bg-cyan-500/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="fixed bottom-0 right-0 w-96 h-96 bg-fuchsia-500/10 dark:bg-violet-500/20 rounded-full blur-[120px] pointer-events-none" />
+    <div className="h-app min-h-app w-full overflow-hidden bg-slate-50 dark:bg-slate-950 flex relative">
       
       {/* Desktop Sidebar - Hidden on mobile, visible on desktop */}
-      {!hideSidebar && (
+      {!effectiveHideSidebar && (
         <div className="hidden lg:block flex-shrink-0">
           <Sidebar />
         </div>
@@ -24,7 +32,7 @@ export default function DashboardLayout() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header Bar - Sticky on all screens */}
-        <header className="sticky top-0 h-14 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-white/5 flex items-center justify-between px-4 lg:px-6 relative z-50">
+        <header className="sticky top-0 pt-safe h-[calc(3.5rem+env(safe-area-inset-top,0px))] bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-200/70 dark:border-white/10 flex items-center justify-between px-4 lg:px-6 relative z-50">
           {/* Left: Mobile menu button + Logo OR custom header content */}
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {!customHeaderContent ? (
@@ -53,7 +61,11 @@ export default function DashboardLayout() {
         </header>
 
         {/* Main Content - Extra bottom padding on mobile for bottom nav */}
-        <main className={`flex-1 overflow-y-auto bg-transparent ${hideSidebar ? 'p-0 pb-20 lg:pb-0' : 'p-4 pb-24 lg:p-6 lg:pb-6'}`}>
+        <main
+          ref={mainRef}
+          className={`flex-1 overflow-y-auto bg-transparent ${effectiveHideSidebar ? 'p-0 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:pb-0' : 'p-4 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] lg:p-5 lg:pb-5'}`}
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
           <Outlet />
         </main>
       </div>

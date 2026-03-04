@@ -344,7 +344,7 @@ export default function CourseDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="min-h-app bg-gray-50 dark:bg-gray-900 py-8">
       <div className="max-w-6xl mx-auto px-8 lg:px-16">
         {/* Course Header */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">

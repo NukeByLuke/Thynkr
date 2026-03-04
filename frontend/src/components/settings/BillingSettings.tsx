@@ -1,7 +1,19 @@
 import { CreditCard, ExternalLink } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import api from '@/lib/api';
 import Button from '@/components/ui/Button';
+
+function isValidStripePortalUrl(url: string | undefined): boolean {
+  if (!url) return false;
+
+  const isStripeBillingUrl = /^https:\/\/billing\.stripe\.com\//i.test(url);
+  const isDeprecatedTestLoginUrl = /\/p\/login\/test/i.test(url);
+
+  return isStripeBillingUrl && !isDeprecatedTestLoginUrl;
+}
 
 export default function BillingSettings() {
   const { user } = useAuth();
@@ -16,6 +28,25 @@ export default function BillingSettings() {
 
   const currentPlan = planInfo[user?.role as keyof typeof planInfo] || planInfo.BASIC;
 
+  const createPortalMutation = useMutation({
+    mutationFn: async () => {
+      const response = await api.post('/stripe/create-portal-session');
+      return response.data as { url?: string };
+    },
+    onSuccess: (data) => {
+      const portalUrl = data?.url;
+
+      if (portalUrl && isValidStripePortalUrl(portalUrl)) {
+        window.location.href = portalUrl;
+      } else {
+        toast.error('Billing portal is unavailable right now. Please try again in a minute.');
+      }
+    },
+    onError: () => {
+      toast.error('Failed to open billing portal. Please try again.');
+    },
+  });
+
   return (
     <div className="space-y-10">
       <section>
@@ -24,7 +55,7 @@ export default function BillingSettings() {
           Manage your subscription plan and billing details.
         </p>
 
-        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-6 border border-slate-100 dark:border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-gradient-to-br from-slate-50/90 to-white dark:from-slate-900/70 dark:to-slate-900/40 rounded-2xl p-6 border border-slate-200 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
@@ -62,7 +93,7 @@ export default function BillingSettings() {
               Update your payment card and billing address.
             </p>
 
-            <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl">
+            <div className="flex items-center justify-between p-4 bg-white/80 dark:bg-slate-900/70 border border-slate-200 dark:border-white/10 rounded-xl">
                <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
                     <CreditCard className="w-5 h-5" />
@@ -72,7 +103,13 @@ export default function BillingSettings() {
                     <p className="text-xs text-slate-500">Managed via Stripe Customer Portal</p>
                   </div>
                </div>
-               <Button variant="ghost" size="sm" onClick={() => window.open('https://billing.stripe.com/p/login/test', '_blank')} className="gap-2">
+               <Button
+                 variant="ghost"
+                 size="sm"
+                 onClick={() => createPortalMutation.mutate()}
+                 isLoading={createPortalMutation.isPending}
+                 className="gap-2"
+               >
                  Manage <ExternalLink className="w-3 h-3" />
                </Button>
             </div>

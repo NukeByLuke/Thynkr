@@ -134,16 +134,16 @@ export default function EmptyState({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="flex flex-col items-center justify-center py-16 px-6 text-center"
+      className="flex flex-col items-center justify-center py-10 sm:py-16 px-4 sm:px-6 text-center"
     >
-      <div className="flex flex-col md:flex-row items-center gap-10 max-w-3xl">
+      <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-10 max-w-3xl">
         {/* Illustration */}
         {illustration && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.15, duration: 0.4 }}
-            className="w-40 h-40 flex-shrink-0"
+            className="w-28 h-28 sm:w-40 sm:h-40 flex-shrink-0"
           >
             {illustrations[illustration]}
           </motion.div>
@@ -156,7 +156,7 @@ export default function EmptyState({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1, type: 'spring', stiffness: 300, damping: 25 }}
-            className="inline-flex items-center justify-center w-14 h-14 bg-primary-50 dark:bg-primary-900/30 rounded-2xl mb-5"
+            className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-primary-50 dark:bg-primary-900/30 rounded-2xl mb-4 sm:mb-5"
           >
             <div className="text-primary-500 dark:text-primary-400">{icon}</div>
           </motion.div>
@@ -166,7 +166,7 @@ export default function EmptyState({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.15 }}
-            className="text-xl font-medium text-slate-800 dark:text-slate-100 mb-2"
+            className="text-lg sm:text-xl font-medium text-slate-800 dark:text-slate-100 mb-2"
           >
             {title}
           </motion.h3>
@@ -175,7 +175,7 @@ export default function EmptyState({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-slate-500 dark:text-slate-400 mb-6 max-w-sm mx-auto"
+            className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mb-5 sm:mb-6 max-w-sm mx-auto"
           >
             {description}
           </motion.p>

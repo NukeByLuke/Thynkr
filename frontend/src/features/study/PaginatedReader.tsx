@@ -113,7 +113,7 @@ export default function PaginatedReader({
         initial={{ y: 0 }}
         animate={{ y: showHeader ? 0 : -100 }}
         transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1.0] }}
-        className="md:relative md:translate-y-0 fixed top-0 left-0 right-0 z-30 md:z-0 flex items-center justify-between p-3 md:p-4 border-b border-gray-200 dark:border-gray-700 bg-white/95 md:bg-white dark:bg-gray-900/95 dark:md:bg-gray-900 backdrop-blur-lg md:backdrop-blur-none shadow-sm md:shadow-none"
+        className="md:relative md:translate-y-0 fixed top-0 left-0 right-0 z-30 md:z-0 flex items-center justify-between p-3 md:p-4 border-b border-gray-200 dark:border-gray-700 bg-white/95 md:bg-white dark:bg-gray-900/95 dark:md:bg-gray-900 backdrop-blur-sm md:backdrop-blur-none shadow-sm md:shadow-none"
       >
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-sm md:text-base text-gray-900 dark:text-white truncate">
@@ -231,18 +231,12 @@ export default function PaginatedReader({
                   </h4>
                   <ul className="space-y-2">
                     {(page as NotesPage).keyPoints.map((point, i) => (
-                      <motion.li
-                        key={i}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.05 }}
-                        className="flex items-start gap-3"
-                      >
+                      <li key={i} className="flex items-start gap-3">
                         <span className="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-sm font-medium">
                           {i + 1}
                         </span>
                         <span className="text-gray-700 dark:text-gray-300 leading-relaxed">{point}</span>
-                      </motion.li>
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -255,7 +249,6 @@ export default function PaginatedReader({
                   <div className="prose prose-gray dark:prose-invert max-w-none">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
-                      rehypePlugins={[rehypeHighlight]}
                       components={{
                         h1: ({ node, ...props }) => (
                           <h1

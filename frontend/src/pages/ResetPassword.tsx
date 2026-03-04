@@ -52,7 +52,7 @@ export default function ResetPassword() {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sunrise-pink/10 via-white to-sunrise-orange/10 dark:from-midnight-violet/10 dark:via-slate-950 dark:to-midnight-cyan/10 p-4">
+      <div className="min-h-app flex items-center justify-center bg-gradient-to-br from-sunrise-pink/10 via-white to-sunrise-orange/10 dark:from-midnight-violet/10 dark:via-slate-950 dark:to-midnight-cyan/10 p-4">
         <div className="max-w-md w-full text-center">
           <Logo variant="full" size="xl" className="justify-center mb-8" />
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl p-8 border border-slate-200/50 dark:border-midnight-blue/30">
@@ -76,7 +76,7 @@ export default function ResetPassword() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sunrise-pink/10 via-white to-sunrise-orange/10 dark:from-midnight-violet/10 dark:via-slate-950 dark:to-midnight-cyan/10 p-4">
+      <div className="min-h-app flex items-center justify-center bg-gradient-to-br from-sunrise-pink/10 via-white to-sunrise-orange/10 dark:from-midnight-violet/10 dark:via-slate-950 dark:to-midnight-cyan/10 p-4">
         <div className="max-w-md w-full text-center">
           <Logo variant="full" size="xl" className="justify-center mb-8" />
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl p-8 border border-slate-200/50 dark:border-midnight-blue/30">
@@ -97,7 +97,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sunrise-pink/10 via-white to-sunrise-orange/10 dark:from-midnight-violet/10 dark:via-slate-950 dark:to-midnight-cyan/10 p-4">
+    <div className="min-h-app flex items-center justify-center bg-gradient-to-br from-sunrise-pink/10 via-white to-sunrise-orange/10 dark:from-midnight-violet/10 dark:via-slate-950 dark:to-midnight-cyan/10 p-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <Logo variant="full" size="xl" className="justify-center mb-4" />

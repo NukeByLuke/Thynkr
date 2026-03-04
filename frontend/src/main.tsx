@@ -6,7 +6,30 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { HelmetProvider } from 'react-helmet-async';
 import App from './App';
 import './index.css';
-import PreviewGate from '@/features/courses/PreviewGate';
+
+function updateAppViewportHeight() {
+  const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+  document.documentElement.style.setProperty('--app-dvh', `${Math.round(viewportHeight)}px`);
+}
+
+if (typeof window !== 'undefined') {
+  updateAppViewportHeight();
+
+  if (!(window as any).__thynkrViewportBound) {
+    let rafId: number | null = null;
+    const onViewportChange = () => {
+      if (rafId !== null) return;
+      rafId = window.requestAnimationFrame(() => {
+        updateAppViewportHeight();
+        rafId = null;
+      });
+    };
+    window.addEventListener('resize', onViewportChange, { passive: true });
+    window.addEventListener('orientationchange', onViewportChange, { passive: true });
+    window.visualViewport?.addEventListener('resize', onViewportChange);
+    (window as any).__thynkrViewportBound = true;
+  }
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,31 +46,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <PreviewWrapper>
-            <App />
-          </PreviewWrapper>
+          <App />
         </BrowserRouter>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </HelmetProvider>
   </React.StrictMode>
 );
-
-function PreviewWrapper({ children }: { children: React.ReactNode }) {
-  const previewPassword = (import.meta.env.VITE_PREVIEW_PASSWORD as string) || '';
-  const [authorized, setAuthorized] = React.useState(() => {
-    return sessionStorage.getItem('previewAuthorized') === 'true' || !previewPassword;
-  });
-
-  if (!authorized) {
-    return (
-      <PreviewGate
-        onSuccess={() => {
-          sessionStorage.setItem('previewAuthorized', 'true');
-          setAuthorized(true);
-        }}
-      />
-    );
-  }
-  return <>{children}</>;
-}

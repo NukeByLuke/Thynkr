@@ -39,7 +39,7 @@ export default function VerifyEmail() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sunrise-pink/10 via-white to-sunrise-orange/10 dark:from-midnight-violet/10 dark:via-slate-950 dark:to-midnight-cyan/10 p-4">
+    <div className="min-h-app flex items-center justify-center bg-gradient-to-br from-sunrise-pink/10 via-white to-sunrise-orange/10 dark:from-midnight-violet/10 dark:via-slate-950 dark:to-midnight-cyan/10 p-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <Logo variant="full" size="xl" className="justify-center mb-4" />

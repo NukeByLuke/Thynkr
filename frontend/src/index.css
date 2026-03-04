@@ -17,12 +17,12 @@
 
   /* Cool Grid Pattern - Midnight Mode */
   .dark .bg-grid-pattern {
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='rgba(29, 78, 216, 0.05)' stroke-width='1'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='rgba(255, 255, 255, 0.03)' stroke-width='1'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E");
   }
 
   /* Premium Glass Panel - Sunrise & Midnight */
   .glass-panel {
-    @apply backdrop-blur-md bg-white/90 dark:bg-midnight-violet/30 border border-stone-200 dark:border-blue-800/30 shadow-lg rounded-xl;
+    @apply backdrop-blur-md bg-white/90 dark:bg-black/75 border border-stone-200 dark:border-white/15 shadow-lg rounded-xl;
     isolation: isolate;
     transform: translateZ(0);
     will-change: transform;
@@ -30,7 +30,7 @@
 
   /* Glass Panel with stronger blur */
   .glass-panel-strong {
-    @apply backdrop-blur-md bg-white/95 dark:bg-midnight-violet/40 border border-stone-300 dark:border-blue-700/40 shadow-xl rounded-2xl;
+    @apply backdrop-blur-md bg-white/95 dark:bg-black/85 border border-stone-300 dark:border-white/20 shadow-xl rounded-2xl;
     isolation: isolate;
     transform: translateZ(0);
     will-change: transform;
@@ -38,13 +38,13 @@
 
   /* Card - Theme-aware glass card with Sunrise & Midnight styling */
   .card {
-    @apply bg-white/90 dark:bg-midnight-violet/20 backdrop-blur-md border border-stone-200 dark:border-blue-800/30 rounded-xl shadow-md;
+    @apply bg-white/90 dark:bg-black/75 backdrop-blur-md border border-stone-200 dark:border-white/15 rounded-xl shadow-md;
     isolation: isolate;
     transform: translateZ(0);
   }
 
   .card-hover {
-    @apply card hover:border-stone-300 dark:hover:border-blue-700/40 hover:shadow-lg;
+    @apply card hover:border-stone-300 dark:hover:border-white/25 hover:shadow-lg;
     transition: transform 0.12s cubic-bezier(0.25, 0.1, 0.25, 1.0),
                 box-shadow 0.12s cubic-bezier(0.25, 0.1, 0.25, 1.0),
                 border-color 0.12s cubic-bezier(0.25, 0.1, 0.25, 1.0);
@@ -218,6 +218,8 @@
   }
 
   :root {
+    --app-dvh: 100dvh;
+
     /* Sunrise Mode - Warm Cream & Fuchsia/Pink/Orange Gradient */
     --color-primary: #C026D3; /* Fuchsia */
     --color-primary-light: #EC4899; /* Pink */
@@ -265,7 +267,7 @@
   }
 
   .dark {
-    /* Midnight Mode - Deep Blue & Violet/Blue/Cyan Gradient */
+    /* Midnight Mode - True Black + High Contrast */
     --color-primary: #5B21B6; /* Deep Violet */
     --color-primary-light: #1D4ED8; /* Royal Blue */
     --color-primary-dark: #06B6D4; /* Cyan */
@@ -273,25 +275,25 @@
     --color-secondary-light: #3B82F6;
     --color-accent: #06B6D4; /* Cyan */
     
-    /* Midnight backgrounds - Deep cool blue/black */
-    --color-bg-primary: #020617;
-    --color-bg-secondary: #0A0E1F;
-    --color-bg-tertiary: #1E3A8A;
+    /* Midnight backgrounds - true black stack */
+    --color-bg-primary: #000000;
+    --color-bg-secondary: #050505;
+    --color-bg-tertiary: #0F0F12;
     
-    /* Glass panel colors - Midnight mode with cool tints */
-    --glass-bg: rgba(91, 33, 182, 0.15);
-    --glass-border: rgba(29, 78, 216, 0.3);
+    /* Glass panel colors - neutral high-contrast dark */
+    --glass-bg: rgba(10, 10, 10, 0.88);
+    --glass-border: rgba(255, 255, 255, 0.16);
     
-    /* Text - Crisp off-white */
-    --color-text-primary: #FAFAF9;
-    --color-text-secondary: #D6D3D1;
-    --color-text-tertiary: #A8A29E;
+    /* Text - high contrast */
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #E5E7EB;
+    --color-text-tertiary: #A1A1AA;
     
-    /* Borders - Cool blue tones */
-    --color-border: rgba(30, 58, 138, 0.5);
-    --color-border-light: rgba(29, 78, 216, 0.3);
+    /* Borders - neutral */
+    --color-border: rgba(255, 255, 255, 0.18);
+    --color-border-light: rgba(255, 255, 255, 0.1);
     
-    /* Cool shadows */
+    /* Deep shadows */
     --shadow-ambient: 0 8px 32px rgba(0, 0, 0, 0.6);
     --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.5);
     --shadow-card-hover: 0 8px 32px rgba(0, 0, 0, 0.7);
@@ -300,6 +302,12 @@
 
   html {
     scroll-behavior: smooth;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
   }
 
   /* Override browser autofill yellow background */
@@ -316,7 +324,7 @@
   .dark input:-webkit-autofill:hover,
   .dark input:-webkit-autofill:focus,
   .dark input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px #374151 inset !important;
+    -webkit-box-shadow: 0 0 0 30px #0A0A0A inset !important;
     -webkit-text-fill-color: #F9FAFB !important;
     caret-color: #F9FAFB !important;
   }
@@ -350,8 +358,8 @@
 
   /* Midnight background */
   .dark body {
-    @apply text-stone-50;
-    background-color: #020617;
+    @apply text-white;
+    background-color: #000000;
   }
 
   /* Background grid pattern applied to body */
@@ -364,8 +372,53 @@
     z-index: 0;
   }
 
+  @media (max-width: 1023px) {
+    body::before {
+      display: none;
+    }
+
+    .bg-grid-pattern {
+      background-image: none !important;
+    }
+  }
+
   .dark body::before {
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='rgba(148, 163, 184, 0.03)' stroke-width='1'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E");
+    background-image: none;
+  }
+
+  /* High-contrast dark mode overrides for shared Tailwind slate utilities */
+  .dark [class*='dark:bg-slate-950'] {
+    background-color: #000000 !important;
+  }
+
+  .dark [class*='dark:bg-slate-900'] {
+    background-color: #020202 !important;
+  }
+
+  .dark [class*='dark:bg-slate-800'] {
+    background-color: #0A0A0A !important;
+  }
+
+  .dark [class*='dark:bg-slate-700'] {
+    background-color: #121216 !important;
+  }
+
+  .dark [class*='dark:border-slate-800'],
+  .dark [class*='dark:border-slate-700'],
+  .dark [class*='dark:border-slate-600'] {
+    border-color: rgba(255, 255, 255, 0.16) !important;
+  }
+
+  .dark [class*='dark:text-slate-300'] {
+    color: #E5E7EB !important;
+  }
+
+  .dark [class*='dark:text-slate-400'] {
+    color: #D1D5DB !important;
+  }
+
+  .dark [class*='dark:text-slate-500'] {
+    color: #9CA3AF !important;
   }
 
   /* Smooth theme transition for all elements */
@@ -388,12 +441,12 @@
   h4 { @apply text-lg md:text-xl; }
 
   p, span, div {
-    @apply text-stone-700 dark:text-stone-300;
+    @apply text-stone-700 dark:text-stone-200;
   }
 
   /* Smooth focus states */
   *:focus-visible {
-    @apply outline-none ring-2 ring-sunrise-pink/20 dark:ring-midnight-cyan/20 ring-offset-2 ring-offset-stone-50 dark:ring-offset-midnight-violet transition-all duration-200;
+    @apply outline-none ring-2 ring-sunrise-pink/20 dark:ring-midnight-cyan/20 ring-offset-2 ring-offset-stone-50 dark:ring-offset-black transition-all duration-200;
   }
 
   /* Input field styling - Light/Dark mode aware */
@@ -421,9 +474,9 @@
   .dark input[type="number"],
   .dark textarea,
   .dark select {
-    @apply bg-midnight-violet/50 backdrop-blur-xl border-midnight-blue/30;
+    @apply bg-black/80 backdrop-blur-xl border-white/15;
     @apply text-white;
-    @apply placeholder:text-stone-500;
+    @apply placeholder:text-zinc-500;
   }
 
   input[type="text"]:focus,
@@ -447,12 +500,32 @@
   .dark input[type="number"]:focus,
   .dark textarea:focus,
   .dark select:focus {
-    @apply border-midnight-cyan/50 ring-midnight-cyan/20 bg-midnight-violet/60;
+    @apply border-midnight-cyan/60 ring-midnight-cyan/30 bg-black;
   }
 
   /* Icon color inheritance */
   svg {
     color: currentColor;
+  }
+}
+
+@layer utilities {
+  .h-app {
+    height: var(--app-dvh, 100dvh);
+  }
+
+  .min-h-app {
+    min-height: var(--app-dvh, 100dvh);
+  }
+
+  @supports (-webkit-touch-callout: none) {
+    .h-app {
+      height: var(--app-dvh, -webkit-fill-available);
+    }
+
+    .min-h-app {
+      min-height: var(--app-dvh, -webkit-fill-available);
+    }
   }
 }
 
@@ -476,7 +549,7 @@
   }
 
   .gradient-bg-dark {
-    background: linear-gradient(to bottom, #0F172A 0%, #1E293B 100%);
+    background: linear-gradient(to bottom, #000000 0%, #050505 100%);
   }
 
   .premium-gradient-bg {
@@ -492,8 +565,8 @@
 
   .dark .gradient-mesh {
     background: 
-      radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.08), transparent 50%),
-      radial-gradient(ellipse at 80% 80%, rgba(167, 139, 250, 0.08), transparent 50%);
+      radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.14), transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(168, 85, 247, 0.12), transparent 50%);
   }
 
   /* Theme transition helper */
@@ -519,7 +592,7 @@
   }
 
   .dark .card-panel {
-    @apply bg-midnight-violet/70 border-midnight-blue/40;
+    @apply bg-black/80 border-white/15;
   }
 
   .card-panel-subtle {
@@ -527,7 +600,7 @@
   }
 
   .dark .card-panel-subtle {
-    @apply bg-midnight-violet/40 border-midnight-blue/30;
+    @apply bg-black/60 border-white/10;
   }
 
   /* Gradient text - calm blue to lavender */
@@ -577,7 +650,7 @@
   }
 
   .dark .brand-section-divider {
-    @apply via-midnight-blue;
+    @apply via-white/20;
   }
 
   /* Clean card style (Thea.study inspired) */
@@ -586,7 +659,7 @@
   }
 
   .dark .premium-card {
-    @apply bg-midnight-violet/80 border-midnight-blue/60;
+    @apply bg-black/85 border-white/15;
   }
 
   .premium-card:hover {
@@ -629,7 +702,10 @@
 }
 
 .animate-fade-in {
-  animation: fade-in 0.4s ease-out forwards;
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
 }
 
 @keyframes pulse-glow {

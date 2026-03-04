@@ -302,7 +302,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
         <div
           ref={quoteRef}
           className="bg-white dark:bg-slate-800 rounded-xl border-2 border-slate-200 dark:border-slate-700 p-8 shadow-lg [&.exporting]:bg-white [&.exporting]:border-slate-200"
-          style={{ padding: '2rem' }}
+          style={{ padding: '2rem', letterSpacing: 'normal', wordSpacing: 'normal' }}
         >
           {/* Header */}
           <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-200 dark:border-slate-700 [.exporting_&]:border-slate-200">

@@ -1,32 +1,80 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { GraduationCap, BookOpen, FolderOpen, Menu as MenuIcon, Settings, User, LogOut, Trophy, TrendingUp, ChevronRight } from 'lucide-react';
+import { GraduationCap, BookOpen, FolderOpen, Menu as MenuIcon, Settings, User, LogOut, Trophy, CircleDollarSign, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect, memo, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const MobileBottomNav = memo(() => {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const menuOpenRef = useRef(false);
+
+  const isEditableElement = (element: HTMLElement | null) => {
+    if (!element) return false;
+    return (
+      element.tagName === 'INPUT' ||
+      element.tagName === 'TEXTAREA' ||
+      element.getAttribute('contenteditable') === 'true'
+    );
+  };
 
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY < 50) {
-        setIsVisible(true);
-      } else if (currentScrollY > lastScrollY) {
-        setIsVisible(false);
-      } else {
-        setIsVisible(true);
+    menuOpenRef.current = isMenuOpen;
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    const updateKeyboardState = () => {
+      const viewport = window.visualViewport;
+      if (!viewport) return;
+      const activeElement = document.activeElement as HTMLElement | null;
+      const isEditing = isEditableElement(activeElement);
+      const viewportDifference = window.innerHeight - viewport.height;
+      const keyboardLikelyOpen = isEditing && viewportDifference > 100;
+      setIsKeyboardOpen(keyboardLikelyOpen);
+      if (keyboardLikelyOpen) {
+        setIsMenuOpen(false);
       }
-      setLastScrollY(currentScrollY);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+    const handleFocusIn = (event: FocusEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+      const isTextInput = isEditableElement(target);
+      if (isTextInput) {
+        setIsKeyboardOpen(true);
+        setIsMenuOpen(false);
+      }
+    };
+
+    const handleFocusOut = () => {
+      window.setTimeout(() => {
+        if (menuOpenRef.current) return;
+        const active = document.activeElement as HTMLElement | null;
+        const stillEditing = isEditableElement(active);
+        if (!stillEditing) {
+          updateKeyboardState();
+        }
+      }, 120);
+    };
+
+    window.visualViewport?.addEventListener('resize', updateKeyboardState);
+    window.addEventListener('focusin', handleFocusIn);
+    window.addEventListener('focusout', handleFocusOut);
+
+    updateKeyboardState();
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', updateKeyboardState);
+      window.removeEventListener('focusin', handleFocusIn);
+      window.removeEventListener('focusout', handleFocusOut);
+    };
+  }, []);
+
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -42,7 +90,7 @@ const MobileBottomNav = memo(() => {
 
   const menuLinks = [
     { icon: User, label: 'My Profile', path: '/account', gradient: 'from-violet-500 to-fuchsia-500 dark:from-violet-500 dark:to-fuchsia-500' },
-    { icon: TrendingUp, label: 'Progress', path: '/progress', gradient: 'from-emerald-400 to-cyan-500 dark:from-emerald-400 dark:to-cyan-500' },
+    { icon: CircleDollarSign, label: 'Pricing', path: '/pricing', gradient: 'from-emerald-400 to-cyan-500 dark:from-emerald-400 dark:to-cyan-500' },
     { icon: Trophy, label: 'Achievements', path: '/achievements', gradient: 'from-amber-400 to-orange-500 dark:from-amber-400 dark:to-orange-500' },
     { icon: Settings, label: 'Settings', path: '/settings', gradient: 'from-slate-400 to-slate-600 dark:from-slate-400 dark:to-slate-500' },
   ];
@@ -122,7 +170,7 @@ const MobileBottomNav = memo(() => {
     <>
       {/* Menu Drawer */}
       <AnimatePresence>
-        {isMenuOpen && (
+        {isMenuOpen && !isKeyboardOpen && (
           <>
             <motion.div
               initial={{ opacity: 0 }}
@@ -210,7 +258,7 @@ const MobileBottomNav = memo(() => {
       {/* Bottom Navigation Bar - Mobile only */}
       <motion.nav
         initial={{ y: 0 }}
-        animate={{ y: isVisible ? 0 : 100 }}
+        animate={{ y: !isKeyboardOpen ? 0 : 120 }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
         className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe"
       >

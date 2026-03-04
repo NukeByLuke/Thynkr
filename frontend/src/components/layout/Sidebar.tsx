@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
   BookOpen,
   GraduationCap,
   FolderOpen,
   CreditCard,
+  CircleHelp,
   Sparkles,
   LogOut,
   ChevronLeft,
@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Logo from '@/components/Logo';
-import { Courses, Study, Files, Pricing, Admin, Settings as SettingsPage } from '@/routes';
+import { Courses, Study, Files, Pricing, Admin, Settings as SettingsPage, HelpCenter } from '@/routes';
 
 interface NavLink {
   to: string;
@@ -34,13 +34,24 @@ const navLinks: NavLink[] = [
 ];
 
 const bottomLinks: NavLink[] = [
+  { to: '/help', icon: CircleHelp, label: 'Help Center', component: HelpCenter },
   { to: '/settings', icon: Settings, label: 'Settings', component: SettingsPage },
 ];
+
+const collapsedTooltipClass =
+  'absolute left-full top-1/2 -translate-y-1/2 ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-medium rounded-md pointer-events-none whitespace-nowrap z-[120] opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-150 shadow-xl';
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(() => {
+    const collapsed = localStorage.getItem('thynkr-sidebar-collapsed');
+    return collapsed !== 'true';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('thynkr-sidebar-collapsed', String(!isExpanded));
+  }, [isExpanded]);
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
@@ -49,16 +60,46 @@ const Sidebar = () => {
   // Filter links based on user role
   const visibleLinks = navLinks.filter((link) => !link.adminOnly || user?.role === 'ADMIN');
   const isPremium = user?.role === 'PREMIUM' || user?.role === 'ADMIN';
+  const userDisplayName = [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username || 'Account';
+  const userEmail = user?.email || '';
+
+  const NavItem = ({ link, active }: { link: NavLink; active: boolean }) => {
+    const Icon = link.icon;
+
+    return (
+      <Link
+        to={link.to}
+        onMouseEnter={() => link.component?.preload()}
+        className={`
+          relative flex items-center gap-3 rounded-lg group
+          ${isExpanded ? 'px-3 py-2.5' : 'justify-center p-2 mx-auto aspect-square w-10'}
+          ${active
+            ? 'text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm'
+            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/70 border border-transparent'}
+        `}
+      >
+        {active && isExpanded && <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-full bg-fuchsia-500 dark:bg-accent-400" />}
+
+        <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-fuchsia-600 dark:text-accent-300' : ''}`} />
+
+        {isExpanded && <span className="text-sm font-medium whitespace-nowrap">{link.label}</span>}
+
+        {!isExpanded && (
+          <div className={collapsedTooltipClass}>
+            {link.label}
+          </div>
+        )}
+      </Link>
+    );
+  };
 
   return (
-    <motion.aside
-      initial={false}
-      animate={{ width: isExpanded ? 280 : 80 }}
-      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      className="relative h-screen bg-stone-50/80 dark:bg-slate-950/95 backdrop-blur-xl border-r border-stone-200/50 dark:border-midnight-blue/30 flex flex-col shadow-xl shadow-stone-200/20 dark:shadow-black/40"
+    <aside
+      className="relative z-40 h-screen bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-r border-slate-200/80 dark:border-slate-800/80 flex flex-col overflow-visible"
+      style={{ width: isExpanded ? 280 : 80, transition: 'width 140ms ease-out' }}
     >
       {/* Header */}
-      <div className={`h-16 px-4 flex items-center ${isExpanded ? 'justify-between' : 'justify-center'} border-b border-stone-200/50 dark:border-midnight-blue/30`}>
+      <div className={`h-16 px-4 flex items-center ${isExpanded ? 'justify-between' : 'justify-center'} border-b border-slate-200/80 dark:border-slate-800/80`}>
         <Link to="/study" className={`flex items-center gap-0.5 overflow-hidden ${!isExpanded ? 'justify-center' : ''}`}>
           <Logo variant="icon" size="xl" className="flex-shrink-0" />
           {isExpanded && (
@@ -82,68 +123,42 @@ const Sidebar = () => {
             </div>
           )}
         </Link>
+
       </div>
 
+      {isExpanded && (
+        <div className="mx-3 mt-3 mb-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/70 px-3 py-2.5">
+          <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{userDisplayName}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{userEmail}</p>
+        </div>
+      )}
+
       {/* Main Navigation */}
-      <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto scrollbar-hide">
+      <nav className={`flex-1 px-3 py-5 space-y-1 scrollbar-hide ${isExpanded ? 'overflow-y-auto overflow-x-hidden' : 'overflow-visible'}`}>
+        {isExpanded && (
+          <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+            Workspace
+          </p>
+        )}
         {visibleLinks.map((link) => {
           const isLinkActive = isActive(link.to);
-          const Icon = link.icon;
-
-          return (
-            <Link
-              key={link.to}
-              to={link.to}
-              onMouseEnter={() => link.component?.preload()}
-              className={`
-                relative flex items-center gap-3 rounded-xl transition-all duration-150 group
-                ${isExpanded ? 'px-3 py-2.5' : 'justify-center p-2 mx-auto aspect-square w-10'}
-                ${isLinkActive
-                  ? isExpanded
-                    ? 'text-sunrise-fuchsia dark:text-white bg-gradient-to-r from-sunrise-pink/20 to-sunrise-peach/20 dark:from-midnight-purple/30 dark:to-midnight-blue-light/30 shadow-lg shadow-sunrise-pink/20 dark:shadow-midnight-purple/25 font-semibold border border-sunrise-pink/30 dark:border-midnight-purple/30'
-                    : 'text-white bg-gradient-to-br from-sunrise-pink to-sunrise-orange dark:from-midnight-violet dark:to-midnight-cyan shadow-lg'
-                  : 'text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/5 hover:scale-[1.02]'
-                }
-              `}
-            >
-              <Icon className={`w-5 h-5 flex-shrink-0 transition-all ${
-                isLinkActive 
-                  ? isExpanded 
-                    ? 'text-sunrise-pink dark:text-white dark:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]'
-                    : 'text-white'
-                  : ''
-              }`} />
-
-              {isExpanded && (
-                <span className="text-sm font-medium whitespace-nowrap">
-                  {link.label}
-                </span>
-              )}
-
-              {/* Tooltip for collapsed state */}
-              {!isExpanded && (
-                <div className="absolute left-full ml-2 px-2 py-1 bg-stone-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-                  {link.label}
-                </div>
-              )}
-            </Link>
-          );
+          return <NavItem key={link.to} link={link} active={isLinkActive} />;
         })}
       </nav>
 
       {/* Upgrade CTA */}
       {!isPremium && isExpanded && (
-        <div className="mx-3 mb-2 p-4 rounded-xl bg-gradient-to-br from-sunrise-pink/20 to-sunrise-orange/30 dark:from-midnight-violet/20 dark:to-midnight-cyan/20 border border-sunrise-pink/20 dark:border-midnight-cyan/30 shadow-lg relative overflow-hidden group flex-shrink-0">
+        <div className="mx-3 mb-2 p-3.5 rounded-lg bg-gradient-to-br from-fuchsia-50 to-pink-50 dark:from-violet-500/20 dark:to-cyan-500/20 border border-fuchsia-200/70 dark:border-cyan-500/30 relative overflow-hidden group flex-shrink-0">
           <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-            <Sparkles className="w-16 h-16 transform rotate-12 text-sunrise-fuchsia dark:text-midnight-cyan" />
+            <Sparkles className="w-16 h-16 transform rotate-12 text-fuchsia-500 dark:text-cyan-300" />
           </div>
-          <h3 className="font-semibold text-sm mb-1 relative z-10 text-sunrise-fuchsia dark:text-midnight-cyan">Upgrade to Pro</h3>
-          <p className="text-[10px] text-sunrise-pink dark:text-slate-300 mb-3 relative z-10 leading-tight">
+          <h3 className="font-semibold text-sm mb-1 relative z-10 text-fuchsia-700 dark:text-cyan-300">Upgrade to Pro</h3>
+          <p className="text-[10px] text-fuchsia-600 dark:text-slate-300 mb-2.5 relative z-10 leading-tight">
             Unlock unlimited AI tutoring and advanced analytics.
           </p>
           <Link
             to="/pricing"
-            className="block w-full py-1.5 bg-gradient-to-r from-sunrise-pink to-sunrise-orange dark:from-midnight-cyan dark:to-midnight-violet text-white text-xs font-bold text-center rounded-lg hover:from-sunrise-fuchsia hover:to-sunrise-pink dark:hover:from-midnight-violet dark:hover:to-midnight-cyan transition-all relative z-10 shadow-md"
+            className="block w-full py-1.5 bg-gradient-to-r from-fuchsia-500 to-pink-500 dark:from-cyan-500 dark:to-violet-500 text-white text-xs font-bold text-center rounded-md relative z-10"
           >
             Get Pro Access
           </Link>
@@ -151,54 +166,22 @@ const Sidebar = () => {
       )}
 
       {/* Bottom Section */}
-      <div className="px-3 pb-4 space-y-1 border-t border-stone-200/50 dark:border-midnight-blue/30 pt-4">
+      <div className="px-3 pb-4 space-y-1 border-t border-slate-200/80 dark:border-slate-800/80 pt-4">
+        {isExpanded && (
+          <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+            Account
+          </p>
+        )}
         {bottomLinks.map((link) => {
           const isLinkActive = isActive(link.to);
-          const Icon = link.icon;
-
-          return (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`
-                relative flex items-center gap-3 rounded-xl transition-all duration-150 group
-                ${isExpanded ? 'px-3 py-2.5' : 'justify-center p-2 mx-auto aspect-square w-10'}
-                ${isLinkActive
-                  ? isExpanded
-                    ? 'text-indigo-700 dark:text-white bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-500 dark:to-purple-500 shadow-lg shadow-indigo-200/50 dark:shadow-indigo-500/25 font-semibold'
-                    : 'text-white bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg'
-                  : 'text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/5 hover:scale-[1.02]'
-                }
-              `}
-            >
-              <Icon className={`w-5 h-5 flex-shrink-0 transition-all ${
-                isLinkActive 
-                  ? isExpanded
-                    ? 'text-sunrise-pink dark:text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]'
-                    : 'text-white'
-                  : ''
-              }`} />
-              {isExpanded && (
-                <span className="text-sm font-medium whitespace-nowrap">
-                  {link.label}
-                </span>
-              )}
-
-              {/* Tooltip for collapsed state */}
-              {!isExpanded && (
-                <div className="absolute left-full ml-2 px-2 py-1 bg-stone-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-                  {link.label}
-                </div>
-              )}
-            </Link>
-          );
+          return <NavItem key={link.to} link={link} active={isLinkActive} />;
         })}
 
         {/* Logout Button */}
         <button
           onClick={logout}
           className={`
-            relative flex items-center gap-3 rounded-xl text-stone-700 dark:text-stone-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-200 group
+            relative flex items-center gap-3 rounded-lg text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 group border border-transparent
             ${isExpanded ? 'w-full px-3 py-2.5' : 'justify-center p-2 mx-auto aspect-square w-10'}
           `}
         >
@@ -209,7 +192,7 @@ const Sidebar = () => {
 
           {/* Tooltip for collapsed state */}
           {!isExpanded && (
-            <div className="absolute left-full ml-2 px-2 py-1 bg-stone-900 dark:bg-stone-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
+            <div className={collapsedTooltipClass}>
               Log out
             </div>
           )}
@@ -219,7 +202,7 @@ const Sidebar = () => {
       {/* Collapse Toggle */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="absolute -right-3 top-20 w-6 h-6 bg-stone-50 dark:bg-midnight-violet border border-stone-200 dark:border-midnight-blue/30 rounded-full flex items-center justify-center text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-midnight-blue/50 transition-colors z-50 shadow-md"
+        className="absolute -right-3 top-20 w-6 h-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 z-50 shadow-md"
         aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
       >
         {isExpanded ? (
@@ -228,7 +211,7 @@ const Sidebar = () => {
           <ChevronRight className="w-3.5 h-3.5" />
         )}
       </button>
-    </motion.aside>
+    </aside>
   );
 };
 

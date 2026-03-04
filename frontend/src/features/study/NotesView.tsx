@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import rehypeHighlight from 'rehype-highlight';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 
 interface NotesViewProps {
@@ -80,7 +79,6 @@ export default function NotesView({
               <div className="text-brand-900 dark:text-brand-100 leading-loose prose prose-brand dark:prose-invert max-w-none text-lg">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeHighlight]}
                   components={{
                     p: ({ node, ...props }) => <span className="inline" {...props} />,
                     strong: ({ node, ...props }) => <strong className="font-bold" {...props} />,
@@ -117,7 +115,6 @@ export default function NotesView({
         <div className="prose prose-lg dark:prose-invert max-w-none">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeHighlight]}
             components={{
               h1: ({ node, ...props }) => (
                 <h1

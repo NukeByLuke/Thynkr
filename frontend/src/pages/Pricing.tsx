@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import Button from '@/components/ui/Button';
-import { Check, X, Sparkles, Zap, Crown, ArrowRight, TrendingUp, Brain, Bolt, FileText } from 'lucide-react';
+import { Check, X, Sparkles, Zap, Crown, ArrowRight, TrendingUp, Brain, Bolt, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
 import QuoteModal from '@/components/modals/QuoteModal';
@@ -57,6 +57,8 @@ export default function Pricing() {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const [mobilePlanIndex, setMobilePlanIndex] = useState(0);
+  const [showAllMobileFeatures, setShowAllMobileFeatures] = useState(false);
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -204,6 +206,232 @@ export default function Pricing() {
 
   const isCurrentPlan = (plan: Plan) => currentPlanId === plan.id;
 
+  const goToNextPlan = () => {
+    setMobilePlanIndex((prev) => (prev + 1) % plans.length);
+    setShowAllMobileFeatures(false);
+  };
+
+  const goToPreviousPlan = () => {
+    setMobilePlanIndex((prev) => (prev - 1 + plans.length) % plans.length);
+    setShowAllMobileFeatures(false);
+  };
+
+  const renderPlanCard = (
+    plan: Plan,
+    isMobile: boolean = false,
+    mobileFeaturesExpanded: boolean = false
+  ) => {
+    const price = billingCycle === 'monthly' ? plan.monthlyPrice : plan.yearlyMonthlyPrice;
+    const yearlyTotal =
+      billingCycle === 'yearly'
+        ? plan.id === 'standard'
+          ? 49.99
+          : plan.id === 'premium'
+            ? 99.99
+            : 0
+        : 0;
+    const yearlySavings = plan.monthlyPrice > 0 ? (plan.monthlyPrice * 12 - yearlyTotal).toFixed(2) : 0;
+    const isCurrent = isCurrentPlan(plan);
+
+    const formatPrice = (p: number) => {
+      return p % 1 === 0 ? p.toString() : p.toFixed(2);
+    };
+
+    const getCardStyles = () => {
+      if (isCurrent) {
+        return 'ring-2 ring-emerald-500/50 bg-white dark:bg-slate-800 shadow-lg';
+      }
+      if (plan.id === 'standard') {
+        return 'ring-2 ring-violet-500/50 bg-white dark:bg-slate-800 shadow-2xl z-10';
+      }
+      return 'bg-white dark:bg-slate-800 shadow-md hover:shadow-lg';
+    };
+
+    const getBadge = () => {
+      if (isCurrent) {
+        return (
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg">
+            Current Plan
+          </div>
+        );
+      }
+      if (plan.id === 'standard') {
+        return (
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg flex items-center gap-1">
+            <span>⭐</span> Most Popular
+          </div>
+        );
+      }
+      if (plan.id === 'premium') {
+        return (
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg flex items-center gap-1 whitespace-nowrap">
+            <span>👑</span> Most Powerful
+          </div>
+        );
+      }
+      return null;
+    };
+
+    const getIconStyles = () => {
+      if (plan.id === 'standard') {
+        return 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400';
+      }
+      if (plan.id === 'premium') {
+        return 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400';
+      }
+      return 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400';
+    };
+
+    const visibleFeatures =
+      isMobile && !mobileFeaturesExpanded ? plan.features.slice(0, 5) : plan.features;
+
+    return (
+      <div
+        key={plan.id}
+        className={`relative flex flex-col border border-slate-200 dark:border-slate-700 transition-all ${isMobile ? 'p-5 rounded-3xl' : 'p-6 rounded-2xl'} ${getCardStyles()}`}
+      >
+        {getBadge()}
+
+        <div className={`text-center ${isMobile ? 'mb-4 pt-1' : 'mb-5 pt-2'}`}>
+          <div
+            className={`inline-flex items-center justify-center ${isMobile ? 'w-11 h-11 rounded-xl mb-2.5' : 'w-12 h-12 rounded-xl mb-3'} ${getIconStyles()}`}
+          >
+            {plan.icon}
+          </div>
+          <h3 className={`font-bold text-slate-900 dark:text-white ${isMobile ? 'text-2xl mb-1.5' : 'text-xl mb-2'}`}>
+            {plan.name}
+          </h3>
+          <p className={`text-sm text-slate-600 dark:text-slate-300 leading-5 ${isMobile ? 'min-h-[3rem] px-2' : 'h-14 overflow-hidden'}`}>
+            {plan.description}
+          </p>
+        </div>
+
+        <div className={`text-center ${isMobile ? 'mb-4' : 'mb-6'}`}>
+          <div className="flex items-baseline justify-center gap-1">
+            <span className={`font-bold text-slate-900 dark:text-white ${isMobile ? 'text-[3.25rem] leading-none' : 'text-4xl'}`}>
+              ${formatPrice(price)}
+            </span>
+            <span className="text-slate-500 dark:text-slate-400 font-medium">/mo</span>
+          </div>
+          <div className={`${isMobile ? 'min-h-[2.5rem]' : 'h-10'} flex flex-col justify-center mt-1.5`}>
+            {billingCycle === 'yearly' && plan.monthlyPrice > 0 ? (
+              <div className="space-y-0.5">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  ${yearlyTotal.toFixed(2)} billed yearly
+                </p>
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+                  Save ${yearlySavings}/year
+                </p>
+              </div>
+            ) : plan.monthlyPrice === 0 ? (
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                Free forever
+              </p>
+            ) : (
+              <p className="text-xs text-slate-500 dark:text-slate-400">Billed monthly</p>
+            )}
+          </div>
+        </div>
+
+        <ul className={`${isMobile ? 'space-y-2.5 mb-3.5 min-h-[12.5rem]' : 'space-y-2.5 mb-6'} flex-grow`}>
+          {visibleFeatures.map((feature, index) => (
+            <li key={index} className="flex items-start gap-2.5">
+              {feature.included ? (
+                <div
+                  className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5 ${
+                    feature.highlight
+                      ? 'bg-violet-100 dark:bg-violet-900/30'
+                      : 'bg-emerald-100 dark:bg-emerald-900/30'
+                  }`}
+                >
+                  <Check
+                    className={`w-3 h-3 ${
+                      feature.highlight
+                        ? 'text-violet-600 dark:text-violet-400'
+                        : 'text-emerald-600 dark:text-emerald-400'
+                    }`}
+                  />
+                </div>
+              ) : (
+                <div className="flex-shrink-0 w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mt-0.5">
+                  <X className="w-3 h-3 text-slate-400" />
+                </div>
+              )}
+              <span
+                className={`text-sm leading-6 ${
+                  feature.included
+                    ? 'text-slate-700 dark:text-slate-200'
+                    : 'text-slate-500 dark:text-slate-400'
+                } ${feature.highlight ? 'font-medium' : ''}`}
+              >
+                {feature.text}
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        {isMobile && plan.features.length > 5 && (
+          <button
+            type="button"
+            onClick={() => setShowAllMobileFeatures((prev) => !prev)}
+            className="mb-4 text-sm font-semibold text-violet-600 dark:text-violet-400 text-center"
+          >
+            {mobileFeaturesExpanded ? 'Show fewer features' : `Show all ${plan.features.length} features`}
+          </button>
+        )}
+
+        <Button
+          variant={
+            isCurrent
+              ? 'secondary'
+              : plan.id === 'premium' || plan.id === 'standard'
+                ? 'primary'
+                : 'secondary'
+          }
+          fullWidth
+          onClick={() => handleSelectPlan(plan)}
+          disabled={isCurrent || isLoading === plan.id}
+          className={`mt-auto h-11 ${
+            isCurrent 
+              ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 cursor-not-allowed hover:bg-emerald-50 dark:hover:bg-emerald-900/20' 
+              : ''
+          }`}
+        >
+          {isLoading === plan.id ? (
+            <span className="flex items-center justify-center gap-2">
+              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  fill="none"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+              Processing...
+            </span>
+          ) : (
+            <span className="flex items-center justify-center gap-2">
+              {getButtonText(plan)}
+              {!isCurrent && plan.id !== 'basic' && <ArrowRight className="w-4 h-4" />}
+            </span>
+          )}
+        </Button>
+
+        <p className="mt-2 text-[12px] text-center text-slate-500 dark:text-slate-400">
+          {plan.id === 'basic' ? 'No credit card required.' : 'Cancel anytime.'}
+        </p>
+      </div>
+    );
+  };
+
   return (
     <>
       <Helmet>
@@ -214,23 +442,26 @@ export default function Pricing() {
         />
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 via-slate-50/50 to-white dark:from-slate-950 dark:via-slate-900/50 dark:to-slate-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+      <div className="min-h-app bg-gradient-to-b from-slate-50 via-slate-50/50 to-white dark:from-slate-950 dark:via-slate-900/50 dark:to-slate-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-16">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+          <div className="text-center mb-5 sm:mb-12">
+            <h1 className="text-[2.15rem] leading-tight sm:text-5xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-4">
               Invest in Your <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Success</span>
             </h1>
-            <p className="text-lg text-slate-600 dark:text-slate-300 mb-2">
+            <p className="md:hidden text-sm text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
+              Pick the plan that matches your study load — switch anytime.
+            </p>
+            <p className="hidden md:block text-lg text-slate-600 dark:text-slate-300 mb-2">
               Choose the plan that fits your learning goals — upgrade anytime.
             </p>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="hidden md:block text-sm text-slate-500 dark:text-slate-400">
               Every plan includes AI-powered study tools.
             </p>
           </div>
 
-          {/* Billing Toggle and Export Quote */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+          {/* Billing Toggle and Export Quote (Desktop) */}
+          <div className="hidden md:flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8 sm:mb-12">
             <div className="inline-flex items-center gap-1 bg-white dark:bg-slate-800 p-1.5 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
               <button
                 onClick={() => setBillingCycle('monthly')}
@@ -273,222 +504,106 @@ export default function Pricing() {
             </Button>
           </div>
 
-          {/* Pricing Cards */}
-          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-16 pt-4 items-stretch">
-            {plans.map((plan) => {
-              const price =
-                billingCycle === 'monthly' ? plan.monthlyPrice : plan.yearlyMonthlyPrice;
-              const yearlyTotal =
-                billingCycle === 'yearly'
-                  ? plan.id === 'standard'
-                    ? 49.99
-                    : plan.id === 'premium'
-                      ? 99.99
-                      : 0
-                  : 0;
-              const yearlySavings =
-                plan.monthlyPrice > 0 ? (plan.monthlyPrice * 12 - yearlyTotal).toFixed(2) : 0;
-              const isCurrent = isCurrentPlan(plan);
-
-              const formatPrice = (p: number) => {
-                return p % 1 === 0 ? p.toString() : p.toFixed(2);
-              };
-
-              const getCardStyles = () => {
-                if (isCurrent) {
-                  return 'ring-2 ring-emerald-500/50 bg-white dark:bg-slate-800 shadow-lg';
-                }
-                if (plan.id === 'standard') {
-                  // Use shadow/ring emphasis instead of scale to avoid layout shift
-                  return 'ring-2 ring-violet-500/50 bg-white dark:bg-slate-800 shadow-2xl z-10';
-                }
-                return 'bg-white dark:bg-slate-800 shadow-md hover:shadow-lg';
-              };
-
-              const getBadge = () => {
-                if (isCurrent) {
-                  return (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg">
-                      Current Plan
-                    </div>
-                  );
-                }
-                if (plan.id === 'standard') {
-                  return (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg flex items-center gap-1">
-                      <span>⭐</span> Most Popular
-                    </div>
-                  );
-                }
-                if (plan.id === 'premium') {
-                  return (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg flex items-center gap-1 whitespace-nowrap">
-                      <span>👑</span> Most Powerful
-                    </div>
-                  );
-                }
-                return null;
-              };
-
-              const getIconStyles = () => {
-                if (plan.id === 'standard') {
-                  return 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400';
-                }
-                if (plan.id === 'premium') {
-                  return 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400';
-                }
-                return 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400';
-              };
-
-              return (
-                <div
-                  key={plan.id}
-                  className={`relative flex flex-col p-6 rounded-2xl border border-slate-200 dark:border-slate-700 transition-all ${getCardStyles()}`}
+          {/* Pricing Cards - Mobile */}
+          <div className="md:hidden max-w-[23.5rem] mx-auto mb-10">
+            {/* Billing + quote controls — always visible above the card */}
+            <div className="flex flex-col items-center gap-3 mb-4">
+              <div className="grid grid-cols-2 gap-1 bg-white dark:bg-slate-800 p-1 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 w-full">
+                <button
+                  onClick={() => setBillingCycle('monthly')}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                    billingCycle === 'monthly'
+                      ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white shadow-md'
+                      : 'text-slate-700 dark:text-slate-200'
+                  }`}
                 >
-                  {getBadge()}
-
-                  {/* Plan Header */}
-                  <div className="text-center mb-6 pt-2">
-                    <div
-                      className={`inline-flex items-center justify-center w-12 h-12 rounded-xl mb-3 ${getIconStyles()}`}
-                    >
-                      {plan.icon}
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                      {plan.name}
-                    </h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-300">
-                      {plan.description}
-                    </p>
-                  </div>
-
-                  {/* Pricing */}
-                  <div className="text-center mb-6">
-                    <div className="flex items-baseline justify-center gap-1">
-                      <span className="text-4xl font-bold text-slate-900 dark:text-white">
-                        ${formatPrice(price)}
-                      </span>
-                      <span className="text-slate-500 dark:text-slate-400 font-medium">/mo</span>
-                    </div>
-                    <div className="h-10 flex flex-col justify-center mt-1">
-                      {billingCycle === 'yearly' && plan.monthlyPrice > 0 ? (
-                        <div className="space-y-0.5">
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
-                            ${yearlyTotal.toFixed(2)} billed yearly
-                          </p>
-                          <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
-                            Save ${yearlySavings}/year
-                          </p>
-                        </div>
-                      ) : plan.monthlyPrice === 0 ? (
-                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                          Free forever
-                        </p>
-                      ) : (
-                        <p className="text-xs text-slate-500 dark:text-slate-400">Billed monthly</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Features */}
-                  <ul className="space-y-2.5 mb-6 flex-grow">
-                    {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-start gap-2.5">
-                        {feature.included ? (
-                          <div
-                            className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5 ${
-                              feature.highlight
-                                ? 'bg-violet-100 dark:bg-violet-900/30'
-                                : 'bg-emerald-100 dark:bg-emerald-900/30'
-                            }`}
-                          >
-                            <Check
-                              className={`w-3 h-3 ${
-                                feature.highlight
-                                  ? 'text-violet-600 dark:text-violet-400'
-                                  : 'text-emerald-600 dark:text-emerald-400'
-                              }`}
-                            />
-                          </div>
-                        ) : (
-                          <div className="flex-shrink-0 w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mt-0.5">
-                            <X className="w-3 h-3 text-slate-400" />
-                          </div>
-                        )}
-                        <span
-                          className={`text-sm ${
-                            feature.included
-                              ? 'text-slate-700 dark:text-slate-200'
-                              : 'text-slate-500 dark:text-slate-400'
-                          } ${feature.highlight ? 'font-medium' : ''}`}
-                        >
-                          {feature.text}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* CTA Button */}
-                  <Button
-                    variant={
-                      isCurrent
-                        ? 'secondary'
-                        : plan.id === 'premium' || plan.id === 'standard'
-                          ? 'primary'
-                          : 'secondary'
-                    }
-                    fullWidth
-                    onClick={() => handleSelectPlan(plan)}
-                    disabled={isCurrent || isLoading === plan.id}
-                    className={`mt-auto ${
-                      isCurrent 
-                        ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 cursor-not-allowed hover:bg-emerald-50 dark:hover:bg-emerald-900/20' 
-                        : ''
+                  Monthly
+                </button>
+                <button
+                  onClick={() => setBillingCycle('yearly')}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                    billingCycle === 'yearly'
+                      ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white shadow-md'
+                      : 'text-slate-700 dark:text-slate-200'
+                  }`}
+                >
+                  Yearly
+                  <span
+                    className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
+                      billingCycle === 'yearly'
+                        ? 'bg-white/20 text-white'
+                        : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
                     }`}
                   >
-                    {isLoading === plan.id ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                            fill="none"
-                          />
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          />
-                        </svg>
-                        Processing...
-                      </span>
-                    ) : (
-                      <span className="flex items-center justify-center gap-2">
-                        {getButtonText(plan)}
-                        {!isCurrent && plan.id !== 'basic' && <ArrowRight className="w-4 h-4" />}
-                      </span>
-                    )}
-                  </Button>
+                    -17%
+                  </span>
+                </button>
+              </div>
 
-                  <p className="mt-2.5 text-xs text-center text-slate-500 dark:text-slate-400">
-                    {plan.id === 'basic' ? 'No credit card required.' : 'Cancel anytime.'}
-                  </p>
+              <Button
+                variant="secondary"
+                onClick={() => setShowQuoteModal(true)}
+                className="w-full h-11 flex items-center justify-center gap-2"
+              >
+                <FileText className="w-4 h-4" />
+                Export Quote
+              </Button>
+            </div>
+
+            {/* Plan card */}
+            {renderPlanCard(plans[mobilePlanIndex], true, showAllMobileFeatures)}
+
+            {/* Arrow nav + counter below the card */}
+            <div className="flex items-center justify-between mt-3 px-1">
+              <button
+                type="button"
+                onClick={goToPreviousPlan}
+                className="w-11 h-11 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 shadow-sm flex items-center justify-center active:scale-95 transition-transform"
+                aria-label="Previous plan"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              {/* Dot indicators */}
+              <div className="flex flex-col items-center gap-1.5">
+                <p className="text-[11px] font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-400">
+                  Plan {mobilePlanIndex + 1} of {plans.length}
+                </p>
+                <div className="flex items-center gap-2">
+                  {plans.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { setMobilePlanIndex(i); setShowAllMobileFeatures(false); }}
+                      className={`transition-all rounded-full ${i === mobilePlanIndex ? 'w-6 h-2 bg-violet-600' : 'w-2 h-2 bg-slate-300 dark:bg-slate-600'}`}
+                      aria-label={`Go to plan ${i + 1}`}
+                    />
+                  ))}
                 </div>
-              );
-            })}
+              </div>
+
+              <button
+                type="button"
+                onClick={goToNextPlan}
+                className="w-11 h-11 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 shadow-sm flex items-center justify-center active:scale-95 transition-transform"
+                aria-label="Next plan"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Pricing Cards - Desktop */}
+          <div className="hidden md:grid md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-16 pt-4 items-stretch">
+            {plans.map((plan) => renderPlanCard(plan))}
           </div>
 
           {/* Why Upgrade Section */}
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold text-center mb-8 bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <h2 className="text-2xl font-bold text-center mb-5 md:mb-8 bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
               Why Upgrade?
             </h2>
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
-              <div className="text-center p-5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8 overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none pb-2 px-1">
+              <div className="text-center p-4 md:p-5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow min-w-[88%] md:min-w-0 snap-center">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 mb-3">
                   <TrendingUp className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                 </div>
@@ -501,7 +616,7 @@ export default function Pricing() {
                 </p>
               </div>
 
-              <div className="text-center p-5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+              <div className="text-center p-4 md:p-5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow min-w-[88%] md:min-w-0 snap-center">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 mb-3">
                   <Brain className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
@@ -513,7 +628,7 @@ export default function Pricing() {
                 </p>
               </div>
 
-              <div className="text-center p-5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+              <div className="text-center p-4 md:p-5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow min-w-[88%] md:min-w-0 snap-center">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 mb-3">
                   <Bolt className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                 </div>
@@ -527,7 +642,7 @@ export default function Pricing() {
               </div>
             </div>
 
-            <div className="text-center mb-12">
+            <div className="text-center mb-8 md:mb-12">
               <Button
                 variant="primary"
                 onClick={() =>
@@ -546,8 +661,8 @@ export default function Pricing() {
           </div>
 
           {/* Footer */}
-          <div className="text-center border-t border-slate-200 dark:border-slate-700 pt-8">
-            <p className="text-slate-600 dark:text-slate-300 mb-2">
+          <div className="text-center border-t border-slate-200 dark:border-slate-700 pt-6 md:pt-8">
+            <p className="hidden md:block text-slate-600 dark:text-slate-300 mb-2">
               All plans include a 7-day money-back guarantee. Cancel anytime.
             </p>
             <p className="text-sm text-slate-500 dark:text-slate-400">

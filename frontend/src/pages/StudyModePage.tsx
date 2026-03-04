@@ -294,7 +294,7 @@ export default function StudyModePage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+      <div className="min-h-app flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="text-center">
           <Loader2 className="h-10 w-10 animate-spin text-indigo-600 mx-auto mb-4" />
           <p className="text-slate-600 dark:text-slate-400">Loading study mode...</p>
@@ -310,7 +310,7 @@ export default function StudyModePage() {
         <Helmet>
           <title>Access Restricted - Thynkr</title>
         </Helmet>
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
+        <div className="min-h-app flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
           <div className="text-center max-w-md">
             <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
               <Lock className="h-10 w-10 text-slate-400" />
@@ -341,7 +341,7 @@ export default function StudyModePage() {
         <Helmet>
           <title>No Compatible Files - Thynkr</title>
         </Helmet>
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
+        <div className="min-h-app flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
           <div className="text-center max-w-md">
             <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
               <AlertCircle className="h-10 w-10 text-slate-400" />
@@ -589,10 +589,10 @@ export default function StudyModePage() {
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2, ease: 'easeOut' }}
                   >
-                    <div className="max-w-5xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+                    <div className="max-w-5xl mx-auto px-2 py-4 sm:px-6 sm:py-6 lg:px-8">
                       <div className="relative rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl shadow-slate-200/20 dark:shadow-slate-900/30 overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-br from-pink-500/[0.02] via-transparent to-fuchsia-500/[0.02] dark:from-cyan-500/[0.02] dark:via-transparent dark:to-violet-500/[0.02] pointer-events-none" />
-                        <div className="relative z-10 p-6 sm:p-8">
+                        <div className="relative z-10 p-3 sm:p-6 lg:p-8">
                           {/* Book-style page navigation for summary/notes */}
                           {(activeTab === 'summary' || activeTab === 'notes') && studyContent.result.pages && studyContent.result.pages.length > 1 && (
                             <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/60 dark:border-slate-700/60">

@@ -13,27 +13,27 @@ export default {
         // BACKGROUND COLORS - Sunrise (Cream) & Midnight (Deep Blue/Black)
         // ═══════════════════════════════════════════════════════════════════
         'bg-light': '#FDFBF7',
-        'bg-dark': '#020617',
+        'bg-dark': '#000000',
         background: {
           light: '#FDFBF7', // Warm cream/paper
           'light-alt': '#F8F6F1',
-          dark: '#020617', // Deep midnight
-          'dark-alt': '#0A0E1F',
+          dark: '#000000', // True black
+          'dark-alt': '#050505',
         },
 
         // ═══════════════════════════════════════════════════════════════════
         // TEXT COLORS - Warm for light, Crisp for dark
         // ═══════════════════════════════════════════════════════════════════
         'text-primary-light': '#1C1917', // Warm dark gray
-        'text-primary-dark': '#FAFAF9', // Crisp off-white
+        'text-primary-dark': '#FFFFFF', // Pure white
         'text-secondary-light': '#78716C',
-        'text-secondary-dark': '#D6D3D1',
+        'text-secondary-dark': '#E5E7EB',
 
         // ═══════════════════════════════════════════════════════════════════
         // BORDER COLORS - Warm for light, Cool for dark
         // ═══════════════════════════════════════════════════════════════════
         'border-light': '#E7E5E4', // Warm border
-        'border-dark': '#1E3A8A', // Cool blue border
+        'border-dark': '#27272A', // Neutral dark border
 
         // ═══════════════════════════════════════════════════════════════════
         // SUNRISE GRADIENT - Fuchsia/Purple → Pink → Orange/Gold
@@ -106,15 +106,15 @@ export default {
         // ═══════════════════════════════════════════════════════════════════
         surface: {
           light: '#FFFFFF',
-          dark: '#0A0E1F',
+          dark: '#050505',
         },
         'surface-highlight': {
           light: '#FEF9F3', // Warm white
-          dark: '#1E3A8A', // Cool blue
+          dark: '#0F0F12', // High-contrast dark highlight
         },
         'border-subtle': {
           light: '#F3F0EB',
-          dark: '#1E40AF',
+          dark: '#27272A',
         },
 
         // Brand alias for backward compatibility (uses Sunrise gradient in light, Midnight in dark)
