@@ -125,6 +125,21 @@ export default function Study() {
     }
   };
 
+  const handleUploadLink = async (url: string) => {
+    try {
+      const response = await api.post('/study/upload-link', { url });
+      toast.success('Web link imported!');
+
+      await queryClient.invalidateQueries({ queryKey: ['study-files'] });
+      if (response.data?.file?.id) {
+        navigate(`/study/${response.data.file.id}`);
+      }
+    } catch (error: any) {
+      const message = error?.response?.data?.error || 'Failed to import web link';
+      toast.error(message);
+    }
+  };
+
   const handleCancelYouTubeProcessing = () => {
     // Note: We can't actually cancel the API call, but we can hide the overlay
     // The request will complete in the background
@@ -286,7 +301,7 @@ export default function Study() {
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Create New Study Set</h2>
                 <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl">
-                  Drag files directly onto this page or click to open the Upload Hub with files, YouTube, and text import.
+                  Drag files directly onto this page or click to open the Upload Hub with files, web links, YouTube, and text import.
                 </p>
               </div>
 
@@ -381,6 +396,7 @@ export default function Study() {
         onClose={() => setShowUploadModal(false)}
         onUploadFiles={handleUploadFiles}
         onUploadYouTube={handleUploadYouTube}
+        onUploadLink={handleUploadLink}
         isUploading={uploadMutation.isPending}
         uploadErrorMessage={uploadError}
       />

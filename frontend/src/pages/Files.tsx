@@ -335,6 +335,23 @@ export default function Files() {
     }
   };
 
+  const handleUploadLink = async (url: string) => {
+    try {
+      const response = await api.post('/study/upload-link', { url, folderId: currentFolderId });
+      toast.success('Web link imported!');
+
+      await queryClient.invalidateQueries({ queryKey: ['study-files'] });
+      await queryClient.invalidateQueries({ queryKey: ['folders'] });
+
+      if (response.data?.file?.id) {
+        navigate(`/study/${response.data.file.id}`);
+      }
+    } catch (error: any) {
+      const message = error?.response?.data?.error || 'Failed to import web link';
+      toast.error(message);
+    }
+  };
+
   const handleCancelYouTubeProcessing = () => {
     setIsProcessingYouTube(false);
     toast('Processing cancelled - the video may still be added', { icon: '⚠️' });
@@ -1030,6 +1047,7 @@ export default function Files() {
           onClose={() => setShowUploadModal(false)}
           onUploadFiles={handleUploadFiles}
           onUploadYouTube={handleUploadYouTube}
+          onUploadLink={handleUploadLink}
           isUploading={uploadMutation.isPending}
           currentFolderId={currentFolderId}
           uploadErrorMessage={uploadError}

@@ -58,7 +58,7 @@ interface UploadedFile {
   }>;
 }
 
-type TabType = 'summary' | 'notes' | 'flashcards' | 'quizzes';
+type TabType = 'original' | 'summary' | 'notes' | 'flashcards' | 'quizzes';
 
 interface TutorChatMessage {
   id: string;
@@ -73,6 +73,7 @@ function createTutorMessageId() {
 
 // Tab configuration with icons
 const TABS: { id: TabType; label: string; shortLabel: string; icon: typeof BookOpen }[] = [
+  { id: 'original', label: 'Original Content', shortLabel: 'Original', icon: FileText },
   { id: 'summary', label: 'Summary', shortLabel: 'Summary', icon: BookOpen },
   { id: 'notes', label: 'Notes', shortLabel: 'Notes', icon: FileText },
   { id: 'flashcards', label: 'Flashcards', shortLabel: 'Cards', icon: Layers },
@@ -363,6 +364,33 @@ export default function ImmersiveStudy() {
     }
 
     switch (activeTab) {
+      case 'original':
+        if (selectedFile.extractedText && selectedFile.extractedText.trim().length > 0) {
+          return (
+            <div className="rounded-2xl border border-slate-200/70 dark:border-white/10 bg-white/90 dark:bg-slate-900/60 p-4 sm:p-6 shadow-sm">
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <h3 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white">Original Content</h3>
+                <span className="text-xs sm:text-sm px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                  Source text
+                </span>
+              </div>
+              <div className="max-h-[62vh] overflow-y-auto rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/80 dark:bg-slate-950/70 p-4 sm:p-5">
+                <pre className="whitespace-pre-wrap break-words text-sm sm:text-[15px] leading-relaxed text-slate-700 dark:text-slate-200 font-sans">
+                  {selectedFile.extractedText}
+                </pre>
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <EmptyState
+            icon={FileText}
+            title="Original content unavailable"
+            description="We couldn't find source text for this file yet. Try again after processing completes."
+          />
+        );
+
       case 'summary':
         if (selectedFile.summary) {
           return (

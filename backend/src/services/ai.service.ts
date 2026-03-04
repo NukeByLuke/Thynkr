@@ -348,6 +348,8 @@ ${preparedText}`;
   async generateNotes(text: string, language: string = DEFAULT_LANGUAGE): Promise<GeneratedNotes> {
     const normalizedLanguage = this.normalizeLanguage(language);
     const preparedText = this.prepareText(text);
+    const hasTimestampMarkers =
+      /\[(\d{2}:){1,2}\d{2}\]/.test(preparedText) || /\b\d{2}:\d{2}:\d{2}\b/.test(preparedText);
     const cacheKey = `notes_${normalizedLanguage}_${this.hashText(preparedText)}`;
     const cached = cache.get<GeneratedNotes>(cacheKey);
 
@@ -358,6 +360,14 @@ ${preparedText}`;
 
     try {
       const languageInstruction = this.buildLanguageInstruction(normalizedLanguage);
+      const timestampInstruction = hasTimestampMarkers
+        ? `
+The source appears to be timestamped (e.g. [00:02:14]).
+- Include a section titled "## Timeline Highlights".
+- Add timestamped bullets in that section using [HH:MM:SS] format.
+- Include timestamps in key points where they help locate the moment in the source.
+`
+        : '';
 
       const prompt = `${languageInstruction}
 
@@ -371,12 +381,14 @@ Create detailed study notes from the following text. Includes:
 1. **Key Points**: 5-10 essential bullet points capturing the most important concepts. Make them concise and memorable.
 
 2. **Detailed Notes**: Create a comprehensive set of notes using Markdown:
-   - Use clear Headers ( ## Topic, ### Sub-topic ) to organize the hierarchy.
+  - Use clear section headers ( ## Topic, ### Sub-topic ) to organize hierarchy into scannable chunks.
+  - Make each ## section feel like a standalone "note card" focused on one concept.
    - Use **bold** for definitions and key vocabulary.
    - Use *italics* for emphasis.
    - Use bullet points and numbered lists for clarity.
    - Include examples where relevant to clarify complex ideas.
    - Make the notes visually appealing and easy to skim.
+${timestampInstruction}
 
 Text:
 ${preparedText}`;

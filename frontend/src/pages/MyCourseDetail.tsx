@@ -396,6 +396,12 @@ export default function MyCourseDetail() {
     toast.success('YouTube uploads coming soon for courses');
   };
 
+  const handleUploadLink = async (url: string) => {
+    setShowUploadModal(false);
+    console.log('Web URL:', url);
+    toast.success('Web link imports coming soon for courses');
+  };
+
   const course: Course | null = data?.course || null;
 
   if (isLoading) {
@@ -1113,6 +1119,7 @@ export default function MyCourseDetail() {
         onClose={() => setShowUploadModal(false)}
         onUploadFiles={handleFileUpload}
         onUploadYouTube={handleUploadYouTube}
+        onUploadLink={handleUploadLink}
         isUploading={uploading}
         requireContentAgreement={true}
       />

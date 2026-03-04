@@ -24,6 +24,100 @@ import { GoogleAuth } from 'google-auth-library';
 const fileProcessor = new FileProcessorService();
 const aiService = new AIService();
 
+const WEB_FETCH_TIMEOUT_MS = 20000;
+const MAX_WEB_CONTENT_CHARS = 120000;
+
+function decodeHtmlEntities(input: string): string {
+  return input
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&apos;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>');
+}
+
+function normalizeExtractedWebText(input: string): string {
+  return decodeHtmlEntities(input)
+    .replace(/\r/g, '')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function stripHtmlToText(html: string): string {
+  return normalizeExtractedWebText(
+    html
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ' ')
+      .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, ' ')
+      .replace(/<noscript\b[^<]*(?:(?!<\/noscript>)<[^<]*)*<\/noscript>/gi, ' ')
+      .replace(/<svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>/gi, ' ')
+      .replace(/<br\s*\/?\s*>/gi, '\n')
+      .replace(/<\/p>/gi, '\n\n')
+      .replace(/<\/div>/gi, '\n')
+      .replace(/<\/li>/gi, '\n')
+      .replace(/<[^>]+>/g, ' ')
+  );
+}
+
+async function extractPublicWebContent(url: string): Promise<{ title: string; content: string }> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), WEB_FETCH_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      redirect: 'follow',
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'ThynkrBot/1.0 (+https://thynkr.study)',
+        Accept: 'text/html,text/plain;q=0.9,*/*;q=0.8',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch URL (HTTP ${response.status})`);
+    }
+
+    const responseContentType = (response.headers.get('content-type') || '').toLowerCase();
+    const raw = await response.text();
+    if (!raw || raw.trim().length === 0) {
+      throw new Error('The provided URL returned empty content');
+    }
+
+    const titleMatch = raw.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    const extractedTitle = normalizeExtractedWebText(titleMatch?.[1] || '');
+
+    let content = '';
+    if (responseContentType.includes('text/plain')) {
+      content = normalizeExtractedWebText(raw);
+    } else {
+      const articleMatch = raw.match(/<article[\s\S]*?<\/article>/i);
+      const mainMatch = raw.match(/<main[\s\S]*?<\/main>/i);
+      const bodyMatch = raw.match(/<body[\s\S]*?<\/body>/i);
+      const candidateHtml = articleMatch?.[0] || mainMatch?.[0] || bodyMatch?.[0] || raw;
+      content = stripHtmlToText(candidateHtml);
+    }
+
+    if (!content || content.trim().length < 80) {
+      throw new Error('Could not extract enough readable content from this URL');
+    }
+
+    const boundedContent =
+      content.length > MAX_WEB_CONTENT_CHARS
+        ? `${content.slice(0, MAX_WEB_CONTENT_CHARS)}\n\n[Content truncated to fit processing limits]`
+        : content;
+
+    return {
+      title: extractedTitle,
+      content: boundedContent,
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 type AchievementResult = {
   tierUnlocked: boolean;
   achievementId?: string;
@@ -679,6 +773,108 @@ export default async function studyRoutes(server: FastifyInstance) {
       } catch (error: any) {
         server.log.error({ error }, 'YouTube upload error');
         return reply.code(500).send({ error: 'Failed to add YouTube link' });
+      }
+    }
+  );
+
+  // Upload publicly accessible web link (articles/wiki/blogs/docs)
+  server.post(
+    '/upload-link',
+    {
+      preHandler: [authenticate],
+    },
+    async (request: AuthenticatedRequest, reply) => {
+      try {
+        const { url, folderId } = request.body as { url?: string; folderId?: string | null };
+        const userId = request.user!.userId;
+
+        const trimmedUrl = url?.trim();
+        if (!trimmedUrl) {
+          return reply.code(400).send({ error: 'A public URL is required' });
+        }
+
+        let parsedUrl: URL;
+        try {
+          parsedUrl = new URL(trimmedUrl);
+        } catch {
+          return reply.code(400).send({ error: 'Invalid URL format' });
+        }
+
+        if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+          return reply.code(400).send({ error: 'Only http and https URLs are supported' });
+        }
+
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { role: true },
+        });
+
+        if (!user) {
+          return reply.code(404).send({ error: 'User not found' });
+        }
+
+        const uploadCheck = await canUploadFile(userId, user.role);
+        if (!uploadCheck.allowed) {
+          return reply.code(403).send({
+            error: uploadCheck.reason,
+            upgradeRequired: true,
+          });
+        }
+
+        const normalizedFolderId =
+          typeof folderId === 'string' && folderId.trim().length > 0 ? folderId.trim() : null;
+
+        if (normalizedFolderId) {
+          const folder = await prisma.folder.findFirst({
+            where: {
+              id: normalizedFolderId,
+              userId,
+            },
+          });
+
+          if (!folder) {
+            return reply.code(400).send({ error: 'Invalid folder selected' });
+          }
+        }
+
+        const { title, content } = await extractPublicWebContent(parsedUrl.toString());
+        const normalizedTitle =
+          title || `${parsedUrl.hostname}${parsedUrl.pathname !== '/' ? parsedUrl.pathname : ''}`;
+
+        const extractedText = [
+          `Source URL: ${parsedUrl.toString()}`,
+          `Captured: ${new Date().toISOString()}`,
+          `Title: ${normalizedTitle}`,
+          '',
+          content,
+        ].join('\n');
+
+        const uploadedFile = await prisma.uploadedFile.create({
+          data: {
+            userId,
+            folderId: normalizedFolderId,
+            fileName: `link_${Date.now()}.url`,
+            originalName: normalizedTitle.slice(0, 200),
+            fileType: 'text/url',
+            fileSize: Buffer.byteLength(extractedText, 'utf-8'),
+            filePath: parsedUrl.toString(),
+            status: 'COMPLETED',
+            extractedText,
+          },
+        });
+
+        await trackStudyActivity(userId, 'FILE_UPLOAD', uploadedFile.id);
+
+        return reply.code(201).send({ file: uploadedFile });
+      } catch (error: any) {
+        server.log.error({ error }, 'Public link upload error');
+
+        const errorMessage =
+          error?.name === 'AbortError'
+            ? 'Fetching the URL timed out. Please try a faster public page.'
+            : error?.message || 'Failed to import web link';
+
+        return reply.code(500).send({ error: errorMessage });
       }
     }
   );
