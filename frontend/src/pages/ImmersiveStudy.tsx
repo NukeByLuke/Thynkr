@@ -636,13 +636,13 @@ export default function ImmersiveStudy() {
                   <span
                     className={`relative inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-[7px] text-xs sm:text-sm font-semibold border transition-colors duration-200 ${
                       isTutorActive
-                        ? 'bg-white text-slate-950 border-white/80 dark:bg-black dark:text-white dark:border-white/15 shadow-sm'
+                        ? 'bg-black text-white border-black/90 dark:bg-white dark:text-slate-950 dark:border-white shadow-sm'
                         : 'bg-white/95 dark:bg-slate-950/95 border-slate-200/70 dark:border-white/15 text-slate-900 dark:text-cyan-100'
                     }`}
                   >
                     <Sparkles
                       className={`w-3.5 h-3.5 ${
-                        isTutorActive ? 'text-slate-900 dark:text-white' : 'text-fuchsia-500 dark:text-cyan-400'
+                        isTutorActive ? 'text-white dark:text-slate-900' : 'text-fuchsia-500 dark:text-cyan-400'
                       }`}
                     />
                     <span className="hidden sm:inline">Chat with AI Tutor</span>
