@@ -42,31 +42,50 @@ export default function NotesView({
     );
   }
 
-  const detailedCards = useMemo(() => {
-    const normalized = (detailed || '').trim();
-    if (!normalized) {
-      return [] as Array<{ title: string; content: string }>;
+  const noteCards = useMemo(() => {
+    const cards: Array<{ title: string; content: string }> = [];
+
+    const cleanedKeyPoints = keyPoints
+      .map((point) => point?.trim())
+      .filter((point): point is string => Boolean(point));
+
+    if (cleanedKeyPoints.length > 0) {
+      cards.push({
+        title: 'Quick Highlights',
+        content: cleanedKeyPoints
+          .map((point) => (point.startsWith('-') ? point : `- ${point}`))
+          .join('\n'),
+      });
     }
 
-    const sections = normalized
+    const normalizedDetailed = (detailed || '').trim();
+    if (!normalizedDetailed) {
+      return cards;
+    }
+
+    const sections = normalizedDetailed
       .split(/\n(?=##\s+)/g)
       .map((section) => section.trim())
       .filter(Boolean);
 
-    const source = sections.length > 0 ? sections : [normalized];
+    const source = sections.length > 0 ? sections : [normalizedDetailed];
 
-    return source.map((contentBlock, index) => {
+    source.forEach((contentBlock, index) => {
       const headingMatch = contentBlock.match(/^##\s+(.+)$/m);
-      const title = headingMatch?.[1]?.trim() || `Note Card ${index + 1}`;
-      return {
+      const title = headingMatch?.[1]?.trim() || `Section ${index + 1}`;
+      const contentWithoutHeading = contentBlock.replace(/^##\s+.+$/m, '').trim();
+
+      cards.push({
         title,
-        content: contentBlock,
-      };
+        content: contentWithoutHeading || contentBlock,
+      });
     });
-  }, [detailed]);
+
+    return cards;
+  }, [detailed, keyPoints]);
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       {/* Regenerate Button */}
       {onRegenerate && (
         <div className="flex justify-end">
@@ -82,87 +101,79 @@ export default function NotesView({
         </div>
       )}
 
-      {/* Key Point Cards */}
-      <div className="bg-gradient-to-br from-brand-50/50 to-accent-50/50 dark:from-brand-900/20 dark:to-accent-900/20 rounded-2xl p-5 sm:p-8 border-2 border-brand-100/50 dark:border-brand-800 shadow-lg">
-        <h3 className="text-2xl font-bold text-brand-900 dark:text-brand-300 mb-5">Key Point Cards</h3>
-        {keyPoints.length > 0 ? (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {keyPoints.map((point, index) => (
-              <article
-                key={index}
-                className="rounded-xl border border-brand-200/70 dark:border-brand-700/60 bg-white/85 dark:bg-brand-950/20 p-4"
-              >
-                <div className="flex items-start gap-3">
-                  <span className="flex-shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 text-white text-sm font-bold">
-                    {index + 1}
-                  </span>
-                  <div className="prose prose-sm dark:prose-invert max-w-none text-brand-900 dark:text-brand-100">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{point}</ReactMarkdown>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-slate-600 dark:text-slate-300">No key points generated yet.</p>
-        )}
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900/40 p-5 sm:p-6">
+        <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
+          <span className="text-brand-600 dark:text-brand-400">AI</span> Notes
+        </h3>
       </div>
 
-      {/* Detailed Note Cards */}
-      <div className="bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-gray-800 rounded-2xl p-5 sm:p-8 border-2 border-blue-100 dark:border-gray-700 shadow-lg">
-        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-5">Detailed Note Cards</h3>
-        {detailedCards.length > 0 ? (
-          <div className="grid gap-4 lg:grid-cols-2">
-            {detailedCards.map((card, index) => (
-              <article
-                key={`${card.title}-${index}`}
-                className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/70 p-4 sm:p-5"
-              >
-                <h4 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white mb-3">{card.title}</h4>
-                <div className="prose prose-sm dark:prose-invert max-w-none">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      h2: () => null,
-                      p: ({ node, ...props }) => (
-                        <p className="text-slate-700 dark:text-slate-200 leading-relaxed mb-3" {...props} />
-                      ),
-                      ul: ({ node, ...props }) => (
-                        <ul className="list-disc ml-5 space-y-1.5 mb-3 marker:text-fuchsia-500" {...props} />
-                      ),
-                      ol: ({ node, ...props }) => (
-                        <ol className="list-decimal ml-5 space-y-1.5 mb-3 marker:text-fuchsia-500" {...props} />
-                      ),
-                      code: ({ node, className, children, ...props }) => {
-                        const isInline = !className;
-                        return isInline ? (
-                          <code
-                            className="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-1.5 py-0.5 rounded text-xs font-mono"
-                            {...props}
-                          >
-                            {children}
-                          </code>
-                        ) : (
-                          <code
-                            className="block bg-slate-900 text-slate-100 p-3 rounded-lg overflow-x-auto text-xs font-mono my-2"
-                            {...props}
-                          >
-                            {children}
-                          </code>
-                        );
-                      },
-                    }}
-                  >
-                    {card.content}
-                  </ReactMarkdown>
-                </div>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-slate-600 dark:text-slate-300">No detailed notes generated yet.</p>
-        )}
-      </div>
+      {noteCards.length > 0 ? (
+        <div className="space-y-5">
+          {noteCards.map((card, index) => (
+            <article
+              key={`${card.title}-${index}`}
+              className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-sm"
+            >
+              <h4 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-white mb-5">{card.title}</h4>
+              <div className="prose prose-slate dark:prose-invert max-w-none">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    h1: () => null,
+                    h2: () => null,
+                    h3: ({ node, ...props }) => (
+                      <h5 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 mt-5 mb-3" {...props} />
+                    ),
+                    p: ({ node, ...props }) => (
+                      <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-3 text-base sm:text-lg" {...props} />
+                    ),
+                    ul: ({ node, ...props }) => (
+                      <ul
+                        className="list-disc ml-5 sm:ml-6 space-y-2.5 mb-4 text-slate-600 dark:text-slate-300 marker:text-slate-500 dark:marker:text-slate-400"
+                        {...props}
+                      />
+                    ),
+                    ol: ({ node, ...props }) => (
+                      <ol
+                        className="list-decimal ml-5 sm:ml-6 space-y-2.5 mb-4 text-slate-600 dark:text-slate-300 marker:text-slate-500 dark:marker:text-slate-400"
+                        {...props}
+                      />
+                    ),
+                    li: ({ node, ...props }) => (
+                      <li className="leading-relaxed text-base sm:text-lg" {...props} />
+                    ),
+                    strong: ({ node, ...props }) => (
+                      <strong className="font-semibold text-slate-900 dark:text-slate-100" {...props} />
+                    ),
+                    code: ({ node, className, children, ...props }) => {
+                      const isInline = !className;
+                      return isInline ? (
+                        <code
+                          className="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-1.5 py-0.5 rounded text-xs sm:text-sm font-mono"
+                          {...props}
+                        >
+                          {children}
+                        </code>
+                      ) : (
+                        <code
+                          className="block bg-slate-900 text-slate-100 p-3 rounded-lg overflow-x-auto text-xs sm:text-sm font-mono my-2"
+                          {...props}
+                        >
+                          {children}
+                        </code>
+                      );
+                    },
+                  }}
+                >
+                  {card.content}
+                </ReactMarkdown>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-slate-600 dark:text-slate-300">No notes generated yet.</p>
+      )}
     </div>
   );
 }
