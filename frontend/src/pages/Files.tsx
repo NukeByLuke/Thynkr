@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -7,11 +7,15 @@ import {
   Folder,
   FileText,
   Upload,
+  Sparkles,
   MoreVertical,
   Edit2,
   Trash2,
   Search,
   Calendar,
+  ChevronRight,
+  ArrowLeft,
+  Home,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { FileTypeBadge, getFileIcon } from '@/lib/fileTypeUtils';
@@ -50,6 +54,7 @@ export default function Files() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [isProcessingYouTube, setIsProcessingYouTube] = useState(false);
   const [processingVideoTitle, setProcessingVideoTitle] = useState<string | undefined>();
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [contextMenu, setContextMenu] = useState<{
@@ -106,12 +111,32 @@ export default function Files() {
   const folders: FolderType[] = foldersData?.folders || [];
   const allFiles: UploadedFile[] = filesData?.files || [];
 
+  const foldersById = useMemo(() => {
+    return new Map(folders.map((folder) => [folder.id, folder]));
+  }, [folders]);
+
+  const folderPath = useMemo(() => {
+    const pathItems: FolderType[] = [];
+    let cursorId = currentFolderId;
+    let safetyCounter = 0;
+
+    while (cursorId && safetyCounter < 100) {
+      const folder = foldersById.get(cursorId);
+      if (!folder) break;
+      pathItems.unshift(folder);
+      cursorId = folder.parentId;
+      safetyCounter += 1;
+    }
+
+    return pathItems;
+  }, [currentFolderId, foldersById]);
+
   // Upload mutation
   const uploadMutation = useMutation({
-    mutationFn: async (files: FileList) => {
+    mutationFn: async ({ files, targetFolderId }: { files: FileList; targetFolderId: string | null }) => {
       const formData = new FormData();
       Array.from(files).forEach((file) => formData.append('files', file));
-      if (currentFolderId) formData.append('folderId', currentFolderId);
+      if (targetFolderId) formData.append('folderId', targetFolderId);
 
       const response = await fetch(`${API_URL}/study/upload`, {
         method: 'POST',
@@ -122,8 +147,13 @@ export default function Files() {
       return response.json();
     },
     onSuccess: () => {
+      setUploadError(null);
       queryClient.invalidateQueries({ queryKey: ['study-files'] });
       toast.success('Files uploaded successfully!');
+    },
+    onError: (error: Error) => {
+      setUploadError(error.message || 'Upload failed');
+      toast.error(error.message || 'Upload failed');
     },
   });
 
@@ -257,14 +287,23 @@ export default function Files() {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  const startUpload = (files: FileList) => {
+    if (files.length === 0) return;
+    setUploadError(null);
+    uploadMutation.mutate({ files, targetFolderId: currentFolderId });
+  };
+
+  const openUploadHub = () => {
+    setUploadError(null);
+    setShowUploadModal(true);
+  };
+
   // Handlers
   const handleUploadFiles = (files: FileList) => {
-    uploadMutation.mutate(files);
-    setShowUploadModal(false);
+    startUpload(files);
   };
 
   const handleUploadYouTube = async (url: string) => {
-    setShowUploadModal(false);
     setIsProcessingYouTube(true);
     setProcessingVideoTitle(undefined);
     
@@ -363,8 +402,14 @@ export default function Files() {
     
     const files = e.dataTransfer.files;
     if (files.length > 0) {
-      uploadMutation.mutate(files);
+      startUpload(files);
     }
+  };
+
+  const handleGoBackFolder = () => {
+    if (!currentFolderId) return;
+    const currentFolder = foldersById.get(currentFolderId);
+    setCurrentFolderId(currentFolder?.parentId ?? null);
   };
 
   // Selection handlers
@@ -416,7 +461,7 @@ export default function Files() {
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className="min-h-screen bg-slate-50 dark:bg-slate-950 relative overflow-hidden"
+        className="min-h-app bg-slate-50 dark:bg-slate-950 relative overflow-hidden"
         style={{
           backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(148 163 184 / 0.15) 1px, transparent 0)',
           backgroundSize: '40px 40px',
@@ -443,6 +488,39 @@ export default function Files() {
               <p className="text-slate-600 dark:text-slate-400 mt-2">
                 {filteredFiles.length + filteredFolders.length} items • Organized and ready to study
               </p>
+
+              <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+                <button
+                  onClick={handleGoBackFolder}
+                  disabled={!currentFolderId}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/70 text-slate-700 dark:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back
+                </button>
+
+                <div className="flex flex-wrap items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                  <button
+                    onClick={() => setCurrentFolderId(null)}
+                    className="inline-flex items-center gap-1 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  >
+                    <Home className="w-4 h-4" />
+                    Root
+                  </button>
+
+                  {folderPath.map((folder) => (
+                    <div key={folder.id} className="inline-flex items-center gap-1.5">
+                      <ChevronRight className="w-3.5 h-3.5" />
+                      <button
+                        onClick={() => setCurrentFolderId(folder.id)}
+                        className="hover:text-slate-900 dark:hover:text-white transition-colors"
+                      >
+                        {folder.name}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
             
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
@@ -457,19 +535,63 @@ export default function Files() {
                   className="w-full pl-11 pr-4 py-3 rounded-full bg-white dark:bg-slate-900/80 backdrop-blur-md border-2 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-cyan-500 focus:border-pink-500 dark:focus:border-cyan-500 transition-all duration-200 shadow-md hover:shadow-lg"
                 />
               </div>
-
-              {/* Upload Button - Premium Design */}
-              <button
-                onClick={() => setShowUploadModal(true)}
-                className="group relative px-6 py-3 rounded-full bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 hover:shadow-xl text-white font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 active:scale-95 will-change-transform"
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <Upload className="w-5 h-5" />
-                  <span className="whitespace-nowrap">Upload</span>
-                </div>
-              </button>
             </div>
           </div>
+
+          {uploadError && (
+            <div className="mb-6 p-4 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
+              <p className="text-sm text-red-700 dark:text-red-400">{uploadError}</p>
+            </div>
+          )}
+
+          {/* Premium Create New Study Set Hero */}
+          <motion.button
+            type="button"
+            onClick={openUploadHub}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDragging(true);
+            }}
+            onDragLeave={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (e.currentTarget === e.target) {
+                setIsDragging(false);
+              }
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDragging(false);
+              const files = e.dataTransfer.files;
+              if (files.length > 0) {
+                startUpload(files);
+              }
+            }}
+            whileHover={{ scale: 1.004 }}
+            className="w-full mb-8 rounded-3xl border border-slate-200 dark:border-white/15 bg-white dark:bg-black p-6 sm:p-8 shadow-xl text-left relative overflow-hidden"
+          >
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_10%_10%,rgba(236,72,153,0.14),transparent_35%),radial-gradient(circle_at_88%_14%,rgba(168,85,247,0.16),transparent_35%),radial-gradient(circle_at_50%_88%,rgba(59,130,246,0.15),transparent_40%)] dark:bg-[radial-gradient(circle_at_10%_10%,rgba(168,85,247,0.24),transparent_35%),radial-gradient(circle_at_88%_14%,rgba(59,130,246,0.25),transparent_35%),radial-gradient(circle_at_50%_88%,rgba(34,211,238,0.2),transparent_40%)]" />
+
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 dark:bg-violet-400/15 border border-violet-500/20 dark:border-violet-300/30 text-xs font-semibold text-violet-700 dark:text-violet-300 mb-3">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Create New Study Set
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Drop Files or Open Upload Hub</h2>
+                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl">
+                  Drag files directly onto this hero (or anywhere on the page), or click here for Files, YouTube, and Paste Text uploads.
+                </p>
+              </div>
+
+              <div className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-violet-600 text-white font-semibold shadow-lg shadow-violet-500/30">
+                <Upload className="w-5 h-5" />
+                Open Upload Hub
+              </div>
+            </div>
+          </motion.button>
 
           {/* Selection Toolbar */}
           <AnimatePresence>
@@ -814,6 +936,7 @@ export default function Files() {
           onUploadYouTube={handleUploadYouTube}
           isUploading={uploadMutation.isPending}
           currentFolderId={currentFolderId}
+          uploadErrorMessage={uploadError}
         />
 
         {/* YouTube Processing Overlay */}
