@@ -4,9 +4,8 @@
  * Optimized with preloadable code-splitting for better performance
  */
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -17,13 +16,12 @@ import ProtectedRoute from '@/features/auth/ProtectedRoute';
 import PublicLayout from './layouts/PublicLayout';
 import DashboardLayout from './layouts/DashboardLayout';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import PreviewGate from '@/features/courses/PreviewGate';
 import GlobalLoadingBar from '@/components/ui/GlobalLoadingBar';
 import BackgroundShapes from '@/components/ui/BackgroundShapes';
 import {
   Login, Register, AuthCallback, OAuthCallback, ForgotPassword, VerifyEmail, 
   ResetPassword, Pricing, Account, Admin, Study, ImmersiveStudy, Files, 
-  Settings, Courses, MyCourseDetail, StudyModePage, Achievements, 
+  Settings, HelpCenter, Courses, MyCourseDetail, StudyModePage, Achievements, 
   PublicAchievements, NotFound, Privacy, Terms, Cookies, About, Contact, 
   Testimonials, Roadmap
 } from './routes';
@@ -103,8 +101,7 @@ function AppContent() {
       
       <GlobalLoadingBar />
       <Suspense fallback={<LoadingSpinner fullScreen />}>
-        <AnimatePresence mode="wait">
-          <Routes location={location} key={location.pathname}>
+        <Routes>
             {/* Home route - redirects to login or study based on auth */}
             <Route path="/" element={<HomeRoute />} />
             
@@ -145,6 +142,7 @@ function AppContent() {
             <Route path="/study/:fileId" element={<ImmersiveStudy />} />
             <Route path="/files" element={<Files />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/help" element={<HelpCenter />} />
             <Route path="/account" element={<Account />} />
             <Route path="/achievements" element={<Achievements />} />
 
@@ -187,32 +185,12 @@ function AppContent() {
 
           <Route path="*" element={<NotFound />} />
         </Routes>
-        </AnimatePresence>
       </Suspense>
     </>
   );
 }
 
 function App() {
-  const previewPassword = (import.meta.env.VITE_PREVIEW_PASSWORD as string) || '';
-  const [gatePassed, setGatePassed] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem('thynkr_preview_gate') === 'passed' || !previewPassword;
-    } catch {
-      return !previewPassword;
-    }
-  });
-
-  useEffect(() => {
-    if (gatePassed) {
-      try {
-        localStorage.setItem('thynkr_preview_gate', 'passed');
-      } catch (error) {
-        // Storage access denied - continue without persisting
-      }
-    }
-  }, [gatePassed]);
-
   return (
     <AuthProvider>
       <NavigationProvider>
@@ -229,11 +207,7 @@ function App() {
                   },
                 }}
               />
-              {!gatePassed && previewPassword ? (
-                <PreviewGate onSuccess={() => setGatePassed(true)} />
-              ) : (
-                <AppContent />
-              )}
+              <AppContent />
             </LayoutProvider>
           </NotificationProvider>
         </ThemeProvider>

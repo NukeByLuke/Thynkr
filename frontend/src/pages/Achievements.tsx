@@ -76,7 +76,7 @@ interface UserAchievement {
     required: number;
     percentage: number;
   } | null;
-  unlocked: boolean;
+  unlocked?: boolean;
 }
 
 // --- Config ---
@@ -854,10 +854,10 @@ export default function Achievements() {
     enabled: !!user?.id,
   });
 
-  // Add unlocked property based on unlockedAt field
+  // Add unlocked property based on backend-computed unlock state (fallback to unlockedAt for compatibility)
   const enrichedAchievements = achievements?.map(achievement => ({
     ...achievement,
-    unlocked: achievement.unlockedAt !== null,
+    unlocked: typeof achievement.unlocked === 'boolean' ? achievement.unlocked : achievement.unlockedAt !== null,
   })) || [];
 
   // Group achievements by category

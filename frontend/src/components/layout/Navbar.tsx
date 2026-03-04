@@ -11,7 +11,7 @@ import {
   Shield,
   Settings,
   Trophy,
-  TrendingUp,
+  CircleDollarSign,
   GraduationCap,
 } from 'lucide-react';
 import { useState, useMemo, memo } from 'react';
@@ -87,7 +87,7 @@ const Navbar = memo(() => {
                 </NavLink>
 
                 <NavLink
-                  to="/progress"
+                  to="/pricing"
                   className={({ isActive }) =>
                     `text-sm font-semibold px-4 py-2 rounded-2xl transition-all duration-150 flex items-center gap-1.5 ${
                       isActive
@@ -96,8 +96,8 @@ const Navbar = memo(() => {
                     }`
                   }
                 >
-                  <TrendingUp className="w-4 h-4" />
-                  Progress
+                  <CircleDollarSign className="w-4 h-4" />
+                  Pricing
                 </NavLink>
               </>
             )}
@@ -246,16 +246,16 @@ const Navbar = memo(() => {
                   Courses
                 </Link>
                 <Link
-                  to="/progress"
+                  to="/pricing"
                   className={`flex items-center px-3 py-2 rounded-xl text-base font-medium transition-all duration-150 ${
-                    isActive('/progress')
+                    isActive('/pricing')
                       ? 'text-white dark:text-white bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 shadow-lg'
                       : 'text-slate-700 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-white/50 dark:hover:bg-white/5'
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <TrendingUp className="w-4 h-4 mr-2" />
-                  Progress
+                  <CircleDollarSign className="w-4 h-4 mr-2" />
+                  Pricing
                 </Link>
               </>
             )}

@@ -14,7 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
  */
 function SkeletonDashboard() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-app bg-slate-50 dark:bg-slate-900">
       {/* Top Navigation Skeleton */}
       <div className="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center px-6">
         <div className="w-32 h-8 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />

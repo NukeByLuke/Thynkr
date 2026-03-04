@@ -15,6 +15,7 @@ export const Study = lazyWithPreload(() => import('./pages/Study'));
 export const ImmersiveStudy = lazyWithPreload(() => import('./pages/ImmersiveStudy'));
 export const Files = lazyWithPreload(() => import('./pages/Files'));
 export const Settings = lazyWithPreload(() => import('./pages/SettingsPage'));
+export const HelpCenter = lazyWithPreload(() => import('./pages/HelpCenter'));
 export const Courses = lazyWithPreload(() => import('./pages/Courses'));
 export const MyCourseDetail = lazyWithPreload(() => import('./pages/MyCourseDetail'));
 export const StudyModePage = lazyWithPreload(() => import('./pages/StudyModePage'));

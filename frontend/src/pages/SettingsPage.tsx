@@ -30,20 +30,20 @@ export default function SettingsPage() {
       </Helmet>
 
       <PageContainer>
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-4 md:mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-1">
+          <div className="mb-5 md:mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-1.5">
               Settings
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-sm md:text-base text-slate-500 dark:text-slate-400">
               Manage your account preferences and study experience.
             </p>
           </div>
 
           <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
             {/* Mobile: Horizontal scrollable tab bar / Desktop: Sidebar */}
-            <nav className="w-full lg:w-64 flex-shrink-0">
+            <nav className="w-full lg:w-72 flex-shrink-0 lg:sticky lg:top-24 lg:self-start">
               {/* Mobile tab strip */}
               <div className="flex lg:hidden gap-2 overflow-x-auto pb-1 scrollbar-hide">
                 {tabs.map((tab) => {
@@ -67,7 +67,7 @@ export default function SettingsPage() {
               </div>
 
               {/* Desktop sidebar list */}
-              <div className="hidden lg:flex flex-col space-y-1">
+                <div className="hidden lg:flex flex-col space-y-1.5 p-2 rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-white/10 backdrop-blur-md shadow-sm">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
@@ -75,9 +75,9 @@ export default function SettingsPage() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center justify-between p-3 rounded-2xl transition-all duration-200 group text-left border ${
+                      className={`w-full flex items-center justify-between p-3.5 rounded-2xl transition-all duration-200 group text-left border ${
                         isActive
-                          ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-white/10 shadow-sm'
+                          ? 'bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-500/15 dark:to-violet-500/15 border-indigo-200/80 dark:border-indigo-400/30 shadow-sm'
                           : 'bg-transparent border-transparent hover:bg-slate-100 dark:hover:bg-white/5'
                       }`}
                     >
@@ -112,7 +112,7 @@ export default function SettingsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.18 }}
-                  className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden"
+                  className="bg-white/80 dark:bg-slate-900/80 rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xl overflow-hidden backdrop-blur-md"
                 >
                   <Suspense
                     fallback={
@@ -121,7 +121,7 @@ export default function SettingsPage() {
                       </div>
                     }
                   >
-                    <div className="p-4 md:p-8">
+                    <div className="p-4 md:p-8 lg:p-9">
                       {activeTab === 'general' && <GeneralSettings />}
                       {activeTab === 'profile' && <ProfileSettings />}
                       {activeTab === 'billing' && <BillingSettings />}

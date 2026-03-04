@@ -16,7 +16,7 @@ export default function LoadingSpinner({ size = 'md', fullScreen = false, messag
   const spinner = (
     <div
       className={clsx(
-        'rounded-full border-primary-200 border-t-primary-500 animate-spin',
+        'rounded-full border-primary-200 border-t-primary-500 [animation:spin_.65s_linear_infinite] transform-gpu will-change-transform',
         sizes[size]
       )}
     />
@@ -24,7 +24,7 @@ export default function LoadingSpinner({ size = 'md', fullScreen = false, messag
 
   if (fullScreen) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-app">
         <div className="text-center">
           {spinner}
           {message && (

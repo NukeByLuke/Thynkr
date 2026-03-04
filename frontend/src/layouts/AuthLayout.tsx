@@ -124,7 +124,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
   return (
     <div 
-      className={`min-h-screen w-full flex items-center justify-center p-4 transition-colors duration-150 ${
+      className={`min-h-app w-full flex items-center justify-center p-4 transition-colors duration-150 ${
         isDark 
           ? 'bg-slate-950'
           : 'bg-slate-100'

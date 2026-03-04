@@ -9,7 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { User, LoginCredentials, RegisterData } from '@/types';
 import api from '@/lib/api';
-import { cachedRequest, clearCache } from '@/lib/apiCache';
+import { cachedRequest, clearCache, invalidateCache } from '@/lib/apiCache';
 
 interface AuthContextType {
   user: User | null;
@@ -161,6 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refetchUser = async () => {
+    invalidateCache('current-user');
     await fetchUser();
   };
 

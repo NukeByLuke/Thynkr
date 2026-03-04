@@ -20,6 +20,7 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import toast from 'react-hot-toast';
 
 interface UserProfile {
   id: string;
@@ -34,6 +35,15 @@ interface UserProfile {
     currentPeriodEnd: string;
     cancelAtPeriodEnd: boolean;
   } | null;
+}
+
+function isValidStripePortalUrl(url: string | undefined): boolean {
+  if (!url) return false;
+
+  const isStripeBillingUrl = /^https:\/\/billing\.stripe\.com\//i.test(url);
+  const isDeprecatedTestLoginUrl = /\/p\/login\/test/i.test(url);
+
+  return isStripeBillingUrl && !isDeprecatedTestLoginUrl;
 }
 
 export default function Account() {
@@ -80,8 +90,14 @@ export default function Account() {
       return response.data;
     },
     onSuccess: (data) => {
-      // Redirect to Stripe portal
-      window.location.href = data.url;
+      if (isValidStripePortalUrl(data?.url)) {
+        window.location.href = data.url;
+      } else {
+        toast.error('Billing portal is unavailable right now. Please try again shortly.');
+      }
+    },
+    onError: () => {
+      toast.error('Failed to open billing portal. Please try again.');
     },
   });
 

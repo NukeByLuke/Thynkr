@@ -43,11 +43,11 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
   }
 
   return (
-    <div className="max-w-none animate-fade-in space-y-6">
+    <div className="max-w-none w-full min-w-0 animate-fade-in space-y-4 sm:space-y-6">
       {/* Summary Content */}
-      <div className="bg-gradient-to-br from-white to-brand-50/50 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-lg border border-brand-100/50 dark:border-gray-700 p-10">
-        <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-brand-200/50 dark:border-gray-700">
-          <h3 className="text-3xl font-bold">
+      <div className="bg-gradient-to-br from-white to-brand-50/50 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-lg border border-brand-100/50 dark:border-gray-700 p-3 sm:p-6 lg:p-10 overflow-hidden">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5 sm:mb-8 pb-4 border-b-2 border-brand-200/50 dark:border-gray-700">
+          <h3 className="text-xl sm:text-3xl font-bold">
             <span className="hidden dark:block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-violet-400 to-violet-500">
               Summary
             </span>
@@ -60,7 +60,7 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
               <button
                 onClick={onRegenerate}
                 disabled={isRegenerating}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-fuchsia-600 dark:text-violet-400 hover:text-fuchsia-700 dark:hover:text-violet-300 bg-fuchsia-50 dark:bg-violet-900/30 hover:bg-fuchsia-100 dark:hover:bg-violet-900/50 rounded-xl transition-all duration-150 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-fuchsia-600 dark:text-violet-400 hover:text-fuchsia-700 dark:hover:text-violet-300 bg-fuchsia-50 dark:bg-violet-900/30 hover:bg-fuchsia-100 dark:hover:bg-violet-900/50 rounded-xl transition-all duration-150 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Regenerate summary with latest AI"
               >
                 <RefreshCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
@@ -69,30 +69,30 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
             )}
           </div>
         </div>
-        <div className="prose prose-lg dark:prose-invert max-w-none">
+        <div className="prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none min-w-0 break-words">
           <ReactMarkdown
             components={{
               h1: ({ node, ...props }: any) => (
                 <h1
-                  className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-pink-600 via-fuchsia-600 to-orange-500 dark:from-cyan-400 dark:via-violet-500 dark:to-blue-500 bg-clip-text text-transparent mt-6 mb-4 pb-2 border-b-2 border-pink-200/60 dark:border-violet-500/30"
+                  className="text-xl sm:text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-pink-600 via-fuchsia-600 to-orange-500 dark:from-cyan-400 dark:via-violet-500 dark:to-blue-500 bg-clip-text text-transparent mt-4 sm:mt-6 mb-3 sm:mb-4 pb-2 border-b-2 border-pink-200/60 dark:border-violet-500/30"
                   {...props}
                 />
               ),
               h2: ({ node, ...props }: any) => (
                 <h2
-                  className="text-xl md:text-2xl font-bold text-brand-700 dark:text-brand-200 mt-6 mb-3 pl-3 border-l-4 border-pink-500 dark:border-cyan-500"
+                  className="text-lg sm:text-xl md:text-2xl font-bold text-brand-700 dark:text-brand-200 mt-5 sm:mt-6 mb-2 sm:mb-3 pl-2 sm:pl-3 border-l-4 border-pink-500 dark:border-cyan-500"
                   {...props}
                 />
               ),
               h3: ({ node, ...props }: any) => (
                 <h3
-                  className="text-lg md:text-xl font-semibold text-brand-700 dark:text-brand-300 mt-5 mb-2 flex items-center gap-2"
+                  className="text-base sm:text-lg md:text-xl font-semibold text-brand-700 dark:text-brand-300 mt-4 sm:mt-5 mb-2 flex items-center gap-2"
                   {...props}
                 />
               ),
               h4: ({ node, ...props }: any) => (
                 <h4
-                  className="text-lg font-semibold text-brand-700 dark:text-brand-300 mt-5 mb-2"
+                  className="text-base sm:text-lg font-semibold text-brand-700 dark:text-brand-300 mt-4 sm:mt-5 mb-2"
                   {...props}
                 />
               ),
@@ -107,23 +107,23 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
               ),
               p: ({ node, ...props }: any) => (
                 <p
-                  className="text-gray-700 dark:text-gray-300 leading-loose mb-6 text-lg"
+                  className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4 sm:mb-6 text-sm sm:text-base lg:text-lg break-words"
                   {...props}
                 />
               ),
               ul: ({ node, ...props }: any) => (
                 <ul
-                  className="list-disc ml-7 space-y-3 mb-6 text-gray-700 dark:text-gray-300 marker:text-brand-500 dark:marker:text-brand-400"
+                  className="list-disc ml-5 sm:ml-7 space-y-2 sm:space-y-3 mb-5 sm:mb-6 text-gray-700 dark:text-gray-300 marker:text-brand-500 dark:marker:text-brand-400"
                   {...props}
                 />
               ),
               ol: ({ node, ...props }: any) => (
                 <ol
-                  className="list-decimal ml-7 space-y-3 mb-6 text-gray-700 dark:text-gray-300 marker:text-brand-500 dark:marker:text-brand-400"
+                  className="list-decimal ml-5 sm:ml-7 space-y-2 sm:space-y-3 mb-5 sm:mb-6 text-gray-700 dark:text-gray-300 marker:text-brand-500 dark:marker:text-brand-400"
                   {...props}
                 />
               ),
-              li: ({ node, ...props }: any) => <li className="leading-loose pl-2" {...props} />,
+              li: ({ node, ...props }: any) => <li className="leading-relaxed sm:leading-loose pl-2 break-words" {...props} />,
               code: ({ node, className, children, ...props }: any) => {
                 const isInline = !className;
                 return isInline ? (

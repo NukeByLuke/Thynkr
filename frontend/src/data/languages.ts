@@ -4,6 +4,30 @@ export interface Language {
   flag: string;
 }
 
+export function getCountryCodeFromFlag(flag: string): string | null {
+  const chars = Array.from(flag);
+  if (chars.length !== 2) return null;
+
+  const codePoints = chars.map((char) => char.codePointAt(0));
+  if (codePoints.some((cp) => cp === undefined)) return null;
+
+  const normalized = codePoints as number[];
+  const isRegionalIndicator = normalized.every((cp) => cp >= 0x1f1e6 && cp <= 0x1f1ff);
+  if (!isRegionalIndicator) return null;
+
+  const countryCode = normalized
+    .map((cp) => String.fromCharCode(cp - 0x1f1e6 + 65))
+    .join('');
+
+  return countryCode;
+}
+
+export function getFlagImageUrl(flag: string, width = 24): string | null {
+  const countryCode = getCountryCodeFromFlag(flag);
+  if (!countryCode) return null;
+  return `https://flagcdn.com/w${width}/${countryCode.toLowerCase()}.png`;
+}
+
 export const SUPPORTED_LANGUAGES: Language[] = [
   // Major Languages
   { value: 'en', label: 'English', flag: '🇬🇧' },

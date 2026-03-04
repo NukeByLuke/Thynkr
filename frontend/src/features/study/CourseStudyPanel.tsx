@@ -290,9 +290,8 @@ export default function CourseStudyPanel({
                   exit={{ opacity: 0, scale: 0.9 }}
                   className="flex flex-col items-center justify-center h-full p-8"
                 >
-                  <div className="relative mb-6">
-                    <div className="absolute inset-0 bg-gradient-aurora rounded-full blur-xl opacity-30" />
-                    <Loader2 className="h-14 w-14 animate-spin text-purple-600 relative z-10" />
+                  <div className="mb-6">
+                    <Loader2 className="h-12 w-12 text-purple-600 [animation:spin_.65s_linear_infinite] transform-gpu will-change-transform" />
                   </div>
                   <p className="text-lg font-semibold text-slate-900 dark:text-white mb-1">Generating {activeTab}...</p>
                   <p className="text-sm text-slate-500 dark:text-slate-400">

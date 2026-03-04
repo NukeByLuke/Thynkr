@@ -143,7 +143,7 @@ export default function SavedPacks() {
         <Helmet>
           <title>Packs - Thynkr</title>
         </Helmet>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+        <div className="min-h-app bg-gray-50 dark:bg-gray-900 py-12">
           <div className="max-w-2xl mx-auto px-4">
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center">
               <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-brand-600 to-accent-600 flex items-center justify-center">
@@ -177,7 +177,7 @@ export default function SavedPacks() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-app bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 dark:text-red-400">Failed to load study packs</p>
         </div>
