@@ -6,6 +6,7 @@ interface FileAIActionsProps {
   fileName: string;
   fileType: string;
   onAction: (action: 'summary' | 'notes' | 'quiz' | 'flashcards') => void;
+  onTutorAction?: () => void;
   loading?: boolean;
   disabled?: boolean;
 }
@@ -28,6 +29,7 @@ export default function FileAIActions({
   fileName: _fileName,
   fileType,
   onAction,
+  onTutorAction,
   loading = false,
   disabled = false,
 }: FileAIActionsProps) {
@@ -70,6 +72,11 @@ export default function FileAIActions({
     onAction(action);
   };
 
+  const handleTutorAction = () => {
+    setShowMenu(false);
+    onTutorAction?.();
+  };
+
   if (!isCompatible) {
     return (
       <div className="relative group">
@@ -101,11 +108,24 @@ export default function FileAIActions({
 
       {showMenu && !loading && (
         <>
-          {/* Backdrop to close menu */}
           <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
 
-          {/* Dropdown menu */}
-          <div className="absolute right-0 top-full mt-1 z-20 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 min-w-[140px] overflow-hidden">
+          <div className="absolute right-0 top-full mt-1 z-20 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-2 min-w-[210px] overflow-hidden">
+            <div className="px-2 pb-2">
+              <button
+                onClick={handleTutorAction}
+                className="group relative w-full rounded-xl p-[1px] transition-transform duration-300 hover:scale-[1.015]"
+                title="Chat with AI Tutor"
+              >
+                <span className="pointer-events-none absolute inset-0 rounded-xl bg-[conic-gradient(from_140deg_at_50%_50%,#ec4899_0deg,#a855f7_120deg,#06b6d4_240deg,#ec4899_360deg)] opacity-90 transition-transform duration-500 group-hover:animate-[spin_2.5s_linear_infinite]" />
+                <span className="pointer-events-none absolute inset-0 rounded-xl bg-fuchsia-500/25 blur-md opacity-70 transition-opacity duration-300 group-hover:opacity-100 dark:bg-cyan-500/25" />
+                <span className="relative flex items-center justify-center gap-2 rounded-[11px] bg-white/95 px-3 py-2 text-xs font-semibold text-slate-900 dark:bg-slate-900/95 dark:text-cyan-100">
+                  <Sparkles className="h-3.5 w-3.5 text-fuchsia-500 dark:text-cyan-400" />
+                  Chat with AI Tutor
+                </span>
+              </button>
+            </div>
+
             {actions.map((action) => (
               <button
                 key={action.id}

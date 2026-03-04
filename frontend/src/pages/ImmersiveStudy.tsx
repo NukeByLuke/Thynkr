@@ -7,18 +7,18 @@
  * CRITICAL: Layout context management ensures sidebar ALWAYS reappears on navigation away.
  */
 
-import { useEffect, useCallback, useLayoutEffect } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate, useParams, Navigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { useNavigate, useParams, Navigate, useSearchParams } from 'react-router-dom';
 import { 
-  ArrowLeft, 
   BookOpen, 
   FileText, 
   Layers, 
   Brain,
-  Sparkles 
+  Sparkles,
+  SendHorizontal
 } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 // Components
 import SummaryView from '@/features/study/SummaryView';
@@ -60,6 +60,17 @@ interface UploadedFile {
 
 type TabType = 'summary' | 'notes' | 'flashcards' | 'quizzes';
 
+interface TutorChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt: string;
+}
+
+function createTutorMessageId() {
+  return `tutor-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 // Tab configuration with icons
 const TABS: { id: TabType; label: string; shortLabel: string; icon: typeof BookOpen }[] = [
   { id: 'summary', label: 'Summary', shortLabel: 'Summary', icon: BookOpen },
@@ -71,7 +82,8 @@ const TABS: { id: TabType; label: string; shortLabel: string; icon: typeof BookO
 export default function ImmersiveStudy() {
   const navigate = useNavigate();
   const { fileId } = useParams<{ fileId: string }>();
-  const { setHideSidebar, setCustomHeaderContent } = useLayout();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { setHideSidebar } = useLayout();
 
   // Early redirect if no fileId
   if (!fileId) {
@@ -96,6 +108,29 @@ export default function ImmersiveStudy() {
     generateQuizMutation,
     selectedQuiz,
   } = useStudySession({ queryKey: ['study-files'] });
+
+  const [isTutorActive, setIsTutorActive] = useState(false);
+  const [isTutorTyping, setIsTutorTyping] = useState(false);
+  const [tutorInput, setTutorInput] = useState('');
+  const [tutorError, setTutorError] = useState<string | null>(null);
+  const [tutorMessages, setTutorMessages] = useState<TutorChatMessage[]>([
+    {
+      id: createTutorMessageId(),
+      role: 'assistant',
+      content: 'Welcome! I can help break this file down, explain concepts, and quiz your understanding. What should we tackle first?',
+      createdAt: new Date().toISOString(),
+    },
+  ]);
+  const tutorTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const tutorEndRef = useRef<HTMLDivElement | null>(null);
+
+  const resizeTutorTextarea = useCallback(() => {
+    const textarea = tutorTextareaRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = '0px';
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 180)}px`;
+  }, []);
 
   // Fetch uploaded files
   const { data: filesData, isLoading } = useQuery({
@@ -122,34 +157,132 @@ export default function ImmersiveStudy() {
     }
   }, [fileId, files, selectedFile?.id, setSelectedFile, navigate]);
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // CRITICAL: Zen Mode Layout Management
-  // useLayoutEffect ensures synchronous cleanup BEFORE React commits any other changes
-  // Empty deps array ensures this ONLY runs on mount/unmount, not on re-renders
-  // ═══════════════════════════════════════════════════════════════════════════
-  useLayoutEffect(() => {
-    // Enter Zen Mode - hide sidebar
-    setHideSidebar(true);
+  useEffect(() => {
+    setHideSidebar(false);
+  }, [setHideSidebar]);
 
-    // CRITICAL: Exit Zen Mode on unmount - synchronous cleanup prevents race conditions
-    return () => {
-      setHideSidebar(false);
-      setCustomHeaderContent(null);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty deps - MUST only run on mount/unmount
+  useEffect(() => {
+    setIsTutorActive(searchParams.get('tab') === 'tutor');
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!selectedFile?.id) return;
+
+    setTutorError(null);
+    setTutorInput('');
+    setIsTutorTyping(false);
+    setTutorMessages([
+      {
+        id: createTutorMessageId(),
+        role: 'assistant',
+        content: `You’re studying ${selectedFile.originalName}. Ask me to explain concepts, build memory hooks, or test your understanding.`,
+        createdAt: new Date().toISOString(),
+      },
+    ]);
+  }, [selectedFile?.id, selectedFile?.originalName]);
+
+  useEffect(() => {
+    resizeTutorTextarea();
+  }, [tutorInput, resizeTutorTextarea]);
+
+  useEffect(() => {
+    if (!isTutorActive) return;
+    tutorEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [isTutorActive, tutorMessages, isTutorTyping]);
 
   // Handle tab navigation
   const handleTabChange = useCallback((tab: TabType) => {
+    setIsTutorActive(false);
+    if (searchParams.get('tab') === 'tutor') {
+      const next = new URLSearchParams(searchParams);
+      next.delete('tab');
+      setSearchParams(next, { replace: true });
+    }
     setActiveTab(tab);
     setSelectedFlashcardSet(null);
-  }, [setActiveTab, setSelectedFlashcardSet]);
+  }, [searchParams, setActiveTab, setSearchParams, setSelectedFlashcardSet]);
+
+  const handleTutorEntry = useCallback(() => {
+    setIsTutorActive(true);
+    if (searchParams.get('tab') !== 'tutor') {
+      const next = new URLSearchParams(searchParams);
+      next.set('tab', 'tutor');
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
+  const handleTutorSend = useCallback(async () => {
+    if (!selectedFile?.id || isTutorTyping) {
+      return;
+    }
+
+    const trimmedInput = tutorInput.trim();
+    if (!trimmedInput) {
+      return;
+    }
+
+    const history = tutorMessages.slice(-8).map((message) => ({
+      role: message.role,
+      content: message.content,
+    }));
+
+    const userMessage: TutorChatMessage = {
+      id: createTutorMessageId(),
+      role: 'user',
+      content: trimmedInput,
+      createdAt: new Date().toISOString(),
+    };
+
+    setTutorMessages((prev) => [...prev, userMessage]);
+    setTutorInput('');
+    setTutorError(null);
+    setIsTutorTyping(true);
+
+    try {
+      const response = await api.post(`/study/files/${selectedFile.id}/tutor`, {
+        message: trimmedInput,
+        history,
+      });
+
+      const assistantContent =
+        response.data?.answer?.trim() ||
+        'I had trouble generating a response for that message. Please try rephrasing your question.';
+
+      setTutorMessages((prev) => [
+        ...prev,
+        {
+          id: createTutorMessageId(),
+          role: 'assistant',
+          content: assistantContent,
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.error || 'Unable to reach AI Tutor right now.';
+      setTutorError(errorMessage);
+      setTutorMessages((prev) => [
+        ...prev,
+        {
+          id: createTutorMessageId(),
+          role: 'assistant',
+          content: `I hit an issue: ${errorMessage}`,
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+    } finally {
+      setIsTutorTyping(false);
+    }
+  }, [isTutorTyping, selectedFile?.id, tutorInput, tutorMessages]);
 
   // Keyboard navigation (A/D for tabs, arrow keys reserved for flashcards)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Skip if user is typing in an input
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      if (isTutorActive) {
         return;
       }
 
@@ -171,77 +304,7 @@ export default function ImmersiveStudy() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeTab, handleTabChange, navigate]);
-
-  // Custom header content
-  useEffect(() => {
-    if (!fileId || !selectedFile) return;
-
-    setCustomHeaderContent(
-      <div className="flex items-center justify-between w-full gap-4">
-        {/* Left: Back button */}
-        <motion.button
-          onClick={() => {
-            // Navigate to study page and trigger refresh
-            window.location.href = '/study';
-          }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-pink-50 dark:hover:bg-cyan-900/20 rounded-lg transition-colors flex-shrink-0"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="hidden sm:inline">Back</span>
-        </motion.button>
-
-        {/* Center: File title with Zen badge */}
-        <div className="flex items-center gap-3 min-w-0 flex-1 justify-center">
-          <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 bg-gradient-to-r from-fuchsia-500/10 to-pink-500/10 dark:from-violet-500/10 dark:to-cyan-500/10 border border-fuchsia-500/20 dark:border-violet-500/20 rounded-full">
-            <Sparkles className="w-3 h-3 text-fuchsia-600 dark:text-violet-400" />
-            <span className="text-xs font-medium text-fuchsia-600 dark:text-violet-400">Zen Mode</span>
-          </div>
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs lg:max-w-md">
-            {selectedFile.originalName}
-          </h2>
-        </div>
-
-        {/* Right: Tab Pills */}
-        <div className="flex items-center gap-1 flex-shrink-0 mr-2">
-          {TABS.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            
-            return (
-              <motion.button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`relative px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-100 flex items-center gap-1.5 ${
-                  isActive
-                    ? 'text-pink-700 dark:text-cyan-300'
-                    : 'text-slate-700 dark:text-slate-400 hover:bg-pink-50 dark:hover:bg-cyan-900/20 hover:text-pink-900 dark:hover:text-cyan-200'
-                }`}
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-0 bg-gradient-to-r from-pink-100 to-fuchsia-100 dark:from-violet-500 dark:to-cyan-500 rounded-lg shadow-lg shadow-pink-200/50 dark:shadow-violet-500/20"
-                    transition={{ type: 'spring', stiffness: 700, damping: 40 }}
-                  />
-                )}
-                <span className="relative z-10 flex items-center gap-1.5">
-                  <Icon className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{tab.shortLabel}</span>
-                </span>
-              </motion.button>
-            );
-          })}
-        </div>
-      </div>
-    );
-
-    return () => setCustomHeaderContent(null);
-  }, [fileId, selectedFile, activeTab, handleTabChange, navigate, setCustomHeaderContent]);
+  }, [activeTab, handleTabChange, isTutorActive, navigate]);
 
   // Stable quiz submit handler to prevent recreation on each render
   const handleQuizSubmit = useCallback(async (
@@ -393,6 +456,111 @@ export default function ImmersiveStudy() {
     }
   };
 
+  const renderTutorChat = () => {
+    if (!selectedFile || selectedFile.status !== 'COMPLETED') {
+      return (
+        <EmptyState
+          icon={Sparkles}
+          title="Tutor is almost ready"
+          description="Your file is still processing. Once complete, AI Tutor will be available instantly."
+        />
+      );
+    }
+
+    return (
+      <div className="flex min-h-[62vh] max-h-[72vh] flex-col bg-[radial-gradient(circle_at_20%_0%,rgba(168,85,247,0.12),transparent_35%),radial-gradient(circle_at_80%_100%,rgba(6,182,212,0.12),transparent_38%)] dark:bg-[radial-gradient(circle_at_20%_0%,rgba(168,85,247,0.16),transparent_35%),radial-gradient(circle_at_80%_100%,rgba(6,182,212,0.18),transparent_38%)]">
+        <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6 space-y-4">
+          {tutorMessages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex items-end gap-2.5 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              {message.role === 'assistant' && (
+                <div className="h-7 w-7 rounded-full bg-gradient-to-br from-fuchsia-500/80 to-cyan-500/80 text-white flex items-center justify-center shadow-md shadow-fuchsia-500/30">
+                  <Sparkles className="h-3.5 w-3.5" />
+                </div>
+              )}
+
+              <div
+                className={`max-w-[86%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap shadow-sm ${
+                  message.role === 'user'
+                    ? 'rounded-br-md bg-gradient-to-br from-pink-600 to-fuchsia-600 dark:from-cyan-500 dark:to-violet-500 text-white shadow-fuchsia-500/30'
+                    : 'rounded-bl-md bg-white/95 dark:bg-slate-900/90 border border-slate-200/70 dark:border-white/10 text-slate-800 dark:text-slate-200'
+                }`}
+              >
+                {message.content}
+              </div>
+
+              {message.role === 'user' && (
+                <div className="h-7 w-7 rounded-full bg-slate-900 dark:bg-slate-100 text-[10px] font-semibold text-white dark:text-slate-900 flex items-center justify-center">
+                  You
+                </div>
+              )}
+            </div>
+          ))}
+
+          {isTutorTyping && (
+            <div className="flex items-end gap-2.5 justify-start">
+              <div className="h-7 w-7 rounded-full bg-gradient-to-br from-fuchsia-500/80 to-cyan-500/80 text-white flex items-center justify-center shadow-md shadow-fuchsia-500/30">
+                <Sparkles className="h-3.5 w-3.5" />
+              </div>
+              <div className="rounded-2xl rounded-bl-md bg-white/95 dark:bg-slate-900/90 border border-slate-200/70 dark:border-white/10 px-4 py-3 shadow-sm">
+                <div className="flex items-center gap-1.5">
+                  {[0, 1, 2].map((index) => (
+                    <span
+                      key={index}
+                      className="h-1.5 w-1.5 rounded-full bg-fuchsia-500 dark:bg-cyan-400 animate-bounce"
+                      style={{ animationDelay: `${index * 120}ms` }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div ref={tutorEndRef} />
+        </div>
+
+        <div className="sticky bottom-0 border-t border-slate-200/80 dark:border-white/10 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl px-3 py-3 sm:px-4 sm:py-4">
+          {tutorError && <p className="text-xs text-rose-600 dark:text-rose-400 mb-2">{tutorError}</p>}
+
+          <div className="relative">
+            <textarea
+              ref={tutorTextareaRef}
+              value={tutorInput}
+              onChange={(e) => {
+                setTutorInput(e.target.value);
+                resizeTutorTextarea();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleTutorSend();
+                }
+              }}
+              rows={1}
+              placeholder="Ask AI Tutor anything about this file..."
+              className="w-full resize-none rounded-2xl border border-slate-300/80 dark:border-white/15 bg-white dark:bg-slate-900 px-4 py-3 pr-14 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/60 dark:focus:ring-cyan-500/60"
+            />
+
+            <button
+              onClick={handleTutorSend}
+              disabled={!tutorInput.trim() || isTutorTyping}
+              className={`absolute right-2 bottom-2 h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-200 ${
+                tutorInput.trim() && !isTutorTyping
+                  ? 'bg-gradient-to-r from-fuchsia-600 to-cyan-500 text-white shadow-lg shadow-fuchsia-500/30 dark:shadow-cyan-500/30 hover:scale-105'
+                  : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+              }`}
+              title="Send message"
+            >
+              <SendHorizontal className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // ═══════════════════════════════════════════════════════════════════════════
   // Loading States
   // ═══════════════════════════════════════════════════════════════════════════
@@ -407,16 +575,12 @@ export default function ImmersiveStudy() {
   if (!selectedFile) {
     return (
       <div className="h-full flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center"
-        >
+        <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-pink-500/20 to-fuchsia-500/20 dark:from-cyan-500/20 dark:to-violet-500/20 flex items-center justify-center">
             <FileText className="w-8 h-8 text-pink-600 dark:text-cyan-400" />
           </div>
           <p className="text-slate-600 dark:text-slate-400">Loading file...</p>
-        </motion.div>
+        </div>
       </div>
     );
   }
@@ -436,37 +600,110 @@ export default function ImmersiveStudy() {
 
       {/* Main Content */}
       <div className="h-full overflow-y-auto">
-        <div className="max-w-5xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-          {/* Content Container with Glass Effect */}
-          <div
-            className="relative rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl shadow-slate-200/20 dark:shadow-slate-900/30 overflow-hidden"
-          >
-            {/* Subtle gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-pink-500/[0.02] via-transparent to-fuchsia-500/[0.02] dark:from-cyan-500/[0.02] dark:via-transparent dark:to-violet-500/[0.02] pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 py-5 sm:px-6 lg:px-8">
+          <div className="mb-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 shadow-sm">
+            <div className="flex flex-wrap items-center gap-2 justify-between">
+              <h2 className="text-base font-semibold text-slate-900 dark:text-white truncate max-w-full sm:max-w-sm lg:max-w-lg">
+                {selectedFile?.originalName || 'Study file'}
+              </h2>
+              <div className="flex items-center gap-1.5">
+                {TABS.map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id && !isTutorActive;
 
-            {/* Content */}
-            <div className="relative z-10 p-6 sm:p-8">
-              {renderTabContent()}
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => handleTabChange(tab.id)}
+                      className={`px-3 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 border ${
+                        isActive
+                          ? 'text-pink-700 dark:text-cyan-300 bg-gradient-to-r from-pink-100 to-fuchsia-100 dark:from-violet-500/30 dark:to-cyan-500/30 border-pink-200 dark:border-cyan-500/40'
+                          : 'text-slate-700 dark:text-slate-400 border-transparent hover:bg-pink-50 dark:hover:bg-cyan-900/20 hover:text-pink-900 dark:hover:text-cyan-200'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">{tab.shortLabel}</span>
+                    </button>
+                  );
+                })}
+
+                <button
+                  onClick={handleTutorEntry}
+                  className="group relative rounded-lg p-[1px] ml-1"
+                  title="Chat with AI Tutor"
+                >
+                  <span className="pointer-events-none absolute inset-0 rounded-lg bg-[conic-gradient(from_120deg_at_50%_50%,#ec4899_0deg,#a855f7_130deg,#06b6d4_250deg,#ec4899_360deg)] opacity-90 transition-transform duration-500 group-hover:animate-[spin_3s_linear_infinite]" />
+                  <span className="pointer-events-none absolute inset-0 rounded-lg bg-fuchsia-500/20 dark:bg-cyan-500/20 blur-md opacity-70 group-hover:opacity-100 transition-opacity duration-300" />
+                  <span
+                    className={`relative inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-[7px] text-xs sm:text-sm font-semibold border transition-colors ${
+                      isTutorActive
+                        ? 'bg-slate-900 text-white border-transparent dark:bg-slate-100 dark:text-slate-900'
+                        : 'bg-white/95 dark:bg-slate-900/95 border-slate-200/60 dark:border-white/15 text-slate-900 dark:text-cyan-100'
+                    }`}
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-fuchsia-500 dark:text-cyan-400" />
+                    <span className="hidden sm:inline">Chat with AI Tutor</span>
+                    <span className="sm:hidden">Tutor</span>
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Keyboard Hints */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="hidden lg:flex items-center justify-center gap-4 mt-6 text-xs text-slate-500 dark:text-slate-500"
-          >
-            <span className="flex items-center gap-1.5">
-              <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 font-mono">←</kbd>
-              <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 font-mono">→</kbd>
-              <span>Switch tabs</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 font-mono">Esc</kbd>
-              <span>Exit</span>
-            </span>
-          </motion.div>
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+            <AnimatePresence mode="wait" initial={false}>
+              {isTutorActive ? (
+                <motion.div
+                  key="tutor"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.24, ease: 'easeOut' }}
+                >
+                  {renderTutorChat()}
+                </motion.div>
+              ) : (
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                  className="p-4 sm:p-5 lg:p-6"
+                >
+                  {renderTabContent()}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <div className="hidden lg:flex items-center justify-center gap-4 mt-5 text-xs text-slate-500 dark:text-slate-500">
+            {!isTutorActive ? (
+              <>
+                <span className="flex items-center gap-1.5">
+                  <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 font-mono">←</kbd>
+                  <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 font-mono">→</kbd>
+                  <span>Switch tabs</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 font-mono">Esc</kbd>
+                  <span>Exit</span>
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="flex items-center gap-1.5">
+                  <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 font-mono">Enter</kbd>
+                  <span>Send message</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 font-mono">Shift</kbd>
+                  <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 font-mono">Enter</kbd>
+                  <span>New line</span>
+                </span>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </>
@@ -486,14 +723,9 @@ interface EmptyStateProps {
 function EmptyState({ icon: Icon, title, description }: EmptyStateProps) {
   return (
     <div className="text-center py-16">
-      <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.1 }}
-        className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center"
-      >
+      <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center">
         <Icon className="w-10 h-10 text-slate-400 dark:text-slate-500" />
-      </motion.div>
+      </div>
       <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">{title}</h3>
       <p className="text-slate-600 dark:text-slate-400 max-w-sm mx-auto">{description}</p>
     </div>
@@ -528,14 +760,9 @@ function GeneratePrompt({ type, onGenerate, isGenerating, extraContent }: Genera
 
   return (
     <div className="text-center py-16">
-      <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.1 }}
-        className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-pink-500/10 to-fuchsia-500/10 dark:from-cyan-500/10 dark:to-violet-500/10 border border-pink-500/20 dark:border-cyan-500/20 flex items-center justify-center"
-      >
+      <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-pink-500/10 to-fuchsia-500/10 dark:from-cyan-500/10 dark:to-violet-500/10 border border-pink-500/20 dark:border-cyan-500/20 flex items-center justify-center">
         <Icon className="w-10 h-10 text-pink-600 dark:text-cyan-400" />
-      </motion.div>
+      </div>
       
       <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">{config.title}</h3>
       <p className="text-slate-600 dark:text-slate-400 max-w-sm mx-auto mb-8">
@@ -544,18 +771,16 @@ function GeneratePrompt({ type, onGenerate, isGenerating, extraContent }: Genera
 
       {extraContent}
 
-      <motion.button
+      <button
         onClick={onGenerate}
         disabled={isGenerating}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
         className="px-6 py-3 bg-gradient-to-r from-pink-600 to-fuchsia-600 hover:from-pink-700 hover:to-fuchsia-700 dark:from-cyan-500 dark:to-violet-500 dark:hover:from-cyan-600 dark:hover:to-violet-600 text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-pink-500/25 dark:shadow-cyan-500/25 hover:shadow-xl hover:shadow-pink-500/30 dark:hover:shadow-cyan-500/30"
       >
         <span className="flex items-center gap-2">
           <Sparkles className="w-4 h-4" />
           {config.button}
         </span>
-      </motion.button>
+      </button>
     </div>
   );
 }
