@@ -70,6 +70,9 @@ export default function UploadModal({
   const [hasAgreed, setHasAgreed] = useState(false);
   const [recordingStatus, setRecordingStatus] = useState<RecordingStatus>('idle');
   const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [recordedTranscript, setRecordedTranscript] = useState('');
+  const [recordingInterimTranscript, setRecordingInterimTranscript] = useState('');
+  const [recordingErrorMessage, setRecordingErrorMessage] = useState<string | null>(null);
 
   const [uploadStage, setUploadStage] = useState<UploadStage>('idle');
   const [uploadContext, setUploadContext] = useState<UploadContext>('files');
@@ -79,6 +82,13 @@ export default function UploadModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const stageTimerRef = useRef<number | null>(null);
   const successTimerRef = useRef<number | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const speechRecognitionRef = useRef<any>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const finalTranscriptRef = useRef('');
+  const shouldRestartRecognitionRef = useRef(false);
+  const recordingStatusRef = useRef<RecordingStatus>('idle');
 
   const clearTransitionTimers = () => {
     if (stageTimerRef.current) {
@@ -91,6 +101,133 @@ export default function UploadModal({
     }
   };
 
+  const getSpeechRecognitionConstructor = () => {
+    if (typeof window === 'undefined') return null;
+
+    const speechWindow = window as Window & {
+      SpeechRecognition?: new () => any;
+      webkitSpeechRecognition?: new () => any;
+    };
+
+    return speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition || null;
+  };
+
+  const releaseRecordingResources = () => {
+    shouldRestartRecognitionRef.current = false;
+
+    if (speechRecognitionRef.current) {
+      try {
+        speechRecognitionRef.current.onresult = null;
+        speechRecognitionRef.current.onerror = null;
+        speechRecognitionRef.current.onend = null;
+        speechRecognitionRef.current.stop();
+      } catch {
+        // Ignore SpeechRecognition stop errors
+      }
+      speechRecognitionRef.current = null;
+    }
+
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch {
+        // Ignore MediaRecorder stop errors
+      }
+    }
+    mediaRecorderRef.current = null;
+
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => {
+        try {
+          track.stop();
+        } catch {
+          // Ignore track stop errors
+        }
+      });
+      mediaStreamRef.current = null;
+    }
+  };
+
+  const resetRecordingState = () => {
+    setRecordingStatus('idle');
+    setRecordingSeconds(0);
+    setRecordedTranscript('');
+    setRecordingInterimTranscript('');
+    setRecordingErrorMessage(null);
+    finalTranscriptRef.current = '';
+    recordedChunksRef.current = [];
+  };
+
+  const startSpeechRecognition = () => {
+    const SpeechRecognitionConstructor = getSpeechRecognitionConstructor();
+    if (!SpeechRecognitionConstructor) {
+      setRecordingErrorMessage('Live transcription is not supported in this browser. Use Chrome or Edge.');
+      return;
+    }
+
+    if (speechRecognitionRef.current) {
+      try {
+        speechRecognitionRef.current.stop();
+      } catch {
+        // Ignore stop race conditions
+      }
+      speechRecognitionRef.current = null;
+    }
+
+    try {
+      const recognition = new SpeechRecognitionConstructor();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onresult = (event: any) => {
+        let latestInterimTranscript = '';
+
+        for (let index = event.resultIndex; index < event.results.length; index += 1) {
+          const transcriptSegment = event.results[index]?.[0]?.transcript?.trim() || '';
+          if (!transcriptSegment) continue;
+
+          if (event.results[index].isFinal) {
+            finalTranscriptRef.current = `${finalTranscriptRef.current} ${transcriptSegment}`.trim();
+          } else {
+            latestInterimTranscript = `${latestInterimTranscript} ${transcriptSegment}`.trim();
+          }
+        }
+
+        setRecordedTranscript(finalTranscriptRef.current);
+        setRecordingInterimTranscript(latestInterimTranscript);
+      };
+
+      recognition.onerror = (event: any) => {
+        const errorCode = String(event?.error || '');
+        if (errorCode === 'not-allowed' || errorCode === 'service-not-allowed') {
+          shouldRestartRecognitionRef.current = false;
+          setRecordingErrorMessage('Speech recognition permission was denied.');
+          return;
+        }
+
+        if (errorCode && errorCode !== 'aborted' && errorCode !== 'no-speech') {
+          setRecordingErrorMessage('Live transcription encountered an issue. Continue speaking or try again.');
+        }
+      };
+
+      recognition.onend = () => {
+        if (shouldRestartRecognitionRef.current && recordingStatusRef.current === 'recording') {
+          try {
+            recognition.start();
+          } catch {
+            // Ignore restart race conditions
+          }
+        }
+      };
+
+      speechRecognitionRef.current = recognition;
+      recognition.start();
+    } catch {
+      setRecordingErrorMessage('Unable to start live transcription in this browser.');
+    }
+  };
+
   const resetFormState = () => {
     setActiveTab('files');
     setYoutubeUrl('');
@@ -99,8 +236,7 @@ export default function UploadModal({
     setTextContent('');
     setHasAgreed(false);
     setIsDragging(false);
-    setRecordingStatus('idle');
-    setRecordingSeconds(0);
+    resetRecordingState();
   };
 
   const resetUploadState = () => {
@@ -115,6 +251,7 @@ export default function UploadModal({
     if (isUploading || uploadStage === 'uploading' || uploadStage === 'processing') {
       return;
     }
+    releaseRecordingResources();
     resetUploadState();
     resetFormState();
     onClose();
@@ -251,39 +388,135 @@ export default function UploadModal({
     handleClose();
   };
 
-  const handleStartRecording = () => {
+  const handleStartRecording = async () => {
     if (requireContentAgreement && !hasAgreed) {
       toast.error('Please confirm the content agreement to continue');
       return;
     }
 
-    setRecordingSeconds(0);
-    setRecordingStatus('recording');
+    if (
+      typeof navigator === 'undefined' ||
+      !navigator.mediaDevices?.getUserMedia ||
+      typeof MediaRecorder === 'undefined'
+    ) {
+      const message = 'Audio recording is not supported on this browser/device.';
+      setRecordingErrorMessage(message);
+      toast.error(message);
+      return;
+    }
+
+    releaseRecordingResources();
+    resetRecordingState();
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+
+      const preferredMimeTypes = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'];
+      const supportedMimeType = preferredMimeTypes.find((mimeType) =>
+        MediaRecorder.isTypeSupported(mimeType)
+      );
+
+      const mediaRecorder = supportedMimeType
+        ? new MediaRecorder(stream, { mimeType: supportedMimeType })
+        : new MediaRecorder(stream);
+
+      recordedChunksRef.current = [];
+      mediaRecorder.ondataavailable = (event: BlobEvent) => {
+        if (event.data && event.data.size > 0) {
+          recordedChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.start(750);
+      mediaRecorderRef.current = mediaRecorder;
+      setRecordingSeconds(0);
+      setRecordingStatus('recording');
+      shouldRestartRecognitionRef.current = true;
+      setRecordingErrorMessage(null);
+      startSpeechRecognition();
+    } catch (error: any) {
+      releaseRecordingResources();
+      resetRecordingState();
+
+      const permissionDenied = error?.name === 'NotAllowedError' || error?.name === 'SecurityError';
+      const message = permissionDenied
+        ? 'Microphone access was denied. Please allow microphone access and try again.'
+        : 'Unable to start recording on this device.';
+
+      setRecordingErrorMessage(message);
+      toast.error(message);
+    }
   };
 
   const handleTogglePauseRecording = () => {
-    setRecordingStatus((prev) => (prev === 'recording' ? 'paused' : 'recording'));
+    if (recordingStatus === 'recording') {
+      if (mediaRecorderRef.current?.state === 'recording') {
+        mediaRecorderRef.current.pause();
+      }
+
+      shouldRestartRecognitionRef.current = false;
+      if (speechRecognitionRef.current) {
+        try {
+          speechRecognitionRef.current.stop();
+        } catch {
+          // Ignore speech stop race conditions
+        }
+      }
+
+      setRecordingStatus('paused');
+      setRecordingInterimTranscript('');
+      return;
+    }
+
+    if (recordingStatus === 'paused') {
+      if (mediaRecorderRef.current?.state === 'paused') {
+        mediaRecorderRef.current.resume();
+      }
+
+      setRecordingStatus('recording');
+      shouldRestartRecognitionRef.current = true;
+      startSpeechRecognition();
+    }
   };
 
   const handleStopAndProcessRecording = () => {
     if (recordingStatus === 'idle') return;
 
-    clearTransitionTimers();
+    if (requireContentAgreement && !hasAgreed) {
+      toast.error('Please confirm the content agreement to continue');
+      return;
+    }
+
+    const transcript = `${finalTranscriptRef.current} ${recordingInterimTranscript}`.trim();
+
+    releaseRecordingResources();
     setRecordingStatus('idle');
-    setUploadContext('record');
-    setUploadStage('processing');
-    setHasSubmitted(false);
-    setHasObservedUpload(false);
+    setRecordingInterimTranscript('');
+    setRecordingSeconds(0);
 
-    stageTimerRef.current = window.setTimeout(() => {
-      setUploadStage('success');
-    }, 1850);
+    if (!transcript) {
+      const message = 'No speech transcript was captured. Please record again and speak clearly.';
+      setRecordingErrorMessage(message);
+      toast.error(message);
+      return;
+    }
 
-    successTimerRef.current = window.setTimeout(() => {
-      resetUploadState();
-      resetFormState();
-      onClose();
-    }, 3100);
+    const transcriptHeader = `Live Lecture Transcript\nCaptured: ${new Date().toLocaleString()}\n\n`;
+    const transcriptFile = new (File as any)(
+      [new Blob([`${transcriptHeader}${transcript}\n`], { type: 'text/plain' })],
+      `live-lecture-${Date.now()}.txt`,
+      { type: 'text/plain' }
+    ) as File;
+
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(transcriptFile);
+
+    finalTranscriptRef.current = '';
+    setRecordedTranscript('');
+    setRecordingErrorMessage(null);
+
+    beginTrackedUpload('record', dataTransfer.files);
   };
 
   const formatRecordingTime = (totalSeconds: number) => {
@@ -301,7 +534,12 @@ export default function UploadModal({
   };
 
   useEffect(() => {
+    recordingStatusRef.current = recordingStatus;
+  }, [recordingStatus]);
+
+  useEffect(() => {
     if (!isOpen) {
+      releaseRecordingResources();
       resetUploadState();
       resetFormState();
     }
@@ -320,11 +558,17 @@ export default function UploadModal({
   }, [recordingStatus]);
 
   useEffect(() => {
-    if (activeTab !== 'record' && recordingStatus !== 'idle') {
-      setRecordingStatus('idle');
-      setRecordingSeconds(0);
+    if (
+      activeTab !== 'record' &&
+      (recordingStatus !== 'idle' ||
+        !!recordedTranscript ||
+        !!recordingInterimTranscript ||
+        !!recordingErrorMessage)
+    ) {
+      releaseRecordingResources();
+      resetRecordingState();
     }
-  }, [activeTab, recordingStatus]);
+  }, [activeTab, recordingStatus, recordedTranscript, recordingInterimTranscript, recordingErrorMessage]);
 
   useEffect(() => {
     if (!isOpen || !hasSubmitted) return;
@@ -362,10 +606,19 @@ export default function UploadModal({
   useEffect(() => {
     return () => {
       clearTransitionTimers();
+      releaseRecordingResources();
     };
   }, []);
 
   const isLocked = isUploading || uploadStage === 'uploading' || uploadStage === 'processing';
+
+  const recordingSupported =
+    typeof navigator !== 'undefined' &&
+    typeof MediaRecorder !== 'undefined' &&
+    !!navigator.mediaDevices?.getUserMedia;
+
+  const speechRecognitionSupported = !!getSpeechRecognitionConstructor();
+  const canStartRecording = recordingSupported && speechRecognitionSupported;
 
   const isSubmitDisabled =
     isLocked ||
@@ -378,10 +631,15 @@ export default function UploadModal({
       ? true
       : !textTitle.trim() || !textContent.trim());
 
-  const isRecordStartDisabled = isLocked || (requireContentAgreement && !hasAgreed);
+  const isRecordStartDisabled =
+    isLocked || (requireContentAgreement && !hasAgreed) || !canStartRecording;
 
   const stageMessage = useMemo(() => {
     if (uploadStage === 'uploading') {
+      if (uploadContext === 'record') {
+        return 'Uploading recording transcript...';
+      }
+
       return uploadContext === 'text'
         ? 'Uploading generated text file...'
         : `Uploading ${selectedFiles.length} file${selectedFiles.length !== 1 ? 's' : ''}...`;
@@ -771,6 +1029,21 @@ export default function UploadModal({
                             <p className="mt-5 text-xs sm:text-sm text-slate-500 dark:text-slate-400 text-center">
                               Your recording will be processed into notes, quiz questions, and key takeaways.
                             </p>
+                            {!recordingSupported && (
+                              <p className="mt-3 text-xs text-amber-600 dark:text-amber-300 text-center max-w-md">
+                                Recording is not available on this browser/device.
+                              </p>
+                            )}
+                            {recordingSupported && !speechRecognitionSupported && (
+                              <p className="mt-3 text-xs text-amber-600 dark:text-amber-300 text-center max-w-md">
+                                Live transcription is not supported here. Use Chrome or Edge to record and process lectures.
+                              </p>
+                            )}
+                            {recordingErrorMessage && (
+                              <p className="mt-3 text-xs text-red-600 dark:text-red-300 text-center max-w-md">
+                                {recordingErrorMessage}
+                              </p>
+                            )}
                           </motion.div>
                         ) : (
                           <motion.div
@@ -830,6 +1103,30 @@ export default function UploadModal({
                               </p>
                             </div>
 
+                            <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-black/55 p-4 sm:p-5">
+                              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
+                                Live transcript
+                              </p>
+                              <div className="mt-2 text-sm text-slate-700 dark:text-slate-200 leading-relaxed max-h-28 overflow-y-auto">
+                                {recordedTranscript || recordingInterimTranscript ? (
+                                  <>
+                                    {recordedTranscript}
+                                    {recordingInterimTranscript && (
+                                      <span className="text-slate-500 dark:text-slate-400 italic"> {recordingInterimTranscript}</span>
+                                    )}
+                                  </>
+                                ) : (
+                                  <span className="text-slate-500 dark:text-slate-400">
+                                    Start speaking and your transcript will appear here in real time.
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {recordingErrorMessage && (
+                              <p className="text-xs text-red-600 dark:text-red-300 text-center">{recordingErrorMessage}</p>
+                            )}
+
                             <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
                               <button
                                 type="button"
@@ -877,7 +1174,7 @@ export default function UploadModal({
             <div className="px-6 sm:px-8 py-4 border-t border-slate-200 dark:border-white/10 flex items-center justify-between gap-3 bg-white/70 dark:bg-black/70">
               <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
                 {activeTab === 'record'
-                  ? 'Tip: Pause recording when you need a break, then resume before processing.'
+                  ? 'Tip: Speak clearly for better live transcription before you stop and process.'
                   : 'Tip: You can drag files directly into this modal for faster uploads.'}
               </p>
               <div className="flex items-center gap-3 ml-auto">
