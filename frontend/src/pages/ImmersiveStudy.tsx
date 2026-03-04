@@ -845,7 +845,7 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200/70 dark:border-white/10 bg-white/90 dark:bg-slate-900/60 p-4 sm:p-6 shadow-sm">
+    <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h3 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white">Original Content</h3>
         <div className="flex items-center gap-2">
@@ -870,12 +870,12 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/80 dark:bg-slate-950/70 p-2 sm:p-3">
+      <div>
         {youtubeEmbedUrl ? (
           <iframe
             title="YouTube original content"
             src={youtubeEmbedUrl}
-            className="w-full min-h-[68vh] rounded-lg border-0 bg-black"
+            className="w-full min-h-[68vh] border-0 bg-black"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
           />
@@ -884,7 +884,7 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
             <iframe
               title="Web page original content"
               src={sourceUrl}
-              className="w-full min-h-[68vh] rounded-lg border-0 bg-white dark:bg-slate-900"
+              className="w-full min-h-[68vh] border-0 bg-white dark:bg-slate-900"
               sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
               referrerPolicy="no-referrer"
             />
@@ -897,7 +897,7 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
             <iframe
               title="Office document preview"
               src={officeViewerUrl}
-              className="w-full min-h-[68vh] rounded-lg border-0 bg-white dark:bg-slate-900"
+              className="w-full min-h-[68vh] border-0 bg-white dark:bg-slate-900"
               referrerPolicy="no-referrer"
             />
             {isPowerPoint && (
@@ -910,20 +910,20 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
           <iframe
             title="PDF preview"
             src={previewFileUrl}
-            className="w-full min-h-[68vh] rounded-lg border-0 bg-white dark:bg-slate-900"
+            className="w-full min-h-[68vh] border-0 bg-white dark:bg-slate-900"
           />
         ) : isImage && previewFileUrl ? (
-          <div className="max-h-[72vh] overflow-auto rounded-lg bg-white dark:bg-slate-900 p-2">
-            <img src={previewFileUrl} alt={file.originalName} className="w-full h-auto rounded-lg" />
+          <div className="max-h-[72vh] overflow-auto bg-white dark:bg-slate-900 p-2">
+            <img src={previewFileUrl} alt={file.originalName} className="w-full h-auto" />
           </div>
         ) : isVideo && previewFileUrl ? (
-          <video src={previewFileUrl} controls className="w-full min-h-[48vh] rounded-lg bg-black" />
+          <video src={previewFileUrl} controls className="w-full min-h-[48vh] bg-black" />
         ) : isAudio && previewFileUrl ? (
           <div className="px-2 py-6">
             <audio src={previewFileUrl} controls className="w-full" />
           </div>
         ) : file.extractedText && file.extractedText.trim().length > 0 ? (
-          <div className="max-h-[68vh] overflow-y-auto rounded-lg bg-white/90 dark:bg-slate-900/80 p-4">
+          <div className="max-h-[68vh] overflow-y-auto bg-white/90 dark:bg-slate-900/80 p-4">
             <pre className="whitespace-pre-wrap break-words text-sm sm:text-[15px] leading-relaxed text-slate-700 dark:text-slate-200 font-sans">
               {file.extractedText}
             </pre>
