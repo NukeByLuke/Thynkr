@@ -473,7 +473,7 @@ export default function ImmersiveStudy() {
           {tutorMessages.map((message) => (
             <div
               key={message.id}
-              className={`flex items-end gap-2.5 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex items-end gap-2.5 ${message.role === 'user' ? 'justify-end' : 'justify-start pl-1 sm:pl-2'}`}
             >
               {message.role === 'assistant' && (
                 <div className="h-7 w-7 rounded-full bg-gradient-to-br from-fuchsia-500/80 to-cyan-500/80 text-white flex items-center justify-center shadow-md shadow-fuchsia-500/30">
@@ -500,7 +500,7 @@ export default function ImmersiveStudy() {
           ))}
 
           {isTutorTyping && (
-            <div className="flex items-end gap-2.5 justify-start">
+            <div className="flex items-end gap-2.5 justify-start pl-1 sm:pl-2">
               <div className="h-7 w-7 rounded-full bg-gradient-to-br from-fuchsia-500/80 to-cyan-500/80 text-white flex items-center justify-center shadow-md shadow-fuchsia-500/30">
                 <Sparkles className="h-3.5 w-3.5" />
               </div>
