@@ -20,11 +20,13 @@ export function normalizeFileForLanguage(file: any) {
   }
 
   const { summaries, notes, userId, filePath, ...rest } = file;
+  const isExternalSource = typeof filePath === 'string' && /^https?:\/\//i.test(filePath);
 
   return {
     ...rest,
     summary: summaries?.[0] ?? null,
     notes: notes?.[0] ?? null,
-    downloadUrl: file.fileName ? `/uploads/${file.fileName}` : null,
+    downloadUrl: !isExternalSource && file.fileName ? `/uploads/${file.fileName}` : null,
+    sourceUrl: isExternalSource ? filePath : null,
   };
 }

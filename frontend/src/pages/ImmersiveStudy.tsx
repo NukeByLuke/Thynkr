@@ -16,7 +16,9 @@ import {
   Layers, 
   Brain,
   Sparkles,
-  SendHorizontal
+  SendHorizontal,
+  ExternalLink,
+  Download
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -37,11 +39,14 @@ import api from '@/lib/api';
 // Types
 interface UploadedFile {
   id: string;
+  fileName?: string;
   originalName: string;
   fileType: string;
   fileSize: number;
   status: 'UPLOADED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
   createdAt: string;
+  downloadUrl?: string | null;
+  sourceUrl?: string | null;
   extractedText?: string;
   summary?: { id: string; content: string };
   notes?: { id: string; keyPoints: string[]; detailed: string };
@@ -365,31 +370,7 @@ export default function ImmersiveStudy() {
 
     switch (activeTab) {
       case 'original':
-        if (selectedFile.extractedText && selectedFile.extractedText.trim().length > 0) {
-          return (
-            <div className="rounded-2xl border border-slate-200/70 dark:border-white/10 bg-white/90 dark:bg-slate-900/60 p-4 sm:p-6 shadow-sm">
-              <div className="flex items-center justify-between gap-3 mb-4">
-                <h3 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white">Original Content</h3>
-                <span className="text-xs sm:text-sm px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                  Source text
-                </span>
-              </div>
-              <div className="max-h-[62vh] overflow-y-auto rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/80 dark:bg-slate-950/70 p-4 sm:p-5">
-                <pre className="whitespace-pre-wrap break-words text-sm sm:text-[15px] leading-relaxed text-slate-700 dark:text-slate-200 font-sans">
-                  {selectedFile.extractedText}
-                </pre>
-              </div>
-            </div>
-          );
-        }
-
-        return (
-          <EmptyState
-            icon={FileText}
-            title="Original content unavailable"
-            description="We couldn't find source text for this file yet. Try again after processing completes."
-          />
-        );
+        return <OriginalContentPreview file={selectedFile} />;
 
       case 'summary':
         if (selectedFile.summary) {
@@ -744,6 +725,220 @@ export default function ImmersiveStudy() {
 // ═══════════════════════════════════════════════════════════════════════════
 // Sub-Components
 // ═══════════════════════════════════════════════════════════════════════════
+
+function getPreviewFileUrl(file: UploadedFile): string | null {
+  const relativeUrl =
+    file.downloadUrl || (file.fileName ? `/uploads/${encodeURIComponent(file.fileName)}` : null);
+
+  if (!relativeUrl) return null;
+  if (relativeUrl.startsWith('http')) return relativeUrl;
+  if (import.meta.env.DEV && relativeUrl.startsWith('/')) return relativeUrl;
+
+  const apiBase = (import.meta.env.VITE_API_URL as string) || '/api';
+  const assetBase = apiBase.replace(/\/_?api\/?$/, '');
+  return `${assetBase}${relativeUrl}`;
+}
+
+function getSourceUrl(file: UploadedFile): string | null {
+  if (file.sourceUrl && /^https?:\/\//i.test(file.sourceUrl)) {
+    return file.sourceUrl;
+  }
+
+  const extractedText = file.extractedText || '';
+  const sourceMatch = extractedText.match(/^\s*Source URL:\s*(https?:\/\/\S+)/im);
+  return sourceMatch?.[1] || null;
+}
+
+function getFileExtension(fileName?: string): string {
+  return fileName?.toLowerCase().split('.').pop() || '';
+}
+
+function toAbsoluteUrl(url: string): string {
+  try {
+    return new URL(url, window.location.origin).toString();
+  } catch {
+    return url;
+  }
+}
+
+function getYouTubeEmbedUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase();
+
+    let videoId = '';
+    if (host.includes('youtu.be')) {
+      videoId = parsed.pathname.replace(/^\//, '').split('/')[0];
+    } else if (host.includes('youtube.com')) {
+      if (parsed.pathname === '/watch') {
+        videoId = parsed.searchParams.get('v') || '';
+      } else {
+        const parts = parsed.pathname.split('/').filter(Boolean);
+        videoId = parts[1] || '';
+      }
+    }
+
+    if (!videoId || videoId.length < 8) {
+      return null;
+    }
+
+    return `https://www.youtube.com/embed/${videoId}`;
+  } catch {
+    return null;
+  }
+}
+
+function OriginalContentPreview({ file }: { file: UploadedFile }) {
+  const fileType = (file.fileType || '').toLowerCase();
+  const extension = getFileExtension(file.originalName);
+  const previewFileUrl = getPreviewFileUrl(file);
+  const sourceUrl = getSourceUrl(file);
+  const absolutePreviewFileUrl = previewFileUrl ? toAbsoluteUrl(previewFileUrl) : null;
+
+  const isPowerPoint =
+    fileType.includes('presentationml') ||
+    fileType.includes('powerpoint') ||
+    ['ppt', 'pptx', 'pps', 'ppsx'].includes(extension);
+
+  const isWordOrExcel =
+    fileType.includes('wordprocessingml') ||
+    fileType.includes('msword') ||
+    fileType.includes('spreadsheetml') ||
+    fileType.includes('ms-excel') ||
+    ['doc', 'docx', 'xls', 'xlsx'].includes(extension);
+
+  const isPdf = fileType.includes('pdf') || extension === 'pdf';
+  const isImage =
+    fileType.startsWith('image/') ||
+    ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'avif'].includes(extension);
+  const isVideo = fileType.startsWith('video/') && !fileType.includes('youtube');
+  const isAudio = fileType.startsWith('audio/');
+  const isWebLink = fileType.includes('text/url');
+  const youtubeEmbedUrl = sourceUrl ? getYouTubeEmbedUrl(sourceUrl) : null;
+
+  const officeViewerUrl =
+    absolutePreviewFileUrl && (isPowerPoint || isWordOrExcel)
+      ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(absolutePreviewFileUrl)}`
+      : null;
+
+  const openTargetUrl = sourceUrl || previewFileUrl;
+
+  const openOriginal = () => {
+    if (!openTargetUrl) return;
+
+    const openedWindow = window.open(openTargetUrl, '_blank', 'noopener,noreferrer');
+    if (!openedWindow) {
+      alert('Popup blocked. Please allow popups and try again.');
+    }
+  };
+
+  const downloadFile = () => {
+    if (!previewFileUrl) return;
+
+    const link = document.createElement('a');
+    link.href = previewFileUrl;
+    link.download = file.originalName || file.fileName || 'download';
+    link.rel = 'noopener';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  return (
+    <div className="rounded-2xl border border-slate-200/70 dark:border-white/10 bg-white/90 dark:bg-slate-900/60 p-4 sm:p-6 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h3 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white">Original Content</h3>
+        <div className="flex items-center gap-2">
+          {openTargetUrl && (
+            <button
+              onClick={openOriginal}
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-sm font-medium border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              Open Original
+            </button>
+          )}
+          {previewFileUrl && !isWebLink && (
+            <button
+              onClick={downloadFile}
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-sm font-medium border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Download
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/80 dark:bg-slate-950/70 p-2 sm:p-3">
+        {youtubeEmbedUrl ? (
+          <iframe
+            title="YouTube original content"
+            src={youtubeEmbedUrl}
+            className="w-full min-h-[68vh] rounded-lg border-0 bg-black"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          />
+        ) : isWebLink && sourceUrl ? (
+          <div className="space-y-3">
+            <iframe
+              title="Web page original content"
+              src={sourceUrl}
+              className="w-full min-h-[68vh] rounded-lg border-0 bg-white dark:bg-slate-900"
+              sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+              referrerPolicy="no-referrer"
+            />
+            <p className="text-xs text-slate-500 dark:text-slate-400 px-1">
+              If the page looks blank, the source site blocks embedding. Use Open Original to view it directly.
+            </p>
+          </div>
+        ) : officeViewerUrl ? (
+          <div className="space-y-3">
+            <iframe
+              title="Office document preview"
+              src={officeViewerUrl}
+              className="w-full min-h-[68vh] rounded-lg border-0 bg-white dark:bg-slate-900"
+              referrerPolicy="no-referrer"
+            />
+            {isPowerPoint && (
+              <p className="text-xs text-slate-500 dark:text-slate-400 px-1">
+                PowerPoint is rendered through Office Web Viewer so you can browse all slides.
+              </p>
+            )}
+          </div>
+        ) : isPdf && previewFileUrl ? (
+          <iframe
+            title="PDF preview"
+            src={previewFileUrl}
+            className="w-full min-h-[68vh] rounded-lg border-0 bg-white dark:bg-slate-900"
+          />
+        ) : isImage && previewFileUrl ? (
+          <div className="max-h-[72vh] overflow-auto rounded-lg bg-white dark:bg-slate-900 p-2">
+            <img src={previewFileUrl} alt={file.originalName} className="w-full h-auto rounded-lg" />
+          </div>
+        ) : isVideo && previewFileUrl ? (
+          <video src={previewFileUrl} controls className="w-full min-h-[48vh] rounded-lg bg-black" />
+        ) : isAudio && previewFileUrl ? (
+          <div className="px-2 py-6">
+            <audio src={previewFileUrl} controls className="w-full" />
+          </div>
+        ) : file.extractedText && file.extractedText.trim().length > 0 ? (
+          <div className="max-h-[68vh] overflow-y-auto rounded-lg bg-white/90 dark:bg-slate-900/80 p-4">
+            <pre className="whitespace-pre-wrap break-words text-sm sm:text-[15px] leading-relaxed text-slate-700 dark:text-slate-200 font-sans">
+              {file.extractedText}
+            </pre>
+          </div>
+        ) : (
+          <EmptyState
+            icon={FileText}
+            title="Original content unavailable"
+            description="We couldn't render a preview for this file type yet. Use Open Original to view the source directly."
+          />
+        )}
+      </div>
+    </div>
+  );
+}
 
 interface EmptyStateProps {
   icon: typeof FileText;
