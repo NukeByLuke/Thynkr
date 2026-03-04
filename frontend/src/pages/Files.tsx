@@ -9,6 +9,8 @@ import {
   Upload,
   Sparkles,
   MoreVertical,
+  Eye,
+  Download,
   Edit2,
   Trash2,
   Search,
@@ -39,6 +41,7 @@ interface FolderType {
 interface UploadedFile {
   id: string;
   fileName: string;
+  downloadUrl?: string | null;
   originalName: string;
   fileType: string;
   fileSize: number;
@@ -368,6 +371,72 @@ export default function Files() {
         deleteFileMutation.mutate(contextMenu.id);
       }
     }
+    setContextMenu(null);
+  };
+
+  const getFileUrl = (file: UploadedFile) => {
+    const relativeUrl =
+      file.downloadUrl || (file.fileName ? `/uploads/${encodeURIComponent(file.fileName)}` : null);
+
+    if (!relativeUrl) return null;
+    if (relativeUrl.startsWith('http')) return relativeUrl;
+    if (import.meta.env.DEV && relativeUrl.startsWith('/')) return relativeUrl;
+
+    const apiBase = (import.meta.env.VITE_API_URL as string) || '/api';
+    const assetBase = apiBase.replace(/\/_?api\/?$/, '');
+    return `${assetBase}${relativeUrl}`;
+  };
+
+  const handleViewFile = () => {
+    if (!contextMenu || contextMenu.type !== 'file') return;
+
+    const targetFile = allFiles.find((file) => file.id === contextMenu.id);
+    if (!targetFile) {
+      toast.error('File not found');
+      setContextMenu(null);
+      return;
+    }
+
+    const fileUrl = getFileUrl(targetFile);
+    if (!fileUrl) {
+      toast.error('Unable to open this file');
+      setContextMenu(null);
+      return;
+    }
+
+    const openedWindow = window.open(fileUrl, '_blank', 'noopener,noreferrer');
+    if (!openedWindow) {
+      toast.error('Popup blocked. Please allow popups and try again.');
+    }
+
+    setContextMenu(null);
+  };
+
+  const handleDownloadFile = () => {
+    if (!contextMenu || contextMenu.type !== 'file') return;
+
+    const targetFile = allFiles.find((file) => file.id === contextMenu.id);
+    if (!targetFile) {
+      toast.error('File not found');
+      setContextMenu(null);
+      return;
+    }
+
+    const fileUrl = getFileUrl(targetFile);
+    if (!fileUrl) {
+      toast.error('Unable to download this file');
+      setContextMenu(null);
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = targetFile.originalName || targetFile.fileName;
+    link.rel = 'noopener';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
     setContextMenu(null);
   };
 
@@ -811,6 +880,24 @@ export default function Files() {
             className="fixed bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10 rounded-xl shadow-2xl py-2 z-50 min-w-[180px]"
             style={{ left: contextMenu.x, top: contextMenu.y }}
           >
+            {contextMenu.type === 'file' && (
+              <>
+                <button
+                  onClick={handleViewFile}
+                  className="w-full px-4 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors duration-150 flex items-center gap-3 active:scale-95"
+                >
+                  <Eye className="w-4 h-4" />
+                  View
+                </button>
+                <button
+                  onClick={handleDownloadFile}
+                  className="w-full px-4 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors duration-150 flex items-center gap-3 active:scale-95"
+                >
+                  <Download className="w-4 h-4" />
+                  Download
+                </button>
+              </>
+            )}
             <button
               onClick={handleRename}
               className="w-full px-4 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors duration-150 flex items-center gap-3 active:scale-95"
