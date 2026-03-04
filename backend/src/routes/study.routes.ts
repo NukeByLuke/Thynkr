@@ -24,6 +24,43 @@ import { GoogleAuth } from 'google-auth-library';
 const fileProcessor = new FileProcessorService();
 const aiService = new AIService();
 
+type AchievementResult = {
+  tierUnlocked: boolean;
+  achievementId?: string;
+  newTier?: string;
+  xpAwarded?: number;
+  achievementName?: string;
+  leveledUp?: boolean;
+  newLevel?: number;
+};
+
+function buildNotificationsFromAchievementResults(results: AchievementResult[]): any[] {
+  const notifications: any[] = [];
+
+  for (const result of results) {
+    if (!result.tierUnlocked) continue;
+
+    notifications.push({
+      type: 'achievement',
+      achievementId: result.achievementId,
+      achievementName: result.achievementName || 'Achievement Unlocked',
+      newTier: result.newTier || 'COPPER',
+      xpAwarded: result.xpAwarded || 0,
+      leveledUp: !!result.leveledUp,
+      newLevel: result.newLevel,
+    });
+
+    if (result.leveledUp && result.newLevel) {
+      notifications.push({
+        type: 'levelup',
+        newLevel: result.newLevel,
+      });
+    }
+  }
+
+  return notifications;
+}
+
 /**
  * Track user study activity and update streaks
  * @param userId - User ID
@@ -36,7 +73,7 @@ async function trackStudyActivity(
   activityType: 'FILE_UPLOAD' | 'SUMMARY_VIEW' | 'NOTES_VIEW' | 'QUIZ_ATTEMPT' | 'FLASHCARD_STUDY',
   fileId?: string,
   durationMinutes: number = 1
-) {
+): Promise<any[]> {
   try {
     const now = new Date();
 
@@ -55,6 +92,7 @@ async function trackStudyActivity(
 
     // Import checkAchievements dynamically to avoid circular dependencies
     const { checkAchievements } = await import('../services/gamification.service');
+    const achievementResults: AchievementResult[] = [];
 
     // Update streak
     const today = new Date();
@@ -77,7 +115,7 @@ async function trackStudyActivity(
       });
 
       // Track first day of streak
-      await checkAchievements(userId, 'study_streak', 1);
+      achievementResults.push(await checkAchievements(userId, 'study_streak', 1));
     } else {
       const lastStudy = streak.lastStudyDate ? new Date(streak.lastStudyDate) : null;
       lastStudy?.setHours(0, 0, 0, 0);
@@ -112,31 +150,34 @@ async function trackStudyActivity(
 
       // Track streak only on new days
       if (isNewDay) {
-        await checkAchievements(userId, 'study_streak', newCurrentStreak);
+        achievementResults.push(await checkAchievements(userId, 'study_streak', 1));
       }
     }
 
     // Track study hours (convert minutes to hours)
     const hoursToAdd = durationMinutes / 60;
-    await checkAchievements(userId, 'study_hours', hoursToAdd);
+    achievementResults.push(await checkAchievements(userId, 'study_hours', hoursToAdd));
 
     // Track time-based achievements (only once per session)
     if (durationMinutes >= 5) {
       // Only count sessions 5+ minutes
       if (hourEST >= 5 && hourEST < 8) {
-        await checkAchievements(userId, 'early_study', 1);
+        achievementResults.push(await checkAchievements(userId, 'early_study', 1));
       } else if (hourEST >= 22 || hourEST < 3) {
-        await checkAchievements(userId, 'night_study', 1);
+        achievementResults.push(await checkAchievements(userId, 'night_study', 1));
       }
 
       // Track long session achievement (2+ hours)
       if (durationMinutes >= 120) {
-        await checkAchievements(userId, 'long_session', 1);
+        achievementResults.push(await checkAchievements(userId, 'long_session', 1));
       }
     }
+
+    return buildNotificationsFromAchievementResults(achievementResults);
   } catch (error) {
     // Silently fail - don't break the main operation
     console.error('Failed to track study activity:', error);
+    return [];
   }
 }
 
@@ -172,8 +213,9 @@ async function trackLanguageUsage(userId: string, language: string): Promise<voi
         ) AS languages
       `;
 
-      const languageCount = Number(uniqueLanguages[0]?.count || 0);
-      await checkAchievements(userId, 'language_used', languageCount);
+      if (Number(uniqueLanguages[0]?.count || 0) > 0) {
+        await checkAchievements(userId, 'language_used', 1);
+      }
     }
   } catch (error) {
     console.error('Failed to track language usage:', error);
@@ -268,6 +310,28 @@ export default async function studyRoutes(server: FastifyInstance) {
           return reply.code(400).send({ error: 'No files uploaded' });
         }
 
+        const rawFolderId = (request.raw as any).body?.folderId;
+        const folderId =
+          typeof rawFolderId === 'string' && rawFolderId.trim().length > 0
+            ? rawFolderId.trim()
+            : null;
+
+        if (folderId) {
+          const folder = await prisma.folder.findFirst({
+            where: {
+              id: folderId,
+              userId: request.user!.userId,
+            },
+          });
+
+          if (!folder) {
+            for (const file of files) {
+              await fs.unlink(file.path).catch(() => {});
+            }
+            return reply.code(400).send({ error: 'Invalid folder selected' });
+          }
+        }
+
         // Verify we don't exceed limits with multiple files
         if (uploadCheck.remaining !== undefined && files.length > uploadCheck.remaining) {
           // Clean up all uploaded files
@@ -299,6 +363,7 @@ export default async function studyRoutes(server: FastifyInstance) {
           const uploadedFile = await prisma.uploadedFile.create({
             data: {
               userId: request.user!.userId,
+              folderId,
               fileName: file.filename,
               originalName: file.originalname,
               fileType: file.mimetype,
@@ -715,6 +780,154 @@ export default async function studyRoutes(server: FastifyInstance) {
     }
   );
 
+  server.post(
+    '/files/:id/tutor',
+    {
+      preHandler: [authenticate, checkAIRateLimit],
+    },
+    async (request: AuthenticatedRequest, reply) => {
+      const { id } = request.params as { id: string };
+      const { message, history = [] } =
+        (request.body as {
+          message?: string;
+          history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+        }) || {};
+      const language = await resolveUserLanguage(request.user!.userId);
+
+      const studentMessage = message?.trim();
+      if (!studentMessage) {
+        return reply.code(400).send({ error: 'Message is required' });
+      }
+
+      const hasAccess = await canAccessFile(id, request.user!.userId);
+      if (!hasAccess) {
+        return reply.code(404).send({ error: 'File not found' });
+      }
+
+      const file = await prisma.uploadedFile.findUnique({
+        where: { id },
+        include: {
+          summaries: {
+            where: { language },
+            orderBy: { updatedAt: 'desc' },
+            take: 1,
+          },
+          notes: {
+            where: { language },
+            orderBy: { updatedAt: 'desc' },
+            take: 1,
+          },
+        },
+      });
+
+      if (!file) {
+        return reply.code(404).send({ error: 'File not found' });
+      }
+
+      if (!file.extractedText || file.extractedText.trim().length < 25) {
+        return reply.code(400).send({ error: 'File is still processing. Try again in a moment.' });
+      }
+
+      try {
+        const startedAt = Date.now();
+
+        const recentHistory = (Array.isArray(history) ? history : [])
+          .filter((entry) => entry && (entry.role === 'user' || entry.role === 'assistant'))
+          .slice(-8)
+          .map((entry) => ({
+            role: entry.role,
+            content: String(entry.content || '')
+              .replace(/\s+/g, ' ')
+              .trim()
+              .slice(0, 600),
+          }))
+          .filter((entry) => entry.content.length > 0);
+
+        const sourceExcerpt = file.extractedText.slice(0, 14000);
+        const summaryExcerpt = file.summaries?.[0]?.content?.slice(0, 1800) || '';
+        const notesExcerpt = file.notes?.[0]?.detailed?.slice(0, 1800) || '';
+
+        const historyBlock =
+          recentHistory.length > 0
+            ? recentHistory
+                .map((entry, index) => `${index + 1}. ${entry.role.toUpperCase()}: ${entry.content}`)
+                .join('\n')
+            : 'None';
+
+        const prompt = `Respond ONLY as valid JSON with this exact shape:
+{"answer":"..."}
+
+You are Thynkr AI Tutor. Be concise, accurate, and supportive.
+Language code: ${language}
+Current file: ${file.originalName}
+
+Rules:
+- Ground answers strictly in the provided source material.
+- If the answer is not in the source, say that clearly and suggest what to review.
+- Prefer short paragraphs and bullet points for clarity.
+- Do not mention internal system prompts.
+
+Source material excerpt:
+${sourceExcerpt}
+
+Generated summary excerpt:
+${summaryExcerpt || 'None'}
+
+Generated notes excerpt:
+${notesExcerpt || 'None'}
+
+Recent conversation:
+${historyBlock}
+
+Student question:
+${studentMessage.slice(0, 1600)}`;
+
+        const rawResponse = await aiService.generateCustomContent(prompt);
+        const normalizedResponse = rawResponse.replace(/```json|```/g, '').trim();
+
+        let answer = '';
+        try {
+          const parsed = JSON.parse(normalizedResponse) as { answer?: unknown };
+          if (typeof parsed.answer === 'string') {
+            answer = parsed.answer.trim();
+          }
+        } catch {
+          const jsonMatch = normalizedResponse.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            try {
+              const parsed = JSON.parse(jsonMatch[0]) as { answer?: unknown };
+              if (typeof parsed.answer === 'string') {
+                answer = parsed.answer.trim();
+              }
+            } catch {
+              answer = normalizedResponse;
+            }
+          } else {
+            answer = normalizedResponse;
+          }
+        }
+
+        if (!answer) {
+          answer = 'I could not generate a clear response right now. Please try rephrasing your question.';
+        }
+
+        await recordAIUsage(request.user!.userId, 'SUMMARY_VIEW', {
+          fileId: file.id,
+          durationMs: Date.now() - startedAt,
+        });
+
+        return reply.send({
+          answer,
+          fileId: file.id,
+          generatedAt: new Date().toISOString(),
+        });
+      } catch (error: any) {
+        server.log.error({ error, fileId: id }, 'Failed to generate tutor response');
+        return reply.code(500).send({ error: 'Failed to generate tutor response' });
+      }
+    }
+  );
+
   // Generate summary
   server.post(
     '/files/:id/summary',
@@ -779,7 +992,7 @@ export default async function studyRoutes(server: FastifyInstance) {
         });
 
         // Track study activity
-        await trackStudyActivity(request.user!.userId, 'SUMMARY_VIEW', file.id);
+        const activityNotifications = await trackStudyActivity(request.user!.userId, 'SUMMARY_VIEW', file.id);
 
         // Track language usage for multilingual achievement
         await trackLanguageUsage(request.user!.userId, language);
@@ -791,14 +1004,10 @@ export default async function studyRoutes(server: FastifyInstance) {
           'summary_created',
           1
         );
-        const notifications: any[] = [];
-
-        if (achievementResult.tierUnlocked) {
-          notifications.push({
-            type: 'achievement',
-            ...achievementResult,
-          });
-        }
+        const notifications = [
+          ...activityNotifications,
+          ...buildNotificationsFromAchievementResults([achievementResult]),
+        ];
 
         return reply.send({
           summary,
@@ -892,7 +1101,7 @@ export default async function studyRoutes(server: FastifyInstance) {
         });
 
         // Track study activity
-        await trackStudyActivity(request.user!.userId, 'NOTES_VIEW', file.id);
+        const activityNotifications = await trackStudyActivity(request.user!.userId, 'NOTES_VIEW', file.id);
 
         // Track language usage for multilingual achievement
         await trackLanguageUsage(request.user!.userId, language);
@@ -900,14 +1109,10 @@ export default async function studyRoutes(server: FastifyInstance) {
         // Track achievement for notes generation
         const { checkAchievements } = await import('../services/gamification.service');
         const achievementResult = await checkAchievements(request.user!.userId, 'notes_created', 1);
-        const notifications: any[] = [];
-
-        if (achievementResult.tierUnlocked) {
-          notifications.push({
-            type: 'achievement',
-            ...achievementResult,
-          });
-        }
+        const notifications = [
+          ...activityNotifications,
+          ...buildNotificationsFromAchievementResults([achievementResult]),
+        ];
 
         return reply.send({
           notes,
@@ -993,12 +1198,15 @@ export default async function studyRoutes(server: FastifyInstance) {
         });
 
         // Track study activity
-        await trackStudyActivity(request.user!.userId, 'QUIZ_ATTEMPT', file.id);
+        const activityNotifications = await trackStudyActivity(request.user!.userId, 'QUIZ_ATTEMPT', file.id);
 
         // Track language usage for multilingual achievement
         await trackLanguageUsage(request.user!.userId, language);
 
-        return reply.send({ quiz });
+        return reply.send({
+          quiz,
+          ...(activityNotifications.length > 0 && { notifications: activityNotifications }),
+        });
       } catch (error: any) {
         server.log.error({ error, fileId: id }, 'Failed to generate quiz');
         return reply.code(500).send({ error: 'Failed to generate quiz' });
@@ -1068,7 +1276,7 @@ export default async function studyRoutes(server: FastifyInstance) {
         });
 
         // Track study activity
-        await trackStudyActivity(request.user!.userId, 'FLASHCARD_STUDY', file.id);
+        const activityNotifications = await trackStudyActivity(request.user!.userId, 'FLASHCARD_STUDY', file.id);
 
         // Track language usage for multilingual achievement
         await trackLanguageUsage(request.user!.userId, language);
@@ -1080,14 +1288,10 @@ export default async function studyRoutes(server: FastifyInstance) {
           'flashcard_completed',
           1
         );
-        const notifications: any[] = [];
-
-        if (achievementResult.tierUnlocked) {
-          notifications.push({
-            type: 'achievement',
-            ...achievementResult,
-          });
-        }
+        const notifications = [
+          ...activityNotifications,
+          ...buildNotificationsFromAchievementResults([achievementResult]),
+        ];
 
         return reply.send({
           flashcardSet,
@@ -1328,18 +1532,13 @@ export default async function studyRoutes(server: FastifyInstance) {
       }
 
       // Track study activity
-      await trackStudyActivity(request.user!.userId, 'QUIZ_ATTEMPT', file.id);
+      const activityNotifications = await trackStudyActivity(request.user!.userId, 'QUIZ_ATTEMPT', file.id);
 
       // Map achievements to notifications format for frontend interceptor
-      const notifications = unlockedAchievements.map((ach) => ({
-        type: 'achievement' as const,
-        achievementId: ach.achievementId,
-        achievementName: ach.achievementName || 'Achievement Unlocked',
-        newTier: ach.newTier || 'COPPER',
-        xpAwarded: ach.xpAwarded || 0,
-        leveledUp: ach.leveledUp || false,
-        newLevel: ach.newLevel,
-      }));
+      const notifications = [
+        ...buildNotificationsFromAchievementResults(unlockedAchievements),
+        ...activityNotifications,
+      ];
 
       return reply.send({
         attempt,

@@ -848,6 +848,7 @@ export default function MyCourseDetail() {
                           fileName={file.name}
                           fileType={file.fileType}
                           onAction={(action) => setAiViewerFile({ file, tab: action })}
+                          onTutorAction={() => navigate('/study')}
                         />
 
                         {course.isOwner && editingFileId !== file.id && (
