@@ -629,11 +629,12 @@ export default function ImmersiveStudy() {
 
                 <button
                   onClick={handleTutorEntry}
-                  className="group relative rounded-lg p-[1px] ml-1"
+                  className="group relative rounded-lg p-[1px] ml-1 overflow-hidden transition-transform duration-300 hover:-translate-y-0.5"
                   title="Chat with AI Tutor"
                 >
-                  <span className="pointer-events-none absolute inset-0 rounded-lg bg-[conic-gradient(from_120deg_at_50%_50%,#ec4899_0deg,#a855f7_130deg,#06b6d4_250deg,#ec4899_360deg)] opacity-90 transition-transform duration-500 group-hover:animate-[spin_3s_linear_infinite]" />
-                  <span className="pointer-events-none absolute inset-0 rounded-lg bg-fuchsia-500/20 dark:bg-cyan-500/20 blur-md opacity-70 group-hover:opacity-100 transition-opacity duration-300" />
+                  <span className="pointer-events-none absolute inset-0 rounded-lg bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-500 opacity-95" />
+                  <span className="pointer-events-none absolute -inset-y-1 -inset-x-10 bg-gradient-to-r from-transparent via-white/35 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+                  <span className="pointer-events-none absolute inset-0 rounded-lg bg-fuchsia-500/20 dark:bg-cyan-500/20 blur-md opacity-65 group-hover:opacity-95 transition-opacity duration-300" />
                   <span
                     className={`relative inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-[7px] text-xs sm:text-sm font-semibold border transition-colors ${
                       isTutorActive
@@ -641,7 +642,7 @@ export default function ImmersiveStudy() {
                         : 'bg-white/95 dark:bg-slate-900/95 border-slate-200/60 dark:border-white/15 text-slate-900 dark:text-cyan-100'
                     }`}
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-fuchsia-500 dark:text-cyan-400" />
+                    <Sparkles className="w-3.5 h-3.5 text-fuchsia-500 transition-transform duration-300 group-hover:scale-110 dark:text-cyan-400" />
                     <span className="hidden sm:inline">Chat with AI Tutor</span>
                     <span className="sm:hidden">Tutor</span>
                   </span>
