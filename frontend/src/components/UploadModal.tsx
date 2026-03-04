@@ -539,9 +539,11 @@ export default function UploadModal({
       return;
     }
 
-    if (mediaRecorderRef.current?.state !== 'inactive') {
+    const mediaRecorder = mediaRecorderRef.current;
+
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
       try {
-        mediaRecorderRef.current.requestData();
+        mediaRecorder.requestData();
       } catch {
         // Ignore requestData race conditions
       }
