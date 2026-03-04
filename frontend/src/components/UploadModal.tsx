@@ -13,6 +13,7 @@ import {
   Pause,
   Play,
   Square,
+  Link,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import LoadingProgress from './ui/LoadingProgress';
@@ -23,13 +24,14 @@ interface UploadModalProps {
   onClose: () => void;
   onUploadFiles: (files: FileList) => void;
   onUploadYouTube: (url: string) => void;
+  onUploadLink?: (url: string) => void;
   isUploading?: boolean;
   currentFolderId?: string | null;
   requireContentAgreement?: boolean;
   uploadErrorMessage?: string | null;
 }
 
-type TabType = 'files' | 'youtube' | 'text' | 'record';
+type TabType = 'files' | 'youtube' | 'link' | 'text' | 'record';
 type UploadStage = 'idle' | 'uploading' | 'processing' | 'success';
 type UploadContext = 'files' | 'text' | 'record';
 type RecordingStatus = 'idle' | 'recording' | 'paused';
@@ -47,6 +49,7 @@ const ACCEPTED_MIME_TYPES = [
 const TAB_CONFIG: Array<{ id: TabType; label: string; icon: typeof UploadCloud }> = [
   { id: 'files', label: 'Upload Files', icon: UploadCloud },
   { id: 'youtube', label: 'YouTube Link', icon: Youtube },
+  { id: 'link', label: 'Web Link', icon: Link },
   { id: 'text', label: 'Paste Text', icon: FileText },
   { id: 'record', label: 'Record Lecture', icon: Mic },
 ];
@@ -56,6 +59,7 @@ export default function UploadModal({
   onClose,
   onUploadFiles,
   onUploadYouTube,
+  onUploadLink,
   isUploading = false,
   currentFolderId,
   requireContentAgreement = false,
@@ -64,6 +68,7 @@ export default function UploadModal({
   const [activeTab, setActiveTab] = useState<TabType>('files');
   const [isDragging, setIsDragging] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [linkUrl, setLinkUrl] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [textTitle, setTextTitle] = useState('');
   const [textContent, setTextContent] = useState('');
@@ -86,6 +91,8 @@ export default function UploadModal({
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const speechRecognitionRef = useRef<any>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
+  const transcriptTimelineRef = useRef<Array<{ timestamp: number; text: string }>>([]);
+  const recordingSecondsRef = useRef(0);
   const finalTranscriptRef = useRef('');
   const shouldRestartRecognitionRef = useRef(false);
   const recordingStatusRef = useRef<RecordingStatus>('idle');
@@ -151,11 +158,24 @@ export default function UploadModal({
   const resetRecordingState = () => {
     setRecordingStatus('idle');
     setRecordingSeconds(0);
+    recordingSecondsRef.current = 0;
     setRecordedTranscript('');
     setRecordingInterimTranscript('');
     setRecordingErrorMessage(null);
+    transcriptTimelineRef.current = [];
     finalTranscriptRef.current = '';
     recordedChunksRef.current = [];
+  };
+
+  const isValidPublicUrl = (url: string): boolean => {
+    if (!url.trim()) return false;
+
+    try {
+      const parsed = new URL(url.trim());
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+      return false;
+    }
   };
 
   const startSpeechRecognition = () => {
@@ -189,6 +209,10 @@ export default function UploadModal({
 
           if (event.results[index].isFinal) {
             finalTranscriptRef.current = `${finalTranscriptRef.current} ${transcriptSegment}`.trim();
+            transcriptTimelineRef.current.push({
+              timestamp: recordingSecondsRef.current,
+              text: transcriptSegment,
+            });
           } else {
             latestInterimTranscript = `${latestInterimTranscript} ${transcriptSegment}`.trim();
           }
@@ -231,6 +255,7 @@ export default function UploadModal({
   const resetFormState = () => {
     setActiveTab('files');
     setYoutubeUrl('');
+    setLinkUrl('');
     setSelectedFiles([]);
     setTextTitle('');
     setTextContent('');
@@ -388,6 +413,31 @@ export default function UploadModal({
     handleClose();
   };
 
+  const handleSubmitLink = () => {
+    if (!linkUrl.trim()) {
+      toast.error('Please enter a public URL');
+      return;
+    }
+
+    if (!isValidPublicUrl(linkUrl)) {
+      toast.error('Please enter a valid public http(s) URL');
+      return;
+    }
+
+    if (requireContentAgreement && !hasAgreed) {
+      toast.error('Please confirm the content agreement to continue');
+      return;
+    }
+
+    if (!onUploadLink) {
+      toast.error('Web link import is not available in this view yet.');
+      return;
+    }
+
+    onUploadLink(linkUrl.trim());
+    handleClose();
+  };
+
   const handleStartRecording = async () => {
     if (requireContentAgreement && !hasAgreed) {
       toast.error('Please confirm the content agreement to continue');
@@ -431,6 +481,7 @@ export default function UploadModal({
       mediaRecorder.start(750);
       mediaRecorderRef.current = mediaRecorder;
       setRecordingSeconds(0);
+      recordingSecondsRef.current = 0;
       setRecordingStatus('recording');
       shouldRestartRecognitionRef.current = true;
       setRecordingErrorMessage(null);
@@ -488,12 +539,43 @@ export default function UploadModal({
       return;
     }
 
+    if (mediaRecorderRef.current?.state !== 'inactive') {
+      try {
+        mediaRecorderRef.current.requestData();
+      } catch {
+        // Ignore requestData race conditions
+      }
+    }
+
+    const timelineEntries = transcriptTimelineRef.current
+      .map((entry) => ({
+        timestamp: Math.max(0, Math.floor(entry.timestamp || 0)),
+        text: entry.text.trim(),
+      }))
+      .filter((entry) => entry.text.length > 0)
+      .filter((entry, index, array) => {
+        if (index === 0) return true;
+        const previous = array[index - 1];
+        return previous.text !== entry.text || previous.timestamp !== entry.timestamp;
+      });
+
+    const timelineTranscript = timelineEntries
+      .map((entry) => `[${formatRecordingTime(entry.timestamp)}] ${entry.text}`)
+      .join('\n');
+
     const transcript = `${finalTranscriptRef.current} ${recordingInterimTranscript}`.trim();
+
+    const audioMimeType = recordedChunksRef.current[0]?.type || 'audio/webm';
+    const audioBlob =
+      recordedChunksRef.current.length > 0
+        ? new Blob(recordedChunksRef.current, { type: audioMimeType })
+        : null;
 
     releaseRecordingResources();
     setRecordingStatus('idle');
     setRecordingInterimTranscript('');
     setRecordingSeconds(0);
+    recordingSecondsRef.current = 0;
 
     if (!transcript) {
       const message = 'No speech transcript was captured. Please record again and speak clearly.';
@@ -502,17 +584,39 @@ export default function UploadModal({
       return;
     }
 
+    const recordingId = Date.now();
     const transcriptHeader = `Live Lecture Transcript\nCaptured: ${new Date().toLocaleString()}\n\n`;
+    const transcriptBody = timelineTranscript
+      ? `${timelineTranscript}\n\nFull Transcript:\n${transcript}`
+      : transcript;
     const transcriptFile = new (File as any)(
-      [new Blob([`${transcriptHeader}${transcript}\n`], { type: 'text/plain' })],
-      `live-lecture-${Date.now()}.txt`,
+      [new Blob([`${transcriptHeader}${transcriptBody}\n`], { type: 'text/plain' })],
+      `live-lecture-${recordingId}.txt`,
       { type: 'text/plain' }
     ) as File;
 
     const dataTransfer = new DataTransfer();
     dataTransfer.items.add(transcriptFile);
 
+    if (audioBlob && audioBlob.size > 0) {
+      const extension = audioMimeType.includes('mpeg')
+        ? 'mp3'
+        : audioMimeType.includes('mp4') || audioMimeType.includes('m4a')
+        ? 'm4a'
+        : audioMimeType.includes('wav')
+        ? 'wav'
+        : 'webm';
+
+      const audioFile = new (File as any)(
+        [audioBlob],
+        `live-lecture-${recordingId}.${extension}`,
+        { type: audioMimeType }
+      ) as File;
+      dataTransfer.items.add(audioFile);
+    }
+
     finalTranscriptRef.current = '';
+    transcriptTimelineRef.current = [];
     setRecordedTranscript('');
     setRecordingErrorMessage(null);
 
@@ -549,7 +653,11 @@ export default function UploadModal({
     if (recordingStatus !== 'recording') return;
 
     const intervalId = window.setInterval(() => {
-      setRecordingSeconds((prev) => prev + 1);
+      setRecordingSeconds((prev) => {
+        const next = prev + 1;
+        recordingSecondsRef.current = next;
+        return next;
+      });
     }, 1000);
 
     return () => {
@@ -627,6 +735,8 @@ export default function UploadModal({
       ? selectedFiles.length === 0
       : activeTab === 'youtube'
       ? !isValidYouTubeUrl(youtubeUrl)
+      : activeTab === 'link'
+      ? !isValidPublicUrl(linkUrl)
       : activeTab === 'record'
       ? true
       : !textTitle.trim() || !textContent.trim());
@@ -647,7 +757,7 @@ export default function UploadModal({
 
     if (uploadStage === 'processing') {
       if (uploadContext === 'record') {
-        return 'Transcribing your recording and generating notes, quizzes, and flashcards...';
+        return 'Transcribing your recording, saving audio, and generating notes, quizzes, and flashcards...';
       }
 
       return uploadContext === 'text'
@@ -690,7 +800,7 @@ export default function UploadModal({
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Create New Study Set</h2>
                 <p className="text-sm text-slate-600 dark:text-slate-300 mt-1.5">
-                  Upload files, process a YouTube video, convert text, or live-record audio into structured study material.
+                  Upload files, import public links, process a YouTube video, convert text, or live-record audio into structured study material.
                 </p>
               </div>
               <button
@@ -704,7 +814,7 @@ export default function UploadModal({
             </div>
 
             <div className="px-6 sm:px-8 pt-5">
-              <div className="grid grid-cols-4 gap-2 p-1.5 rounded-2xl bg-slate-100/90 dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 p-1.5 rounded-2xl bg-slate-100/90 dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10">
                 {TAB_CONFIG.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
@@ -930,6 +1040,56 @@ export default function UploadModal({
                         <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">Supported formats:</p>
                         <p className="text-xs text-slate-600 dark:text-slate-400 font-mono break-all">
                           youtube.com/watch?v=..., youtu.be/..., /shorts/... and /embed/...
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : activeTab === 'link' ? (
+                  <motion.div
+                    key="tab-link"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-5"
+                  >
+                    <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-black/60 p-5">
+                      <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-3">
+                        Public web URL
+                      </label>
+                      <div className="relative">
+                        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-cyan-500/15 flex items-center justify-center pointer-events-none">
+                          <Link className="w-5 h-5 text-cyan-500" />
+                        </div>
+                        <input
+                          type="url"
+                          value={linkUrl}
+                          onChange={(e) => setLinkUrl(e.target.value)}
+                          placeholder="https://en.wikipedia.org/wiki/Earth"
+                          className={`w-full pl-14 pr-12 py-4 rounded-xl border-2 bg-white dark:bg-black text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
+                            linkUrl && isValidPublicUrl(linkUrl)
+                              ? 'border-emerald-500 focus:ring-emerald-500/30'
+                              : linkUrl && !isValidPublicUrl(linkUrl)
+                              ? 'border-red-500 focus:ring-red-500/30'
+                              : 'border-slate-200 dark:border-white/15 focus:ring-violet-500/30 focus:border-violet-500'
+                          }`}
+                          disabled={isLocked}
+                        />
+                        {linkUrl && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            {isValidPublicUrl(linkUrl) ? (
+                              <Check className="w-5 h-5 text-emerald-500" />
+                            ) : (
+                              <AlertCircle className="w-5 h-5 text-red-500" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mt-4 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-3">
+                        <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">Examples:</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 break-all">
+                          Wikipedia pages, public docs, blog posts, news articles, and public course resources.
                         </p>
                       </div>
                     </div>
@@ -1192,6 +1352,8 @@ export default function UploadModal({
                         ? handleSubmitFiles
                         : activeTab === 'youtube'
                         ? handleSubmitYouTube
+                        : activeTab === 'link'
+                        ? handleSubmitLink
                         : handleSubmitText
                     }
                     disabled={isSubmitDisabled}
@@ -1199,6 +1361,8 @@ export default function UploadModal({
                   >
                     {activeTab === 'youtube'
                       ? 'Process Video'
+                      : activeTab === 'link'
+                      ? 'Import Link'
                       : activeTab === 'text'
                       ? 'Create from Text'
                       : 'Upload and Build'}

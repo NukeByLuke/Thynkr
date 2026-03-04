@@ -205,6 +205,12 @@ export class FileProcessorService {
       'application/vnd.ms-powerpoint',
       'application/vnd.openxmlformats-officedocument.presentationml.presentation',
       'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
+      'audio/webm',
+      'audio/mp4',
+      'audio/mpeg',
+      'audio/wav',
+      'audio/x-wav',
+      'audio/x-m4a',
       'text/plain',
       'application/octet-stream',
     ]);
@@ -218,6 +224,11 @@ export class FileProcessorService {
       '.pptx',
       '.pps',
       '.ppsx',
+      '.webm',
+      '.mp4',
+      '.mp3',
+      '.wav',
+      '.m4a',
     ]);
 
     return allowedMimeTypes.has(normalizedMime) || allowedExtensions.has(extension);

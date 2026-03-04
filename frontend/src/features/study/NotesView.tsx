@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
@@ -41,6 +42,29 @@ export default function NotesView({
     );
   }
 
+  const detailedCards = useMemo(() => {
+    const normalized = (detailed || '').trim();
+    if (!normalized) {
+      return [] as Array<{ title: string; content: string }>;
+    }
+
+    const sections = normalized
+      .split(/\n(?=##\s+)/g)
+      .map((section) => section.trim())
+      .filter(Boolean);
+
+    const source = sections.length > 0 ? sections : [normalized];
+
+    return source.map((contentBlock, index) => {
+      const headingMatch = contentBlock.match(/^##\s+(.+)$/m);
+      const title = headingMatch?.[1]?.trim() || `Note Card ${index + 1}`;
+      return {
+        title,
+        content: contentBlock,
+      };
+    });
+  }, [detailed]);
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Regenerate Button */}
@@ -58,183 +82,86 @@ export default function NotesView({
         </div>
       )}
 
-      {/* Key Points */}
-      <div className="bg-gradient-to-br from-brand-50/50 to-accent-50/50 dark:from-brand-900/20 dark:to-accent-900/20 rounded-2xl p-8 border-2 border-brand-100/50 dark:border-brand-800 shadow-lg">
-        <h3 className="text-2xl font-bold text-brand-900 dark:text-brand-300 mb-6 flex items-center">
-          <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-              clipRule="evenodd"
-            />
-          </svg>
-          Key Points
-        </h3>
-        <ul className="space-y-4">
-          {keyPoints.map((point, index) => (
-            <li key={index} className="flex items-start group">
-              <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 text-white text-base font-bold mr-4 mt-1 shadow-md group-hover:shadow-lg transition-shadow duration-150">
-                {index + 1}
-              </span>
-              <div className="text-brand-900 dark:text-brand-100 leading-loose prose prose-brand dark:prose-invert max-w-none text-lg">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    p: ({ node, ...props }) => <span className="inline" {...props} />,
-                    strong: ({ node, ...props }) => <strong className="font-bold" {...props} />,
-                    em: ({ node, ...props }) => <em className="italic" {...props} />,
-                    code: ({ node, ...props }) => (
-                      <code
-                        className="bg-brand-100 dark:bg-brand-900 text-brand-800 dark:text-brand-200 px-2 py-1 rounded-lg text-sm font-mono shadow-sm"
-                        {...props}
-                      />
-                    ),
-                  }}
-                >
-                  {point}
-                </ReactMarkdown>
-              </div>
-            </li>
-          ))}
-        </ul>
+      {/* Key Point Cards */}
+      <div className="bg-gradient-to-br from-brand-50/50 to-accent-50/50 dark:from-brand-900/20 dark:to-accent-900/20 rounded-2xl p-5 sm:p-8 border-2 border-brand-100/50 dark:border-brand-800 shadow-lg">
+        <h3 className="text-2xl font-bold text-brand-900 dark:text-brand-300 mb-5">Key Point Cards</h3>
+        {keyPoints.length > 0 ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {keyPoints.map((point, index) => (
+              <article
+                key={index}
+                className="rounded-xl border border-brand-200/70 dark:border-brand-700/60 bg-white/85 dark:bg-brand-950/20 p-4"
+              >
+                <div className="flex items-start gap-3">
+                  <span className="flex-shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 text-white text-sm font-bold">
+                    {index + 1}
+                  </span>
+                  <div className="prose prose-sm dark:prose-invert max-w-none text-brand-900 dark:text-brand-100">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{point}</ReactMarkdown>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-slate-600 dark:text-slate-300">No key points generated yet.</p>
+        )}
       </div>
 
-      {/* Detailed Notes */}
-      <div className="bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-gray-800 rounded-2xl p-8 border-2 border-blue-100 dark:border-gray-700 shadow-lg">
-        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-          <svg className="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
-          Detailed Notes
-        </h3>
-        <div className="prose prose-lg dark:prose-invert max-w-none">
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            components={{
-              h1: ({ node, ...props }) => (
-                <h1
-                  className="text-3xl font-extrabold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mt-8 mb-6 pb-2 border-b-4 border-primary-500/30 dark:border-primary-400/30"
-                  {...props}
-                />
-              ),
-              h2: ({ node, ...props }) => (
-                <h2
-                  className="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4 pl-4 border-l-4 border-primary-500 dark:border-primary-400"
-                  {...props}
-                />
-              ),
-              h3: ({ node, ...props }) => (
-                <h3
-                  className="text-xl font-bold text-gray-800 dark:text-gray-200 mt-6 mb-3 flex items-center gap-2"
-                  {...props}
-                />
-              ),
-              h4: ({ node, ...props }) => (
-                <h4
-                  className="text-lg font-semibold text-primary-700 dark:text-primary-300 mt-5 mb-2"
-                  {...props}
-                />
-              ),
-              p: ({ node, ...props }) => (
-                <p
-                  className="text-gray-700 dark:text-gray-300 leading-relaxed mb-5 text-base"
-                  {...props}
-                />
-              ),
-              ul: ({ node, ...props }) => (
-                <ul
-                  className="list-disc ml-6 space-y-2 mb-5 text-gray-700 dark:text-gray-300 marker:text-primary-500 dark:marker:text-primary-400"
-                  {...props}
-                />
-              ),
-              ol: ({ node, ...props }) => (
-                <ol
-                  className="list-decimal ml-6 space-y-2 mb-5 text-gray-700 dark:text-gray-300 marker:text-primary-500 dark:marker:text-primary-400"
-                  {...props}
-                />
-              ),
-              li: ({ node, ...props }) => <li className="leading-relaxed pl-2" {...props} />,
-              strong: ({ node, ...props }) => (
-                <strong className="font-bold text-primary-700 dark:text-primary-300" {...props} />
-              ),
-              em: ({ node, ...props }) => (
-                <em className="italic text-gray-800 dark:text-gray-200 bg-yellow-100 dark:bg-yellow-900/30 px-1 rounded-sm" {...props} />
-              ),
-              code: ({ node, className, children, ...props }) => {
-                const isInline = !className;
-                return isInline ? (
-                  <code
-                    className="bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-md text-sm font-mono border border-primary-200 dark:border-primary-800"
-                    {...props}
+      {/* Detailed Note Cards */}
+      <div className="bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-gray-800 rounded-2xl p-5 sm:p-8 border-2 border-blue-100 dark:border-gray-700 shadow-lg">
+        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-5">Detailed Note Cards</h3>
+        {detailedCards.length > 0 ? (
+          <div className="grid gap-4 lg:grid-cols-2">
+            {detailedCards.map((card, index) => (
+              <article
+                key={`${card.title}-${index}`}
+                className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/70 p-4 sm:p-5"
+              >
+                <h4 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white mb-3">{card.title}</h4>
+                <div className="prose prose-sm dark:prose-invert max-w-none">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      h2: () => null,
+                      p: ({ node, ...props }) => (
+                        <p className="text-slate-700 dark:text-slate-200 leading-relaxed mb-3" {...props} />
+                      ),
+                      ul: ({ node, ...props }) => (
+                        <ul className="list-disc ml-5 space-y-1.5 mb-3 marker:text-fuchsia-500" {...props} />
+                      ),
+                      ol: ({ node, ...props }) => (
+                        <ol className="list-decimal ml-5 space-y-1.5 mb-3 marker:text-fuchsia-500" {...props} />
+                      ),
+                      code: ({ node, className, children, ...props }) => {
+                        const isInline = !className;
+                        return isInline ? (
+                          <code
+                            className="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-1.5 py-0.5 rounded text-xs font-mono"
+                            {...props}
+                          >
+                            {children}
+                          </code>
+                        ) : (
+                          <code
+                            className="block bg-slate-900 text-slate-100 p-3 rounded-lg overflow-x-auto text-xs font-mono my-2"
+                            {...props}
+                          >
+                            {children}
+                          </code>
+                        );
+                      },
+                    }}
                   >
-                    {children}
-                  </code>
-                ) : (
-                  <code
-                    className="block bg-gray-900 dark:bg-gray-950 text-gray-100 p-5 rounded-xl overflow-x-auto text-sm font-mono shadow-lg border border-gray-700 dark:border-gray-800 my-4"
-                    {...props}
-                  >
-                    {children}
-                  </code>
-                );
-              },
-              blockquote: ({ node, ...props }) => (
-                <blockquote
-                  className="border-l-4 border-primary-500 dark:border-primary-400 bg-primary-50 dark:bg-primary-900/20 pl-6 pr-4 py-4 italic text-gray-700 dark:text-gray-300 my-5 rounded-r-lg shadow-sm"
-                  {...props}
-                />
-              ),
-              a: ({ node, ...props }) => (
-                <a
-                  className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 underline decoration-primary-300 dark:decoration-primary-600 hover:decoration-primary-500 dark:hover:decoration-primary-400 transition-colors"
-                  {...props}
-                />
-              ),
-              table: ({ node, ...props }) => (
-                <div className="overflow-x-auto my-5">
-                  <table
-                    className="min-w-full divide-y divide-gray-300 dark:divide-gray-700 border border-gray-300 dark:border-gray-700 rounded-lg"
-                    {...props}
-                  />
+                    {card.content}
+                  </ReactMarkdown>
                 </div>
-              ),
-              thead: ({ node, ...props }) => (
-                <thead className="bg-gray-100 dark:bg-gray-800" {...props} />
-              ),
-              tbody: ({ node, ...props }) => (
-                <tbody
-                  className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900"
-                  {...props}
-                />
-              ),
-              tr: ({ node, ...props }) => (
-                <tr
-                  className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  {...props}
-                />
-              ),
-              th: ({ node, ...props }) => (
-                <th
-                  className="px-4 py-3 text-left text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider"
-                  {...props}
-                />
-              ),
-              td: ({ node, ...props }) => (
-                <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300" {...props} />
-              ),
-              hr: ({ node, ...props }) => (
-                <hr className="my-8 border-t-2 border-gray-300 dark:border-gray-700" {...props} />
-              ),
-            }}
-          >
-            {detailed}
-          </ReactMarkdown>
-        </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-slate-600 dark:text-slate-300">No detailed notes generated yet.</p>
+        )}
       </div>
     </div>
   );
