@@ -129,7 +129,7 @@ export default function ImmersiveStudy() {
     if (!textarea) return;
 
     textarea.style.height = '0px';
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 180)}px`;
+    textarea.style.height = `${textarea.scrollHeight}px`;
   }, []);
 
   // Fetch uploaded files
@@ -540,7 +540,7 @@ export default function ImmersiveStudy() {
               }}
               rows={1}
               placeholder="Ask AI Tutor anything about this file..."
-              className="w-full resize-none rounded-2xl border border-slate-300/80 dark:border-white/15 bg-white dark:bg-slate-900 px-4 py-3 pr-14 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/60 dark:focus:ring-cyan-500/60"
+              className="w-full resize-none overflow-hidden rounded-2xl border border-slate-300/80 dark:border-white/15 bg-white dark:bg-slate-900 px-4 py-3 pr-14 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/60 dark:focus:ring-cyan-500/60"
             />
 
             <button
@@ -637,7 +637,7 @@ export default function ImmersiveStudy() {
                   <span
                     className={`relative inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-[7px] text-xs sm:text-sm font-semibold border transition-colors ${
                       isTutorActive
-                        ? 'bg-slate-900 text-white border-transparent dark:bg-slate-100 dark:text-slate-900'
+                        ? 'bg-slate-900 text-white border-transparent dark:bg-slate-900 dark:text-cyan-100 dark:border-white/10'
                         : 'bg-white/95 dark:bg-slate-900/95 border-slate-200/60 dark:border-white/15 text-slate-900 dark:text-cyan-100'
                     }`}
                   >
