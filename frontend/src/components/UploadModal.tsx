@@ -554,40 +554,26 @@ export default function UploadModal({
                         PDF, DOCX, PPTX, TXT • Max 50MB each
                       </div>
 
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-4">
-                        {currentFolderId
-                          ? 'Files will be added to your current folder.'
-                          : 'Files will be added to your root study library.'}
-                      </p>
-                    </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-black/60 p-4 sm:p-5"
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-red-500/15 text-red-500 flex items-center justify-center flex-shrink-0">
-                            <Mic className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-semibold text-slate-900 dark:text-white">Record a new lecture instead</p>
-                            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
-                              Capture live audio now and turn it into notes, quizzes, and flashcards.
-                            </p>
-                          </div>
-                        </div>
+                      <div className="mt-4 flex items-center justify-center">
                         <button
                           type="button"
-                          onClick={() => setActiveTab('record')}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveTab('record');
+                          }}
                           disabled={isLocked}
-                          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-400 hover:to-rose-500 text-white text-sm font-semibold shadow-lg shadow-red-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-400 hover:to-rose-500 text-white text-sm font-semibold shadow-lg shadow-red-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <Mic className="w-4 h-4" />
                           Record New Lecture
                         </button>
                       </div>
+
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-4">
+                        {currentFolderId
+                          ? 'Files will be added to your current folder.'
+                          : 'Files will be added to your root study library.'}
+                      </p>
                     </motion.div>
 
                     {selectedFiles.length > 0 && (
