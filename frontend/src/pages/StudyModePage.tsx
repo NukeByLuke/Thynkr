@@ -407,6 +407,7 @@ export default function StudyModePage() {
                     files={statusData.files}
                     selectedFileIds={selectedFileIds}
                     onSelectionChange={setSelectedFileIds}
+                    onFileOpen={(fileId) => navigate(`/study/${fileId}`)}
                     isLoading={isGenerating}
                     disabled={isGenerating}
                   />
@@ -451,6 +452,7 @@ export default function StudyModePage() {
                       onSelectionChange={(ids) => {
                         setSelectedFileIds(ids);
                       }}
+                      onFileOpen={(fileId) => navigate(`/study/${fileId}`)}
                       isLoading={isGenerating}
                       disabled={isGenerating}
                     />

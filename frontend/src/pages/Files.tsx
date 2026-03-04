@@ -387,6 +387,19 @@ export default function Files() {
     return `${assetBase}${relativeUrl}`;
   };
 
+  const openFileInNewTab = (targetFile: UploadedFile) => {
+    const fileUrl = getFileUrl(targetFile);
+    if (!fileUrl) {
+      toast.error('Unable to open this file');
+      return;
+    }
+
+    const openedWindow = window.open(fileUrl, '_blank', 'noopener,noreferrer');
+    if (!openedWindow) {
+      toast.error('Popup blocked. Please allow popups and try again.');
+    }
+  };
+
   const handleViewFile = () => {
     if (!contextMenu || contextMenu.type !== 'file') return;
 
@@ -397,17 +410,7 @@ export default function Files() {
       return;
     }
 
-    const fileUrl = getFileUrl(targetFile);
-    if (!fileUrl) {
-      toast.error('Unable to open this file');
-      setContextMenu(null);
-      return;
-    }
-
-    const openedWindow = window.open(fileUrl, '_blank', 'noopener,noreferrer');
-    if (!openedWindow) {
-      toast.error('Popup blocked. Please allow popups and try again.');
-    }
+    openFileInNewTab(targetFile);
 
     setContextMenu(null);
   };
@@ -441,7 +444,13 @@ export default function Files() {
   };
 
   const handleFileDoubleClick = (fileId: string) => {
-    navigate(`/study?file=${fileId}`);
+    const targetFile = allFiles.find((file) => file.id === fileId);
+    if (!targetFile) {
+      toast.error('File not found');
+      return;
+    }
+
+    openFileInNewTab(targetFile);
   };
 
   // Drag and Drop handlers

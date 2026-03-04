@@ -27,6 +27,7 @@ interface FileSelectionPaneProps {
   files: CourseFile[];
   selectedFileIds: Set<string>;
   onSelectionChange: (fileIds: Set<string>) => void;
+  onFileOpen?: (fileId: string) => void;
   isLoading?: boolean;
   disabled?: boolean;
 }
@@ -63,6 +64,7 @@ export default function FileSelectionPane({
   files,
   selectedFileIds,
   onSelectionChange,
+  onFileOpen,
   isLoading = false,
   disabled = false,
 }: FileSelectionPaneProps) {
@@ -106,6 +108,17 @@ export default function FileSelectionPane({
     } else {
       onSelectionChange(new Set(aiCompatibleFiles.map((f) => f.id)));
     }
+  };
+
+  const handleRowClick = (fileId: string, isCompatible: boolean) => {
+    if (!isCompatible || disabled || isLoading) return;
+
+    if (onFileOpen) {
+      onFileOpen(fileId);
+      return;
+    }
+
+    toggleFile(fileId);
   };
 
   if (files.length === 0) {
@@ -163,7 +176,7 @@ export default function FileSelectionPane({
                   stiffness: 400,
                   damping: 25
                 }}
-                onClick={() => isCompatible && toggleFile(file.id)}
+                onClick={() => handleRowClick(file.id, isCompatible)}
                 disabled={disabled || !isCompatible || isLoading}
                 whileHover={isCompatible && !disabled ? { x: 4, backgroundColor: isSelected ? 'rgba(139, 92, 246, 0.15)' : 'rgba(148, 163, 184, 0.05)' } : {}}
                 whileTap={isCompatible && !disabled ? { scale: 0.98 } : {}}
@@ -176,7 +189,14 @@ export default function FileSelectionPane({
                 }`}
               >
                 {/* Checkbox */}
-                <div className="flex-shrink-0">
+                <div
+                  className={`flex-shrink-0 ${isCompatible && !disabled && !isLoading ? 'cursor-pointer' : ''}`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    if (!isCompatible || disabled || isLoading) return;
+                    toggleFile(file.id);
+                  }}
+                >
                   {isCompatible ? (
                     isSelected ? (
                       <motion.div
