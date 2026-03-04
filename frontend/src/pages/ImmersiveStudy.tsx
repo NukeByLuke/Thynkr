@@ -632,9 +632,8 @@ export default function ImmersiveStudy() {
                   className="group relative rounded-lg p-[1px] ml-1 overflow-hidden transition-transform duration-300 hover:-translate-y-0.5"
                   title="Chat with AI Tutor"
                 >
-                  <span className="pointer-events-none absolute inset-0 rounded-lg bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-500 opacity-95" />
-                  <span className="pointer-events-none absolute -inset-y-1 -inset-x-10 bg-gradient-to-r from-transparent via-white/35 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
-                  <span className="pointer-events-none absolute inset-0 rounded-lg bg-fuchsia-500/20 dark:bg-cyan-500/20 blur-md opacity-65 group-hover:opacity-95 transition-opacity duration-300" />
+                  <span className="pointer-events-none absolute inset-0 rounded-lg bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-500 opacity-90 transition-opacity duration-300 group-hover:opacity-100" />
+                  <span className="pointer-events-none absolute inset-0 rounded-lg bg-fuchsia-500/20 dark:bg-cyan-500/20 blur-md opacity-45 group-hover:opacity-80 transition-opacity duration-300" />
                   <span
                     className={`relative inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-[7px] text-xs sm:text-sm font-semibold border transition-colors ${
                       isTutorActive
