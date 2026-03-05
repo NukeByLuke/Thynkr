@@ -1082,14 +1082,32 @@ export default async function studyRoutes(server: FastifyInstance) {
 
         const message = String(error?.message || '').trim();
         const multerCode = String(error?.code || '').trim();
+        const isMulterLikeError =
+          error?.name === 'MulterError' ||
+          Boolean(multerCode) ||
+          Array.isArray(error?.storageErrors);
 
-        if (error?.name === 'MulterError') {
+        if (isMulterLikeError) {
           if (multerCode === 'LIMIT_FILE_SIZE') {
             return reply.code(400).send({ error: 'Recording exceeds the 100MB upload limit.' });
           }
 
-          if (multerCode === 'LIMIT_UNEXPECTED_FILE') {
+          if (multerCode === 'LIMIT_UNEXPECTED_FILE' || multerCode === 'LIMIT_FILE_COUNT') {
             return reply.code(400).send({ error: 'Recording payload is invalid. Try again.' });
+          }
+
+          if (
+            /unexpected end of form|unexpected end of multipart data|stream ended unexpectedly|aborted|premature close/i.test(
+              message
+            )
+          ) {
+            return reply
+              .code(400)
+              .send({ error: 'Recording upload was interrupted. Please try again.' });
+          }
+
+          if (/invalid file type|unsupported recording format/i.test(message)) {
+            return reply.code(400).send({ error: 'Unsupported recording format' });
           }
 
           return reply.code(400).send({ error: message || 'Invalid recording upload payload.' });
