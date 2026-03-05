@@ -35,11 +35,7 @@
       rel="stylesheet"
     />
     
-    <!-- Preload brand assets matching the current theme so logo appears instantly -->
-    <link rel="preload" as="image" href="/brand/brain-light.png" fetchpriority="high" media="(prefers-color-scheme: light)" />
-    <link rel="preload" as="image" href="/brand/brain-dark.png" fetchpriority="high" media="(prefers-color-scheme: dark)" />
-    <link rel="preload" as="image" href="/brand/wordmark-light.png" fetchpriority="high" media="(prefers-color-scheme: light)" />
-    <link rel="preload" as="image" href="/brand/wordmark-dark.png" fetchpriority="high" media="(prefers-color-scheme: dark)" />
+    <!-- Brand images are loaded by React components when needed. -->
     
     <title>Thynkr</title>
     <!-- Lottie - loaded async to not block rendering -->
@@ -52,12 +48,26 @@
         try {
           var mode = localStorage.getItem('themeMode');
           var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          var theme = (!mode || mode === 'system') ? (systemDark ? 'dark' : 'light') : mode;
+          var normalizedMode = mode;
+
+          if (normalizedMode === 'light') normalizedMode = 'sunrise';
+          if (normalizedMode === 'dark') normalizedMode = 'sunset';
+          if (normalizedMode === 'black') normalizedMode = 'midnight';
+          if (!normalizedMode || normalizedMode === 'system') {
+            normalizedMode = systemDark ? 'sunset' : 'sunrise';
+          }
+
+          var isDarkTheme = normalizedMode === 'sunset' || normalizedMode === 'midnight';
           var root = document.documentElement;
           var body = document.body;
+
           root.classList.remove('light', 'dark');
           body && body.classList.remove('light', 'dark');
-          if (theme === 'dark') {
+
+          root.setAttribute('data-theme', normalizedMode);
+          body && body.setAttribute('data-theme', normalizedMode);
+
+          if (isDarkTheme) {
             root.classList.add('dark');
             body && body.classList.add('dark');
           } else {
