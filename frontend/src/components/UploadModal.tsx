@@ -18,17 +18,33 @@ import {
 import toast from 'react-hot-toast';
 import LoadingProgress from './ui/LoadingProgress';
 import SuccessAnimation from './ui/SuccessAnimation';
+import { createUploadFileId, type UploadProgressSnapshot } from '@/lib/uploadProgress';
 
 interface UploadModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUploadFiles: (files: FileList) => void;
+  onUploadRecording?: (payload: RecordingUploadPayload) => void | Promise<void>;
   onUploadYouTube: (url: string) => void;
   onUploadLink?: (url: string) => void;
   isUploading?: boolean;
+  uploadProgress?: UploadProgressSnapshot | null;
   currentFolderId?: string | null;
   requireContentAgreement?: boolean;
   uploadErrorMessage?: string | null;
+}
+
+export interface RecordingTimelineEntry {
+  timestamp: number;
+  text: string;
+}
+
+export interface RecordingUploadPayload {
+  audioFile: File;
+  transcript: string;
+  timeline: RecordingTimelineEntry[];
+  capturedAt: string;
+  durationSeconds: number;
 }
 
 type TabType = 'files' | 'youtube' | 'link' | 'text' | 'record';
@@ -36,15 +52,42 @@ type UploadStage = 'idle' | 'uploading' | 'processing' | 'success';
 type UploadContext = 'files' | 'text' | 'record';
 type RecordingStatus = 'idle' | 'recording' | 'paused';
 
-const ACCEPTED_FILE_TYPES = '.pdf,.doc,.docx,.ppt,.pptx,.pps,.ppsx,.txt';
+const ACCEPTED_FILE_TYPES =
+  '.pdf,.doc,.docx,.ppt,.pptx,.pps,.ppsx,.txt,.webm,.mp3,.wav,.m4a,.mp4,.ogg';
 const ACCEPTED_MIME_TYPES = [
   'application/pdf',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/msword',
-  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
+  'audio/webm',
+  'audio/mp4',
+  'audio/mpeg',
+  'audio/wav',
+  'audio/x-wav',
+  'audio/x-m4a',
+  'audio/ogg',
   'text/plain',
+  'application/octet-stream',
 ];
+
+const ACCEPTED_FILE_EXTENSIONS = new Set([
+  '.pdf',
+  '.docx',
+  '.doc',
+  '.txt',
+  '.ppt',
+  '.pptx',
+  '.pps',
+  '.ppsx',
+  '.webm',
+  '.mp4',
+  '.mp3',
+  '.wav',
+  '.m4a',
+  '.ogg',
+]);
 
 const TAB_CONFIG: Array<{ id: TabType; label: string; icon: typeof UploadCloud }> = [
   { id: 'files', label: 'Upload Files', icon: UploadCloud },
@@ -58,9 +101,11 @@ export default function UploadModal({
   isOpen,
   onClose,
   onUploadFiles,
+  onUploadRecording,
   onUploadYouTube,
   onUploadLink,
   isUploading = false,
+  uploadProgress,
   currentFolderId,
   requireContentAgreement = false,
   uploadErrorMessage,
@@ -81,8 +126,16 @@ export default function UploadModal({
 
   const [uploadStage, setUploadStage] = useState<UploadStage>('idle');
   const [uploadContext, setUploadContext] = useState<UploadContext>('files');
+  const [uploadFilesInFlight, setUploadFilesInFlight] = useState<
+    Array<{ id: string; name: string; size: number }>
+  >([]);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [hasObservedUpload, setHasObservedUpload] = useState(false);
+
+  const availableTabs = useMemo(
+    () => (onUploadRecording ? TAB_CONFIG : TAB_CONFIG.filter((tab) => tab.id !== 'record')),
+    [onUploadRecording]
+  );
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const stageTimerRef = useRef<number | null>(null);
@@ -268,6 +321,7 @@ export default function UploadModal({
     clearTransitionTimers();
     setUploadStage('idle');
     setUploadContext('files');
+    setUploadFilesInFlight([]);
     setHasSubmitted(false);
     setHasObservedUpload(false);
   };
@@ -295,7 +349,15 @@ export default function UploadModal({
     const invalidFiles: string[] = [];
 
     Array.from(files).forEach((file) => {
-      if (ACCEPTED_MIME_TYPES.includes(file.type)) {
+      const normalizedMime = (file.type || '').toLowerCase();
+      const lowerName = (file.name || '').toLowerCase();
+      const lastDot = lowerName.lastIndexOf('.');
+      const extension = lastDot >= 0 ? lowerName.slice(lastDot) : '';
+
+      const mimeAccepted = normalizedMime.length > 0 && ACCEPTED_MIME_TYPES.includes(normalizedMime);
+      const extensionAccepted = ACCEPTED_FILE_EXTENSIONS.has(extension);
+
+      if (mimeAccepted || extensionAccepted) {
         validFiles.push(file);
       } else {
         invalidFiles.push(file.name);
@@ -326,6 +388,13 @@ export default function UploadModal({
   };
 
   const beginTrackedUpload = (context: UploadContext, files: FileList) => {
+    setUploadFilesInFlight(
+      Array.from(files).map((file) => ({
+        id: createUploadFileId(file),
+        name: file.name,
+        size: file.size,
+      }))
+    );
     setUploadContext(context);
     setUploadStage('uploading');
     setHasSubmitted(true);
@@ -462,7 +531,13 @@ export default function UploadModal({
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaStreamRef.current = stream;
 
-      const preferredMimeTypes = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'];
+      const preferredMimeTypes = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/ogg;codecs=opus',
+        'audio/ogg',
+        'audio/mp4',
+      ];
       const supportedMimeType = preferredMimeTypes.find((mimeType) =>
         MediaRecorder.isTypeSupported(mimeType)
       );
@@ -566,6 +641,8 @@ export default function UploadModal({
       .join('\n');
 
     const transcript = `${finalTranscriptRef.current} ${recordingInterimTranscript}`.trim();
+    const recordingDurationSeconds = recordingSecondsRef.current;
+    const capturedAtIso = new Date().toISOString();
 
     const audioMimeType = recordedChunksRef.current[0]?.type || 'audio/webm';
     const audioBlob =
@@ -579,14 +656,79 @@ export default function UploadModal({
     setRecordingSeconds(0);
     recordingSecondsRef.current = 0;
 
-    if (!transcript) {
-      const message = 'No speech transcript was captured. Please record again and speak clearly.';
+    const hasTranscript = transcript.length > 0;
+    const hasAudio = !!audioBlob && audioBlob.size > 0;
+
+    if (!hasTranscript) {
+      const message =
+        'No speech transcript was captured. Please use Chrome or Edge, speak clearly, and try again.';
+      setRecordingErrorMessage(message);
+      toast.error(message);
+      return;
+    }
+
+    if (!hasAudio || !audioBlob) {
+      const message =
+        'No audio was captured. Please check microphone permissions and try recording again.';
       setRecordingErrorMessage(message);
       toast.error(message);
       return;
     }
 
     const recordingId = Date.now();
+
+    const extension = audioMimeType.includes('mpeg')
+      ? 'mp3'
+      : audioMimeType.includes('mp4') || audioMimeType.includes('m4a')
+      ? 'm4a'
+      : audioMimeType.includes('wav')
+      ? 'wav'
+      : audioMimeType.includes('ogg') || audioMimeType.includes('opus')
+      ? 'ogg'
+      : 'webm';
+
+    const audioFile = new (File as any)(
+      [audioBlob],
+      `live-lecture-${recordingId}.${extension}`,
+      { type: audioMimeType }
+    ) as File;
+
+    finalTranscriptRef.current = '';
+    transcriptTimelineRef.current = [];
+    setRecordedTranscript('');
+    setRecordingErrorMessage(null);
+
+    if (onUploadRecording) {
+      setUploadFilesInFlight([
+        {
+          id: createUploadFileId(audioFile),
+          name: audioFile.name,
+          size: audioFile.size,
+        },
+      ]);
+      setUploadContext('record');
+      setUploadStage('uploading');
+      setHasSubmitted(true);
+      setHasObservedUpload(false);
+
+      void Promise.resolve(
+        onUploadRecording({
+          audioFile,
+          transcript,
+          timeline: timelineEntries,
+          capturedAt: capturedAtIso,
+          durationSeconds: recordingDurationSeconds,
+        })
+      ).catch((error) => {
+        const message =
+          (error as Error)?.message || 'Failed to upload recording. Please try again.';
+        setRecordingErrorMessage(message);
+        toast.error(message);
+        resetUploadState();
+      });
+      return;
+    }
+
     const transcriptHeader = `Live Lecture Transcript\nCaptured: ${new Date().toLocaleString()}\n\n`;
     const transcriptBody = timelineTranscript
       ? `${timelineTranscript}\n\nFull Transcript:\n${transcript}`
@@ -599,28 +741,7 @@ export default function UploadModal({
 
     const dataTransfer = new DataTransfer();
     dataTransfer.items.add(transcriptFile);
-
-    if (audioBlob && audioBlob.size > 0) {
-      const extension = audioMimeType.includes('mpeg')
-        ? 'mp3'
-        : audioMimeType.includes('mp4') || audioMimeType.includes('m4a')
-        ? 'm4a'
-        : audioMimeType.includes('wav')
-        ? 'wav'
-        : 'webm';
-
-      const audioFile = new (File as any)(
-        [audioBlob],
-        `live-lecture-${recordingId}.${extension}`,
-        { type: audioMimeType }
-      ) as File;
-      dataTransfer.items.add(audioFile);
-    }
-
-    finalTranscriptRef.current = '';
-    transcriptTimelineRef.current = [];
-    setRecordedTranscript('');
-    setRecordingErrorMessage(null);
+    dataTransfer.items.add(audioFile);
 
     beginTrackedUpload('record', dataTransfer.files);
   };
@@ -650,6 +771,12 @@ export default function UploadModal({
       resetFormState();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!onUploadRecording && activeTab === 'record') {
+      setActiveTab('files');
+    }
+  }, [activeTab, onUploadRecording]);
 
   useEffect(() => {
     if (recordingStatus !== 'recording') return;
@@ -685,6 +812,26 @@ export default function UploadModal({
 
     if (isUploading) {
       setHasObservedUpload(true);
+
+      if (uploadProgress?.phase === 'processing') {
+        if (stageTimerRef.current) {
+          window.clearTimeout(stageTimerRef.current);
+          stageTimerRef.current = null;
+        }
+        setUploadStage('processing');
+        return;
+      }
+
+      if (typeof uploadProgress?.overallPercent === 'number') {
+        if (stageTimerRef.current) {
+          window.clearTimeout(stageTimerRef.current);
+          stageTimerRef.current = null;
+        }
+
+        setUploadStage(uploadProgress.overallPercent >= 99 ? 'processing' : 'uploading');
+        return;
+      }
+
       setUploadStage((prev) => (prev === 'processing' ? prev : 'uploading'));
       if (stageTimerRef.current) {
         window.clearTimeout(stageTimerRef.current);
@@ -711,7 +858,15 @@ export default function UploadModal({
         onClose();
       }, 1250);
     }
-  }, [isOpen, hasSubmitted, hasObservedUpload, isUploading, uploadErrorMessage, onClose]);
+  }, [
+    isOpen,
+    hasSubmitted,
+    hasObservedUpload,
+    isUploading,
+    uploadErrorMessage,
+    onClose,
+    uploadProgress,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -747,19 +902,21 @@ export default function UploadModal({
     isLocked || (requireContentAgreement && !hasAgreed) || !canStartRecording;
 
   const stageMessage = useMemo(() => {
+    const trackedFileCount = uploadFilesInFlight.length || selectedFiles.length;
+
     if (uploadStage === 'uploading') {
       if (uploadContext === 'record') {
-        return 'Uploading recording transcript...';
+        return 'Uploading your recording...';
       }
 
       return uploadContext === 'text'
         ? 'Uploading generated text file...'
-        : `Uploading ${selectedFiles.length} file${selectedFiles.length !== 1 ? 's' : ''}...`;
+        : `Uploading ${trackedFileCount} file${trackedFileCount !== 1 ? 's' : ''}...`;
     }
 
     if (uploadStage === 'processing') {
       if (uploadContext === 'record') {
-        return 'Transcribing your recording, saving audio, and generating notes, quizzes, and flashcards...';
+        return 'Aligning timestamps and preparing your summary, notes, quizzes, and flashcards...';
       }
 
       return uploadContext === 'text'
@@ -768,7 +925,41 @@ export default function UploadModal({
     }
 
     return '';
-  }, [uploadStage, uploadContext, selectedFiles.length]);
+  }, [uploadStage, uploadContext, selectedFiles.length, uploadFilesInFlight.length]);
+
+  const perFileProgress = useMemo(() => {
+    if (uploadProgress?.files?.length) {
+      return uploadProgress.files;
+    }
+
+    if (!uploadFilesInFlight.length) {
+      return [];
+    }
+
+    const fallbackProgress = uploadStage === 'processing' ? 100 : 0;
+    const fallbackStatus = uploadStage === 'processing' ? 'processing' : 'queued';
+
+    return uploadFilesInFlight.map((file) => ({
+      id: file.id,
+      name: file.name,
+      progress: fallbackProgress,
+      status: fallbackStatus,
+      uploadedBytes: fallbackProgress === 100 ? Math.max(1, file.size) : 0,
+      totalBytes: Math.max(1, file.size),
+    }));
+  }, [uploadProgress, uploadFilesInFlight, uploadStage]);
+
+  const overallProgressPercent = useMemo(() => {
+    if (typeof uploadProgress?.overallPercent === 'number') {
+      return Math.max(0, Math.min(100, Math.round(uploadProgress.overallPercent)));
+    }
+
+    if (uploadStage === 'processing') {
+      return 100;
+    }
+
+    return 0;
+  }, [uploadProgress, uploadStage]);
 
   if (!isOpen) return null;
 
@@ -817,7 +1008,7 @@ export default function UploadModal({
 
             <div className="px-6 sm:px-8 pt-5">
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 p-1.5 rounded-2xl bg-slate-100/90 dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10">
-                {TAB_CONFIG.map((tab) => {
+                {availableTabs.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
 
@@ -924,20 +1115,22 @@ export default function UploadModal({
                         PDF, DOCX, PPTX, TXT • Max 50MB each
                       </div>
 
-                      <div className="mt-4 flex items-center justify-center">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setActiveTab('record');
-                          }}
-                          disabled={isLocked}
-                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-400 hover:to-rose-500 text-white text-sm font-semibold shadow-lg shadow-red-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <Mic className="w-4 h-4" />
-                          Record New Lecture
-                        </button>
-                      </div>
+                      {onUploadRecording && (
+                        <div className="mt-4 flex items-center justify-center">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveTab('record');
+                            }}
+                            disabled={isLocked}
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-400 hover:to-rose-500 text-white text-sm font-semibold shadow-lg shadow-red-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <Mic className="w-4 h-4" />
+                            Record New Lecture
+                          </button>
+                        </div>
+                      )}
 
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-4">
                         {currentFolderId
@@ -1010,7 +1203,7 @@ export default function UploadModal({
                         YouTube URL
                       </label>
                       <div className="relative">
-                        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-red-500/15 flex items-center justify-center pointer-events-none">
+                        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg bg-red-500/15 flex items-center justify-center pointer-events-none">
                           <Youtube className="w-5 h-5 text-red-500" />
                         </div>
                         <input
@@ -1018,7 +1211,7 @@ export default function UploadModal({
                           value={youtubeUrl}
                           onChange={(e) => setYoutubeUrl(e.target.value)}
                           placeholder="https://www.youtube.com/watch?v=..."
-                          className={`w-full pl-14 pr-12 py-4 rounded-xl border-2 bg-white dark:bg-black text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
+                          className={`w-full pl-20 pr-14 py-4 rounded-xl border-2 bg-white dark:bg-black text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
                             youtubeUrl && isValidYouTubeUrl(youtubeUrl)
                               ? 'border-emerald-500 focus:ring-emerald-500/30'
                               : youtubeUrl && !isValidYouTubeUrl(youtubeUrl)
@@ -1028,7 +1221,7 @@ export default function UploadModal({
                           disabled={isLocked}
                         />
                         {youtubeUrl && (
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
                             {isValidYouTubeUrl(youtubeUrl) ? (
                               <Check className="w-5 h-5 text-emerald-500" />
                             ) : (
@@ -1060,7 +1253,7 @@ export default function UploadModal({
                         Public web URL
                       </label>
                       <div className="relative">
-                        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-cyan-500/15 flex items-center justify-center pointer-events-none">
+                        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg bg-cyan-500/15 flex items-center justify-center pointer-events-none">
                           <Link className="w-5 h-5 text-cyan-500" />
                         </div>
                         <input
@@ -1068,7 +1261,7 @@ export default function UploadModal({
                           value={linkUrl}
                           onChange={(e) => setLinkUrl(e.target.value)}
                           placeholder="https://en.wikipedia.org/wiki/Earth"
-                          className={`w-full pl-14 pr-12 py-4 rounded-xl border-2 bg-white dark:bg-black text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
+                          className={`w-full pl-20 pr-14 py-4 rounded-xl border-2 bg-white dark:bg-black text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
                             linkUrl && isValidPublicUrl(linkUrl)
                               ? 'border-emerald-500 focus:ring-emerald-500/30'
                               : linkUrl && !isValidPublicUrl(linkUrl)
@@ -1078,7 +1271,7 @@ export default function UploadModal({
                           disabled={isLocked}
                         />
                         {linkUrl && (
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
                             {isValidPublicUrl(linkUrl) ? (
                               <Check className="w-5 h-5 text-emerald-500" />
                             ) : (
@@ -1414,11 +1607,96 @@ export default function UploadModal({
                       transition={{ duration: 0.2 }}
                       className="w-full max-w-md rounded-3xl border border-slate-200 dark:border-white/10 bg-white/95 dark:bg-black/90 p-6"
                     >
-                      <LoadingProgress
-                        message={uploadStage === 'uploading' ? 'Uploading' : 'Processing'}
-                        stage={stageMessage}
-                        variant="upload"
-                      />
+                      {perFileProgress.length > 0 ? (
+                        <div className="space-y-4">
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                                {uploadStage === 'uploading' ? 'Uploading files' : 'Processing files'}
+                              </p>
+                              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                                {overallProgressPercent}%
+                              </span>
+                            </div>
+                            <div className="h-2.5 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+                              <motion.div
+                                className="h-full rounded-full bg-gradient-to-r from-blue-600 to-violet-600"
+                                animate={{ width: `${overallProgressPercent}%` }}
+                                transition={{ duration: 0.2, ease: 'easeOut' }}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                            {perFileProgress.map((progressFile) => {
+                              const statusLabel =
+                                progressFile.status === 'failed'
+                                  ? 'Failed'
+                                  : progressFile.status === 'processing'
+                                  ? 'Processing'
+                                  : progressFile.status === 'completed'
+                                  ? 'Uploaded'
+                                  : progressFile.status === 'uploading'
+                                  ? 'Uploading'
+                                  : 'Queued';
+
+                              const statusPillClass =
+                                progressFile.status === 'failed'
+                                  ? 'bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-200'
+                                  : progressFile.status === 'processing'
+                                  ? 'bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-200'
+                                  : progressFile.status === 'completed'
+                                  ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-200'
+                                  : progressFile.status === 'uploading'
+                                  ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-200'
+                                  : 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300';
+
+                              const progressBarClass =
+                                progressFile.status === 'failed'
+                                  ? 'h-full rounded-full bg-gradient-to-r from-rose-500 to-red-500'
+                                  : 'h-full rounded-full bg-gradient-to-r from-fuchsia-500 to-cyan-500';
+
+                              return (
+                                <div
+                                  key={progressFile.id}
+                                  className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-3"
+                                >
+                                  <div className="flex items-center justify-between gap-3 mb-1.5">
+                                    <p className="text-xs font-medium text-slate-800 dark:text-slate-200 truncate">
+                                      {progressFile.name}
+                                    </p>
+                                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap ${statusPillClass}`}>
+                                      {statusLabel}
+                                    </span>
+                                  </div>
+
+                                  <div className="h-2 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+                                    <motion.div
+                                      className={progressBarClass}
+                                      animate={{ width: `${Math.max(0, Math.min(100, progressFile.progress))}%` }}
+                                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                                    />
+                                  </div>
+
+                                  <div className="mt-1.5 text-right">
+                                    <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                                      {progressFile.progress}%
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          <p className="text-xs text-slate-600 dark:text-slate-300">{stageMessage}</p>
+                        </div>
+                      ) : (
+                        <LoadingProgress
+                          message={uploadStage === 'uploading' ? 'Uploading' : 'Processing'}
+                          stage={stageMessage}
+                          variant="upload"
+                        />
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>

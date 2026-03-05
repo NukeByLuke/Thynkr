@@ -12,9 +12,18 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { UploadCloud, FolderOpen, FileText, Clock, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { FileTypeBadge } from '@/lib/fileTypeUtils';
-import UploadModal from '@/components/UploadModal';
+import UploadModal, { type RecordingUploadPayload } from '@/components/UploadModal';
 import YouTubeProcessingOverlay from '@/components/YouTubeProcessingOverlay';
 import api from '@/lib/api';
+import {
+  buildUploadProgressSnapshot,
+  createServerProcessingUploadProgress,
+  createQueuedUploadProgress,
+  hasStudyUploadFailures,
+  isStudyUploadProcessingComplete,
+  type StudyUploadServerFile,
+  type UploadProgressSnapshot,
+} from '@/lib/uploadProgress';
 
 interface UploadedFile {
   id: string;
@@ -23,6 +32,12 @@ interface UploadedFile {
   fileSize: number;
   status: 'UPLOADED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
   createdAt: string;
+}
+
+interface UploadMutationResult {
+  files: UploadedFile[];
+  processingPending: boolean;
+  failedFiles: Array<{ name: string; error: string }>;
 }
 
 export default function Study() {
@@ -34,6 +49,7 @@ export default function Study() {
   const [isProcessingYouTube, setIsProcessingYouTube] = useState(false);
   const [processingVideoTitle, setProcessingVideoTitle] = useState<string | undefined>();
   const [isDraggingToCreate, setIsDraggingToCreate] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgressSnapshot | null>(null);
 
   // CRITICAL: Reset layout on mount
   useEffect(() => {
@@ -41,7 +57,18 @@ export default function Study() {
     setCustomHeaderContent(null);
   }, [setHideSidebar, setCustomHeaderContent]);
 
-  const getToken = () => localStorage.getItem('accessToken');
+  const getApiErrorMessage = (error: unknown, fallback: string) => {
+    const maybeError = error as any;
+    return (
+      maybeError?.response?.data?.error ||
+      maybeError?.response?.data?.message ||
+      maybeError?.message ||
+      fallback
+    );
+  };
+
+  const delay = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
+  const hasAuthToken = Boolean(localStorage.getItem('accessToken'));
 
   // Fetch uploaded files
   const { data: filesData, isLoading } = useQuery({
@@ -50,7 +77,7 @@ export default function Study() {
       const response = await api.get('/study/files');
       return response.data;
     },
-    enabled: !!getToken(),
+    enabled: hasAuthToken,
   });
 
   const files: UploadedFile[] = filesData?.files || [];
@@ -60,41 +87,203 @@ export default function Study() {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 3);
 
+  const waitForUploadedFilesToProcess = async (
+    selectedFiles: File[],
+    initialUploadedFiles: StudyUploadServerFile[]
+  ): Promise<boolean> => {
+    if (!selectedFiles.length || !initialUploadedFiles.length) {
+      return false;
+    }
+
+    let trackedFiles = [...initialUploadedFiles];
+    const startedAt = Date.now();
+    const processingTimeoutMs = 45000;
+
+    while (true) {
+      const elapsedMs = Date.now() - startedAt;
+      setUploadProgress(createServerProcessingUploadProgress(selectedFiles, trackedFiles, elapsedMs));
+
+      if (hasStudyUploadFailures(trackedFiles)) {
+        throw new Error('One or more files failed during processing. Please re-upload and try again.');
+      }
+
+      if (isStudyUploadProcessingComplete(trackedFiles)) {
+        return false;
+      }
+
+      if (elapsedMs >= processingTimeoutMs) {
+        return true;
+      }
+
+      await delay(1000);
+      try {
+        const statusResponse = await api.get('/study/files');
+        const latestFiles: UploadedFile[] = Array.isArray(statusResponse.data?.files)
+          ? statusResponse.data.files
+          : [];
+        const statusById = new Map(latestFiles.map((file) => [file.id, file.status]));
+
+        trackedFiles = trackedFiles.map((file) => ({
+          ...file,
+          status: statusById.get(file.id) || file.status,
+        }));
+      } catch {
+        return true;
+      }
+    }
+  };
+
   // Upload mutation
   const uploadMutation = useMutation({
     mutationFn: async (files: FileList) => {
+      const fileList = Array.from(files);
+      const totalFileBytes = fileList.reduce((sum, file) => sum + Math.max(1, file.size), 0);
+
+      setUploadProgress(createQueuedUploadProgress(fileList));
+
       const formData = new FormData();
-      Array.from(files).forEach((file) => {
+      fileList.forEach((file) => {
         formData.append('files', file);
       });
 
-      const response = await api.post('/study/upload', formData);
-      return response.data;
+      const response = await api.post('/study/upload', formData, {
+        onUploadProgress: (progressEvent) => {
+          const loaded = typeof progressEvent.loaded === 'number' ? progressEvent.loaded : 0;
+          const total =
+            typeof progressEvent.total === 'number' && progressEvent.total > 0
+              ? progressEvent.total
+              : totalFileBytes;
+
+          const normalizedLoadedBytes =
+            total > 0
+              ? Math.min(totalFileBytes, (loaded / total) * totalFileBytes)
+              : Math.min(totalFileBytes, loaded);
+
+          setUploadProgress(
+            buildUploadProgressSnapshot(fileList, normalizedLoadedBytes, 'uploading')
+          );
+        },
+      });
+
+      const uploadedFiles: UploadedFile[] = Array.isArray(response.data?.files)
+        ? response.data.files
+        : [];
+      const rawFailedFiles: unknown[] = Array.isArray(response.data?.failedFiles)
+        ? response.data.failedFiles
+        : [];
+      const failedFiles: Array<{ name: string; error: string }> = rawFailedFiles
+        .map((entry: any): { name: string; error: string } => ({
+          name: typeof entry?.name === 'string' ? entry.name : 'Unknown file',
+          error: typeof entry?.error === 'string' ? entry.error : 'Upload failed',
+        }))
+        .filter((entry: { name: string; error: string }) => entry.name.trim().length > 0);
+      const processingPending = await waitForUploadedFilesToProcess(fileList, uploadedFiles);
+
+      return {
+        files: uploadedFiles,
+        processingPending,
+        failedFiles,
+      } as UploadMutationResult;
     },
-    onSuccess: async (data) => {
+    onSuccess: async (data: UploadMutationResult) => {
       setUploadError(null);
+      setUploadProgress(null);
       // Refetch immediately to show new files
       await queryClient.invalidateQueries({ queryKey: ['study-files'] });
       await queryClient.refetchQueries({ queryKey: ['study-files'] });
+
+      if (data.processingPending) {
+        toast.success('Upload complete. Processing continues in the background.');
+      }
+
+      if (data.failedFiles.length > 0) {
+        const failedNames = data.failedFiles.map((failed) => failed.name).join(', ');
+        toast.error(`Some files could not be uploaded: ${failedNames}`);
+      }
+
       // Auto-navigate to the first uploaded file
       if (data.files && data.files.length > 0) {
         navigate(`/study/${data.files[0].id}`);
       }
     },
-    onError: (error: Error) => {
-      setUploadError(error.message);
+    onError: (error: unknown) => {
+      const message = getApiErrorMessage(error, 'Upload failed');
+      setUploadError(message);
+      setUploadProgress(null);
+      toast.error(message);
       console.error('Upload error:', error);
+    },
+  });
+
+  const recordingUploadMutation = useMutation({
+    mutationFn: async (payload: RecordingUploadPayload) => {
+      const { audioFile, transcript, timeline, capturedAt, durationSeconds } = payload;
+      const fileList = [audioFile];
+      const totalFileBytes = Math.max(1, audioFile.size);
+
+      setUploadProgress(createQueuedUploadProgress(fileList));
+
+      const formData = new FormData();
+      formData.append('audio', audioFile);
+      formData.append('transcript', transcript);
+      formData.append('timeline', JSON.stringify(timeline));
+      formData.append('capturedAt', capturedAt);
+      formData.append('durationSeconds', String(Math.max(0, Math.floor(durationSeconds || 0))));
+
+      const response = await api.post('/study/upload-recording', formData, {
+        onUploadProgress: (progressEvent) => {
+          const loaded = typeof progressEvent.loaded === 'number' ? progressEvent.loaded : 0;
+          const total =
+            typeof progressEvent.total === 'number' && progressEvent.total > 0
+              ? progressEvent.total
+              : totalFileBytes;
+
+          const normalizedLoadedBytes =
+            total > 0
+              ? Math.min(totalFileBytes, (loaded / total) * totalFileBytes)
+              : Math.min(totalFileBytes, loaded);
+
+          setUploadProgress(
+            buildUploadProgressSnapshot(fileList, normalizedLoadedBytes, 'uploading')
+          );
+        },
+      });
+
+      return response.data?.file as UploadedFile | undefined;
+    },
+    onSuccess: async (file?: UploadedFile) => {
+      setUploadError(null);
+      setUploadProgress(null);
+      await queryClient.invalidateQueries({ queryKey: ['study-files'] });
+      await queryClient.refetchQueries({ queryKey: ['study-files'] });
+      toast.success('Recording uploaded successfully!');
+
+      if (file?.id) {
+        navigate(`/study/${file.id}`);
+      }
+    },
+    onError: (error: unknown) => {
+      const message = getApiErrorMessage(error, 'Recording upload failed');
+      setUploadError(message);
+      setUploadProgress(null);
+      console.error('Recording upload error:', error);
     },
   });
 
   const handleQuickUpload = () => {
     setUploadError(null);
+    setUploadProgress(null);
     setShowUploadModal(true);
   };
 
   const handleUploadFiles = (files: FileList) => {
     setUploadError(null);
     uploadMutation.mutate(files);
+  };
+
+  const handleUploadRecording = async (payload: RecordingUploadPayload) => {
+    setUploadError(null);
+    await recordingUploadMutation.mutateAsync(payload);
   };
 
   const handleUploadYouTube = async (url: string) => {
@@ -395,9 +584,11 @@ export default function Study() {
         isOpen={showUploadModal}
         onClose={() => setShowUploadModal(false)}
         onUploadFiles={handleUploadFiles}
+        onUploadRecording={handleUploadRecording}
         onUploadYouTube={handleUploadYouTube}
         onUploadLink={handleUploadLink}
-        isUploading={uploadMutation.isPending}
+        isUploading={uploadMutation.isPending || recordingUploadMutation.isPending}
+        uploadProgress={uploadProgress}
         uploadErrorMessage={uploadError}
       />
 
