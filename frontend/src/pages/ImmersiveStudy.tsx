@@ -971,6 +971,8 @@ type TranscriptCue = {
   text: string;
 };
 
+const CUE_CLICK_PLAYBACK_LEAD_SECONDS = 1.2;
+
 function formatAudioClock(totalSeconds: number, fallback: string = '0:00'): string {
   if (!Number.isFinite(totalSeconds) || totalSeconds < 0) {
     return fallback;
@@ -1157,9 +1159,9 @@ function AudioTranscriptPlayer({
   }, [volume]);
 
   const seekTo = useCallback(
-    (nextTime: number) => {
+    (nextTime: number): number | null => {
       const audio = audioRef.current;
-      if (!audio) return;
+      if (!audio) return null;
 
       const maxDuration =
         Number.isFinite(duration || 0) && (duration || 0) > 0
@@ -1169,12 +1171,13 @@ function AudioTranscriptPlayer({
           : 0;
 
       if (!maxDuration || maxDuration <= 0) {
-        return;
+        return null;
       }
 
       const clampedTime = Math.max(0, Math.min(nextTime, maxDuration || 0));
       audio.currentTime = clampedTime;
       setCurrentTime(clampedTime);
+      return clampedTime;
     },
     [duration, inferredDuration]
   );
@@ -1222,8 +1225,25 @@ function AudioTranscriptPlayer({
   }, [cues, currentTime]);
 
   const handleCueClick = useCallback(
-    (timestamp: number) => {
-      seekTo(timestamp);
+    async (timestamp: number) => {
+      // SpeechRecognition "final" events can land slightly late, so we nudge back for better alignment.
+      const alignedTimestamp = Math.max(0, timestamp - CUE_CLICK_PLAYBACK_LEAD_SECONDS);
+      const seekedTime = seekTo(alignedTimestamp);
+      if (seekedTime === null) {
+        return;
+      }
+
+      const audio = audioRef.current;
+      if (!audio) {
+        return;
+      }
+
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch {
+        setIsPlaying(!audio.paused);
+      }
     },
     [seekTo]
   );

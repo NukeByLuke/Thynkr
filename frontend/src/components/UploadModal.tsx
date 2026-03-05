@@ -145,10 +145,20 @@ export default function UploadModal({
   const speechRecognitionRef = useRef<any>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const transcriptTimelineRef = useRef<Array<{ timestamp: number; text: string }>>([]);
+  const transcriptSegmentStartTimesRef = useRef<Map<number, number>>(new Map());
   const recordingSecondsRef = useRef(0);
   const finalTranscriptRef = useRef('');
   const shouldRestartRecognitionRef = useRef(false);
   const recordingStatusRef = useRef<RecordingStatus>('idle');
+
+  const estimateTranscriptLeadSeconds = (segment: string) => {
+    const words = String(segment || '')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean).length;
+
+    return Math.min(4, Math.max(1, Math.round(words / 3)));
+  };
 
   const clearTransitionTimers = () => {
     if (stageTimerRef.current) {
@@ -216,6 +226,7 @@ export default function UploadModal({
     setRecordingInterimTranscript('');
     setRecordingErrorMessage(null);
     transcriptTimelineRef.current = [];
+    transcriptSegmentStartTimesRef.current.clear();
     finalTranscriptRef.current = '';
     recordedChunksRef.current = [];
   };
@@ -248,6 +259,7 @@ export default function UploadModal({
     }
 
     try {
+      transcriptSegmentStartTimesRef.current.clear();
       const recognition = new SpeechRecognitionConstructor();
       recognition.continuous = true;
       recognition.interimResults = true;
@@ -257,15 +269,30 @@ export default function UploadModal({
         let latestInterimTranscript = '';
 
         for (let index = event.resultIndex; index < event.results.length; index += 1) {
-          const transcriptSegment = event.results[index]?.[0]?.transcript?.trim() || '';
+          const recognitionResult = event.results[index];
+          const transcriptSegment = recognitionResult?.[0]?.transcript?.trim() || '';
           if (!transcriptSegment) continue;
 
-          if (event.results[index].isFinal) {
+          const existingStartTimestamp = transcriptSegmentStartTimesRef.current.get(index);
+          if (typeof existingStartTimestamp !== 'number') {
+            transcriptSegmentStartTimesRef.current.set(index, recordingSecondsRef.current);
+          }
+
+          const segmentStartTimestamp =
+            transcriptSegmentStartTimesRef.current.get(index) ?? recordingSecondsRef.current;
+
+          if (recognitionResult.isFinal) {
+            const estimatedLeadSeconds =
+              typeof existingStartTimestamp === 'number'
+                ? 0
+                : estimateTranscriptLeadSeconds(transcriptSegment);
+
             finalTranscriptRef.current = `${finalTranscriptRef.current} ${transcriptSegment}`.trim();
             transcriptTimelineRef.current.push({
-              timestamp: recordingSecondsRef.current,
+              timestamp: Math.max(0, Math.floor(segmentStartTimestamp - estimatedLeadSeconds)),
               text: transcriptSegment,
             });
+            transcriptSegmentStartTimesRef.current.delete(index);
           } else {
             latestInterimTranscript = `${latestInterimTranscript} ${transcriptSegment}`.trim();
           }
@@ -695,6 +722,7 @@ export default function UploadModal({
 
     finalTranscriptRef.current = '';
     transcriptTimelineRef.current = [];
+    transcriptSegmentStartTimesRef.current.clear();
     setRecordedTranscript('');
     setRecordingErrorMessage(null);
 
