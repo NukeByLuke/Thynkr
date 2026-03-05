@@ -983,7 +983,7 @@ export default async function studyRoutes(server: FastifyInstance) {
           return reply.code(404).send({ error: 'User not found' });
         }
 
-        const preferredLanguage = resolveUserLanguage(user.preferredLanguage || undefined);
+        const preferredLanguage = await resolveUserLanguage(userId);
 
         const uploadCheck = await canUploadFile(userId, user.role);
         if (!uploadCheck.allowed) {
