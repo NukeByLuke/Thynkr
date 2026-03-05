@@ -432,7 +432,7 @@ async function extractPublicWebContent(url: string): Promise<{ title: string; co
       redirect: 'follow',
       signal: controller.signal,
       headers: {
-        'User-Agent': 'ThynkrBot/1.0 (+https://thynkr.study)',
+        'User-Agent': 'ThynkrBot/1.0 (+https://thynkr.ca)',
         Accept: 'text/html,text/plain;q=0.9,*/*;q=0.8',
       },
     });

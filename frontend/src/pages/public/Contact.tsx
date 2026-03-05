@@ -189,10 +189,10 @@ export default function Contact() {
                 For general inquiries and support questions:
               </p>
               <a
-                href="mailto:support@thynkr.study"
+                href="mailto:support@thynkr.ca"
                 className="text-blue-600 dark:text-cyan-400 hover:underline font-medium"
               >
-                support@thynkr.study
+                support@thynkr.ca
               </a>
             </Card>
 

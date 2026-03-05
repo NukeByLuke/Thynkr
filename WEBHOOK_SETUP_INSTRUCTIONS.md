@@ -1,11 +1,11 @@
-﻿# Stripe Webhook Setup
+# Stripe Webhook Setup
 
 ## Create Webhook in Stripe Dashboard
 
 1. Go to: https://dashboard.stripe.com/test/webhooks
 2. Click **"Add endpoint"**
 3. **Endpoint URL:** `https://YOUR_DOMAIN/api/webhooks/stripe`
-   (Replace YOUR_DOMAIN with your actual domain like thynkr.study)
+   (Replace YOUR_DOMAIN with your actual domain like thynkr.ca)
 
 4. **Events to send** - Select these:
    - âœ… `checkout.session.completed`

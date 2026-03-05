@@ -3,12 +3,12 @@
 .SYNOPSIS
     Renew SSL certificate on DigitalOcean server
 .DESCRIPTION
-    SSH into production server and renew Let's Encrypt SSL certificate for thynkr.study
+    SSH into production server and renew Let's Encrypt SSL certificate for thynkr.ca
 #>
 
-$SERVER = "root@thynkr.study"
+$SERVER = "root@thynkr.ca"
 
-Write-Host "ðŸ” Renewing SSL Certificate for thynkr.study..." -ForegroundColor Cyan
+Write-Host "ðŸ” Renewing SSL Certificate for thynkr.ca..." -ForegroundColor Cyan
 Write-Host ""
 
 # Check if we can connect
@@ -40,8 +40,7 @@ if ($LASTEXITCODE -ne 0) {
     Write-Host ""
     Write-Host "âš ï¸  Auto-renewal failed. Trying standalone mode..." -ForegroundColor Yellow
     ssh $SERVER @"
-certbot certonly --standalone --force-renewal --cert-name thynkr.study -d thynkr.study -d www.thynkr.study --non-interactive --agree-tos -m admin@thynkr.study && \
-certbot certonly --standalone --force-renewal --cert-name thynkr.ca -d thynkr.ca -d www.thynkr.ca --non-interactive --agree-tos -m admin@thynkr.study
+certbot certonly --standalone --force-renewal --cert-name thynkr.ca -d thynkr.ca -d www.thynkr.ca --non-interactive --agree-tos -m admin@thynkr.ca
 "@
 }
 
@@ -61,4 +60,4 @@ certbot certificates
 "@
 
 Write-Host ""
-Write-Host "âœ… Done! Visit https://thynkr.study to verify." -ForegroundColor Green
+Write-Host "âœ… Done! Visit https://thynkr.ca to verify." -ForegroundColor Green

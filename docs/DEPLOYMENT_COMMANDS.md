@@ -1,4 +1,4 @@
-﻿# ðŸš€ Production Deployment Commands for thynkr.study
+# ðŸš€ Production Deployment Commands for thynkr.ca
 
 ## Initial Setup (One-Time)
 
@@ -42,7 +42,7 @@ OPENAI_API_KEY=sk-proj-m2JvOgwM6hkZCxgiFjeVcNdY4LoeL6czpSMC-lVNd1ckMzD1IrDP2Esom
 OPENAI_MODEL=gpt-4o-mini
 
 # Frontend URL
-FRONTEND_URL=https://thynkr.study
+FRONTEND_URL=https://thynkr.ca
 
 # Feature Flags
 ENABLE_EMAIL_VERIFICATION=false
@@ -56,9 +56,9 @@ sudo apt update
 sudo apt install certbot
 
 # Get certificates
-sudo certbot certonly --standalone -d thynkr.study -d www.thynkr.study
+sudo certbot certonly --standalone -d thynkr.ca -d www.thynkr.ca
 
-# Certificates will be at: /etc/letsencrypt/live/thynkr.study/
+# Certificates will be at: /etc/letsencrypt/live/thynkr.ca/
 ```
 
 ### 4. Initial Deploy
@@ -132,7 +132,7 @@ docker-compose -f docker-compose.prod.yml ps
 docker-compose -f docker-compose.prod.yml exec backend wget -qO- http://localhost:3001/health
 
 # From anywhere
-curl https://thynkr.study/api/health
+curl https://thynkr.ca/api/health
 ```
 
 ### Check Logs
@@ -322,5 +322,5 @@ docker-compose -f docker-compose.prod.yml exec backend npx prisma migrate deploy
 docker-compose -f docker-compose.prod.yml exec postgres psql -U thynkr -d thynkr_db
 
 # Check health
-curl https://thynkr.study/api/health
+curl https://thynkr.ca/api/health
 ```

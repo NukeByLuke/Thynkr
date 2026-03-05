@@ -61,7 +61,7 @@ async function seedUsers() {
   logger.info('Seeding admin user...');
 
   const adminData = {
-    email: 'admin@thynkr.study',
+    email: 'admin@thynkr.ca',
     username: 'admin',
     password: 'Password123!',
     firstName: 'Admin',
@@ -251,12 +251,12 @@ async function seed() {
     logger.info('============================================================');
     console.log('\n');
     logger.info('Summary:');
-    logger.info('   - 1 Admin user (admin@thynkr.study)');
+    logger.info('   - 1 Admin user (admin@thynkr.ca)');
     logger.info('   - 5 Sample courses with files');
     logger.info('   - 3 Content articles');
     console.log('\n');
     logger.info('Admin Account (password: Password123!):');
-    logger.info('   - admin@thynkr.study');
+    logger.info('   - admin@thynkr.ca');
     console.log('\n');
 
   } catch (error) {

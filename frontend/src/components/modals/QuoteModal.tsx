@@ -404,7 +404,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
             <p className="text-xs text-slate-500 dark:text-slate-400 [.exporting_&]:text-slate-500 text-center">
               All plans include a 7-day money-back guarantee. Cancel anytime.
               <br />
-              Questions? Contact us at support@thynkr.study
+              Questions? Contact us at support@thynkr.ca
             </p>
           </div>
         </div>

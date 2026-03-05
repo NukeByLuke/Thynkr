@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env pwsh
+#!/usr/bin/env pwsh
 <#
 .SYNOPSIS
     Production deployment script for Thynkr to DigitalOcean
@@ -282,7 +282,7 @@ Write-Host "â•‘              âœ… DEPLOYMENT SUCCESSFUL                 
 Write-Host "â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•`n" -ForegroundColor Green
 
 Write-Info "Your application should now be running at:"
-Write-Host "  ðŸŒ https://thynkr.study" -ForegroundColor Cyan
+Write-Host "  ðŸŒ https://thynkr.ca" -ForegroundColor Cyan
 Write-Info "`nTo view logs:"
 Write-Host "  ssh $SERVER 'cd /root && docker compose -f docker-compose.prod.yml logs -f'" -ForegroundColor Gray
 Write-Info "`nTo rollback if needed:"

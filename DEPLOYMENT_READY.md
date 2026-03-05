@@ -1,4 +1,4 @@
-﻿# âœ… Docker Images Built & Pushed! (Updated with Debug Logging)
+# âœ… Docker Images Built & Pushed! (Updated with Debug Logging)
 
 Both frontend and backend images have been built with Stripe test configuration and pushed to Docker Hub:
 - âœ… `nukebyluke/thynkr-frontend:latest` (with price IDs baked in + debug logging)
@@ -27,7 +27,7 @@ STRIPE_EOF
 docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 sleep 10
-curl https://thynkr.study/api/health
+curl https://thynkr.ca/api/health
 ```
 
 ## Check the Browser Console
@@ -43,13 +43,13 @@ If the price IDs show as `undefined`, the build args didn't work and we need to 
 
 1. Go to: https://dashboard.stripe.com/test/webhooks
 2. Click "Add endpoint"
-3. URL: `https://thynkr.study/api/webhooks/stripe`
+3. URL: `https://thynkr.ca/api/webhooks/stripe`
 4. Events: `checkout.session.completed`, `customer.subscription.*`, `invoice.payment_*`
 5. Verify webhook secret matches: `whsec_f9f4b41a1a6d6800...`
 
 ## Test It!
 
-1. Go to https://thynkr.study
+1. Go to https://thynkr.ca
 2. Sign up or login
 3. Go to Pricing
 4. Upgrade to Pro

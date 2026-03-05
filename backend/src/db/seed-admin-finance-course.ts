@@ -15,11 +15,11 @@ async function seedAdminFinanceCourse() {
 
     // Get the admin user
     const adminUser = await prisma.user.findUnique({
-      where: { email: 'admin@thynkr.study' },
+      where: { email: 'admin@thynkr.ca' },
     });
 
     if (!adminUser) {
-      logger.error('Admin user (admin@thynkr.study) not found. Run main seed first.');
+      logger.error('Admin user (admin@thynkr.ca) not found. Run main seed first.');
       return;
     }
 

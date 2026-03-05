@@ -1,4 +1,4 @@
-﻿# Quick Reference: Stripe Test Mode on DigitalOcean
+# Quick Reference: Stripe Test Mode on DigitalOcean
 
 ## ðŸŽ¯ Goal
 Set up Stripe test mode on your DigitalOcean production environment to test subscriptions without real charges.
@@ -18,7 +18,7 @@ Set up Stripe test mode on your DigitalOcean production environment to test subs
 
 ### 3. Set Up Webhook
 - [Webhooks](https://dashboard.stripe.com/test/webhooks) (TEST mode)
-- Add endpoint: `https://thynkr.study/api/webhooks/stripe`
+- Add endpoint: `https://thynkr.ca/api/webhooks/stripe`
 - Select events: `checkout.session.completed`, `customer.subscription.*`, `invoice.payment_*`
 - Copy webhook secret (`whsec_...`)
 
@@ -69,7 +69,7 @@ Deploy frontend via GitHub Actions.
 - ZIP: Any 5 digits
 
 **Test Flow:**
-1. Go to `https://thynkr.study`
+1. Go to `https://thynkr.ca`
 2. Sign up/login
 3. Navigate to Pricing
 4. Click "Upgrade to Pro"
@@ -141,4 +141,4 @@ This will guide you through collecting all the keys and generate the commands yo
 **Can't connect to server**
 - Verify SSL certificate is valid
 - Check nginx is running: `docker compose -f docker-compose.prod.yml ps`
-- Check health: `curl https://thynkr.study/api/health`
+- Check health: `curl https://thynkr.ca/api/health`

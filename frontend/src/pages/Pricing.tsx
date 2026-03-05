@@ -668,10 +668,10 @@ export default function Pricing() {
             <p className="text-sm text-slate-500 dark:text-slate-400">
               Questions? Contact us at{' '}
               <a
-                href="mailto:support@thynkr.study"
+                href="mailto:support@thynkr.ca"
                 className="text-violet-600 dark:text-violet-400 hover:underline"
               >
-                support@thynkr.study
+                support@thynkr.ca
               </a>
             </p>
           </div>

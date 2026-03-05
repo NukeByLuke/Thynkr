@@ -1,4 +1,4 @@
-﻿# Scripts Directory
+# Scripts Directory
 
 Automation scripts for Thynkr development and deployment workflows.
 
@@ -159,7 +159,7 @@ Configure Stripe webhooks for your local or production environment.
 
 - **Server**: `root@138.197.208.81`
 - **Docker Hub**: `nukebyluke/thynkr-*`
-- **Production URL**: https://thynkr.study
+- **Production URL**: https://thynkr.ca
 
 ## ðŸ“ Notes
 

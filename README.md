@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # Thynkr
 
@@ -23,7 +23,7 @@
 
 Thynkr is an enterprise-grade EdTech platform that leverages OpenAI to parse PDFs, documents, and videos into structured study content. It features a **"Zen Mode"** immersive study interface, a comprehensive **gamification system** with tiered achievements, and a robust **subscription model** via Stripe.
 
-**Live Demo:** [https://thynkr.study](https://thynkr.study)
+**Live Demo:** [https://thynkr.ca](https://thynkr.ca)
 
 ---
 

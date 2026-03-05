@@ -1,4 +1,4 @@
-﻿# ðŸ’³ Stripe Payment System Setup Complete
+# ðŸ’³ Stripe Payment System Setup Complete
 
 Your Thynkr payment system is now fully configured! Here's what was set up:
 
@@ -166,7 +166,7 @@ Key differences for production:
 - Switch to LIVE mode in Stripe Dashboard
 - Create LIVE products and prices
 - Use LIVE API keys
-- Set up webhook endpoint at `https://thynkr.study/api/stripe/webhook`
+- Set up webhook endpoint at `https://thynkr.ca/api/stripe/webhook`
 - Update all environment variables on production server
 
 ---

@@ -229,10 +229,10 @@ export default function Privacy() {
               <p>
                 To exercise these rights, please contact us at{' '}
                 <a
-                  href="mailto:support@thynkr.study"
+                  href="mailto:support@thynkr.ca"
                   className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                 >
-                  support@thynkr.study
+                  support@thynkr.ca
                 </a>
                 .
               </p>
@@ -282,19 +282,19 @@ export default function Privacy() {
                 <li>
                   Email:{' '}
                   <a
-                    href="mailto:support@thynkr.study"
+                    href="mailto:support@thynkr.ca"
                     className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                   >
-                    support@thynkr.study
+                    support@thynkr.ca
                   </a>
                 </li>
                 <li>
                   Website:{' '}
                   <a
-                    href="https://thynkr.study"
+                    href="https://thynkr.ca"
                     className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                   >
-                    https://thynkr.study
+                    https://thynkr.ca
                   </a>
                 </li>
               </ul>

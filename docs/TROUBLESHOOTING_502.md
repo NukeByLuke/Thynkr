@@ -1,7 +1,7 @@
-﻿# ðŸš¨ Troubleshooting 502 Bad Gateway on thynkr.study
+# ðŸš¨ Troubleshooting 502 Bad Gateway on thynkr.ca
 
 ## Problem
-Your frontend loads but the backend API at `https://thynkr.study/api/auth/login` returns 502 Bad Gateway.
+Your frontend loads but the backend API at `https://thynkr.ca/api/auth/login` returns 502 Bad Gateway.
 
 ## What 502 Means
 The nginx frontend can't reach the backend service. The backend is either:
@@ -206,7 +206,7 @@ OPENAI_API_KEY=your_openai_key
 OPENAI_MODEL=gpt-4o-mini
 
 # Frontend URL
-FRONTEND_URL=https://thynkr.study
+FRONTEND_URL=https://thynkr.ca
 ```
 
 ### Fix 4: Check Database Migration
@@ -218,7 +218,7 @@ docker-compose -f docker-compose.prod.yml exec backend npx prisma migrate deploy
 ### Fix 5: Check SSL Certificates
 ```bash
 # Verify Let's Encrypt certificates exist
-ls -la /etc/letsencrypt/live/thynkr.study/
+ls -la /etc/letsencrypt/live/thynkr.ca/
 
 # Should show:
 # fullchain.pem
@@ -267,11 +267,11 @@ Once backend is running:
 
 1. Test health endpoint:
    ```bash
-   curl https://thynkr.study/api/health
+   curl https://thynkr.ca/api/health
    ```
    Should return: `{"status":"ok"}`
 
-2. Try logging in again at https://thynkr.study
+2. Try logging in again at https://thynkr.ca
 
 3. Check browser console - should work without 502 error
 

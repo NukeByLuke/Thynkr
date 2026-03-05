@@ -1,4 +1,4 @@
-﻿# ðŸŽ¯ Thynkr Stripe Payment Setup Guide
+# ðŸŽ¯ Thynkr Stripe Payment Setup Guide
 
 ## Quick Start: Local Development Setup
 
@@ -181,7 +181,7 @@ Use any future date, any CVC, and any ZIP.
 
 1. Go to [Webhooks (LIVE mode)](https://dashboard.stripe.com/webhooks)
 2. Click **"Add endpoint"**
-3. **Endpoint URL:** `https://thynkr.study/api/stripe/webhook`
+3. **Endpoint URL:** `https://thynkr.ca/api/stripe/webhook`
 4. **Events to listen to:**
    - `checkout.session.completed`
    - `customer.subscription.updated`
@@ -208,7 +208,7 @@ STRIPE_PRICE_PREMIUM_MONTHLY=price_YOUR_LIVE_ID
 STRIPE_PRICE_PREMIUM_YEARLY=price_YOUR_LIVE_ID
 
 # Production URL
-FRONTEND_URL=https://thynkr.study
+FRONTEND_URL=https://thynkr.ca
 ```
 
 Also update frontend production environment variables.
@@ -216,7 +216,7 @@ Also update frontend production environment variables.
 ### Step 5: Deploy & Test
 
 1. Deploy your updated code to production
-2. Test the full payment flow on https://thynkr.study
+2. Test the full payment flow on https://thynkr.ca
 3. Monitor the [Stripe Dashboard (LIVE mode)](https://dashboard.stripe.com/dashboard) for real payments
 
 ---
@@ -301,7 +301,7 @@ stripe listen --forward-to localhost:3001/api/stripe/webhook
 ### Production Deployment
 - [ ] Products and prices created in LIVE mode
 - [ ] Live API keys configured
-- [ ] Webhook endpoint configured at `https://thynkr.study/api/stripe/webhook`
+- [ ] Webhook endpoint configured at `https://thynkr.ca/api/stripe/webhook`
 - [ ] All 5 webhook events selected
 - [ ] Webhook signing secret configured
 - [ ] Production deployment successful

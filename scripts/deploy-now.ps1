@@ -1,4 +1,4 @@
-﻿# Quick Deploy - Stripe to DigitalOcean
+# Quick Deploy - Stripe to DigitalOcean
 $ErrorActionPreference = "Stop"
 
 Write-Host ""
@@ -76,9 +76,9 @@ Write-Host "[5/5] Deploying to DigitalOcean..." -ForegroundColor Cyan
 Write-Host ""
 
 # $dropletIp = Read-Host "DigitalOcean Droplet IP"
-# $domain = Read-Host "Domain (e.g., thynkr.study)"
+# $domain = Read-Host "Domain (e.g., thynkr.ca)"
 $dropletIp = "138.197.208.81"
-$domain = "thynkr.study"
+$domain = "thynkr.ca"
 
 Write-Host ""
 Write-Host "Connecting to server and updating..." -ForegroundColor Yellow

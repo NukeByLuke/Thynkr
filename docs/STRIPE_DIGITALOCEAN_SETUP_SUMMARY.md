@@ -1,4 +1,4 @@
-﻿# Stripe DigitalOcean Test Setup - Summary
+# Stripe DigitalOcean Test Setup - Summary
 
 ## âœ… What Was Done
 
@@ -44,7 +44,7 @@ I've set up everything you need to configure Stripe test mode on your DigitalOce
 ### Step 3: Set Up Webhook (3 min)
 1. Go to https://dashboard.stripe.com/test/webhooks
 2. Click "Add endpoint"
-3. URL: `https://thynkr.study/api/webhooks/stripe` (or your domain)
+3. URL: `https://thynkr.ca/api/webhooks/stripe` (or your domain)
 4. Select these events:
    - `checkout.session.completed`
    - `customer.subscription.created`
@@ -108,7 +108,7 @@ docker compose -f docker-compose.prod.yml restart backend
 3. Wait for deployment to complete (~3-5 minutes)
 
 ### Step 8: Test! (5 min)
-1. Go to your site (e.g., `https://thynkr.study`)
+1. Go to your site (e.g., `https://thynkr.ca`)
 2. Sign up or login
 3. Go to Pricing page
 4. Click "Upgrade to Pro"

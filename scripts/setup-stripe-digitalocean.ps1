@@ -1,4 +1,4 @@
-﻿# Stripe Test Mode Setup for DigitalOcean
+# Stripe Test Mode Setup for DigitalOcean
 # This script helps you configure Stripe test keys on your DigitalOcean droplet
 
 Write-Host "ðŸŽ¯ Thynkr - DigitalOcean Stripe Test Setup" -ForegroundColor Cyan
@@ -20,7 +20,7 @@ $pricePremiumYearly = Read-Host "Premium Yearly Price ID (price_...)"
 
 Write-Host "`nðŸŒ Server Configuration:"
 $dropletIp = Read-Host "DigitalOcean Droplet IP"
-$domain = Read-Host "Domain (e.g., thynkr.study)" 
+$domain = Read-Host "Domain (e.g., thynkr.ca)" 
 
 # Generate SSH command
 Write-Host "`nðŸ“‹ Commands to run on your DigitalOcean server:" -ForegroundColor Green
