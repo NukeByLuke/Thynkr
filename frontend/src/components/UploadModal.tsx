@@ -146,6 +146,9 @@ export default function UploadModal({
   const recordedChunksRef = useRef<Blob[]>([]);
   const transcriptTimelineRef = useRef<Array<{ timestamp: number; text: string }>>([]);
   const transcriptSegmentStartTimesRef = useRef<Map<number, number>>(new Map());
+  const recordingStartedAtMsRef = useRef<number | null>(null);
+  const recordingPausedAtMsRef = useRef<number | null>(null);
+  const recordingAccumulatedPausedMsRef = useRef(0);
   const recordingSecondsRef = useRef(0);
   const finalTranscriptRef = useRef('');
   const shouldRestartRecognitionRef = useRef(false);
@@ -158,6 +161,26 @@ export default function UploadModal({
       .filter(Boolean).length;
 
     return Math.min(4, Math.max(1, Math.round(words / 3)));
+  };
+
+  const getRecordingClockMs = () =>
+    (typeof performance !== 'undefined' ? performance.now() : Date.now());
+
+  const getRecordingElapsedSeconds = () => {
+    const startedAtMs = recordingStartedAtMsRef.current;
+    if (typeof startedAtMs !== 'number') {
+      return recordingSecondsRef.current;
+    }
+
+    const nowMs = getRecordingClockMs();
+    const pausedAtMs = recordingPausedAtMsRef.current;
+    const currentPausedDurationMs =
+      typeof pausedAtMs === 'number' ? Math.max(0, nowMs - pausedAtMs) : 0;
+
+    const activeDurationMs =
+      nowMs - startedAtMs - recordingAccumulatedPausedMsRef.current - currentPausedDurationMs;
+
+    return Math.max(0, activeDurationMs / 1000);
   };
 
   const clearTransitionTimers = () => {
@@ -222,6 +245,9 @@ export default function UploadModal({
     setRecordingStatus('idle');
     setRecordingSeconds(0);
     recordingSecondsRef.current = 0;
+    recordingStartedAtMsRef.current = null;
+    recordingPausedAtMsRef.current = null;
+    recordingAccumulatedPausedMsRef.current = 0;
     setRecordedTranscript('');
     setRecordingInterimTranscript('');
     setRecordingErrorMessage(null);
@@ -273,23 +299,27 @@ export default function UploadModal({
           const transcriptSegment = recognitionResult?.[0]?.transcript?.trim() || '';
           if (!transcriptSegment) continue;
 
+          const observedSeconds = getRecordingElapsedSeconds();
+
           const existingStartTimestamp = transcriptSegmentStartTimesRef.current.get(index);
           if (typeof existingStartTimestamp !== 'number') {
-            transcriptSegmentStartTimesRef.current.set(index, recordingSecondsRef.current);
+            transcriptSegmentStartTimesRef.current.set(index, observedSeconds);
           }
 
           const segmentStartTimestamp =
-            transcriptSegmentStartTimesRef.current.get(index) ?? recordingSecondsRef.current;
+            transcriptSegmentStartTimesRef.current.get(index) ?? observedSeconds;
 
           if (recognitionResult.isFinal) {
-            const estimatedLeadSeconds =
-              typeof existingStartTimestamp === 'number'
-                ? 0
-                : estimateTranscriptLeadSeconds(transcriptSegment);
+            const estimatedLeadSeconds = estimateTranscriptLeadSeconds(transcriptSegment);
+            const estimatedStartTimestamp = Math.max(0, observedSeconds - estimatedLeadSeconds);
+            const alignedStartTimestamp = Math.max(
+              0,
+              Math.min(segmentStartTimestamp, estimatedStartTimestamp)
+            );
 
             finalTranscriptRef.current = `${finalTranscriptRef.current} ${transcriptSegment}`.trim();
             transcriptTimelineRef.current.push({
-              timestamp: Math.max(0, Math.floor(segmentStartTimestamp - estimatedLeadSeconds)),
+              timestamp: alignedStartTimestamp,
               text: transcriptSegment,
             });
             transcriptSegmentStartTimesRef.current.delete(index);
@@ -584,6 +614,9 @@ export default function UploadModal({
       mediaRecorderRef.current = mediaRecorder;
       setRecordingSeconds(0);
       recordingSecondsRef.current = 0;
+      recordingStartedAtMsRef.current = getRecordingClockMs();
+      recordingPausedAtMsRef.current = null;
+      recordingAccumulatedPausedMsRef.current = 0;
       setRecordingStatus('recording');
       shouldRestartRecognitionRef.current = true;
       setRecordingErrorMessage(null);
@@ -608,6 +641,10 @@ export default function UploadModal({
         mediaRecorderRef.current.pause();
       }
 
+      if (recordingPausedAtMsRef.current === null) {
+        recordingPausedAtMsRef.current = getRecordingClockMs();
+      }
+
       shouldRestartRecognitionRef.current = false;
       if (speechRecognitionRef.current) {
         try {
@@ -625,6 +662,14 @@ export default function UploadModal({
     if (recordingStatus === 'paused') {
       if (mediaRecorderRef.current?.state === 'paused') {
         mediaRecorderRef.current.resume();
+      }
+
+      if (recordingPausedAtMsRef.current !== null) {
+        recordingAccumulatedPausedMsRef.current += Math.max(
+          0,
+          getRecordingClockMs() - recordingPausedAtMsRef.current
+        );
+        recordingPausedAtMsRef.current = null;
       }
 
       setRecordingStatus('recording');
@@ -668,7 +713,10 @@ export default function UploadModal({
       .join('\n');
 
     const transcript = `${finalTranscriptRef.current} ${recordingInterimTranscript}`.trim();
-    const recordingDurationSeconds = recordingSecondsRef.current;
+    const recordingDurationSeconds = Math.max(
+      0,
+      Math.floor(Math.max(recordingSecondsRef.current, getRecordingElapsedSeconds()))
+    );
     const capturedAtIso = new Date().toISOString();
 
     const audioMimeType = recordedChunksRef.current[0]?.type || 'audio/webm';
@@ -810,12 +858,10 @@ export default function UploadModal({
     if (recordingStatus !== 'recording') return;
 
     const intervalId = window.setInterval(() => {
-      setRecordingSeconds((prev) => {
-        const next = prev + 1;
-        recordingSecondsRef.current = next;
-        return next;
-      });
-    }, 1000);
+      const elapsedSeconds = Math.max(0, Math.floor(getRecordingElapsedSeconds()));
+      recordingSecondsRef.current = elapsedSeconds;
+      setRecordingSeconds(elapsedSeconds);
+    }, 250);
 
     return () => {
       window.clearInterval(intervalId);
