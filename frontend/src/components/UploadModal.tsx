@@ -428,11 +428,10 @@ export default function UploadModal({
 
           if (recognitionResult.isFinal) {
             const estimatedLeadSeconds = estimateTranscriptLeadSeconds(transcriptSegment);
-            const estimatedStartTimestamp = Math.max(0, observedSeconds - estimatedLeadSeconds);
-            const alignedStartTimestamp = Math.max(
-              0,
-              Math.min(segmentStartTimestamp, estimatedStartTimestamp)
-            );
+            const alignedStartTimestamp =
+              typeof existingStartTimestamp === 'number'
+                ? Math.max(0, segmentStartTimestamp)
+                : Math.max(0, observedSeconds - estimatedLeadSeconds);
 
             finalTranscriptRef.current = `${finalTranscriptRef.current} ${transcriptSegment}`.trim();
             transcriptTimelineRef.current.push({

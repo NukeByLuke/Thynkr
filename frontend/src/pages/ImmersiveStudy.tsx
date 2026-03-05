@@ -971,8 +971,6 @@ type TranscriptCue = {
   text: string;
 };
 
-const CUE_CLICK_PLAYBACK_LEAD_SECONDS = 1.2;
-
 function formatAudioClock(totalSeconds: number, fallback: string = '0:00'): string {
   if (!Number.isFinite(totalSeconds) || totalSeconds < 0) {
     return fallback;
@@ -1396,9 +1394,7 @@ function AudioTranscriptPlayer({
 
   const handleCueClick = useCallback(
     async (timestamp: number) => {
-      // SpeechRecognition "final" events can land slightly late, so we nudge back for better alignment.
-      const alignedTimestamp = Math.max(0, timestamp - CUE_CLICK_PLAYBACK_LEAD_SECONDS);
-      const seekedTime = seekTo(alignedTimestamp);
+      const seekedTime = seekTo(Math.max(0, timestamp));
       if (seekedTime === null) {
         return;
       }
