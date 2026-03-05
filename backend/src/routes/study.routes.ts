@@ -71,6 +71,9 @@ type RecordingTimelineEntry = {
 const MIN_RECORDING_SEGMENT_SECONDS = 0.45;
 
 const AUDIO_EXTENSIONS = new Set(['.webm', '.mp3', '.wav', '.m4a', '.mp4', '.ogg']);
+const MAX_RECORDING_AUTO_TRANSCRIBE_BYTES = 20 * 1024 * 1024;
+
+type RecordingTranscriptionSource = 'live-browser' | 'gemini-audio' | 'unavailable';
 
 function estimateRecordingSegmentDurationSeconds(segmentText: string): number {
   const wordCount = String(segmentText || '')
@@ -377,9 +380,21 @@ function buildRecordingExtractedText(
   transcript: string,
   timeline: RecordingTimelineEntry[],
   capturedAtIso: string,
-  durationSeconds: number
+  durationSeconds: number,
+  transcriptionSource: RecordingTranscriptionSource
 ): string {
   const fullTranscript = String(transcript || '').replace(/\s+/g, ' ').trim();
+  const transcriptBody =
+    fullTranscript ||
+    'Transcript was unavailable from the browser and auto-transcription did not complete.';
+
+  const transcriptionSourceLabel =
+    transcriptionSource === 'gemini-audio'
+      ? 'Gemini Auto Transcript'
+      : transcriptionSource === 'live-browser'
+      ? 'Browser Live Transcript'
+      : 'Unavailable';
+
   const timelineLines = timeline
     .map(
       (entry) =>
@@ -394,13 +409,14 @@ function buildRecordingExtractedText(
     'Live Lecture Transcript',
     `Captured: ${capturedAtIso}`,
     durationLabel ? `Duration: ${durationLabel}` : null,
+    `Transcription Source: ${transcriptionSourceLabel}`,
     'Timing Anchor: Speech Start',
     '',
     timelineLines ? 'Timestamped Transcript:' : 'Transcript:',
-    timelineLines || fullTranscript,
+    timelineLines || transcriptBody,
     '',
     'Full Transcript:',
-    fullTranscript,
+    transcriptBody,
   ]
     .filter((line): line is string => Boolean(line))
     .join('\n');
@@ -927,7 +943,7 @@ export default async function studyRoutes(server: FastifyInstance) {
     }
   );
 
-  // Upload live recording as a single study file (audio + transcript)
+  // Upload live recording as a single study file (audio + transcript, with server-side fallback)
   server.post(
     '/upload-recording',
     {
@@ -960,12 +976,14 @@ export default async function studyRoutes(server: FastifyInstance) {
 
         const user = await prisma.user.findUnique({
           where: { id: userId },
-          select: { role: true },
+          select: { role: true, preferredLanguage: true },
         });
 
         if (!user) {
           return reply.code(404).send({ error: 'User not found' });
         }
+
+        const preferredLanguage = resolveUserLanguage(user.preferredLanguage || undefined);
 
         const uploadCheck = await canUploadFile(userId, user.role);
         if (!uploadCheck.allowed) {
@@ -1026,17 +1044,71 @@ export default async function studyRoutes(server: FastifyInstance) {
         }
 
         const requestBody = ((request.raw as any).body || {}) as Record<string, unknown>;
-        const transcript = String(requestBody.transcript || '')
+        let transcript = String(requestBody.transcript || '')
           .replace(/\s+/g, ' ')
           .trim();
 
+        let transcriptionSource: RecordingTranscriptionSource =
+          transcript.length > 0 ? 'live-browser' : 'unavailable';
+
         if (transcript.length < 1) {
-          await fs.unlink(audioFile.path).catch(() => {});
-          return rejectRecordingUpload(
-            'Transcript is required before uploading recording.',
-            'RECORDING_TRANSCRIPT_REQUIRED',
-            { transcriptLength: transcript.length }
-          );
+          if (audioFile.size > MAX_RECORDING_AUTO_TRANSCRIBE_BYTES) {
+            server.log.warn(
+              {
+                userId,
+                fileSizeBytes: audioFile.size,
+                maxAutoTranscribeBytes: MAX_RECORDING_AUTO_TRANSCRIBE_BYTES,
+                mimeType: audioFile.mimetype,
+              },
+              'Skipping Gemini auto-transcription for recording due to payload size'
+            );
+          } else {
+            try {
+              const audioBuffer = await fs.readFile(audioFile.path);
+              const generatedAudioResult = await aiService.generateFromAudio(
+                audioBuffer.toString('base64'),
+                audioMimeTypeWithoutParameters || audioMimeType || audioFile.mimetype,
+                preferredLanguage
+              );
+
+              const generatedTranscript = String(generatedAudioResult.transcript || '')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+              if (generatedTranscript.length > 0) {
+                transcript = generatedTranscript;
+                transcriptionSource = 'gemini-audio';
+                server.log.info(
+                  {
+                    userId,
+                    transcriptLength: generatedTranscript.length,
+                    mimeType: audioFile.mimetype,
+                    fileSizeBytes: audioFile.size,
+                  },
+                  'Generated recording transcript with Gemini'
+                );
+              } else {
+                server.log.warn(
+                  {
+                    userId,
+                    mimeType: audioFile.mimetype,
+                    fileSizeBytes: audioFile.size,
+                  },
+                  'Gemini returned empty transcript for recording upload'
+                );
+              }
+            } catch (transcriptionError: any) {
+              server.log.warn(
+                {
+                  userId,
+                  mimeType: audioFile.mimetype,
+                  fileSizeBytes: audioFile.size,
+                  errorMessage: String(transcriptionError?.message || '').trim(),
+                },
+                'Gemini auto-transcription failed for recording upload'
+              );
+            }
+          }
         }
 
         const rawFolderId = requestBody.folderId;
@@ -1076,7 +1148,8 @@ export default async function studyRoutes(server: FastifyInstance) {
           transcript,
           timelineEntries,
           capturedAtIso,
-          durationSeconds
+          durationSeconds,
+          transcriptionSource
         );
 
         const uploadedFile = await prisma.uploadedFile.create({
@@ -1102,18 +1175,29 @@ export default async function studyRoutes(server: FastifyInstance) {
           server.log.error({ error }, 'Failed to check achievements for recording upload');
         }
 
-        try {
-          await recordAIUsage(userId, 'SUMMARY_VIEW', {
-            fileId: uploadedFile.id,
-            tokensUsed: Math.ceil(extractedText.length / 4),
-          });
-        } catch (error) {
-          server.log.error({ error }, 'Failed to record AI usage for recording upload');
+        if (transcriptionSource === 'gemini-audio') {
+          try {
+            await recordAIUsage(userId, 'SUMMARY_VIEW', {
+              fileId: uploadedFile.id,
+              tokensUsed: Math.ceil(transcript.length / 4),
+            });
+          } catch (error) {
+            server.log.error({ error }, 'Failed to record AI usage for recording upload');
+          }
         }
 
-        return reply.code(201).send({
+        const responsePayload: any = {
           file: normalizeFileForLanguage(uploadedFile),
-        });
+          transcriptionSource,
+        };
+
+        if (transcriptionSource === 'unavailable') {
+          responsePayload.warning =
+            'Recording uploaded, but transcript could not be extracted automatically. You can still use the audio file and retry later.';
+          responsePayload.limitedFeatures = true;
+        }
+
+        return reply.code(201).send(responsePayload);
       } catch (error: any) {
         if (audioFile?.path) {
           await fs.unlink(audioFile.path).catch(() => {});

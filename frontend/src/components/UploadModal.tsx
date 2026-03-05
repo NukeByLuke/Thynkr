@@ -481,7 +481,6 @@ export default function UploadModal({
   const startSpeechRecognition = () => {
     const SpeechRecognitionConstructor = getSpeechRecognitionConstructor();
     if (!SpeechRecognitionConstructor) {
-      setRecordingErrorMessage('Live transcription is not supported in this browser. Use Chrome or Edge.');
       return;
     }
 
@@ -550,7 +549,9 @@ export default function UploadModal({
         const errorCode = String(event?.error || '');
         if (errorCode === 'not-allowed' || errorCode === 'service-not-allowed') {
           shouldRestartRecognitionRef.current = false;
-          setRecordingErrorMessage('Speech recognition permission was denied.');
+          setRecordingErrorMessage(
+            'Live transcription permission was denied. Recording will still upload and auto-transcribe.'
+          );
           return;
         }
 
@@ -572,7 +573,7 @@ export default function UploadModal({
       speechRecognitionRef.current = recognition;
       recognition.start();
     } catch {
-      setRecordingErrorMessage('Unable to start live transcription in this browser.');
+      // Recording continues even if live transcription cannot start.
     }
   };
 
@@ -832,9 +833,12 @@ export default function UploadModal({
       recordingPausedAtMsRef.current = null;
       recordingAccumulatedPausedMsRef.current = 0;
       setRecordingStatus('recording');
-      shouldRestartRecognitionRef.current = true;
+      shouldRestartRecognitionRef.current = speechRecognitionSupported;
       setRecordingErrorMessage(null);
-      startSpeechRecognition();
+
+      if (speechRecognitionSupported) {
+        startSpeechRecognition();
+      }
     } catch (error: any) {
       releaseRecordingResources();
       resetRecordingState();
@@ -887,8 +891,10 @@ export default function UploadModal({
       }
 
       setRecordingStatus('recording');
-      shouldRestartRecognitionRef.current = true;
-      startSpeechRecognition();
+      shouldRestartRecognitionRef.current = speechRecognitionSupported;
+      if (speechRecognitionSupported) {
+        startSpeechRecognition();
+      }
     }
   };
 
@@ -955,16 +961,7 @@ export default function UploadModal({
     setRecordingSeconds(0);
     recordingSecondsRef.current = 0;
 
-    const hasTranscript = transcript.length > 0;
     const hasAudio = !!audioBlob && audioBlob.size > 0;
-
-    if (!hasTranscript) {
-      const message =
-        'No speech transcript was captured. Please use Chrome or Edge, speak clearly, and try again.';
-      setRecordingErrorMessage(message);
-      toast.error(message);
-      return;
-    }
 
     if (!hasAudio || !audioBlob) {
       const message =
@@ -1217,7 +1214,7 @@ export default function UploadModal({
     !!navigator.mediaDevices?.getUserMedia;
 
   const speechRecognitionSupported = !!getSpeechRecognitionConstructor();
-  const canStartRecording = recordingSupported && speechRecognitionSupported;
+  const canStartRecording = recordingSupported;
 
   const isSubmitDisabled =
     isLocked ||
@@ -1725,7 +1722,7 @@ export default function UploadModal({
                             )}
                             {recordingSupported && !speechRecognitionSupported && (
                               <p className="mt-3 text-xs text-amber-600 dark:text-amber-300 text-center max-w-md">
-                                Live transcription is not supported here. Use Chrome or Edge to record and process lectures.
+                                Live transcription is unavailable here. You can still record and we will auto-transcribe after upload.
                               </p>
                             )}
                             {recordingErrorMessage && (
@@ -1806,7 +1803,9 @@ export default function UploadModal({
                                   </>
                                 ) : (
                                   <span className="text-slate-500 dark:text-slate-400">
-                                    Start speaking and your transcript will appear here in real time.
+                                    {speechRecognitionSupported
+                                      ? 'Start speaking and your transcript will appear here in real time.'
+                                      : 'Live transcript is unavailable in this browser. Keep recording and we will auto-transcribe after upload.'}
                                   </span>
                                 )}
                               </div>
@@ -1863,7 +1862,7 @@ export default function UploadModal({
             <div className="px-6 sm:px-8 py-4 border-t border-slate-200 dark:border-white/10 flex items-center justify-between gap-3 bg-white/70 dark:bg-black/70">
               <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
                 {activeTab === 'record'
-                  ? 'Tip: Speak clearly for better live transcription before you stop and process.'
+                  ? 'Tip: Speak clearly and reduce background noise for better automatic transcript quality.'
                   : 'Tip: You can drag files directly into this modal for faster uploads.'}
               </p>
               <div className="flex items-center gap-3 ml-auto">

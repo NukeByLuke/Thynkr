@@ -604,19 +604,145 @@ ${sanitizedPrompt}`;
   }
 
   /**
-   * Generate content from audio file
-   * NOTE: Gemini doesn't have a Whisper equivalent yet. This method is kept for compatibility
-   * but will throw an error. YouTube transcription should use captions instead.
+   * Generate transcript metadata from uploaded audio.
    */
   async generateFromAudio(
-    _audioBase64: string,
-    _mimeType: string
+    audioBase64: string,
+    mimeType: string,
+    language: string = DEFAULT_LANGUAGE
   ): Promise<{ transcript: string; summary: string; title: string; keyConcepts: string[] }> {
     try {
-      logger.warn('Audio transcription requested but Gemini does not support audio-to-text yet');
-      throw new Error(
-        'Audio transcription is not supported with Gemini. Please ensure YouTube videos have captions available.'
+      const normalizedAudioBase64 = String(audioBase64 || '').replace(/\s+/g, '');
+      if (!normalizedAudioBase64) {
+        throw new Error('Audio payload is empty. Please try recording again.');
+      }
+
+      const normalizedMimeType = String(mimeType || '').toLowerCase().trim() || 'audio/webm';
+      const normalizedLanguage = this.normalizeLanguage(language);
+      const languageInstruction = this.buildLanguageInstruction(normalizedLanguage);
+
+      if (!this.authClient) {
+        this.authClient = await this.auth.getClient();
+      }
+
+      const tokenResponse = await this.authClient.getAccessToken();
+      if (!tokenResponse.token) {
+        throw new Error('Failed to obtain access token for Gemini API');
+      }
+
+      const requestBody = {
+        contents: [
+          {
+            parts: [
+              {
+                inlineData: {
+                  mimeType: normalizedMimeType,
+                  data: normalizedAudioBase64,
+                },
+              },
+              {
+                text: `${languageInstruction}
+
+You are an expert lecture transcription assistant.
+
+You must respond with valid JSON in this exact format:
+{"transcript":"full transcript text","summary":"2-4 sentence summary","title":"short lecture title","keyConcepts":["concept 1","concept 2"]}
+
+Rules:
+- transcript: include the full spoken transcript as plain text without timestamps.
+- summary: concise and study-focused.
+- title: short, descriptive lecture title.
+- keyConcepts: 3 to 8 concise study concepts.
+- If some words are unclear, transcribe best effort and keep going.
+`,
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.2,
+          topK: 32,
+          topP: 0.9,
+          maxOutputTokens: 16384,
+        },
+      };
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 180000);
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${tokenResponse.token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal,
+        }
       );
+
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`Gemini API error ${response.status}: ${errorBody}`);
+      }
+
+      const data = (await response.json()) as any;
+      const modelText =
+        data?.candidates?.[0]?.content?.parts
+          ?.map((part: any) => String(part?.text || '').trim())
+          .filter(Boolean)
+          .join('\n') || '';
+
+      if (!modelText) {
+        throw new Error('Empty audio transcription response from Gemini API');
+      }
+
+      const parsed = this.safeParseJson<{
+        transcript?: string;
+        summary?: string;
+        title?: string;
+        keyConcepts?: string[];
+      }>(modelText, (rawText) => {
+        const cleaned = rawText.replace(/```json\n?|```\n?/g, '').trim();
+        return {
+          transcript: cleaned,
+          summary: '',
+          title: 'Recorded Lecture',
+          keyConcepts: [],
+        };
+      });
+
+      const transcript = String(parsed.transcript || '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const summary = String(parsed.summary || '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const title =
+        String(parsed.title || 'Recorded Lecture')
+          .replace(/\s+/g, ' ')
+          .trim() || 'Recorded Lecture';
+      const keyConcepts = Array.isArray(parsed.keyConcepts)
+        ? parsed.keyConcepts
+            .map((concept) => String(concept || '').replace(/\s+/g, ' ').trim())
+            .filter(Boolean)
+            .slice(0, 8)
+        : [];
+
+      if (!transcript) {
+        throw new Error('Gemini did not return a usable transcript for this recording.');
+      }
+
+      return {
+        transcript,
+        summary,
+        title,
+        keyConcepts,
+      };
     } catch (error: any) {
       logger.error({ error: error.message }, 'Failed to generate content from audio');
       throw new Error(error.message || 'Failed to process audio content');

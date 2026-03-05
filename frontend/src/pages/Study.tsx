@@ -40,6 +40,13 @@ interface UploadMutationResult {
   failedFiles: Array<{ name: string; error: string }>;
 }
 
+interface RecordingUploadResult {
+  file?: UploadedFile;
+  warning?: string;
+  limitedFeatures?: boolean;
+  transcriptionSource?: string;
+}
+
 export default function Study() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -249,17 +256,34 @@ export default function Study() {
         },
       });
 
-      return response.data?.file as UploadedFile | undefined;
+      return {
+        file: response.data?.file as UploadedFile | undefined,
+        warning:
+          typeof response.data?.warning === 'string' ? response.data.warning : undefined,
+        limitedFeatures: Boolean(response.data?.limitedFeatures),
+        transcriptionSource:
+          typeof response.data?.transcriptionSource === 'string'
+            ? response.data.transcriptionSource
+            : undefined,
+      } as RecordingUploadResult;
     },
-    onSuccess: async (file?: UploadedFile) => {
+    onSuccess: async (result: RecordingUploadResult) => {
       setUploadError(null);
       setUploadProgress(null);
       await queryClient.invalidateQueries({ queryKey: ['study-files'] });
       await queryClient.refetchQueries({ queryKey: ['study-files'] });
-      toast.success('Recording uploaded successfully!');
 
-      if (file?.id) {
-        navigate(`/study/${file.id}`);
+      if (result.warning) {
+        toast.success('Recording uploaded.');
+        toast.error(result.warning, { duration: 8000 });
+      } else if (result.transcriptionSource === 'gemini-audio') {
+        toast.success('Recording uploaded and auto-transcribed!');
+      } else {
+        toast.success('Recording uploaded successfully!');
+      }
+
+      if (result.file?.id) {
+        navigate(`/study/${result.file.id}`);
       }
     },
     onError: (error: unknown) => {
