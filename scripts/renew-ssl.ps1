@@ -26,8 +26,8 @@ Write-Host ""
 # Run certificate renewal commands
 Write-Host "Stopping nginx..." -ForegroundColor Yellow
 ssh $SERVER @"
-cd /root/thynkr && \
-docker-compose -f docker-compose.prod.yml stop nginx
+cd /root && \
+docker-compose -f docker-compose.prod.yml stop frontend
 "@
 
 Write-Host ""
@@ -40,15 +40,16 @@ if ($LASTEXITCODE -ne 0) {
     Write-Host ""
     Write-Host "âš ï¸  Auto-renewal failed. Trying standalone mode..." -ForegroundColor Yellow
     ssh $SERVER @"
-certbot certonly --standalone --force-renewal -d thynkr.study -d www.thynkr.study -d thynkr.ca -d www.thynkr.ca --non-interactive --agree-tos -m admin@thynkr.study
+certbot certonly --standalone --force-renewal --cert-name thynkr.study -d thynkr.study -d www.thynkr.study --non-interactive --agree-tos -m admin@thynkr.study && \
+certbot certonly --standalone --force-renewal --cert-name thynkr.ca -d thynkr.ca -d www.thynkr.ca --non-interactive --agree-tos -m admin@thynkr.study
 "@
 }
 
 Write-Host ""
 Write-Host "Restarting nginx..." -ForegroundColor Yellow
 ssh $SERVER @"
-cd /root/thynkr && \
-docker-compose -f docker-compose.prod.yml up -d nginx
+cd /root && \
+docker-compose -f docker-compose.prod.yml up -d frontend
 "@
 
 Write-Host ""
