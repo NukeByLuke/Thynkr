@@ -6,6 +6,7 @@
 
 import { GoogleAuth, AuthClient } from 'google-auth-library';
 import NodeCache from 'node-cache';
+import crypto from 'crypto';
 import { logger } from '../lib/logger';
 import { DEFAULT_LANGUAGE } from '../constants/language.constants';
 
@@ -760,16 +761,11 @@ Rules:
   }
 
   /**
-   * Create a simple hash of text for caching
+   * Create a stable hash from full text for cache keys.
+   * Using the full prompt avoids collisions when different prompts share long prefixes.
    */
   private hashText(text: string): string {
-    let hash = 0;
-    for (let i = 0; i < Math.min(text.length, 1000); i++) {
-      const char = text.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash;
-    }
-    return hash.toString(36);
+    return crypto.createHash('sha256').update(text).digest('hex').slice(0, 32);
   }
 
   private normalizeLanguage(language?: string): string {
