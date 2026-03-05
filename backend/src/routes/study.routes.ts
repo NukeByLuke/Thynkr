@@ -146,6 +146,76 @@ function buildFallbackTimeline(
   }));
 }
 
+function selectRecordingTimeline(
+  parsedTimeline: RecordingTimelineEntry[],
+  transcript: string,
+  durationSeconds: number
+): RecordingTimelineEntry[] {
+  const transcriptFallbackTimeline = buildFallbackTimeline(transcript, durationSeconds);
+
+  if (parsedTimeline.length === 0) {
+    return transcriptFallbackTimeline;
+  }
+
+  const normalizedParsedTimeline = parsedTimeline
+    .map((entry) => ({
+      timestamp: Math.max(0, Math.floor(Number(entry.timestamp) || 0)),
+      text: String(entry.text || '').replace(/\s+/g, ' ').trim(),
+    }))
+    .filter((entry) => entry.text.length > 0)
+    .sort((a, b) => a.timestamp - b.timestamp)
+    .filter((entry, index, array) => {
+      if (index === 0) return true;
+      const previous = array[index - 1];
+      return previous.timestamp !== entry.timestamp || previous.text !== entry.text;
+    });
+
+  if (normalizedParsedTimeline.length === 0) {
+    return transcriptFallbackTimeline;
+  }
+
+  const normalizedTranscriptLength = String(transcript || '').replace(/\s+/g, ' ').trim().length;
+  const cueCoverageRatio =
+    normalizedTranscriptLength > 0
+      ? normalizedParsedTimeline.map((entry) => entry.text).join(' ').length /
+        normalizedTranscriptLength
+      : 1;
+
+  const uniqueSecondCount = new Set(normalizedParsedTimeline.map((entry) => entry.timestamp)).size;
+  const hasHeavyOverlap =
+    normalizedParsedTimeline.length > 1 &&
+    uniqueSecondCount <= Math.max(1, Math.ceil(normalizedParsedTimeline.length * 0.6));
+
+  const shouldUseFallbackTimeline =
+    transcriptFallbackTimeline.length > 1 && (hasHeavyOverlap || cueCoverageRatio < 0.55);
+
+  const workingTimeline = shouldUseFallbackTimeline
+    ? transcriptFallbackTimeline
+    : normalizedParsedTimeline;
+
+  if (workingTimeline.length <= 1) {
+    return workingTimeline;
+  }
+
+  const hasOverlappingSeconds = workingTimeline.some(
+    (entry, index) => index > 0 && entry.timestamp <= workingTimeline[index - 1].timestamp
+  );
+
+  if (!hasOverlappingSeconds) {
+    return workingTimeline;
+  }
+
+  const maxSecond =
+    durationSeconds > 0
+      ? Math.max(durationSeconds - 1, workingTimeline.length - 1)
+      : Math.max(workingTimeline.length * 4, workingTimeline.length - 1);
+
+  return workingTimeline.map((entry, index) => ({
+    timestamp: Math.round((index / Math.max(1, workingTimeline.length - 1)) * maxSecond),
+    text: entry.text,
+  }));
+}
+
 function buildRecordingExtractedText(
   transcript: string,
   timeline: RecordingTimelineEntry[],
@@ -801,10 +871,7 @@ export default async function studyRoutes(server: FastifyInstance) {
 
         const durationSeconds = Math.max(0, Math.floor(Number(requestBody.durationSeconds) || 0));
         const parsedTimeline = parseRecordingTimeline(requestBody.timeline);
-        const timelineEntries =
-          parsedTimeline.length > 0
-            ? parsedTimeline
-            : buildFallbackTimeline(transcript, durationSeconds);
+        const timelineEntries = selectRecordingTimeline(parsedTimeline, transcript, durationSeconds);
 
         const extractedText = buildRecordingExtractedText(
           transcript,

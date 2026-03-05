@@ -1049,16 +1049,138 @@ function estimateTranscriptCueLeadSeconds(text: string): number {
   return Math.min(4, Math.max(1, Math.round(wordCount / 3)));
 }
 
+function extractDeclaredRecordingDurationSeconds(rawText: string): number {
+  const explicitSecondsMatch = String(rawText || '').match(/(?:^|\n)\s*Duration:\s*.*\((\d+)s\)/i);
+  if (explicitSecondsMatch?.[1]) {
+    return Math.max(0, Number(explicitSecondsMatch[1]) || 0);
+  }
+
+  const clockOnlyMatch = String(rawText || '').match(
+    /(?:^|\n)\s*Duration:\s*(\d{2}):(\d{2}):(\d{2})(?:\s|$)/i
+  );
+  if (clockOnlyMatch) {
+    const hours = Number(clockOnlyMatch[1] || 0);
+    const minutes = Number(clockOnlyMatch[2] || 0);
+    const seconds = Number(clockOnlyMatch[3] || 0);
+    return Math.max(0, hours * 3600 + minutes * 60 + seconds);
+  }
+
+  return 0;
+}
+
+function splitTranscriptForCueGeneration(rawText: string): string[] {
+  const compact = String(rawText || '').replace(/\s+/g, ' ').trim();
+  if (!compact) return [];
+
+  const sentenceChunks = compact
+    .split(/(?<=[.!?])\s+/)
+    .map((chunk) => chunk.trim())
+    .filter(Boolean)
+    .slice(0, 80);
+
+  if (sentenceChunks.length > 1) {
+    return sentenceChunks;
+  }
+
+  const words = compact.split(/\s+/).filter(Boolean);
+  if (words.length <= 14) {
+    return sentenceChunks;
+  }
+
+  const fallbackChunks: string[] = [];
+  for (let index = 0; index < words.length; index += 12) {
+    fallbackChunks.push(words.slice(index, index + 12).join(' ').trim());
+  }
+
+  return fallbackChunks.filter(Boolean).slice(0, 80);
+}
+
+function buildSyntheticTranscriptCues(
+  fullTranscript: string,
+  declaredDurationSeconds: number
+): TranscriptCue[] {
+  const transcriptChunks = splitTranscriptForCueGeneration(fullTranscript);
+  if (!transcriptChunks.length) {
+    return [];
+  }
+
+  if (transcriptChunks.length === 1) {
+    const text = normalizeTranscriptSentence(transcriptChunks[0]);
+    return text
+      ? [
+          {
+            timestamp: 0,
+            label: formatCueLabel(0),
+            text,
+          },
+        ]
+      : [];
+  }
+
+  const safeDuration =
+    declaredDurationSeconds > 0
+      ? Math.max(declaredDurationSeconds, transcriptChunks.length)
+      : Math.max(transcriptChunks.length * 4, transcriptChunks.length);
+
+  const maxSecond = Math.max(0, safeDuration - 1);
+
+  return transcriptChunks
+    .map((chunk, index) => {
+      const text = normalizeTranscriptSentence(chunk);
+      const timestamp = Math.round((index / Math.max(1, transcriptChunks.length - 1)) * maxSecond);
+      return {
+        timestamp,
+        label: formatCueLabel(timestamp),
+        text,
+      };
+    })
+    .filter((cue) => cue.text.length > 0);
+}
+
+function normalizeTranscriptCues(
+  cues: TranscriptCue[],
+  declaredDurationSeconds: number
+): TranscriptCue[] {
+  if (cues.length <= 1) {
+    return cues;
+  }
+
+  const sortedCues = [...cues].sort((a, b) => a.timestamp - b.timestamp);
+  const uniqueSecondCount = new Set(sortedCues.map((cue) => Math.floor(cue.timestamp))).size;
+  const hasHeavyOverlap =
+    sortedCues.length > 1 && uniqueSecondCount <= Math.max(1, Math.ceil(sortedCues.length * 0.6));
+
+  if (!hasHeavyOverlap) {
+    return sortedCues;
+  }
+
+  const maxSecond =
+    declaredDurationSeconds > 0
+      ? Math.max(declaredDurationSeconds - 1, sortedCues.length - 1)
+      : Math.max(sortedCues.length * 4, sortedCues.length - 1);
+
+  return sortedCues.map((cue, index) => {
+    const timestamp = Math.round((index / Math.max(1, sortedCues.length - 1)) * maxSecond);
+    return {
+      ...cue,
+      timestamp,
+      label: formatCueLabel(timestamp),
+    };
+  });
+}
+
 function parseRecordingTranscript(extractedText: string): {
   cues: TranscriptCue[];
   fullTranscript: string;
+  declaredDuration: number;
   inferredDuration: number;
 } {
   const normalizedText = String(extractedText || '').trim();
   if (!normalizedText) {
-    return { cues: [], fullTranscript: '', inferredDuration: 0 };
+    return { cues: [], fullTranscript: '', declaredDuration: 0, inferredDuration: 0 };
   }
 
+  const declaredDuration = extractDeclaredRecordingDurationSeconds(normalizedText);
   const hasSpeechStartTimelineAnchor =
     /(?:^|\n)\s*Timing Anchor:\s*Speech Start\s*(?:\n|$)/i.test(normalizedText);
 
@@ -1085,13 +1207,16 @@ function parseRecordingTranscript(extractedText: string): {
     });
   }
 
-  const dedupedCues = cues
+  const dedupedCues = normalizeTranscriptCues(
+    cues
     .sort((a, b) => a.timestamp - b.timestamp)
     .filter((cue, index, array) => {
       if (index === 0) return true;
       const previous = array[index - 1];
       return previous.timestamp !== cue.timestamp || previous.text !== cue.text;
-    });
+    }),
+    declaredDuration
+  );
 
   const fullTranscriptMatch = normalizedText.match(/(?:^|\n)\s*Full Transcript:\s*\n?([\s\S]*)$/i);
 
@@ -1111,11 +1236,23 @@ function parseRecordingTranscript(extractedText: string): {
     ? formatTranscriptBody(dedupedCues.map((cue) => cue.text).join(' '))
     : formatTranscriptBody(fallbackTranscript);
 
-  const inferredDuration = dedupedCues.length
-    ? dedupedCues[dedupedCues.length - 1].timestamp + 4
-    : 0;
+  const syntheticCues = buildSyntheticTranscriptCues(fullTranscript, declaredDuration);
+  const cueCoverageRatio = fullTranscript
+    ? dedupedCues.map((cue) => cue.text).join(' ').length /
+      Math.max(1, fullTranscript.replace(/\s+/g, ' ').trim().length)
+    : 1;
 
-  return { cues: dedupedCues, fullTranscript, inferredDuration };
+  const shouldUseSyntheticCues =
+    syntheticCues.length > 1 && (dedupedCues.length === 0 || cueCoverageRatio < 0.55);
+
+  const finalCues = shouldUseSyntheticCues ? syntheticCues : dedupedCues;
+
+  const inferredDuration = Math.max(
+    declaredDuration,
+    finalCues.length ? finalCues[finalCues.length - 1].timestamp + 4 : 0
+  );
+
+  return { cues: finalCues, fullTranscript, declaredDuration, inferredDuration };
 }
 
 function AudioTranscriptPlayer({
@@ -1133,7 +1270,7 @@ function AudioTranscriptPlayer({
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(0.9);
 
-  const { cues, fullTranscript, inferredDuration } = useMemo(
+  const { cues, fullTranscript, declaredDuration, inferredDuration } = useMemo(
     () => parseRecordingTranscript(extractedText),
     [extractedText]
   );
@@ -1195,6 +1332,8 @@ function AudioTranscriptPlayer({
       const maxDuration =
         Number.isFinite(duration || 0) && (duration || 0) > 0
           ? (duration as number)
+          : Number.isFinite(declaredDuration) && declaredDuration > 0
+          ? declaredDuration
           : Number.isFinite(inferredDuration) && inferredDuration > 0
           ? inferredDuration
           : 0;
@@ -1208,7 +1347,7 @@ function AudioTranscriptPlayer({
       setCurrentTime(clampedTime);
       return clampedTime;
     },
-    [duration, inferredDuration]
+    [declaredDuration, duration, inferredDuration]
   );
 
   const togglePlayback = useCallback(async () => {
@@ -1218,6 +1357,8 @@ function AudioTranscriptPlayer({
     const knownDuration =
       Number.isFinite(duration || 0) && (duration || 0) > 0
         ? (duration as number)
+        : Number.isFinite(declaredDuration) && declaredDuration > 0
+        ? declaredDuration
         : Number.isFinite(inferredDuration) && inferredDuration > 0
         ? inferredDuration
         : 0;
@@ -1239,7 +1380,7 @@ function AudioTranscriptPlayer({
 
     audio.pause();
     setIsPlaying(false);
-  }, [currentTime, duration, inferredDuration]);
+  }, [currentTime, declaredDuration, duration, inferredDuration]);
 
   const activeCueIndex = useMemo(() => {
     if (!cues.length) return -1;
@@ -1282,12 +1423,18 @@ function AudioTranscriptPlayer({
       return duration as number;
     }
 
+    const observedPlaybackDuration = currentTime > 0 ? currentTime + 1 : 0;
+
+    if (declaredDuration > 0 || inferredDuration > 0 || observedPlaybackDuration > 0) {
+      return Math.max(declaredDuration, inferredDuration, observedPlaybackDuration);
+    }
+
     if (Number.isFinite(inferredDuration) && inferredDuration > 0) {
       return inferredDuration;
     }
 
     return 0;
-  }, [duration, inferredDuration]);
+  }, [currentTime, declaredDuration, duration, inferredDuration]);
 
   const canSeek = effectiveDuration > 0;
   const safeCurrentTime = Math.max(
