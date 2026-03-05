@@ -183,6 +183,123 @@ export default function UploadModal({
     return Math.max(0, activeDurationMs / 1000);
   };
 
+  const splitTranscriptSentences = (source: string) => {
+    const normalizedSource = String(source || '').replace(/\s+/g, ' ').trim();
+    if (!normalizedSource) {
+      return [] as string[];
+    }
+
+    const sentenceChunks = normalizedSource
+      .split(/(?<=[.!?])\s+/)
+      .map((chunk) => chunk.trim())
+      .filter(Boolean)
+      .slice(0, 80);
+
+    if (sentenceChunks.length > 1) {
+      return sentenceChunks;
+    }
+
+    const words = normalizedSource.split(/\s+/).filter(Boolean);
+    if (words.length <= 14) {
+      return sentenceChunks;
+    }
+
+    const fallbackChunks: string[] = [];
+    for (let index = 0; index < words.length; index += 12) {
+      fallbackChunks.push(words.slice(index, index + 12).join(' ').trim());
+    }
+
+    return fallbackChunks.filter(Boolean).slice(0, 80);
+  };
+
+  const buildTimelineFromTranscript = (transcript: string, durationSeconds: number) => {
+    const sentenceChunks = splitTranscriptSentences(transcript);
+    if (!sentenceChunks.length) {
+      return [] as Array<{ timestamp: number; text: string }>;
+    }
+
+    if (sentenceChunks.length === 1) {
+      return [{ timestamp: 0, text: sentenceChunks[0] }];
+    }
+
+    const safeDuration =
+      durationSeconds > 0 ? durationSeconds : Math.max(sentenceChunks.length * 4, sentenceChunks.length);
+    const maxSecond = Math.max(0, safeDuration - 1);
+
+    return sentenceChunks.map((text, index) => ({
+      timestamp: Math.round((index / Math.max(1, sentenceChunks.length - 1)) * maxSecond),
+      text,
+    }));
+  };
+
+  const normalizeRecordingTimeline = (
+    rawEntries: Array<{ timestamp: number; text: string }>,
+    transcript: string,
+    durationSeconds: number
+  ) => {
+    const sanitizedEntries = rawEntries
+      .map((entry) => ({
+        timestamp: Number(entry.timestamp) || 0,
+        text: String(entry.text || '').trim(),
+      }))
+      .filter((entry) => entry.text.length > 0)
+      .sort((a, b) => a.timestamp - b.timestamp)
+      .filter((entry, index, array) => {
+        if (index === 0) return true;
+        const previous = array[index - 1];
+        return previous.text !== entry.text || previous.timestamp !== entry.timestamp;
+      });
+
+    const transcriptFallbackTimeline = buildTimelineFromTranscript(transcript, durationSeconds);
+
+    if (!sanitizedEntries.length) {
+      return transcriptFallbackTimeline;
+    }
+
+    const normalizedTranscriptLength = String(transcript || '').replace(/\s+/g, ' ').trim().length;
+    const cueCoverageRatio =
+      normalizedTranscriptLength > 0
+        ? sanitizedEntries.map((entry) => entry.text).join(' ').length / normalizedTranscriptLength
+        : 1;
+
+    const uniqueSecondCount = new Set(sanitizedEntries.map((entry) => Math.floor(entry.timestamp))).size;
+    const hasHeavyOverlap =
+      sanitizedEntries.length > 1 &&
+      uniqueSecondCount <= Math.max(1, Math.ceil(sanitizedEntries.length * 0.6));
+
+    const shouldUseFallbackTimeline =
+      transcriptFallbackTimeline.length > 1 && (hasHeavyOverlap || cueCoverageRatio < 0.55);
+
+    const workingTimeline = shouldUseFallbackTimeline ? transcriptFallbackTimeline : sanitizedEntries;
+
+    const roundedTimeline = workingTimeline.map((entry) => ({
+      timestamp: Math.max(0, Math.round(entry.timestamp)),
+      text: entry.text,
+    }));
+
+    if (roundedTimeline.length <= 1) {
+      return roundedTimeline;
+    }
+
+    const hasOverlappingSeconds = roundedTimeline.some(
+      (entry, index) => index > 0 && entry.timestamp <= roundedTimeline[index - 1].timestamp
+    );
+
+    if (!hasOverlappingSeconds) {
+      return roundedTimeline;
+    }
+
+    const maxSecond =
+      durationSeconds > 0
+        ? Math.max(durationSeconds - 1, roundedTimeline.length - 1)
+        : Math.max(roundedTimeline.length * 4, roundedTimeline.length - 1);
+
+    return roundedTimeline.map((entry, index) => ({
+      timestamp: Math.round((index / Math.max(1, roundedTimeline.length - 1)) * maxSecond),
+      text: entry.text,
+    }));
+  };
+
   const clearTransitionTimers = () => {
     if (stageTimerRef.current) {
       window.clearTimeout(stageTimerRef.current);
@@ -696,27 +813,36 @@ export default function UploadModal({
       }
     }
 
-    const timelineEntries = transcriptTimelineRef.current
-      .map((entry) => ({
-        timestamp: Math.max(0, Math.floor(entry.timestamp || 0)),
-        text: entry.text.trim(),
-      }))
-      .filter((entry) => entry.text.length > 0)
-      .filter((entry, index, array) => {
-        if (index === 0) return true;
-        const previous = array[index - 1];
-        return previous.text !== entry.text || previous.timestamp !== entry.timestamp;
-      });
+    const transcript = `${finalTranscriptRef.current} ${recordingInterimTranscript}`.trim();
+    const recordingDurationSeconds = Math.max(
+      0,
+      Math.ceil(Math.max(recordingSecondsRef.current, getRecordingElapsedSeconds()))
+    );
+
+    const interimCueText = String(recordingInterimTranscript || '').trim();
+    const rawTimelineEntries = interimCueText
+      ? [
+          ...transcriptTimelineRef.current,
+          {
+            timestamp: Math.max(
+              0,
+              getRecordingElapsedSeconds() - estimateTranscriptLeadSeconds(interimCueText)
+            ),
+            text: interimCueText,
+          },
+        ]
+      : transcriptTimelineRef.current;
+
+    const timelineEntries = normalizeRecordingTimeline(
+      rawTimelineEntries,
+      transcript,
+      recordingDurationSeconds
+    );
 
     const timelineTranscript = timelineEntries
       .map((entry) => `[${formatRecordingTime(entry.timestamp)}] ${entry.text}`)
       .join('\n');
 
-    const transcript = `${finalTranscriptRef.current} ${recordingInterimTranscript}`.trim();
-    const recordingDurationSeconds = Math.max(
-      0,
-      Math.floor(Math.max(recordingSecondsRef.current, getRecordingElapsedSeconds()))
-    );
     const capturedAtIso = new Date().toISOString();
 
     const audioMimeType = recordedChunksRef.current[0]?.type || 'audio/webm';
