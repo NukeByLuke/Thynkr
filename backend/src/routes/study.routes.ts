@@ -63,14 +63,31 @@ function stripHtmlToText(html: string): string {
 }
 
 type RecordingTimelineEntry = {
-  timestamp: number;
+  start: number;
+  end: number;
   text: string;
 };
 
+const MIN_RECORDING_SEGMENT_SECONDS = 0.45;
+
 const AUDIO_EXTENSIONS = new Set(['.webm', '.mp3', '.wav', '.m4a', '.mp4', '.ogg']);
 
-function formatRecordingTimestamp(totalSeconds: number): string {
-  const safeSeconds = Math.max(0, Math.floor(totalSeconds || 0));
+function estimateRecordingSegmentDurationSeconds(segmentText: string): number {
+  const wordCount = String(segmentText || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+
+  return Math.min(8, Math.max(0.9, wordCount / 2.4));
+}
+
+function roundRecordingTimelineSecond(value: number): number {
+  return Math.round(Math.max(0, value) * 100) / 100;
+}
+
+function formatRecordingTimestamp(totalSeconds: number, includeTenths: boolean = false): string {
+  const safeSecondsFloat = Math.max(0, Number(totalSeconds) || 0);
+  const safeSeconds = Math.floor(safeSecondsFloat);
   const hours = Math.floor(safeSeconds / 3600)
     .toString()
     .padStart(2, '0');
@@ -80,7 +97,16 @@ function formatRecordingTimestamp(totalSeconds: number): string {
   const seconds = Math.floor(safeSeconds % 60)
     .toString()
     .padStart(2, '0');
-  return `${hours}:${minutes}:${seconds}`;
+
+  if (!includeTenths) {
+    return `${hours}:${minutes}:${seconds}`;
+  }
+
+  const tenths = Math.floor((safeSecondsFloat - safeSeconds) * 10)
+    .toString()
+    .padStart(1, '0');
+
+  return `${hours}:${minutes}:${seconds}.${tenths}`;
 }
 
 function parseRecordingTimeline(rawTimeline: unknown): RecordingTimelineEntry[] {
@@ -103,26 +129,42 @@ function parseRecordingTimeline(rawTimeline: unknown): RecordingTimelineEntry[] 
   }
 
   const normalizedTimeline = parsedTimeline
-    .map((entry: any) => ({
-      timestamp: Math.max(0, Math.floor(Number(entry?.timestamp) || 0)),
-      text: String(entry?.text || '').replace(/\s+/g, ' ').trim(),
-    }))
+    .map((entry: any) => {
+      const startCandidate = Number(entry?.start);
+      const legacyTimestampCandidate = Number(entry?.timestamp);
+      const resolvedStart =
+        Number.isFinite(startCandidate) && startCandidate >= 0
+          ? startCandidate
+          : Number.isFinite(legacyTimestampCandidate)
+          ? legacyTimestampCandidate
+          : 0;
+
+      const endCandidate = Number(entry?.end);
+      const text = String(entry?.text || '').replace(/\s+/g, ' ').trim();
+      const hasValidEnd = Number.isFinite(endCandidate) && endCandidate > resolvedStart;
+      const resolvedEnd = hasValidEnd
+        ? endCandidate
+        : resolvedStart + estimateRecordingSegmentDurationSeconds(text);
+
+      return {
+        start: Math.max(0, resolvedStart),
+        end: Math.max(0, resolvedEnd),
+        text,
+      };
+    })
     .filter((entry) => entry.text.length > 0)
-    .sort((a, b) => a.timestamp - b.timestamp)
+    .sort((a, b) => a.start - b.start)
     .filter((entry, index, array) => {
       if (index === 0) return true;
       const previous = array[index - 1];
-      return previous.timestamp !== entry.timestamp || previous.text !== entry.text;
+      return previous.text !== entry.text || Math.abs(previous.start - entry.start) > 0.05;
     });
 
   return normalizedTimeline;
 }
 
-function buildFallbackTimeline(
-  transcript: string,
-  durationSeconds: number
-): RecordingTimelineEntry[] {
-  const normalizedTranscript = String(transcript || '').trim();
+function splitRecordingTranscriptSentences(transcript: string): string[] {
+  const normalizedTranscript = String(transcript || '').replace(/\s+/g, ' ').trim();
   if (!normalizedTranscript) {
     return [];
   }
@@ -131,19 +173,143 @@ function buildFallbackTimeline(
     .split(/(?<=[.!?])\s+/)
     .map((chunk) => chunk.trim())
     .filter(Boolean)
-    .slice(0, 60);
+    .slice(0, 80);
 
-  if (sentenceChunks.length === 0) {
+  if (sentenceChunks.length > 1) {
+    return sentenceChunks;
+  }
+
+  const words = normalizedTranscript.split(/\s+/).filter(Boolean);
+  if (words.length <= 14) {
+    return sentenceChunks;
+  }
+
+  const fallbackChunks: string[] = [];
+  for (let index = 0; index < words.length; index += 12) {
+    fallbackChunks.push(words.slice(index, index + 12).join(' ').trim());
+  }
+
+  return fallbackChunks.filter(Boolean).slice(0, 80);
+}
+
+function normalizeRecordingTimelineBoundaries(
+  timelineEntries: RecordingTimelineEntry[],
+  durationSeconds: number
+): RecordingTimelineEntry[] {
+  if (!timelineEntries.length) {
     return [];
   }
 
-  const safeDuration = Math.max(durationSeconds, Math.ceil(sentenceChunks.length * 6));
-  const interval = Math.max(4, Math.floor(safeDuration / Math.max(1, sentenceChunks.length)));
+  const sortedEntries = [...timelineEntries]
+    .map((entry) => ({
+      start: Math.max(0, Number(entry.start) || 0),
+      end: Math.max(0, Number(entry.end) || 0),
+      text: String(entry.text || '').replace(/\s+/g, ' ').trim(),
+    }))
+    .filter((entry) => entry.text.length > 0)
+    .sort((a, b) => a.start - b.start);
 
-  return sentenceChunks.map((text, index) => ({
-    timestamp: Math.min(safeDuration, index * interval),
-    text,
-  }));
+  if (!sortedEntries.length) {
+    return [];
+  }
+
+  const adjustedStarts: number[] = [];
+  for (let index = 0; index < sortedEntries.length; index += 1) {
+    const entry = sortedEntries[index];
+    if (index === 0) {
+      adjustedStarts.push(entry.start);
+      continue;
+    }
+
+    adjustedStarts.push(
+      Math.max(entry.start, adjustedStarts[index - 1] + MIN_RECORDING_SEGMENT_SECONDS)
+    );
+  }
+
+  const lastIndex = adjustedStarts.length - 1;
+  const estimatedTailDuration = estimateRecordingSegmentDurationSeconds(sortedEntries[lastIndex].text);
+  let safeDuration =
+    durationSeconds > 0
+      ? durationSeconds
+      : Math.max(
+          sortedEntries[lastIndex].end,
+          adjustedStarts[lastIndex] + Math.max(estimatedTailDuration, MIN_RECORDING_SEGMENT_SECONDS)
+        );
+
+  if (safeDuration < adjustedStarts[lastIndex] + MIN_RECORDING_SEGMENT_SECONDS) {
+    safeDuration = adjustedStarts[lastIndex] + MIN_RECORDING_SEGMENT_SECONDS;
+  }
+
+  return sortedEntries.map((entry, index) => {
+    const start = adjustedStarts[index];
+    const end =
+      index === lastIndex
+        ? safeDuration
+        : Math.max(adjustedStarts[index + 1], start + MIN_RECORDING_SEGMENT_SECONDS);
+
+    return {
+      start: roundRecordingTimelineSecond(start),
+      end: roundRecordingTimelineSecond(end),
+      text: entry.text,
+    };
+  });
+}
+
+function buildFallbackTimeline(
+  transcript: string,
+  durationSeconds: number
+): RecordingTimelineEntry[] {
+  const sentenceChunks = splitRecordingTranscriptSentences(transcript);
+  if (!sentenceChunks.length) {
+    return [];
+  }
+
+  if (sentenceChunks.length === 1) {
+    const safeDuration =
+      durationSeconds > 0
+        ? Math.max(durationSeconds, estimateRecordingSegmentDurationSeconds(sentenceChunks[0]))
+        : estimateRecordingSegmentDurationSeconds(sentenceChunks[0]);
+
+    return [
+      {
+        start: 0,
+        end: roundRecordingTimelineSecond(safeDuration),
+        text: sentenceChunks[0],
+      },
+    ];
+  }
+
+  const sentenceWeights = sentenceChunks.map((chunk) =>
+    Math.max(1, chunk.split(/\s+/).filter(Boolean).length)
+  );
+  const totalWeight = sentenceWeights.reduce((sum, weight) => sum + weight, 0);
+
+  const minimumDuration = sentenceChunks.length * MIN_RECORDING_SEGMENT_SECONDS;
+  const estimatedDuration = sentenceChunks.reduce(
+    (sum, chunk) => sum + estimateRecordingSegmentDurationSeconds(chunk),
+    0
+  );
+
+  const safeDuration =
+    durationSeconds > 0
+      ? Math.max(durationSeconds, minimumDuration)
+      : Math.max(estimatedDuration, minimumDuration);
+
+  let elapsedWeight = 0;
+  return sentenceChunks.map((text, index) => {
+    const start = (elapsedWeight / totalWeight) * safeDuration;
+    elapsedWeight += sentenceWeights[index];
+    const end =
+      index === sentenceChunks.length - 1
+        ? safeDuration
+        : (elapsedWeight / totalWeight) * safeDuration;
+
+    return {
+      start: roundRecordingTimelineSecond(start),
+      end: roundRecordingTimelineSecond(Math.max(end, start + MIN_RECORDING_SEGMENT_SECONDS)),
+      text,
+    };
+  });
 }
 
 function selectRecordingTimeline(
@@ -154,24 +320,33 @@ function selectRecordingTimeline(
   const transcriptFallbackTimeline = buildFallbackTimeline(transcript, durationSeconds);
 
   if (parsedTimeline.length === 0) {
-    return transcriptFallbackTimeline;
+    return normalizeRecordingTimelineBoundaries(transcriptFallbackTimeline, durationSeconds);
   }
 
   const normalizedParsedTimeline = parsedTimeline
     .map((entry) => ({
-      timestamp: Math.max(0, Math.floor(Number(entry.timestamp) || 0)),
+      start: Math.max(0, Number(entry.start) || 0),
+      end: Math.max(0, Number(entry.end) || 0),
       text: String(entry.text || '').replace(/\s+/g, ' ').trim(),
     }))
+    .map((entry) => {
+      const hasValidEnd = entry.end > entry.start;
+      return {
+        start: entry.start,
+        end: hasValidEnd ? entry.end : entry.start + estimateRecordingSegmentDurationSeconds(entry.text),
+        text: entry.text,
+      };
+    })
     .filter((entry) => entry.text.length > 0)
-    .sort((a, b) => a.timestamp - b.timestamp)
+    .sort((a, b) => a.start - b.start)
     .filter((entry, index, array) => {
       if (index === 0) return true;
       const previous = array[index - 1];
-      return previous.timestamp !== entry.timestamp || previous.text !== entry.text;
+      return previous.text !== entry.text || Math.abs(previous.start - entry.start) > 0.05;
     });
 
   if (normalizedParsedTimeline.length === 0) {
-    return transcriptFallbackTimeline;
+    return normalizeRecordingTimelineBoundaries(transcriptFallbackTimeline, durationSeconds);
   }
 
   const normalizedTranscriptLength = String(transcript || '').replace(/\s+/g, ' ').trim().length;
@@ -181,10 +356,12 @@ function selectRecordingTimeline(
         normalizedTranscriptLength
       : 1;
 
-  const uniqueSecondCount = new Set(normalizedParsedTimeline.map((entry) => entry.timestamp)).size;
+  const uniqueStartBucketCount = new Set(
+    normalizedParsedTimeline.map((entry) => Math.floor(entry.start * 2))
+  ).size;
   const hasHeavyOverlap =
     normalizedParsedTimeline.length > 1 &&
-    uniqueSecondCount <= Math.max(1, Math.ceil(normalizedParsedTimeline.length * 0.6));
+    uniqueStartBucketCount <= Math.max(1, Math.ceil(normalizedParsedTimeline.length * 0.6));
 
   const shouldUseFallbackTimeline =
     transcriptFallbackTimeline.length > 1 && (hasHeavyOverlap || cueCoverageRatio < 0.55);
@@ -193,27 +370,7 @@ function selectRecordingTimeline(
     ? transcriptFallbackTimeline
     : normalizedParsedTimeline;
 
-  if (workingTimeline.length <= 1) {
-    return workingTimeline;
-  }
-
-  const hasOverlappingSeconds = workingTimeline.some(
-    (entry, index) => index > 0 && entry.timestamp <= workingTimeline[index - 1].timestamp
-  );
-
-  if (!hasOverlappingSeconds) {
-    return workingTimeline;
-  }
-
-  const maxSecond =
-    durationSeconds > 0
-      ? Math.max(durationSeconds - 1, workingTimeline.length - 1)
-      : Math.max(workingTimeline.length * 4, workingTimeline.length - 1);
-
-  return workingTimeline.map((entry, index) => ({
-    timestamp: Math.round((index / Math.max(1, workingTimeline.length - 1)) * maxSecond),
-    text: entry.text,
-  }));
+  return normalizeRecordingTimelineBoundaries(workingTimeline, durationSeconds);
 }
 
 function buildRecordingExtractedText(
@@ -224,7 +381,10 @@ function buildRecordingExtractedText(
 ): string {
   const fullTranscript = String(transcript || '').replace(/\s+/g, ' ').trim();
   const timelineLines = timeline
-    .map((entry) => `[${formatRecordingTimestamp(entry.timestamp)}] ${entry.text}`)
+    .map(
+      (entry) =>
+        `[${formatRecordingTimestamp(entry.start, true)} -> ${formatRecordingTimestamp(entry.end, true)}] ${entry.text}`
+    )
     .join('\n');
 
   const durationLabel =
