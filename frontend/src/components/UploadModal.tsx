@@ -35,7 +35,8 @@ interface UploadModalProps {
 }
 
 export interface RecordingTimelineEntry {
-  timestamp: number;
+  start: number;
+  end: number;
   text: string;
 }
 
@@ -144,7 +145,7 @@ export default function UploadModal({
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const speechRecognitionRef = useRef<any>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
-  const transcriptTimelineRef = useRef<Array<{ timestamp: number; text: string }>>([]);
+  const transcriptTimelineRef = useRef<RecordingTimelineEntry[]>([]);
   const transcriptSegmentStartTimesRef = useRef<Map<number, number>>(new Map());
   const recordingStartedAtMsRef = useRef<number | null>(null);
   const recordingPausedAtMsRef = useRef<number | null>(null);
@@ -154,14 +155,18 @@ export default function UploadModal({
   const shouldRestartRecognitionRef = useRef(false);
   const recordingStatusRef = useRef<RecordingStatus>('idle');
 
-  const estimateTranscriptLeadSeconds = (segment: string) => {
+  const MIN_RECORDING_SEGMENT_SECONDS = 0.45;
+
+  const estimateSegmentDurationSeconds = (segment: string) => {
     const words = String(segment || '')
       .trim()
       .split(/\s+/)
       .filter(Boolean).length;
 
-    return Math.min(4, Math.max(1, Math.round(words / 3)));
+    return Math.min(8, Math.max(0.9, words / 2.4));
   };
+
+  const roundTimelineSecond = (value: number) => Math.round(Math.max(0, value) * 100) / 100;
 
   const getRecordingClockMs = () =>
     (typeof performance !== 'undefined' ? performance.now() : Date.now());
@@ -212,48 +217,159 @@ export default function UploadModal({
     return fallbackChunks.filter(Boolean).slice(0, 80);
   };
 
-  const buildTimelineFromTranscript = (transcript: string, durationSeconds: number) => {
+  const buildTimelineFromTranscript = (
+    transcript: string,
+    durationSeconds: number
+  ): RecordingTimelineEntry[] => {
     const sentenceChunks = splitTranscriptSentences(transcript);
     if (!sentenceChunks.length) {
-      return [] as Array<{ timestamp: number; text: string }>;
+      return [];
     }
 
     if (sentenceChunks.length === 1) {
-      return [{ timestamp: 0, text: sentenceChunks[0] }];
+      const safeDuration =
+        durationSeconds > 0
+          ? Math.max(durationSeconds, estimateSegmentDurationSeconds(sentenceChunks[0]))
+          : estimateSegmentDurationSeconds(sentenceChunks[0]);
+
+      return [
+        {
+          start: 0,
+          end: roundTimelineSecond(safeDuration),
+          text: sentenceChunks[0],
+        },
+      ];
     }
 
-    const safeDuration =
-      durationSeconds > 0 ? durationSeconds : Math.max(sentenceChunks.length * 4, sentenceChunks.length);
-    const maxSecond = Math.max(0, safeDuration - 1);
+    const chunkWeights = sentenceChunks.map((chunk) =>
+      Math.max(1, chunk.split(/\s+/).filter(Boolean).length)
+    );
+    const totalWeight = chunkWeights.reduce((sum, weight) => sum + weight, 0);
 
-    return sentenceChunks.map((text, index) => ({
-      timestamp: Math.round((index / Math.max(1, sentenceChunks.length - 1)) * maxSecond),
-      text,
-    }));
+    const minimumDuration = sentenceChunks.length * MIN_RECORDING_SEGMENT_SECONDS;
+    const estimatedDuration = sentenceChunks.reduce(
+      (sum, chunk) => sum + estimateSegmentDurationSeconds(chunk),
+      0
+    );
+
+    const safeDuration =
+      durationSeconds > 0
+        ? Math.max(durationSeconds, minimumDuration)
+        : Math.max(estimatedDuration, minimumDuration);
+
+    let elapsedWeight = 0;
+    return sentenceChunks.map((text, index) => {
+      const start = (elapsedWeight / totalWeight) * safeDuration;
+      elapsedWeight += chunkWeights[index];
+      const end =
+        index === sentenceChunks.length - 1
+          ? safeDuration
+          : (elapsedWeight / totalWeight) * safeDuration;
+
+      return {
+        start: roundTimelineSecond(start),
+        end: roundTimelineSecond(Math.max(end, start + MIN_RECORDING_SEGMENT_SECONDS)),
+        text,
+      };
+    });
   };
 
-  const normalizeRecordingTimeline = (
-    rawEntries: Array<{ timestamp: number; text: string }>,
-    transcript: string,
+  const enforceTimelineBoundaries = (
+    timelineEntries: RecordingTimelineEntry[],
     durationSeconds: number
-  ) => {
-    const sanitizedEntries = rawEntries
+  ): RecordingTimelineEntry[] => {
+    if (!timelineEntries.length) {
+      return [];
+    }
+
+    const sortedEntries = [...timelineEntries]
       .map((entry) => ({
-        timestamp: Number(entry.timestamp) || 0,
+        start: Math.max(0, entry.start),
+        end: Math.max(0, entry.end),
         text: String(entry.text || '').trim(),
       }))
       .filter((entry) => entry.text.length > 0)
-      .sort((a, b) => a.timestamp - b.timestamp)
+      .sort((a, b) => a.start - b.start);
+
+    if (!sortedEntries.length) {
+      return [];
+    }
+
+    const adjustedStarts: number[] = [];
+    for (let index = 0; index < sortedEntries.length; index += 1) {
+      const entry = sortedEntries[index];
+      if (index === 0) {
+        adjustedStarts.push(entry.start);
+        continue;
+      }
+
+      adjustedStarts.push(
+        Math.max(entry.start, adjustedStarts[index - 1] + MIN_RECORDING_SEGMENT_SECONDS)
+      );
+    }
+
+    const lastIndex = adjustedStarts.length - 1;
+    const estimatedTailDuration = estimateSegmentDurationSeconds(sortedEntries[lastIndex].text);
+    let safeDuration =
+      durationSeconds > 0
+        ? durationSeconds
+        : Math.max(
+            sortedEntries[lastIndex].end,
+            adjustedStarts[lastIndex] + Math.max(estimatedTailDuration, MIN_RECORDING_SEGMENT_SECONDS)
+          );
+
+    if (safeDuration < adjustedStarts[lastIndex] + MIN_RECORDING_SEGMENT_SECONDS) {
+      safeDuration = adjustedStarts[lastIndex] + MIN_RECORDING_SEGMENT_SECONDS;
+    }
+
+    return sortedEntries.map((entry, index) => {
+      const start = adjustedStarts[index];
+      const end =
+        index === lastIndex ? safeDuration : Math.max(adjustedStarts[index + 1], start + MIN_RECORDING_SEGMENT_SECONDS);
+
+      return {
+        start: roundTimelineSecond(start),
+        end: roundTimelineSecond(end),
+        text: entry.text,
+      };
+    });
+  };
+
+  const normalizeRecordingTimeline = (
+    rawEntries: Array<Partial<RecordingTimelineEntry> & { timestamp?: number }>,
+    transcript: string,
+    durationSeconds: number
+  ): RecordingTimelineEntry[] => {
+    const sanitizedEntries = rawEntries
+      .map((entry) => ({
+        start:
+          Number.isFinite(Number(entry.start)) && Number(entry.start) >= 0
+            ? Number(entry.start)
+            : Number(entry.timestamp) || 0,
+        end: Number(entry.end),
+        text: String(entry.text || '').trim(),
+      }))
+      .filter((entry) => entry.text.length > 0)
+      .map((entry) => {
+        const start = Math.max(0, entry.start);
+        const hasValidEnd = Number.isFinite(entry.end) && entry.end > start;
+        return {
+          start,
+          end: hasValidEnd ? (entry.end as number) : start + estimateSegmentDurationSeconds(entry.text),
+          text: entry.text,
+        };
+      })
+      .sort((a, b) => a.start - b.start)
       .filter((entry, index, array) => {
         if (index === 0) return true;
         const previous = array[index - 1];
-        return previous.text !== entry.text || previous.timestamp !== entry.timestamp;
+        return previous.text !== entry.text || Math.abs(previous.start - entry.start) > 0.05;
       });
 
     const transcriptFallbackTimeline = buildTimelineFromTranscript(transcript, durationSeconds);
 
     if (!sanitizedEntries.length) {
-      return transcriptFallbackTimeline;
+      return enforceTimelineBoundaries(transcriptFallbackTimeline, durationSeconds);
     }
 
     const normalizedTranscriptLength = String(transcript || '').replace(/\s+/g, ' ').trim().length;
@@ -262,42 +378,19 @@ export default function UploadModal({
         ? sanitizedEntries.map((entry) => entry.text).join(' ').length / normalizedTranscriptLength
         : 1;
 
-    const uniqueSecondCount = new Set(sanitizedEntries.map((entry) => Math.floor(entry.timestamp))).size;
+    const uniqueStartBucketCount = new Set(
+      sanitizedEntries.map((entry) => Math.floor(entry.start * 2))
+    ).size;
     const hasHeavyOverlap =
       sanitizedEntries.length > 1 &&
-      uniqueSecondCount <= Math.max(1, Math.ceil(sanitizedEntries.length * 0.6));
+      uniqueStartBucketCount <= Math.max(1, Math.ceil(sanitizedEntries.length * 0.6));
 
     const shouldUseFallbackTimeline =
       transcriptFallbackTimeline.length > 1 && (hasHeavyOverlap || cueCoverageRatio < 0.55);
 
     const workingTimeline = shouldUseFallbackTimeline ? transcriptFallbackTimeline : sanitizedEntries;
 
-    const roundedTimeline = workingTimeline.map((entry) => ({
-      timestamp: Math.max(0, Math.round(entry.timestamp)),
-      text: entry.text,
-    }));
-
-    if (roundedTimeline.length <= 1) {
-      return roundedTimeline;
-    }
-
-    const hasOverlappingSeconds = roundedTimeline.some(
-      (entry, index) => index > 0 && entry.timestamp <= roundedTimeline[index - 1].timestamp
-    );
-
-    if (!hasOverlappingSeconds) {
-      return roundedTimeline;
-    }
-
-    const maxSecond =
-      durationSeconds > 0
-        ? Math.max(durationSeconds - 1, roundedTimeline.length - 1)
-        : Math.max(roundedTimeline.length * 4, roundedTimeline.length - 1);
-
-    return roundedTimeline.map((entry, index) => ({
-      timestamp: Math.round((index / Math.max(1, roundedTimeline.length - 1)) * maxSecond),
-      text: entry.text,
-    }));
+    return enforceTimelineBoundaries(workingTimeline, durationSeconds);
   };
 
   const clearTransitionTimers = () => {
@@ -427,15 +520,20 @@ export default function UploadModal({
             transcriptSegmentStartTimesRef.current.get(index) ?? observedSeconds;
 
           if (recognitionResult.isFinal) {
-            const estimatedLeadSeconds = estimateTranscriptLeadSeconds(transcriptSegment);
+            const estimatedSegmentDuration = estimateSegmentDurationSeconds(transcriptSegment);
             const alignedStartTimestamp =
               typeof existingStartTimestamp === 'number'
                 ? Math.max(0, segmentStartTimestamp)
-                : Math.max(0, observedSeconds - estimatedLeadSeconds);
+                : Math.max(0, observedSeconds - estimatedSegmentDuration);
+            const alignedEndTimestamp = Math.max(
+              alignedStartTimestamp + MIN_RECORDING_SEGMENT_SECONDS,
+              observedSeconds
+            );
 
             finalTranscriptRef.current = `${finalTranscriptRef.current} ${transcriptSegment}`.trim();
             transcriptTimelineRef.current.push({
-              timestamp: alignedStartTimestamp,
+              start: roundTimelineSecond(alignedStartTimestamp),
+              end: roundTimelineSecond(alignedEndTimestamp),
               text: transcriptSegment,
             });
             transcriptSegmentStartTimesRef.current.delete(index);
@@ -823,10 +921,8 @@ export default function UploadModal({
       ? [
           ...transcriptTimelineRef.current,
           {
-            timestamp: Math.max(
-              0,
-              getRecordingElapsedSeconds() - estimateTranscriptLeadSeconds(interimCueText)
-            ),
+            start: Math.max(0, getRecordingElapsedSeconds() - estimateSegmentDurationSeconds(interimCueText)),
+            end: Math.max(0, getRecordingElapsedSeconds()),
             text: interimCueText,
           },
         ]
@@ -839,7 +935,10 @@ export default function UploadModal({
     );
 
     const timelineTranscript = timelineEntries
-      .map((entry) => `[${formatRecordingTime(entry.timestamp)}] ${entry.text}`)
+      .map(
+        (entry) =>
+          `[${formatRecordingTimelineTime(entry.start)} -> ${formatRecordingTimelineTime(entry.end)}] ${entry.text}`
+      )
       .join('\n');
 
     const capturedAtIso = new Date().toISOString();
@@ -959,6 +1058,25 @@ export default function UploadModal({
       .padStart(2, '0');
 
     return `${hours}:${minutes}:${seconds}`;
+  };
+
+  const formatRecordingTimelineTime = (totalSeconds: number) => {
+    const safeSeconds = Math.max(0, Number(totalSeconds) || 0);
+    const wholeSeconds = Math.floor(safeSeconds);
+    const hours = Math.floor(wholeSeconds / 3600)
+      .toString()
+      .padStart(2, '0');
+    const minutes = Math.floor((wholeSeconds % 3600) / 60)
+      .toString()
+      .padStart(2, '0');
+    const seconds = Math.floor(wholeSeconds % 60)
+      .toString()
+      .padStart(2, '0');
+    const tenths = Math.floor((safeSeconds - wholeSeconds) * 10)
+      .toString()
+      .padStart(1, '0');
+
+    return `${hours}:${minutes}:${seconds}.${tenths}`;
   };
 
   useEffect(() => {

@@ -966,10 +966,13 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
 }
 
 type TranscriptCue = {
-  timestamp: number;
+  start: number;
+  end: number;
   label: string;
   text: string;
 };
+
+const MIN_TRANSCRIPT_SEGMENT_SECONDS = 0.45;
 
 function formatAudioClock(totalSeconds: number, fallback: string = '0:00'): string {
   if (!Number.isFinite(totalSeconds) || totalSeconds < 0) {
@@ -1024,27 +1027,109 @@ function formatTranscriptBody(rawText: string): string {
 }
 
 function formatCueLabel(totalSeconds: number): string {
-  const safeSeconds = Math.max(0, Math.floor(totalSeconds || 0));
-  const hours = Math.floor(safeSeconds / 3600)
+  const safeSeconds = Math.max(0, Number(totalSeconds) || 0);
+  const wholeSeconds = Math.floor(safeSeconds);
+  const hours = Math.floor(wholeSeconds / 3600)
     .toString()
     .padStart(2, '0');
-  const minutes = Math.floor((safeSeconds % 3600) / 60)
+  const minutes = Math.floor((wholeSeconds % 3600) / 60)
     .toString()
     .padStart(2, '0');
-  const seconds = Math.floor(safeSeconds % 60)
+  const seconds = Math.floor(wholeSeconds % 60)
     .toString()
     .padStart(2, '0');
+  const tenths = Math.floor((safeSeconds - wholeSeconds) * 10)
+    .toString()
+    .padStart(1, '0');
 
-  return `${hours}:${minutes}:${seconds}`;
+  return `${hours}:${minutes}:${seconds}.${tenths}`;
 }
 
-function estimateTranscriptCueLeadSeconds(text: string): number {
+function buildCueRangeLabel(startSeconds: number, endSeconds: number): string {
+  return `${formatCueLabel(startSeconds)} -> ${formatCueLabel(endSeconds)}`;
+}
+
+function estimateTranscriptSegmentSeconds(text: string): number {
   const wordCount = String(text || '')
     .trim()
     .split(/\s+/)
     .filter(Boolean).length;
 
-  return Math.min(4, Math.max(1, Math.round(wordCount / 3)));
+  return Math.min(8, Math.max(0.9, wordCount / 2.4));
+}
+
+function roundCueSecond(value: number): number {
+  return Math.round(Math.max(0, value) * 100) / 100;
+}
+
+function parseTimestampPartsToSeconds(
+  hoursRaw: string,
+  minutesRaw: string,
+  secondsRaw: string,
+  fractionRaw?: string
+): number {
+  const hours = Number(hoursRaw || 0);
+  const minutes = Number(minutesRaw || 0);
+  const seconds = Number(secondsRaw || 0);
+  const fraction = fractionRaw ? Number(`0.${fractionRaw}`) : 0;
+
+  return Math.max(0, hours * 3600 + minutes * 60 + seconds + fraction);
+}
+
+function parseTimelineRangeCues(normalizedText: string): TranscriptCue[] {
+  const rangePattern =
+    /^\[(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?\s*(?:->|to|-)\s*(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?\]\s*(.+)$/gm;
+  const cues: TranscriptCue[] = [];
+
+  for (const match of normalizedText.matchAll(rangePattern)) {
+    const start = parseTimestampPartsToSeconds(match[1], match[2], match[3], match[4]);
+    const parsedEnd = parseTimestampPartsToSeconds(match[5], match[6], match[7], match[8]);
+    const text = normalizeTranscriptSentence(String(match[9] || ''));
+
+    if (!text) continue;
+
+    const end = Math.max(start + MIN_TRANSCRIPT_SEGMENT_SECONDS, parsedEnd);
+    cues.push({
+      start,
+      end,
+      label: buildCueRangeLabel(start, end),
+      text,
+    });
+  }
+
+  return cues;
+}
+
+function parseTimelinePointCues(
+  normalizedText: string,
+  hasSpeechStartTimelineAnchor: boolean
+): TranscriptCue[] {
+  const cuePattern = /^\[(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?\]\s*(.+)$/gm;
+  const cues: TranscriptCue[] = [];
+
+  for (const match of normalizedText.matchAll(cuePattern)) {
+    const originalTimestamp = parseTimestampPartsToSeconds(match[1], match[2], match[3], match[4]);
+    const text = normalizeTranscriptSentence(String(match[5] || ''));
+
+    if (!text) continue;
+
+    const estimatedSegmentDuration = estimateTranscriptSegmentSeconds(text);
+    const start = hasSpeechStartTimelineAnchor
+      ? originalTimestamp
+      : Math.max(0, originalTimestamp - estimatedSegmentDuration);
+    const end = hasSpeechStartTimelineAnchor
+      ? start + estimatedSegmentDuration
+      : Math.max(originalTimestamp, start + MIN_TRANSCRIPT_SEGMENT_SECONDS);
+
+    cues.push({
+      start,
+      end,
+      label: buildCueRangeLabel(start, end),
+      text,
+    });
+  }
+
+  return cues;
 }
 
 function extractDeclaredRecordingDurationSeconds(rawText: string): number {
@@ -1107,28 +1192,46 @@ function buildSyntheticTranscriptCues(
     return text
       ? [
           {
-            timestamp: 0,
-            label: formatCueLabel(0),
+            start: 0,
+            end: roundCueSecond(estimateTranscriptSegmentSeconds(text)),
+            label: buildCueRangeLabel(0, estimateTranscriptSegmentSeconds(text)),
             text,
           },
         ]
       : [];
   }
 
+  const chunkWeights = transcriptChunks.map((chunk) =>
+    Math.max(1, chunk.split(/\s+/).filter(Boolean).length)
+  );
+  const totalWeight = chunkWeights.reduce((sum, weight) => sum + weight, 0);
+
+  const minimumDuration = transcriptChunks.length * MIN_TRANSCRIPT_SEGMENT_SECONDS;
+  const estimatedDuration = transcriptChunks.reduce(
+    (sum, chunk) => sum + estimateTranscriptSegmentSeconds(chunk),
+    0
+  );
+
   const safeDuration =
     declaredDurationSeconds > 0
-      ? Math.max(declaredDurationSeconds, transcriptChunks.length)
-      : Math.max(transcriptChunks.length * 4, transcriptChunks.length);
+      ? Math.max(declaredDurationSeconds, minimumDuration)
+      : Math.max(estimatedDuration, minimumDuration);
 
-  const maxSecond = Math.max(0, safeDuration - 1);
+  let elapsedWeight = 0;
 
   return transcriptChunks
     .map((chunk, index) => {
       const text = normalizeTranscriptSentence(chunk);
-      const timestamp = Math.round((index / Math.max(1, transcriptChunks.length - 1)) * maxSecond);
+      const start = (elapsedWeight / totalWeight) * safeDuration;
+      elapsedWeight += chunkWeights[index];
+      const end =
+        index === transcriptChunks.length - 1
+          ? safeDuration
+          : (elapsedWeight / totalWeight) * safeDuration;
       return {
-        timestamp,
-        label: formatCueLabel(timestamp),
+        start: roundCueSecond(start),
+        end: roundCueSecond(Math.max(end, start + MIN_TRANSCRIPT_SEGMENT_SECONDS)),
+        label: buildCueRangeLabel(start, end),
         text,
       };
     })
@@ -1139,30 +1242,84 @@ function normalizeTranscriptCues(
   cues: TranscriptCue[],
   declaredDurationSeconds: number
 ): TranscriptCue[] {
-  if (cues.length <= 1) {
-    return cues;
+  if (!cues.length) {
+    return [];
   }
 
-  const sortedCues = [...cues].sort((a, b) => a.timestamp - b.timestamp);
-  const uniqueSecondCount = new Set(sortedCues.map((cue) => Math.floor(cue.timestamp))).size;
+  const sortedCues = [...cues]
+    .filter((cue) => cue.text.length > 0)
+    .sort((a, b) => a.start - b.start)
+    .filter((cue, index, array) => {
+      if (index === 0) return true;
+      const previous = array[index - 1];
+      return previous.text !== cue.text || Math.abs(previous.start - cue.start) > 0.05;
+    });
+
+  if (!sortedCues.length) {
+    return [];
+  }
+
+  const uniqueStartBucketCount = new Set(sortedCues.map((cue) => Math.floor(cue.start * 2))).size;
   const hasHeavyOverlap =
-    sortedCues.length > 1 && uniqueSecondCount <= Math.max(1, Math.ceil(sortedCues.length * 0.6));
+    sortedCues.length > 1 &&
+    uniqueStartBucketCount <= Math.max(1, Math.ceil(sortedCues.length * 0.6));
 
-  if (!hasHeavyOverlap) {
-    return sortedCues;
+  let workingCues = sortedCues;
+  if (hasHeavyOverlap && sortedCues.length > 1) {
+    const safeDuration =
+      declaredDurationSeconds > 0
+        ? Math.max(declaredDurationSeconds, sortedCues.length * MIN_TRANSCRIPT_SEGMENT_SECONDS)
+        : Math.max(
+            sortedCues[sortedCues.length - 1].end,
+            sortedCues.length * MIN_TRANSCRIPT_SEGMENT_SECONDS * 2
+          );
+    const maxStart = Math.max(0, safeDuration - MIN_TRANSCRIPT_SEGMENT_SECONDS);
+
+    workingCues = sortedCues.map((cue, index) => ({
+      ...cue,
+      start: (index / Math.max(1, sortedCues.length - 1)) * maxStart,
+    }));
   }
 
-  const maxSecond =
-    declaredDurationSeconds > 0
-      ? Math.max(declaredDurationSeconds - 1, sortedCues.length - 1)
-      : Math.max(sortedCues.length * 4, sortedCues.length - 1);
+  const adjustedStarts: number[] = [];
+  for (let index = 0; index < workingCues.length; index += 1) {
+    const cue = workingCues[index];
+    if (index === 0) {
+      adjustedStarts.push(Math.max(0, cue.start));
+      continue;
+    }
 
-  return sortedCues.map((cue, index) => {
-    const timestamp = Math.round((index / Math.max(1, sortedCues.length - 1)) * maxSecond);
+    adjustedStarts.push(
+      Math.max(Math.max(0, cue.start), adjustedStarts[index - 1] + MIN_TRANSCRIPT_SEGMENT_SECONDS)
+    );
+  }
+
+  const lastIndex = adjustedStarts.length - 1;
+  const estimatedTailDuration = estimateTranscriptSegmentSeconds(workingCues[lastIndex].text);
+  let safeDuration =
+    declaredDurationSeconds > 0
+      ? declaredDurationSeconds
+      : Math.max(
+          workingCues[lastIndex].end,
+          adjustedStarts[lastIndex] + Math.max(estimatedTailDuration, MIN_TRANSCRIPT_SEGMENT_SECONDS)
+        );
+
+  if (safeDuration < adjustedStarts[lastIndex] + MIN_TRANSCRIPT_SEGMENT_SECONDS) {
+    safeDuration = adjustedStarts[lastIndex] + MIN_TRANSCRIPT_SEGMENT_SECONDS;
+  }
+
+  return workingCues.map((cue, index) => {
+    const start = adjustedStarts[index];
+    const end =
+      index === lastIndex
+        ? safeDuration
+        : Math.max(adjustedStarts[index + 1], start + MIN_TRANSCRIPT_SEGMENT_SECONDS);
+
     return {
       ...cue,
-      timestamp,
-      label: formatCueLabel(timestamp),
+      start: roundCueSecond(start),
+      end: roundCueSecond(end),
+      label: buildCueRangeLabel(start, end),
     };
   });
 }
@@ -1182,37 +1339,10 @@ function parseRecordingTranscript(extractedText: string): {
   const hasSpeechStartTimelineAnchor =
     /(?:^|\n)\s*Timing Anchor:\s*Speech Start\s*(?:\n|$)/i.test(normalizedText);
 
-  const cuePattern = /^\[(\d{2}):(\d{2}):(\d{2})\]\s*(.+)$/gm;
-  const cues: TranscriptCue[] = [];
-
-  for (const match of normalizedText.matchAll(cuePattern)) {
-    const hours = Number(match[1] || 0);
-    const minutes = Number(match[2] || 0);
-    const seconds = Number(match[3] || 0);
-    const text = normalizeTranscriptSentence(String(match[4] || ''));
-
-    if (!text) continue;
-
-    const originalTimestamp = hours * 3600 + minutes * 60 + seconds;
-    const timestamp = hasSpeechStartTimelineAnchor
-      ? originalTimestamp
-      : Math.max(0, originalTimestamp - estimateTranscriptCueLeadSeconds(text));
-
-    cues.push({
-      timestamp,
-      label: formatCueLabel(timestamp),
-      text,
-    });
-  }
-
-  const dedupedCues = normalizeTranscriptCues(
-    cues
-    .sort((a, b) => a.timestamp - b.timestamp)
-    .filter((cue, index, array) => {
-      if (index === 0) return true;
-      const previous = array[index - 1];
-      return previous.timestamp !== cue.timestamp || previous.text !== cue.text;
-    }),
+  const parsedRangeCues = parseTimelineRangeCues(normalizedText);
+  const parsedPointCues = parseTimelinePointCues(normalizedText, hasSpeechStartTimelineAnchor);
+  const normalizedParsedCues = normalizeTranscriptCues(
+    parsedRangeCues.length > 0 ? parsedRangeCues : parsedPointCues,
     declaredDuration
   );
 
@@ -1230,24 +1360,26 @@ function parseRecordingTranscript(extractedText: string): {
 
   const fullTranscript = fullTranscriptMatch?.[1]?.trim()
     ? formatTranscriptBody(fullTranscriptMatch[1])
-    : dedupedCues.length > 0
-    ? formatTranscriptBody(dedupedCues.map((cue) => cue.text).join(' '))
+    : normalizedParsedCues.length > 0
+    ? formatTranscriptBody(normalizedParsedCues.map((cue) => cue.text).join(' '))
     : formatTranscriptBody(fallbackTranscript);
 
   const syntheticCues = buildSyntheticTranscriptCues(fullTranscript, declaredDuration);
   const cueCoverageRatio = fullTranscript
-    ? dedupedCues.map((cue) => cue.text).join(' ').length /
+    ? normalizedParsedCues.map((cue) => cue.text).join(' ').length /
       Math.max(1, fullTranscript.replace(/\s+/g, ' ').trim().length)
     : 1;
 
   const shouldUseSyntheticCues =
-    syntheticCues.length > 1 && (dedupedCues.length === 0 || cueCoverageRatio < 0.55);
+    syntheticCues.length > 1 && (normalizedParsedCues.length === 0 || cueCoverageRatio < 0.55);
 
-  const finalCues = shouldUseSyntheticCues ? syntheticCues : dedupedCues;
+  const finalCues = shouldUseSyntheticCues
+    ? normalizeTranscriptCues(syntheticCues, declaredDuration)
+    : normalizedParsedCues;
 
   const inferredDuration = Math.max(
     declaredDuration,
-    finalCues.length ? finalCues[finalCues.length - 1].timestamp + 4 : 0
+    finalCues.length ? finalCues[finalCues.length - 1].end : 0
   );
 
   return { cues: finalCues, fullTranscript, declaredDuration, inferredDuration };
@@ -1383,18 +1515,21 @@ function AudioTranscriptPlayer({
   const activeCueIndex = useMemo(() => {
     if (!cues.length) return -1;
 
-    for (let index = cues.length - 1; index >= 0; index -= 1) {
-      if (currentTime >= cues[index].timestamp) {
+    for (let index = 0; index < cues.length; index += 1) {
+      const cue = cues[index];
+      const isLastCue = index === cues.length - 1;
+
+      if (currentTime >= cue.start && (currentTime < cue.end || isLastCue)) {
         return index;
       }
     }
 
-    return 0;
+    return currentTime < cues[0].start ? 0 : cues.length - 1;
   }, [cues, currentTime]);
 
   const handleCueClick = useCallback(
-    async (timestamp: number) => {
-      const seekedTime = seekTo(Math.max(0, timestamp));
+    async (start: number) => {
+      const seekedTime = seekTo(Math.max(0, start));
       if (seekedTime === null) {
         return;
       }
@@ -1549,8 +1684,8 @@ function AudioTranscriptPlayer({
               return (
                 <button
                   type="button"
-                  key={`${cue.timestamp}-${index}`}
-                  onClick={() => handleCueClick(cue.timestamp)}
+                  key={`${cue.start}-${cue.end}-${index}`}
+                  onClick={() => handleCueClick(cue.start)}
                   className={`w-full text-left rounded-xl border px-3 py-2.5 transition-all ${
                     isActive
                       ? 'border-sunrise-pink/70 bg-sunrise-pink/10 dark:border-midnight-cyan/60 dark:bg-midnight-cyan/10 shadow-sm'
