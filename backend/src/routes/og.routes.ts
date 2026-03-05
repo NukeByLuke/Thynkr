@@ -111,23 +111,20 @@ function buildOgHtml(opts: {
 }
 
 export default async function ogRoutes(server: FastifyInstance) {
-  const configuredFrontendUrl = config.app.frontendUrl || 'https://thynkr.study';
+  const configuredFrontendUrl = config.app.frontendUrl || 'https://thynkr.ca';
 
   /**
    * Get the frontend URL based on the request's Host header.
-   * This ensures OG tags work for both thynkr.ca and thynkr.study.
+   * This ensures OG tags use the canonical thynkr.ca domain.
    */
   function getFrontendUrl(request: any): string {
     const host = request.headers.host;
     if (host) {
       // Extract domain from host (remove port if present)
       const domain = host.split(':')[0];
-      // If accessing via thynkr.ca or thynkr.study, use that
+      // If accessing via thynkr.ca, use canonical domain
       if (domain === 'thynkr.ca' || domain === 'www.thynkr.ca') {
         return 'https://thynkr.ca';
-      }
-      if (domain === 'thynkr.study' || domain === 'www.thynkr.study') {
-        return 'https://thynkr.study';
       }
     }
     // Fallback to configured URL

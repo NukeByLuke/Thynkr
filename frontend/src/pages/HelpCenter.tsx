@@ -73,10 +73,10 @@ export default function HelpCenter() {
                     For urgent help, email us directly and include screenshots.
                   </p>
                   <a
-                    href="mailto:support@thynkr.study"
+                    href="mailto:support@thynkr.ca"
                     className="inline-block mt-3 text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
                   >
-                    support@thynkr.study
+                    support@thynkr.ca
                   </a>
                 </div>
               </div>

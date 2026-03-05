@@ -102,10 +102,6 @@ async function start() {
     // CORS
     await server.register(cors, {
       origin: [
-        'https://thynkr.study',
-        'https://www.thynkr.study',
-        'http://thynkr.study',
-        'http://www.thynkr.study',
         'https://thynkr.ca',
         'https://www.thynkr.ca',
         'http://thynkr.ca',

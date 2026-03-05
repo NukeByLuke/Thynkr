@@ -1,4 +1,4 @@
-﻿# âœ… Stripe Setup Complete for Thynkr
+# âœ… Stripe Setup Complete for Thynkr
 
 ## ðŸŽ‰ What's Been Done
 
@@ -58,7 +58,7 @@ Premium Yearly:  price_1SbTpvFLpibl0I1eMwaex7YR  ($199.99/yr)
 
 ---
 
-## ðŸš€ Deploy to Production (thynkr.study)
+## ðŸš€ Deploy to Production (thynkr.ca)
 
 ### Step 1: Create LIVE Stripe Products
 
@@ -74,7 +74,7 @@ Go to https://dashboard.stripe.com (toggle to **LIVE mode**):
    - Copy Secret key (`sk_live_...`)
 
 3. **Webhooks â†’ Add endpoint**
-   - URL: `https://thynkr.study/api/webhooks/stripe`
+   - URL: `https://thynkr.ca/api/webhooks/stripe`
    - Events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_succeeded`, `invoice.payment_failed`
    - Copy Signing secret (`whsec_...`)
 
@@ -102,7 +102,7 @@ STRIPE_PRICE_PRO_YEARLY=price_YOUR_ID
 STRIPE_PRICE_PREMIUM_MONTHLY=price_YOUR_ID
 STRIPE_PRICE_PREMIUM_YEARLY=price_YOUR_ID
 
-FRONTEND_URL=https://thynkr.study
+FRONTEND_URL=https://thynkr.ca
 ```
 
 Also create/update `frontend/.env.production`:
@@ -132,7 +132,7 @@ docker-compose -f docker-compose.prod.yml logs -f backend
 
 ### Step 4: Test Production
 
-1. Go to https://thynkr.study
+1. Go to https://thynkr.ca
 2. Sign up / Login
 3. Try to subscribe (use a real card - you'll be charged!)
 4. Verify in Stripe Dashboard: https://dashboard.stripe.com/payments
@@ -171,10 +171,10 @@ I've created three guides for you:
 - Webhook Endpoint: http://localhost:3001/api/webhooks/stripe
 
 **Production:**
-- Frontend: https://thynkr.study
-- Backend: https://thynkr.study/api
-- Backend Health: https://thynkr.study/api/health
-- Webhook Endpoint: https://thynkr.study/api/webhooks/stripe
+- Frontend: https://thynkr.ca
+- Backend: https://thynkr.ca/api
+- Backend Health: https://thynkr.ca/api/health
+- Webhook Endpoint: https://thynkr.ca/api/webhooks/stripe
 
 **Stripe Dashboard:**
 - Test Mode: https://dashboard.stripe.com/test/dashboard

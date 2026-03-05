@@ -1,4 +1,4 @@
-﻿# Stripe DigitalOcean Deployment Script
+# Stripe DigitalOcean Deployment Script
 # This script will help you deploy Stripe test configuration to DigitalOcean
 
 Write-Host "`n========================================" -ForegroundColor Cyan
@@ -23,7 +23,7 @@ Write-Host "âœ“ Loaded 4 price IDs" -ForegroundColor Green
 # Get server details
 Write-Host "`nServer Configuration:" -ForegroundColor Yellow
 $dropletIp = Read-Host "Enter your DigitalOcean Droplet IP"
-$domain = Read-Host "Enter your domain (e.g., thynkr.study)"
+$domain = Read-Host "Enter your domain (e.g., thynkr.ca)"
 
 Write-Host "`n========================================" -ForegroundColor Cyan
 Write-Host " STEP 1: Update GitHub Secrets" -ForegroundColor Cyan

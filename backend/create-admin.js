@@ -13,14 +13,14 @@ async function createAdmin() {
     
     // Create or update admin user
     const admin = await prisma.user.upsert({
-      where: { email: 'admin@thynkr.study' },
+      where: { email: 'admin@thynkr.ca' },
       update: {
         role: 'ADMIN',
         password: hashedPassword,
         emailVerified: true,
       },
       create: {
-        email: 'admin@thynkr.study',
+        email: 'admin@thynkr.ca',
         username: 'admin',
         password: hashedPassword,
         role: 'ADMIN',
@@ -29,7 +29,7 @@ async function createAdmin() {
     });
     
     console.log('✓ Admin user created successfully!');
-    console.log('  Email: admin@thynkr.study');
+    console.log('  Email: admin@thynkr.ca');
     console.log('  Password: test123');
     console.log('  Role:', admin.role);
   } catch (error) {

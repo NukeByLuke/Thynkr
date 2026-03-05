@@ -1,4 +1,4 @@
-﻿# Stripe Test Mode Setup for DigitalOcean
+# Stripe Test Mode Setup for DigitalOcean
 
 This guide will help you set up Stripe **test mode** on your DigitalOcean deployment, allowing you to test subscriptions in production environment without real charges.
 
@@ -59,9 +59,9 @@ This is the **critical step** that makes webhooks work without the CLI.
 2. Click **"Add endpoint"**
 3. **Endpoint URL**: 
    ```
-   https://thynkr.study/api/webhooks/stripe
+   https://thynkr.ca/api/webhooks/stripe
    ```
-   (Replace `thynkr.study` with your actual domain)
+   (Replace `thynkr.ca` with your actual domain)
 
 4. **Description**: `DigitalOcean Test Webhook`
 
@@ -112,9 +112,9 @@ STRIPE_PRICE_PREMIUM_MONTHLY=price_YOUR_PREMIUM_MONTHLY_ID
 STRIPE_PRICE_PREMIUM_YEARLY=price_YOUR_PREMIUM_YEARLY_ID
 
 # URLs (should already be set)
-FRONTEND_URL=https://thynkr.study
-BACKEND_URL=https://thynkr.study
-VITE_API_URL=https://thynkr.study
+FRONTEND_URL=https://thynkr.ca
+BACKEND_URL=https://thynkr.ca
+VITE_API_URL=https://thynkr.ca
 ```
 
 Save and exit (Ctrl+X, then Y, then Enter)
@@ -192,14 +192,14 @@ backend  | Received Stripe webhook: checkout.session.completed
 ### 1. Health Check
 
 ```bash
-curl https://thynkr.study/api/health
+curl https://thynkr.ca/api/health
 ```
 
 Should return: `{"status":"ok"}`
 
 ### 2. Test Subscription Flow
 
-1. Go to `https://thynkr.study`
+1. Go to `https://thynkr.ca`
 2. Create a new test account or login
 3. Navigate to **Pricing** or **Settings/Billing**
 4. Click **"Upgrade to Pro"** or **"Upgrade to Premium"**
@@ -295,7 +295,7 @@ docker compose -f docker-compose.prod.yml logs backend | grep -i "webhook\|strip
 
 **Test webhook endpoint directly:**
 ```bash
-curl -X POST https://thynkr.study/api/webhooks/stripe \
+curl -X POST https://thynkr.ca/api/webhooks/stripe \
   -H "Content-Type: application/json" \
   -d '{"test": true}'
 ```

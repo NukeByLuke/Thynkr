@@ -258,10 +258,10 @@ export default function Terms() {
               <p>
                 Educational institutions may contact us at{' '}
                 <a
-                  href="mailto:academic@thynkr.study"
+                  href="mailto:academic@thynkr.ca"
                   className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                 >
-                  academic@thynkr.study
+                  academic@thynkr.ca
                 </a>{' '}
                 with concerns about content that may violate academic integrity policies.
               </p>
@@ -312,10 +312,10 @@ export default function Terms() {
               </p>
               <p className="ml-6 font-semibold">
                 <a
-                  href="mailto:copyright@thynkr.study"
+                  href="mailto:copyright@thynkr.ca"
                   className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                 >
-                  copyright@thynkr.study
+                  copyright@thynkr.ca
                 </a>
               </p>
               
@@ -370,10 +370,10 @@ export default function Terms() {
                 If you believe content you uploaded was removed in error, you may submit a
                 counter-notification to{' '}
                 <a
-                  href="mailto:copyright@thynkr.study"
+                  href="mailto:copyright@thynkr.ca"
                   className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                 >
-                  copyright@thynkr.study
+                  copyright@thynkr.ca
                 </a>
                 {' '}explaining why the content does not infringe copyright. We will review
                 counter-notifications in accordance with applicable law.
@@ -466,19 +466,19 @@ export default function Terms() {
                 <li>
                   Email:{' '}
                   <a
-                    href="mailto:support@thynkr.study"
+                    href="mailto:support@thynkr.ca"
                     className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                   >
-                    support@thynkr.study
+                    support@thynkr.ca
                   </a>
                 </li>
                 <li>
                   Website:{' '}
                   <a
-                    href="https://thynkr.study"
+                    href="https://thynkr.ca"
                     className="text-sunrise-pink dark:text-midnight-cyan hover:underline"
                   >
-                    https://thynkr.study
+                    https://thynkr.ca
                   </a>
                 </li>
               </ul>

@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Stop"
 
 Write-Host ""
 Write-Host "========================================"
@@ -22,7 +22,7 @@ Write-Host ""
 # Get server details
 Write-Host "Enter your server details:"
 $dropletIp = Read-Host "DigitalOcean Droplet IP"
-$domain = Read-Host "Domain (e.g., thynkr.study)"
+$domain = Read-Host "Domain (e.g., thynkr.ca)"
 
 Write-Host ""
 Write-Host "========================================"

@@ -1,4 +1,4 @@
-﻿import { forwardRef } from 'react';
+import { forwardRef } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
   Trophy,
@@ -554,7 +554,7 @@ export const PlayerCardExport = forwardRef<HTMLDivElement, PlayerCardExportProps
                display: 'inline-block',
                verticalAlign: 'middle',
            }}>
-             thynkr.study
+             thynkr.ca
            </span>
         </div>
       </div>

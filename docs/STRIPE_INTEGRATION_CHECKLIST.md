@@ -1,4 +1,4 @@
-﻿# âœ… Stripe Payment Integration Checklist
+# âœ… Stripe Payment Integration Checklist
 
 Use this checklist to ensure your Stripe payment system is fully set up and tested.
 
@@ -155,7 +155,7 @@ Use this checklist to ensure your Stripe payment system is fully set up and test
 - [ ] Created products with LIVE prices
 - [ ] Copied LIVE Price IDs
 - [ ] Created LIVE webhook endpoint
-- [ ] Configured webhook URL: `https://thynkr.study/api/stripe/webhook`
+- [ ] Configured webhook URL: `https://thynkr.ca/api/stripe/webhook`
 - [ ] Added all 5 webhook events:
   - [ ] `checkout.session.completed`
   - [ ] `customer.subscription.updated`
@@ -169,7 +169,7 @@ Use this checklist to ensure your Stripe payment system is fully set up and test
 - [ ] Updated production backend `.env` with LIVE keys
 - [ ] Updated production frontend `.env` with LIVE publishable key
 - [ ] Updated all 4 price IDs to LIVE values
-- [ ] Set `FRONTEND_URL=https://thynkr.study`
+- [ ] Set `FRONTEND_URL=https://thynkr.ca`
 - [ ] Set `NODE_ENV=production`
 
 ### Production Deployment
@@ -180,7 +180,7 @@ Use this checklist to ensure your Stripe payment system is fully set up and test
 - [ ] SSL certificate valid and working
 
 ### Production Testing
-- [ ] Accessed https://thynkr.study/pricing
+- [ ] Accessed https://thynkr.ca/pricing
 - [ ] Completed test payment with real card
 - [ ] Received payment confirmation email
 - [ ] Subscription active in Stripe Dashboard

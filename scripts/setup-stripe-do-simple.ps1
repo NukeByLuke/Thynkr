@@ -1,4 +1,4 @@
-﻿Write-Host "Stripe DigitalOcean Test Setup" -ForegroundColor Cyan
+Write-Host "Stripe DigitalOcean Test Setup" -ForegroundColor Cyan
 Write-Host "==============================`n"
 
 Write-Host "Please provide your Stripe TEST mode credentials:`n" -ForegroundColor Yellow
@@ -15,7 +15,7 @@ $pricePremiumYearly = Read-Host "Premium Yearly Price ID (price_...)"
 
 Write-Host "`nServer Configuration:" -ForegroundColor Yellow
 $dropletIp = Read-Host "DigitalOcean Droplet IP"
-$domain = Read-Host "Domain (e.g., thynkr.study)"
+$domain = Read-Host "Domain (e.g., thynkr.ca)"
 
 Write-Host "`n=== GITHUB SECRETS ===" -ForegroundColor Magenta
 Write-Host "Add these at: https://github.com/YOUR_USERNAME/Thynkr/settings/secrets/actions`n"

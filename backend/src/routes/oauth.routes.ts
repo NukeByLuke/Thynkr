@@ -9,7 +9,7 @@ import prisma from '../db/client';
 import { generateAccessToken, generateRefreshToken } from '../lib/jwt';
 
 // Backend API URL (where OAuth callbacks are handled)
-// In production this should be https://thynkr.study (the nginx proxies /auth to backend)
+// In production this should be https://thynkr.ca (the nginx proxies /auth to backend)
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 // Google OAuth client

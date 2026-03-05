@@ -18,7 +18,7 @@ STRIPE_EOF
 docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 sleep 10
-curl https://thynkr.study/health
+curl https://thynkr.ca/health
 "@
 
 # Save with LF line endings

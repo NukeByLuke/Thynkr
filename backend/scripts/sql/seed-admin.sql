@@ -12,7 +12,7 @@ INSERT INTO users (
   "updatedAt"
 ) VALUES (
   'clprodadmin001',
-  'admin@thynkr.study',
+  'admin@thynkr.ca',
   'admin',
   '$2b$12$3izzeiJynmjmunpqa93x4ep9T7UUhgvbLkGvo46oTZxViGvMh6KtC',
   'Admin',

@@ -1,4 +1,4 @@
-﻿# Stripe Testing Guide - Local & Production
+# Stripe Testing Guide - Local & Production
 
 ## ðŸ§ª LOCAL TESTING (Test Mode)
 
@@ -88,7 +88,7 @@ Should see:
 
 ---
 
-## ðŸš€ PRODUCTION TESTING (thynkr.study)
+## ðŸš€ PRODUCTION TESTING (thynkr.ca)
 
 After deploying to production with LIVE Stripe keys:
 
@@ -102,13 +102,13 @@ After deploying to production with LIVE Stripe keys:
 
 #### 1. Health Check
 ```powershell
-Invoke-WebRequest -Uri "https://thynkr.study/api/health" -UseBasicParsing
+Invoke-WebRequest -Uri "https://thynkr.ca/api/health" -UseBasicParsing
 ```
 
 #### 2. Test with Real Card (Small Amount)
 âš ï¸ **WARNING**: This will create a REAL charge!
 
-1. Go to https://thynkr.study
+1. Go to https://thynkr.ca
 2. Sign up/login
 3. Choose Pro Monthly ($9.99)
 4. Use a REAL credit card
@@ -205,13 +205,13 @@ Invoke-WebRequest -Uri "http://localhost:3001/health"
 ### Production
 ```powershell
 # 1. Check backend
-Invoke-WebRequest -Uri "https://thynkr.study/api/health"
+Invoke-WebRequest -Uri "https://thynkr.ca/api/health"
 
 # 2. Check frontend
-Invoke-WebRequest -Uri "https://thynkr.study"
+Invoke-WebRequest -Uri "https://thynkr.ca"
 
 # 3. Check webhook endpoint (should return 400 or 405, not 404)
-Invoke-WebRequest -Uri "https://thynkr.study/api/webhooks/stripe" -Method POST
+Invoke-WebRequest -Uri "https://thynkr.ca/api/webhooks/stripe" -Method POST
 ```
 
 ---

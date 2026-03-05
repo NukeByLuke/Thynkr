@@ -1,4 +1,4 @@
-﻿# Stripe Production Deployment Guide for thynkr.study
+# Stripe Production Deployment Guide for thynkr.ca
 
 ## ðŸ”§ Step 1: Create Production Stripe Products & Prices
 
@@ -36,7 +36,7 @@ After creating, copy the **Price IDs** (they start with `price_`).
 
 1. Go to https://dashboard.stripe.com/webhooks
 2. Click "Add endpoint"
-3. Endpoint URL: `https://thynkr.study/api/webhooks/stripe`
+3. Endpoint URL: `https://thynkr.ca/api/webhooks/stripe`
 4. Events to listen to:
    - `checkout.session.completed`
    - `customer.subscription.updated`
@@ -69,7 +69,7 @@ STRIPE_PRICE_PREMIUM_MONTHLY=price_YOUR_ACTUAL_ID
 STRIPE_PRICE_PREMIUM_YEARLY=price_YOUR_ACTUAL_ID
 
 # Set production URL
-FRONTEND_URL=https://thynkr.study
+FRONTEND_URL=https://thynkr.ca
 ```
 
 ## ðŸš€ Step 5: Deploy Updated Code & Restart Services
@@ -90,11 +90,11 @@ docker-compose -f docker-compose.prod.yml logs -f backend
 
 ### Test 1: Check Health
 ```bash
-curl https://thynkr.study/api/health
+curl https://thynkr.ca/api/health
 ```
 
 ### Test 2: Test Subscription Flow
-1. Go to https://thynkr.study
+1. Go to https://thynkr.ca
 2. Sign in or create an account
 3. Navigate to Settings/Billing
 4. Click "Upgrade to Pro" or "Upgrade to Premium"

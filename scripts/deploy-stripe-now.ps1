@@ -1,4 +1,4 @@
-﻿# Build and Deploy Stripe Configuration to DigitalOcean
+# Build and Deploy Stripe Configuration to DigitalOcean
 # This builds locally and pushes to Docker Hub
 
 $ErrorActionPreference = "Stop"
@@ -62,7 +62,7 @@ Write-Host ""
 # Get server details
 Write-Host "Enter your DigitalOcean details:" -ForegroundColor Yellow
 $dropletIp = Read-Host "Droplet IP"
-$domain = Read-Host "Domain (e.g., thynkr.study)"
+$domain = Read-Host "Domain (e.g., thynkr.ca)"
 
 Write-Host ""
 Write-Host "[5/5] Deploying to DigitalOcean..." -ForegroundColor Yellow

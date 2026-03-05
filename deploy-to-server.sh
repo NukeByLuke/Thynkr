@@ -35,7 +35,7 @@ sleep 10
 
 # Health check
 echo "Checking health..."
-curl https://thynkr.study/api/health
+curl https://thynkr.ca/api/health
 
 echo ""
 echo "========================================" 
@@ -44,9 +44,9 @@ echo "========================================"
 echo ""
 echo "Next steps:"
 echo "1. Set up Stripe webhook at: https://dashboard.stripe.com/test/webhooks"
-echo "   - Endpoint URL: https://thynkr.study/api/webhooks/stripe"
+echo "   - Endpoint URL: https://thynkr.ca/api/webhooks/stripe"
 echo "   - Events: checkout.session.completed, customer.subscription.*, invoice.payment_*"
 echo ""
-echo "2. Test at: https://thynkr.study"
+echo "2. Test at: https://thynkr.ca"
 echo "   - Test card: 4242 4242 4242 4242"
 echo ""
