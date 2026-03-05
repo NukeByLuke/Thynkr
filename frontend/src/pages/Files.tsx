@@ -64,6 +64,13 @@ interface UploadMutationResult {
   failedFiles: Array<{ name: string; error: string }>;
 }
 
+interface RecordingUploadResult {
+  file?: UploadedFile;
+  warning?: string;
+  limitedFeatures?: boolean;
+  transcriptionSource?: string;
+}
+
 export default function Files() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -319,14 +326,31 @@ export default function Files() {
         },
       });
 
-      return response.data?.file as UploadedFile | undefined;
+      return {
+        file: response.data?.file as UploadedFile | undefined,
+        warning:
+          typeof response.data?.warning === 'string' ? response.data.warning : undefined,
+        limitedFeatures: Boolean(response.data?.limitedFeatures),
+        transcriptionSource:
+          typeof response.data?.transcriptionSource === 'string'
+            ? response.data.transcriptionSource
+            : undefined,
+      } as RecordingUploadResult;
     },
-    onSuccess: async () => {
+    onSuccess: async (result: RecordingUploadResult) => {
       setUploadError(null);
       setUploadProgress(null);
       await queryClient.invalidateQueries({ queryKey: ['study-files'] });
       await queryClient.invalidateQueries({ queryKey: ['folders'] });
-      toast.success('Recording uploaded successfully!');
+
+      if (result.warning) {
+        toast.success('Recording uploaded.');
+        toast.error(result.warning, { duration: 8000 });
+      } else if (result.transcriptionSource === 'gemini-audio') {
+        toast.success('Recording uploaded and auto-transcribed!');
+      } else {
+        toast.success('Recording uploaded successfully!');
+      }
     },
     onError: (error: unknown) => {
       const message = getApiErrorMessage(error, 'Recording upload failed');
