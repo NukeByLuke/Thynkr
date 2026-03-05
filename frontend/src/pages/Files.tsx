@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Folder,
   FileText,
+  BookOpen,
   Upload,
   Sparkles,
   MoreVertical,
@@ -21,12 +22,19 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { FileTypeBadge, getFileIcon } from '@/lib/fileTypeUtils';
-import UploadModal from '@/components/UploadModal';
+import UploadModal, { type RecordingUploadPayload } from '@/components/UploadModal';
 import YouTubeProcessingOverlay from '@/components/YouTubeProcessingOverlay';
 import { useLayout } from '@/contexts/LayoutContext';
 import api from '@/lib/api';
-
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+import {
+  buildUploadProgressSnapshot,
+  createServerProcessingUploadProgress,
+  createQueuedUploadProgress,
+  hasStudyUploadFailures,
+  isStudyUploadProcessingComplete,
+  type StudyUploadServerFile,
+  type UploadProgressSnapshot,
+} from '@/lib/uploadProgress';
 
 interface FolderType {
   id: string;
@@ -48,6 +56,12 @@ interface UploadedFile {
   status: 'UPLOADED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
   folderId: string | null;
   createdAt: string;
+}
+
+interface UploadMutationResult {
+  files: UploadedFile[];
+  processingPending: boolean;
+  failedFiles: Array<{ name: string; error: string }>;
 }
 
 export default function Files() {
@@ -78,6 +92,7 @@ export default function Files() {
   const [isDragging, setIsDragging] = useState(false);
   const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
+  const [uploadProgress, setUploadProgress] = useState<UploadProgressSnapshot | null>(null);
 
   // CRITICAL: Reset layout on mount
   useEffect(() => {
@@ -85,30 +100,37 @@ export default function Files() {
     setCustomHeaderContent(null);
   }, [setHideSidebar, setCustomHeaderContent]);
 
-  const getToken = () => localStorage.getItem('accessToken');
+  const getApiErrorMessage = (error: unknown, fallback: string) => {
+    const maybeError = error as any;
+    return (
+      maybeError?.response?.data?.error ||
+      maybeError?.response?.data?.message ||
+      maybeError?.message ||
+      fallback
+    );
+  };
+
+  const delay = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
+  const hasAuthToken = Boolean(localStorage.getItem('accessToken'));
 
   // Fetch folders
   const { data: foldersData, isLoading: loadingFolders } = useQuery({
     queryKey: ['folders'],
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/study/folders`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      if (!response.ok) throw new Error('Failed to fetch folders');
-      return response.json();
+      const response = await api.get('/study/folders');
+      return response.data;
     },
+    enabled: hasAuthToken,
   });
 
   // Fetch files
   const { data: filesData, isLoading: loadingFiles } = useQuery({
     queryKey: ['study-files'],
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/study/files`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      if (!response.ok) throw new Error('Failed to fetch files');
-      return response.json();
+      const response = await api.get('/study/files');
+      return response.data;
     },
+    enabled: hasAuthToken,
   });
 
   const folders: FolderType[] = foldersData?.folders || [];
@@ -134,41 +156,190 @@ export default function Files() {
     return pathItems;
   }, [currentFolderId, foldersById]);
 
+  const waitForUploadedFilesToProcess = async (
+    selectedFiles: File[],
+    initialUploadedFiles: StudyUploadServerFile[]
+  ): Promise<boolean> => {
+    if (!selectedFiles.length || !initialUploadedFiles.length) {
+      return false;
+    }
+
+    let trackedFiles = [...initialUploadedFiles];
+    const startedAt = Date.now();
+    const processingTimeoutMs = 45000;
+
+    while (true) {
+      const elapsedMs = Date.now() - startedAt;
+      setUploadProgress(createServerProcessingUploadProgress(selectedFiles, trackedFiles, elapsedMs));
+
+      if (hasStudyUploadFailures(trackedFiles)) {
+        throw new Error('One or more files failed during processing. Please re-upload and try again.');
+      }
+
+      if (isStudyUploadProcessingComplete(trackedFiles)) {
+        return false;
+      }
+
+      if (elapsedMs >= processingTimeoutMs) {
+        return true;
+      }
+
+      await delay(1000);
+      try {
+        const statusResponse = await api.get('/study/files');
+        const latestFiles: UploadedFile[] = Array.isArray(statusResponse.data?.files)
+          ? statusResponse.data.files
+          : [];
+        const statusById = new Map(latestFiles.map((file) => [file.id, file.status]));
+
+        trackedFiles = trackedFiles.map((file) => ({
+          ...file,
+          status: statusById.get(file.id) || file.status,
+        }));
+      } catch {
+        return true;
+      }
+    }
+  };
+
   // Upload mutation
   const uploadMutation = useMutation({
     mutationFn: async ({ files, targetFolderId }: { files: FileList; targetFolderId: string | null }) => {
+      const fileList = Array.from(files);
+      const totalFileBytes = fileList.reduce((sum, file) => sum + Math.max(1, file.size), 0);
+
+      setUploadProgress(createQueuedUploadProgress(fileList));
+
       const formData = new FormData();
-      Array.from(files).forEach((file) => formData.append('files', file));
+      fileList.forEach((file) => formData.append('files', file));
       if (targetFolderId) formData.append('folderId', targetFolderId);
 
-      const response = await fetch(`${API_URL}/study/upload`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${getToken()}` },
-        body: formData,
+      const response = await api.post('/study/upload', formData, {
+        onUploadProgress: (progressEvent) => {
+          const loaded = typeof progressEvent.loaded === 'number' ? progressEvent.loaded : 0;
+          const total =
+            typeof progressEvent.total === 'number' && progressEvent.total > 0
+              ? progressEvent.total
+              : totalFileBytes;
+
+          const normalizedLoadedBytes =
+            total > 0
+              ? Math.min(totalFileBytes, (loaded / total) * totalFileBytes)
+              : Math.min(totalFileBytes, loaded);
+
+          setUploadProgress(
+            buildUploadProgressSnapshot(fileList, normalizedLoadedBytes, 'uploading')
+          );
+        },
       });
-      if (!response.ok) throw new Error('Upload failed');
-      return response.json();
+
+      const uploadedFiles: UploadedFile[] = Array.isArray(response.data?.files)
+        ? response.data.files
+        : [];
+      const rawFailedFiles: unknown[] = Array.isArray(response.data?.failedFiles)
+        ? response.data.failedFiles
+        : [];
+      const failedFiles: Array<{ name: string; error: string }> = rawFailedFiles
+        .map((entry: any): { name: string; error: string } => ({
+          name: typeof entry?.name === 'string' ? entry.name : 'Unknown file',
+          error: typeof entry?.error === 'string' ? entry.error : 'Upload failed',
+        }))
+        .filter((entry: { name: string; error: string }) => entry.name.trim().length > 0);
+      const processingPending = await waitForUploadedFilesToProcess(fileList, uploadedFiles);
+
+      return {
+        files: uploadedFiles,
+        processingPending,
+        failedFiles,
+      } as UploadMutationResult;
     },
-    onSuccess: () => {
+    onSuccess: (result: UploadMutationResult) => {
       setUploadError(null);
+      setUploadProgress(null);
       queryClient.invalidateQueries({ queryKey: ['study-files'] });
-      toast.success('Files uploaded successfully!');
+      queryClient.invalidateQueries({ queryKey: ['folders'] });
+
+      if (result.processingPending) {
+        toast.success('Files uploaded. Processing continues in the background.');
+      } else {
+        toast.success('Files uploaded successfully!');
+      }
+
+      if (result.failedFiles.length > 0) {
+        const failedNames = result.failedFiles.map((failed) => failed.name).join(', ');
+        toast.error(`Some files could not be uploaded: ${failedNames}`);
+      }
     },
-    onError: (error: Error) => {
-      setUploadError(error.message || 'Upload failed');
-      toast.error(error.message || 'Upload failed');
+    onError: (error: unknown) => {
+      const message = getApiErrorMessage(error, 'Upload failed');
+      setUploadError(message);
+      setUploadProgress(null);
+      toast.error(message);
+    },
+  });
+
+  const recordingUploadMutation = useMutation({
+    mutationFn: async ({
+      payload,
+      targetFolderId,
+    }: {
+      payload: RecordingUploadPayload;
+      targetFolderId: string | null;
+    }) => {
+      const { audioFile, transcript, timeline, capturedAt, durationSeconds } = payload;
+      const fileList = [audioFile];
+      const totalFileBytes = Math.max(1, audioFile.size);
+
+      setUploadProgress(createQueuedUploadProgress(fileList));
+
+      const formData = new FormData();
+      formData.append('audio', audioFile);
+      formData.append('transcript', transcript);
+      formData.append('timeline', JSON.stringify(timeline));
+      formData.append('capturedAt', capturedAt);
+      formData.append('durationSeconds', String(Math.max(0, Math.floor(durationSeconds || 0))));
+      if (targetFolderId) formData.append('folderId', targetFolderId);
+
+      const response = await api.post('/study/upload-recording', formData, {
+        onUploadProgress: (progressEvent) => {
+          const loaded = typeof progressEvent.loaded === 'number' ? progressEvent.loaded : 0;
+          const total =
+            typeof progressEvent.total === 'number' && progressEvent.total > 0
+              ? progressEvent.total
+              : totalFileBytes;
+
+          const normalizedLoadedBytes =
+            total > 0
+              ? Math.min(totalFileBytes, (loaded / total) * totalFileBytes)
+              : Math.min(totalFileBytes, loaded);
+
+          setUploadProgress(
+            buildUploadProgressSnapshot(fileList, normalizedLoadedBytes, 'uploading')
+          );
+        },
+      });
+
+      return response.data?.file as UploadedFile | undefined;
+    },
+    onSuccess: async () => {
+      setUploadError(null);
+      setUploadProgress(null);
+      await queryClient.invalidateQueries({ queryKey: ['study-files'] });
+      await queryClient.invalidateQueries({ queryKey: ['folders'] });
+      toast.success('Recording uploaded successfully!');
+    },
+    onError: (error: unknown) => {
+      const message = getApiErrorMessage(error, 'Recording upload failed');
+      setUploadError(message);
+      setUploadProgress(null);
     },
   });
 
   // Delete mutations
   const deleteFolderMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`${API_URL}/study/folders/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      if (!response.ok) throw new Error('Failed to delete folder');
-      return response.json();
+      const response = await api.delete(`/study/folders/${id}`);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['folders'] });
@@ -178,12 +349,8 @@ export default function Files() {
 
   const deleteFileMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`${API_URL}/study/files/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      if (!response.ok) throw new Error('Failed to delete file');
-      return response.json();
+      const response = await api.delete(`/study/files/${id}`);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['study-files'] });
@@ -195,13 +362,9 @@ export default function Files() {
   const massDeleteMutation = useMutation({
     mutationFn: async (items: { type: 'folder' | 'file'; id: string }[]) => {
       const promises = items.map((item) => {
-        const url = item.type === 'folder' 
-          ? `${API_URL}/study/folders/${item.id}`
-          : `${API_URL}/study/files/${item.id}`;
-        return fetch(url, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${getToken()}` },
-        });
+        const url =
+          item.type === 'folder' ? `/study/folders/${item.id}` : `/study/files/${item.id}`;
+        return api.delete(url);
       });
       await Promise.all(promises);
     },
@@ -216,16 +379,8 @@ export default function Files() {
   // Create folder mutation
   const createFolderMutation = useMutation({
     mutationFn: async (name: string) => {
-      const response = await fetch(`${API_URL}/study/folders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ name, parentId: currentFolderId }),
-      });
-      if (!response.ok) throw new Error('Failed to create folder');
-      return response.json();
+      const response = await api.post('/study/folders', { name, parentId: currentFolderId });
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['folders'] });
@@ -240,21 +395,13 @@ export default function Files() {
     mutationFn: async (data: { type: 'folder' | 'file'; id: string; name: string }) => {
       const url =
         data.type === 'folder'
-          ? `${API_URL}/study/folders/${data.id}`
-          : `${API_URL}/study/files/${data.id}/rename`;
+          ? `/study/folders/${data.id}`
+          : `/study/files/${data.id}/rename`;
       const body =
         data.type === 'folder' ? { name: data.name } : { originalName: data.name };
 
-      const response = await fetch(url, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify(body),
-      });
-      if (!response.ok) throw new Error('Failed to rename');
-      return response.json();
+      const response = await api.patch(url, body);
+      return response.data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
@@ -293,11 +440,13 @@ export default function Files() {
   const startUpload = (files: FileList) => {
     if (files.length === 0) return;
     setUploadError(null);
+    setUploadProgress(null);
     uploadMutation.mutate({ files, targetFolderId: currentFolderId });
   };
 
   const openUploadHub = () => {
     setUploadError(null);
+    setUploadProgress(null);
     setShowUploadModal(true);
   };
 
@@ -333,6 +482,14 @@ export default function Files() {
       const message = error?.response?.data?.error || 'Failed to add YouTube video';
       toast.error(message);
     }
+  };
+
+  const handleUploadRecording = async (payload: RecordingUploadPayload) => {
+    setUploadError(null);
+    await recordingUploadMutation.mutateAsync({
+      payload,
+      targetFolderId: currentFolderId,
+    });
   };
 
   const handleUploadLink = async (url: string) => {
@@ -417,6 +574,15 @@ export default function Files() {
     }
   };
 
+  const openFileInStudy = (targetFile: UploadedFile) => {
+    if (!targetFile?.id) {
+      toast.error('File not found');
+      return;
+    }
+
+    navigate(`/study/${targetFile.id}`);
+  };
+
   const handleViewFile = () => {
     if (!contextMenu || contextMenu.type !== 'file') return;
 
@@ -467,7 +633,21 @@ export default function Files() {
       return;
     }
 
-    openFileInNewTab(targetFile);
+    openFileInStudy(targetFile);
+  };
+
+  const handleStudyFile = () => {
+    if (!contextMenu || contextMenu.type !== 'file') return;
+
+    const targetFile = allFiles.find((file) => file.id === contextMenu.id);
+    if (!targetFile) {
+      toast.error('File not found');
+      setContextMenu(null);
+      return;
+    }
+
+    openFileInStudy(targetFile);
+    setContextMenu(null);
   };
 
   // Drag and Drop handlers
@@ -909,6 +1089,13 @@ export default function Files() {
             {contextMenu.type === 'file' && (
               <>
                 <button
+                  onClick={handleStudyFile}
+                  className="w-full px-4 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors duration-150 flex items-center gap-3 active:scale-95"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  Study
+                </button>
+                <button
                   onClick={handleViewFile}
                   className="w-full px-4 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors duration-150 flex items-center gap-3 active:scale-95"
                 >
@@ -1046,9 +1233,11 @@ export default function Files() {
           isOpen={showUploadModal}
           onClose={() => setShowUploadModal(false)}
           onUploadFiles={handleUploadFiles}
+          onUploadRecording={handleUploadRecording}
           onUploadYouTube={handleUploadYouTube}
           onUploadLink={handleUploadLink}
-          isUploading={uploadMutation.isPending}
+          isUploading={uploadMutation.isPending || recordingUploadMutation.isPending}
+          uploadProgress={uploadProgress}
           currentFolderId={currentFolderId}
           uploadErrorMessage={uploadError}
         />

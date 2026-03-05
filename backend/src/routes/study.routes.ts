@@ -16,6 +16,7 @@ import { FileProcessorService } from '../services/file-processor.service';
 import { AIService } from '../services/ai.service';
 import prisma from '../db/client';
 import fs from 'fs/promises';
+import path from 'path';
 import { normalizeFileForLanguage, resolveUserLanguage } from '../utils/language.utils';
 import { canUploadFile, getUserUsageStats } from '../lib/tier-limits';
 import { checkAIRateLimit, recordAIUsage } from '../middleware/ai-rate-limit.middleware';
@@ -59,6 +60,119 @@ function stripHtmlToText(html: string): string {
       .replace(/<\/li>/gi, '\n')
       .replace(/<[^>]+>/g, ' ')
   );
+}
+
+type RecordingTimelineEntry = {
+  timestamp: number;
+  text: string;
+};
+
+const AUDIO_EXTENSIONS = new Set(['.webm', '.mp3', '.wav', '.m4a', '.mp4', '.ogg']);
+
+function formatRecordingTimestamp(totalSeconds: number): string {
+  const safeSeconds = Math.max(0, Math.floor(totalSeconds || 0));
+  const hours = Math.floor(safeSeconds / 3600)
+    .toString()
+    .padStart(2, '0');
+  const minutes = Math.floor((safeSeconds % 3600) / 60)
+    .toString()
+    .padStart(2, '0');
+  const seconds = Math.floor(safeSeconds % 60)
+    .toString()
+    .padStart(2, '0');
+  return `${hours}:${minutes}:${seconds}`;
+}
+
+function parseRecordingTimeline(rawTimeline: unknown): RecordingTimelineEntry[] {
+  if (!rawTimeline) {
+    return [];
+  }
+
+  let parsedTimeline = rawTimeline;
+
+  if (typeof rawTimeline === 'string') {
+    try {
+      parsedTimeline = JSON.parse(rawTimeline);
+    } catch {
+      return [];
+    }
+  }
+
+  if (!Array.isArray(parsedTimeline)) {
+    return [];
+  }
+
+  const normalizedTimeline = parsedTimeline
+    .map((entry: any) => ({
+      timestamp: Math.max(0, Math.floor(Number(entry?.timestamp) || 0)),
+      text: String(entry?.text || '').replace(/\s+/g, ' ').trim(),
+    }))
+    .filter((entry) => entry.text.length > 0)
+    .sort((a, b) => a.timestamp - b.timestamp)
+    .filter((entry, index, array) => {
+      if (index === 0) return true;
+      const previous = array[index - 1];
+      return previous.timestamp !== entry.timestamp || previous.text !== entry.text;
+    });
+
+  return normalizedTimeline;
+}
+
+function buildFallbackTimeline(
+  transcript: string,
+  durationSeconds: number
+): RecordingTimelineEntry[] {
+  const normalizedTranscript = String(transcript || '').trim();
+  if (!normalizedTranscript) {
+    return [];
+  }
+
+  const sentenceChunks = normalizedTranscript
+    .split(/(?<=[.!?])\s+/)
+    .map((chunk) => chunk.trim())
+    .filter(Boolean)
+    .slice(0, 60);
+
+  if (sentenceChunks.length === 0) {
+    return [];
+  }
+
+  const safeDuration = Math.max(durationSeconds, Math.ceil(sentenceChunks.length * 6));
+  const interval = Math.max(4, Math.floor(safeDuration / Math.max(1, sentenceChunks.length)));
+
+  return sentenceChunks.map((text, index) => ({
+    timestamp: Math.min(safeDuration, index * interval),
+    text,
+  }));
+}
+
+function buildRecordingExtractedText(
+  transcript: string,
+  timeline: RecordingTimelineEntry[],
+  capturedAtIso: string,
+  durationSeconds: number
+): string {
+  const fullTranscript = String(transcript || '').replace(/\s+/g, ' ').trim();
+  const timelineLines = timeline
+    .map((entry) => `[${formatRecordingTimestamp(entry.timestamp)}] ${entry.text}`)
+    .join('\n');
+
+  const durationLabel =
+    durationSeconds > 0 ? `${formatRecordingTimestamp(durationSeconds)} (${durationSeconds}s)` : null;
+
+  return [
+    'Live Lecture Transcript',
+    `Captured: ${capturedAtIso}`,
+    durationLabel ? `Duration: ${durationLabel}` : null,
+    '',
+    timelineLines ? 'Timestamped Transcript:' : 'Transcript:',
+    timelineLines || fullTranscript,
+    '',
+    'Full Transcript:',
+    fullTranscript,
+  ]
+    .filter((line): line is string => Boolean(line))
+    .join('\n');
 }
 
 async function extractPublicWebContent(url: string): Promise<{ title: string; content: string }> {
@@ -433,71 +547,99 @@ export default async function studyRoutes(server: FastifyInstance) {
             await fs.unlink(file.path).catch(() => {});
           }
           return reply.code(403).send({
-            error: `You can only upload ${uploadCheck.remaining} more file(s) this month. Upgrade to get more uploads.`,
+            error: 'You have no uploads remaining for this month. Upgrade to get more uploads.',
             upgradeRequired: true,
           });
         }
 
         server.log.info({ fileCount: files.length }, 'Processing uploaded files');
-        const uploadedFiles = [];
+        const uploadedFiles: Awaited<ReturnType<typeof prisma.uploadedFile.create>>[] = [];
+        const failedFiles: Array<{ name: string; error: string }> = [];
 
         for (const file of files) {
-          // Validate file
-          if (!fileProcessor.validateFileType(file.mimetype, file.originalname)) {
-            await fs.unlink(file.path);
-            return reply.code(400).send({ error: `File ${file.originalname} has invalid type` });
-          }
+          try {
+            // Validate file
+            if (!fileProcessor.validateFileType(file.mimetype, file.originalname)) {
+              await fs.unlink(file.path).catch(() => {});
+              failedFiles.push({
+                name: file.originalname,
+                error: `File ${file.originalname} has invalid type`,
+              });
+              continue;
+            }
 
-          const canExtractText = fileProcessor.supportsTextExtraction(
-            file.mimetype,
-            file.originalname
-          );
+            const canExtractText = fileProcessor.supportsTextExtraction(
+              file.mimetype,
+              file.originalname
+            );
 
-          // Save to database immediately with PROCESSING status
-          const uploadedFile = await prisma.uploadedFile.create({
-            data: {
-              userId: request.user!.userId,
-              folderId,
-              fileName: file.filename,
-              originalName: file.originalname,
-              fileType: file.mimetype,
-              fileSize: file.size,
-              filePath: file.path,
-              status: canExtractText ? 'PROCESSING' : 'UPLOADED',
-              extractedText: null,
-            },
-          });
+            // Save to database immediately with PROCESSING status
+            const uploadedFile = await prisma.uploadedFile.create({
+              data: {
+                userId: request.user!.userId,
+                folderId,
+                fileName: file.filename,
+                originalName: file.originalname,
+                fileType: file.mimetype,
+                fileSize: file.size,
+                filePath: file.path,
+                status: canExtractText ? 'PROCESSING' : 'UPLOADED',
+                extractedText: null,
+              },
+            });
 
-          uploadedFiles.push(uploadedFile);
+            uploadedFiles.push(uploadedFile);
 
-          // Process text extraction asynchronously in the background (don't await)
-          if (canExtractText) {
-            setImmediate(async () => {
-              try {
-                const extractedText = await fileProcessor.extractText(file.path, file.mimetype);
-                await prisma.uploadedFile.update({
-                  where: { id: uploadedFile.id },
-                  data: {
-                    extractedText,
-                    status: 'COMPLETED',
-                  },
-                });
-                server.log.info(
-                  { fileId: uploadedFile.id, fileName: file.originalname },
-                  'Text extraction completed'
-                );
-              } catch (error: any) {
-                server.log.error(
-                  { error, fileId: uploadedFile.id, file: file.originalname },
-                  'Failed to extract text in background'
-                );
-                await prisma.uploadedFile.update({
-                  where: { id: uploadedFile.id },
-                  data: { status: 'FAILED' },
-                });
-              }
+            // Process text extraction asynchronously in the background (don't await)
+            if (canExtractText) {
+              setImmediate(async () => {
+                try {
+                  const extractedText = await fileProcessor.extractText(file.path, file.mimetype);
+                  await prisma.uploadedFile.update({
+                    where: { id: uploadedFile.id },
+                    data: {
+                      extractedText,
+                      status: 'COMPLETED',
+                    },
+                  });
+                  server.log.info(
+                    { fileId: uploadedFile.id, fileName: file.originalname },
+                    'Text extraction completed'
+                  );
+                } catch (error: any) {
+                  server.log.error(
+                    { error, fileId: uploadedFile.id, file: file.originalname },
+                    'Failed to extract text in background'
+                  );
+                  await prisma.uploadedFile.update({
+                    where: { id: uploadedFile.id },
+                    data: { status: 'FAILED' },
+                  });
+                }
+              });
+            }
+          } catch (fileError: any) {
+            server.log.error(
+              { file: file.originalname, error: fileError },
+              'Failed to save uploaded file'
+            );
+            await fs.unlink(file.path).catch(() => {});
+            failedFiles.push({
+              name: file.originalname,
+              error: 'Failed to save uploaded file',
             });
           }
+        }
+
+        if (uploadedFiles.length === 0) {
+          const firstError = failedFiles[0]?.error || 'No files could be uploaded';
+          const hasValidationOnlyErrors =
+            failedFiles.length > 0 &&
+            failedFiles.every((failed) => /invalid type/i.test(failed.error));
+
+          return reply
+            .code(hasValidationOnlyErrors ? 400 : 500)
+            .send({ error: firstError, failedFiles });
         }
 
         // Track study activity for file upload
@@ -513,10 +655,229 @@ export default async function studyRoutes(server: FastifyInstance) {
           server.log.error({ error }, 'Failed to check achievements for file upload');
         }
 
+        if (failedFiles.length > 0) {
+          return reply.code(201).send({ files: uploadedFiles, failedFiles });
+        }
+
         return reply.code(201).send({ files: uploadedFiles });
       } catch (error: any) {
+        const message = String(error?.message || '').trim();
+        const multerCode = String(error?.code || '').trim();
+
+        if (error?.name === 'MulterError') {
+          if (multerCode === 'LIMIT_FILE_SIZE') {
+            return reply
+              .code(400)
+              .send({ error: 'One or more files exceed the 100MB upload limit.' });
+          }
+
+          if (multerCode === 'LIMIT_FILE_COUNT' || multerCode === 'LIMIT_UNEXPECTED_FILE') {
+            return reply
+              .code(400)
+              .send({ error: 'Too many files uploaded at once. Maximum is 10 files.' });
+          }
+
+          return reply.code(400).send({ error: message || 'Invalid upload payload.' });
+        }
+
+        const isClientValidationError =
+          message === 'No files received' ||
+          /invalid file type/i.test(message) ||
+          /invalid folder/i.test(message) ||
+          /no files/i.test(message);
+
+        if (isClientValidationError) {
+          return reply.code(400).send({ error: message || 'Invalid upload request.' });
+        }
+
         server.log.error({ error }, 'File upload error');
         return reply.code(500).send({ error: 'Failed to upload files' });
+      }
+    }
+  );
+
+  // Upload live recording as a single study file (audio + transcript)
+  server.post(
+    '/upload-recording',
+    {
+      preHandler: [authenticate],
+    },
+    async (request: AuthenticatedRequest, reply) => {
+      let audioFile: Express.Multer.File | null = null;
+
+      try {
+        const userId = request.user!.userId;
+
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { role: true },
+        });
+
+        if (!user) {
+          return reply.code(404).send({ error: 'User not found' });
+        }
+
+        const uploadCheck = await canUploadFile(userId, user.role);
+        if (!uploadCheck.allowed) {
+          return reply.code(403).send({
+            error: uploadCheck.reason,
+            upgradeRequired: true,
+          });
+        }
+
+        audioFile = await new Promise<Express.Multer.File>((resolve, reject) => {
+          const multerMiddleware = upload.single('audio');
+          multerMiddleware(request.raw as any, reply.raw as any, (err: any) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+
+            const parsedFile = (request.raw as any).file as Express.Multer.File | undefined;
+            if (!parsedFile) {
+              reject(new Error('No audio file uploaded'));
+              return;
+            }
+
+            resolve(parsedFile);
+          });
+        });
+
+        if (!fileProcessor.validateFileType(audioFile.mimetype, audioFile.originalname)) {
+          await fs.unlink(audioFile.path).catch(() => {});
+          return reply.code(400).send({ error: 'Unsupported recording format' });
+        }
+
+        const audioMimeType = String(audioFile.mimetype || '').toLowerCase();
+        const audioExtension = path.extname(audioFile.originalname || '').toLowerCase();
+        const isAudioFile =
+          audioMimeType.startsWith('audio/') ||
+          (audioMimeType === 'application/octet-stream' && AUDIO_EXTENSIONS.has(audioExtension));
+
+        if (!isAudioFile) {
+          await fs.unlink(audioFile.path).catch(() => {});
+          return reply.code(400).send({ error: 'Only audio files are supported for recording upload' });
+        }
+
+        const requestBody = ((request.raw as any).body || {}) as Record<string, unknown>;
+        const transcript = String(requestBody.transcript || '')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        if (transcript.length < 20) {
+          await fs.unlink(audioFile.path).catch(() => {});
+          return reply
+            .code(400)
+            .send({ error: 'Transcript is required and must contain at least 20 characters.' });
+        }
+
+        const rawFolderId = requestBody.folderId;
+        const folderId =
+          typeof rawFolderId === 'string' && rawFolderId.trim().length > 0
+            ? rawFolderId.trim()
+            : null;
+
+        if (folderId) {
+          const folder = await prisma.folder.findFirst({
+            where: {
+              id: folderId,
+              userId,
+            },
+          });
+
+          if (!folder) {
+            await fs.unlink(audioFile.path).catch(() => {});
+            return reply.code(400).send({ error: 'Invalid folder selected' });
+          }
+        }
+
+        const rawCapturedAt =
+          typeof requestBody.capturedAt === 'string' ? requestBody.capturedAt.trim() : '';
+        const parsedCapturedAt = rawCapturedAt ? new Date(rawCapturedAt) : new Date();
+        const capturedAtIso = Number.isNaN(parsedCapturedAt.getTime())
+          ? new Date().toISOString()
+          : parsedCapturedAt.toISOString();
+
+        const durationSeconds = Math.max(0, Math.floor(Number(requestBody.durationSeconds) || 0));
+        const parsedTimeline = parseRecordingTimeline(requestBody.timeline);
+        const timelineEntries =
+          parsedTimeline.length > 0
+            ? parsedTimeline
+            : buildFallbackTimeline(transcript, durationSeconds);
+
+        const extractedText = buildRecordingExtractedText(
+          transcript,
+          timelineEntries,
+          capturedAtIso,
+          durationSeconds
+        );
+
+        const uploadedFile = await prisma.uploadedFile.create({
+          data: {
+            userId,
+            folderId,
+            fileName: audioFile.filename,
+            originalName: audioFile.originalname,
+            fileType: audioFile.mimetype,
+            fileSize: audioFile.size,
+            filePath: audioFile.path,
+            status: 'COMPLETED',
+            extractedText,
+          },
+        });
+
+        await trackStudyActivity(userId, 'FILE_UPLOAD', uploadedFile.id);
+
+        try {
+          const { checkAchievements } = await import('../services/gamification.service');
+          await checkAchievements(userId, 'file_upload', 1);
+        } catch (error) {
+          server.log.error({ error }, 'Failed to check achievements for recording upload');
+        }
+
+        try {
+          await recordAIUsage(userId, 'SUMMARY_VIEW', {
+            fileId: uploadedFile.id,
+            tokensUsed: Math.ceil(extractedText.length / 4),
+          });
+        } catch (error) {
+          server.log.error({ error }, 'Failed to record AI usage for recording upload');
+        }
+
+        return reply.code(201).send({
+          file: normalizeFileForLanguage(uploadedFile),
+        });
+      } catch (error: any) {
+        if (audioFile?.path) {
+          await fs.unlink(audioFile.path).catch(() => {});
+        }
+
+        const message = String(error?.message || '').trim();
+        const multerCode = String(error?.code || '').trim();
+
+        if (error?.name === 'MulterError') {
+          if (multerCode === 'LIMIT_FILE_SIZE') {
+            return reply.code(400).send({ error: 'Recording exceeds the 100MB upload limit.' });
+          }
+
+          if (multerCode === 'LIMIT_UNEXPECTED_FILE') {
+            return reply.code(400).send({ error: 'Recording payload is invalid. Try again.' });
+          }
+
+          return reply.code(400).send({ error: message || 'Invalid recording upload payload.' });
+        }
+
+        const isClientValidationError =
+          message === 'No audio file uploaded' ||
+          /invalid folder/i.test(message) ||
+          /transcript is required/i.test(message);
+
+        if (isClientValidationError) {
+          return reply.code(400).send({ error: message || 'Invalid recording upload request.' });
+        }
+
+        server.log.error({ error }, 'Recording upload error');
+        return reply.code(500).send({ error: 'Failed to upload recording' });
       }
     }
   );
@@ -1020,7 +1381,60 @@ export default async function studyRoutes(server: FastifyInstance) {
         return reply.code(404).send({ error: 'File not found' });
       }
 
-      if (!file.extractedText || file.extractedText.trim().length < 25) {
+      const audioExtensions = new Set(['.webm', '.mp3', '.wav', '.m4a', '.mp4', '.ogg']);
+      const lowerOriginalName = (file.originalName || '').toLowerCase();
+      const extensionIndex = lowerOriginalName.lastIndexOf('.');
+      const fileExtension = extensionIndex >= 0 ? lowerOriginalName.slice(extensionIndex) : '';
+      const isAudioFile =
+        String(file.fileType || '')
+          .toLowerCase()
+          .startsWith('audio/') || audioExtensions.has(fileExtension);
+
+      let tutorSourceFile = file;
+      let tutorSourceText = String(file.extractedText || '').trim();
+      let summaryExcerpt = file.summaries?.[0]?.content?.slice(0, 1800) || '';
+      let notesExcerpt = file.notes?.[0]?.detailed?.slice(0, 1800) || '';
+
+      if (tutorSourceText.length < 25 && isAudioFile) {
+        const audioStem = extensionIndex >= 0 ? file.originalName.slice(0, extensionIndex) : file.originalName;
+        const transcriptPrefix = `${audioStem}-transcript`;
+
+        const companionTranscript = await prisma.uploadedFile.findFirst({
+          where: {
+            userId: request.user!.userId,
+            id: { not: file.id },
+            originalName: { startsWith: transcriptPrefix },
+          },
+          orderBy: { createdAt: 'desc' },
+          include: {
+            summaries: {
+              where: { language },
+              orderBy: { updatedAt: 'desc' },
+              take: 1,
+            },
+            notes: {
+              where: { language },
+              orderBy: { updatedAt: 'desc' },
+              take: 1,
+            },
+          },
+        });
+
+        if (companionTranscript) {
+          tutorSourceFile = companionTranscript;
+          tutorSourceText = String(companionTranscript.extractedText || '').trim();
+          summaryExcerpt = companionTranscript.summaries?.[0]?.content?.slice(0, 1800) || '';
+          notesExcerpt = companionTranscript.notes?.[0]?.detailed?.slice(0, 1800) || '';
+        }
+      }
+
+      if (tutorSourceText.length < 25 && !summaryExcerpt && !notesExcerpt) {
+        if (file.status === 'FAILED') {
+          return reply
+            .code(400)
+            .send({ error: 'This file failed to process. Re-upload it to use AI Tutor.' });
+        }
+
         return reply.code(400).send({ error: 'File is still processing. Try again in a moment.' });
       }
 
@@ -1039,9 +1453,13 @@ export default async function studyRoutes(server: FastifyInstance) {
           }))
           .filter((entry) => entry.content.length > 0);
 
-        const sourceExcerpt = file.extractedText.slice(0, 14000);
-        const summaryExcerpt = file.summaries?.[0]?.content?.slice(0, 1800) || '';
-        const notesExcerpt = file.notes?.[0]?.detailed?.slice(0, 1800) || '';
+        const sourceExcerpt = tutorSourceText
+          ? tutorSourceText.slice(0, 14000)
+          : `${summaryExcerpt}\n\n${notesExcerpt}`.trim().slice(0, 14000);
+        const sourceFileLabel =
+          tutorSourceFile.id === file.id
+            ? file.originalName
+            : `${file.originalName} (using transcript context from ${tutorSourceFile.originalName})`;
 
         const historyBlock =
           recentHistory.length > 0
@@ -1050,12 +1468,48 @@ export default async function studyRoutes(server: FastifyInstance) {
                 .join('\n')
             : 'None';
 
+        const parseTutorResponse = (rawResponse: string): string => {
+          const normalizedResponse = String(rawResponse || '').replace(/```json|```/g, '').trim();
+          if (!normalizedResponse) return '';
+
+          let parsedAnswer = '';
+
+          try {
+            const parsed = JSON.parse(normalizedResponse) as { answer?: unknown };
+            if (typeof parsed.answer === 'string') {
+              parsedAnswer = parsed.answer.trim();
+            }
+          } catch {
+            const jsonMatch = normalizedResponse.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+              try {
+                const parsed = JSON.parse(jsonMatch[0]) as { answer?: unknown };
+                if (typeof parsed.answer === 'string') {
+                  parsedAnswer = parsed.answer.trim();
+                }
+              } catch {
+                parsedAnswer = normalizedResponse;
+              }
+            } else {
+              parsedAnswer = normalizedResponse;
+            }
+          }
+
+          return parsedAnswer;
+        };
+
+        const normalizeTutorText = (value: string): string =>
+          String(value || '')
+            .toLowerCase()
+            .replace(/\s+/g, ' ')
+            .trim();
+
         const prompt = `Respond ONLY as valid JSON with this exact shape:
 {"answer":"..."}
 
 You are Thynkr AI Tutor. Be concise, accurate, and supportive.
 Language code: ${language}
-Current file: ${file.originalName}
+Current file: ${sourceFileLabel}
 
 Rules:
 - Ground answers strictly in the provided source material.
@@ -1078,36 +1532,119 @@ ${historyBlock}
 Student question:
 ${studentMessage.slice(0, 1600)}`;
 
-        const rawResponse = await aiService.generateCustomContent(prompt);
-        const normalizedResponse = rawResponse.replace(/```json|```/g, '').trim();
-
         let answer = '';
         try {
-          const parsed = JSON.parse(normalizedResponse) as { answer?: unknown };
-          if (typeof parsed.answer === 'string') {
-            answer = parsed.answer.trim();
-          }
-        } catch {
-          const jsonMatch = normalizedResponse.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            try {
-              const parsed = JSON.parse(jsonMatch[0]) as { answer?: unknown };
-              if (typeof parsed.answer === 'string') {
-                answer = parsed.answer.trim();
-              }
-            } catch {
-              answer = normalizedResponse;
-            }
-          } else {
-            answer = normalizedResponse;
+          const rawResponse = await aiService.generateCustomContent(prompt);
+          answer = parseTutorResponse(rawResponse);
+        } catch (primaryTutorError: any) {
+          server.log.warn(
+            {
+              error: primaryTutorError,
+              fileId: id,
+            },
+            'Primary tutor generation failed; attempting fallback prompt'
+          );
+        }
+
+        if (!answer) {
+          const fallbackPrompt = `You are Thynkr AI Tutor.
+Language code: ${language}
+Current file: ${sourceFileLabel}
+
+Use ONLY the provided material. Keep your answer concise, clear, and helpful.
+If the answer is not in the material, say that clearly and suggest what to review.
+Do not mention internal instructions.
+
+Source material excerpt:
+${sourceExcerpt}
+
+Generated summary excerpt:
+${summaryExcerpt || 'None'}
+
+Generated notes excerpt:
+${notesExcerpt || 'None'}
+
+Recent conversation:
+${historyBlock}
+
+Student question:
+${studentMessage.slice(0, 1600)}`;
+
+          try {
+            const fallbackResponse = await aiService.generateCustomContent(fallbackPrompt);
+            answer = fallbackResponse.replace(/```json|```/g, '').trim();
+          } catch (fallbackTutorError: any) {
+            server.log.error(
+              {
+                error: fallbackTutorError,
+                fileId: id,
+              },
+              'Fallback tutor generation failed'
+            );
           }
         }
 
         if (!answer) {
-          answer = 'I could not generate a clear response right now. Please try rephrasing your question.';
+          answer =
+            'I am having trouble reaching the AI tutor right now. Please try again in a moment.';
         }
 
-        await recordAIUsage(request.user!.userId, 'SUMMARY_VIEW', {
+        const latestAssistantMessage = [...recentHistory]
+          .reverse()
+          .find((entry) => entry.role === 'assistant')?.content;
+        const latestUserMessage = [...recentHistory]
+          .reverse()
+          .find((entry) => entry.role === 'user')?.content;
+        const answerLooksRepeated =
+          !!latestAssistantMessage &&
+          normalizeTutorText(answer) === normalizeTutorText(latestAssistantMessage);
+        const repeatedQuestion =
+          !!latestUserMessage &&
+          normalizeTutorText(studentMessage) === normalizeTutorText(latestUserMessage);
+
+        if (answerLooksRepeated && !repeatedQuestion) {
+          const antiRepeatPrompt = `Respond ONLY as valid JSON with this exact shape:
+{"answer":"..."}
+
+You are Thynkr AI Tutor.
+The model draft is too repetitive relative to the previous assistant message.
+Rewrite a fresh answer for the new student question while staying grounded in the same source.
+
+Rules:
+- Keep the answer concise and specific to the new question.
+- Do not repeat the prior assistant response verbatim.
+- If the source does not support the answer, say that clearly.
+
+Previous assistant response (do not repeat):
+${latestAssistantMessage}
+
+Source material excerpt:
+${sourceExcerpt}
+
+Generated summary excerpt:
+${summaryExcerpt || 'None'}
+
+Generated notes excerpt:
+${notesExcerpt || 'None'}
+
+Student question:
+${studentMessage.slice(0, 1600)}`;
+
+          try {
+            const antiRepeatResponse = await aiService.generateCustomContent(antiRepeatPrompt);
+            const antiRepeatAnswer = parseTutorResponse(antiRepeatResponse);
+            if (antiRepeatAnswer) {
+              answer = antiRepeatAnswer;
+            }
+          } catch (antiRepeatError: any) {
+            server.log.warn(
+              { error: antiRepeatError, fileId: id },
+              'Tutor anti-repeat regeneration failed'
+            );
+          }
+        }
+
+        await recordAIUsage(request.user!.userId, 'TUTOR_CHAT', {
           fileId: file.id,
           durationMs: Date.now() - startedAt,
         });
