@@ -980,10 +980,15 @@ export default async function studyRoutes(server: FastifyInstance) {
         }
 
         const audioMimeType = String(audioFile.mimetype || '').toLowerCase();
+        const audioMimeTypeWithoutParameters = audioMimeType.split(';')[0].trim();
         const audioExtension = path.extname(audioFile.originalname || '').toLowerCase();
+        const recorderVideoAudioMimeTypes = new Set(['video/webm', 'video/mp4']);
         const isAudioFile =
-          audioMimeType.startsWith('audio/') ||
-          (audioMimeType === 'application/octet-stream' && AUDIO_EXTENSIONS.has(audioExtension));
+          audioMimeTypeWithoutParameters.startsWith('audio/') ||
+          AUDIO_EXTENSIONS.has(audioExtension) ||
+          recorderVideoAudioMimeTypes.has(audioMimeTypeWithoutParameters) ||
+          (audioMimeTypeWithoutParameters === 'application/octet-stream' &&
+            AUDIO_EXTENSIONS.has(audioExtension));
 
         if (!isAudioFile) {
           await fs.unlink(audioFile.path).catch(() => {});
@@ -995,11 +1000,9 @@ export default async function studyRoutes(server: FastifyInstance) {
           .replace(/\s+/g, ' ')
           .trim();
 
-        if (transcript.length < 20) {
+        if (transcript.length < 1) {
           await fs.unlink(audioFile.path).catch(() => {});
-          return reply
-            .code(400)
-            .send({ error: 'Transcript is required and must contain at least 20 characters.' });
+          return reply.code(400).send({ error: 'Transcript is required before uploading recording.' });
         }
 
         const rawFolderId = requestBody.folderId;
