@@ -164,6 +164,7 @@ function buildRecordingExtractedText(
     'Live Lecture Transcript',
     `Captured: ${capturedAtIso}`,
     durationLabel ? `Duration: ${durationLabel}` : null,
+    'Timing Anchor: Speech Start',
     '',
     timelineLines ? 'Timestamped Transcript:' : 'Transcript:',
     timelineLines || fullTranscript,

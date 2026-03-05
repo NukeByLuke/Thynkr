@@ -805,7 +805,7 @@ export default function UploadModal({
       return;
     }
 
-    const transcriptHeader = `Live Lecture Transcript\nCaptured: ${new Date().toLocaleString()}\n\n`;
+    const transcriptHeader = `Live Lecture Transcript\nCaptured: ${new Date().toLocaleString()}\nTiming Anchor: Speech Start\n\n`;
     const transcriptBody = timelineTranscript
       ? `${timelineTranscript}\n\nFull Transcript:\n${transcript}`
       : transcript;

@@ -1025,6 +1025,30 @@ function formatTranscriptBody(rawText: string): string {
   return sentenceFragments.join('\n\n');
 }
 
+function formatCueLabel(totalSeconds: number): string {
+  const safeSeconds = Math.max(0, Math.floor(totalSeconds || 0));
+  const hours = Math.floor(safeSeconds / 3600)
+    .toString()
+    .padStart(2, '0');
+  const minutes = Math.floor((safeSeconds % 3600) / 60)
+    .toString()
+    .padStart(2, '0');
+  const seconds = Math.floor(safeSeconds % 60)
+    .toString()
+    .padStart(2, '0');
+
+  return `${hours}:${minutes}:${seconds}`;
+}
+
+function estimateTranscriptCueLeadSeconds(text: string): number {
+  const wordCount = String(text || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+
+  return Math.min(4, Math.max(1, Math.round(wordCount / 3)));
+}
+
 function parseRecordingTranscript(extractedText: string): {
   cues: TranscriptCue[];
   fullTranscript: string;
@@ -1034,6 +1058,9 @@ function parseRecordingTranscript(extractedText: string): {
   if (!normalizedText) {
     return { cues: [], fullTranscript: '', inferredDuration: 0 };
   }
+
+  const hasSpeechStartTimelineAnchor =
+    /(?:^|\n)\s*Timing Anchor:\s*Speech Start\s*(?:\n|$)/i.test(normalizedText);
 
   const cuePattern = /^\[(\d{2}):(\d{2}):(\d{2})\]\s*(.+)$/gm;
   const cues: TranscriptCue[] = [];
@@ -1046,12 +1073,14 @@ function parseRecordingTranscript(extractedText: string): {
 
     if (!text) continue;
 
-    const timestamp = hours * 3600 + minutes * 60 + seconds;
+    const originalTimestamp = hours * 3600 + minutes * 60 + seconds;
+    const timestamp = hasSpeechStartTimelineAnchor
+      ? originalTimestamp
+      : Math.max(0, originalTimestamp - estimateTranscriptCueLeadSeconds(text));
+
     cues.push({
       timestamp,
-      label: `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(
-        seconds
-      ).padStart(2, '0')}`,
+      label: formatCueLabel(timestamp),
       text,
     });
   }
