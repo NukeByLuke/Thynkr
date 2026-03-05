@@ -935,9 +935,28 @@ export default async function studyRoutes(server: FastifyInstance) {
     },
     async (request: AuthenticatedRequest, reply) => {
       let audioFile: Express.Multer.File | null = null;
+      let recordingUserId: string | null = null;
+
+      const rejectRecordingUpload = (
+        message: string,
+        code: string,
+        context: Record<string, unknown> = {}
+      ) => {
+        server.log.warn(
+          {
+            userId: recordingUserId,
+            code,
+            ...context,
+          },
+          'Recording upload rejected'
+        );
+
+        return reply.code(400).send({ error: message, code });
+      };
 
       try {
         const userId = request.user!.userId;
+        recordingUserId = userId;
 
         const user = await prisma.user.findUnique({
           where: { id: userId },
@@ -976,7 +995,10 @@ export default async function studyRoutes(server: FastifyInstance) {
 
         if (!fileProcessor.validateFileType(audioFile.mimetype, audioFile.originalname)) {
           await fs.unlink(audioFile.path).catch(() => {});
-          return reply.code(400).send({ error: 'Unsupported recording format' });
+          return rejectRecordingUpload('Unsupported recording format', 'RECORDING_UNSUPPORTED_FORMAT', {
+            mimeType: audioFile.mimetype,
+            originalName: audioFile.originalname,
+          });
         }
 
         const audioMimeType = String(audioFile.mimetype || '').toLowerCase();
@@ -992,7 +1014,15 @@ export default async function studyRoutes(server: FastifyInstance) {
 
         if (!isAudioFile) {
           await fs.unlink(audioFile.path).catch(() => {});
-          return reply.code(400).send({ error: 'Only audio files are supported for recording upload' });
+          return rejectRecordingUpload(
+            'Only audio files are supported for recording upload',
+            'RECORDING_NON_AUDIO_FILE',
+            {
+              mimeType: audioFile.mimetype,
+              originalName: audioFile.originalname,
+              extension: audioExtension,
+            }
+          );
         }
 
         const requestBody = ((request.raw as any).body || {}) as Record<string, unknown>;
@@ -1002,7 +1032,11 @@ export default async function studyRoutes(server: FastifyInstance) {
 
         if (transcript.length < 1) {
           await fs.unlink(audioFile.path).catch(() => {});
-          return reply.code(400).send({ error: 'Transcript is required before uploading recording.' });
+          return rejectRecordingUpload(
+            'Transcript is required before uploading recording.',
+            'RECORDING_TRANSCRIPT_REQUIRED',
+            { transcriptLength: transcript.length }
+          );
         }
 
         const rawFolderId = requestBody.folderId;
@@ -1021,7 +1055,9 @@ export default async function studyRoutes(server: FastifyInstance) {
 
           if (!folder) {
             await fs.unlink(audioFile.path).catch(() => {});
-            return reply.code(400).send({ error: 'Invalid folder selected' });
+            return rejectRecordingUpload('Invalid folder selected', 'RECORDING_INVALID_FOLDER', {
+              folderId,
+            });
           }
         }
 
@@ -1083,7 +1119,7 @@ export default async function studyRoutes(server: FastifyInstance) {
           await fs.unlink(audioFile.path).catch(() => {});
         }
 
-        const message = String(error?.message || '').trim();
+        const errorMessage = String(error?.message || '').trim();
         const multerCode = String(error?.code || '').trim();
         const isMulterLikeError =
           error?.name === 'MulterError' ||
@@ -1092,37 +1128,61 @@ export default async function studyRoutes(server: FastifyInstance) {
 
         if (isMulterLikeError) {
           if (multerCode === 'LIMIT_FILE_SIZE') {
-            return reply.code(400).send({ error: 'Recording exceeds the 100MB upload limit.' });
+            return rejectRecordingUpload(
+              'Recording exceeds the 100MB upload limit.',
+              'RECORDING_LIMIT_FILE_SIZE',
+              { multerCode }
+            );
           }
 
           if (multerCode === 'LIMIT_UNEXPECTED_FILE' || multerCode === 'LIMIT_FILE_COUNT') {
-            return reply.code(400).send({ error: 'Recording payload is invalid. Try again.' });
+            return rejectRecordingUpload(
+              'Recording payload is invalid. Try again.',
+              'RECORDING_INVALID_PAYLOAD',
+              { multerCode }
+            );
           }
 
           if (
             /unexpected end of form|unexpected end of multipart data|stream ended unexpectedly|aborted|premature close/i.test(
-              message
+              errorMessage
             )
           ) {
-            return reply
-              .code(400)
-              .send({ error: 'Recording upload was interrupted. Please try again.' });
+            return rejectRecordingUpload(
+              'Recording upload was interrupted. Please try again.',
+              'RECORDING_UPLOAD_INTERRUPTED',
+              { multerCode, errorMessage }
+            );
           }
 
-          if (/invalid file type|unsupported recording format/i.test(message)) {
-            return reply.code(400).send({ error: 'Unsupported recording format' });
+          if (/invalid file type|unsupported recording format/i.test(errorMessage)) {
+            return rejectRecordingUpload('Unsupported recording format', 'RECORDING_UNSUPPORTED_FORMAT', {
+              multerCode,
+              errorMessage,
+            });
           }
 
-          return reply.code(400).send({ error: message || 'Invalid recording upload payload.' });
+          return rejectRecordingUpload(
+            errorMessage || 'Invalid recording upload payload.',
+            'RECORDING_INVALID_MULTIPART',
+            {
+              multerCode,
+              errorName: error?.name,
+              hasStorageErrors: Array.isArray(error?.storageErrors),
+            }
+          );
         }
 
         const isClientValidationError =
-          message === 'No audio file uploaded' ||
-          /invalid folder/i.test(message) ||
-          /transcript is required/i.test(message);
+          errorMessage === 'No audio file uploaded' ||
+          /invalid folder/i.test(errorMessage) ||
+          /transcript is required/i.test(errorMessage);
 
         if (isClientValidationError) {
-          return reply.code(400).send({ error: message || 'Invalid recording upload request.' });
+          return rejectRecordingUpload(
+            errorMessage || 'Invalid recording upload request.',
+            'RECORDING_INVALID_REQUEST'
+          );
         }
 
         server.log.error({ error }, 'Recording upload error');

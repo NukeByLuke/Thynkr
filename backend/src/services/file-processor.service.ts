@@ -194,6 +194,7 @@ export class FileProcessorService {
    */
   validateFileType(mimeType: string, originalName: string): boolean {
     const normalizedMime = (mimeType || '').toLowerCase();
+    const mimeWithoutParameters = normalizedMime.split(';')[0].trim();
     const lowerOriginal = originalName ? originalName.toLowerCase().trim() : '';
     const lastDot = lowerOriginal.lastIndexOf('.');
     const extension = lastDot >= 0 ? lowerOriginal.slice(lastDot) : '';
@@ -211,6 +212,9 @@ export class FileProcessorService {
       'audio/wav',
       'audio/x-wav',
       'audio/x-m4a',
+      'audio/ogg',
+      'video/webm',
+      'video/mp4',
       'text/plain',
       'application/octet-stream',
     ]);
@@ -229,13 +233,19 @@ export class FileProcessorService {
       '.mp3',
       '.wav',
       '.m4a',
+      '.ogg',
     ]);
 
-    return allowedMimeTypes.has(normalizedMime) || allowedExtensions.has(extension);
+    return (
+      allowedMimeTypes.has(normalizedMime) ||
+      allowedMimeTypes.has(mimeWithoutParameters) ||
+      allowedExtensions.has(extension)
+    );
   }
 
   supportsTextExtraction(mimeType: string, originalName: string): boolean {
     const normalizedMime = (mimeType || '').toLowerCase();
+    const mimeWithoutParameters = normalizedMime.split(';')[0].trim();
     const lowerOriginal = originalName ? originalName.toLowerCase().trim() : '';
     const lastDot = lowerOriginal.lastIndexOf('.');
     const extension = lastDot >= 0 ? lowerOriginal.slice(lastDot) : '';
@@ -251,6 +261,10 @@ export class FileProcessorService {
 
     const extractableExtensions = new Set(['.pdf', '.docx', '.doc', '.txt', '.pptx', '.ppsx']);
 
-    return extractableMimeTypes.has(normalizedMime) || extractableExtensions.has(extension);
+    return (
+      extractableMimeTypes.has(normalizedMime) ||
+      extractableMimeTypes.has(mimeWithoutParameters) ||
+      extractableExtensions.has(extension)
+    );
   }
 }

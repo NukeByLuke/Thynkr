@@ -1020,8 +1020,25 @@ export default function UploadModal({
           durationSeconds: recordingDurationSeconds,
         })
       ).catch((error) => {
+        const maybeError = error as any;
         const message =
-          (error as Error)?.message || 'Failed to upload recording. Please try again.';
+          maybeError?.response?.data?.error ||
+          maybeError?.response?.data?.message ||
+          maybeError?.message ||
+          'Failed to upload recording. Please try again.';
+        const errorCode =
+          typeof maybeError?.response?.data?.code === 'string'
+            ? maybeError.response.data.code
+            : null;
+
+        if (errorCode) {
+          console.error('Recording upload rejected by server:', {
+            code: errorCode,
+            message,
+            response: maybeError?.response?.data,
+          });
+        }
+
         setRecordingErrorMessage(message);
         toast.error(message);
         resetUploadState();

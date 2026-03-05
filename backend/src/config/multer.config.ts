@@ -34,6 +34,8 @@ const allowedDocumentMimeTypes = new Set([
   'audio/x-wav',
   'audio/x-m4a',
   'audio/ogg',
+  'video/webm',
+  'video/mp4',
   'text/plain',
   'application/octet-stream',
 ]);

@@ -332,6 +332,8 @@ export default function Files() {
       const message = getApiErrorMessage(error, 'Recording upload failed');
       setUploadError(message);
       setUploadProgress(null);
+      toast.error(message);
+      console.error('Recording upload error:', error);
     },
   });
 
@@ -486,10 +488,14 @@ export default function Files() {
 
   const handleUploadRecording = async (payload: RecordingUploadPayload) => {
     setUploadError(null);
-    await recordingUploadMutation.mutateAsync({
-      payload,
-      targetFolderId: currentFolderId,
-    });
+    try {
+      await recordingUploadMutation.mutateAsync({
+        payload,
+        targetFolderId: currentFolderId,
+      });
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Recording upload failed'));
+    }
   };
 
   const handleUploadLink = async (url: string) => {
