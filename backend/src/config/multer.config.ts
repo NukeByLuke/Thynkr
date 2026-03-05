@@ -27,11 +27,33 @@ const allowedDocumentMimeTypes = new Set([
   'application/vnd.ms-powerpoint',
   'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
+  'audio/webm',
+  'audio/mp4',
+  'audio/mpeg',
+  'audio/wav',
+  'audio/x-wav',
+  'audio/x-m4a',
+  'audio/ogg',
   'text/plain',
   'application/octet-stream',
 ]);
 
-const allowedDocumentExtensions = new Set(['.pdf', '.docx', '.doc', '.txt', '.ppt', '.pptx', '.pps', '.ppsx']);
+const allowedDocumentExtensions = new Set([
+  '.pdf',
+  '.docx',
+  '.doc',
+  '.txt',
+  '.ppt',
+  '.pptx',
+  '.pps',
+  '.ppsx',
+  '.webm',
+  '.mp4',
+  '.mp3',
+  '.wav',
+  '.m4a',
+  '.ogg',
+]);
 
 const fileFilter = (
   _req: Express.Request,
@@ -52,12 +74,21 @@ const fileFilter = (
 
   // Default: allow document uploads
   const mime = (file.mimetype || '').toLowerCase();
+  const normalizedMime = mime.split(';')[0].trim();
   const ext = path.extname(file.originalname || '').toLowerCase();
 
-  if (allowedDocumentMimeTypes.has(mime) || allowedDocumentExtensions.has(ext)) {
+  if (
+    allowedDocumentMimeTypes.has(mime) ||
+    allowedDocumentMimeTypes.has(normalizedMime) ||
+    allowedDocumentExtensions.has(ext)
+  ) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only PDF, DOC/DOCX, TXT, and PPT/PPTX files are allowed.'));
+    cb(
+      new Error(
+        'Invalid file type. Allowed: PDF, DOC/DOCX, TXT, PPT/PPTX, and audio (WEBM/MP3/WAV/M4A/MP4/OGG).'
+      )
+    );
   }
 };
 
@@ -68,5 +99,8 @@ export const upload = multer({
   limits: {
     fileSize: 100 * 1024 * 1024, // 100MB per file
     files: 10, // Max 10 files at once
+    fieldSize: 10 * 1024 * 1024, // Allow large transcript/timeline payloads
+    fields: 20,
+    parts: 30,
   },
 });
