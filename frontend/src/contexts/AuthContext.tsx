@@ -24,6 +24,39 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const ACCESS_TOKEN_REFRESH_LEEWAY_MS = 30000;
+
+const parseJwtExpiryMs = (token: string): number | null => {
+  try {
+    const parts = token.split('.');
+    if (parts.length < 2) {
+      return null;
+    }
+
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+    const payloadJson = atob(padded);
+    const payload = JSON.parse(payloadJson) as { exp?: number };
+
+    if (typeof payload.exp !== 'number' || !Number.isFinite(payload.exp)) {
+      return null;
+    }
+
+    return payload.exp * 1000;
+  } catch {
+    return null;
+  }
+};
+
+const isTokenNearExpiry = (token: string, leewayMs: number = ACCESS_TOKEN_REFRESH_LEEWAY_MS) => {
+  const expiryMs = parseJwtExpiryMs(token);
+  if (typeof expiryMs !== 'number') {
+    return false;
+  }
+
+  return Date.now() + Math.max(0, leewayMs) >= expiryMs;
+};
+
 /**
  * AuthProvider - Wraps app to provide authentication state and methods
  */
@@ -36,12 +69,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUser = async () => {
     try {
       const API_URL = import.meta.env.VITE_API_URL || '/api';
-      const accessToken = localStorage.getItem('accessToken');
+      let accessToken = localStorage.getItem('accessToken');
+      const refreshToken = localStorage.getItem('refreshToken');
 
       if (!accessToken) {
         setUser(null);
         setIsLoading(false);
         return;
+      }
+
+      if (refreshToken && isTokenNearExpiry(accessToken)) {
+        try {
+          const refreshResponse = await fetch(`${API_URL}/auth/refresh`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ refreshToken }),
+          });
+
+          if (refreshResponse.ok) {
+            const refreshData = await refreshResponse.json();
+            const refreshedAccessToken = String(refreshData?.accessToken || '').trim();
+            if (refreshedAccessToken) {
+              accessToken = refreshedAccessToken;
+              localStorage.setItem('accessToken', refreshedAccessToken);
+            }
+          } else if (refreshResponse.status === 401) {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            setUser(null);
+            setIsLoading(false);
+            return;
+          }
+        } catch {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
       }
 
       // Use cached request to prevent duplicate user fetches
@@ -106,8 +174,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
 
       setUser(userData);
-    } catch (error) {
-      console.error('Failed to fetch user:', error);
+    } catch (error: any) {
+      const message = String(error?.message || '').toLowerCase();
+      if (!message.includes('token refresh failed') && !message.includes('no refresh token available')) {
+        console.error('Failed to fetch user:', error);
+      }
       setUser(null);
     } finally {
       setIsLoading(false);

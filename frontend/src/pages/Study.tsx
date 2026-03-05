@@ -266,6 +266,7 @@ export default function Study() {
       const message = getApiErrorMessage(error, 'Recording upload failed');
       setUploadError(message);
       setUploadProgress(null);
+      toast.error(message);
       console.error('Recording upload error:', error);
     },
   });
@@ -283,7 +284,11 @@ export default function Study() {
 
   const handleUploadRecording = async (payload: RecordingUploadPayload) => {
     setUploadError(null);
-    await recordingUploadMutation.mutateAsync(payload);
+    try {
+      await recordingUploadMutation.mutateAsync(payload);
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Recording upload failed'));
+    }
   };
 
   const handleUploadYouTube = async (url: string) => {
