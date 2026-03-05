@@ -971,7 +971,11 @@ type TranscriptCue = {
   text: string;
 };
 
-function formatAudioClock(totalSeconds: number): string {
+function formatAudioClock(totalSeconds: number, fallback: string = '0:00'): string {
+  if (!Number.isFinite(totalSeconds) || totalSeconds < 0) {
+    return fallback;
+  }
+
   const safeSeconds = Math.max(0, Math.floor(totalSeconds || 0));
   const hours = Math.floor(safeSeconds / 3600);
   const minutes = Math.floor((safeSeconds % 3600) / 60);
@@ -986,13 +990,47 @@ function formatAudioClock(totalSeconds: number): string {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
+function normalizeTranscriptSentence(rawText: string): string {
+  const compact = String(rawText || '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!compact) return '';
+
+  const leadingUpper = compact.charAt(0).toUpperCase() + compact.slice(1);
+  const normalizedPronouns = leadingUpper.replace(/\bi\b/g, 'I');
+
+  if (/[.!?]$/.test(normalizedPronouns)) {
+    return normalizedPronouns;
+  }
+
+  return `${normalizedPronouns}.`;
+}
+
+function formatTranscriptBody(rawText: string): string {
+  const compact = String(rawText || '').replace(/\s+/g, ' ').trim();
+  if (!compact) return '';
+
+  const sentenceFragments = compact
+    .split(/(?<=[.!?])\s+/)
+    .map(normalizeTranscriptSentence)
+    .filter(Boolean);
+
+  if (!sentenceFragments.length) {
+    return normalizeTranscriptSentence(compact);
+  }
+
+  return sentenceFragments.join('\n\n');
+}
+
 function parseRecordingTranscript(extractedText: string): {
   cues: TranscriptCue[];
   fullTranscript: string;
+  inferredDuration: number;
 } {
   const normalizedText = String(extractedText || '').trim();
   if (!normalizedText) {
-    return { cues: [], fullTranscript: '' };
+    return { cues: [], fullTranscript: '', inferredDuration: 0 };
   }
 
   const cuePattern = /^\[(\d{2}):(\d{2}):(\d{2})\]\s*(.+)$/gm;
@@ -1002,7 +1040,7 @@ function parseRecordingTranscript(extractedText: string): {
     const hours = Number(match[1] || 0);
     const minutes = Number(match[2] || 0);
     const seconds = Number(match[3] || 0);
-    const text = String(match[4] || '').trim();
+    const text = normalizeTranscriptSentence(String(match[4] || ''));
 
     if (!text) continue;
 
@@ -1015,6 +1053,14 @@ function parseRecordingTranscript(extractedText: string): {
       text,
     });
   }
+
+  const dedupedCues = cues
+    .sort((a, b) => a.timestamp - b.timestamp)
+    .filter((cue, index, array) => {
+      if (index === 0) return true;
+      const previous = array[index - 1];
+      return previous.timestamp !== cue.timestamp || previous.text !== cue.text;
+    });
 
   const fullTranscriptMatch = normalizedText.match(/(?:^|\n)\s*Full Transcript:\s*\n?([\s\S]*)$/i);
 
@@ -1029,12 +1075,16 @@ function parseRecordingTranscript(extractedText: string): {
     .trim();
 
   const fullTranscript = fullTranscriptMatch?.[1]?.trim()
-    ? fullTranscriptMatch[1].trim()
-    : cues.length > 0
-    ? cues.map((cue) => cue.text).join(' ')
-    : fallbackTranscript;
+    ? formatTranscriptBody(fullTranscriptMatch[1])
+    : dedupedCues.length > 0
+    ? formatTranscriptBody(dedupedCues.map((cue) => cue.text).join(' '))
+    : formatTranscriptBody(fallbackTranscript);
 
-  return { cues, fullTranscript };
+  const inferredDuration = dedupedCues.length
+    ? dedupedCues[dedupedCues.length - 1].timestamp + 4
+    : 0;
+
+  return { cues: dedupedCues, fullTranscript, inferredDuration };
 }
 
 function AudioTranscriptPlayer({
@@ -1048,11 +1098,11 @@ function AudioTranscriptPlayer({
 }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [duration, setDuration] = useState(0);
+  const [duration, setDuration] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(0.9);
 
-  const { cues, fullTranscript } = useMemo(
+  const { cues, fullTranscript, inferredDuration } = useMemo(
     () => parseRecordingTranscript(extractedText),
     [extractedText]
   );
@@ -1061,9 +1111,17 @@ function AudioTranscriptPlayer({
     const audio = audioRef.current;
     if (!audio) return;
 
-    const handleLoadedMetadata = () => {
-      if (Number.isFinite(audio.duration)) {
+    const syncDuration = () => {
+      if (Number.isFinite(audio.duration) && audio.duration > 0) {
         setDuration(audio.duration);
+        return;
+      }
+
+      if (audio.seekable && audio.seekable.length > 0) {
+        const seekableEnd = audio.seekable.end(audio.seekable.length - 1);
+        if (Number.isFinite(seekableEnd) && seekableEnd > 0) {
+          setDuration(seekableEnd);
+        }
       }
     };
 
@@ -1075,14 +1133,18 @@ function AudioTranscriptPlayer({
       setIsPlaying(false);
     };
 
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-    audio.addEventListener('durationchange', handleLoadedMetadata);
+    audio.addEventListener('loadedmetadata', syncDuration);
+    audio.addEventListener('durationchange', syncDuration);
+    audio.addEventListener('canplay', syncDuration);
+    audio.addEventListener('progress', syncDuration);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('ended', handleEnded);
 
     return () => {
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      audio.removeEventListener('durationchange', handleLoadedMetadata);
+      audio.removeEventListener('loadedmetadata', syncDuration);
+      audio.removeEventListener('durationchange', syncDuration);
+      audio.removeEventListener('canplay', syncDuration);
+      audio.removeEventListener('progress', syncDuration);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
     };
@@ -1099,19 +1161,41 @@ function AudioTranscriptPlayer({
       const audio = audioRef.current;
       if (!audio) return;
 
-      const maxDuration = Number.isFinite(duration) && duration > 0 ? duration : audio.duration || 0;
+      const maxDuration =
+        Number.isFinite(duration || 0) && (duration || 0) > 0
+          ? (duration as number)
+          : Number.isFinite(inferredDuration) && inferredDuration > 0
+          ? inferredDuration
+          : 0;
+
+      if (!maxDuration || maxDuration <= 0) {
+        return;
+      }
+
       const clampedTime = Math.max(0, Math.min(nextTime, maxDuration || 0));
       audio.currentTime = clampedTime;
       setCurrentTime(clampedTime);
     },
-    [duration]
+    [duration, inferredDuration]
   );
 
   const togglePlayback = useCallback(async () => {
     const audio = audioRef.current;
     if (!audio) return;
 
+    const knownDuration =
+      Number.isFinite(duration || 0) && (duration || 0) > 0
+        ? (duration as number)
+        : Number.isFinite(inferredDuration) && inferredDuration > 0
+        ? inferredDuration
+        : 0;
+
     if (audio.paused) {
+      if (knownDuration > 0 && currentTime >= knownDuration - 0.25) {
+        audio.currentTime = 0;
+        setCurrentTime(0);
+      }
+
       try {
         await audio.play();
         setIsPlaying(true);
@@ -1123,7 +1207,7 @@ function AudioTranscriptPlayer({
 
     audio.pause();
     setIsPlaying(false);
-  }, []);
+  }, [currentTime, duration, inferredDuration]);
 
   const activeCueIndex = useMemo(() => {
     if (!cues.length) return -1;
@@ -1144,40 +1228,71 @@ function AudioTranscriptPlayer({
     [seekTo]
   );
 
-  const safeDuration = Number.isFinite(duration) && duration > 0 ? duration : 0;
-  const safeCurrentTime = Math.max(0, Math.min(currentTime, safeDuration || currentTime || 0));
+  const effectiveDuration = useMemo(() => {
+    if (Number.isFinite(duration || 0) && (duration || 0) > 0) {
+      return duration as number;
+    }
+
+    if (Number.isFinite(inferredDuration) && inferredDuration > 0) {
+      return inferredDuration;
+    }
+
+    return 0;
+  }, [duration, inferredDuration]);
+
+  const canSeek = effectiveDuration > 0;
+  const safeCurrentTime = Math.max(
+    0,
+    Math.min(currentTime, canSeek ? effectiveDuration : currentTime || 0)
+  );
+  const playbackPercent = canSeek ? Math.min(100, (safeCurrentTime / effectiveDuration) * 100) : 0;
+  const timeStartLabel = formatAudioClock(safeCurrentTime, '0:00');
+  const timeEndLabel = canSeek ? formatAudioClock(effectiveDuration, '--:--') : '--:--';
 
   return (
     <div className="space-y-5">
       <audio ref={audioRef} src={audioUrl} preload="metadata" className="hidden" />
 
-      <div className="rounded-3xl border border-emerald-200/70 dark:border-emerald-500/25 bg-[radial-gradient(circle_at_0%_0%,rgba(16,185,129,0.2),transparent_50%),radial-gradient(circle_at_100%_0%,rgba(59,130,246,0.2),transparent_45%),linear-gradient(135deg,#0f172a_0%,#111827_100%)] p-5 sm:p-6 text-white shadow-[0_24px_60px_rgba(15,23,42,0.45)]">
+      <div className="rounded-3xl border border-sunrise-pink/30 dark:border-midnight-cyan/30 bg-gradient-to-br from-sunrise-fuchsia/15 via-white/95 to-sunrise-orange/20 dark:from-midnight-violet/25 dark:via-slate-950/90 dark:to-midnight-blue/25 p-5 sm:p-6 shadow-[0_16px_40px_rgba(236,72,153,0.15)] dark:shadow-[0_16px_44px_rgba(6,182,212,0.16)]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-emerald-200/90">Live Recording</p>
-            <h4 className="text-lg sm:text-xl font-semibold mt-1 line-clamp-2">{title}</h4>
+            <p className="text-xs uppercase tracking-[0.24em] text-sunrise-fuchsia dark:text-midnight-cyan">
+              Live Recording
+            </p>
+            <h4 className="text-lg sm:text-xl font-semibold mt-1 line-clamp-2 text-slate-900 dark:text-slate-50">
+              {title}
+            </h4>
           </div>
           <button
             type="button"
             onClick={togglePlayback}
-            className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white text-slate-900 hover:bg-emerald-100 transition-colors"
+            className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-sunrise-fuchsia to-sunrise-orange dark:from-midnight-cyan dark:to-midnight-violet text-white hover:brightness-105 transition-all shadow-lg shadow-sunrise-pink/30 dark:shadow-midnight-cyan/25"
           >
             {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
           </button>
         </div>
 
         <div className="space-y-3">
-          <input
-            type="range"
-            min={0}
-            max={safeDuration > 0 ? safeDuration : 1}
-            value={safeCurrentTime}
-            onChange={(event) => seekTo(Number(event.target.value))}
-            className="w-full accent-emerald-400 cursor-pointer"
-          />
-          <div className="flex items-center justify-between text-xs sm:text-sm text-emerald-100/90 font-mono">
-            <span>{formatAudioClock(safeCurrentTime)}</span>
-            <span>{formatAudioClock(safeDuration)}</span>
+          <div className="relative h-3">
+            <div className="absolute inset-0 rounded-full bg-slate-200/80 dark:bg-white/10" />
+            <motion.div
+              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-sunrise-fuchsia via-sunrise-pink to-sunrise-orange dark:from-midnight-cyan dark:via-midnight-blue dark:to-midnight-violet"
+              animate={{ width: `${playbackPercent}%` }}
+              transition={{ duration: 0.15, ease: 'linear' }}
+            />
+            <input
+              type="range"
+              min={0}
+              max={canSeek ? effectiveDuration : 1}
+              value={canSeek ? safeCurrentTime : 0}
+              onChange={(event) => seekTo(Number(event.target.value))}
+              disabled={!canSeek}
+              className="absolute inset-0 h-3 w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+            />
+          </div>
+          <div className="flex items-center justify-between text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-mono">
+            <span>{timeStartLabel}</span>
+            <span>{timeEndLabel}</span>
           </div>
         </div>
 
@@ -1186,7 +1301,7 @@ function AudioTranscriptPlayer({
             <button
               type="button"
               onClick={() => seekTo(safeCurrentTime - 10)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/80 dark:bg-white/10 text-slate-700 dark:text-slate-100 hover:bg-sunrise-pink/10 dark:hover:bg-midnight-cyan/15 transition-colors text-sm border border-slate-200/80 dark:border-white/10"
             >
               <SkipBack className="w-4 h-4" />
               10s
@@ -1194,15 +1309,15 @@ function AudioTranscriptPlayer({
             <button
               type="button"
               onClick={() => seekTo(safeCurrentTime + 10)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/80 dark:bg-white/10 text-slate-700 dark:text-slate-100 hover:bg-sunrise-pink/10 dark:hover:bg-midnight-cyan/15 transition-colors text-sm border border-slate-200/80 dark:border-white/10"
             >
               10s
               <SkipForward className="w-4 h-4" />
             </button>
           </div>
 
-          <label className="inline-flex items-center gap-2 text-sm text-emerald-100/90">
-            <Volume2 className="w-4 h-4" />
+          <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+            <Volume2 className="w-4 h-4 text-sunrise-fuchsia dark:text-midnight-cyan" />
             <input
               type="range"
               min={0}
@@ -1210,20 +1325,32 @@ function AudioTranscriptPlayer({
               step={0.05}
               value={volume}
               onChange={(event) => setVolume(Number(event.target.value))}
-              className="w-full accent-emerald-300 cursor-pointer"
+              className="w-full cursor-pointer"
+              style={{ accentColor: 'var(--color-primary)' }}
             />
           </label>
         </div>
+
+        {!canSeek && (
+          <p className="mt-3 text-xs text-slate-600 dark:text-slate-300">
+            Calculating audio duration. You can still play now, and seeking will enable automatically.
+          </p>
+        )}
       </div>
 
-      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-slate-900/70 p-4 sm:p-5">
+      <div className="rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-slate-950/55 p-4 sm:p-5 shadow-sm">
         <div className="flex items-center gap-2 mb-3">
-          <Clock3 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+          <Clock3 className="w-4 h-4 text-sunrise-fuchsia dark:text-midnight-cyan" />
           <p className="text-sm font-semibold text-slate-900 dark:text-white">Timestamped transcript</p>
+          {cues.length > 0 && (
+            <span className="ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300">
+              {cues.length} cues
+            </span>
+          )}
         </div>
 
         {cues.length > 0 ? (
-          <div className="space-y-2 max-h-[44vh] overflow-y-auto pr-1">
+          <div className="space-y-2.5 max-h-[44vh] overflow-y-auto pr-1">
             {cues.map((cue, index) => {
               const isActive = activeCueIndex === index;
 
@@ -1232,13 +1359,13 @@ function AudioTranscriptPlayer({
                   type="button"
                   key={`${cue.timestamp}-${index}`}
                   onClick={() => handleCueClick(cue.timestamp)}
-                  className={`w-full text-left rounded-xl border px-3 py-2.5 transition-colors ${
+                  className={`w-full text-left rounded-xl border px-3 py-2.5 transition-all ${
                     isActive
-                      ? 'border-emerald-400/80 bg-emerald-50 dark:bg-emerald-500/10'
-                      : 'border-slate-200 dark:border-white/10 hover:border-emerald-300 dark:hover:border-emerald-500/50 bg-white/70 dark:bg-slate-900/40'
+                      ? 'border-sunrise-pink/70 bg-sunrise-pink/10 dark:border-midnight-cyan/60 dark:bg-midnight-cyan/10 shadow-sm'
+                      : 'border-slate-200/90 dark:border-white/10 hover:border-sunrise-pink/45 dark:hover:border-midnight-cyan/45 bg-white/80 dark:bg-slate-900/40'
                   }`}
                 >
-                  <span className="inline-flex items-center text-[11px] font-mono tracking-wide text-emerald-700 dark:text-emerald-300 mb-1">
+                  <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-mono tracking-wide bg-white/90 dark:bg-black/30 text-sunrise-fuchsia dark:text-midnight-cyan mb-1.5">
                     {cue.label}
                   </span>
                   <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">{cue.text}</p>
@@ -1247,7 +1374,7 @@ function AudioTranscriptPlayer({
             })}
           </div>
         ) : fullTranscript ? (
-          <pre className="whitespace-pre-wrap break-words text-sm sm:text-[15px] leading-relaxed text-slate-700 dark:text-slate-200 font-sans max-h-[44vh] overflow-y-auto">
+          <pre className="whitespace-pre-wrap break-words text-sm sm:text-[15px] leading-relaxed text-slate-700 dark:text-slate-200 font-sans max-h-[44vh] overflow-y-auto rounded-xl border border-slate-200/90 dark:border-white/10 bg-white/80 dark:bg-slate-900/35 p-3.5">
             {fullTranscript}
           </pre>
         ) : (
