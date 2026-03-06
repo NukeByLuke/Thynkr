@@ -49,7 +49,7 @@ export interface User {
   firstName?: string;
   lastName?: string;
   avatarUrl?: string;
-  theme?: 'light' | 'dark';
+  theme?: 'light' | 'dark' | 'sunrise' | 'sunset' | 'midnight' | 'system' | 'black';
   preferredLanguage?: string;
   ttsVoice?: string;
   ttsSpeed?: number;

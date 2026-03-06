@@ -1,6 +1,6 @@
 /**
  * Theme Context
- * Manages application theme (light/dark/system) with instant dark mode to prevent white flash
+ * Supports sunrise (light), sunset (dark), midnight (deep dark), and system preference.
  */
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -8,37 +8,68 @@ import { useAuth } from './AuthContext';
 import api from '@/lib/api';
 
 type Theme = 'light' | 'dark';
-type ThemeMode = 'light' | 'dark' | 'system';
+type AppliedThemeMode = 'sunrise' | 'sunset' | 'midnight';
+type NormalizedThemeMode = AppliedThemeMode | 'system';
+type ThemeMode = NormalizedThemeMode | 'light' | 'dark' | 'black';
 
 interface ThemeContextType {
-  theme: Theme; // The actual applied theme (light or dark)
-  themeMode: ThemeMode; // User's preference (light, dark, or system)
+  theme: Theme;
+  themeMode: ThemeMode;
+  resolvedThemeMode: AppliedThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// Helper to get system theme preference
-function getSystemTheme(): Theme {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+function normalizeThemeMode(mode: string | null | undefined): NormalizedThemeMode {
+  if (!mode) return 'system';
+
+  if (mode === 'light' || mode === 'sunrise') return 'sunrise';
+  if (mode === 'dark' || mode === 'sunset') return 'sunset';
+  if (mode === 'black' || mode === 'midnight') return 'midnight';
+  return 'system';
 }
 
-// Apply theme immediately to prevent flash - runs BEFORE React hydration
-function applyThemeImmediately() {
-  const saved = localStorage.getItem('themeMode') as ThemeMode | null;
-  const mode = saved || 'system';
-  const theme = mode === 'system' ? getSystemTheme() : (mode as Theme);
-  
+function getSystemThemeMode(): AppliedThemeMode {
+  if (typeof window === 'undefined') return 'sunrise';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'sunset' : 'sunrise';
+}
+
+function resolveThemeMode(mode: NormalizedThemeMode): AppliedThemeMode {
+  return mode === 'system' ? getSystemThemeMode() : mode;
+}
+
+function getThemeFromMode(mode: AppliedThemeMode): Theme {
+  return mode === 'sunrise' ? 'light' : 'dark';
+}
+
+function applyThemeToDom(mode: AppliedThemeMode) {
+  if (typeof document === 'undefined') return;
+
   const root = document.documentElement;
-  // Tailwind only uses 'dark' class
+  const body = document.body;
+  const theme = getThemeFromMode(mode);
+
+  root.classList.remove('light', 'dark');
+  body?.classList.remove('light', 'dark');
+
+  root.setAttribute('data-theme', mode);
+  body?.setAttribute('data-theme', mode);
+
   if (theme === 'dark') {
     root.classList.add('dark');
+    body?.classList.add('dark');
   } else {
-    root.classList.remove('dark');
+    root.classList.add('light');
+    body?.classList.add('light');
   }
 }
 
-// Run immediately on module load
+function applyThemeImmediately() {
+  const savedMode = normalizeThemeMode(localStorage.getItem('themeMode'));
+  applyThemeToDom(resolveThemeMode(savedMode));
+}
+
 if (typeof window !== 'undefined') {
   applyThemeImmediately();
 }
@@ -46,108 +77,59 @@ if (typeof window !== 'undefined') {
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated, user } = useAuth();
 
-  // Initialize themeMode from localStorage or default to 'system'
-  const [themeMode, setThemeModeState] = useState<ThemeMode>(() => {
-    const saved = localStorage.getItem('themeMode') as ThemeMode | null;
-    return saved || 'system';
-  });
+  const [themeMode, setThemeModeState] = useState<NormalizedThemeMode>(() =>
+    normalizeThemeMode(localStorage.getItem('themeMode'))
+  );
 
-  // Calculate the actual theme to apply based on mode
-  const [theme, setThemeState] = useState<Theme>(() => {
-    const saved = localStorage.getItem('themeMode') as ThemeMode | null;
-    const mode = saved || 'system';
+  const [resolvedThemeMode, setResolvedThemeMode] = useState<AppliedThemeMode>(() =>
+    resolveThemeMode(normalizeThemeMode(localStorage.getItem('themeMode')))
+  );
 
-    if (mode === 'system') {
-      return getSystemTheme();
-    }
-    return mode as Theme;
-  });
+  const theme = getThemeFromMode(resolvedThemeMode);
 
-  // Apply theme to document immediately on mount and changes
   useEffect(() => {
-    const root = document.documentElement;
-    const body = document.body;
+    applyThemeToDom(resolvedThemeMode);
+  }, [resolvedThemeMode]);
 
-    // Remove potential conflicting classes
-    root.classList.remove('light', 'dark');
-    body.classList.remove('light', 'dark');
-
-    // Add correct class to both html and body to ensure all selectors work
-    if (theme === 'dark') {
-      root.classList.add('dark');
-      body.classList.add('dark');
-    } else {
-      root.classList.add('light');
-      body.classList.add('light');
-      root.classList.remove('dark');
-      body.classList.remove('dark');
-    }
-  }, [theme]);
-
-  // Listen for system theme changes (only when mode is 'system')
   useEffect(() => {
     if (themeMode !== 'system') return;
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e: MediaQueryListEvent) => {
-      setThemeState(e.matches ? 'dark' : 'light');
+    const handleChange = () => {
+      setResolvedThemeMode(getSystemThemeMode());
     };
 
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [themeMode]);
 
-  // Sync with user's saved theme on login (only once, only if no local preference)
   useEffect(() => {
     if (isAuthenticated && user?.theme) {
-      const savedMode = localStorage.getItem('themeMode') as ThemeMode | null;
+      const savedMode = localStorage.getItem('themeMode');
       if (!savedMode) {
-        // First login - use user's saved preference from DB
-        // User's theme in DB is always 'light' or 'dark' (explicit preference, never 'system')
-        const userTheme = user.theme as Theme;
-        setThemeModeState(userTheme as ThemeMode);
-        setThemeState(userTheme);
-        localStorage.setItem('themeMode', userTheme);
+        const normalizedUserMode = normalizeThemeMode(String(user.theme));
+        setThemeModeState(normalizedUserMode);
+        setResolvedThemeMode(resolveThemeMode(normalizedUserMode));
+        localStorage.setItem('themeMode', normalizedUserMode);
       }
     }
   }, [isAuthenticated, user?.theme]);
 
   const setThemeMode = (mode: ThemeMode) => {
-    // Calculate actual theme to apply
-    const newTheme = mode === 'system' ? getSystemTheme() : (mode as Theme);
+    const normalizedMode = normalizeThemeMode(mode);
+    const nextResolvedMode = resolveThemeMode(normalizedMode);
 
-    // Apply immediately to DOM to prevent flicker
-    const root = document.documentElement;
-    const body = document.body;
-    
-    // Clean up
-    root.classList.remove('light', 'dark');
-    body.classList.remove('light', 'dark');
-    
-    if (newTheme === 'dark') {
-      root.classList.add('dark');
-      body.classList.add('dark');
-    } else {
-      root.classList.add('light');
-      body.classList.add('light');
-      root.classList.remove('dark');
-      body.classList.remove('dark');
-    }
+    setThemeModeState(normalizedMode);
+    setResolvedThemeMode(nextResolvedMode);
+    localStorage.setItem('themeMode', normalizedMode);
 
-    // Update state
-    setThemeModeState(mode);
-    setThemeState(newTheme);
-    localStorage.setItem('themeMode', mode);
-
-    // Save to backend ONLY if explicit preference (not 'system')
-    // Backend should only store 'light' or 'dark', never 'system'
-    if (isAuthenticated && mode !== 'system') {
-      api.patch('/auth/profile', { theme: newTheme }).catch(console.error);
+    if (isAuthenticated && normalizedMode !== 'system') {
+      api.patch('/auth/profile', { theme: normalizedMode }).catch(console.error);
     }
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, themeMode, setThemeMode }}>
+    <ThemeContext.Provider value={{ theme, themeMode, resolvedThemeMode, setThemeMode }}>
       {children}
     </ThemeContext.Provider>
   );

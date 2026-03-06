@@ -6,6 +6,7 @@ import {
   User,
   Moon,
   Sun,
+  Sunset,
   Globe,
   Bell,
   HelpCircle,
@@ -27,9 +28,8 @@ export default function ProfileMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
-  const { theme, setThemeMode } = useTheme();
+  const { resolvedThemeMode, setThemeMode } = useTheme();
   const navigate = useNavigate();
-  const isDark = theme === 'dark';
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -64,9 +64,26 @@ export default function ProfileMenu() {
     return role.charAt(0) + role.slice(1).toLowerCase();
   };
 
-  const toggleDarkMode = () => {
-    setThemeMode(isDark ? 'light' : 'dark');
+  const themeOrder = ['sunrise', 'sunset', 'midnight'] as const;
+  const currentThemeIndex = themeOrder.indexOf(resolvedThemeMode);
+  const nextThemeMode = themeOrder[(currentThemeIndex + 1) % themeOrder.length];
+
+  const cycleThemeMode = () => {
+    setThemeMode(nextThemeMode);
   };
+
+  const currentThemeLabel =
+    resolvedThemeMode === 'sunrise'
+      ? 'Sunrise'
+      : resolvedThemeMode === 'sunset'
+      ? 'Sunset'
+      : 'Midnight';
+
+  const nextThemeLabel =
+    nextThemeMode === 'sunrise' ? 'Sunrise' : nextThemeMode === 'sunset' ? 'Sunset' : 'Midnight';
+
+  const CurrentThemeIcon =
+    resolvedThemeMode === 'sunrise' ? Sun : resolvedThemeMode === 'sunset' ? Sunset : Moon;
 
   const handleNavigation = (path: string) => {
     setIsOpen(false);
@@ -152,34 +169,29 @@ export default function ProfileMenu() {
 
             {/* Theme Toggle */}
             <button
-              onClick={toggleDarkMode}
+              onClick={cycleThemeMode}
               className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 transition-colors text-left"
             >
               <div className="flex items-center gap-3">
-                {isDark ? (
-                  <Moon className="w-4 h-4 text-blue-500" />
-                ) : (
-                  <Sun className="w-4 h-4 text-amber-500" />
-                )}
+                <CurrentThemeIcon
+                  className={`w-4 h-4 ${
+                    resolvedThemeMode === 'sunrise'
+                      ? 'text-amber-500'
+                      : resolvedThemeMode === 'sunset'
+                      ? 'text-violet-500'
+                      : 'text-cyan-500'
+                  }`}
+                />
                 <div className="flex flex-col">
                   <span className="text-sm font-medium">Appearance</span>
                   <span className="text-xs text-slate-500 dark:text-slate-400">
-                    {isDark ? 'Dark' : 'Light'} mode
+                    {currentThemeLabel} theme
                   </span>
                 </div>
               </div>
-              {/* Toggle Switch */}
-              <div
-                className={`w-11 h-6 rounded-full transition-all duration-200 ${
-                  isDark ? 'bg-blue-500' : 'bg-slate-300'
-                }`}
-              >
-                <div
-                  className={`w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-200 ${
-                    isDark ? 'translate-x-5' : 'translate-x-0.5'
-                  } mt-0.5`}
-                />
-              </div>
+              <span className="inline-flex items-center rounded-full px-2 py-1 text-[10px] font-semibold bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                Next: {nextThemeLabel}
+              </span>
             </button>
 
             {/* Change Language */}
