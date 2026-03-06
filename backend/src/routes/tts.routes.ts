@@ -120,15 +120,67 @@ const FIRST_CHUNK_TARGET_SIZE = 200;
 const CHUNK_TARGET_SIZE = 2000;
 // Minimum chunk size to avoid very short audio clips
 const CHUNK_MIN_SIZE = 150;
+// Long texts are streamed chunk-by-chunk for much faster time-to-first-audio.
+const FAST_START_THRESHOLD = 2000;
+
+/**
+ * Hard split overly long sentence-like content by words when punctuation
+ * boundaries are not available.
+ */
+function splitByWordBoundary(text: string, maxSize: number): string[] {
+  const words = text.split(/\s+/).filter(Boolean);
+  if (words.length === 0) return [];
+
+  const parts: string[] = [];
+  let current = '';
+
+  const pushCurrent = () => {
+    if (current.trim()) {
+      parts.push(current.trim());
+      current = '';
+    }
+  };
+
+  for (const word of words) {
+    // Fallback for very long single tokens/URLs.
+    if (word.length > maxSize) {
+      pushCurrent();
+      for (let i = 0; i < word.length; i += maxSize) {
+        parts.push(word.slice(i, i + maxSize));
+      }
+      continue;
+    }
+
+    if (!current) {
+      current = word;
+      continue;
+    }
+
+    if (current.length + 1 + word.length <= maxSize) {
+      current += ` ${word}`;
+    } else {
+      pushCurrent();
+      current = word;
+    }
+  }
+
+  pushCurrent();
+  return parts;
+}
 
 /**
  * Split text into speakable chunks at sentence boundaries
  * First chunk is smaller for faster time-to-first-byte
  */
 function splitTextIntoChunks(text: string): string[] {
+  const normalized = text.trim();
+  if (!normalized) {
+    return [];
+  }
+
   // For short texts, return as-is
-  if (text.length <= FIRST_CHUNK_TARGET_SIZE) {
-    return [text.trim()];
+  if (normalized.length <= FIRST_CHUNK_TARGET_SIZE) {
+    return [normalized];
   }
 
   const chunks: string[] = [];
@@ -136,15 +188,37 @@ function splitTextIntoChunks(text: string): string[] {
   let isFirstChunk = true;
 
   // Split by sentences (period, exclamation, question mark followed by space or end)
-  const sentences = text.split(/(?<=[.!?])\s+/);
+  const sentences = normalized.split(/(?<=[.!?])\s+/);
 
   for (const sentence of sentences) {
     const trimmed = sentence.trim();
     if (!trimmed) continue;
 
     // Use smaller target for first chunk (near-instant playback)
-    const targetSize = isFirstChunk ? FIRST_CHUNK_TARGET_SIZE : CHUNK_TARGET_SIZE;
-    const minSize = isFirstChunk ? 100 : CHUNK_MIN_SIZE;
+    let targetSize = isFirstChunk ? FIRST_CHUNK_TARGET_SIZE : CHUNK_TARGET_SIZE;
+    let minSize = isFirstChunk ? 100 : CHUNK_MIN_SIZE;
+
+    // If punctuation splitting produced a very long segment, force chunking by words.
+    if (trimmed.length > targetSize) {
+      const forcedParts = splitByWordBoundary(trimmed, targetSize);
+      for (const part of forcedParts) {
+        const partTargetSize = isFirstChunk ? FIRST_CHUNK_TARGET_SIZE : CHUNK_TARGET_SIZE;
+        const partMinSize = isFirstChunk ? 100 : CHUNK_MIN_SIZE;
+
+        if (currentChunk.length > 0 && currentChunk.length + part.length > partTargetSize) {
+          if (currentChunk.length >= partMinSize) {
+            chunks.push(currentChunk.trim());
+            currentChunk = part;
+            isFirstChunk = false;
+          } else {
+            currentChunk += ` ${part}`;
+          }
+        } else {
+          currentChunk = currentChunk ? `${currentChunk} ${part}` : part;
+        }
+      }
+      continue;
+    }
 
     // If adding this sentence would exceed target and we already have content
     if (currentChunk.length > 0 && currentChunk.length + trimmed.length > targetSize) {
@@ -318,7 +392,7 @@ async function generateOrGetCached(text: string, voice: Voice): Promise<Buffer> 
   }
 
   // 2. For short/medium texts (<=2000 chars), generate in a single API call
-  if (text.length <= 2000) {
+  if (text.length <= FAST_START_THRESHOLD) {
     const buffer = await generateGoogleTTS(text, voice);
     cacheAudio(hash, buffer).catch(() => {});
     return buffer;
@@ -533,13 +607,16 @@ export default async function ttsRoutes(server: FastifyInstance) {
         expiresAt: Date.now() + 60000 // 1 minute to start stream
       });
 
-      // Kick off audio generation immediately (don't await — overlaps with client setup)
-      const genPromise = generateOrGetCached(trimmedText, voice);
-      pendingGenerations.set(token, genPromise);
-      // Auto-cleanup after 2 minutes
-      genPromise.finally(() => {
-        setTimeout(() => pendingGenerations.delete(token), 120000);
-      });
+      // Kick off eager generation for short/medium payloads.
+      // Long payloads are streamed with fast-start chunking in /stream for better UX.
+      if (trimmedText.length <= FAST_START_THRESHOLD) {
+        const genPromise = generateOrGetCached(trimmedText, voice);
+        pendingGenerations.set(token, genPromise);
+        // Auto-cleanup after 2 minutes
+        genPromise.finally(() => {
+          setTimeout(() => pendingGenerations.delete(token), 120000);
+        });
+      }
 
       return reply.send({ token, url: `/api/tts/stream/${token}` });
     }
@@ -547,8 +624,8 @@ export default async function ttsRoutes(server: FastifyInstance) {
 
   /**
    * GET /api/tts/stream/:token - Serve generated audio
-   * Audio generation starts eagerly during negotiate for minimal latency.
-   * Always serves complete buffer with Content-Length for reliable duration/seeking.
+   * Short texts: serves complete buffer with Content-Length.
+   * Long texts: streams chunk-by-chunk to start playback sooner.
    */
   server.get(
     '/tts/stream/:token',
@@ -563,30 +640,98 @@ export default async function ttsRoutes(server: FastifyInstance) {
       // Extend expiry for browser retries
       data.expiresAt = Date.now() + 30000;
       const { userId } = data;
+      const cacheHash = generateContentHash(data.text, data.voice);
 
       try {
-        // Await the generation that was kicked off during negotiate
-        const pending = pendingGenerations.get(token);
-        let buffer: Buffer;
+        // 1) Serve from disk cache immediately if available.
+        const cachedAudio = await getCachedAudio(cacheHash);
+        if (cachedAudio) {
+          pendingGenerations.delete(token);
+          streamTokens.delete(token);
 
-        if (pending) {
-          buffer = await pending;
-        } else {
-          // Fallback: generate now (shouldn't normally happen)
-          logger.warn({ token, userId }, 'No pending generation found, generating on demand');
-          buffer = await generateOrGetCached(data.text, data.voice);
+          reply.header('Content-Type', 'audio/mpeg');
+          reply.header('Content-Length', cachedAudio.length);
+          reply.header('Cache-Control', 'private, max-age=3600');
+          reply.header('Accept-Ranges', 'bytes');
+          reply.header('X-TTS-Provider', 'google-cloud');
+          reply.header('X-TTS-Cached', 'true');
+          return reply.send(cachedAudio);
         }
 
-        // Serve complete buffer with Content-Length — browser knows exact duration
+        // 2) Fast-start mode for long payloads: stream chunks as they complete.
+        if (data.text.length > FAST_START_THRESHOLD) {
+          const chunks = splitTextIntoChunks(data.text);
+          if (chunks.length === 0) {
+            pendingGenerations.delete(token);
+            streamTokens.delete(token);
+            return reply.status(400).send({ error: 'No text to stream' });
+          }
+
+          logger.info({ token, userId, chunkCount: chunks.length, textLength: data.text.length }, 'Starting fast-start chunked TTS stream');
+
+          // Start all chunk generations in parallel; first chunk is intentionally short.
+          const chunkPromises = chunks.map((chunk) => generateGoogleChunk(chunk, data.voice));
+          const chunkBuffers: Buffer[] = new Array(chunks.length);
+
+          // Ensure first chunk is ready before hijacking response.
+          const firstChunk = await chunkPromises[0];
+          chunkBuffers[0] = firstChunk;
+
+          reply.hijack();
+          const raw = reply.raw;
+          raw.statusCode = 200;
+          raw.setHeader('Content-Type', 'audio/mpeg');
+          raw.setHeader('Cache-Control', 'private, max-age=3600');
+          raw.setHeader('X-TTS-Provider', 'google-cloud');
+          raw.setHeader('X-TTS-Cached', 'false');
+          raw.setHeader('X-TTS-Mode', 'chunked-faststart');
+
+          raw.write(firstChunk);
+
+          try {
+            for (let i = 1; i < chunkPromises.length; i += 1) {
+              const nextChunk = await chunkPromises[i];
+              chunkBuffers[i] = nextChunk;
+              raw.write(nextChunk);
+            }
+
+            raw.end();
+
+            const combined = Buffer.concat(chunkBuffers);
+            cacheAudio(cacheHash, combined).catch(() => {});
+          } catch (streamErr: any) {
+            logger.error({ error: streamErr.message, token, userId }, 'Chunked TTS stream failed mid-stream');
+            if (!raw.writableEnded) {
+              raw.end();
+            }
+          } finally {
+            pendingGenerations.delete(token);
+            streamTokens.delete(token);
+          }
+
+          return;
+        }
+
+        // 3) Short payload path (full buffer for reliable seeking/duration).
+        const pending = pendingGenerations.get(token);
+        const buffer = pending
+          ? await pending
+          : await generateOrGetCached(data.text, data.voice);
+
+        pendingGenerations.delete(token);
+        streamTokens.delete(token);
+
         reply.header('Content-Type', 'audio/mpeg');
         reply.header('Content-Length', buffer.length);
         reply.header('Cache-Control', 'private, max-age=3600');
         reply.header('Accept-Ranges', 'bytes');
         reply.header('X-TTS-Provider', 'google-cloud');
+        reply.header('X-TTS-Cached', 'false');
         return reply.send(buffer);
       } catch (error: any) {
         logger.error({ error: error.message, userId }, 'TTS stream generation failed');
         pendingGenerations.delete(token);
+        streamTokens.delete(token);
         return reply.status(500).send({ error: 'Generation failed' });
       }
     }
