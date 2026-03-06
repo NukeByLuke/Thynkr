@@ -23,10 +23,15 @@ import {
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { TTS_VOICES } from '@/lib/constants';
+import {
+  emitTTSPreferencesUpdated,
+  normalizeTTSPreferences,
+  readTTSPreferencesFromStorage,
+  subscribeToTTSPreferences,
+  type TTSVoice,
+} from '@/lib/ttsPreferences';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
-
-export type TTSVoice = 'charon' | 'fenrir' | 'puck' | 'enceladus' | 'aoede' | 'kore';
 
 interface AudioPlayerProps {
   text: string;
@@ -129,6 +134,7 @@ export default function AudioPlayer({
   const [activeSetting, setActiveSetting] = useState<'voice' | 'speed' | null>(null);
   const [voice, setVoice] = useState<TTSVoice>('charon');
   const [speed, setSpeed] = useState(1.0);
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const [dragConstraints, setDragConstraints] = useState({ top: 0, left: 0, right: 0, bottom: 0 });
 
   // Refs
@@ -144,16 +150,63 @@ export default function AudioPlayer({
 
   // Load user preferences on mount
   useEffect(() => {
+    let isDisposed = false;
+
+    const cachedPreferences = readTTSPreferencesFromStorage();
+    if (cachedPreferences.voice) {
+      setVoice(cachedPreferences.voice);
+    }
+    if (typeof cachedPreferences.speed === 'number') {
+      setSpeed(cachedPreferences.speed);
+    }
+
     const loadPreferences = async () => {
       try {
         const response = await api.get('/tts/preferences');
-        if (response.data.voice) setVoice(response.data.voice);
-        if (response.data.speed) setSpeed(response.data.speed);
-      } catch (error) {
+        if (isDisposed) {
+          return;
+        }
+
+        const normalized = normalizeTTSPreferences(response.data);
+        if (normalized.voice) {
+          setVoice(normalized.voice);
+        }
+        if (typeof normalized.speed === 'number') {
+          setSpeed(normalized.speed);
+        }
+
+        emitTTSPreferencesUpdated(normalized);
+      } catch {
         // Use defaults
+      } finally {
+        if (!isDisposed) {
+          setPreferencesLoaded(true);
+        }
       }
     };
-    loadPreferences();
+
+    void loadPreferences();
+
+    return () => {
+      isDisposed = true;
+    };
+  }, []);
+
+  // Stay synchronized with preference changes made elsewhere (e.g. Settings page).
+  useEffect(() => {
+    return subscribeToTTSPreferences((preferences) => {
+      if (preferences.voice) {
+        setVoice(preferences.voice);
+      }
+
+      if (typeof preferences.speed === 'number') {
+        setSpeed(preferences.speed);
+
+        if (audioRef.current) {
+          audioRef.current.playbackRate = preferences.speed;
+        }
+      }
+    });
   }, []);
 
   // Smooth 60fps progress updates using requestAnimationFrame
@@ -205,6 +258,7 @@ export default function AudioPlayer({
       if (newVoice) updates.voice = newVoice;
       if (newSpeed !== undefined) updates.speed = newSpeed;
       await api.patch('/tts/preferences', updates);
+      emitTTSPreferencesUpdated(updates);
     } catch (error) {
       console.error('Failed to save TTS preferences:', error);
     }
@@ -529,6 +583,10 @@ export default function AudioPlayer({
       return;
     }
 
+    if (!preferencesLoaded) {
+      return;
+    }
+
     if (autoPlayKey === undefined) {
       return;
     }
@@ -542,7 +600,7 @@ export default function AudioPlayer({
     setDuration(0);
     setActiveSetting(null);
     void play();
-  }, [autoPlay, autoPlayKey, play]);
+  }, [autoPlay, autoPlayKey, play, preferencesLoaded]);
 
   // Keep drag area inside viewport while still allowing free movement.
   useEffect(() => {

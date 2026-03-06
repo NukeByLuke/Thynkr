@@ -98,8 +98,8 @@ function getTTSClient(): TextToSpeechClient {
   return ttsClient;
 }
 
-// Timeout for TTS API calls (20 seconds - fast API)
-const TTS_TIMEOUT_MS = 20000;
+// Timeout for TTS API calls. Some Chirp voices need longer synthesis windows.
+const TTS_TIMEOUT_MS = 45000;
 
 /**
  * Wrap a promise with a timeout
@@ -115,10 +115,10 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation: strin
 
 // Prefer a single synthesis request for normal payload sizes so the browser gets
 // reliable duration/progress metadata from one complete MP3 file.
-const SINGLE_REQUEST_MAX_CHARS = 4500;
-// For longer payloads, we still split into larger chunks and stitch server-side.
-const CHUNK_TARGET_SIZE = 4500;
-const CHUNK_MIN_SIZE = 1200;
+const SINGLE_REQUEST_MAX_CHARS = 5000;
+// For longer payloads, split into provider-safe chunks and stitch server-side.
+const CHUNK_TARGET_SIZE = 4000;
+const CHUNK_MIN_SIZE = 1000;
 
 /**
  * Hard split overly long sentence-like content by words when punctuation
