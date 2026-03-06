@@ -1,6 +1,6 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Moon, Sun, Monitor, Volume2, Play } from 'lucide-react';
+import { Moon, Sun, Sunset, Monitor, Volume2, Play } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
 import { useTTSVoices } from '@/hooks/useTTS';
 import { useEffect, useState } from 'react';
@@ -111,10 +111,11 @@ export default function GeneralSettings() {
           Customize how Thynkr looks on your device.
         </p>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {([
-            { mode: 'light', Icon: Sun, label: 'Light' },
-            { mode: 'dark', Icon: Moon, label: 'Dark' },
+            { mode: 'sunrise', Icon: Sun, label: 'Sunrise (Light)' },
+            { mode: 'sunset', Icon: Sunset, label: 'Sunset (Dark)' },
+            { mode: 'midnight', Icon: Moon, label: 'Midnight (Black)' },
             { mode: 'system', Icon: Monitor, label: 'System' },
           ] as const).map(({ mode, Icon, label }) => (
             <button

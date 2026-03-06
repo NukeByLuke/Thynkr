@@ -266,7 +266,37 @@
     --radius-input: 0.75rem;
   }
 
-  .dark {
+  .dark[data-theme='sunset'] {
+    /* Sunset Mode - Dark slate with softer contrast */
+    --color-primary: #7C3AED; /* Violet */
+    --color-primary-light: #2563EB; /* Blue */
+    --color-primary-dark: #06B6D4; /* Cyan */
+    --color-secondary: #2563EB;
+    --color-secondary-light: #60A5FA;
+    --color-accent: #06B6D4;
+
+    --color-bg-primary: #020617;
+    --color-bg-secondary: #0B1220;
+    --color-bg-tertiary: #111827;
+
+    --glass-bg: rgba(12, 18, 31, 0.82);
+    --glass-border: rgba(148, 163, 184, 0.22);
+
+    --color-text-primary: #F8FAFC;
+    --color-text-secondary: #CBD5E1;
+    --color-text-tertiary: #94A3B8;
+
+    --color-border: rgba(148, 163, 184, 0.26);
+    --color-border-light: rgba(148, 163, 184, 0.16);
+
+    --shadow-ambient: 0 8px 32px rgba(2, 6, 23, 0.45);
+    --shadow-card: 0 4px 16px rgba(2, 6, 23, 0.38);
+    --shadow-card-hover: 0 8px 32px rgba(2, 6, 23, 0.52);
+    --shadow-glow: 0 0 40px rgba(59, 130, 246, 0.3);
+  }
+
+  .dark:not([data-theme]),
+  .dark[data-theme='midnight'] {
     /* Midnight Mode - True Black + High Contrast */
     --color-primary: #5B21B6; /* Deep Violet */
     --color-primary-light: #1D4ED8; /* Royal Blue */
@@ -362,6 +392,10 @@
     background-color: #000000;
   }
 
+  .dark[data-theme='sunset'] body {
+    background-color: #020617;
+  }
+
   /* Background grid pattern applied to body */
   body::before {
     content: '';
@@ -387,25 +421,32 @@
   }
 
   /* High-contrast dark mode overrides for shared Tailwind slate utilities */
-  .dark [class*='dark:bg-slate-950'] {
+  .dark:not([data-theme]) [class*='dark:bg-slate-950'],
+  .dark[data-theme='midnight'] [class*='dark:bg-slate-950'] {
     background-color: #000000 !important;
   }
 
-  .dark [class*='dark:bg-slate-900'] {
+  .dark:not([data-theme]) [class*='dark:bg-slate-900'],
+  .dark[data-theme='midnight'] [class*='dark:bg-slate-900'] {
     background-color: #020202 !important;
   }
 
-  .dark [class*='dark:bg-slate-800'] {
+  .dark:not([data-theme]) [class*='dark:bg-slate-800'],
+  .dark[data-theme='midnight'] [class*='dark:bg-slate-800'] {
     background-color: #0A0A0A !important;
   }
 
-  .dark [class*='dark:bg-slate-700'] {
+  .dark:not([data-theme]) [class*='dark:bg-slate-700'],
+  .dark[data-theme='midnight'] [class*='dark:bg-slate-700'] {
     background-color: #121216 !important;
   }
 
-  .dark [class*='dark:border-slate-800'],
-  .dark [class*='dark:border-slate-700'],
-  .dark [class*='dark:border-slate-600'] {
+  .dark:not([data-theme]) [class*='dark:border-slate-800'],
+  .dark:not([data-theme]) [class*='dark:border-slate-700'],
+  .dark:not([data-theme]) [class*='dark:border-slate-600'],
+  .dark[data-theme='midnight'] [class*='dark:border-slate-800'],
+  .dark[data-theme='midnight'] [class*='dark:border-slate-700'],
+  .dark[data-theme='midnight'] [class*='dark:border-slate-600'] {
     border-color: rgba(255, 255, 255, 0.16) !important;
   }
 
@@ -479,6 +520,18 @@
     @apply placeholder:text-zinc-500;
   }
 
+  .dark[data-theme='sunset'] input[type="text"],
+  .dark[data-theme='sunset'] input[type="email"],
+  .dark[data-theme='sunset'] input[type="password"],
+  .dark[data-theme='sunset'] input[type="search"],
+  .dark[data-theme='sunset'] input[type="url"],
+  .dark[data-theme='sunset'] input[type="tel"],
+  .dark[data-theme='sunset'] input[type="number"],
+  .dark[data-theme='sunset'] textarea,
+  .dark[data-theme='sunset'] select {
+    @apply bg-slate-900/75 border-slate-500/40;
+  }
+
   input[type="text"]:focus,
   input[type="email"]:focus,
   input[type="password"]:focus,
@@ -501,6 +554,18 @@
   .dark textarea:focus,
   .dark select:focus {
     @apply border-midnight-cyan/60 ring-midnight-cyan/30 bg-black;
+  }
+
+  .dark[data-theme='sunset'] input[type="text"]:focus,
+  .dark[data-theme='sunset'] input[type="email"]:focus,
+  .dark[data-theme='sunset'] input[type="password"]:focus,
+  .dark[data-theme='sunset'] input[type="search"]:focus,
+  .dark[data-theme='sunset'] input[type="url"]:focus,
+  .dark[data-theme='sunset'] input[type="tel"]:focus,
+  .dark[data-theme='sunset'] input[type="number"]:focus,
+  .dark[data-theme='sunset'] textarea:focus,
+  .dark[data-theme='sunset'] select:focus {
+    @apply bg-slate-900 border-cyan-400/55 ring-cyan-400/25;
   }
 
   /* Icon color inheritance */
