@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface SummaryViewProps {
   content: string;
@@ -18,6 +19,11 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
       // Also handle forms like "H3 Title" without a colon
       .replace(/(^|\n)\s*H([1-6])\s+(.+)/gm, (_m, p1, lvl, txt) => `${p1}${'#'.repeat(Number(lvl))} ${String(txt).trim()}`);
   }, [content]);
+
+  const estimatedReadMinutes = useMemo(() => {
+    const words = normalizedContent.trim().split(/\s+/).filter(Boolean).length;
+    return Math.max(1, Math.round(words / 180));
+  }, [normalizedContent]);
 
   // Show error alert if generation failed
   if (error) {
@@ -44,23 +50,25 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
 
   return (
     <div className="max-w-none w-full min-w-0 animate-fade-in space-y-4 sm:space-y-6">
-      {/* Summary Content */}
-      <div className="bg-gradient-to-br from-white to-brand-50/50 dark:from-gray-800 dark:to-gray-800 rounded-2xl shadow-lg border border-brand-100/50 dark:border-gray-700 p-3 sm:p-6 lg:p-10 overflow-hidden">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5 sm:mb-8 pb-4 border-b-2 border-brand-200/50 dark:border-gray-700">
-          <h3 className="text-xl sm:text-3xl font-bold">
-            <span className="hidden dark:block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-violet-400 to-violet-500">
-              Summary
-            </span>
-            <span className="block dark:hidden text-transparent bg-clip-text bg-gradient-to-r from-pink-600 via-fuchsia-600 to-fuchsia-700">
-              Summary
-            </span>
-          </h3>
-          <div className="flex items-center gap-3">
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950 shadow-xl">
+        <div className="absolute -top-24 -right-16 h-56 w-56 rounded-full bg-amber-200/40 blur-3xl dark:bg-amber-500/10" />
+        <div className="absolute -bottom-16 -left-12 h-48 w-48 rounded-full bg-cyan-200/40 blur-3xl dark:bg-cyan-500/10" />
+
+        <div className="relative z-10 p-4 sm:p-7 lg:p-10">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 pb-4 border-b border-slate-200 dark:border-white/10">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                AI Study Brief
+              </p>
+              <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Summary</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">Estimated reading time: {estimatedReadMinutes} min</p>
+            </div>
+
             {onRegenerate && (
               <button
                 onClick={onRegenerate}
                 disabled={isRegenerating}
-                className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-fuchsia-600 dark:text-violet-400 hover:text-fuchsia-700 dark:hover:text-violet-300 bg-fuchsia-50 dark:bg-violet-900/30 hover:bg-fuchsia-100 dark:hover:bg-violet-900/50 rounded-xl transition-all duration-150 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold text-cyan-700 dark:text-cyan-300 hover:text-cyan-800 dark:hover:text-cyan-200 bg-cyan-50 dark:bg-cyan-500/15 hover:bg-cyan-100 dark:hover:bg-cyan-500/25 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Regenerate summary with latest AI"
               >
                 <RefreshCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
@@ -68,40 +76,41 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
               </button>
             )}
           </div>
-        </div>
-        <div className="prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none min-w-0 break-words">
+
+          <div className="prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none min-w-0 break-words">
           <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
             components={{
               h1: ({ node, ...props }: any) => (
                 <h1
-                  className="text-xl sm:text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-pink-600 via-fuchsia-600 to-orange-500 dark:from-cyan-400 dark:via-violet-500 dark:to-blue-500 bg-clip-text text-transparent mt-4 sm:mt-6 mb-3 sm:mb-4 pb-2 border-b-2 border-pink-200/60 dark:border-violet-500/30"
+                  className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white mt-4 sm:mt-6 mb-3 sm:mb-4 pb-2 border-b-2 border-slate-200/80 dark:border-white/10"
                   {...props}
                 />
               ),
               h2: ({ node, ...props }: any) => (
                 <h2
-                  className="text-lg sm:text-xl md:text-2xl font-bold text-brand-700 dark:text-brand-200 mt-5 sm:mt-6 mb-2 sm:mb-3 pl-2 sm:pl-3 border-l-4 border-pink-500 dark:border-cyan-500"
+                  className="text-lg sm:text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-100 mt-5 sm:mt-6 mb-2 sm:mb-3 pl-2 sm:pl-3 border-l-4 border-cyan-500 dark:border-cyan-400"
                   {...props}
                 />
               ),
               h3: ({ node, ...props }: any) => (
                 <h3
-                  className="text-base sm:text-lg md:text-xl font-semibold text-brand-700 dark:text-brand-300 mt-4 sm:mt-5 mb-2 flex items-center gap-2"
+                  className="text-base sm:text-lg md:text-xl font-semibold text-slate-800 dark:text-slate-200 mt-4 sm:mt-5 mb-2"
                   {...props}
                 />
               ),
               h4: ({ node, ...props }: any) => (
                 <h4
-                  className="text-base sm:text-lg font-semibold text-brand-700 dark:text-brand-300 mt-4 sm:mt-5 mb-2"
+                  className="text-base sm:text-lg font-semibold text-slate-800 dark:text-slate-200 mt-4 sm:mt-5 mb-2"
                   {...props}
                 />
               ),
               strong: ({ node, ...props }: any) => (
-                <strong className="font-bold text-brand-700 dark:text-brand-300" {...props} />
+                <strong className="font-bold text-slate-900 dark:text-white" {...props} />
               ),
               blockquote: ({ node, ...props }: any) => (
                 <blockquote
-                  className="border-l-4 border-brand-300 dark:border-brand-700 bg-brand-50 dark:bg-brand-900/10 p-4 rounded-r-lg italic text-gray-700 dark:text-gray-300 my-4 shadow-sm"
+                  className="border-l-4 border-cyan-400 dark:border-cyan-500 bg-cyan-50 dark:bg-cyan-500/10 p-4 rounded-r-lg italic text-gray-700 dark:text-gray-300 my-4 shadow-sm"
                   {...props}
                 />
               ),
@@ -113,13 +122,13 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
               ),
               ul: ({ node, ...props }: any) => (
                 <ul
-                  className="list-disc ml-5 sm:ml-7 space-y-2 sm:space-y-3 mb-5 sm:mb-6 text-gray-700 dark:text-gray-300 marker:text-brand-500 dark:marker:text-brand-400"
+                  className="list-disc ml-5 sm:ml-7 space-y-2 sm:space-y-3 mb-5 sm:mb-6 text-gray-700 dark:text-gray-300 marker:text-cyan-500 dark:marker:text-cyan-400"
                   {...props}
                 />
               ),
               ol: ({ node, ...props }: any) => (
                 <ol
-                  className="list-decimal ml-5 sm:ml-7 space-y-2 sm:space-y-3 mb-5 sm:mb-6 text-gray-700 dark:text-gray-300 marker:text-brand-500 dark:marker:text-brand-400"
+                  className="list-decimal ml-5 sm:ml-7 space-y-2 sm:space-y-3 mb-5 sm:mb-6 text-gray-700 dark:text-gray-300 marker:text-cyan-500 dark:marker:text-cyan-400"
                   {...props}
                 />
               ),
@@ -128,14 +137,14 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
                 const isInline = !className;
                 return isInline ? (
                   <code
-                    className="bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 px-2.5 py-1 rounded-lg text-sm font-mono border border-brand-200 dark:border-brand-800 shadow-sm"
+                    className="bg-cyan-50 dark:bg-cyan-500/15 text-cyan-700 dark:text-cyan-200 px-2.5 py-1 rounded-lg text-sm font-mono border border-cyan-200 dark:border-cyan-500/30 shadow-sm"
                     {...props}
                   >
                     {children}
                   </code>
                 ) : (
                   <code
-                    className={`block bg-gray-900 dark:bg-gray-950 text-gray-100 p-6 rounded-2xl overflow-x-auto text-sm font-mono shadow-xl border border-gray-700 dark:border-gray-800 my-6 ${className || ''}`}
+                    className={`block bg-slate-900 dark:bg-slate-950 text-slate-100 p-6 rounded-2xl overflow-x-auto text-sm font-mono shadow-xl border border-slate-700 dark:border-slate-800 my-6 ${className || ''}`}
                     {...props}
                   >
                     {children}
@@ -145,7 +154,7 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
               pre: ({ node, ...props }: any) => <pre className="my-4" {...props} />,
               a: ({ node, ...props }: any) => (
                 <a
-                  className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 underline decoration-primary-300 dark:decoration-primary-600 hover:decoration-primary-500 dark:hover:decoration-primary-400 transition-colors"
+                  className="text-cyan-700 dark:text-cyan-300 hover:text-cyan-800 dark:hover:text-cyan-200 underline decoration-cyan-300 dark:decoration-cyan-600 hover:decoration-cyan-500 dark:hover:decoration-cyan-400 transition-colors"
                   {...props}
                 />
               ),
@@ -188,6 +197,7 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
           >
             {normalizedContent}
           </ReactMarkdown>
+          </div>
         </div>
       </div>
     </div>
