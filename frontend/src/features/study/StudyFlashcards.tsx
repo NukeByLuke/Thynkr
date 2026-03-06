@@ -9,11 +9,9 @@ import {
   Shuffle,
   Sparkles,
   RefreshCw,
-  Loader2,
-  Square,
   Volume2,
 } from 'lucide-react';
-import { useTTS } from '@/hooks/useTTS';
+import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import { sanitizeTextForTTS } from '@/utils/ttsText';
 
 interface Flashcard {
@@ -42,24 +40,12 @@ export default function StudyFlashcards({
   const [isFlipped, setIsFlipped] = useState(false);
   const [knownCards, setKnownCards] = useState<Set<number>>(new Set());
   const [shuffledIndices, setShuffledIndices] = useState<number[]>(data.cards.map((_, i) => i));
-  const [playingItem, setPlayingItem] = useState<string | null>(null);
-
-  const {
-    isPlaying,
-    isLoading: isTTSLoading,
-    play: playTTS,
-    stop: stopTTS,
-  } = useTTS({
-    onPlayEnd: () => setPlayingItem(null),
-  });
+  const { openAudioPlayer, closeAudioPlayer } = useAudioPlayer();
 
   const currentCard = data.cards[shuffledIndices[currentIndex]];
   const totalCards = data.cards.length;
   const knownCount = knownCards.size;
   const remainingCount = totalCards - knownCount;
-  const currentCardItemId = currentCard
-    ? `study-flashcard-${shuffledIndices[currentIndex]}-${isFlipped ? 'answer' : 'question'}`
-    : null;
   const currentCardSpeechText = useMemo(() => {
     if (!currentCard) return '';
     const sideLabel = isFlipped ? 'Answer' : 'Question';
@@ -68,23 +54,20 @@ export default function StudyFlashcards({
   }, [currentCard, isFlipped]);
 
   const stopCardAudio = useCallback(() => {
-    stopTTS();
-    setPlayingItem(null);
-  }, [stopTTS]);
+    closeAudioPlayer();
+  }, [closeAudioPlayer]);
 
-  const handleCardAudioToggle = useCallback(async () => {
-    if (!currentCardItemId || !currentCardSpeechText) {
+  const handleCardAudioToggle = useCallback(() => {
+    if (!currentCardSpeechText) {
       return;
     }
 
-    if (playingItem === currentCardItemId && isPlaying) {
-      stopCardAudio();
-      return;
-    }
-
-    setPlayingItem(currentCardItemId);
-    await playTTS(currentCardSpeechText);
-  }, [currentCardItemId, currentCardSpeechText, isPlaying, playTTS, playingItem, stopCardAudio]);
+    openAudioPlayer({
+      text: currentCardSpeechText,
+      title: `${data.title || 'Flashcards'} Audio`,
+      autoPlay: true,
+    });
+  }, [currentCardSpeechText, data.title, openAudioPlayer]);
 
   const goToCard = (index: number) => {
     if (index >= 0 && index < totalCards) {
@@ -160,17 +143,11 @@ export default function StudyFlashcards({
         <div className="flex items-center gap-2">
           <button
             onClick={handleCardAudioToggle}
-            disabled={isTTSLoading || !currentCardSpeechText}
+            disabled={!currentCardSpeechText}
             className="p-2 text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 rounded-lg hover:bg-cyan-50 dark:hover:bg-cyan-900/30 disabled:opacity-50"
-            title={playingItem === currentCardItemId && isPlaying ? 'Stop audio' : 'Read current card aloud'}
+            title="Open card audio player"
           >
-            {isTTSLoading && playingItem === currentCardItemId ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : playingItem === currentCardItemId && isPlaying ? (
-              <Square className="h-4 w-4" />
-            ) : (
-              <Volume2 className="h-4 w-4" />
-            )}
+            <Volume2 className="h-4 w-4" />
           </button>
           <button
             onClick={shuffleCards}

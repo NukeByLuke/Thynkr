@@ -5,14 +5,17 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import {
   Play,
   Pause,
+  SkipBack,
+  SkipForward,
   Square,
   Volume2,
   VolumeX,
   Settings,
+  GripVertical,
   X,
   Loader2,
   // Mic2, // removed
@@ -27,9 +30,12 @@ export type TTSVoice = 'charon' | 'fenrir' | 'puck' | 'enceladus' | 'aoede' | 'k
 
 interface AudioPlayerProps {
   text: string;
+  title?: string;
   className?: string;
   compact?: boolean;
   docked?: boolean;
+  autoPlay?: boolean;
+  autoPlayKey?: string | number;
   onClose?: () => void;
   onPlayStart?: () => void;
   onPlayEnd?: () => void;
@@ -47,9 +53,18 @@ let globalStopCallback: (() => void) | null = null;
 // In-memory cache for streaming URLs (not blobs)
 const audioCache = new Map<string, string>();
 
+function fnv1aHash(value: string): string {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16);
+}
+
 function generateCacheKey(text: string, voice: TTSVoice): string {
-  // We only cache by text and voice since speed is now client-side
-  return `${text.slice(0, 100)}:${voice}`;
+  // Full-text hash prevents collisions for similarly prefixed content.
+  return `${voice}:${text.length}:${fnv1aHash(text)}`;
 }
 
 /**
@@ -92,9 +107,12 @@ function formatTime(seconds: number): string {
 
 export default function AudioPlayer({
   text,
+  title = 'Audio Summary',
   className,
   compact = false,
   docked = false,
+  autoPlay = false,
+  autoPlayKey,
   onClose,
   onPlayStart,
   onPlayEnd,
@@ -111,14 +129,18 @@ export default function AudioPlayer({
   const [activeSetting, setActiveSetting] = useState<'voice' | 'speed' | null>(null);
   const [voice, setVoice] = useState<TTSVoice>('charon');
   const [speed, setSpeed] = useState(1.0);
+  const [dragConstraints, setDragConstraints] = useState({ top: 0, left: 0, right: 0, bottom: 0 });
 
   // Refs
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const progressRef = useRef<HTMLDivElement>(null);
+  const floatingPlayerRef = useRef<HTMLDivElement | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const resumeTimeRef = useRef<number | null>(null);
   const isChangingVoiceRef = useRef(false);
   const rafRef = useRef<number | null>(null);
+  const lastAutoPlayKeyRef = useRef<string | number | undefined>(undefined);
+  const dragControls = useDragControls();
 
   // Load user preferences on mount
   useEffect(() => {
@@ -242,6 +264,10 @@ export default function AudioPlayer({
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.src = '';
+        if (globalAudioInstance === audioRef.current) {
+          globalAudioInstance = null;
+          globalStopCallback = null;
+        }
       }
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -253,36 +279,69 @@ export default function AudioPlayer({
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
+      if (globalAudioInstance === audioRef.current) {
+        globalAudioInstance = null;
+        globalStopCallback = null;
+      }
     }
     setIsPlaying(false);
     setCurrentTime(0);
     onPlayEnd?.();
   }, [onPlayEnd]);
 
+  const seekBySeconds = useCallback(
+    (deltaSeconds: number) => {
+      if (!audioRef.current) {
+        return;
+      }
+
+      const audio = audioRef.current;
+      const nextTime = audio.currentTime + deltaSeconds;
+      const maxTime =
+        Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : Number.POSITIVE_INFINITY;
+      const clamped = Math.max(0, Math.min(nextTime, maxTime));
+
+      audio.currentTime = clamped;
+      setCurrentTime(clamped);
+    },
+    []
+  );
+
   // Media Session API Integration
   useEffect(() => {
     if ('mediaSession' in navigator) {
+      const setActionHandlerSafely = (
+        action: MediaSessionAction,
+        handler: MediaSessionActionHandler | null
+      ) => {
+        try {
+          navigator.mediaSession.setActionHandler(action, handler);
+        } catch {
+          // Some browsers do not support every action type.
+        }
+      };
+
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: 'Audio Summary',
+        title,
         artist: 'Thynkr AI',
         artwork: [
             { src: '/brand/brain-dark.png', sizes: '512x512', type: 'image/png' }
         ]
       });
 
-      navigator.mediaSession.setActionHandler('play', () => {
+      setActionHandlerSafely('play', () => {
         if (audioRef.current) {
             audioRef.current.play();
             setIsPlaying(true);
         }
       });
-      navigator.mediaSession.setActionHandler('pause', () => {
+      setActionHandlerSafely('pause', () => {
         if (audioRef.current) {
             audioRef.current.pause();
             setIsPlaying(false);
         }
       });
-      navigator.mediaSession.setActionHandler('seekto', (details) => {
+      setActionHandlerSafely('seekto', (details) => {
         if (audioRef.current && details.seekTime !== undefined) {
              const dur = audioRef.current.duration;
              if (dur && Number.isFinite(dur)) {
@@ -292,11 +351,21 @@ export default function AudioPlayer({
              }
         }
       });
-      navigator.mediaSession.setActionHandler('stop', () => {
+      setActionHandlerSafely('stop', () => {
          stop();
       });
+
+      setActionHandlerSafely('seekbackward', (details) => {
+        const jump = typeof details.seekOffset === 'number' ? details.seekOffset : 15;
+        seekBySeconds(-jump);
+      });
+
+      setActionHandlerSafely('seekforward', (details) => {
+        const jump = typeof details.seekOffset === 'number' ? details.seekOffset : 15;
+        seekBySeconds(jump);
+      });
     }
-  }, [stop, setIsPlaying]);
+  }, [seekBySeconds, setIsPlaying, stop, title]);
 
   const play = useCallback(async () => {
     if (!text?.trim()) {
@@ -454,184 +523,308 @@ export default function AudioPlayer({
     }
   }, [voice]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Auto-start playback when a new request is opened.
+  useEffect(() => {
+    if (!autoPlay) {
+      return;
+    }
+
+    if (autoPlayKey === undefined) {
+      return;
+    }
+
+    if (lastAutoPlayKeyRef.current === autoPlayKey) {
+      return;
+    }
+    lastAutoPlayKeyRef.current = autoPlayKey;
+
+    setCurrentTime(0);
+    setDuration(0);
+    setActiveSetting(null);
+    void play();
+  }, [autoPlay, autoPlayKey, play]);
+
+  // Keep drag area inside viewport while still allowing free movement.
+  useEffect(() => {
+    if (!docked) {
+      return;
+    }
+
+    const updateConstraints = () => {
+      const margin = 16;
+      const width = floatingPlayerRef.current?.offsetWidth ?? 360;
+      const height = floatingPlayerRef.current?.offsetHeight ?? 280;
+
+      const horizontalTravel = Math.max(0, window.innerWidth - width - margin * 2);
+      const verticalTravel = Math.max(0, window.innerHeight - height - margin * 2);
+
+      setDragConstraints({
+        left: -horizontalTravel,
+        right: 0,
+        top: -verticalTravel,
+        bottom: 0,
+      });
+    };
+
+    updateConstraints();
+    window.addEventListener('resize', updateConstraints, { passive: true });
+    window.addEventListener('orientationchange', updateConstraints, { passive: true });
+
+    return () => {
+      window.removeEventListener('resize', updateConstraints);
+      window.removeEventListener('orientationchange', updateConstraints);
+    };
+  }, [activeSetting, docked, text]);
+
   // Use real duration (always available with Content-Length responses)
   const progress = (duration > 0 && Number.isFinite(duration)) 
     ? Math.min((currentTime / duration) * 100, 100) 
     : 0;
 
+  const selectedVoiceLabel = TTS_VOICES.find((v) => v.id === voice)?.name || voice;
+
   // --- DOCKED/FLOATING PLAYER LAYOUT ---
   if (docked) {
     const playerContent = (
       <motion.div
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 100, opacity: 0 }}
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-t border-brand-200/50 dark:border-gray-700 shadow-[0_-8px_32px_rgba(0,0,0,0.1)]"
+        initial={{ opacity: 0, y: 24, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 16, scale: 0.96 }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
+        drag
+        dragControls={dragControls}
+        dragListener={false}
+        dragMomentum={false}
+        dragElastic={0.08}
+        dragConstraints={dragConstraints}
+        className="fixed bottom-4 right-4 z-[90] w-[min(92vw,24rem)] sm:w-[23rem] touch-none"
       >
-        {/* Progress Bar (Top Edge) - REMOVED to avoid duplicate refs and confusion */}
-        
-        <div className="max-w-7xl mx-auto px-4 py-3 md:py-4">
-          <div className="flex items-center justify-between gap-4">
-            
-            {/* Play/Pause Button - Prominent */}
-            <button
-              onClick={togglePlay}
-              disabled={isLoading}
-              className="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-full bg-gradient-to-r from-pink-600 to-fuchsia-600 dark:from-cyan-500 dark:to-violet-600 text-white shadow-lg hover:shadow-pink-500/25 dark:hover:shadow-cyan-500/25 hover:scale-105 transition-all disabled:opacity-50 disabled:scale-100"
-            >
-              {isLoading ? (
-                <Loader2 className="w-6 h-6 animate-spin" />
-              ) : isPlaying ? (
-                <Pause className="w-6 h-6 fill-current" />
-              ) : (
-                <Play className="w-6 h-6 fill-current ml-1" />
-              )}
-            </button>
-
-            {/* Main Content Area: Title & Progress */}
-            <div className="flex-1 flex flex-col justify-center gap-1 min-w-0">
-               <div className="flex justify-between items-baseline">
-                  <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                    {isLoading ? 'Generating Audio...' : 'Audio Summary'}
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-                    {formatTime(currentTime)} / {formatTime(duration)}
-                  </div>
-               </div>
-
-               {/* Seek Bar - Smooth CSS transitions */}
-               <div
-                  ref={progressRef}
-                  onClick={handleProgressClick}
-                  className="relative h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer group overflow-hidden"
-                >
-                  {/* Loading shimmer when generating audio */}
-                  {isLoading && (
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-fuchsia-400/40 dark:via-cyan-400/40 to-transparent animate-shimmer" />
-                  )}
-                  <div
-                    className="absolute h-full rounded-full bg-gradient-to-r from-pink-500 to-fuchsia-600 dark:from-cyan-400 dark:to-violet-500 transition-[width] duration-150 ease-linear"
-                    style={{ width: `${progress}%` }}
-                  />
-                  {/* Seek Handle */}
-                  <div 
-                     className="absolute top-1/2 -mt-2 w-4 h-4 bg-white dark:bg-gray-200 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-                     style={{ left: `calc(${progress}% - 8px)` }}
-                  />
-               </div>
+        <div
+          ref={floatingPlayerRef}
+          className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 shadow-2xl backdrop-blur-md dark:border-slate-700/80 dark:bg-slate-900/95"
+        >
+          <div className="flex items-center justify-between gap-2 border-b border-slate-200/70 px-3 py-2 dark:border-slate-700/70">
+            <div className="min-w-0 flex-1 flex items-center gap-1.5">
+              <button
+                type="button"
+                onPointerDown={(event) => dragControls.start(event)}
+                className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 cursor-grab active:cursor-grabbing"
+                title="Drag player"
+              >
+                <GripVertical className="h-4 w-4" />
+              </button>
+              <div className="min-w-0">
+                <p className="truncate text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  {isLoading ? 'Generating audio...' : title}
+                </p>
+                <p className="truncate text-[11px] text-slate-500 dark:text-slate-400">{selectedVoiceLabel} voice</p>
+              </div>
             </div>
-
-
-            {/* Right: Controls & Settings */}
-            <div className="flex items-center gap-4 pl-4 border-l border-gray-200 dark:border-gray-700">
-               {/* Voice Settings */}
-               <div className="hidden md:flex flex-col items-center">
-                  <span className="text-[10px] uppercase text-gray-400 font-bold mb-0.5 tracking-wider">Voice</span>
-                  <button 
-                    onClick={() => setActiveSetting(activeSetting === 'voice' ? null : 'voice')}
-                    className={clsx(
-                      "px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors", 
-                      activeSetting === 'voice' 
-                        ? "bg-fuchsia-100 dark:bg-fuchsia-900/40 text-fuchsia-700 dark:text-fuchsia-300 ring-2 ring-fuchsia-500 ring-opacity-50" 
-                        : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-                    )}
-                  >
-                    {TTS_VOICES.find(v => v.id === voice)?.name || voice}
-                  </button>
-               </div>
-
-               {/* Speed Settings */}
-               <div className="hidden md:flex flex-col items-center">
-                  <span className="text-[10px] uppercase text-gray-400 font-bold mb-0.5 tracking-wider">Speed</span>
-                  <button 
-                     onClick={() => setActiveSetting(activeSetting === 'speed' ? null : 'speed')}
-                     className={clsx(
-                      "px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors", 
-                      activeSetting === 'speed' 
-                        ? "bg-fuchsia-100 dark:bg-fuchsia-900/40 text-fuchsia-700 dark:text-fuchsia-300 ring-2 ring-fuchsia-500 ring-opacity-50" 
-                        : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-                     )}
-                  >
-                     {speed}x
-                  </button>
-               </div>
-              
-               {/* Close */}
-               {onClose && (
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setActiveSetting(activeSetting ? null : 'voice')}
+                className={clsx(
+                  'inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
+                  activeSetting
+                    ? 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300'
+                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
+                )}
+                title="Open audio settings"
+              >
+                <Settings className="h-4 w-4" />
+              </button>
+              {onClose && (
                 <button
+                  type="button"
                   onClick={() => {
-                   stop();
-                   onClose();
+                    stop();
+                    onClose();
                   }}
-                  className="p-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors ml-2"
-                  title="Close Player"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-950/40 dark:hover:text-red-300"
+                  title="Close player"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="h-4 w-4" />
                 </button>
               )}
             </div>
           </div>
 
-          {/* Expanded Settings Panel (for Docked Mode) */}
+          <div className="px-3 pt-3">
+            <div
+              ref={progressRef}
+              onClick={handleProgressClick}
+              className="relative h-2 w-full cursor-pointer overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"
+            >
+              {isLoading && (
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-fuchsia-400/40 to-transparent animate-shimmer dark:via-cyan-400/40" />
+              )}
+              <div
+                className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-pink-500 to-fuchsia-500 transition-[width] duration-150 ease-linear dark:from-cyan-500 dark:to-violet-500"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <div className="mt-1.5 flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-slate-400">
+              <span>{formatTime(currentTime)}</span>
+              <span>{formatTime(duration)}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between px-3 pb-2 pt-3">
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => seekBySeconds(-15)}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                title="Back 15 seconds"
+              >
+                <SkipBack className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={togglePlay}
+                disabled={isLoading}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-pink-600 to-fuchsia-600 text-white shadow-md transition-all hover:scale-105 disabled:opacity-60 disabled:hover:scale-100 dark:from-cyan-500 dark:to-violet-600"
+                title={isPlaying ? 'Pause' : 'Play'}
+              >
+                {isLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : isPlaying ? (
+                  <Pause className="h-5 w-5 fill-current" />
+                ) : (
+                  <Play className="h-5 w-5 fill-current ml-0.5" />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => seekBySeconds(15)}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                title="Forward 15 seconds"
+              >
+                <SkipForward className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={stop}
+                disabled={!isPlaying && currentTime <= 0}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition-colors hover:bg-slate-200 disabled:opacity-40 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                title="Stop"
+              >
+                <Square className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setActiveSetting(activeSetting === 'speed' ? null : 'speed')}
+                className={clsx(
+                  'rounded-lg px-2 py-1 text-xs font-semibold transition-colors',
+                  activeSetting === 'speed'
+                    ? 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+                )}
+                title="Playback speed"
+              >
+                {speed}x
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveSetting(activeSetting === 'voice' ? null : 'voice')}
+                className={clsx(
+                  'rounded-lg px-2 py-1 text-xs font-semibold transition-colors',
+                  activeSetting === 'voice'
+                    ? 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+                )}
+                title="Select voice"
+              >
+                {selectedVoiceLabel}
+              </button>
+            </div>
+          </div>
+
+          <div className="px-3 pb-3">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={toggleMute}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                title={isMuted || volume === 0 ? 'Unmute' : 'Mute'}
+              >
+                {isMuted || volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+              </button>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={isMuted ? 0 : volume}
+                onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-fuchsia-500 dark:bg-slate-700 dark:accent-cyan-500"
+                aria-label="Volume"
+              />
+            </div>
+          </div>
+
           <AnimatePresence>
             {activeSetting && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden border-t border-gray-100 dark:border-gray-800 mt-4 md:absolute md:bottom-full md:right-4 md:w-80 md:bg-white md:dark:bg-gray-900 md:rounded-2xl md:shadow-2xl md:border md:border-gray-200 md:dark:border-gray-700 md:mb-4"
+                className="overflow-hidden border-t border-slate-200/70 px-3 pb-3 pt-3 dark:border-slate-700/70"
               >
-                <div className="p-4 space-y-4">
-                    <div className="flex justify-between items-center md:hidden">
-                       <h3 className="text-sm font-semibold capitalize">{activeSetting} Settings</h3>
-                       <button onClick={() => setActiveSetting(null)}><X className="w-4 h-4" /></button>
+                {activeSetting === 'voice' && (
+                  <div>
+                    <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      Voice
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {TTS_VOICES.map((v) => (
+                        <button
+                          key={v.id}
+                          type="button"
+                          onClick={() => handleVoiceChange(v.id as TTSVoice)}
+                          className={clsx(
+                            'rounded-lg border px-2 py-2 text-left text-xs transition-all',
+                            voice === v.id
+                              ? 'border-fuchsia-500 bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-900/20 dark:text-fuchsia-300'
+                              : 'border-transparent bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                          )}
+                        >
+                          <span className="block font-semibold">{v.name}</span>
+                          <span className="block truncate text-[10px] opacity-80">{v.description}</span>
+                        </button>
+                      ))}
                     </div>
+                  </div>
+                )}
 
-                    {activeSetting === 'voice' && (
-                      <div>
-                        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">Voice</label>
-                        <div className="grid grid-cols-2 gap-2">
-                            {TTS_VOICES.map((v) => (
-                            <button
-                                key={v.id}
-                                onClick={() => handleVoiceChange(v.id as TTSVoice)}
-                                className={clsx(
-                                'px-2 py-2 rounded-lg text-xs font-medium transition-all border text-left',
-                                voice === v.id
-                                    ? 'border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-900/20 text-fuchsia-700 dark:text-fuchsia-300'
-                                    : 'border-transparent bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100'
-                                )}
-                            >
-                                <span className="block font-bold">{v.name}</span>
-                                <span className="text-[10px] opacity-75 truncate block">{v.description}</span>
-                            </button>
-                            ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {activeSetting === 'speed' && (
-                      <div>
-                      <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">Speed: {speed}x</label>
-                      <div className="grid grid-cols-4 gap-2">
-                          {[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => handleSpeedChange(s)}
-                              className={clsx(
-                                'px-2 py-2 rounded-lg text-xs font-medium transition-all border',
-                                Math.abs(speed - s) < 0.01
-                                  ? 'border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-900/20 text-fuchsia-700 dark:text-fuchsia-300 shadow-sm'
-                                  : 'border-transparent bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                              )}
-                            >
-                              {s === 1 ? 'Normal' : `${s}x`}
-                            </button>
-                          ))}
-                      </div>
-                      </div>
-                    )}
-                </div>
+                {activeSetting === 'speed' && (
+                  <div>
+                    <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      Speed: {speed}x
+                    </label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => handleSpeedChange(s)}
+                          className={clsx(
+                            'rounded-lg border px-2 py-2 text-xs font-medium transition-all',
+                            Math.abs(speed - s) < 0.01
+                              ? 'border-fuchsia-500 bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-900/20 dark:text-fuchsia-300'
+                              : 'border-transparent bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                          )}
+                        >
+                          {s === 1 ? 'Normal' : `${s}x`}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

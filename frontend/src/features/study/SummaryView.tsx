@@ -1,11 +1,9 @@
-import { useCallback, useMemo, useState } from 'react';
-import { RefreshCw, AlertTriangle, Loader2, Square, Volume2 } from 'lucide-react';
+import { useCallback, useMemo } from 'react';
+import { RefreshCw, AlertTriangle, Volume2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useTTS } from '@/hooks/useTTS';
+import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import { sanitizeTextForTTS } from '@/utils/ttsText';
-
-const SUMMARY_TTS_ITEM_ID = 'summary-main';
 
 interface SummaryViewProps {
   content: string;
@@ -29,38 +27,25 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
     return Math.max(1, Math.round(words / 180));
   }, [normalizedContent]);
 
-  const [playingItem, setPlayingItem] = useState<string | null>(null);
   const summarySpeechText = useMemo(() => sanitizeTextForTTS(normalizedContent), [normalizedContent]);
+  const { openAudioPlayer, closeAudioPlayer } = useAudioPlayer();
 
-  const {
-    isPlaying,
-    isLoading: isTTSLoading,
-    play: playTTS,
-    stop: stopTTS,
-  } = useTTS({
-    onPlayEnd: () => setPlayingItem(null),
-  });
-
-  const handleSummaryAudioToggle = useCallback(async () => {
-    if (playingItem === SUMMARY_TTS_ITEM_ID && isPlaying) {
-      stopTTS();
-      setPlayingItem(null);
-      return;
-    }
-
+  const handleSummaryAudioToggle = useCallback(() => {
     if (!summarySpeechText) {
       return;
     }
 
-    setPlayingItem(SUMMARY_TTS_ITEM_ID);
-    await playTTS(summarySpeechText);
-  }, [isPlaying, playTTS, playingItem, stopTTS, summarySpeechText]);
+    openAudioPlayer({
+      text: summarySpeechText,
+      title: 'Summary Audio',
+      autoPlay: true,
+    });
+  }, [openAudioPlayer, summarySpeechText]);
 
   const handleRegenerateClick = useCallback(() => {
-    stopTTS();
-    setPlayingItem(null);
+    closeAudioPlayer();
     onRegenerate?.();
-  }, [onRegenerate, stopTTS]);
+  }, [closeAudioPlayer, onRegenerate]);
 
   // Show error alert if generation failed
   if (error) {
@@ -104,18 +89,12 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
             <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={handleSummaryAudioToggle}
-                disabled={isTTSLoading || !summarySpeechText}
+                disabled={!summarySpeechText}
                 className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 dark:hover:text-emerald-200 bg-emerald-50 dark:bg-emerald-500/15 hover:bg-emerald-100 dark:hover:bg-emerald-500/25 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                title={playingItem === SUMMARY_TTS_ITEM_ID && isPlaying ? 'Stop audio' : 'Read summary aloud'}
+                title="Open audio player"
               >
-                {isTTSLoading && playingItem === SUMMARY_TTS_ITEM_ID ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : playingItem === SUMMARY_TTS_ITEM_ID && isPlaying ? (
-                  <Square className="w-4 h-4" />
-                ) : (
-                  <Volume2 className="w-4 h-4" />
-                )}
-                {playingItem === SUMMARY_TTS_ITEM_ID && isPlaying ? 'Stop Audio' : 'Listen'}
+                <Volume2 className="w-4 h-4" />
+                Listen
               </button>
 
               {onRegenerate && (
