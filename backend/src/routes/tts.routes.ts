@@ -115,10 +115,10 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation: strin
 
 // Prefer a single synthesis request for normal payload sizes so the browser gets
 // reliable duration/progress metadata from one complete MP3 file.
-const SINGLE_REQUEST_MAX_CHARS = 5000;
+const SINGLE_REQUEST_MAX_CHARS = 1800;
 // For longer payloads, split into provider-safe chunks and stitch server-side.
-const CHUNK_TARGET_SIZE = 4000;
-const CHUNK_MIN_SIZE = 1000;
+const CHUNK_TARGET_SIZE = 1800;
+const CHUNK_MIN_SIZE = 600;
 
 /**
  * Hard split overly long sentence-like content by words when punctuation
@@ -377,11 +377,22 @@ async function generateOrGetCached(text: string, voice: Voice): Promise<Buffer> 
     return cached;
   }
 
-  // 2. For normal texts, generate in a single API call for stable metadata.
+  // 2. For short texts, attempt single-call synthesis first.
   if (text.length <= SINGLE_REQUEST_MAX_CHARS) {
-    const buffer = await generateGoogleTTS(text, voice);
-    cacheAudio(hash, buffer).catch(() => {});
-    return buffer;
+    try {
+      const buffer = await generateGoogleTTS(text, voice);
+      cacheAudio(hash, buffer).catch(() => {});
+      return buffer;
+    } catch (error: any) {
+      logger.warn(
+        {
+          voice,
+          textLength: text.length,
+          error: error?.message,
+        },
+        'Single-call TTS failed; retrying with chunked synthesis'
+      );
+    }
   }
 
   // 3. For longer texts, split into chunks and generate ALL in parallel
