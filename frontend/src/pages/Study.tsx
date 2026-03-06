@@ -614,7 +614,7 @@ export default function Study() {
         onClose={() => setShowUploadModal(false)}
         onUploadFiles={handleUploadFiles}
         onUploadRecording={handleUploadRecording}
-        enableRecordingTab={false}
+        enableRecordingTab={true}
         onUploadYouTube={handleUploadYouTube}
         onUploadLink={handleUploadLink}
         isUploading={uploadMutation.isPending || recordingUploadMutation.isPending}
