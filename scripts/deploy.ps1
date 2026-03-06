@@ -20,6 +20,13 @@ $DOCKER_USER = "nukebyluke"
 $PROJECT_ROOT = Split-Path -Parent $PSScriptRoot
 $TIMESTAMP = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
 
+# Optional local-only overrides (gitignored).
+# Example: set $SERVER / $DOCKER_USER in scripts/deploy.local.ps1
+$LOCAL_DEPLOY_CONFIG = Join-Path $PSScriptRoot 'deploy.local.ps1'
+if (Test-Path $LOCAL_DEPLOY_CONFIG) {
+    . $LOCAL_DEPLOY_CONFIG
+}
+
 # Color output functions
 function Write-Success { 
     param($Message) 
