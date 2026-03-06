@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { memo, useCallback, useState, type KeyboardEvent } from 'react';
+import { memo, useCallback, useMemo, useState, type KeyboardEvent } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
@@ -12,7 +12,12 @@ import {
   AlertTriangle,
   RefreshCw,
   Check,
+  Loader2,
+  Square,
+  Volume2,
 } from 'lucide-react';
+import { useTTS } from '@/hooks/useTTS';
+import { sanitizeTextForTTS } from '@/utils/ttsText';
 
 interface Flashcard {
   id: string;
@@ -68,11 +73,47 @@ const FlashcardViewer = memo(function FlashcardViewer({
   const [shuffledCards, setShuffledCards] = useState<Flashcard[] | null>(null);
   const [direction, setDirection] = useState(0);
   const [masteredCards, setMasteredCards] = useState<Set<string>>(new Set());
+  const [playingItem, setPlayingItem] = useState<string | null>(null);
+
+  const {
+    isPlaying,
+    isLoading: isTTSLoading,
+    play: playTTS,
+    stop: stopTTS,
+  } = useTTS({
+    onPlayEnd: () => setPlayingItem(null),
+  });
 
   const displayCards = shuffledCards ?? cards;
   const currentCard = displayCards[currentIndex];
   const progressPercentage =
     displayCards.length > 0 ? (masteredCards.size / displayCards.length) * 100 : 0;
+  const currentCardItemId = currentCard ? `${currentCard.id}-${isFlipped ? 'answer' : 'prompt'}` : null;
+  const currentCardSpeechText = useMemo(() => {
+    if (!currentCard) return '';
+    const sideText = isFlipped ? currentCard.back : currentCard.front;
+    const sideLabel = isFlipped ? 'Answer' : 'Prompt';
+    return sanitizeTextForTTS(`${sideLabel}. ${sideText}`);
+  }, [currentCard, isFlipped]);
+
+  const stopCardAudio = useCallback(() => {
+    stopTTS();
+    setPlayingItem(null);
+  }, [stopTTS]);
+
+  const handleCardAudioToggle = useCallback(async () => {
+    if (!currentCardItemId || !currentCardSpeechText) {
+      return;
+    }
+
+    if (playingItem === currentCardItemId && isPlaying) {
+      stopCardAudio();
+      return;
+    }
+
+    setPlayingItem(currentCardItemId);
+    await playTTS(currentCardSpeechText);
+  }, [currentCardItemId, currentCardSpeechText, isPlaying, playTTS, playingItem, stopCardAudio]);
 
   if (error) {
     return (
@@ -101,39 +142,44 @@ const FlashcardViewer = memo(function FlashcardViewer({
   }
 
   const handleNext = useCallback(() => {
+    stopCardAudio();
     if (currentIndex < displayCards.length - 1) {
       setDirection(1);
       setCurrentIndex(currentIndex + 1);
       setIsFlipped(false);
     }
-  }, [currentIndex, displayCards.length]);
+  }, [currentIndex, displayCards.length, stopCardAudio]);
 
   const handlePrevious = useCallback(() => {
+    stopCardAudio();
     if (currentIndex > 0) {
       setDirection(-1);
       setCurrentIndex(currentIndex - 1);
       setIsFlipped(false);
     }
-  }, [currentIndex]);
+  }, [currentIndex, stopCardAudio]);
 
   const handleFlip = useCallback(() => {
+    stopCardAudio();
     setIsFlipped((prev) => !prev);
-  }, []);
+  }, [stopCardAudio]);
 
   const handleShuffle = useCallback(() => {
+    stopCardAudio();
     const shuffled = [...cards].sort(() => Math.random() - 0.5);
     setShuffledCards(shuffled);
     setCurrentIndex(0);
     setIsFlipped(false);
     setMasteredCards(new Set());
-  }, [cards]);
+  }, [cards, stopCardAudio]);
 
   const handleReset = useCallback(() => {
+    stopCardAudio();
     setShuffledCards(null);
     setCurrentIndex(0);
     setIsFlipped(false);
     setMasteredCards(new Set());
-  }, []);
+  }, [stopCardAudio]);
 
   const handleMarkMastered = useCallback(() => {
     if (!currentCard) return;
@@ -213,6 +259,24 @@ const FlashcardViewer = memo(function FlashcardViewer({
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={handleCardAudioToggle}
+              disabled={isTTSLoading || !currentCardSpeechText}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-cyan-700 dark:text-cyan-300 bg-cyan-50 hover:bg-cyan-100 dark:bg-cyan-500/15 dark:hover:bg-cyan-500/25 rounded-xl transition-colors disabled:opacity-50"
+              title={playingItem === currentCardItemId && isPlaying ? 'Stop audio' : 'Read current card aloud'}
+            >
+              {isTTSLoading && playingItem === currentCardItemId ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : playingItem === currentCardItemId && isPlaying ? (
+                <Square className="w-3.5 h-3.5" />
+              ) : (
+                <Volume2 className="w-3.5 h-3.5" />
+              )}
+              {playingItem === currentCardItemId && isPlaying ? 'Stop Audio' : 'Listen Card'}
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleShuffle}
               className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-cyan-700 dark:text-cyan-300 bg-cyan-50 hover:bg-cyan-100 dark:bg-cyan-500/15 dark:hover:bg-cyan-500/25 rounded-xl transition-colors"
             >
@@ -275,11 +339,7 @@ const FlashcardViewer = memo(function FlashcardViewer({
             <motion.div
               animate={{ rotateY: isFlipped ? 180 : 0 }}
               transition={flipTransition}
-              style={{
-                transformStyle: 'preserve-3d',
-                willChange: 'transform',
-              }}
-              className="w-full h-full"
+              className="w-full h-full [transform-style:preserve-3d] [will-change:transform]"
             >
               <div
                 className="absolute w-full h-full bg-gradient-to-br from-amber-50 via-white to-cyan-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 rounded-3xl shadow-2xl border-2 border-slate-200/70 dark:border-white/10 flex items-center justify-center p-8 sm:p-12 overflow-y-auto"
@@ -461,6 +521,7 @@ const FlashcardViewer = memo(function FlashcardViewer({
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {
+                    stopCardAudio();
                     setDirection(index > currentIndex ? 1 : -1);
                     setCurrentIndex(index);
                     setIsFlipped(false);
@@ -477,6 +538,7 @@ const FlashcardViewer = memo(function FlashcardViewer({
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
+                    stopCardAudio();
                     setDirection(-1);
                     setCurrentIndex(Math.max(0, currentIndex - 5));
                     setIsFlipped(false);
@@ -492,6 +554,7 @@ const FlashcardViewer = memo(function FlashcardViewer({
                 </span>
                 <button
                   onClick={() => {
+                    stopCardAudio();
                     setDirection(1);
                     setCurrentIndex(Math.min(displayCards.length - 1, currentIndex + 5));
                     setIsFlipped(false);

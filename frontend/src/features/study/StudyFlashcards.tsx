@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft,
@@ -9,7 +9,12 @@ import {
   Shuffle,
   Sparkles,
   RefreshCw,
+  Loader2,
+  Square,
+  Volume2,
 } from 'lucide-react';
+import { useTTS } from '@/hooks/useTTS';
+import { sanitizeTextForTTS } from '@/utils/ttsText';
 
 interface Flashcard {
   front: string;
@@ -37,14 +42,53 @@ export default function StudyFlashcards({
   const [isFlipped, setIsFlipped] = useState(false);
   const [knownCards, setKnownCards] = useState<Set<number>>(new Set());
   const [shuffledIndices, setShuffledIndices] = useState<number[]>(data.cards.map((_, i) => i));
+  const [playingItem, setPlayingItem] = useState<string | null>(null);
+
+  const {
+    isPlaying,
+    isLoading: isTTSLoading,
+    play: playTTS,
+    stop: stopTTS,
+  } = useTTS({
+    onPlayEnd: () => setPlayingItem(null),
+  });
 
   const currentCard = data.cards[shuffledIndices[currentIndex]];
   const totalCards = data.cards.length;
   const knownCount = knownCards.size;
   const remainingCount = totalCards - knownCount;
+  const currentCardItemId = currentCard
+    ? `study-flashcard-${shuffledIndices[currentIndex]}-${isFlipped ? 'answer' : 'question'}`
+    : null;
+  const currentCardSpeechText = useMemo(() => {
+    if (!currentCard) return '';
+    const sideLabel = isFlipped ? 'Answer' : 'Question';
+    const sideText = isFlipped ? currentCard.back : currentCard.front;
+    return sanitizeTextForTTS(`${sideLabel}. ${sideText}`);
+  }, [currentCard, isFlipped]);
+
+  const stopCardAudio = useCallback(() => {
+    stopTTS();
+    setPlayingItem(null);
+  }, [stopTTS]);
+
+  const handleCardAudioToggle = useCallback(async () => {
+    if (!currentCardItemId || !currentCardSpeechText) {
+      return;
+    }
+
+    if (playingItem === currentCardItemId && isPlaying) {
+      stopCardAudio();
+      return;
+    }
+
+    setPlayingItem(currentCardItemId);
+    await playTTS(currentCardSpeechText);
+  }, [currentCardItemId, currentCardSpeechText, isPlaying, playTTS, playingItem, stopCardAudio]);
 
   const goToCard = (index: number) => {
     if (index >= 0 && index < totalCards) {
+      stopCardAudio();
       setCurrentIndex(index);
       setIsFlipped(false);
     }
@@ -53,7 +97,10 @@ export default function StudyFlashcards({
   const nextCard = () => goToCard(currentIndex + 1);
   const prevCard = () => goToCard(currentIndex - 1);
 
-  const toggleFlip = () => setIsFlipped(!isFlipped);
+  const toggleFlip = () => {
+    stopCardAudio();
+    setIsFlipped(!isFlipped);
+  };
 
   const markAsKnown = () => {
     setKnownCards((prev) => new Set([...prev, shuffledIndices[currentIndex]]));
@@ -74,6 +121,7 @@ export default function StudyFlashcards({
   };
 
   const shuffleCards = useCallback(() => {
+    stopCardAudio();
     const indices = [...shuffledIndices];
     for (let i = indices.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -82,13 +130,19 @@ export default function StudyFlashcards({
     setShuffledIndices(indices);
     setCurrentIndex(0);
     setIsFlipped(false);
-  }, [shuffledIndices]);
+  }, [shuffledIndices, stopCardAudio]);
 
   const resetProgress = () => {
+    stopCardAudio();
     setKnownCards(new Set());
     setCurrentIndex(0);
     setIsFlipped(false);
   };
+
+  const handleRegenerate = useCallback(() => {
+    stopCardAudio();
+    onRegenerate?.();
+  }, [onRegenerate, stopCardAudio]);
 
   return (
     <div className="flex flex-col h-full">
@@ -105,6 +159,20 @@ export default function StudyFlashcards({
         </div>
         <div className="flex items-center gap-2">
           <button
+            onClick={handleCardAudioToggle}
+            disabled={isTTSLoading || !currentCardSpeechText}
+            className="p-2 text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 rounded-lg hover:bg-cyan-50 dark:hover:bg-cyan-900/30 disabled:opacity-50"
+            title={playingItem === currentCardItemId && isPlaying ? 'Stop audio' : 'Read current card aloud'}
+          >
+            {isTTSLoading && playingItem === currentCardItemId ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : playingItem === currentCardItemId && isPlaying ? (
+              <Square className="h-4 w-4" />
+            ) : (
+              <Volume2 className="h-4 w-4" />
+            )}
+          </button>
+          <button
             onClick={shuffleCards}
             className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
             title="Shuffle cards"
@@ -120,7 +188,7 @@ export default function StudyFlashcards({
           </button>
           {onRegenerate && (
             <button
-              onClick={onRegenerate}
+              onClick={handleRegenerate}
               disabled={isRegenerating}
               className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
               title="Regenerate flashcards"

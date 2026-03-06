@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { RefreshCw, AlertTriangle } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Loader2, Square, Volume2 } from 'lucide-react';
+import { useTTS } from '@/hooks/useTTS';
+import { sanitizeTextForTTS } from '@/utils/ttsText';
 
 interface NotesViewProps {
   keyPoints: string[];
@@ -84,13 +86,48 @@ export default function NotesView({
     return cards;
   }, [detailed, keyPoints]);
 
+  const [playingItem, setPlayingItem] = useState<string | null>(null);
+  const {
+    isPlaying,
+    isLoading: isTTSLoading,
+    play: playTTS,
+    stop: stopTTS,
+  } = useTTS({
+    onPlayEnd: () => setPlayingItem(null),
+  });
+
+  const handleNoteAudioToggle = useCallback(
+    async (itemId: string, text: string) => {
+      if (playingItem === itemId && isPlaying) {
+        stopTTS();
+        setPlayingItem(null);
+        return;
+      }
+
+      const cleanText = sanitizeTextForTTS(text);
+      if (!cleanText) {
+        return;
+      }
+
+      setPlayingItem(itemId);
+      await playTTS(cleanText);
+    },
+    [isPlaying, playTTS, playingItem, stopTTS]
+  );
+
+  const handleRegenerateClick = useCallback(() => {
+    stopTTS();
+    setPlayingItem(null);
+    onRegenerate?.();
+  }, [onRegenerate, stopTTS]);
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Regenerate Button */}
       {onRegenerate && (
         <div className="flex justify-end">
           <button
-            onClick={onRegenerate}
+            onClick={handleRegenerateClick}
             disabled={isRegenerating}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-xl transition-all duration-150 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             title="Regenerate notes with latest AI"
@@ -114,7 +151,24 @@ export default function NotesView({
               key={`${card.title}-${index}`}
               className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-sm"
             >
-              <h4 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-white mb-5">{card.title}</h4>
+              <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
+                <h4 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-white">{card.title}</h4>
+                <button
+                  onClick={() => handleNoteAudioToggle(`note-card-${index}`, `${card.title}. ${card.content}`)}
+                  disabled={isTTSLoading}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-cyan-700 dark:text-cyan-300 hover:text-cyan-800 dark:hover:text-cyan-200 bg-cyan-50 dark:bg-cyan-500/15 hover:bg-cyan-100 dark:hover:bg-cyan-500/25 rounded-lg transition-colors disabled:opacity-50"
+                  title={playingItem === `note-card-${index}` && isPlaying ? 'Stop audio' : 'Read this note card aloud'}
+                >
+                  {isTTSLoading && playingItem === `note-card-${index}` ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : playingItem === `note-card-${index}` && isPlaying ? (
+                    <Square className="w-3.5 h-3.5" />
+                  ) : (
+                    <Volume2 className="w-3.5 h-3.5" />
+                  )}
+                  {playingItem === `note-card-${index}` && isPlaying ? 'Stop' : 'Listen'}
+                </button>
+              </div>
               <div className="prose prose-slate dark:prose-invert max-w-none">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}

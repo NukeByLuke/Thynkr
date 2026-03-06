@@ -1,7 +1,11 @@
-import { useMemo } from 'react';
-import { RefreshCw, AlertTriangle } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
+import { RefreshCw, AlertTriangle, Loader2, Square, Volume2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { useTTS } from '@/hooks/useTTS';
+import { sanitizeTextForTTS } from '@/utils/ttsText';
+
+const SUMMARY_TTS_ITEM_ID = 'summary-main';
 
 interface SummaryViewProps {
   content: string;
@@ -24,6 +28,39 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
     const words = normalizedContent.trim().split(/\s+/).filter(Boolean).length;
     return Math.max(1, Math.round(words / 180));
   }, [normalizedContent]);
+
+  const [playingItem, setPlayingItem] = useState<string | null>(null);
+  const summarySpeechText = useMemo(() => sanitizeTextForTTS(normalizedContent), [normalizedContent]);
+
+  const {
+    isPlaying,
+    isLoading: isTTSLoading,
+    play: playTTS,
+    stop: stopTTS,
+  } = useTTS({
+    onPlayEnd: () => setPlayingItem(null),
+  });
+
+  const handleSummaryAudioToggle = useCallback(async () => {
+    if (playingItem === SUMMARY_TTS_ITEM_ID && isPlaying) {
+      stopTTS();
+      setPlayingItem(null);
+      return;
+    }
+
+    if (!summarySpeechText) {
+      return;
+    }
+
+    setPlayingItem(SUMMARY_TTS_ITEM_ID);
+    await playTTS(summarySpeechText);
+  }, [isPlaying, playTTS, playingItem, stopTTS, summarySpeechText]);
+
+  const handleRegenerateClick = useCallback(() => {
+    stopTTS();
+    setPlayingItem(null);
+    onRegenerate?.();
+  }, [onRegenerate, stopTTS]);
 
   // Show error alert if generation failed
   if (error) {
@@ -64,17 +101,35 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
               <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">Estimated reading time: {estimatedReadMinutes} min</p>
             </div>
 
-            {onRegenerate && (
+            <div className="flex flex-wrap items-center gap-2">
               <button
-                onClick={onRegenerate}
-                disabled={isRegenerating}
-                className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold text-cyan-700 dark:text-cyan-300 hover:text-cyan-800 dark:hover:text-cyan-200 bg-cyan-50 dark:bg-cyan-500/15 hover:bg-cyan-100 dark:hover:bg-cyan-500/25 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Regenerate summary with latest AI"
+                onClick={handleSummaryAudioToggle}
+                disabled={isTTSLoading || !summarySpeechText}
+                className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 dark:hover:text-emerald-200 bg-emerald-50 dark:bg-emerald-500/15 hover:bg-emerald-100 dark:hover:bg-emerald-500/25 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title={playingItem === SUMMARY_TTS_ITEM_ID && isPlaying ? 'Stop audio' : 'Read summary aloud'}
               >
-                <RefreshCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
-                {isRegenerating ? 'Regenerating...' : 'Regenerate'}
+                {isTTSLoading && playingItem === SUMMARY_TTS_ITEM_ID ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : playingItem === SUMMARY_TTS_ITEM_ID && isPlaying ? (
+                  <Square className="w-4 h-4" />
+                ) : (
+                  <Volume2 className="w-4 h-4" />
+                )}
+                {playingItem === SUMMARY_TTS_ITEM_ID && isPlaying ? 'Stop Audio' : 'Listen'}
               </button>
-            )}
+
+              {onRegenerate && (
+                <button
+                  onClick={handleRegenerateClick}
+                  disabled={isRegenerating}
+                  className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold text-cyan-700 dark:text-cyan-300 hover:text-cyan-800 dark:hover:text-cyan-200 bg-cyan-50 dark:bg-cyan-500/15 hover:bg-cyan-100 dark:hover:bg-cyan-500/25 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Regenerate summary with latest AI"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
+                  {isRegenerating ? 'Regenerating...' : 'Regenerate'}
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none min-w-0 break-words">
