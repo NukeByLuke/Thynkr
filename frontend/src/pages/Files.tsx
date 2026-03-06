@@ -1198,6 +1198,21 @@ export default function Files() {
     setSourceFilter('all');
   };
 
+  useEffect(() => {
+    if (!showFilterPanel) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowFilterPanel(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showFilterPanel]);
+
   const isLoading = loadingFolders || loadingFiles;
 
   return (
@@ -1276,7 +1291,10 @@ export default function Files() {
 
               <button
                 type="button"
-                onClick={() => setShowFilterPanel((prev) => !prev)}
+                onClick={() => {
+                  setContextMenu(null);
+                  setShowFilterPanel((prev) => !prev);
+                }}
                 className={`h-12 min-w-[140px] rounded-xl border px-3 text-sm font-semibold inline-flex items-center justify-center gap-2 transition-colors ${
                   showFilterPanel || hasActiveFilters
                     ? 'border-stone-400 dark:border-slate-400 bg-stone-100 dark:bg-slate-800 text-stone-900 dark:text-stone-100'
@@ -1308,97 +1326,6 @@ export default function Files() {
                 Upload
               </button>
             </div>
-
-            <AnimatePresence>
-              {showFilterPanel && (
-                <motion.div
-                  initial={{ opacity: 0, y: -6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.15 }}
-                  className="rounded-xl border border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900/60 p-4"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <label className="space-y-1.5">
-                      <span className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-500 dark:text-stone-400">
-                        Type
-                      </span>
-                      <select
-                        value={fileTypeFilter}
-                        onChange={(e) => setFileTypeFilter(e.target.value as FileTypeFilter)}
-                        className="w-full h-10 rounded-lg border border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900 px-3 text-sm text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-300 dark:focus:ring-slate-500"
-                      >
-                        <option value="all">All types</option>
-                        <option value="pdf">PDF</option>
-                        <option value="document">Document</option>
-                        <option value="presentation">Presentation</option>
-                        <option value="audio">Audio</option>
-                        <option value="video">Video</option>
-                        <option value="image">Image</option>
-                        <option value="link">Web/YouTube Link</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </label>
-
-                    <label className="space-y-1.5">
-                      <span className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-500 dark:text-stone-400">
-                        Status
-                      </span>
-                      <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value as FileStatusFilter)}
-                        className="w-full h-10 rounded-lg border border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900 px-3 text-sm text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-300 dark:focus:ring-slate-500"
-                      >
-                        <option value="all">All statuses</option>
-                        <option value="COMPLETED">Completed</option>
-                        <option value="PROCESSING">Processing</option>
-                        <option value="UPLOADED">Uploaded</option>
-                        <option value="FAILED">Failed</option>
-                      </select>
-                    </label>
-
-                    <label className="space-y-1.5">
-                      <span className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-500 dark:text-stone-400">
-                        Source
-                      </span>
-                      <select
-                        value={sourceFilter}
-                        onChange={(e) => setSourceFilter(e.target.value as FileSourceFilter)}
-                        className="w-full h-10 rounded-lg border border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900 px-3 text-sm text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-300 dark:focus:ring-slate-500"
-                      >
-                        <option value="all">All sources</option>
-                        <option value="internal">Internal files</option>
-                        <option value="external">External sources</option>
-                        <option value="downloadable">Downloadable only</option>
-                      </select>
-                    </label>
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-xs text-stone-500 dark:text-stone-400">
-                      {filteredFiles.length} matching file{filteredFiles.length === 1 ? '' : 's'}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={clearFileFilters}
-                        disabled={!hasActiveFilters}
-                        className="h-9 px-3 rounded-lg border border-stone-200 dark:border-white/10 text-sm text-stone-600 dark:text-stone-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-stone-50 dark:hover:bg-slate-800 transition-colors"
-                      >
-                        Clear filters
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setShowFilterPanel(false)}
-                        className="h-9 px-3 rounded-lg bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-sm font-semibold hover:opacity-90 transition-opacity"
-                      >
-                        Done
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
 
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <button
@@ -1645,6 +1572,112 @@ export default function Files() {
             </div>
           </div>
         </div>
+
+        <AnimatePresence>
+          {showFilterPanel && (
+            <div
+              className="fixed inset-0 z-[80] bg-black/30 dark:bg-black/60 backdrop-blur-[1px] flex items-start justify-center px-4 pt-24 pb-6"
+              onClick={() => setShowFilterPanel(false)}
+            >
+              <motion.div
+                initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                transition={{ duration: 0.16 }}
+                onClick={(event) => event.stopPropagation()}
+                className="w-full max-w-md rounded-2xl border border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-[0_24px_80px_-30px_rgba(15,23,42,0.6)] p-4 sm:p-5"
+              >
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div>
+                    <h3 className="text-base font-semibold text-stone-900 dark:text-stone-100">Filter Files</h3>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
+                      {filteredFiles.length} matching file{filteredFiles.length === 1 ? '' : 's'}
+                    </p>
+                  </div>
+                  {hasActiveFilters && (
+                    <span className="inline-flex items-center justify-center min-w-[22px] h-6 px-2 rounded-full text-[11px] font-bold bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <label className="space-y-1.5 block">
+                    <span className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-500 dark:text-stone-400">
+                      Type
+                    </span>
+                    <select
+                      value={fileTypeFilter}
+                      onChange={(e) => setFileTypeFilter(e.target.value as FileTypeFilter)}
+                      className="w-full h-10 rounded-lg border border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900 px-3 text-sm text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-300 dark:focus:ring-slate-500"
+                    >
+                      <option value="all">All types</option>
+                      <option value="pdf">PDF</option>
+                      <option value="document">Document</option>
+                      <option value="presentation">Presentation</option>
+                      <option value="audio">Audio</option>
+                      <option value="video">Video</option>
+                      <option value="image">Image</option>
+                      <option value="link">Web/YouTube Link</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </label>
+
+                  <label className="space-y-1.5 block">
+                    <span className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-500 dark:text-stone-400">
+                      Status
+                    </span>
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value as FileStatusFilter)}
+                      className="w-full h-10 rounded-lg border border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900 px-3 text-sm text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-300 dark:focus:ring-slate-500"
+                    >
+                      <option value="all">All statuses</option>
+                      <option value="COMPLETED">Completed</option>
+                      <option value="PROCESSING">Processing</option>
+                      <option value="UPLOADED">Uploaded</option>
+                      <option value="FAILED">Failed</option>
+                    </select>
+                  </label>
+
+                  <label className="space-y-1.5 block">
+                    <span className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-500 dark:text-stone-400">
+                      Source
+                    </span>
+                    <select
+                      value={sourceFilter}
+                      onChange={(e) => setSourceFilter(e.target.value as FileSourceFilter)}
+                      className="w-full h-10 rounded-lg border border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900 px-3 text-sm text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-300 dark:focus:ring-slate-500"
+                    >
+                      <option value="all">All sources</option>
+                      <option value="internal">Internal files</option>
+                      <option value="external">External sources</option>
+                      <option value="downloadable">Downloadable only</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div className="mt-4 flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={clearFileFilters}
+                    disabled={!hasActiveFilters}
+                    className="h-9 px-3 rounded-lg border border-stone-200 dark:border-white/10 text-sm text-stone-600 dark:text-stone-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-stone-50 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    Clear filters
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowFilterPanel(false)}
+                    className="h-9 px-3 rounded-lg bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-sm font-semibold hover:opacity-90 transition-opacity"
+                  >
+                    Done
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
         {/* Context Menu */}
         {contextMenu && (
