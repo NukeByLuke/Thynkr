@@ -12,11 +12,9 @@ import {
   AlertTriangle,
   RefreshCw,
   Check,
-  Loader2,
-  Square,
   Volume2,
 } from 'lucide-react';
-import { useTTS } from '@/hooks/useTTS';
+import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import { sanitizeTextForTTS } from '@/utils/ttsText';
 
 interface Flashcard {
@@ -73,22 +71,12 @@ const FlashcardViewer = memo(function FlashcardViewer({
   const [shuffledCards, setShuffledCards] = useState<Flashcard[] | null>(null);
   const [direction, setDirection] = useState(0);
   const [masteredCards, setMasteredCards] = useState<Set<string>>(new Set());
-  const [playingItem, setPlayingItem] = useState<string | null>(null);
-
-  const {
-    isPlaying,
-    isLoading: isTTSLoading,
-    play: playTTS,
-    stop: stopTTS,
-  } = useTTS({
-    onPlayEnd: () => setPlayingItem(null),
-  });
+  const { openAudioPlayer, closeAudioPlayer } = useAudioPlayer();
 
   const displayCards = shuffledCards ?? cards;
   const currentCard = displayCards[currentIndex];
   const progressPercentage =
     displayCards.length > 0 ? (masteredCards.size / displayCards.length) * 100 : 0;
-  const currentCardItemId = currentCard ? `${currentCard.id}-${isFlipped ? 'answer' : 'prompt'}` : null;
   const currentCardSpeechText = useMemo(() => {
     if (!currentCard) return '';
     const sideText = isFlipped ? currentCard.back : currentCard.front;
@@ -97,23 +85,20 @@ const FlashcardViewer = memo(function FlashcardViewer({
   }, [currentCard, isFlipped]);
 
   const stopCardAudio = useCallback(() => {
-    stopTTS();
-    setPlayingItem(null);
-  }, [stopTTS]);
+    closeAudioPlayer();
+  }, [closeAudioPlayer]);
 
-  const handleCardAudioToggle = useCallback(async () => {
-    if (!currentCardItemId || !currentCardSpeechText) {
+  const handleCardAudioToggle = useCallback(() => {
+    if (!currentCardSpeechText) {
       return;
     }
 
-    if (playingItem === currentCardItemId && isPlaying) {
-      stopCardAudio();
-      return;
-    }
-
-    setPlayingItem(currentCardItemId);
-    await playTTS(currentCardSpeechText);
-  }, [currentCardItemId, currentCardSpeechText, isPlaying, playTTS, playingItem, stopCardAudio]);
+    openAudioPlayer({
+      text: currentCardSpeechText,
+      title: `${title || 'Flashcards'} Audio`,
+      autoPlay: true,
+    });
+  }, [currentCardSpeechText, openAudioPlayer, title]);
 
   if (error) {
     return (
@@ -260,18 +245,12 @@ const FlashcardViewer = memo(function FlashcardViewer({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleCardAudioToggle}
-              disabled={isTTSLoading || !currentCardSpeechText}
+              disabled={!currentCardSpeechText}
               className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-cyan-700 dark:text-cyan-300 bg-cyan-50 hover:bg-cyan-100 dark:bg-cyan-500/15 dark:hover:bg-cyan-500/25 rounded-xl transition-colors disabled:opacity-50"
-              title={playingItem === currentCardItemId && isPlaying ? 'Stop audio' : 'Read current card aloud'}
+              title="Open card audio player"
             >
-              {isTTSLoading && playingItem === currentCardItemId ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : playingItem === currentCardItemId && isPlaying ? (
-                <Square className="w-3.5 h-3.5" />
-              ) : (
-                <Volume2 className="w-3.5 h-3.5" />
-              )}
-              {playingItem === currentCardItemId && isPlaying ? 'Stop Audio' : 'Listen Card'}
+              <Volume2 className="w-3.5 h-3.5" />
+              Listen Card
             </motion.button>
 
             <motion.button

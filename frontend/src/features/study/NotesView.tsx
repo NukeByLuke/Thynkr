@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { RefreshCw, AlertTriangle, Loader2, Square, Volume2 } from 'lucide-react';
-import { useTTS } from '@/hooks/useTTS';
+import { RefreshCw, AlertTriangle, Volume2 } from 'lucide-react';
+import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import { sanitizeTextForTTS } from '@/utils/ttsText';
 
 interface NotesViewProps {
@@ -86,40 +86,28 @@ export default function NotesView({
     return cards;
   }, [detailed, keyPoints]);
 
-  const [playingItem, setPlayingItem] = useState<string | null>(null);
-  const {
-    isPlaying,
-    isLoading: isTTSLoading,
-    play: playTTS,
-    stop: stopTTS,
-  } = useTTS({
-    onPlayEnd: () => setPlayingItem(null),
-  });
+  const { openAudioPlayer, closeAudioPlayer } = useAudioPlayer();
 
   const handleNoteAudioToggle = useCallback(
-    async (itemId: string, text: string) => {
-      if (playingItem === itemId && isPlaying) {
-        stopTTS();
-        setPlayingItem(null);
-        return;
-      }
-
+    (text: string) => {
       const cleanText = sanitizeTextForTTS(text);
       if (!cleanText) {
         return;
       }
 
-      setPlayingItem(itemId);
-      await playTTS(cleanText);
+      openAudioPlayer({
+        text: cleanText,
+        title: 'Notes Audio',
+        autoPlay: true,
+      });
     },
-    [isPlaying, playTTS, playingItem, stopTTS]
+    [openAudioPlayer]
   );
 
   const handleRegenerateClick = useCallback(() => {
-    stopTTS();
-    setPlayingItem(null);
+    closeAudioPlayer();
     onRegenerate?.();
-  }, [onRegenerate, stopTTS]);
+  }, [closeAudioPlayer, onRegenerate]);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -154,19 +142,12 @@ export default function NotesView({
               <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
                 <h4 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-white">{card.title}</h4>
                 <button
-                  onClick={() => handleNoteAudioToggle(`note-card-${index}`, `${card.title}. ${card.content}`)}
-                  disabled={isTTSLoading}
+                  onClick={() => handleNoteAudioToggle(`${card.title}. ${card.content}`)}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-cyan-700 dark:text-cyan-300 hover:text-cyan-800 dark:hover:text-cyan-200 bg-cyan-50 dark:bg-cyan-500/15 hover:bg-cyan-100 dark:hover:bg-cyan-500/25 rounded-lg transition-colors disabled:opacity-50"
-                  title={playingItem === `note-card-${index}` && isPlaying ? 'Stop audio' : 'Read this note card aloud'}
+                  title="Open note card audio player"
                 >
-                  {isTTSLoading && playingItem === `note-card-${index}` ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : playingItem === `note-card-${index}` && isPlaying ? (
-                    <Square className="w-3.5 h-3.5" />
-                  ) : (
-                    <Volume2 className="w-3.5 h-3.5" />
-                  )}
-                  {playingItem === `note-card-${index}` && isPlaying ? 'Stop' : 'Listen'}
+                  <Volume2 className="w-3.5 h-3.5" />
+                  Listen
                 </button>
               </div>
               <div className="prose prose-slate dark:prose-invert max-w-none">

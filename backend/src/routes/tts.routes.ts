@@ -572,8 +572,13 @@ export default async function ttsRoutes(server: FastifyInstance) {
         return reply.status(400).send({ error: 'Text is required' });
       }
 
+      const normalizedText = body.text.trim();
+      if (!normalizedText) {
+        return reply.status(400).send({ error: 'Text is required' });
+      }
+
       // Check limits early
-      const ttsCheck = await canUseTTS(userId, userRole, body.text.length);
+      const ttsCheck = await canUseTTS(userId, userRole, normalizedText.length);
       if (!ttsCheck.allowed) {
         return reply.status(403).send({ error: ttsCheck.reason, upgradeRequired: true });
       }
@@ -597,9 +602,8 @@ export default async function ttsRoutes(server: FastifyInstance) {
 
       // Generate token
       const token = randomBytes(16).toString('hex');
-      const trimmedText = body.text.slice(0, 4096);
       streamTokens.set(token, {
-        text: trimmedText,
+        text: normalizedText,
         voice,
         speed,
         userId,
@@ -609,8 +613,8 @@ export default async function ttsRoutes(server: FastifyInstance) {
 
       // Kick off eager generation for short/medium payloads.
       // Long payloads are streamed with fast-start chunking in /stream for better UX.
-      if (trimmedText.length <= FAST_START_THRESHOLD) {
-        const genPromise = generateOrGetCached(trimmedText, voice);
+      if (normalizedText.length <= FAST_START_THRESHOLD) {
+        const genPromise = generateOrGetCached(normalizedText, voice);
         pendingGenerations.set(token, genPromise);
         // Auto-cleanup after 2 minutes
         genPromise.finally(() => {
@@ -784,8 +788,10 @@ export default async function ttsRoutes(server: FastifyInstance) {
         });
       }
 
-      // Limit text length (Gemini TTS has a 32k token context window)
-      const text = body.text.slice(0, 4096);
+      const text = body.text.trim();
+      if (!text) {
+        return reply.status(400).send({ error: 'Text is required' });
+      }
 
       // Check tier-based limits
       const ttsCheck = await canUseTTS(userId, userRole, text.length);
@@ -938,9 +944,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
           'Generating study pack page TTS via Google Cloud'
         );
 
-        const buffer = await generateGoogleTTS(textToRead.slice(0, 4096), voice);
-
-        await cacheAudio(hash, buffer);
+        const buffer = await generateOrGetCached(textToRead, voice);
 
         reply.header('Content-Type', 'audio/mpeg');
         reply.header('Content-Disposition', 'inline');

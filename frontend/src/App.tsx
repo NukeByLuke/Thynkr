@@ -12,6 +12,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import { LayoutProvider, useLayout } from './contexts/LayoutContext';
 import { NotificationProvider } from './contexts/NotificationContext';
+import { AudioPlayerProvider } from './contexts/AudioPlayerContext';
 import ProtectedRoute from '@/features/auth/ProtectedRoute';
 import PublicLayout from './layouts/PublicLayout';
 import DashboardLayout from './layouts/DashboardLayout';
@@ -197,17 +198,19 @@ function App() {
         <ThemeProvider>
           <NotificationProvider>
             <LayoutProvider>
-              <Toaster 
-                position="top-center"
-                toastOptions={{
-                  duration: 3000,
-                  style: {
-                    background: 'var(--toast-bg, #333)',
-                    color: 'var(--toast-color, #fff)',
-                  },
-                }}
-              />
-              <AppContent />
+              <AudioPlayerProvider>
+                <Toaster 
+                  position="top-center"
+                  toastOptions={{
+                    duration: 3000,
+                    style: {
+                      background: 'var(--toast-bg, #333)',
+                      color: 'var(--toast-color, #fff)',
+                    },
+                  }}
+                />
+                <AppContent />
+              </AudioPlayerProvider>
             </LayoutProvider>
           </NotificationProvider>
         </ThemeProvider>

@@ -1,4 +1,4 @@
-const DEFAULT_TTS_MAX_CHARS = 4096;
+const DEFAULT_TTS_MAX_CHARS: number | null = null;
 
 function truncateAtSentenceBoundary(text: string, maxChars: number): string {
   if (text.length <= maxChars) return text;
@@ -18,7 +18,7 @@ function truncateAtSentenceBoundary(text: string, maxChars: number): string {
   return truncated.trim();
 }
 
-export function sanitizeTextForTTS(rawText: string, maxChars = DEFAULT_TTS_MAX_CHARS): string {
+export function sanitizeTextForTTS(rawText: string, maxChars: number | null = DEFAULT_TTS_MAX_CHARS): string {
   const cleaned = String(rawText || '')
     // Remove fenced code wrappers but keep code content readable
     .replace(/```([\s\S]*?)```/g, '$1')
@@ -47,5 +47,9 @@ export function sanitizeTextForTTS(rawText: string, maxChars = DEFAULT_TTS_MAX_C
 
   if (!cleaned) return '';
 
-  return truncateAtSentenceBoundary(cleaned, maxChars);
+  if (typeof maxChars === 'number' && Number.isFinite(maxChars) && maxChars > 0) {
+    return truncateAtSentenceBoundary(cleaned, maxChars);
+  }
+
+  return cleaned;
 }
