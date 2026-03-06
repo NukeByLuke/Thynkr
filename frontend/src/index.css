@@ -491,80 +491,92 @@
   }
 
   /* Input field styling - Light/Dark mode aware */
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  input[type="search"],
-  input[type="url"],
-  input[type="tel"],
-  input[type="number"],
-  textarea,
-  select {
+  :where(
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    input[type="url"],
+    input[type="tel"],
+    input[type="number"],
+    textarea,
+    select
+  ) {
     @apply bg-stone-50 border border-stone-200;
     @apply rounded-xl px-4 py-2.5 text-stone-900;
     @apply placeholder:text-stone-400;
     @apply transition-all duration-200;
   }
 
-  .dark input[type="text"],
-  .dark input[type="email"],
-  .dark input[type="password"],
-  .dark input[type="search"],
-  .dark input[type="url"],
-  .dark input[type="tel"],
-  .dark input[type="number"],
-  .dark textarea,
-  .dark select {
+  .dark :where(
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    input[type="url"],
+    input[type="tel"],
+    input[type="number"],
+    textarea,
+    select
+  ) {
     @apply bg-black/80 backdrop-blur-xl border-white/15;
     @apply text-white;
     @apply placeholder:text-zinc-500;
   }
 
-  .dark[data-theme='sunset'] input[type="text"],
-  .dark[data-theme='sunset'] input[type="email"],
-  .dark[data-theme='sunset'] input[type="password"],
-  .dark[data-theme='sunset'] input[type="search"],
-  .dark[data-theme='sunset'] input[type="url"],
-  .dark[data-theme='sunset'] input[type="tel"],
-  .dark[data-theme='sunset'] input[type="number"],
-  .dark[data-theme='sunset'] textarea,
-  .dark[data-theme='sunset'] select {
+  .dark[data-theme='sunset'] :where(
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    input[type="url"],
+    input[type="tel"],
+    input[type="number"],
+    textarea,
+    select
+  ) {
     @apply bg-slate-900/75 border-slate-500/40;
   }
 
-  input[type="text"]:focus,
-  input[type="email"]:focus,
-  input[type="password"]:focus,
-  input[type="search"]:focus,
-  input[type="url"]:focus,
-  input[type="tel"]:focus,
-  input[type="number"]:focus,
-  textarea:focus,
-  select:focus {
+  :where(
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    input[type="url"],
+    input[type="tel"],
+    input[type="number"],
+    textarea,
+    select
+  ):focus {
     @apply border-sunrise-pink ring-2 ring-sunrise-pink/20 outline-none;
   }
 
-  .dark input[type="text"]:focus,
-  .dark input[type="email"]:focus,
-  .dark input[type="password"]:focus,
-  .dark input[type="search"]:focus,
-  .dark input[type="url"]:focus,
-  .dark input[type="tel"]:focus,
-  .dark input[type="number"]:focus,
-  .dark textarea:focus,
-  .dark select:focus {
+  .dark :where(
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    input[type="url"],
+    input[type="tel"],
+    input[type="number"],
+    textarea,
+    select
+  ):focus {
     @apply border-midnight-cyan/60 ring-midnight-cyan/30 bg-black;
   }
 
-  .dark[data-theme='sunset'] input[type="text"]:focus,
-  .dark[data-theme='sunset'] input[type="email"]:focus,
-  .dark[data-theme='sunset'] input[type="password"]:focus,
-  .dark[data-theme='sunset'] input[type="search"]:focus,
-  .dark[data-theme='sunset'] input[type="url"]:focus,
-  .dark[data-theme='sunset'] input[type="tel"]:focus,
-  .dark[data-theme='sunset'] input[type="number"]:focus,
-  .dark[data-theme='sunset'] textarea:focus,
-  .dark[data-theme='sunset'] select:focus {
+  .dark[data-theme='sunset'] :where(
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    input[type="url"],
+    input[type="tel"],
+    input[type="number"],
+    textarea,
+    select
+  ):focus {
     @apply bg-slate-900 border-cyan-400/55 ring-cyan-400/25;
   }
 
@@ -574,22 +586,22 @@
   }
 
   /*
-   * Global spacing polish for icon-led form boxes.
-   * Applies when a relative wrapper has a leading absolute icon container.
+   * Global spacing fallback for icon-led form boxes.
+   * Applies only when a control does not already define explicit left padding.
    */
   @supports selector(:has(*)) {
     .relative:has(> :is(svg, div).absolute[class*='left-'][class*='top-1/2'])
-      > :is(input, textarea, select):is(
-        [class*='pl-4'],
-        [class*='pl-8'],
-        [class*='pl-9'],
-        [class*='pl-10'],
-        [class*='pl-11'],
-        [class*='pl-12']
-      ),
-    .relative:has(> :is(svg, div).absolute[class*='left-'][class*='top-1/2'])
       > :is(input, textarea, select):not([class*='pl-']) {
-      padding-left: 3.1rem !important;
+      padding-left: 3.25rem !important;
+    }
+
+    .relative:has(
+        > div.absolute[class*='left-'][class*='top-1/2'][class*='w-8'],
+        > div.absolute[class*='left-'][class*='top-1/2'][class*='w-9'],
+        > div.absolute[class*='left-'][class*='top-1/2'][class*='w-10']
+      )
+      > :is(input, textarea, select):not([class*='pl-']) {
+      padding-left: 5rem !important;
     }
   }
 }

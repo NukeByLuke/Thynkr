@@ -1552,7 +1552,7 @@ export default function UploadModal({
                           value={youtubeUrl}
                           onChange={(e) => setYoutubeUrl(e.target.value)}
                           placeholder="https://www.youtube.com/watch?v=..."
-                          className={`w-full pl-20 pr-14 py-4 rounded-xl border-2 bg-white dark:bg-black text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
+                          className={`w-full !pl-20 pr-14 py-4 rounded-xl border-2 bg-white dark:bg-black text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
                             youtubeUrl && isValidYouTubeUrl(youtubeUrl)
                               ? 'border-emerald-500 focus:ring-emerald-500/30'
                               : youtubeUrl && !isValidYouTubeUrl(youtubeUrl)
@@ -1602,7 +1602,7 @@ export default function UploadModal({
                           value={linkUrl}
                           onChange={(e) => setLinkUrl(e.target.value)}
                           placeholder="https://en.wikipedia.org/wiki/Earth"
-                          className={`w-full pl-20 pr-14 py-4 rounded-xl border-2 bg-white dark:bg-black text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
+                          className={`w-full !pl-20 pr-14 py-4 rounded-xl border-2 bg-white dark:bg-black text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
                             linkUrl && isValidPublicUrl(linkUrl)
                               ? 'border-emerald-500 focus:ring-emerald-500/30'
                               : linkUrl && !isValidPublicUrl(linkUrl)

@@ -253,7 +253,7 @@ const FlashcardViewer = memo(function FlashcardViewer({
       </div>
 
       <div
-        className="relative w-full h-[58vh] sm:h-[60vh] md:h-[32rem] cursor-pointer"
+        className="relative w-full h-[clamp(18rem,44vh,25rem)] sm:h-[clamp(20rem,48vh,28rem)] md:h-[clamp(22rem,52vh,30rem)] cursor-pointer"
         style={{ perspective: '2000px' }}
         onClick={handleFlip}
         onKeyDown={handleKeyPress}
@@ -417,7 +417,7 @@ const FlashcardViewer = memo(function FlashcardViewer({
         </AnimatePresence>
       </div>
 
-      <div className="mt-6 sm:mt-10 space-y-4">
+      <div className="mt-4 sm:mt-6 space-y-4">
         <div className="flex md:hidden gap-3">
           <motion.button
             whileHover={{ scale: 1.02 }}
