@@ -47,7 +47,7 @@ const MIN_SPEED = 0.25;
 const MAX_SPEED = 4.0;
 
 // Temporary token store for streaming (Token -> { text, voice, speed, userId, userRole })
-// Expires after 1 minute
+// Tokens are short-lived but reusable so browsers can perform repeated media requests.
 interface StreamRequest {
   text: string;
   voice: Voice;
@@ -57,6 +57,8 @@ interface StreamRequest {
   expiresAt: number;
 }
 const streamTokens = new Map<string, StreamRequest>();
+const STREAM_TOKEN_TTL_MS = 10 * 60 * 1000;
+const STREAM_TOKEN_REFRESH_MS = 5 * 60 * 1000;
 
 // Periodic cleanup of expired tokens
 setInterval(() => {
@@ -605,7 +607,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
         speed,
         userId,
         userRole,
-        expiresAt: Date.now() + 60000 // 1 minute to start stream
+        expiresAt: Date.now() + STREAM_TOKEN_TTL_MS,
       });
 
       // Kick off eager generation for every request so /stream can return quickly.
@@ -633,8 +635,8 @@ export default async function ttsRoutes(server: FastifyInstance) {
         return reply.status(404).send({ error: 'Invalid or expired stream token' });
       }
 
-      // Extend expiry for browser retries
-      data.expiresAt = Date.now() + 30000;
+      // Extend expiry for browser retries/range fetches.
+      data.expiresAt = Date.now() + STREAM_TOKEN_REFRESH_MS;
       const { userId } = data;
       const cacheHash = generateContentHash(data.text, data.voice);
 
@@ -643,7 +645,6 @@ export default async function ttsRoutes(server: FastifyInstance) {
         const cachedAudio = await getCachedAudio(cacheHash);
         if (cachedAudio) {
           pendingGenerations.delete(token);
-          streamTokens.delete(token);
 
           reply.header('Content-Type', 'audio/mpeg');
           reply.header('Content-Length', cachedAudio.length);
@@ -661,7 +662,6 @@ export default async function ttsRoutes(server: FastifyInstance) {
           : await generateOrGetCached(data.text, data.voice);
 
         pendingGenerations.delete(token);
-        streamTokens.delete(token);
 
         reply.header('Content-Type', 'audio/mpeg');
         reply.header('Content-Length', buffer.length);
@@ -673,7 +673,6 @@ export default async function ttsRoutes(server: FastifyInstance) {
       } catch (error: any) {
         logger.error({ error: error.message, userId }, 'TTS stream generation failed');
         pendingGenerations.delete(token);
-        streamTokens.delete(token);
         return reply.status(500).send({ error: 'Generation failed' });
       }
     }
