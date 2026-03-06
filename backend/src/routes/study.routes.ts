@@ -2948,6 +2948,78 @@ ${studentMessage.slice(0, 1600)}`;
     }
   );
 
+  // Move folder to parent folder
+  server.patch(
+    '/folders/:id/move',
+    {
+      preHandler: [authenticate],
+    },
+    async (request: AuthenticatedRequest, reply) => {
+      const { id } = request.params as { id: string };
+      const { folderId } = request.body as { folderId: string | null };
+      const userId = request.user!.userId;
+
+      const folder = await prisma.folder.findFirst({
+        where: {
+          id,
+          userId,
+        },
+      });
+
+      if (!folder) {
+        return reply.code(404).send({ error: 'Folder not found' });
+      }
+
+      if (folderId === id) {
+        return reply.code(400).send({ error: 'Cannot move a folder into itself' });
+      }
+
+      if (folderId) {
+        const destinationFolder = await prisma.folder.findFirst({
+          where: {
+            id: folderId,
+            userId,
+          },
+        });
+
+        if (!destinationFolder) {
+          return reply.code(404).send({ error: 'Destination folder not found' });
+        }
+
+        // Prevent circular hierarchy by ensuring destination is not a descendant.
+        const userFolders = await prisma.folder.findMany({
+          where: { userId },
+          select: {
+            id: true,
+            parentId: true,
+          },
+        });
+
+        const parentById = new Map(userFolders.map((item) => [item.id, item.parentId]));
+        let cursor: string | null = folderId;
+        let safetyCounter = 0;
+
+        while (cursor && safetyCounter < 1000) {
+          if (cursor === id) {
+            return reply
+              .code(400)
+              .send({ error: 'Cannot move folder into its own subfolder' });
+          }
+
+          cursor = parentById.get(cursor) ?? null;
+          safetyCounter += 1;
+        }
+      }
+
+      const updatedFolder = await prisma.folder.update({
+        where: { id },
+        data: { parentId: folderId },
+      });
+
+      return reply.send({ folder: updatedFolder });
+    }
+  );
+
   // Delete folder
   server.delete(
     '/folders/:id',
