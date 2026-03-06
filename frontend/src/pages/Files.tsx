@@ -8,6 +8,7 @@ import {
   FileText,
   BookOpen,
   Upload,
+  SlidersHorizontal,
   MoreVertical,
   Eye,
   Download,
@@ -73,6 +74,18 @@ interface RecordingUploadResult {
 }
 
 type LibraryItemType = 'folder' | 'file';
+type FileTypeFilter =
+  | 'all'
+  | 'pdf'
+  | 'document'
+  | 'presentation'
+  | 'audio'
+  | 'video'
+  | 'image'
+  | 'link'
+  | 'other';
+type FileStatusFilter = 'all' | UploadedFile['status'];
+type FileSourceFilter = 'all' | 'internal' | 'external' | 'downloadable';
 
 interface LibraryItemReference {
   type: LibraryItemType;
@@ -95,6 +108,10 @@ export default function Files() {
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'recent' | 'name' | 'size'>('recent');
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const [fileTypeFilter, setFileTypeFilter] = useState<FileTypeFilter>('all');
+  const [statusFilter, setStatusFilter] = useState<FileStatusFilter>('all');
+  const [sourceFilter, setSourceFilter] = useState<FileSourceFilter>('all');
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
@@ -481,6 +498,78 @@ export default function Files() {
   const currentFolders = folders.filter((f) => f.parentId === currentFolderId);
   const currentFiles = allFiles.filter((f) => f.folderId === currentFolderId);
 
+  function isExternalResourceFile(file: UploadedFile): boolean {
+    const type = String(file.fileType || '').toLowerCase();
+    const hasExternalSourceUrl =
+      typeof file.sourceUrl === 'string' && /^https?:\/\//i.test(file.sourceUrl);
+
+    return hasExternalSourceUrl || type.includes('youtube') || type.includes('text/url');
+  }
+
+  function canDownloadFile(file: UploadedFile): boolean {
+    if (isExternalResourceFile(file)) {
+      return false;
+    }
+
+    return Boolean(file.downloadUrl || file.fileName);
+  }
+
+  const getFileExtension = (fileName: string) => {
+    const lastDotIndex = fileName.lastIndexOf('.');
+    if (lastDotIndex < 0) return '';
+    return fileName.slice(lastDotIndex + 1).toLowerCase();
+  };
+
+  const getFileCategory = (file: UploadedFile): Exclude<FileTypeFilter, 'all'> => {
+    const mime = String(file.fileType || '').toLowerCase();
+    const ext = getFileExtension(file.originalName || file.fileName || '');
+
+    if (isExternalResourceFile(file)) return 'link';
+    if (mime.includes('pdf') || ext === 'pdf') return 'pdf';
+    if (
+      mime.includes('presentation') ||
+      mime.includes('powerpoint') ||
+      ['ppt', 'pptx', 'pps', 'ppsx'].includes(ext)
+    ) {
+      return 'presentation';
+    }
+    if (
+      mime.includes('word') ||
+      mime.includes('document') ||
+      mime.startsWith('text/') ||
+      ['doc', 'docx', 'txt', 'md', 'rtf'].includes(ext)
+    ) {
+      return 'document';
+    }
+    if (
+      mime.startsWith('audio/') ||
+      ['mp3', 'wav', 'm4a', 'ogg', 'webm', 'aac', 'flac'].includes(ext)
+    ) {
+      return 'audio';
+    }
+    if (
+      mime.startsWith('video/') ||
+      ['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext)
+    ) {
+      return 'video';
+    }
+    if (
+      mime.startsWith('image/') ||
+      ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'avif'].includes(ext)
+    ) {
+      return 'image';
+    }
+
+    return 'other';
+  };
+
+  const matchesSourceFilter = (file: UploadedFile) => {
+    if (sourceFilter === 'all') return true;
+    if (sourceFilter === 'internal') return !isExternalResourceFile(file);
+    if (sourceFilter === 'external') return isExternalResourceFile(file);
+    return canDownloadFile(file);
+  };
+
   // Filter by search
   const filteredFolders = useMemo(
     () =>
@@ -488,9 +577,35 @@ export default function Files() {
     [currentFolders, searchQuery]
   );
   const filteredFiles = useMemo(
-    () =>
-      currentFiles.filter((f) => f.originalName.toLowerCase().includes(searchQuery.toLowerCase())),
-    [currentFiles, searchQuery]
+    () => {
+      return currentFiles.filter((file) => {
+        const matchesSearch = file.originalName.toLowerCase().includes(searchQuery.toLowerCase());
+        if (!matchesSearch) return false;
+
+        if (fileTypeFilter !== 'all' && getFileCategory(file) !== fileTypeFilter) {
+          return false;
+        }
+
+        if (statusFilter !== 'all' && file.status !== statusFilter) {
+          return false;
+        }
+
+        if (!matchesSourceFilter(file)) {
+          return false;
+        }
+
+        return true;
+      });
+    },
+    [
+      currentFiles,
+      searchQuery,
+      fileTypeFilter,
+      statusFilter,
+      sourceFilter,
+      matchesSourceFilter,
+      getFileCategory,
+    ]
   );
 
   const sortedFolders = useMemo(() => {
@@ -816,22 +931,6 @@ export default function Files() {
     moveItemToFolder(moveItem, moveTargetFolderId);
   };
 
-  const isExternalResourceFile = (file: UploadedFile): boolean => {
-    const type = String(file.fileType || '').toLowerCase();
-    const hasExternalSourceUrl =
-      typeof file.sourceUrl === 'string' && /^https?:\/\//i.test(file.sourceUrl);
-
-    return hasExternalSourceUrl || type.includes('youtube') || type.includes('text/url');
-  };
-
-  const canDownloadFile = (file: UploadedFile): boolean => {
-    if (isExternalResourceFile(file)) {
-      return false;
-    }
-
-    return Boolean(file.downloadUrl || file.fileName);
-  };
-
   const getFileUrl = (file: UploadedFile, options?: { forDownload?: boolean }) => {
     const forDownload = Boolean(options?.forDownload);
 
@@ -1086,6 +1185,18 @@ export default function Files() {
   const contextMenuFile =
     contextMenu?.type === 'file' ? allFiles.find((file) => file.id === contextMenu.id) || null : null;
   const canDownloadContextMenuFile = contextMenuFile ? canDownloadFile(contextMenuFile) : false;
+  const activeFilterCount =
+    (fileTypeFilter !== 'all' ? 1 : 0) +
+    (statusFilter !== 'all' ? 1 : 0) +
+    (sourceFilter !== 'all' ? 1 : 0);
+  const hasActiveFilters = activeFilterCount > 0;
+  const hasQueryOrFilter = searchQuery.trim().length > 0 || hasActiveFilters;
+
+  const clearFileFilters = () => {
+    setFileTypeFilter('all');
+    setStatusFilter('all');
+    setSourceFilter('all');
+  };
 
   const isLoading = loadingFolders || loadingFiles;
 
@@ -1140,7 +1251,7 @@ export default function Files() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_auto_auto] gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_auto_auto_auto] gap-3">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
                 <input
@@ -1164,6 +1275,24 @@ export default function Files() {
               </select>
 
               <button
+                type="button"
+                onClick={() => setShowFilterPanel((prev) => !prev)}
+                className={`h-12 min-w-[140px] rounded-xl border px-3 text-sm font-semibold inline-flex items-center justify-center gap-2 transition-colors ${
+                  showFilterPanel || hasActiveFilters
+                    ? 'border-stone-400 dark:border-slate-400 bg-stone-100 dark:bg-slate-800 text-stone-900 dark:text-stone-100'
+                    : 'border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900/60 text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-slate-800'
+                }`}
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
+
+              <button
                 onClick={() => setShowCreateFolderModal(true)}
                 className="h-12 px-4 rounded-xl border border-stone-300 dark:border-white/20 bg-white dark:bg-slate-900/60 text-stone-700 dark:text-stone-200 text-sm font-semibold hover:bg-stone-50 dark:hover:bg-slate-800 transition-colors"
               >
@@ -1179,6 +1308,97 @@ export default function Files() {
                 Upload
               </button>
             </div>
+
+            <AnimatePresence>
+              {showFilterPanel && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.15 }}
+                  className="rounded-xl border border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900/60 p-4"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <label className="space-y-1.5">
+                      <span className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-500 dark:text-stone-400">
+                        Type
+                      </span>
+                      <select
+                        value={fileTypeFilter}
+                        onChange={(e) => setFileTypeFilter(e.target.value as FileTypeFilter)}
+                        className="w-full h-10 rounded-lg border border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900 px-3 text-sm text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-300 dark:focus:ring-slate-500"
+                      >
+                        <option value="all">All types</option>
+                        <option value="pdf">PDF</option>
+                        <option value="document">Document</option>
+                        <option value="presentation">Presentation</option>
+                        <option value="audio">Audio</option>
+                        <option value="video">Video</option>
+                        <option value="image">Image</option>
+                        <option value="link">Web/YouTube Link</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </label>
+
+                    <label className="space-y-1.5">
+                      <span className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-500 dark:text-stone-400">
+                        Status
+                      </span>
+                      <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value as FileStatusFilter)}
+                        className="w-full h-10 rounded-lg border border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900 px-3 text-sm text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-300 dark:focus:ring-slate-500"
+                      >
+                        <option value="all">All statuses</option>
+                        <option value="COMPLETED">Completed</option>
+                        <option value="PROCESSING">Processing</option>
+                        <option value="UPLOADED">Uploaded</option>
+                        <option value="FAILED">Failed</option>
+                      </select>
+                    </label>
+
+                    <label className="space-y-1.5">
+                      <span className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-500 dark:text-stone-400">
+                        Source
+                      </span>
+                      <select
+                        value={sourceFilter}
+                        onChange={(e) => setSourceFilter(e.target.value as FileSourceFilter)}
+                        className="w-full h-10 rounded-lg border border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900 px-3 text-sm text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-300 dark:focus:ring-slate-500"
+                      >
+                        <option value="all">All sources</option>
+                        <option value="internal">Internal files</option>
+                        <option value="external">External sources</option>
+                        <option value="downloadable">Downloadable only</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-xs text-stone-500 dark:text-stone-400">
+                      {filteredFiles.length} matching file{filteredFiles.length === 1 ? '' : 's'}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={clearFileFilters}
+                        disabled={!hasActiveFilters}
+                        className="h-9 px-3 rounded-lg border border-stone-200 dark:border-white/10 text-sm text-stone-600 dark:text-stone-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-stone-50 dark:hover:bg-slate-800 transition-colors"
+                      >
+                        Clear filters
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowFilterPanel(false)}
+                        className="h-9 px-3 rounded-lg bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-sm font-semibold hover:opacity-90 transition-opacity"
+                      >
+                        Done
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <button
@@ -1414,10 +1634,10 @@ export default function Files() {
                       <FileText className="w-7 h-7 text-stone-400" />
                     </div>
                     <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
-                      {searchQuery ? 'No results found' : 'No files yet'}
+                      {hasQueryOrFilter ? 'No results found' : 'No files yet'}
                     </h3>
                     <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
-                      {searchQuery ? 'Try a different search.' : 'Upload your first study material to get started.'}
+                      {hasQueryOrFilter ? 'Try adjusting your search or filters.' : 'Upload your first study material to get started.'}
                     </p>
                   </div>
                 )}
