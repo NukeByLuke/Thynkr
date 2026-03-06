@@ -6,14 +6,13 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
-
-export type TTSVoice = 'charon' | 'fenrir' | 'puck' | 'enceladus' | 'aoede' | 'kore';
-
-const TTS_VOICES: TTSVoice[] = ['charon', 'fenrir', 'puck', 'enceladus', 'aoede', 'kore'];
-
-function isTTSVoice(value: unknown): value is TTSVoice {
-  return typeof value === 'string' && TTS_VOICES.includes(value as TTSVoice);
-}
+import {
+  isTTSVoice,
+  normalizeTTSPreferences,
+  readTTSPreferencesFromStorage,
+  subscribeToTTSPreferences,
+  type TTSVoice,
+} from '@/lib/ttsPreferences';
 
 interface UseTTSOptions {
   voice?: TTSVoice;
@@ -111,18 +110,25 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
 
     let isCancelled = false;
 
+    const cachedPreferences = readTTSPreferencesFromStorage();
+    if (cachedPreferences.voice) {
+      setPreferredVoice(cachedPreferences.voice);
+    }
+    if (typeof cachedPreferences.speed === 'number') {
+      setPreferredSpeed(cachedPreferences.speed);
+    }
+
     const fetchPreferences = async () => {
       try {
         const response = await api.get('/tts/preferences');
         if (isCancelled) return;
 
-        if (isTTSVoice(response?.data?.voice)) {
-          setPreferredVoice(response.data.voice);
+        const normalized = normalizeTTSPreferences(response?.data);
+        if (normalized.voice) {
+          setPreferredVoice(normalized.voice);
         }
-
-        const speed = response?.data?.speed;
-        if (typeof speed === 'number' && Number.isFinite(speed)) {
-          setPreferredSpeed(Math.min(4, Math.max(0.25, speed)));
+        if (typeof normalized.speed === 'number') {
+          setPreferredSpeed(normalized.speed);
         }
       } catch {
         // Silent fallback: defaults are still valid when preference fetch fails.
@@ -134,6 +140,22 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
     return () => {
       isCancelled = true;
     };
+  }, [options.speed, options.voice]);
+
+  // Reflect live updates from Settings/Audio player while mounted.
+  useEffect(() => {
+    if (options.voice && typeof options.speed === 'number') {
+      return;
+    }
+
+    return subscribeToTTSPreferences((preferences) => {
+      if (preferences.voice && !options.voice) {
+        setPreferredVoice(preferences.voice);
+      }
+      if (typeof preferences.speed === 'number' && typeof options.speed !== 'number') {
+        setPreferredSpeed(preferences.speed);
+      }
+    });
   }, [options.speed, options.voice]);
 
   // Cleanup on unmount

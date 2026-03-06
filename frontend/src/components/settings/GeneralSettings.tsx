@@ -6,6 +6,14 @@ import { useTTSVoices } from '@/hooks/useTTS';
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import {
+  emitTTSPreferencesUpdated,
+  isTTSVoice,
+  normalizeTTSPreferences,
+  readTTSPreferencesFromStorage,
+  subscribeToTTSPreferences,
+  type TTSVoice,
+} from '@/lib/ttsPreferences';
 
 export default function GeneralSettings() {
   const { themeMode, setThemeMode } = useTheme();
@@ -16,18 +24,34 @@ export default function GeneralSettings() {
   const currentLanguage = user?.preferredLanguage || 'en';
 
   // TTS preferences state
-  const [ttsVoice, setTtsVoice] = useState<string>('charon');
+  const [ttsVoice, setTtsVoice] = useState<TTSVoice>('charon');
   const [ttsSpeed, setTtsSpeed] = useState<number>(1.0);
   const [isSavingTTS, setIsSavingTTS] = useState(false);
   const [audioPreview, setAudioPreview] = useState<HTMLAudioElement | null>(null);
 
   // Load TTS preferences
   useEffect(() => {
+    const cachedPreferences = readTTSPreferencesFromStorage();
+    if (cachedPreferences.voice) {
+      setTtsVoice(cachedPreferences.voice);
+    }
+    if (typeof cachedPreferences.speed === 'number') {
+      setTtsSpeed(cachedPreferences.speed);
+    }
+
     const loadPreferences = async () => {
       try {
         const response = await api.get('/tts/preferences');
-        setTtsVoice(response.data.voice || 'charon');
-        setTtsSpeed(response.data.speed || 1.0);
+        const normalized = normalizeTTSPreferences(response.data);
+
+        if (normalized.voice) {
+          setTtsVoice(normalized.voice);
+        }
+        if (typeof normalized.speed === 'number') {
+          setTtsSpeed(normalized.speed);
+        }
+
+        emitTTSPreferencesUpdated(normalized);
       } catch (error) {
         console.error('Failed to load TTS preferences:', error);
       }
@@ -35,11 +59,23 @@ export default function GeneralSettings() {
     loadPreferences();
   }, []);
 
+  useEffect(() => {
+    return subscribeToTTSPreferences((preferences) => {
+      if (preferences.voice) {
+        setTtsVoice(preferences.voice);
+      }
+      if (typeof preferences.speed === 'number') {
+        setTtsSpeed(preferences.speed);
+      }
+    });
+  }, []);
+
   // Save TTS preferences
-  const saveTTSPreferences = async (voice: string, speed: number) => {
+  const saveTTSPreferences = async (voice: TTSVoice, speed: number) => {
     setIsSavingTTS(true);
     try {
       await api.patch('/tts/preferences', { voice, speed });
+      emitTTSPreferencesUpdated({ voice, speed });
       toast.success('Audio preferences saved!');
     } catch (error) {
       toast.error('Failed to save preferences');
@@ -50,6 +86,10 @@ export default function GeneralSettings() {
   };
 
   const handleVoiceChange = (voice: string) => {
+    if (!isTTSVoice(voice)) {
+      return;
+    }
+
     setTtsVoice(voice);
     saveTTSPreferences(voice, ttsSpeed);
   };
@@ -60,6 +100,10 @@ export default function GeneralSettings() {
   };
 
   const playVoicePreview = async (voice: string) => {
+    if (!isTTSVoice(voice)) {
+      return;
+    }
+
     // Stop any existing preview
     if (audioPreview) {
       audioPreview.pause();
