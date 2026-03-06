@@ -1,10 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useCallback, memo } from 'react';
+import { memo, useCallback, useState, type KeyboardEvent } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, RotateCcw, Shuffle, AlertTriangle, RefreshCw, Check } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  RotateCcw,
+  Shuffle,
+  AlertTriangle,
+  RefreshCw,
+  Check,
+} from 'lucide-react';
 
 interface Flashcard {
   id: string;
@@ -21,12 +29,11 @@ interface FlashcardViewerProps {
   isRegenerating?: boolean;
 }
 
-// Memoize slide animation variants - Optimized for performance
 const slideVariants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? '50%' : '-50%',
+    x: direction > 0 ? '45%' : '-45%',
     opacity: 0,
-    scale: 0.95,
+    scale: 0.96,
   }),
   center: {
     zIndex: 1,
@@ -36,13 +43,12 @@ const slideVariants = {
   },
   exit: (direction: number) => ({
     zIndex: 0,
-    x: direction < 0 ? '20%' : '-20%',
+    x: direction < 0 ? '18%' : '-18%',
     opacity: 0,
-    scale: 0.95,
+    scale: 0.96,
   }),
 };
 
-// Spring physics for tactile, snappy flip animation
 const flipTransition = {
   type: 'spring' as const,
   stiffness: 300,
@@ -50,25 +56,35 @@ const flipTransition = {
   mass: 0.8,
 };
 
-const FlashcardViewer = memo(function FlashcardViewer({ cards, title: _title, error, onRegenerate, isRegenerating }: FlashcardViewerProps) {
+const FlashcardViewer = memo(function FlashcardViewer({
+  cards,
+  title,
+  error,
+  onRegenerate,
+  isRegenerating,
+}: FlashcardViewerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [shuffledCards, setShuffledCards] = useState<Flashcard[] | null>(null);
   const [direction, setDirection] = useState(0);
   const [masteredCards, setMasteredCards] = useState<Set<string>>(new Set());
 
-  const displayCards = shuffledCards || cards;
+  const displayCards = shuffledCards ?? cards;
   const currentCard = displayCards[currentIndex];
-  const progressPercentage = (masteredCards.size / displayCards.length) * 100;
+  const progressPercentage =
+    displayCards.length > 0 ? (masteredCards.size / displayCards.length) * 100 : 0;
 
-  // Show error alert if generation failed
   if (error) {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-0 animate-fade-in">
         <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-2xl p-8 text-center">
           <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-red-700 dark:text-red-400 mb-2">Failed to Generate Flashcards</h3>
-          <p className="text-red-600 dark:text-red-300 mb-4">{error.message || 'An unexpected error occurred. Please try again.'}</p>
+          <h3 className="text-xl font-bold text-red-700 dark:text-red-400 mb-2">
+            Failed to Generate Flashcards
+          </h3>
+          <p className="text-red-600 dark:text-red-300 mb-4">
+            {error.message || 'An unexpected error occurred. Please try again.'}
+          </p>
           {onRegenerate && (
             <button
               onClick={onRegenerate}
@@ -84,7 +100,6 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title: _title, er
     );
   }
 
-  // Memoize handlers
   const handleNext = useCallback(() => {
     if (currentIndex < displayCards.length - 1) {
       setDirection(1);
@@ -121,121 +136,124 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title: _title, er
   }, []);
 
   const handleMarkMastered = useCallback(() => {
-    if (currentCard) {
-      setMasteredCards(prev => {
-        const newSet = new Set(prev);
-        if (newSet.has(currentCard.id)) {
-          newSet.delete(currentCard.id);
-        } else {
-          newSet.add(currentCard.id);
-        }
-        return newSet;
-      });
-    }
+    if (!currentCard) return;
+    setMasteredCards((prev) => {
+      const next = new Set(prev);
+      if (next.has(currentCard.id)) {
+        next.delete(currentCard.id);
+      } else {
+        next.add(currentCard.id);
+      }
+      return next;
+    });
   }, [currentCard]);
 
-  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
-    // Prevent if user is typing in an input
-    const target = e.target as HTMLElement;
-    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-      return;
-    }
+  const handleKeyPress = useCallback(
+    (e: KeyboardEvent<HTMLElement>) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
 
-    if (e.key === ' ' || e.key === 'Enter') {
-      e.preventDefault();
-      handleFlip();
-    } else if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      handlePrevious();
-    } else if (e.key === 'ArrowRight') {
-      e.preventDefault();
-      handleNext();
-    } else if (e.key === 'm' || e.key === 'M') {
-      e.preventDefault();
-      handleMarkMastered();
-    }
-  }, [handleFlip, handlePrevious, handleNext, handleMarkMastered]);
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        handleFlip();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handlePrevious();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleNext();
+      } else if (e.key === 'm' || e.key === 'M') {
+        e.preventDefault();
+        handleMarkMastered();
+      }
+    },
+    [handleFlip, handlePrevious, handleNext, handleMarkMastered]
+  );
 
-  if (!cards || cards.length === 0) {
+  if (!cards || cards.length === 0 || !currentCard) {
     return (
-      <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-        No flashcards available
-      </div>
+      <div className="text-center py-12 text-gray-500 dark:text-gray-400">No flashcards available</div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-0">
-      {/* Header Row: Title + Card Count + Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 whitespace-nowrap">
-            Card {currentIndex + 1} of {displayCards.length}
-            {shuffledCards && <span className="ml-1.5 text-brand-600 dark:text-brand-400">(Shuffled)</span>}
-          </p>
+    <div className="max-w-6xl mx-auto px-2 sm:px-0">
+      <div className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950 shadow-lg p-4 sm:p-6 mb-4">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <p className="text-xs uppercase tracking-[0.2em] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+              Flashcard Studio
+            </p>
+            <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white truncate">
+              {title || 'Flashcards'}
+            </h3>
+            <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
+              Card {currentIndex + 1} of {displayCards.length}
+              {shuffledCards && (
+                <span className="ml-1.5 font-medium text-cyan-700 dark:text-cyan-300">(Shuffled)</span>
+              )}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleMarkMastered}
+              className={`inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl transition-colors ${
+                masteredCards.has(currentCard.id)
+                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              <Check className="w-3.5 h-3.5" />
+              {masteredCards.has(currentCard.id) ? 'Mastered' : 'Mark Mastered'}
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleShuffle}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-cyan-700 dark:text-cyan-300 bg-cyan-50 hover:bg-cyan-100 dark:bg-cyan-500/15 dark:hover:bg-cyan-500/25 rounded-xl transition-colors"
+            >
+              <Shuffle className="w-3.5 h-3.5" />
+              Shuffle
+            </motion.button>
+
+            {shuffledCards && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleReset}
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl transition-colors"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Reset
+              </motion.button>
+            )}
+          </div>
         </div>
 
-        {/* Shuffle & Reset Controls */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleMarkMastered}
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 shadow-sm hover:shadow-md ${
-            currentCard && masteredCards.has(currentCard.id)
-              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700'
-          }`}
-        >
-          <Check className="w-3.5 h-3.5" />
-          {currentCard && masteredCards.has(currentCard.id) ? 'Mastered' : 'Mark Mastered'}
-        </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleShuffle}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-lg transition-all duration-150 shadow-sm hover:shadow-md"
-        >
-          <Shuffle className="w-3.5 h-3.5" />
-          Shuffle
-        </motion.button>
-        {shuffledCards && (
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleReset}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 bg-brand-50 dark:bg-brand-900/30 hover:bg-brand-100 dark:hover:bg-brand-900/50 rounded-lg transition-all duration-150 shadow-sm hover:shadow-md"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            Reset
-          </motion.button>
-        )}
+        <div className="mt-4">
+          <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500"
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPercentage}%` }}
+              transition={{ type: 'spring', stiffness: 100, damping: 15 }}
+            />
+          </div>
+          <div className="flex justify-between items-center mt-1.5 text-xs font-medium">
+            <span className="text-slate-500 dark:text-slate-500">{masteredCards.size} mastered</span>
+            <span className="text-slate-500 dark:text-slate-500">
+              {displayCards.length - masteredCards.size} remaining
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Progress Bar - Compact */}
-      <div className="mb-3">
-        <div className="h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-          <motion.div
-            className="h-full bg-gradient-to-r from-green-500 to-emerald-500"
-            initial={{ width: 0 }}
-            animate={{ width: `${progressPercentage}%` }}
-            transition={{ type: 'spring', stiffness: 100, damping: 15 }}
-          />
-        </div>
-        <div className="flex justify-between items-center mt-1 text-xs font-medium">
-          <span className="text-slate-500 dark:text-slate-500">
-            {masteredCards.size} mastered
-          </span>
-          <span className="text-slate-500 dark:text-slate-500">
-            {displayCards.length - masteredCards.size} remaining
-          </span>
-        </div>
-      </div>
-
-      {/* Flashcard with Animation - Larger Hero Card */}
       <div
-        className="relative w-full h-[55vh] sm:h-[60vh] md:h-[28rem] cursor-pointer"
+        className="relative w-full h-[58vh] sm:h-[60vh] md:h-[32rem] cursor-pointer"
         style={{ perspective: '2000px' }}
         onClick={handleFlip}
         onKeyDown={handleKeyPress}
@@ -245,7 +263,7 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title: _title, er
       >
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div
-            key={currentIndex}
+            key={`${currentCard.id}-${currentIndex}`}
             custom={direction}
             variants={slideVariants}
             initial="enter"
@@ -257,24 +275,23 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title: _title, er
             <motion.div
               animate={{ rotateY: isFlipped ? 180 : 0 }}
               transition={flipTransition}
-              style={{ 
+              style={{
                 transformStyle: 'preserve-3d',
                 willChange: 'transform',
               }}
               className="w-full h-full"
             >
-              {/* Front */}
               <div
-                className="absolute w-full h-full bg-gradient-to-br from-white to-brand-50/50 dark:from-gray-800 dark:to-gray-800 rounded-3xl shadow-2xl border-2 border-brand-100/50 dark:border-gray-700 flex items-center justify-center p-8 sm:p-12 overflow-y-auto"
-                style={{ 
+                className="absolute w-full h-full bg-gradient-to-br from-amber-50 via-white to-cyan-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 rounded-3xl shadow-2xl border-2 border-slate-200/70 dark:border-white/10 flex items-center justify-center p-8 sm:p-12 overflow-y-auto"
+                style={{
                   backfaceVisibility: 'hidden',
                   WebkitBackfaceVisibility: 'hidden',
                   transform: 'translateZ(0)',
                 }}
               >
                 <div className="text-center w-full">
-                  <p className="text-base sm:text-lg text-brand-600 dark:text-brand-400 mb-4 sm:mb-6 uppercase tracking-wide font-bold">
-                    Question
+                  <p className="text-xs sm:text-sm text-cyan-700 dark:text-cyan-300 mb-4 sm:mb-6 uppercase tracking-[0.25em] font-bold">
+                    Prompt
                   </p>
                   <div className="prose prose-lg sm:prose-2xl dark:prose-invert max-w-none">
                     <ReactMarkdown
@@ -283,23 +300,35 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title: _title, er
                       components={{
                         p: ({ node, ...props }) => (
                           <p
-                            className="text-lg sm:text-3xl font-bold text-gray-900 dark:text-white mb-4"
+                            className="text-lg sm:text-3xl font-bold text-slate-900 dark:text-white mb-4"
                             {...props}
                           />
                         ),
-                        h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4" {...props} />,
-                        h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3" {...props} />,
-                        h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2" {...props} />,
-                        strong: ({ node, ...props }) => <strong className="font-bold text-brand-900 dark:text-brand-300" {...props} />,
+                        h1: ({ node, ...props }) => (
+                          <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-4" {...props} />
+                        ),
+                        h2: ({ node, ...props }) => (
+                          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-3" {...props} />
+                        ),
+                        h3: ({ node, ...props }) => (
+                          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2" {...props} />
+                        ),
+                        strong: ({ node, ...props }) => (
+                          <strong className="font-bold text-cyan-900 dark:text-cyan-200" {...props} />
+                        ),
                         em: ({ node, ...props }) => <em className="italic" {...props} />,
-                        ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-2 text-left marker:text-brand-500" {...props} />,
-                        ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-2 text-left marker:text-brand-500" {...props} />,
+                        ul: ({ node, ...props }) => (
+                          <ul className="list-disc ml-6 space-y-2 text-left marker:text-cyan-500" {...props} />
+                        ),
+                        ol: ({ node, ...props }) => (
+                          <ol className="list-decimal ml-6 space-y-2 text-left marker:text-cyan-500" {...props} />
+                        ),
                         li: ({ node, ...props }) => <li className="leading-relaxed text-base sm:text-xl" {...props} />,
                         code: ({ node, className, children, ...props }) => {
                           const isInline = !className;
                           return isInline ? (
                             <code
-                              className="bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 px-2 py-1 rounded-lg text-sm sm:text-lg font-mono border border-brand-200 dark:border-brand-800"
+                              className="bg-cyan-50 dark:bg-cyan-500/15 text-cyan-700 dark:text-cyan-200 px-2 py-1 rounded-lg text-sm sm:text-lg font-mono border border-cyan-200 dark:border-cyan-500/30"
                               {...props}
                             >
                               {children}
@@ -318,15 +347,14 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title: _title, er
                       {currentCard.front}
                     </ReactMarkdown>
                   </div>
-                  <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-6 sm:mt-10 font-medium">
-                    💡 Click or press Space to flip
+                  <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-6 sm:mt-10 font-medium">
+                    Click or press Space to flip
                   </p>
                 </div>
               </div>
 
-              {/* Back */}
               <div
-                className="absolute w-full h-full bg-gradient-to-br from-pink-500 via-fuchsia-500 to-orange-400 dark:from-violet-600 dark:via-indigo-600 dark:to-cyan-500 rounded-3xl shadow-2xl flex items-center justify-center p-8 sm:p-12 overflow-y-auto"
+                className="absolute w-full h-full bg-gradient-to-br from-cyan-700 via-teal-700 to-emerald-700 dark:from-cyan-700 dark:via-blue-700 dark:to-emerald-700 rounded-3xl shadow-2xl flex items-center justify-center p-8 sm:p-12 overflow-y-auto"
                 style={{
                   backfaceVisibility: 'hidden',
                   WebkitBackfaceVisibility: 'hidden',
@@ -334,7 +362,7 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title: _title, er
                 }}
               >
                 <div className="text-center w-full">
-                  <p className="text-base sm:text-lg text-white/90 mb-4 sm:mb-6 uppercase tracking-wide font-bold">
+                  <p className="text-xs sm:text-sm text-white/90 mb-4 sm:mb-6 uppercase tracking-[0.25em] font-bold">
                     Answer
                   </p>
                   <div className="prose prose-lg sm:prose-2xl prose-invert max-w-none">
@@ -343,16 +371,22 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title: _title, er
                       rehypePlugins={[rehypeHighlight]}
                       components={{
                         p: ({ node, ...props }) => (
-                          <p className="text-xl sm:text-4xl font-bold text-white mb-5" {...props} />
+                          <p className="text-xl sm:text-4xl font-bold text-white mb-5 leading-tight" {...props} />
                         ),
                         h1: ({ node, ...props }) => <h1 className="text-3xl font-bold text-white mb-5" {...props} />,
                         h2: ({ node, ...props }) => <h2 className="text-2xl font-bold text-white mb-4" {...props} />,
                         h3: ({ node, ...props }) => <h3 className="text-xl font-semibold text-white mb-3" {...props} />,
                         strong: ({ node, ...props }) => <strong className="font-bold text-white" {...props} />,
                         em: ({ node, ...props }) => <em className="italic text-white/90" {...props} />,
-                        ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-2 text-left marker:text-white/70" {...props} />,
-                        ol: ({ node, ...props }) => <ol className="list-decimal ml-6 space-y-2 text-left marker:text-white/70" {...props} />,
-                        li: ({ node, ...props }) => <li className="leading-relaxed text-base sm:text-xl text-white" {...props} />,
+                        ul: ({ node, ...props }) => (
+                          <ul className="list-disc ml-6 space-y-2 text-left marker:text-white/70" {...props} />
+                        ),
+                        ol: ({ node, ...props }) => (
+                          <ol className="list-decimal ml-6 space-y-2 text-left marker:text-white/70" {...props} />
+                        ),
+                        li: ({ node, ...props }) => (
+                          <li className="leading-relaxed text-base sm:text-xl text-white" {...props} />
+                        ),
                         code: ({ node, className, children, ...props }) => {
                           const isInline = !className;
                           return isInline ? (
@@ -383,16 +417,14 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title: _title, er
         </AnimatePresence>
       </div>
 
-      {/* Navigation - Enhanced for Mobile */}
       <div className="mt-6 sm:mt-10 space-y-4">
-        {/* Mobile: Large Thumb-Friendly Buttons */}
         <div className="flex md:hidden gap-3">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.95 }}
             onClick={handlePrevious}
             disabled={currentIndex === 0}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-2xl disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 shadow-lg font-bold text-lg touch-manipulation active:scale-95"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 shadow-lg font-bold text-lg touch-manipulation active:scale-95"
           >
             <ChevronLeft className="w-6 h-6" />
             Previous
@@ -402,30 +434,27 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title: _title, er
             whileTap={{ scale: 0.95 }}
             onClick={handleNext}
             disabled={currentIndex === displayCards.length - 1}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-2xl disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 shadow-lg font-bold text-lg touch-manipulation active:scale-95"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 shadow-lg font-bold text-lg touch-manipulation active:scale-95"
           >
             Next
             <ChevronRight className="w-6 h-6" />
           </motion.button>
         </div>
 
-        {/* Desktop: Original Layout */}
         <div className="hidden md:flex items-center justify-between gap-3">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handlePrevious}
             disabled={currentIndex === 0}
-            className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-brand-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-brand-50 dark:hover:bg-gray-700 hover:border-brand-300 dark:hover:border-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 text-sm sm:text-base shadow-md font-semibold"
+            className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base shadow-sm font-semibold"
           >
             <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             <span className="hidden sm:inline">Previous</span>
           </motion.button>
 
-          {/* Progress dots - show limited on mobile */}
           <div className="flex space-x-1 sm:space-x-2 justify-center items-center">
             {displayCards.length <= 10 ? (
-              // Show all dots if 10 or fewer cards
               displayCards.map((_, index) => (
                 <motion.button
                   key={index}
@@ -438,14 +467,13 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title: _title, er
                   }}
                   className={`w-2 h-2 rounded-full transition-all flex-shrink-0 ${
                     index === currentIndex
-                      ? 'bg-gradient-to-r from-brand-600 to-accent-600 w-6 sm:w-8 shadow-md'
-                      : 'bg-gray-300 dark:bg-gray-600 hover:bg-brand-400 dark:hover:bg-brand-500'
+                      ? 'bg-gradient-to-r from-cyan-500 to-emerald-500 w-6 sm:w-8 shadow-md'
+                      : 'bg-gray-300 dark:bg-gray-600 hover:bg-cyan-400 dark:hover:bg-cyan-500'
                   }`}
                   aria-label={`Go to card ${index + 1}`}
                 />
               ))
             ) : (
-              // Show indicator with +5/-5 navigation for many cards
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
@@ -454,10 +482,10 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title: _title, er
                     setIsFlipped(false);
                   }}
                   disabled={currentIndex === 0}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-brand-100 dark:hover:bg-brand-900/30 hover:text-brand-700 dark:hover:text-brand-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 hover:text-cyan-700 dark:hover:text-cyan-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   aria-label="Jump back 5"
                 >
-                  −5
+                  -5
                 </button>
                 <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 px-1 whitespace-nowrap font-semibold tabular-nums min-w-[4rem] text-center">
                   {currentIndex + 1} / {displayCards.length}
@@ -469,7 +497,7 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title: _title, er
                     setIsFlipped(false);
                   }}
                   disabled={currentIndex === displayCards.length - 1}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-brand-100 dark:hover:bg-brand-900/30 hover:text-brand-700 dark:hover:text-brand-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 hover:text-cyan-700 dark:hover:text-cyan-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   aria-label="Jump forward 5"
                 >
                   +5
@@ -483,14 +511,13 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title: _title, er
             whileTap={{ scale: 0.98 }}
             onClick={handleNext}
             disabled={currentIndex === displayCards.length - 1}
-            className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-gray-800 border-2 border-brand-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-brand-50 dark:hover:bg-gray-700 hover:border-brand-300 dark:hover:border-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 text-sm sm:text-base shadow-md font-semibold"
+            className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/15 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base shadow-sm font-semibold"
           >
             <span className="hidden sm:inline">Next</span>
             <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
           </motion.button>
         </div>
 
-        {/* Mobile: Progress Indicator */}
         <div className="md:hidden text-center">
           <span className="inline-block px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-full text-sm font-semibold text-slate-700 dark:text-slate-300">
             {currentIndex + 1} / {displayCards.length}
@@ -498,12 +525,13 @@ const FlashcardViewer = memo(function FlashcardViewer({ cards, title: _title, er
         </div>
       </div>
 
-      {/* Keyboard shortcuts hint */}
       <div className="mt-2 sm:mt-3 text-center text-xs text-gray-500 dark:text-gray-500 hidden sm:block">
         <p>
-          <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-[10px] font-mono">←</kbd>{' '}
-          <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-[10px] font-mono">→</kbd> navigate{' · '}
-          <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-[10px] font-mono">Space</kbd> flip{' · '}
+          <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-[10px] font-mono">&larr;</kbd>{' '}
+          <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-[10px] font-mono">&rarr;</kbd> navigate{' '}
+          <span aria-hidden="true">&#183;</span>{' '}
+          <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-[10px] font-mono">Space</kbd> flip{' '}
+          <span aria-hidden="true">&#183;</span>{' '}
           <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-[10px] font-mono">M</kbd> master
         </p>
       </div>
