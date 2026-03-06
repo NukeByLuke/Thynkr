@@ -9,6 +9,12 @@ import toast from 'react-hot-toast';
 
 export type TTSVoice = 'charon' | 'fenrir' | 'puck' | 'enceladus' | 'aoede' | 'kore';
 
+const TTS_VOICES: TTSVoice[] = ['charon', 'fenrir', 'puck', 'enceladus', 'aoede', 'kore'];
+
+function isTTSVoice(value: unknown): value is TTSVoice {
+  return typeof value === 'string' && TTS_VOICES.includes(value as TTSVoice);
+}
+
 interface UseTTSOptions {
   voice?: TTSVoice;
   speed?: number;
@@ -34,10 +40,23 @@ let globalStopCallback: (() => void) | null = null;
 const audioCache = new Map<string, string>(); // key: hash, value: stream URL
 
 /**
- * Generate cache key from text + voice (speed is client-side)
+ * Fast non-cryptographic hash for cache keys.
  */
-function generateCacheKey(text: string, voice: TTSVoice): string {
-  return `${text.slice(0, 100)}:${voice}`;
+function fnv1aHash(value: string): string {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16);
+}
+
+/**
+ * Generate cache key from full text + voice.
+ * Uses full-content hash to avoid collisions between similarly prefixed texts.
+ */
+function generateCacheKey(text: string, voice?: TTSVoice): string {
+  return `${voice || 'default'}:${text.length}:${fnv1aHash(text)}`;
 }
 
 /**
@@ -78,9 +97,44 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [preferredVoice, setPreferredVoice] = useState<TTSVoice | null>(null);
+  const [preferredSpeed, setPreferredSpeed] = useState<number | null>(null);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Pull user's saved TTS preferences when voice/speed are not explicitly passed.
+  useEffect(() => {
+    if (options.voice && typeof options.speed === 'number') {
+      return;
+    }
+
+    let isCancelled = false;
+
+    const fetchPreferences = async () => {
+      try {
+        const response = await api.get('/tts/preferences');
+        if (isCancelled) return;
+
+        if (isTTSVoice(response?.data?.voice)) {
+          setPreferredVoice(response.data.voice);
+        }
+
+        const speed = response?.data?.speed;
+        if (typeof speed === 'number' && Number.isFinite(speed)) {
+          setPreferredSpeed(Math.min(4, Math.max(0.25, speed)));
+        }
+      } catch {
+        // Silent fallback: defaults are still valid when preference fetch fails.
+      }
+    };
+
+    fetchPreferences();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [options.speed, options.voice]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -88,6 +142,10 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.src = '';
+        if (globalAudioInstance === audioRef.current) {
+          globalAudioInstance = null;
+          globalStopCallback = null;
+        }
       }
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -102,6 +160,10 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
+      if (globalAudioInstance === audioRef.current) {
+        globalAudioInstance = null;
+        globalStopCallback = null;
+      }
     }
     setIsPlaying(false);
     options.onPlayEnd?.();
@@ -111,7 +173,9 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
    * Play audio from text using streaming negotiation
    */
   const play = useCallback(async (text: string) => {
-    if (!text?.trim()) {
+    const cleanText = text?.trim();
+
+    if (!cleanText) {
       toast.error('No text to play');
       return;
     }
@@ -119,13 +183,18 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
     // Stop any global audio first (exclusive playback)
     stopGlobalAudio();
 
+    // Cancel any in-flight negotiate request for this instance
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
     setError(null);
     setIsLoading(true);
 
     try {
-      const voice = options.voice || 'charon';
-      const speed = options.speed || 1.0;
-      const cacheKey = generateCacheKey(text, voice);
+      const voice = options.voice ?? preferredVoice ?? undefined;
+      const speed = Math.min(4, Math.max(0.25, typeof options.speed === 'number' ? options.speed : (preferredSpeed ?? 1.0)));
+      const cacheKey = generateCacheKey(cleanText, voice);
 
       let audioUrl: string;
 
@@ -135,10 +204,18 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
       } else {
         // Negotiate for streaming URL (fast - just returns a token)
         abortControllerRef.current = new AbortController();
+
+        const payload: Record<string, unknown> = {
+          text: cleanText,
+        };
+
+        if (voice) {
+          payload.voice = voice;
+        }
         
         const response = await api.post(
           '/tts/negotiate',
-          { text, voice, speed: 1 }, // speed=1 since it's handled client-side
+          payload,
           { signal: abortControllerRef.current.signal }
         );
 
@@ -188,7 +265,12 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
         // Remove failed URL from cache so it can be re-negotiated
         audioCache.delete(cacheKey);
         setError('Failed to play audio');
+        options.onPlayEnd?.();
         toast.error('Failed to play audio');
+        if (globalAudioInstance === audio) {
+          globalAudioInstance = null;
+          globalStopCallback = null;
+        }
       };
 
       // Start playback immediately - audio will stream in
@@ -208,7 +290,9 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
 
       const errorMessage = err.response?.data?.error || err.message || 'Failed to generate audio';
       setError(errorMessage);
+      setIsPlaying(false);
       setIsLoading(false);
+      options.onPlayEnd?.();
       
       if (err.response?.status === 403) {
         toast.error('TTS limit reached. Upgrade to Pro for unlimited access.');
@@ -216,7 +300,7 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
         toast.error(errorMessage);
       }
     }
-  }, [options, stop]);
+  }, [options, preferredSpeed, preferredVoice, stop]);
 
   /**
    * Toggle play/stop
