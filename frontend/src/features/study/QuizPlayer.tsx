@@ -192,12 +192,16 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   }, [waitingForGeneration, isGenerating]);
 
   useEffect(() => {
-    if (!waitingForGeneration || !generationCycleStarted || isGenerating) return;
-
-    if (sanitizedQuestions.length > 0) {
-      initializeQuizSession(sanitizedQuestions);
+    if (
+      !waitingForGeneration ||
+      !generationCycleStarted ||
+      isGenerating ||
+      sanitizedQuestions.length === 0
+    ) {
+      return;
     }
 
+    initializeQuizSession(sanitizedQuestions);
     setWaitingForGeneration(false);
     setGenerationCycleStarted(false);
   }, [
@@ -207,6 +211,25 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
     sanitizedQuestions,
     initializeQuizSession,
   ]);
+
+  useEffect(() => {
+    if (
+      !waitingForGeneration ||
+      !generationCycleStarted ||
+      isGenerating ||
+      sanitizedQuestions.length > 0
+    ) {
+      return;
+    }
+
+    // Allow a short settle window for parent state to propagate generated questions.
+    const settleTimer = setTimeout(() => {
+      setWaitingForGeneration(false);
+      setGenerationCycleStarted(false);
+    }, 2500);
+
+    return () => clearTimeout(settleTimer);
+  }, [waitingForGeneration, generationCycleStarted, isGenerating, sanitizedQuestions.length]);
 
   const requiresRevealStep = settings.feedbackMode === 'instant';
   const currentQuestion = quizQuestions[currentIndex];
@@ -309,6 +332,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
     if (onGenerateQuiz && fileId) {
       // Trigger quiz generation with current settings
       setWaitingForGeneration(true);
+      setGenerationCycleStarted(false);
       setSubmissionError(null);
       onGenerateQuiz(settings.difficulty, numQuestions);
     } else {
