@@ -111,3 +111,6 @@ stripe-cli.zip
 backend/uploads/
 uploads/
 **/uploads/
+
+# Local deployment overrides (private machine-only config)
+scripts/deploy.local.ps1
