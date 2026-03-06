@@ -15,6 +15,7 @@ import {
   Trash2,
   Search,
   Calendar,
+  FolderInput,
   ChevronRight,
   ArrowLeft,
   Home,
@@ -70,6 +71,18 @@ interface RecordingUploadResult {
   transcriptionSource?: string;
 }
 
+type LibraryItemType = 'folder' | 'file';
+
+interface LibraryItemReference {
+  type: LibraryItemType;
+  id: string;
+  name: string;
+}
+
+interface DraggedLibraryItem extends LibraryItemReference {
+  parentFolderId: string | null;
+}
+
 export default function Files() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -84,19 +97,20 @@ export default function Files() {
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
-    type: 'folder' | 'file';
+    type: LibraryItemType;
     id: string;
     name: string;
   } | null>(null);
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [renameValue, setRenameValue] = useState('');
-  const [selectedItem, setSelectedItem] = useState<{
-    type: 'folder' | 'file';
-    id: string;
-    name: string;
-  } | null>(null);
+  const [selectedItem, setSelectedItem] = useState<LibraryItemReference | null>(null);
+  const [moveItem, setMoveItem] = useState<LibraryItemReference | null>(null);
+  const [showMoveModal, setShowMoveModal] = useState(false);
+  const [moveTargetFolderId, setMoveTargetFolderId] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [isDragging, setIsDragging] = useState(false);
+  const [draggedItem, setDraggedItem] = useState<DraggedLibraryItem | null>(null);
+  const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
   const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [uploadProgress, setUploadProgress] = useState<UploadProgressSnapshot | null>(null);
@@ -386,7 +400,7 @@ export default function Files() {
 
   // Mass delete mutation
   const massDeleteMutation = useMutation({
-    mutationFn: async (items: { type: 'folder' | 'file'; id: string }[]) => {
+    mutationFn: async (items: { type: LibraryItemType; id: string }[]) => {
       const promises = items.map((item) => {
         const url =
           item.type === 'folder' ? `/study/folders/${item.id}` : `/study/files/${item.id}`;
@@ -418,7 +432,7 @@ export default function Files() {
 
   // Rename mutation
   const renameMutation = useMutation({
-    mutationFn: async (data: { type: 'folder' | 'file'; id: string; name: string }) => {
+    mutationFn: async (data: { type: LibraryItemType; id: string; name: string }) => {
       const url =
         data.type === 'folder'
           ? `/study/folders/${data.id}`
@@ -436,6 +450,29 @@ export default function Files() {
       setShowRenameModal(false);
       setSelectedItem(null);
       toast.success('Renamed successfully');
+    },
+  });
+
+  const moveItemMutation = useMutation({
+    mutationFn: async (payload: { type: LibraryItemType; id: string; folderId: string | null }) => {
+      const url =
+        payload.type === 'folder'
+          ? `/study/folders/${payload.id}/move`
+          : `/study/files/${payload.id}/move`;
+
+      const response = await api.patch(url, { folderId: payload.folderId });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['folders'] });
+      queryClient.invalidateQueries({ queryKey: ['study-files'] });
+      setShowMoveModal(false);
+      setMoveItem(null);
+      setMoveTargetFolderId(null);
+      toast.success('Moved successfully');
+    },
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, 'Failed to move item'));
     },
   });
 
@@ -531,6 +568,20 @@ export default function Files() {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  const getFolderDisplayPath = (folderId: string) => {
+    const parts: string[] = [];
+    let cursor: FolderType | undefined = foldersById.get(folderId);
+    let safetyCounter = 0;
+
+    while (cursor && safetyCounter < 100) {
+      parts.unshift(cursor.name);
+      cursor = cursor.parentId ? foldersById.get(cursor.parentId) : undefined;
+      safetyCounter += 1;
+    }
+
+    return parts.join(' / ');
+  };
+
   const startUpload = (files: FileList) => {
     if (files.length === 0) return;
     setUploadError(null);
@@ -612,14 +663,28 @@ export default function Files() {
     toast('Processing cancelled - the video may still be added', { icon: '⚠️' });
   };
 
+  const openContextMenuAt = (x: number, y: number, item: LibraryItemReference) => {
+    setContextMenu({ x, y, ...item });
+  };
+
   const handleContextMenu = (
     e: React.MouseEvent,
-    type: 'folder' | 'file',
+    type: LibraryItemType,
     id: string,
     name: string
   ) => {
     e.preventDefault();
-    setContextMenu({ x: e.clientX, y: e.clientY, type, id, name });
+    openContextMenuAt(e.clientX, e.clientY, { type, id, name });
+  };
+
+  const handleMenuButtonClick = (
+    e: React.MouseEvent<HTMLElement>,
+    item: LibraryItemReference
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const bounds = e.currentTarget.getBoundingClientRect();
+    openContextMenuAt(bounds.left, bounds.bottom + 6, item);
   };
 
   const handleRename = () => {
@@ -644,6 +709,110 @@ export default function Files() {
       }
     }
     setContextMenu(null);
+  };
+
+  const getItemParentFolderId = (item: LibraryItemReference): string | null => {
+    if (item.type === 'file') {
+      return allFiles.find((file) => file.id === item.id)?.folderId ?? null;
+    }
+
+    return foldersById.get(item.id)?.parentId ?? null;
+  };
+
+  const getFolderDescendantIds = (folderId: string): Set<string> => {
+    const descendants = new Set<string>();
+    const queue: string[] = [folderId];
+
+    while (queue.length > 0) {
+      const currentId = queue.shift();
+      if (!currentId) continue;
+
+      folders
+        .filter((folder) => folder.parentId === currentId)
+        .forEach((folder) => {
+          if (!descendants.has(folder.id)) {
+            descendants.add(folder.id);
+            queue.push(folder.id);
+          }
+        });
+    }
+
+    return descendants;
+  };
+
+  const isStructurallyInvalidMoveTarget = (
+    item: LibraryItemReference,
+    targetFolderId: string | null
+  ) => {
+    if (item.type !== 'folder') {
+      return false;
+    }
+
+    if (targetFolderId === item.id) {
+      return true;
+    }
+
+    if (targetFolderId && getFolderDescendantIds(item.id).has(targetFolderId)) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const canMoveItemToFolder = (
+    item: LibraryItemReference,
+    targetFolderId: string | null,
+    sourceFolderId?: string | null
+  ) => {
+    const currentParentId = sourceFolderId ?? getItemParentFolderId(item);
+
+    if (currentParentId === targetFolderId) {
+      return false;
+    }
+
+    if (isStructurallyInvalidMoveTarget(item, targetFolderId)) {
+      return false;
+    }
+
+    return true;
+  };
+
+  const moveItemToFolder = (
+    item: LibraryItemReference,
+    targetFolderId: string | null,
+    sourceFolderId?: string | null
+  ) => {
+    if (!canMoveItemToFolder(item, targetFolderId, sourceFolderId)) {
+      if (item.type === 'folder') {
+        toast.error('Invalid folder destination');
+      }
+      return;
+    }
+
+    moveItemMutation.mutate({
+      type: item.type,
+      id: item.id,
+      folderId: targetFolderId,
+    });
+  };
+
+  const handleOpenMoveModal = () => {
+    if (!contextMenu) return;
+    const item: LibraryItemReference = {
+      type: contextMenu.type,
+      id: contextMenu.id,
+      name: contextMenu.name,
+    };
+
+    setMoveItem(item);
+    setMoveTargetFolderId(getItemParentFolderId(item));
+    setShowMoveModal(true);
+    setContextMenu(null);
+  };
+
+  const handleConfirmMove = () => {
+    if (!moveItem) return;
+    moveItemToFolder(moveItem, moveTargetFolderId);
   };
 
   const getFileUrl = (file: UploadedFile) => {
@@ -748,11 +917,54 @@ export default function Files() {
     setContextMenu(null);
   };
 
+  const hasDraggedFiles = (e: React.DragEvent) => {
+    return Array.from(e.dataTransfer.types || []).includes('Files');
+  };
+
+  const handleItemDragStart = (
+    e: React.DragEvent,
+    item: LibraryItemReference,
+    parentFolderId: string | null
+  ) => {
+    setDraggedItem({ ...item, parentFolderId });
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', `${item.type}:${item.id}`);
+  };
+
+  const handleItemDragEnd = () => {
+    setDraggedItem(null);
+    setDragOverFolderId(null);
+  };
+
+  const handleFolderDragOver = (e: React.DragEvent, targetFolderId: string) => {
+    if (!draggedItem) return;
+    if (!canMoveItemToFolder(draggedItem, targetFolderId, draggedItem.parentFolderId)) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverFolderId(targetFolderId);
+  };
+
+  const handleFolderDrop = (e: React.DragEvent, targetFolderId: string) => {
+    if (!draggedItem) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    moveItemToFolder(draggedItem, targetFolderId, draggedItem.parentFolderId);
+    setDraggedItem(null);
+    setDragOverFolderId(null);
+  };
+
   // Drag and Drop handlers
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragging(true);
+
+    if (hasDraggedFiles(e)) {
+      setIsDragging(true);
+    }
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
@@ -764,15 +976,22 @@ export default function Files() {
   };
 
   const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    if (hasDraggedFiles(e)) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = 'copy';
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    
+
+    if (!hasDraggedFiles(e)) {
+      return;
+    }
+
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       startUpload(files);
@@ -811,13 +1030,25 @@ export default function Files() {
   const handleMassDelete = () => {
     const itemsToDelete = Array.from(selectedItems).map(id => {
       const [type, itemId] = id.split('-');
-      return { type: type as 'folder' | 'file', id: itemId };
+      return { type: type as LibraryItemType, id: itemId };
     });
 
     if (confirm(`Are you sure you want to delete ${itemsToDelete.length} item(s)?`)) {
       massDeleteMutation.mutate(itemsToDelete);
     }
   };
+
+  const moveItemCurrentParentId = useMemo(() => {
+    if (!moveItem) return null;
+    return getItemParentFolderId(moveItem);
+  }, [moveItem, allFiles, foldersById]);
+
+  const moveTargetOptions = useMemo(() => {
+    if (!moveItem) return folders;
+    return folders.filter((folder) => !isStructurallyInvalidMoveTarget(moveItem, folder.id));
+  }, [folders, moveItem]);
+
+  const isMoveDestinationUnchanged = moveItemCurrentParentId === moveTargetFolderId;
 
   const isLoading = loadingFolders || loadingFiles;
 
@@ -995,19 +1226,36 @@ export default function Files() {
                   <div className="space-y-2">
                     {sortedFolders.map((folder, index) => {
                       const isSelected = selectedItems.has(`folder-${folder.id}`);
+                      const isDragOverTarget = dragOverFolderId === folder.id;
 
                       return (
-                        <motion.button
+                        <motion.div
                           key={folder.id}
                           initial={{ opacity: 0, y: 4 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.015, duration: 0.12 }}
                           onClick={() => setCurrentFolderId(folder.id)}
                           onContextMenu={(e) => handleContextMenu(e, 'folder', folder.id, folder.name)}
-                          className={`w-full grid grid-cols-[28px_1fr_auto_24px] items-center gap-3 rounded-xl px-3 sm:px-4 py-3 border transition-colors ${
+                          draggable
+                          onDragStartCapture={(e) =>
+                            handleItemDragStart(
+                              e,
+                              { type: 'folder', id: folder.id, name: folder.name },
+                              folder.parentId
+                            )
+                          }
+                          onDragEndCapture={handleItemDragEnd}
+                          onDragOverCapture={(e) => handleFolderDragOver(e, folder.id)}
+                          onDragLeaveCapture={() => {
+                            setDragOverFolderId((previous) => (previous === folder.id ? null : previous));
+                          }}
+                          onDropCapture={(e) => handleFolderDrop(e, folder.id)}
+                          className={`w-full grid grid-cols-[28px_1fr_auto_32px] items-center gap-3 rounded-xl px-3 sm:px-4 py-3 border transition-colors cursor-pointer ${
                             isSelected
                               ? 'border-stone-400 dark:border-slate-400 bg-stone-100 dark:bg-slate-800'
-                              : 'border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900/60 hover:bg-stone-50 dark:hover:bg-slate-800/80'
+                              : isDragOverTarget
+                                ? 'border-emerald-400 dark:border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10'
+                                : 'border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900/60 hover:bg-stone-50 dark:hover:bg-slate-800/80'
                           }`}
                         >
                           <Folder className="w-5 h-5 text-amber-500" fill="currentColor" />
@@ -1016,8 +1264,21 @@ export default function Files() {
                             <p className="text-xs text-stone-500 dark:text-stone-400">{folder.files?.length || 0} files</p>
                           </div>
                           <span className="text-xs text-stone-500 dark:text-stone-400 hidden sm:inline">{formatDate(folder.updatedAt)}</span>
-                          <MoreVertical className="w-4 h-4 text-stone-400" />
-                        </motion.button>
+                          <button
+                            type="button"
+                            onClick={(e) =>
+                              handleMenuButtonClick(e, {
+                                type: 'folder',
+                                id: folder.id,
+                                name: folder.name,
+                              })
+                            }
+                            className="p-1.5 rounded-md hover:bg-stone-200 dark:hover:bg-slate-700"
+                            aria-label={`Open folder actions for ${folder.name}`}
+                          >
+                            <MoreVertical className="w-4 h-4 text-stone-500 dark:text-stone-400" />
+                          </button>
+                        </motion.div>
                       );
                     })}
                   </div>
@@ -1055,6 +1316,15 @@ export default function Files() {
                                 initial={{ opacity: 0, y: 4 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.015, duration: 0.12 }}
+                                draggable
+                                onDragStartCapture={(e) =>
+                                  handleItemDragStart(
+                                    e,
+                                    { type: 'file', id: file.id, name: file.originalName },
+                                    file.folderId
+                                  )
+                                }
+                                onDragEndCapture={handleItemDragEnd}
                                 onDoubleClick={() => handleFileDoubleClick(file.id)}
                                 onContextMenu={(e) => handleContextMenu(e, 'file', file.id, file.originalName)}
                                 className={`group grid grid-cols-[24px_28px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl px-3 sm:px-4 py-3 border cursor-pointer transition-colors ${
@@ -1084,8 +1354,11 @@ export default function Files() {
 
                                 <button
                                   onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleContextMenu(e, 'file', file.id, file.originalName);
+                                    handleMenuButtonClick(e, {
+                                      type: 'file',
+                                      id: file.id,
+                                      name: file.originalName,
+                                    });
                                   }}
                                   className="p-1.5 rounded-md hover:bg-stone-200 dark:hover:bg-slate-700"
                                 >
@@ -1148,6 +1421,13 @@ export default function Files() {
               </>
             )}
             <button
+              onClick={handleOpenMoveModal}
+              className="w-full px-4 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors duration-150 flex items-center gap-3 active:scale-95"
+            >
+              <FolderInput className="w-4 h-4" />
+              Move to folder
+            </button>
+            <button
               onClick={handleRename}
               className="w-full px-4 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors duration-150 flex items-center gap-3 active:scale-95"
             >
@@ -1161,6 +1441,67 @@ export default function Files() {
               <Trash2 className="w-4 h-4" />
               Delete
             </button>
+          </div>
+        )}
+
+        {/* Move Modal */}
+        {showMoveModal && moveItem && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4"
+            >
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+                Move {moveItem.type === 'folder' ? 'Folder' : 'File'}
+              </h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">
+                Choose where to move <span className="font-medium">{moveItem.name}</span>
+              </p>
+
+              <label
+                htmlFor="move-target-folder"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+              >
+                Destination
+              </label>
+              <select
+                id="move-target-folder"
+                value={moveTargetFolderId ?? '__ROOT__'}
+                onChange={(e) =>
+                  setMoveTargetFolderId(e.target.value === '__ROOT__' ? null : e.target.value)
+                }
+                className="w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-cyan-500 focus:border-pink-500 dark:focus:border-cyan-500 mb-4"
+              >
+                <option value="__ROOT__">Root</option>
+                {moveTargetOptions.map((folder) => (
+                  <option key={folder.id} value={folder.id}>
+                    {getFolderDisplayPath(folder.id)}
+                  </option>
+                ))}
+              </select>
+
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => {
+                    setShowMoveModal(false);
+                    setMoveItem(null);
+                    setMoveTargetFolderId(null);
+                  }}
+                  className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors duration-150 active:scale-95"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmMove}
+                  disabled={moveItemMutation.isPending || isMoveDestinationUnchanged}
+                  className="px-6 py-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 hover:shadow-xl text-white rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed font-medium active:scale-95 shadow-sm"
+                >
+                  {moveItemMutation.isPending ? 'Moving...' : 'Move'}
+                </button>
+              </div>
+            </motion.div>
           </div>
         )}
 
