@@ -13,6 +13,7 @@ jobs:
     name: Build & Deploy
     runs-on: ubuntu-latest
     environment: production
+    if: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' && secrets.DROPLET_IP != '' && secrets.SSH_PRIVATE_KEY != '' }}
 
     steps:
       - name: Checkout code

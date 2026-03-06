@@ -100,6 +100,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Detect test suites
+        id: detect-tests
+        shell: bash
+        run: |
+          if find backend -type f \( -name "*.test.ts" -o -name "*.test.tsx" -o -name "*.spec.ts" -o -name "*.spec.tsx" -o -name "*.test.js" -o -name "*.spec.js" \) | grep -q .; then
+            echo "backend=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "backend=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if find frontend -type f \( -name "*.test.ts" -o -name "*.test.tsx" -o -name "*.spec.ts" -o -name "*.spec.tsx" -o -name "*.test.js" -o -name "*.spec.js" \) | grep -q .; then
+            echo "frontend=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "frontend=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Lint backend
         run: pnpm --filter backend lint
 
@@ -110,6 +126,7 @@ jobs:
         run: pnpm --filter backend db:generate
 
       - name: Run backend tests
+        if: steps.detect-tests.outputs.backend == 'true'
         run: pnpm --filter backend test
         env:
           DATABASE_URL: postgresql://thynkr:thynkr_test@localhost:5432/thynkr_test
@@ -119,8 +136,17 @@ jobs:
           STRIPE_SECRET_KEY: sk_test_fake
           NODE_ENV: test
 
+      - name: Skip backend tests (none found)
+        if: steps.detect-tests.outputs.backend != 'true'
+        run: echo "No backend test files found. Skipping backend test run."
+
       - name: Run frontend tests
+        if: steps.detect-tests.outputs.frontend == 'true'
         run: pnpm --filter frontend test
+
+      - name: Skip frontend tests (none found)
+        if: steps.detect-tests.outputs.frontend != 'true'
+        run: echo "No frontend test files found. Skipping frontend test run."
 
       - name: Build backend
         run: pnpm --filter backend build
@@ -170,23 +196,38 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Detect E2E tests
+        id: detect-e2e
+        shell: bash
+        run: |
+          if find frontend -type f \( -name "*.e2e.ts" -o -name "*.e2e.tsx" -o -name "*.e2e.js" -o -name "*.spec.e2e.ts" -o -name "*.spec.e2e.tsx" -o -path "*/e2e/*.ts" -o -path "*/e2e/*.tsx" -o -path "*/e2e/*.js" \) | grep -q .; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Install Playwright Browsers
+        if: steps.detect-e2e.outputs.exists == 'true'
         run: pnpm --filter frontend exec playwright install --with-deps
 
       - name: Generate Prisma Client
+        if: steps.detect-e2e.outputs.exists == 'true'
         run: pnpm --filter backend db:generate
 
       - name: Run migrations
+        if: steps.detect-e2e.outputs.exists == 'true'
         run: pnpm --filter backend db:migrate
         env:
           DATABASE_URL: postgresql://thynkr:thynkr_test@localhost:5432/thynkr_test
 
       - name: Seed database
+        if: steps.detect-e2e.outputs.exists == 'true'
         run: pnpm --filter backend db:seed
         env:
           DATABASE_URL: postgresql://thynkr:thynkr_test@localhost:5432/thynkr_test
 
       - name: Run E2E tests
+        if: steps.detect-e2e.outputs.exists == 'true'
         run: pnpm test:e2e
         env:
           DATABASE_URL: postgresql://thynkr:thynkr_test@localhost:5432/thynkr_test
@@ -195,9 +236,13 @@ jobs:
           STRIPE_SECRET_KEY: sk_test_fake
           VITE_API_URL: http://localhost:3001/api
 
+      - name: Skip E2E tests (none found)
+        if: steps.detect-e2e.outputs.exists != 'true'
+        run: echo "No E2E test files found. Skipping E2E test run."
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && steps.detect-e2e.outputs.exists == 'true'
         with:
           name: playwright-report
           path: frontend/playwright-report/
