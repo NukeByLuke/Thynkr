@@ -25,6 +25,7 @@ interface UploadModalProps {
   onClose: () => void;
   onUploadFiles: (files: FileList) => void;
   onUploadRecording?: (payload: RecordingUploadPayload) => void | Promise<void>;
+  enableRecordingTab?: boolean;
   onUploadYouTube: (url: string) => void;
   onUploadLink?: (url: string) => void;
   isUploading?: boolean;
@@ -103,6 +104,7 @@ export default function UploadModal({
   onClose,
   onUploadFiles,
   onUploadRecording,
+  enableRecordingTab = false,
   onUploadYouTube,
   onUploadLink,
   isUploading = false,
@@ -133,10 +135,16 @@ export default function UploadModal({
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [hasObservedUpload, setHasObservedUpload] = useState(false);
 
+  const canUseRecording = Boolean(onUploadRecording && enableRecordingTab);
+
   const availableTabs = useMemo(
-    () => (onUploadRecording ? TAB_CONFIG : TAB_CONFIG.filter((tab) => tab.id !== 'record')),
-    [onUploadRecording]
+    () => (canUseRecording ? TAB_CONFIG : TAB_CONFIG.filter((tab) => tab.id !== 'record')),
+    [canUseRecording]
   );
+
+  const uploadHubDescription = canUseRecording
+    ? 'Upload files, import public links, process a YouTube video, convert text, or live-record audio into structured study material.'
+    : 'Upload files, import public links, process a YouTube video, or convert text into structured study material.';
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const stageTimerRef = useRef<number | null>(null);
@@ -1106,10 +1114,10 @@ export default function UploadModal({
   }, [isOpen]);
 
   useEffect(() => {
-    if (!onUploadRecording && activeTab === 'record') {
+    if (!canUseRecording && activeTab === 'record') {
       setActiveTab('files');
     }
-  }, [activeTab, onUploadRecording]);
+  }, [activeTab, canUseRecording]);
 
   useEffect(() => {
     if (recordingStatus !== 'recording') return;
@@ -1324,7 +1332,7 @@ export default function UploadModal({
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Create New Study Set</h2>
                 <p className="text-sm text-slate-600 dark:text-slate-300 mt-1.5">
-                  Upload files, import public links, process a YouTube video, convert text, or live-record audio into structured study material.
+                  {uploadHubDescription}
                 </p>
               </div>
               <button
@@ -1338,7 +1346,9 @@ export default function UploadModal({
             </div>
 
             <div className="px-6 sm:px-8 pt-5">
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 p-1.5 rounded-2xl bg-slate-100/90 dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10">
+              <div
+                className={`grid grid-cols-2 ${availableTabs.length >= 5 ? 'sm:grid-cols-5' : 'sm:grid-cols-4'} gap-2 p-1.5 rounded-2xl bg-slate-100/90 dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10`}
+              >
                 {availableTabs.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;

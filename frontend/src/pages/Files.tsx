@@ -50,6 +50,7 @@ interface UploadedFile {
   id: string;
   fileName: string;
   downloadUrl?: string | null;
+  sourceUrl?: string | null;
   originalName: string;
   fileType: string;
   fileSize: number;
@@ -815,7 +816,33 @@ export default function Files() {
     moveItemToFolder(moveItem, moveTargetFolderId);
   };
 
-  const getFileUrl = (file: UploadedFile) => {
+  const isExternalResourceFile = (file: UploadedFile): boolean => {
+    const type = String(file.fileType || '').toLowerCase();
+    const hasExternalSourceUrl =
+      typeof file.sourceUrl === 'string' && /^https?:\/\//i.test(file.sourceUrl);
+
+    return hasExternalSourceUrl || type.includes('youtube') || type.includes('text/url');
+  };
+
+  const canDownloadFile = (file: UploadedFile): boolean => {
+    if (isExternalResourceFile(file)) {
+      return false;
+    }
+
+    return Boolean(file.downloadUrl || file.fileName);
+  };
+
+  const getFileUrl = (file: UploadedFile, options?: { forDownload?: boolean }) => {
+    const forDownload = Boolean(options?.forDownload);
+
+    if (isExternalResourceFile(file)) {
+      if (forDownload) return null;
+      if (typeof file.sourceUrl === 'string' && /^https?:\/\//i.test(file.sourceUrl)) {
+        return file.sourceUrl;
+      }
+      return null;
+    }
+
     const relativeUrl =
       file.downloadUrl || (file.fileName ? `/uploads/${encodeURIComponent(file.fileName)}` : null);
 
@@ -875,7 +902,13 @@ export default function Files() {
       return;
     }
 
-    const fileUrl = getFileUrl(targetFile);
+    if (!canDownloadFile(targetFile)) {
+      toast.error('This source can be opened, but it is not downloadable');
+      setContextMenu(null);
+      return;
+    }
+
+    const fileUrl = getFileUrl(targetFile, { forDownload: true });
     if (!fileUrl) {
       toast.error('Unable to download this file');
       setContextMenu(null);
@@ -1049,6 +1082,10 @@ export default function Files() {
   }, [folders, moveItem]);
 
   const isMoveDestinationUnchanged = moveItemCurrentParentId === moveTargetFolderId;
+
+  const contextMenuFile =
+    contextMenu?.type === 'file' ? allFiles.find((file) => file.id === contextMenu.id) || null : null;
+  const canDownloadContextMenuFile = contextMenuFile ? canDownloadFile(contextMenuFile) : false;
 
   const isLoading = loadingFolders || loadingFiles;
 
@@ -1411,13 +1448,15 @@ export default function Files() {
                   <Eye className="w-4 h-4" />
                   View
                 </button>
-                <button
-                  onClick={handleDownloadFile}
-                  className="w-full px-4 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors duration-150 flex items-center gap-3 active:scale-95"
-                >
-                  <Download className="w-4 h-4" />
-                  Download
-                </button>
+                {canDownloadContextMenuFile && (
+                  <button
+                    onClick={handleDownloadFile}
+                    className="w-full px-4 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors duration-150 flex items-center gap-3 active:scale-95"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download
+                  </button>
+                )}
               </>
             )}
             <button
@@ -1611,6 +1650,7 @@ export default function Files() {
           onClose={() => setShowUploadModal(false)}
           onUploadFiles={handleUploadFiles}
           onUploadRecording={handleUploadRecording}
+          enableRecordingTab={true}
           onUploadYouTube={handleUploadYouTube}
           onUploadLink={handleUploadLink}
           isUploading={uploadMutation.isPending || recordingUploadMutation.isPending}

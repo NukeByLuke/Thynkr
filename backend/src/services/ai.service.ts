@@ -564,9 +564,13 @@ ${preparedText}`;
    * Generate custom content based on a provided prompt
    * Used for game generation and other flexible AI tasks
    */
-  async generateCustomContent(prompt: string): Promise<string> {
+  async generateCustomContent(
+    prompt: string,
+    options?: { disableCache?: boolean }
+  ): Promise<string> {
+    const disableCache = Boolean(options?.disableCache);
     const cacheKey = `custom_${this.hashText(prompt)}`;
-    const cached = cache.get<string>(cacheKey);
+    const cached = disableCache ? null : cache.get<string>(cacheKey);
 
     if (cached) {
       logger.info('Returning cached custom content');
@@ -590,10 +594,16 @@ ${sanitizedPrompt}`;
         throw new Error('Empty response from Gemini');
       }
 
-      cache.set(cacheKey, content);
+      if (!disableCache) {
+        cache.set(cacheKey, content);
+      }
 
       logger.info(
-        { promptLength: sanitizedPrompt.length, responseLength: content.length },
+        {
+          promptLength: sanitizedPrompt.length,
+          responseLength: content.length,
+          cacheBypassed: disableCache,
+        },
         'Custom content generated successfully'
       );
 

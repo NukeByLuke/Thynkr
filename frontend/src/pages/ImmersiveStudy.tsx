@@ -27,6 +27,8 @@ import {
   Clock3,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // Components
 import SummaryView from '@/features/study/SummaryView';
@@ -80,6 +82,14 @@ interface TutorChatMessage {
 
 function createTutorMessageId() {
   return `tutor-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function normalizeTutorMarkdown(content: string): string {
+  return String(content || '')
+    .replace(/(^|\n)H([1-6])\s*:\s*(.+)/gm, (_m, p1, lvl, txt) => `${p1}${'#'.repeat(Number(lvl))} ${String(txt).trim()}`)
+    .replace(/(^|\n)\s*H([1-6])\s+(.+)/gm, (_m, p1, lvl, txt) => `${p1}${'#'.repeat(Number(lvl))} ${String(txt).trim()}`)
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 // Tab configuration with icons
@@ -514,13 +524,21 @@ export default function ImmersiveStudy() {
               )}
 
               <div
-                className={`max-w-[86%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap shadow-sm ${
+                className={`max-w-[86%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
                   message.role === 'user'
                     ? 'rounded-br-md bg-gradient-to-br from-pink-600 to-fuchsia-600 dark:from-cyan-500 dark:to-violet-500 text-white shadow-fuchsia-500/30'
                     : 'rounded-bl-md bg-white/95 dark:bg-slate-900/90 border border-slate-200/70 dark:border-white/10 text-slate-800 dark:text-slate-200'
                 }`}
               >
-                {message.content}
+                {message.role === 'assistant' ? (
+                  <div className="prose prose-sm max-w-none dark:prose-invert prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-1 prose-headings:my-2 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {normalizeTutorMarkdown(message.content)}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  <span className="whitespace-pre-wrap">{message.content}</span>
+                )}
               </div>
 
               {message.role === 'user' && (
@@ -750,6 +768,13 @@ export default function ImmersiveStudy() {
 // ═══════════════════════════════════════════════════════════════════════════
 
 function getPreviewFileUrl(file: UploadedFile): string | null {
+  const hasExternalSourceUrl =
+    typeof file.sourceUrl === 'string' && /^https?:\/\//i.test(file.sourceUrl);
+
+  if (hasExternalSourceUrl) {
+    return null;
+  }
+
   const relativeUrl =
     file.downloadUrl || (file.fileName ? `/uploads/${encodeURIComponent(file.fileName)}` : null);
 
@@ -770,6 +795,15 @@ function getSourceUrl(file: UploadedFile): string | null {
   const extractedText = file.extractedText || '';
   const sourceMatch = extractedText.match(/^\s*Source URL:\s*(https?:\/\/\S+)/im);
   return sourceMatch?.[1] || null;
+}
+
+function isExternallySourcedFile(file: UploadedFile): boolean {
+  const type = String(file.fileType || '').toLowerCase();
+  return (
+    (typeof file.sourceUrl === 'string' && /^https?:\/\//i.test(file.sourceUrl)) ||
+    type.includes('youtube') ||
+    type.includes('text/url')
+  );
 }
 
 function getFileExtension(fileName?: string): string {
@@ -838,6 +872,7 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
   const isAudio = fileType.startsWith('audio/');
   const isWebLink = fileType.includes('text/url');
   const youtubeEmbedUrl = sourceUrl ? getYouTubeEmbedUrl(sourceUrl) : null;
+  const canDownload = Boolean(previewFileUrl) && !isExternallySourcedFile(file);
 
   const officeViewerUrl =
     absolutePreviewFileUrl && (isPowerPoint || isWordOrExcel)
@@ -856,7 +891,7 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
   };
 
   const downloadFile = () => {
-    if (!previewFileUrl) return;
+    if (!canDownload || !previewFileUrl) return;
 
     const link = document.createElement('a');
     link.href = previewFileUrl;
@@ -881,7 +916,7 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
               Open Original
             </button>
           )}
-          {previewFileUrl && !isWebLink && (
+          {canDownload && (
             <button
               onClick={downloadFile}
               className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-sm font-medium border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
