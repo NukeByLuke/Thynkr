@@ -113,15 +113,12 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation: strin
   ]);
 }
 
-// Chunk size target for streaming
-// First chunk is smaller (~200 chars) for near-instant playback
-// Subsequent chunks are larger (~2000 chars) for efficiency
-const FIRST_CHUNK_TARGET_SIZE = 200;
-const CHUNK_TARGET_SIZE = 2000;
-// Minimum chunk size to avoid very short audio clips
-const CHUNK_MIN_SIZE = 150;
-// Long texts are streamed chunk-by-chunk for much faster time-to-first-audio.
-const FAST_START_THRESHOLD = 2000;
+// Prefer a single synthesis request for normal payload sizes so the browser gets
+// reliable duration/progress metadata from one complete MP3 file.
+const SINGLE_REQUEST_MAX_CHARS = 4500;
+// For longer payloads, we still split into larger chunks and stitch server-side.
+const CHUNK_TARGET_SIZE = 4500;
+const CHUNK_MIN_SIZE = 1200;
 
 /**
  * Hard split overly long sentence-like content by words when punctuation
@@ -169,8 +166,7 @@ function splitByWordBoundary(text: string, maxSize: number): string[] {
 }
 
 /**
- * Split text into speakable chunks at sentence boundaries
- * First chunk is smaller for faster time-to-first-byte
+ * Split text into sentence-aligned chunks for oversized payloads.
  */
 function splitTextIntoChunks(text: string): string[] {
   const normalized = text.trim();
@@ -178,14 +174,13 @@ function splitTextIntoChunks(text: string): string[] {
     return [];
   }
 
-  // For short texts, return as-is
-  if (normalized.length <= FIRST_CHUNK_TARGET_SIZE) {
+  // Most requests stay as a single synthesis call for stable metadata.
+  if (normalized.length <= SINGLE_REQUEST_MAX_CHARS) {
     return [normalized];
   }
 
   const chunks: string[] = [];
   let currentChunk = '';
-  let isFirstChunk = true;
 
   // Split by sentences (period, exclamation, question mark followed by space or end)
   const sentences = normalized.split(/(?<=[.!?])\s+/);
@@ -194,22 +189,14 @@ function splitTextIntoChunks(text: string): string[] {
     const trimmed = sentence.trim();
     if (!trimmed) continue;
 
-    // Use smaller target for first chunk (near-instant playback)
-    let targetSize = isFirstChunk ? FIRST_CHUNK_TARGET_SIZE : CHUNK_TARGET_SIZE;
-    let minSize = isFirstChunk ? 100 : CHUNK_MIN_SIZE;
-
     // If punctuation splitting produced a very long segment, force chunking by words.
-    if (trimmed.length > targetSize) {
-      const forcedParts = splitByWordBoundary(trimmed, targetSize);
+    if (trimmed.length > CHUNK_TARGET_SIZE) {
+      const forcedParts = splitByWordBoundary(trimmed, CHUNK_TARGET_SIZE);
       for (const part of forcedParts) {
-        const partTargetSize = isFirstChunk ? FIRST_CHUNK_TARGET_SIZE : CHUNK_TARGET_SIZE;
-        const partMinSize = isFirstChunk ? 100 : CHUNK_MIN_SIZE;
-
-        if (currentChunk.length > 0 && currentChunk.length + part.length > partTargetSize) {
-          if (currentChunk.length >= partMinSize) {
+        if (currentChunk.length > 0 && currentChunk.length + 1 + part.length > CHUNK_TARGET_SIZE) {
+          if (currentChunk.length >= CHUNK_MIN_SIZE) {
             chunks.push(currentChunk.trim());
             currentChunk = part;
-            isFirstChunk = false;
           } else {
             currentChunk += ` ${part}`;
           }
@@ -221,12 +208,11 @@ function splitTextIntoChunks(text: string): string[] {
     }
 
     // If adding this sentence would exceed target and we already have content
-    if (currentChunk.length > 0 && currentChunk.length + trimmed.length > targetSize) {
+    if (currentChunk.length > 0 && currentChunk.length + 1 + trimmed.length > CHUNK_TARGET_SIZE) {
       // Only push if chunk meets minimum size
-      if (currentChunk.length >= minSize) {
+      if (currentChunk.length >= CHUNK_MIN_SIZE) {
         chunks.push(currentChunk.trim());
         currentChunk = trimmed;
-        isFirstChunk = false;
       } else {
         // Chunk is too small, keep adding
         currentChunk += ' ' + trimmed;
@@ -242,7 +228,7 @@ function splitTextIntoChunks(text: string): string[] {
     chunks.push(currentChunk.trim());
   }
 
-  return chunks.length > 0 ? chunks : [text.trim()];
+  return chunks.length > 0 ? chunks : [normalized];
 }
 
 // No pcmToWav needed — we use MP3 output directly from Google Cloud TTS
@@ -378,7 +364,7 @@ async function cacheAudio(hash: string, buffer: Buffer): Promise<void> {
 
 /**
  * Generate or retrieve cached audio for a text+voice combination.
- * For long texts, splits into chunks and generates all in parallel for speed.
+ * For oversized texts, splits into large chunks and generates in parallel.
  * Returns a complete MP3 buffer ready to serve with Content-Length.
  */
 async function generateOrGetCached(text: string, voice: Voice): Promise<Buffer> {
@@ -391,8 +377,8 @@ async function generateOrGetCached(text: string, voice: Voice): Promise<Buffer> 
     return cached;
   }
 
-  // 2. For short/medium texts (<=2000 chars), generate in a single API call
-  if (text.length <= FAST_START_THRESHOLD) {
+  // 2. For normal texts, generate in a single API call for stable metadata.
+  if (text.length <= SINGLE_REQUEST_MAX_CHARS) {
     const buffer = await generateGoogleTTS(text, voice);
     cacheAudio(hash, buffer).catch(() => {});
     return buffer;
@@ -611,25 +597,20 @@ export default async function ttsRoutes(server: FastifyInstance) {
         expiresAt: Date.now() + 60000 // 1 minute to start stream
       });
 
-      // Kick off eager generation for short/medium payloads.
-      // Long payloads are streamed with fast-start chunking in /stream for better UX.
-      if (normalizedText.length <= FAST_START_THRESHOLD) {
-        const genPromise = generateOrGetCached(normalizedText, voice);
-        pendingGenerations.set(token, genPromise);
-        // Auto-cleanup after 2 minutes
-        genPromise.finally(() => {
-          setTimeout(() => pendingGenerations.delete(token), 120000);
-        });
-      }
+      // Kick off eager generation for every request so /stream can return quickly.
+      const genPromise = generateOrGetCached(normalizedText, voice);
+      pendingGenerations.set(token, genPromise);
+      // Auto-cleanup after 2 minutes
+      genPromise.finally(() => {
+        setTimeout(() => pendingGenerations.delete(token), 120000);
+      });
 
       return reply.send({ token, url: `/api/tts/stream/${token}` });
     }
   );
 
   /**
-   * GET /api/tts/stream/:token - Serve generated audio
-   * Short texts: serves complete buffer with Content-Length.
-   * Long texts: streams chunk-by-chunk to start playback sooner.
+  * GET /api/tts/stream/:token - Serve generated audio as a complete MP3 buffer.
    */
   server.get(
     '/tts/stream/:token',
@@ -662,61 +643,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
           return reply.send(cachedAudio);
         }
 
-        // 2) Fast-start mode for long payloads: stream chunks as they complete.
-        if (data.text.length > FAST_START_THRESHOLD) {
-          const chunks = splitTextIntoChunks(data.text);
-          if (chunks.length === 0) {
-            pendingGenerations.delete(token);
-            streamTokens.delete(token);
-            return reply.status(400).send({ error: 'No text to stream' });
-          }
-
-          logger.info({ token, userId, chunkCount: chunks.length, textLength: data.text.length }, 'Starting fast-start chunked TTS stream');
-
-          // Start all chunk generations in parallel; first chunk is intentionally short.
-          const chunkPromises = chunks.map((chunk) => generateGoogleChunk(chunk, data.voice));
-          const chunkBuffers: Buffer[] = new Array(chunks.length);
-
-          // Ensure first chunk is ready before hijacking response.
-          const firstChunk = await chunkPromises[0];
-          chunkBuffers[0] = firstChunk;
-
-          reply.hijack();
-          const raw = reply.raw;
-          raw.statusCode = 200;
-          raw.setHeader('Content-Type', 'audio/mpeg');
-          raw.setHeader('Cache-Control', 'private, max-age=3600');
-          raw.setHeader('X-TTS-Provider', 'google-cloud');
-          raw.setHeader('X-TTS-Cached', 'false');
-          raw.setHeader('X-TTS-Mode', 'chunked-faststart');
-
-          raw.write(firstChunk);
-
-          try {
-            for (let i = 1; i < chunkPromises.length; i += 1) {
-              const nextChunk = await chunkPromises[i];
-              chunkBuffers[i] = nextChunk;
-              raw.write(nextChunk);
-            }
-
-            raw.end();
-
-            const combined = Buffer.concat(chunkBuffers);
-            cacheAudio(cacheHash, combined).catch(() => {});
-          } catch (streamErr: any) {
-            logger.error({ error: streamErr.message, token, userId }, 'Chunked TTS stream failed mid-stream');
-            if (!raw.writableEnded) {
-              raw.end();
-            }
-          } finally {
-            pendingGenerations.delete(token);
-            streamTokens.delete(token);
-          }
-
-          return;
-        }
-
-        // 3) Short payload path (full buffer for reliable seeking/duration).
+        // 2) Serve complete buffer for reliable seeking/duration.
         const pending = pendingGenerations.get(token);
         const buffer = pending
           ? await pending
