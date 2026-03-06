@@ -1,91 +1,126 @@
 <div align="center">
 
-# Luke DVLPR
+# Thynkr
 
-### Full-Stack Developer | AI Product Builder | Red Deer Polytechnic Graduate
+### AI-Powered Learning Platform
 
-![Private Source](https://img.shields.io/badge/Source-Private-black?style=for-the-badge&logo=github)
-![Red Deer Polytechnic](https://img.shields.io/badge/Red%20Deer%20Polytechnic-Computer%20Programming%20Diploma-C8102E?style=for-the-badge)
-![Production Ready](https://img.shields.io/badge/Status-Production%20Deployed-0A7E3B?style=for-the-badge)
-![CI](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
-
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
-![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)
-![Fastify](https://img.shields.io/badge/Fastify-000000?style=flat-square&logo=fastify&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-5FA04E?style=flat-square&logo=node.js&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=redis&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=flat-square&logo=prisma&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
-![Nginx](https://img.shields.io/badge/Nginx-009639?style=flat-square&logo=nginx&logoColor=white)
-![DigitalOcean](https://img.shields.io/badge/DigitalOcean-0080FF?style=flat-square&logo=digitalocean&logoColor=white)
-![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=flat-square&logo=openai&logoColor=white)
-![Stripe](https://img.shields.io/badge/Stripe-635BFF?style=flat-square&logo=stripe&logoColor=white)
+[![CI](https://github.com/NukeByLuke/Thynkr/actions/workflows/ci.yml/badge.svg)](https://github.com/NukeByLuke/Thynkr/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/NukeByLuke/Thynkr/actions/workflows/codeql.yml/badge.svg)](https://github.com/NukeByLuke/Thynkr/actions/workflows/codeql.yml)
+[![Deploy](https://github.com/NukeByLuke/Thynkr/actions/workflows/deploy.yml/badge.svg)](https://github.com/NukeByLuke/Thynkr/actions/workflows/deploy.yml)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-18-20232A?logo=react&logoColor=61DAFB)
+![Fastify](https://img.shields.io/badge/Fastify-5-000000?logo=fastify&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
 
 </div>
 
-## Profile Highlight
-This repository represents real-world, production-grade work from my full-stack development journey.  
-The implementation is private-source by design, but the architecture, problem-solving depth, and engineering outcomes are showcased here.
+## Overview
+Thynkr transforms static study material into interactive learning experiences.
 
-## Featured Build: Thynkr
-Thynkr is an AI-powered learning platform that transforms lectures, files, and web content into active study tools.
+It ingests uploaded files, web links, and media sources, then generates study outputs like summaries, quizzes, and flashcards through AI workflows. The platform is built as a full-stack application with a modern React frontend and a Fastify API backend.
 
-Key product capabilities:
-- AI-generated quizzes, flashcards, and summaries
-- Immersive study modes with progress tracking
-- Gamification systems (streaks, XP, milestones)
-- Subscription and billing workflows
-- Production deployment and operational monitoring
+## Core Features
+- AI study generation: summaries, flashcards, and quiz flows.
+- Immersive study mode with keyboard-friendly interactions.
+- File and source management for mixed learning inputs.
+- Progress and engagement systems for sustained study habits.
+- Role-aware product behavior for free and paid tiers.
 
-## Skills Built Through Red Deer Polytechnic (Computer Programming Diploma)
-Core foundations developed through formal training:
-- Programming fundamentals and computational thinking
-- Object-oriented design and clean code practices
-- Data structures, algorithms, and problem decomposition
-- Relational database modeling and SQL
-- Software testing, debugging, and quality assurance
-- Team collaboration, version control, and project workflows
-- Requirements analysis and software lifecycle execution
+## Tech Stack
 
-## Skills Demonstrated in This Production Project
+### Frontend
+- React + TypeScript
+- Vite
+- Tailwind CSS + Framer Motion
+- TanStack Query
 
-### Frontend Engineering
-- React + TypeScript application architecture
-- Component design, reusable UI systems, and state management
-- Responsive design, accessibility practices, and UX iteration
-- API integration patterns and client-side performance optimization
+### Backend
+- Node.js + Fastify
+- Prisma ORM
+- PostgreSQL
+- Redis
 
-### Backend and API Development
-- Fastify/Node.js service design and modular route architecture
-- Authentication, authorization, and role-based access control
-- File processing pipelines and async job flows
-- API hardening, validation, and error handling strategies
+### Infrastructure
+- Docker and Docker Compose
+- Nginx reverse proxy
+- DigitalOcean deployment target
+- GitHub Actions CI/CD
 
-### Data and AI Integration
-- PostgreSQL schema design and Prisma ORM workflows
-- Redis usage for caching and performance support
-- AI pipeline integration for content generation and learning workflows
-- Prompt and output handling tuned for educational use cases
+## Project Structure
+```text
+thynkr/
+	backend/
+		prisma/
+		src/
+	frontend/
+		src/
+	scripts/
+	.github/workflows/
+	docker-compose.yml
+	docker-compose.prod.yml
+```
 
-### Cloud, DevOps, and Delivery
-- Dockerized multi-service environments
-- Nginx reverse proxy and production traffic routing
-- DigitalOcean deployment and container lifecycle management
-- CI/CD with GitHub Actions and release workflow maintenance
-- Incident response, hotfix deployment, and post-deploy verification
+## Local Setup
 
-## Engineering Outcomes
-- Designed and shipped user-facing AI study experiences end-to-end
-- Diagnosed and fixed real production issues under active usage
-- Established safer deployment and CI practices to reduce breakage noise
-- Maintained iterative delivery across UI, backend, and infrastructure layers
+### Prerequisites
+- Node.js 20+
+- pnpm 8+
+- Docker Desktop
 
-## Current Focus
-- Scalable AI-assisted learning workflows
-- High-quality full-stack product development
-- Platform reliability, developer experience, and maintainable architecture
+### 1) Install dependencies
+```bash
+pnpm install
+```
 
-## Notes
-- Source code links are intentionally omitted.
-- This repository is presented as a skills and outcomes showcase.
+### 2) Start local services
+```bash
+docker compose up -d postgres redis
+```
+
+### 3) Generate Prisma client
+```bash
+pnpm --filter backend db:generate
+```
+
+### 4) Run migrations
+```bash
+pnpm --filter backend db:migrate
+```
+
+### 5) Start app
+```bash
+pnpm dev
+```
+
+Frontend default: `http://localhost:5173`  
+Backend default: `http://localhost:3001`
+
+## Quality Commands
+```bash
+pnpm lint
+pnpm typecheck
+pnpm build
+```
+
+## Deployment
+Production deployment is orchestrated through Docker images and a remote compose stack.
+
+Primary script:
+```powershell
+./scripts/deploy.ps1
+```
+
+Useful flags:
+```powershell
+./scripts/deploy.ps1 -Component frontend -SkipTests
+./scripts/deploy.ps1 -Component backend
+./scripts/deploy.ps1 -NoCache
+```
+
+## Security and Operations Notes
+- Secrets are managed through environment variables and deployment secrets.
+- CI is configured to run lint/build checks and conditionally run tests when suites exist.
+- CodeQL scanning is enabled for JavaScript/TypeScript analysis.
+
+## License
+MIT (see `LICENSE`).
