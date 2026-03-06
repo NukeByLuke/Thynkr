@@ -1456,23 +1456,6 @@ export default function UploadModal({
                         PDF, DOCX, PPTX, TXT • Max 50MB each
                       </div>
 
-                      {onUploadRecording && (
-                        <div className="mt-4 flex items-center justify-center">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setActiveTab('record');
-                            }}
-                            disabled={isLocked}
-                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-400 hover:to-rose-500 text-white text-sm font-semibold shadow-lg shadow-red-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <Mic className="w-4 h-4" />
-                            Record New Lecture
-                          </button>
-                        </div>
-                      )}
-
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-4">
                         {currentFolderId
                           ? 'Files will be added to your current folder.'
