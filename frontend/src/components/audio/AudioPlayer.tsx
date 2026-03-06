@@ -55,23 +55,6 @@ interface TTSPreferences {
 let globalAudioInstance: HTMLAudioElement | null = null;
 let globalStopCallback: (() => void) | null = null;
 
-// In-memory cache for streaming URLs (not blobs)
-const audioCache = new Map<string, string>();
-
-function fnv1aHash(value: string): string {
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < value.length; i += 1) {
-    hash ^= value.charCodeAt(i);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return (hash >>> 0).toString(16);
-}
-
-function generateCacheKey(text: string, voice: TTSVoice): string {
-  // Full-text hash prevents collisions for similarly prefixed content.
-  return `${voice}:${text.length}:${fnv1aHash(text)}`;
-}
-
 /**
  * Build full backend URL for streaming
  */
@@ -435,31 +418,20 @@ export default function AudioPlayer({
 
     try {
       // NOTE: We always request speed: 1 from server to allow client-side speed changes without regeneration
-      const cacheKey = generateCacheKey(text, voice);
-      let audioUrl: string;
+      abortControllerRef.current = new AbortController();
 
-      if (audioCache.has(cacheKey)) {
-        audioUrl = audioCache.get(cacheKey)!;
-      } else {
-        abortControllerRef.current = new AbortController();
+      // Negotiate for a fresh streaming URL (tokens are short-lived).
+      const response = await api.post(
+        '/tts/negotiate',
+        { text, voice, speed: 1 },
+        { signal: abortControllerRef.current.signal }
+      );
 
-        // Negotiate for streaming URL (fast — server starts generation immediately)
-        const response = await api.post(
-          '/tts/negotiate',
-          { text, voice, speed: 1 }, 
-          { signal: abortControllerRef.current.signal }
-        );
-
-        if (!response.data.url) {
-          throw new Error('No stream URL returned');
-        }
-
-        // Build full streaming URL
-        audioUrl = buildStreamUrl(response.data.url);
-        
-        // Cache the URL for voice change resume
-        audioCache.set(cacheKey, audioUrl);
+      if (!response.data.url) {
+        throw new Error('No stream URL returned');
       }
+
+      const audioUrl = buildStreamUrl(response.data.url);
 
       if (!audioRef.current) {
         audioRef.current = new Audio();
@@ -477,7 +449,6 @@ export default function AudioPlayer({
       audio.onerror = () => {
         setIsPlaying(false);
         setIsLoading(false);
-        audioCache.delete(cacheKey);
         toast.error('Failed to play audio');
       };
       

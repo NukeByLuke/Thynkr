@@ -33,30 +33,6 @@ interface UseTTSReturn {
 let globalAudioInstance: HTMLAudioElement | null = null;
 let globalStopCallback: (() => void) | null = null;
 
-// In-memory cache for streaming URLs (session-based)
-// Note: These are backend stream URLs, not blob URLs
-const audioCache = new Map<string, string>(); // key: hash, value: stream URL
-
-/**
- * Fast non-cryptographic hash for cache keys.
- */
-function fnv1aHash(value: string): string {
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < value.length; i += 1) {
-    hash ^= value.charCodeAt(i);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return (hash >>> 0).toString(16);
-}
-
-/**
- * Generate cache key from full text + voice.
- * Uses full-content hash to avoid collisions between similarly prefixed texts.
- */
-function generateCacheKey(text: string, voice?: TTSVoice): string {
-  return `${voice || 'default'}:${text.length}:${fnv1aHash(text)}`;
-}
-
 /**
  * Build full backend URL for streaming
  */
@@ -215,41 +191,29 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
     try {
       const voice = options.voice ?? preferredVoice ?? undefined;
       const speed = Math.min(4, Math.max(0.25, typeof options.speed === 'number' ? options.speed : (preferredSpeed ?? 1.0)));
-      const cacheKey = generateCacheKey(cleanText, voice);
 
-      let audioUrl: string;
+      // Negotiate for a fresh streaming URL (tokenized URLs are short-lived).
+      abortControllerRef.current = new AbortController();
 
-      // Check cache first (cached URLs may have expired, but browser handles that)
-      if (audioCache.has(cacheKey)) {
-        audioUrl = audioCache.get(cacheKey)!;
-      } else {
-        // Negotiate for streaming URL (fast - just returns a token)
-        abortControllerRef.current = new AbortController();
+      const payload: Record<string, unknown> = {
+        text: cleanText,
+      };
 
-        const payload: Record<string, unknown> = {
-          text: cleanText,
-        };
-
-        if (voice) {
-          payload.voice = voice;
-        }
-        
-        const response = await api.post(
-          '/tts/negotiate',
-          payload,
-          { signal: abortControllerRef.current.signal }
-        );
-
-        if (!response.data.url) {
-          throw new Error('No stream URL returned');
-        }
-
-        // Build full streaming URL
-        audioUrl = buildStreamUrl(response.data.url);
-
-        // Cache the URL for reuse (tokens expire in 1 min but cached audio persists)
-        audioCache.set(cacheKey, audioUrl);
+      if (voice) {
+        payload.voice = voice;
       }
+
+      const response = await api.post(
+        '/tts/negotiate',
+        payload,
+        { signal: abortControllerRef.current.signal }
+      );
+
+      if (!response.data.url) {
+        throw new Error('No stream URL returned');
+      }
+
+      const audioUrl = buildStreamUrl(response.data.url);
 
       // Create or reuse audio element with preload for instant start
       if (!audioRef.current) {
@@ -283,8 +247,6 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
       audio.onerror = () => {
         setIsPlaying(false);
         setIsLoading(false);
-        // Remove failed URL from cache so it can be re-negotiated
-        audioCache.delete(cacheKey);
         setError('Failed to play audio');
         options.onPlayEnd?.();
         toast.error('Failed to play audio');
