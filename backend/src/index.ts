@@ -35,6 +35,7 @@ import ttsRoutes from './routes/tts.routes';
 import courseStudyRoutes from './routes/course-study.routes';
 import oauthRoutes from './routes/oauth.routes';
 import ogRoutes from './routes/og.routes';
+import supportRoutes from './routes/support.routes';
 import { errorHandler } from './middleware/error-handler';
 
 /**
@@ -173,6 +174,7 @@ async function start() {
     await server.register(studyPackRoutes, { prefix: '/api' });
     await server.register(ttsRoutes, { prefix: '/api' });
     await server.register(courseStudyRoutes, { prefix: '/api' });
+    await server.register(supportRoutes, { prefix: '/api/support' });
 
     // OG meta tag routes for social media crawlers (no /api prefix)
     await server.register(ogRoutes, { prefix: '/og' });

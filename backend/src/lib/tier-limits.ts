@@ -25,7 +25,7 @@ export const TIER_LIMITS: Record<string, TierLimits> = {
     canCreatePublicCourses: false,
     canUseTutor: false,
     canProcessYouTube: false,
-    hasEmailSupport: false,
+    hasEmailSupport: true,
     hasPrioritySupport: false,
   },
   STANDARD: {
