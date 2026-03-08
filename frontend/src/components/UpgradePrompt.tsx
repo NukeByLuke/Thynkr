@@ -131,14 +131,13 @@ export const FEATURE_TIERS = {
   flashcards: 'BASIC',
   basicNotes: 'BASIC',
   basicQuizzes: 'BASIC',
+  emailSupport: 'BASIC',
 
   // Standard features
   privateCourses: 'STANDARD',
   shareLinks: 'STANDARD',
   increasedUploads: 'STANDARD',
   increasedAI: 'STANDARD',
-  emailSupport: 'STANDARD',
-
   // Premium features
   aiTutor: 'PREMIUM',
   publicCourses: 'PREMIUM',
