@@ -1,323 +1,539 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { motion } from 'framer-motion';
+import {
+  ArrowRight,
+  Brain,
+  Check,
+  Clock,
+  FileText,
+  Heart,
+  Quote,
+  Sparkles,
+  Upload,
+} from 'lucide-react';
+
+// UI Components
 import Button from '@/components/ui/Button';
-import { ArrowRight, Brain, Check, FileText, Quote, Upload } from 'lucide-react';
+import Card from '@/components/ui/Card';
+import GlassCard from '@/components/ui/GlassCard';
+import GradientText from '@/components/ui/GradientText';
+import BackgroundShapes from '@/components/ui/BackgroundShapes';
 
 const studyFlow = [
   {
     step: '01',
-    title: 'Collect everything in one place',
-    detail: 'Upload chapters, lecture slides, notes, and transcripts in a single workspace.',
+    title: 'Drop your course files in one place',
+    detail: 'Upload chapters, lecture slides, and rough notes without needing to clean them first.',
     icon: Upload,
     visualTitle: 'Source stack ready',
-    visualRows: ['chapter-08-reading.pdf', 'lecture-slides-week5.pptx', 'review-notes.docx'],
+    visualRows: ['chapter-08-reading.pdf', 'lecture-slides-week5.pptx', 'messy-midterm-notes.docx'],
   },
   {
     step: '02',
-    title: 'Generate concise summaries',
-    detail: 'Convert dense reading into short, structured takeaways that are easier to retain.',
+    title: 'Get a "what matters tonight" summary',
+    detail: 'Thynkr pulls key ideas and simplifies dense language into a focused game plan.',
     icon: FileText,
     visualTitle: 'Summary output',
-    visualRows: ['6 key points extracted', '3 definitions simplified', '2 examples rewritten clearly'],
+    visualRows: [
+      '6 key points extracted',
+      '3 confusing terms simplified',
+      '2 examples rewritten clearly',
+    ],
   },
   {
     step: '03',
-    title: 'Review with flashcards and quizzes',
-    detail: 'Practice from the same source context so studying feels focused instead of fragmented.',
+    title: 'Practice with source-linked flashcards and quizzes',
+    detail: 'Study from the same source context so you stop re-reading and start retaining.',
     icon: Brain,
     visualTitle: 'Practice set generated',
-    visualRows: ['12 flashcards linked to source', '8-question quiz with feedback', 'Weak areas highlighted automatically'],
+    visualRows: [
+      '12 flashcards linked to source',
+      '8-question quiz with feedback',
+      'Weak areas highlighted automatically',
+    ],
   },
 ];
 
-const clarityPoints = [
-  'Readable summaries in plain language',
-  'Clear key points without extra noise',
-  'Flashcards and quizzes linked to the same material',
-  'A calmer workflow for heavy reading weeks',
+const benefits = [
+  'Free to start, no credit card',
+  'Save 5+ hours per week',
+  '15-minute study sessions',
 ];
 
-const trustSignals = [
-  'Used during exam-week crunch time',
-  'Built for dense reading workloads',
-  'Designed for low-friction review sessions',
+const stats = [
+  { value: '10,000+', label: 'Study packs created', icon: Brain },
+  { value: '50,000+', label: 'Hours saved', icon: Clock },
+  { value: '95%', label: 'Student satisfaction', icon: Heart },
 ];
 
 const testimonials = [
   {
-    quote: 'I finally stopped re-reading the same paragraph for an hour. The summary gives me a starting point right away.',
+    quote:
+      'I finally stopped re-reading the same paragraph for an hour. The summary gives me a starting point right away.',
     role: 'First-year nursing student',
   },
   {
-    quote: 'The best part is continuity. My flashcards and quiz come from the exact same source, so I stay in context.',
+    quote:
+      'The best part is continuity. My flashcards and quiz come from the exact same source, so I stay in context.',
     role: 'Engineering undergrad',
   },
   {
-    quote: 'When I am tired, this helps me still get a complete study session done instead of skipping it entirely.',
+    quote:
+      'When I am tired, this helps me still get a complete study session done instead of skipping it entirely.',
     role: 'Working adult learner',
   },
 ];
 
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: 'spring' as const,
+      stiffness: 300,
+      damping: 30,
+    },
+  },
+};
+
 export default function Landing() {
+  const navigate = useNavigate();
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  const handleCTAClick = (route: string) => {
+    setIsNavigating(true);
+    navigate(route);
+  };
+
   return (
     <>
       <Helmet>
-        <title>Thynkr | Study Smarter with AI</title>
+        <title>Thynkr | Turn Reading into 15-Minute Study Plans</title>
         <meta
           name="description"
-          content="Thynkr turns overwhelming reading into clear, digestible summaries, flashcards, and quizzes so studying feels manageable again."
+          content="Transform overwhelming course reading into focused study packs with AI-generated summaries, flashcards, and quizzes. Save 5+ hours per week."
         />
       </Helmet>
 
-      <div className="bg-[#FAFAFA] dark:bg-slate-950">
-        <section className="pb-12 pt-16 md:pb-14 md:pt-20">
-          <div className="mx-auto max-w-6xl px-6 lg:px-10">
-            <div className="grid items-center gap-12 lg:grid-cols-[1.03fr_0.97fr]">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
-                  Built for overwhelming reading loads
-                </p>
-                <h1 className="mt-4 max-w-3xl text-4xl font-semibold leading-tight text-slate-900 dark:text-white md:text-5xl lg:text-6xl">
-                  Turn heavy reading into clear, easy-to-digest study packs.
-                </h1>
-                <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-700 dark:text-slate-300">
-                  When chapters pile up and focus is low, Thynkr helps you break long material into concise summaries, flashcards, and quizzes you can actually finish.
-                </p>
+      {/* Skip to main content link for accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-slate-900 focus:rounded-lg focus:shadow-lg"
+      >
+        Skip to main content
+      </a>
 
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <Button
-                    size="lg"
-                    className="!rounded-full !bg-brand-600 !from-brand-600 !via-brand-600 !to-brand-600 !shadow-[0_14px_28px_rgba(192,38,211,0.22)] hover:!-translate-y-0.5 hover:!from-brand-700 hover:!via-brand-700 hover:!to-brand-700"
-                    onClick={() => (window.location.href = '/register')}
+      <main id="main-content">
+        {/* Hero Section */}
+        <div className="relative overflow-hidden min-h-[90vh] flex items-center bg-gradient-to-b from-rose-50 via-orange-50/70 to-stone-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
+          <BackgroundShapes />
+
+          <div className="relative w-full">
+            <div className="max-w-6xl mx-auto px-6 py-20">
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={containerVariants}
+                className="grid lg:grid-cols-2 gap-12 items-center"
+              >
+                {/* Left: Content */}
+                <motion.div variants={itemVariants}>
+                  {/* Badge */}
+                  <motion.span
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="inline-flex items-center gap-2 rounded-full border border-rose-200/60 dark:border-cyan-500/30 bg-white/90 dark:bg-slate-900/70 backdrop-blur-sm px-4 py-2 text-xs font-semibold uppercase tracking-wider"
                   >
-                    Start free
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="!rounded-full !border-stone-300 !bg-white/80 hover:!bg-white dark:!border-slate-700 dark:!bg-slate-900/70"
-                    onClick={() => (window.location.href = '/login')}
+                    <Sparkles className="h-4 w-4 text-brand-600 dark:text-cyan-400" />
+                    Hate reading? Start here
+                  </motion.span>
+
+                  {/* Headline with gradient emphasis */}
+                  <h1
+                    id="hero-heading"
+                    className="mt-6 text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-stone-900 dark:text-white"
                   >
-                    I already have an account
-                  </Button>
-                </div>
+                    Turn tonight&apos;s overwhelming reading into a clear{' '}
+                    <GradientText className="text-4xl md:text-5xl lg:text-6xl">
+                      15-minute study plan
+                    </GradientText>
+                  </h1>
 
-                <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-600 dark:text-slate-400">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Check className="h-4 w-4 text-emerald-500" />
-                    No credit card required
-                  </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <Check className="h-4 w-4 text-emerald-500" />
-                    Upload notes, PDFs, and lecture slides
-                  </span>
-                </div>
-              </div>
+                  {/* Subheadline */}
+                  <p className="mt-6 text-lg leading-relaxed text-slate-700 dark:text-slate-300">
+                    When studying feels way too hard, Thynkr reads first and gives you focused summaries,
+                    flashcards, and quizzes from the exact material you uploaded.
+                  </p>
 
-              <div className="mx-auto w-full max-w-[520px]">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
-                  Product UI Preview
-                </p>
-                <div className="relative mt-3 h-[350px] sm:h-[390px]">
-                  <article className="absolute left-0 top-9 w-[78%] rounded-2xl border border-stone-200/90 bg-white/88 p-5 backdrop-blur-md shadow-[0_20px_40px_rgba(0,0,0,0.04)] dark:border-slate-700/80 dark:bg-slate-900/80">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
-                      Summary
-                    </p>
-                    <h3 className="mt-2 text-base font-semibold text-slate-900 dark:text-white">Chapter 4 in 6 key points</h3>
-                    <ul className="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
-                      <li className="flex items-start gap-2">
-                        <span className="mt-2 h-1.5 w-1.5 rounded-full bg-brand-500" />
-                        Main idea and definitions pulled first
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="mt-2 h-1.5 w-1.5 rounded-full bg-brand-500" />
-                        Examples simplified into plain language
-                      </li>
-                    </ul>
-                  </article>
+                  {/* CTAs */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="mt-8 flex flex-col sm:flex-row gap-4"
+                  >
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      className="rounded-full"
+                      isLoading={isNavigating}
+                      onClick={() => handleCTAClick('/register')}
+                      aria-label="Create your free study pack and start learning"
+                    >
+                      Create my free study pack
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="rounded-full"
+                      onClick={() =>
+                        document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })
+                      }
+                    >
+                      See how it works
+                    </Button>
+                  </motion.div>
 
-                  <article className="absolute right-0 top-0 w-[60%] rounded-2xl border border-stone-200/90 bg-white/92 p-4 backdrop-blur-md shadow-[0_20px_40px_rgba(0,0,0,0.04)] dark:border-slate-700/80 dark:bg-slate-900/82">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
-                      Flashcard
-                    </p>
-                    <p className="mt-3 text-sm font-medium text-slate-900 dark:text-white">
-                      Q: What does opportunity cost measure?
-                    </p>
-                    <div className="mt-4 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
-                      A: The value of the best alternative you did not choose.
+                  {/* Benefits checklist */}
+                  <ul className="mt-8 space-y-3">
+                    {benefits.map((benefit, index) => (
+                      <motion.li
+                        key={benefit}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.6 + index * 0.1 }}
+                        className="flex items-center gap-3 text-slate-700 dark:text-slate-300"
+                      >
+                        <Check className="h-5 w-5 text-emerald-500 flex-shrink-0" aria-hidden="true" />
+                        <span>{benefit}</span>
+                      </motion.li>
+                    ))}
+                  </ul>
+                </motion.div>
+
+                {/* Right: Premium Preview */}
+                <motion.div variants={itemVariants}>
+                  <GlassCard className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Before → After
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-fuchsia-600 via-rose-500 to-orange-500 dark:from-cyan-400 dark:via-blue-400 dark:to-violet-400 px-3 py-1 text-xs font-bold text-white">
+                        <Sparkles className="h-3 w-3" />
+                        AI
+                      </span>
                     </div>
-                  </article>
 
-                  <article className="absolute bottom-0 right-4 w-[70%] rounded-2xl border border-stone-200/90 bg-white/92 p-4 backdrop-blur-md shadow-[0_20px_40px_rgba(0,0,0,0.04)] dark:border-slate-700/80 dark:bg-slate-900/84">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
-                      Quiz
-                    </p>
-                    <p className="mt-2 text-sm font-medium text-slate-900 dark:text-white">
-                      Which statement is most accurate?
-                    </p>
-                    <div className="mt-3 space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                      <p className="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-brand-700 dark:border-brand-700 dark:bg-brand-900/30 dark:text-brand-200">
-                        Correct: Scarcity exists even with growth.
+                    <div className="grid sm:grid-cols-2 gap-3 mt-5">
+                      <article className="rounded-2xl border border-rose-100 bg-rose-50/80 p-4 dark:border-slate-700 dark:bg-slate-950/80">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-rose-700 dark:text-slate-400">
+                          Before
+                        </p>
+                        <p className="mt-2 text-sm font-medium text-slate-800 dark:text-slate-200">
+                          62 pages of readings, 3 slide decks, and no idea where to start.
+                        </p>
+                      </article>
+
+                      <article className="rounded-2xl border border-emerald-100 bg-emerald-50/80 p-4 dark:border-emerald-600/30 dark:bg-emerald-900/10">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                          After
+                        </p>
+                        <p className="mt-2 text-sm font-medium text-slate-800 dark:text-slate-100">
+                          6 key ideas, 12 flashcards, and 1 focused quiz for tonight.
+                        </p>
+                      </article>
+                    </div>
+
+                    <div className="mt-4 grid gap-2 text-xs text-slate-600 dark:text-slate-300 sm:grid-cols-3">
+                      <p className="rounded-xl border border-stone-200 bg-white/85 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/85">
+                        62 pages uploaded
                       </p>
-                      <p className="rounded-lg border border-stone-200 px-3 py-2 dark:border-slate-700">
-                        Review explanation and source line
+                      <p className="rounded-xl border border-stone-200 bg-white/85 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/85">
+                        11-minute summary
+                      </p>
+                      <p className="rounded-xl border border-stone-200 bg-white/85 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/85">
+                        Quiz ready instantly
                       </p>
                     </div>
-                  </article>
-                </div>
-              </div>
+                  </GlassCard>
+                </motion.div>
+              </motion.div>
             </div>
           </div>
-        </section>
+        </div>
 
-        <section className="border-y border-stone-200/80 py-24 dark:border-slate-800/90 md:py-28">
-          <div className="mx-auto max-w-6xl px-6 lg:px-10">
-            <div className="max-w-3xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+        {/* How It Works Section */}
+        <section
+          id="how-it-works"
+          aria-labelledby="how-it-works-heading"
+          className="py-24 bg-gradient-to-b from-transparent to-slate-50/50 dark:to-slate-900/30 border-t border-stone-200/80 dark:border-slate-800/90"
+        >
+          <div className="max-w-6xl mx-auto px-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center max-w-2xl mx-auto mb-16"
+            >
+              <p className="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
                 How it works
               </p>
-              <h2 className="mt-3 text-3xl font-semibold leading-tight text-slate-900 dark:text-white md:text-4xl">
-                A calm, step-by-step path from overload to clarity.
+              <h2
+                id="how-it-works-heading"
+                className="text-3xl md:text-4xl font-bold text-stone-900 dark:text-white"
+              >
+                From chaos to clarity in <GradientText>three simple steps</GradientText>
               </h2>
-            </div>
+            </motion.div>
 
-            <div className="mt-14 space-y-10 md:space-y-14">
-              {studyFlow.map((item, index) => {
-                const Icon = item.icon;
+            <div className="space-y-12">
+              {studyFlow.map((step, index) => {
                 const isReversed = index % 2 === 1;
+                const Icon = step.icon;
 
                 return (
-                  <article
-                    key={item.title}
-                    className="grid items-center gap-6 rounded-2xl border border-stone-200 bg-white/70 p-6 dark:border-slate-700 dark:bg-slate-900/45 md:p-8 lg:grid-cols-2 lg:gap-14"
+                  <motion.div
+                    key={step.step}
+                    initial={{ opacity: 0, x: isReversed ? 30 : -30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: '-50px' }}
+                    transition={{ duration: 0.5 }}
                   >
-                    <div className={isReversed ? 'lg:order-2' : 'lg:order-1'}>
-                      <p className="text-xs font-semibold tracking-[0.14em] text-slate-500 dark:text-slate-400">
-                        STEP {item.step}
-                      </p>
-                      <h3 className="mt-3 text-2xl font-semibold text-slate-900 dark:text-white">{item.title}</h3>
-                      <p className="mt-3 max-w-xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                        {item.detail}
-                      </p>
-                    </div>
-
-                    <div className={isReversed ? 'lg:order-1' : 'lg:order-2'}>
-                      <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-[0_20px_40px_rgba(0,0,0,0.04)] dark:border-slate-700 dark:bg-slate-950/80">
-                        <div className="flex items-center gap-3">
-                          <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 text-brand-700 dark:border-brand-800 dark:bg-brand-900/20 dark:text-brand-200">
-                            <Icon className="h-5 w-5" />
-                          </span>
-                          <p className="text-sm font-semibold text-slate-900 dark:text-white">{item.visualTitle}</p>
-                        </div>
-
-                        <div className="mt-4 space-y-2">
-                          {item.visualRows.map((row) => (
-                            <div
-                              key={row}
-                              className="rounded-lg border border-stone-200/80 bg-stone-50/70 px-3 py-2 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
-                            >
-                              {row}
-                            </div>
-                          ))}
-                        </div>
+                    <GlassCard
+                      variant="hover"
+                      className={`grid lg:grid-cols-2 gap-8 items-center p-8 ${
+                        isReversed ? 'lg:grid-flow-dense' : ''
+                      }`}
+                    >
+                      <div className={isReversed ? 'lg:col-start-2' : ''}>
+                        <span className="inline-block text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-cyan-400 mb-2">
+                          Step {step.step}
+                        </span>
+                        <h3 className="text-2xl font-semibold mb-3 text-stone-900 dark:text-white">
+                          {step.title}
+                        </h3>
+                        <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                          {step.detail}
+                        </p>
                       </div>
-                    </div>
-                  </article>
+
+                      <motion.div
+                        className={isReversed ? 'lg:col-start-1 lg:row-start-1' : ''}
+                        whileHover={{ scale: 1.02 }}
+                        transition={{ type: 'spring', stiffness: 300 }}
+                      >
+                        <Card variant="elevated" padding="md" className="bg-white dark:bg-slate-900">
+                          <div className="flex items-center gap-3">
+                            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 text-brand-700 dark:border-brand-800 dark:bg-brand-900/20 dark:text-brand-200">
+                              <Icon className="h-5 w-5" />
+                            </span>
+                            <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                              {step.visualTitle}
+                            </p>
+                          </div>
+
+                          <div className="mt-4 space-y-2">
+                            {step.visualRows.map((row) => (
+                              <div
+                                key={row}
+                                className="rounded-lg border border-stone-200/80 bg-stone-50/70 px-3 py-2 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+                              >
+                                {row}
+                              </div>
+                            ))}
+                          </div>
+                        </Card>
+                      </motion.div>
+                    </GlassCard>
+                  </motion.div>
                 );
               })}
             </div>
           </div>
         </section>
 
-        <section className="bg-slate-100/80 py-24 dark:bg-slate-900/70 md:py-28">
-          <div className="mx-auto max-w-6xl px-6 lg:px-10">
-            <div className="flex flex-wrap gap-2">
-              {trustSignals.map((signal) => (
-                <span
-                  key={signal}
-                  className="inline-flex rounded-full border border-slate-300 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+        {/* Testimonials Section */}
+        <section
+          aria-labelledby="testimonials-heading"
+          className="py-24 bg-slate-50/50 dark:bg-slate-900/20"
+        >
+          <div className="max-w-6xl mx-auto px-6">
+            <motion.h2
+              id="testimonials-heading"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-3xl md:text-4xl font-bold text-center mb-12 text-stone-900 dark:text-white"
+            >
+              Loved by students who needed to study <GradientText>faster</GradientText>
+            </motion.h2>
+
+            <motion.div
+              className="grid md:grid-cols-3 gap-6"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.15 },
+                },
+              }}
+            >
+              {testimonials.map((testimonial, index) => (
+                <motion.div
+                  key={index}
+                  variants={{
+                    hidden: { opacity: 0, y: 30 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
                 >
-                  {signal}
-                </span>
-              ))}
-            </div>
-
-            <div className="mt-6 max-w-3xl">
-              <h2 className="text-3xl font-semibold leading-tight text-slate-900 dark:text-white md:text-4xl">
-                Trusted by students who need clarity fast.
-              </h2>
-              <p className="mt-3 text-slate-600 dark:text-slate-300">
-                Real feedback from learners using Thynkr when material gets dense and time gets tight.
-              </p>
-            </div>
-
-            <div className="mt-10 grid gap-4 md:grid-cols-3">
-              {testimonials.map((item) => (
-                <article
-                  key={item.quote}
-                  className="rounded-xl border border-slate-200 bg-white/85 p-5 dark:border-slate-700 dark:bg-slate-950/75"
-                >
-                  <Quote className="h-5 w-5 text-slate-400 dark:text-slate-500" />
-                  <p className="mt-3 text-sm leading-relaxed text-slate-700 dark:text-slate-200">{item.quote}</p>
-                  <p className="mt-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
-                    {item.role}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-24 md:py-28">
-          <div className="mx-auto max-w-6xl px-6 lg:px-10">
-            <div className="grid gap-6 md:grid-cols-[1.05fr_0.95fr]">
-              <article className="rounded-xl border border-stone-200 bg-white/80 p-6 dark:border-slate-700 dark:bg-slate-900/45">
-                <h2 className="text-2xl font-semibold text-slate-900 dark:text-white md:text-3xl">
-                  Designed to feel calm, even during crunch time.
-                </h2>
-                <p className="mt-3 max-w-2xl text-slate-600 dark:text-slate-300">
-                  Thynkr keeps the interface intentionally clean so you can move from reading to understanding without fighting the tool.
-                </p>
-
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  {clarityPoints.map((point) => (
-                    <p key={point} className="inline-flex items-start gap-2 text-sm text-slate-700 dark:text-slate-200">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                      <span>{point}</span>
+                  <Card hover padding="lg" variant="glass" className="h-full flex flex-col">
+                    <Quote className="h-8 w-8 text-brand-500 dark:text-cyan-400 mb-4" aria-hidden="true" />
+                    <p className="text-slate-700 dark:text-slate-200 leading-relaxed flex-1 mb-4">
+                      {testimonial.quote}
                     </p>
-                  ))}
-                </div>
-              </article>
-
-              <article className="rounded-xl border border-stone-200 bg-white/80 p-6 dark:border-slate-700 dark:bg-slate-900/45">
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">Start where you are</h3>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                  You do not need perfect focus or perfect notes. Upload what you have, get a clear starting point, and build momentum one session at a time.
-                </p>
-
-                <div className="mt-6 flex flex-col gap-3">
-                  <Button
-                    size="lg"
-                    className="!rounded-full !bg-brand-600 !from-brand-600 !via-brand-600 !to-brand-600 hover:!from-brand-700 hover:!via-brand-700 hover:!to-brand-700"
-                    onClick={() => (window.location.href = '/register')}
-                  >
-                    Create free account
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="!rounded-full !border-stone-300 !bg-white/80 hover:!bg-white dark:!border-slate-700 dark:!bg-slate-900/70"
-                    onClick={() => (window.location.href = '/pricing')}
-                  >
-                    View plans
-                  </Button>
-                </div>
-              </article>
-            </div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      {testimonial.role}
+                    </p>
+                  </Card>
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
         </section>
-      </div>
+
+        {/* Stats Section */}
+        <section
+          aria-labelledby="stats-heading"
+          className="py-24 relative overflow-hidden border-y border-slate-200/50 dark:border-slate-800/50 bg-gradient-to-b from-transparent to-slate-50 dark:to-slate-900/50"
+        >
+          <BackgroundShapes />
+
+          <div className="max-w-6xl mx-auto px-6 relative">
+            <h2 id="stats-heading" className="sr-only">
+              Platform Statistics
+            </h2>
+
+            <motion.div
+              className="grid md:grid-cols-3 gap-8"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-100px' }}
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.2 },
+                },
+              }}
+            >
+              {stats.map((stat) => {
+                const Icon = stat.icon;
+
+                return (
+                  <motion.div
+                    key={stat.label}
+                    variants={{
+                      hidden: { opacity: 0, scale: 0.9 },
+                      visible: { opacity: 1, scale: 1 },
+                    }}
+                  >
+                    <GlassCard variant="hover" className="text-center p-8">
+                      <Icon className="h-10 w-10 mx-auto mb-4 text-brand-600 dark:text-cyan-400" aria-hidden="true" />
+                      <p className="text-4xl font-bold bg-gradient-to-r from-fuchsia-600 via-rose-500 to-orange-500 dark:from-cyan-400 dark:via-blue-400 dark:to-violet-400 bg-clip-text text-transparent">
+                        {stat.value}
+                      </p>
+                      <p className="mt-2 text-slate-600 dark:text-slate-300">{stat.label}</p>
+                    </GlassCard>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Final CTA Section */}
+        <section
+          aria-labelledby="final-cta-heading"
+          className="py-24 bg-gradient-to-b from-transparent to-slate-50 dark:to-slate-900/50"
+        >
+          <div className="max-w-4xl mx-auto px-6 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <h2
+                id="final-cta-heading"
+                className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-stone-900 dark:text-white"
+              >
+                Ready to transform how you study?
+              </h2>
+              <p className="text-lg text-slate-700 dark:text-slate-300 mb-8 max-w-2xl mx-auto">
+                Join thousands of students who are studying smarter, not harder. Get started for free in less
+                than 30 seconds.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="rounded-full"
+                  isLoading={isNavigating}
+                  onClick={() => handleCTAClick('/register')}
+                  aria-label="Start your free account in 30 seconds"
+                >
+                  Start free in 30 seconds
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  onClick={() => handleCTAClick('/login')}
+                  aria-label="Log in to your existing account"
+                >
+                  I already have an account
+                </Button>
+              </div>
+
+              {/* Feature badges */}
+              <ul className="mt-8 flex flex-wrap gap-4 justify-center text-sm text-slate-600 dark:text-slate-400">
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-emerald-500" aria-hidden="true" />
+                  No credit card required
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-emerald-500" aria-hidden="true" />
+                  Free forever plan
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-emerald-500" aria-hidden="true" />
+                  Cancel anytime
+                </li>
+              </ul>
+            </motion.div>
+          </div>
+        </section>
+      </main>
     </>
   );
 }
