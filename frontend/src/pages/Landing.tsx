@@ -6,9 +6,6 @@ import {
   ArrowRight,
   Brain,
   Check,
-  Clock,
-  FileText,
-  Heart,
   Quote,
   Sparkles,
   Upload,
@@ -333,13 +330,13 @@ export default function Landing() {
             </div>
 
             <div className="grid md:grid-cols-3 gap-8">
-              {testimonials.map((testimonial, index) => (
+              {testimonials.map((testimonial) => (
                 <motion.div
-                  key={index}
+                  key={testimonial.role}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  transition={{ duration: 0.5 }}
                 >
                   <Card padding="lg" className="h-full">
                     <Quote className="h-8 w-8 text-brand-500 dark:text-cyan-400 mb-4" />
