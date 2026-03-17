@@ -56,7 +56,7 @@ const Navbar = memo(() => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
-            {isAuthenticated && (
+            {isAuthenticated ? (
               <>
                 <NavLink
                   to="/study"
@@ -99,6 +99,27 @@ const Navbar = memo(() => {
                   <CircleDollarSign className="w-4 h-4" />
                   Pricing
                 </NavLink>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/pricing"
+                  className="text-sm font-medium px-4 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:text-brand-600 dark:hover:text-cyan-400 transition-colors"
+                >
+                  Pricing
+                </Link>
+                <Link
+                  to="/about"
+                  className="text-sm font-medium px-4 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:text-brand-600 dark:hover:text-cyan-400 transition-colors"
+                >
+                  About
+                </Link>
+                <Link
+                  to="/contact"
+                  className="text-sm font-medium px-4 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:text-brand-600 dark:hover:text-cyan-400 transition-colors"
+                >
+                  Contact
+                </Link>
               </>
             )}
 
@@ -313,6 +334,28 @@ const Navbar = memo(() => {
               </>
             ) : (
               <>
+                <Link
+                  to="/pricing"
+                  className="block px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-150"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Pricing
+                </Link>
+                <Link
+                  to="/about"
+                  className="block px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-150"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  About
+                </Link>
+                <Link
+                  to="/contact"
+                  className="block px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-150"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Contact
+                </Link>
+                <div className="my-3 mx-1 border-t border-slate-200/50 dark:border-white/10"></div>
                 <Link
                   to="/login"
                   className="block px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-150"
