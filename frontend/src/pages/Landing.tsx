@@ -289,7 +289,7 @@ export default function Landing() {
             </div>
 
             <div className="space-y-16">
-              {studyFlow.map((step, index) => (
+              {studyFlow.map((step) => (
                 <motion.div
                   key={step.step}
                   initial={{ opacity: 0, y: 30 }}
