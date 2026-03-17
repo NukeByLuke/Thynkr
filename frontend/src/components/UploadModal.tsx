@@ -55,7 +55,7 @@ type UploadContext = 'files' | 'text' | 'record';
 type RecordingStatus = 'idle' | 'recording' | 'paused';
 
 const ACCEPTED_FILE_TYPES =
-  '.pdf,.doc,.docx,.ppt,.pptx,.pps,.ppsx,.txt,.webm,.mp3,.wav,.m4a,.mp4,.ogg';
+  '.pdf,.doc,.docx,.ppt,.pptx,.pps,.ppsx,.txt,.png,.jpg,.jpeg,.gif,.webp,.webm,.mp3,.wav,.m4a,.mp4,.ogg';
 const ACCEPTED_MIME_TYPES = [
   'application/pdf',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -63,6 +63,11 @@ const ACCEPTED_MIME_TYPES = [
   'application/vnd.ms-powerpoint',
   'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/gif',
+  'image/webp',
   'audio/webm',
   'audio/mp4',
   'audio/mpeg',
@@ -83,6 +88,11 @@ const ACCEPTED_FILE_EXTENSIONS = new Set([
   '.pptx',
   '.pps',
   '.ppsx',
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.webp',
   '.webm',
   '.mp4',
   '.mp3',
@@ -1453,7 +1463,7 @@ export default function UploadModal({
 
                       <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-200/80 dark:bg-white/10 border border-slate-300/80 dark:border-white/20 text-xs font-medium text-slate-700 dark:text-slate-200">
                         <FileIcon className="w-4 h-4" />
-                        PDF, DOCX, PPTX, TXT • Max 50MB each
+                        PDF, DOCX, PPTX, TXT, Images, Audio/Video • Max 200MB each
                       </div>
 
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-4">

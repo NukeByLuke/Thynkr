@@ -21,6 +21,10 @@ import { normalizeFileForLanguage, resolveUserLanguage } from '../utils/language
 import { canUploadFile, getUserUsageStats } from '../lib/tier-limits';
 import { checkAIRateLimit, recordAIUsage } from '../middleware/ai-rate-limit.middleware';
 import { GoogleAuth } from 'google-auth-library';
+import {
+  isQuizAnswerCorrect,
+  resolveQuizCorrectAnswerText,
+} from '../utils/quiz-answer.utils';
 
 const fileProcessor = new FileProcessorService();
 const aiService = new AIService();
@@ -915,7 +919,7 @@ export default async function studyRoutes(server: FastifyInstance) {
           if (multerCode === 'LIMIT_FILE_SIZE') {
             return reply
               .code(400)
-              .send({ error: 'One or more files exceed the 100MB upload limit.' });
+              .send({ error: 'One or more files exceed the 200MB upload limit.' });
           }
 
           if (multerCode === 'LIMIT_FILE_COUNT' || multerCode === 'LIMIT_UNEXPECTED_FILE') {
@@ -1213,7 +1217,7 @@ export default async function studyRoutes(server: FastifyInstance) {
         if (isMulterLikeError) {
           if (multerCode === 'LIMIT_FILE_SIZE') {
             return rejectRecordingUpload(
-              'Recording exceeds the 100MB upload limit.',
+              'Recording exceeds the 200MB upload limit.',
               'RECORDING_LIMIT_FILE_SIZE',
               { multerCode }
             );
@@ -2522,7 +2526,11 @@ ${studentMessage.slice(0, 1600)}`;
 
       quiz.questions.forEach((question: any) => {
         const userAnswer = answers[question.id];
-        const isCorrect = userAnswer === question.correctAnswer;
+        const resolvedCorrectAnswer = resolveQuizCorrectAnswerText(
+          question.correctAnswer,
+          question.options
+        );
+        const isCorrect = isQuizAnswerCorrect(userAnswer, question.correctAnswer, question.options);
 
         if (isCorrect) {
           correctCount++;
@@ -2530,7 +2538,7 @@ ${studentMessage.slice(0, 1600)}`;
 
         results[question.id] = {
           correct: isCorrect,
-          correctAnswer: question.correctAnswer,
+          correctAnswer: resolvedCorrectAnswer,
         };
       });
 

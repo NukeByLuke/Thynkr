@@ -27,6 +27,11 @@ const allowedDocumentMimeTypes = new Set([
   'application/vnd.ms-powerpoint',
   'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/gif',
+  'image/webp',
   'audio/webm',
   'audio/mp4',
   'audio/mpeg',
@@ -49,6 +54,11 @@ const allowedDocumentExtensions = new Set([
   '.pptx',
   '.pps',
   '.ppsx',
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.webp',
   '.webm',
   '.mp4',
   '.mp3',
@@ -88,7 +98,7 @@ const fileFilter = (
   } else {
     cb(
       new Error(
-        'Invalid file type. Allowed: PDF, DOC/DOCX, TXT, PPT/PPTX, and audio (WEBM/MP3/WAV/M4A/MP4/OGG).'
+        'Invalid file type. Allowed: PDF, DOC/DOCX, TXT, PPT/PPTX, images (PNG/JPG/JPEG/GIF/WEBP), and media (WEBM/MP3/WAV/M4A/MP4/OGG).'
       )
     );
   }
@@ -99,7 +109,7 @@ export const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 100 * 1024 * 1024, // 100MB per file
+    fileSize: 200 * 1024 * 1024, // 200MB per file
     files: 10, // Max 10 files at once
     fieldSize: 10 * 1024 * 1024, // Allow large transcript/timeline payloads
     fields: 20,
