@@ -1,22 +1,31 @@
 import { Helmet } from 'react-helmet-async';
 import Button from '@/components/ui/Button';
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Brain, Check, FileText, Quote, Upload } from 'lucide-react';
 
 const studyFlow = [
   {
     step: '01',
     title: 'Collect everything in one place',
     detail: 'Upload chapters, lecture slides, notes, and transcripts in a single workspace.',
+    icon: Upload,
+    visualTitle: 'Source stack ready',
+    visualRows: ['chapter-08-reading.pdf', 'lecture-slides-week5.pptx', 'review-notes.docx'],
   },
   {
     step: '02',
     title: 'Generate concise summaries',
     detail: 'Convert dense reading into short, structured takeaways that are easier to retain.',
+    icon: FileText,
+    visualTitle: 'Summary output',
+    visualRows: ['6 key points extracted', '3 definitions simplified', '2 examples rewritten clearly'],
   },
   {
     step: '03',
     title: 'Review with flashcards and quizzes',
     detail: 'Practice from the same source context so studying feels focused instead of fragmented.',
+    icon: Brain,
+    visualTitle: 'Practice set generated',
+    visualRows: ['12 flashcards linked to source', '8-question quiz with feedback', 'Weak areas highlighted automatically'],
   },
 ];
 
@@ -25,6 +34,27 @@ const clarityPoints = [
   'Clear key points without extra noise',
   'Flashcards and quizzes linked to the same material',
   'A calmer workflow for heavy reading weeks',
+];
+
+const trustSignals = [
+  'Used during exam-week crunch time',
+  'Built for dense reading workloads',
+  'Designed for low-friction review sessions',
+];
+
+const testimonials = [
+  {
+    quote: 'I finally stopped re-reading the same paragraph for an hour. The summary gives me a starting point right away.',
+    role: 'First-year nursing student',
+  },
+  {
+    quote: 'The best part is continuity. My flashcards and quiz come from the exact same source, so I stay in context.',
+    role: 'Engineering undergrad',
+  },
+  {
+    quote: 'When I am tired, this helps me still get a complete study session done instead of skipping it entirely.',
+    role: 'Working adult learner',
+  },
 ];
 
 export default function Landing() {
@@ -140,26 +170,105 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="border-y border-stone-200/80 py-12 dark:border-slate-800/90 md:py-14">
+        <section className="border-y border-stone-200/80 py-24 dark:border-slate-800/90 md:py-28">
           <div className="mx-auto max-w-6xl px-6 lg:px-10">
-            <div className="grid gap-4 md:grid-cols-3">
-              {studyFlow.map((item) => (
-                <article
-                  key={item.title}
-                  className="rounded-xl border border-stone-200 bg-white/80 p-5 dark:border-slate-700 dark:bg-slate-900/45"
+            <div className="max-w-3xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                How it works
+              </p>
+              <h2 className="mt-3 text-3xl font-semibold leading-tight text-slate-900 dark:text-white md:text-4xl">
+                A calm, step-by-step path from overload to clarity.
+              </h2>
+            </div>
+
+            <div className="mt-14 space-y-10 md:space-y-14">
+              {studyFlow.map((item, index) => {
+                const Icon = item.icon;
+                const isReversed = index % 2 === 1;
+
+                return (
+                  <article
+                    key={item.title}
+                    className="grid items-center gap-6 rounded-2xl border border-stone-200 bg-white/70 p-6 dark:border-slate-700 dark:bg-slate-900/45 md:p-8 lg:grid-cols-2 lg:gap-14"
+                  >
+                    <div className={isReversed ? 'lg:order-2' : 'lg:order-1'}>
+                      <p className="text-xs font-semibold tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                        STEP {item.step}
+                      </p>
+                      <h3 className="mt-3 text-2xl font-semibold text-slate-900 dark:text-white">{item.title}</h3>
+                      <p className="mt-3 max-w-xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
+                        {item.detail}
+                      </p>
+                    </div>
+
+                    <div className={isReversed ? 'lg:order-1' : 'lg:order-2'}>
+                      <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-[0_20px_40px_rgba(0,0,0,0.04)] dark:border-slate-700 dark:bg-slate-950/80">
+                        <div className="flex items-center gap-3">
+                          <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 text-brand-700 dark:border-brand-800 dark:bg-brand-900/20 dark:text-brand-200">
+                            <Icon className="h-5 w-5" />
+                          </span>
+                          <p className="text-sm font-semibold text-slate-900 dark:text-white">{item.visualTitle}</p>
+                        </div>
+
+                        <div className="mt-4 space-y-2">
+                          {item.visualRows.map((row) => (
+                            <div
+                              key={row}
+                              className="rounded-lg border border-stone-200/80 bg-stone-50/70 px-3 py-2 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+                            >
+                              {row}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-slate-100/80 py-24 dark:bg-slate-900/70 md:py-28">
+          <div className="mx-auto max-w-6xl px-6 lg:px-10">
+            <div className="flex flex-wrap gap-2">
+              {trustSignals.map((signal) => (
+                <span
+                  key={signal}
+                  className="inline-flex rounded-full border border-slate-300 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
                 >
-                  <p className="text-xs font-semibold tracking-[0.14em] text-slate-500 dark:text-slate-400">
-                    STEP {item.step}
+                  {signal}
+                </span>
+              ))}
+            </div>
+
+            <div className="mt-6 max-w-3xl">
+              <h2 className="text-3xl font-semibold leading-tight text-slate-900 dark:text-white md:text-4xl">
+                Trusted by students who need clarity fast.
+              </h2>
+              <p className="mt-3 text-slate-600 dark:text-slate-300">
+                Real feedback from learners using Thynkr when material gets dense and time gets tight.
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-4 md:grid-cols-3">
+              {testimonials.map((item) => (
+                <article
+                  key={item.quote}
+                  className="rounded-xl border border-slate-200 bg-white/85 p-5 dark:border-slate-700 dark:bg-slate-950/75"
+                >
+                  <Quote className="h-5 w-5 text-slate-400 dark:text-slate-500" />
+                  <p className="mt-3 text-sm leading-relaxed text-slate-700 dark:text-slate-200">{item.quote}</p>
+                  <p className="mt-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+                    {item.role}
                   </p>
-                  <h3 className="mt-3 text-lg font-semibold text-slate-900 dark:text-white">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{item.detail}</p>
                 </article>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="py-12 md:py-14">
+        <section className="py-24 md:py-28">
           <div className="mx-auto max-w-6xl px-6 lg:px-10">
             <div className="grid gap-6 md:grid-cols-[1.05fr_0.95fr]">
               <article className="rounded-xl border border-stone-200 bg-white/80 p-6 dark:border-slate-700 dark:bg-slate-900/45">
