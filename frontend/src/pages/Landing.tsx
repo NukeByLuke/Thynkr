@@ -2,19 +2,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import {
-  ArrowRight,
-  Brain,
-  Check,
-  Quote,
-  Sparkles,
-  Upload,
-  Zap,
-} from 'lucide-react';
+import { ArrowRight, Brain, Check, Quote, Sparkles, Upload, Zap, ChevronDown } from 'lucide-react';
 
 // UI Components
 import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
 
 const features = [
   {
@@ -57,16 +48,19 @@ const testimonials = [
     quote:
       'I finally stopped re-reading the same paragraph for an hour. The summary gives me a starting point right away.',
     role: 'First-year nursing student',
+    initials: 'NS',
   },
   {
     quote:
       'The best part is continuity. My flashcards and quiz come from the exact same source, so I stay in context.',
     role: 'Engineering undergrad',
+    initials: 'EU',
   },
   {
     quote:
       'When I am tired, this helps me still get a complete study session done instead of skipping it entirely.',
     role: 'Working adult learner',
+    initials: 'WL',
   },
 ];
 
@@ -76,9 +70,33 @@ const stats = [
   { value: '95%', label: 'Student satisfaction' },
 ];
 
+const faqs = [
+  {
+    question: 'How does Thynkr process my materials?',
+    answer:
+      'Simply upload your PDFs, slides, or notes. Our AI instantly analyzes the content and generates comprehensive study tools tailored to your material.',
+  },
+  {
+    question: 'What file types do you support?',
+    answer:
+      'We support PDF, DOCX, PPT, images, and text files. Our platform automatically extracts and processes the content from any format.',
+  },
+  {
+    question: 'Can I customize the study tools?',
+    answer:
+      'Yes! You can edit summaries, adjust flashcard content, and customize quiz difficulty to match your learning needs.',
+  },
+  {
+    question: 'Is my data private and secure?',
+    answer:
+      'Absolutely. We use enterprise-grade encryption and never share your study materials. Your data is entirely yours.',
+  },
+];
+
 export default function Landing() {
   const navigate = useNavigate();
   const [isNavigating, setIsNavigating] = useState(false);
+  const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
 
   const handleCTAClick = (route: string) => {
     setIsNavigating(true);
@@ -103,74 +121,71 @@ export default function Landing() {
         Skip to main content
       </a>
 
-      <main id="main-content">
-        {/* Hero Section - Clean and professional */}
-        <section className="relative pt-20 pb-32 px-6 overflow-hidden bg-gradient-to-b from-white to-slate-50 dark:from-slate-950 dark:to-slate-900">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center max-w-4xl mx-auto">
+      <main id="main-content" className="overflow-hidden">
+        {/* Hero Section - Professional and clean */}
+        <section className="relative pt-24 pb-32 px-6 bg-white dark:bg-slate-950">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center max-w-3xl mx-auto">
               {/* Badge */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="inline-flex items-center gap-2 rounded-full border border-brand-200/50 dark:border-cyan-500/20 bg-brand-50/50 dark:bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-brand-700 dark:text-cyan-300 mb-8"
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 mb-8"
               >
-                <Sparkles className="h-4 w-4" />
-                AI-Powered Study Assistant
+                <Sparkles className="h-4 w-4 text-purple-600 dark:text-blue-400" />
+                Intelligent Study Assistant
               </motion.div>
 
-              {/* Main Headline */}
+              {/* Main Headline - Serif-inspired with sophistication */}
               <motion.h1
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight text-slate-900 dark:text-white mb-6"
+                className="text-5xl md:text-6xl lg:text-6xl font-bold leading-tight text-slate-900 dark:text-white mb-6 tracking-tight"
               >
-                Study smarter with{' '}
-                <span className="bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-400 dark:via-blue-400 dark:to-violet-400 bg-clip-text text-transparent">
-                  AI-generated
-                </span>{' '}
-                study tools
+                Study <span className="text-purple-700 dark:text-blue-400">intelligently</span> with
+                AI
               </motion.h1>
 
               {/* Subheadline */}
               <motion.p
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="text-xl text-slate-600 dark:text-slate-300 mb-10 max-w-3xl mx-auto"
+                className="text-lg text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed"
               >
-                Upload your course materials and get instant summaries, flashcards, and quizzes.
-                Save 5+ hours every week.
+                Transform any course material into personalized summaries, flashcards, and quizzes.
+                Save hours each week while learning more effectively.
               </motion.p>
 
               {/* CTAs */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
-                className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8"
+                className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-10"
               >
                 <Button
                   variant="primary"
                   size="lg"
-                  className="rounded-full px-8 text-lg"
+                  className="rounded-lg px-8 text-base"
                   isLoading={isNavigating}
                   onClick={() => handleCTAClick('/register')}
                   aria-label="Get started with Thynkr for free"
                 >
                   Get Started Free
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
                 <Button
                   variant="outline"
                   size="lg"
-                  className="rounded-full px-8 text-lg"
+                  className="rounded-lg px-8 text-base"
                   onClick={() =>
                     document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })
                   }
                 >
-                  See How It Works
+                  Learn More
                 </Button>
               </motion.div>
 
@@ -179,45 +194,54 @@ export default function Landing() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
-                className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-600 dark:text-slate-400"
+                className="flex flex-wrap items-center justify-center gap-8 text-sm text-slate-600 dark:text-slate-400"
               >
                 <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-emerald-500" />
-                  Free to start
+                  <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-500" />
+                  <span>Free to start</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-emerald-500" />
-                  No credit card required
+                  <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-500" />
+                  <span>No card required</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-emerald-500" />
-                  10,000+ students
+                  <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-500" />
+                  <span>10,000+ students</span>
                 </div>
               </motion.div>
             </div>
 
-            {/* Hero Visual - Product screenshot placeholder */}
+            {/* Hero Visual - Refined product showcase */}
             <motion.div
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="mt-16 max-w-5xl mx-auto"
+              className="mt-20 max-w-4xl mx-auto"
             >
-              <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden">
-                <div className="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center">
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xl">
+                <div className="aspect-video bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
                   <div className="text-center p-8">
-                    <Brain className="h-16 w-16 mx-auto mb-4 text-brand-500 dark:text-cyan-400" />
-                    <p className="text-slate-600 dark:text-slate-400">Product demo video coming soon</p>
+                    <Brain className="h-16 w-16 mx-auto mb-3 text-purple-600 dark:text-blue-400" />
+                    <p className="text-slate-500 dark:text-slate-500">Demo video coming soon</p>
                   </div>
                 </div>
               </div>
             </motion.div>
+
+            {/* Scroll indicator */}
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="flex justify-center mt-12"
+            >
+              <ChevronDown className="h-5 w-5 text-slate-400" />
+            </motion.div>
           </div>
         </section>
 
-        {/* Stats Section */}
-        <section className="py-16 bg-white dark:bg-slate-950 border-y border-slate-200 dark:border-slate-800">
-          <div className="max-w-6xl mx-auto px-6">
+        {/* Stats Section - Refined */}
+        <section className="py-20 px-6 bg-slate-50 dark:bg-slate-900/30 border-y border-slate-200 dark:border-slate-800">
+          <div className="max-w-6xl mx-auto">
             <div className="grid md:grid-cols-3 gap-12 text-center">
               {stats.map((stat, index) => (
                 <motion.div
@@ -227,25 +251,25 @@ export default function Landing() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
-                  <div className="text-4xl font-bold bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-400 dark:via-blue-400 dark:to-violet-400 bg-clip-text text-transparent mb-2">
+                  <div className="text-4xl md:text-5xl font-bold text-purple-700 dark:text-blue-400 mb-2">
                     {stat.value}
                   </div>
-                  <div className="text-slate-600 dark:text-slate-400">{stat.label}</div>
+                  <div className="text-slate-600 dark:text-slate-400 text-sm">{stat.label}</div>
                 </motion.div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className="py-24 px-6 bg-slate-50 dark:bg-slate-900/50">
+        {/* Features Section - Professional cards */}
+        <section className="py-24 px-6 bg-white dark:bg-slate-950">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">
-                Everything you need to study effectively
+                Powerful features for effective learning
               </h2>
-              <p className="text-xl text-slate-600 dark:text-slate-300">
-                Powerful AI tools that adapt to your learning style
+              <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+                Everything you need to transform your study experience
               </p>
             </div>
 
@@ -260,15 +284,17 @@ export default function Landing() {
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                   >
-                    <Card padding="lg" className="h-full text-center hover:shadow-lg transition-shadow duration-300">
-                      <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-50 to-brand-100 dark:from-cyan-500/10 dark:to-blue-500/10 text-brand-600 dark:text-cyan-400 mb-6">
-                        <Icon className="h-7 w-7" />
+                    <div className="p-8 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-lg transition-all duration-300">
+                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-blue-400 mb-5">
+                        <Icon className="h-6 w-6" />
                       </div>
-                      <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">
+                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
                         {feature.title}
                       </h3>
-                      <p className="text-slate-600 dark:text-slate-300">{feature.description}</p>
-                    </Card>
+                      <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </div>
                   </motion.div>
                 );
               })}
@@ -277,42 +303,41 @@ export default function Landing() {
         </section>
 
         {/* How It Works Section */}
-        <section id="how-it-works" className="py-24 px-6 bg-white dark:bg-slate-950">
+        <section id="how-it-works" className="py-24 px-6 bg-slate-50 dark:bg-slate-900/30">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">
-                How Thynkr works
+                Three simple steps
               </h2>
-              <p className="text-xl text-slate-600 dark:text-slate-300">
-                Get started in three simple steps
+              <p className="text-lg text-slate-600 dark:text-slate-400">
+                Get started with Thynkr in minutes
               </p>
             </div>
 
-            <div className="space-y-16">
-              {studyFlow.map((step) => (
+            <div className="space-y-12">
+              {studyFlow.map((step, index) => (
                 <motion.div
                   key={step.step}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.6 }}
-                  className="flex flex-col md:flex-row gap-8 items-center"
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="flex flex-col md:flex-row gap-8 items-start md:items-center"
                 >
-                  <div className="flex-1 text-center md:text-left">
-                    <div className="inline-block text-sm font-bold uppercase tracking-wider text-brand-600 dark:text-cyan-400 mb-3">
-                      Step {step.step}
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800">
+                      <span className="text-lg font-semibold text-purple-700 dark:text-blue-400">
+                        {step.step}
+                      </span>
                     </div>
-                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
-                      {step.title}
-                    </h3>
-                    <p className="text-lg text-slate-600 dark:text-slate-300">{step.detail}</p>
                   </div>
                   <div className="flex-1">
-                    <div className="aspect-square rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
-                      <div className="text-6xl font-bold text-slate-300 dark:text-slate-700">
-                        {step.step}
-                      </div>
-                    </div>
+                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+                      {step.title}
+                    </h3>
+                    <p className="text-slate-600 dark:text-slate-400">
+                      {step.detail || step.description}
+                    </p>
                   </div>
                 </motion.div>
               ))}
@@ -321,32 +346,120 @@ export default function Landing() {
         </section>
 
         {/* Testimonials Section */}
-        <section className="py-24 px-6 bg-slate-50 dark:bg-slate-900/50">
+        <section className="py-24 px-6 bg-white dark:bg-slate-950">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">
-                Loved by students everywhere
+                Loved by students
               </h2>
+              <p className="text-lg text-slate-600 dark:text-slate-400">
+                See what learners are saying about Thynkr
+              </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8">
-              {testimonials.map((testimonial) => (
+              {testimonials.map((testimonial, index) => (
                 <motion.div
-                  key={testimonial.role}
+                  key={index}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="p-6 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-300"
                 >
-                  <Card padding="lg" className="h-full">
-                    <Quote className="h-8 w-8 text-brand-500 dark:text-cyan-400 mb-4" />
-                    <p className="text-slate-700 dark:text-slate-200 leading-relaxed mb-6">
-                      "{testimonial.quote}"
-                    </p>
-                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                  <Quote className="h-6 w-6 text-purple-400 dark:text-blue-500 mb-4" />
+                  <p className="text-slate-700 dark:text-slate-200 leading-relaxed mb-6 text-sm">
+                    "{testimonial.quote}"
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-sm font-medium text-purple-700 dark:text-blue-400">
+                      {testimonial.initials}
+                    </div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
                       {testimonial.role}
                     </p>
-                  </Card>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Company Section - Trust & Partnership */}
+        <section className="py-20 px-6 bg-slate-50 dark:bg-slate-900/30">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                Trusted by leading institutions
+              </h2>
+              <p className="text-slate-600 dark:text-slate-400">
+                Powering smarter learning at universities and colleges
+              </p>
+            </div>
+
+            <div className="flex justify-center">
+              <div className="p-8 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-300">
+                <div className="text-center">
+                  <div className="inline-block px-6 py-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 mb-4">
+                    <p className="text-lg font-semibold text-purple-700 dark:text-blue-400">
+                      Red Deer Polytechnic
+                    </p>
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    Partnering to enhance student learning outcomes
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="py-24 px-6 bg-white dark:bg-slate-950">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">
+                Frequently asked questions
+              </h2>
+              <p className="text-lg text-slate-600 dark:text-slate-400">
+                Everything you need to know about Thynkr
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {faqs.map((faq, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  className="border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden hover:border-slate-300 dark:hover:border-slate-700 transition-colors duration-300"
+                >
+                  <button
+                    onClick={() => setExpandedFAQ(expandedFAQ === index ? null : index)}
+                    className="w-full px-6 py-4 flex items-center justify-between bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-900/70 transition-colors duration-300 text-left"
+                  >
+                    <span className="font-semibold text-slate-900 dark:text-white text-sm">
+                      {faq.question}
+                    </span>
+                    <motion.div
+                      animate={{ rotate: expandedFAQ === index ? 180 : 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <ChevronDown className="h-5 w-5 text-slate-400" />
+                    </motion.div>
+                  </button>
+                  <motion.div
+                    initial={false}
+                    animate={{ height: expandedFAQ === index ? 'auto' : 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden border-t border-slate-200 dark:border-slate-800"
+                  >
+                    <p className="px-6 py-4 text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                      {faq.answer}
+                    </p>
+                  </motion.div>
                 </motion.div>
               ))}
             </div>
@@ -354,50 +467,58 @@ export default function Landing() {
         </section>
 
         {/* Final CTA Section */}
-        <section className="py-24 px-6 bg-white dark:bg-slate-950">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">
-              Ready to transform your study routine?
-            </h2>
-            <p className="text-xl text-slate-600 dark:text-slate-300 mb-10">
-              Join thousands of students who are learning smarter with Thynkr
-            </p>
+        <section className="py-24 px-6 bg-slate-50 dark:bg-slate-900/30">
+          <div className="max-w-4xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="text-center"
+            >
+              <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+                Ready to study smarter?
+              </h2>
+              <p className="text-lg text-slate-600 dark:text-slate-400 mb-10">
+                Join thousands of students who are transforming their learning with AI
+              </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                variant="primary"
-                size="lg"
-                className="rounded-full px-8 text-lg"
-                isLoading={isNavigating}
-                onClick={() => handleCTAClick('/register')}
-              >
-                Start Free Today
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="lg"
-                className="rounded-full px-8 text-lg"
-                onClick={() => handleCTAClick('/pricing')}
-              >
-                View Pricing
-              </Button>
-            </div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="rounded-lg px-8"
+                  isLoading={isNavigating}
+                  onClick={() => handleCTAClick('/register')}
+                >
+                  Get Started Free
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="rounded-lg px-8"
+                  onClick={() => handleCTAClick('/pricing')}
+                >
+                  View Pricing
+                </Button>
+              </div>
 
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-slate-600 dark:text-slate-400">
-              <div className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-emerald-500" />
-                Free forever plan
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-slate-600 dark:text-slate-400">
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-500" />
+                  <span>Free forever plan</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-500" />
+                  <span>No card required</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-500" />
+                  <span>Cancel anytime</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-emerald-500" />
-                No credit card required
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-emerald-500" />
-                Cancel anytime
-              </div>
-            </div>
+            </motion.div>
           </div>
         </section>
       </main>
