@@ -31,12 +31,12 @@ const QUIZ_CORRECT_SOUND_OPTIONS: Array<{
   {
     value: 'wave',
     label: 'Wave',
-    description: 'Imported wave-style success sound.',
+    description: 'Smooth and bright with a soft, satisfying finish.',
   },
   {
     value: 'classicding',
     label: 'Classic Ding',
-    description: 'Imported classic ding success sound.',
+    description: 'Clean and familiar ding for a crisp success cue.',
   },
   {
     value: 'spark',
