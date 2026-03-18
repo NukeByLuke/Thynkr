@@ -64,6 +64,9 @@ export const updateProfileSchema = z.object({
       message: 'Unsupported language selection',
     })
     .optional(),
+  quizCorrectSound: z
+    .enum(['ding', 'spark', 'chime', 'arcade', 'pop', 'off'])
+    .optional(),
 });
 
 export const createContentSchema = z.object({
