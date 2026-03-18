@@ -71,6 +71,10 @@ const updateCourseFileSchema = z.object({
   order: z.number().int().min(0).optional(),
 });
 
+const attachExistingCourseFilesSchema = z.object({
+  fileIds: z.array(z.string().min(1)).min(1).max(50),
+});
+
 // Helper to generate secure view URL with token (no direct file access)
 // Note: Don't include /api prefix - the frontend will add the appropriate base URL
 function getSecureFileUrl(fileId: string, courseId: string, userId: string): string {
@@ -676,6 +680,54 @@ export default async function userCoursesRoutes(server: FastifyInstance) {
         }
         logger.error({ error }, 'Failed to upload file');
         return reply.code(500).send({ error: 'Failed to upload file' });
+      }
+    }
+  );
+
+  // POST /api/user-courses/:id/files/attach - Attach previously uploaded files to course
+  server.post(
+    '/user-courses/:id/files/attach',
+    {
+      preHandler: [authenticate, requireMinRole('STANDARD')],
+    },
+    async (request: AuthenticatedRequest, reply) => {
+      const { id } = request.params as { id: string };
+      const userId = request.user!.userId;
+      const userRole = request.user!.role;
+
+      try {
+        const payload = attachExistingCourseFilesSchema.parse(request.body || {});
+        const result = await courseService.attachExistingFiles(
+          id,
+          payload.fileIds,
+          userId,
+          userRole
+        );
+
+        return reply.send({
+          files: result.attachedFiles.map((file: any) => ({
+            id: file.id,
+            name: file.name,
+            originalName: file.originalName,
+            url: getSecureFileUrl(file.id, id, userId),
+            fileType: file.fileType,
+            fileSize: file.fileSize,
+            order: file.order,
+            createdAt: file.createdAt,
+          })),
+          failedFiles: result.failedFiles,
+        });
+      } catch (error: any) {
+        if (error instanceof z.ZodError) {
+          return reply.code(400).send({ error: error.issues[0]?.message || 'Invalid request body' });
+        }
+
+        if (error.statusCode) {
+          return reply.code(error.statusCode).send({ error: error.message });
+        }
+
+        logger.error({ error }, 'Failed to attach existing files to course');
+        return reply.code(500).send({ error: 'Failed to attach existing files' });
       }
     }
   );

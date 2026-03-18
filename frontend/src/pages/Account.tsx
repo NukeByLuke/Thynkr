@@ -205,12 +205,12 @@ export default function Account() {
           Account Settings
         </PageContainer.Header>
 
-        <div className="space-y-6">
+        <div className="space-y-5 sm:space-y-6">
             {/* Profile Information */}
             <Card>
-              <div className="flex items-center gap-3 mb-6">
+              <div className="mb-5 flex items-start gap-3 sm:mb-6 sm:items-center">
                 <User className="w-6 h-6 text-gray-400 dark:text-gray-500" />
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                   Profile Information
                 </h2>
               </div>
@@ -222,7 +222,7 @@ export default function Account() {
                     Name
                   </label>
                   {isEditingName ? (
-                    <form onSubmit={handleUpdateName} className="flex gap-2">
+                    <form onSubmit={handleUpdateName} className="flex flex-col gap-2 sm:flex-row">
                       <Input
                         type="text"
                         value={name}
@@ -230,13 +230,19 @@ export default function Account() {
                         placeholder="Enter your name"
                         className="flex-1"
                       />
-                      <Button type="submit" isLoading={updateProfileMutation.isPending} size="sm">
+                      <Button
+                        type="submit"
+                        isLoading={updateProfileMutation.isPending}
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
                         Save
                       </Button>
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
+                        className="w-full sm:w-auto"
                         onClick={() => {
                           setIsEditingName(false);
                           setName(`${profile.firstName || ''} ${profile.lastName || ''}`.trim());
@@ -246,8 +252,8 @@ export default function Account() {
                       </Button>
                     </form>
                   ) : (
-                    <div className="flex items-center gap-2">
-                      <p className="text-gray-900 dark:text-white">
+                    <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
+                      <p className="text-gray-900 dark:text-white break-words">
                         {`${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Not set'}
                       </p>
                       <Button variant="ghost" size="sm" onClick={() => setIsEditingName(true)}>
@@ -263,8 +269,8 @@ export default function Account() {
                     <Mail className="w-4 h-4" />
                     Email
                   </label>
-                  <div className="flex items-center gap-2">
-                    <p className="text-gray-900 dark:text-white">{profile.email}</p>
+                  <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
+                    <p className="text-gray-900 dark:text-white break-all sm:break-normal">{profile.email}</p>
                     {profile.emailVerified ? (
                       <span className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
                         <CheckCircle className="w-3 h-3" />
@@ -298,9 +304,9 @@ export default function Account() {
 
             {/* Membership & Subscription */}
             <Card>
-              <div className="flex items-center gap-3 mb-6">
+              <div className="mb-5 flex items-start gap-3 sm:mb-6 sm:items-center">
                 <Shield className="w-6 h-6 text-gray-400 dark:text-gray-500" />
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                   Membership & Subscription
                 </h2>
               </div>
@@ -381,12 +387,12 @@ export default function Account() {
                   <div className="pt-4 border-t">
                     <div className="bg-gradient-to-r from-brand-50 to-accent-50 dark:from-brand-900/20 dark:to-accent-900/20 rounded-lg p-6">
                       <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Upgrade Your Plan</h3>
-                      <p className="text-gray-600 mb-4">
+                      <p className="text-gray-600 dark:text-gray-300 mb-4">
                         Unlock premium content and exclusive features with Pro or Premium membership
                       </p>
                       <Button
                         onClick={() => (window.location.href = '/pricing')}
-                        className="flex items-center gap-2"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2"
                       >
                         View Plans
                         <ExternalLink className="w-4 h-4" />
@@ -399,9 +405,9 @@ export default function Account() {
 
             {/* Danger Zone */}
             <Card className="border-red-200 dark:border-red-800">
-              <div className="flex items-center gap-3 mb-6">
+              <div className="mb-5 flex items-start gap-3 sm:mb-6 sm:items-center">
                 <AlertCircle className="w-6 h-6 text-red-500 dark:text-red-400" />
-                <h2 className="text-2xl font-bold text-red-600 dark:text-red-400">Danger Zone</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-red-600 dark:text-red-400">Danger Zone</h2>
               </div>
 
               <div className="space-y-4">
@@ -414,6 +420,7 @@ export default function Account() {
                   </p>
                   <Button
                     variant="danger"
+                    className="w-full sm:w-auto"
                     onClick={() => alert('Account deletion feature coming soon')}
                   >
                     Delete Account

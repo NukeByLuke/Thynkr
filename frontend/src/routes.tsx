@@ -30,6 +30,7 @@ export const Terms = lazyWithPreload(() => import('./pages/legal/Terms'));
 export const Cookies = lazyWithPreload(() => import('./pages/legal/Cookies'));
 
 // Public pages
+export const Landing = lazyWithPreload(() => import('./pages/Landing'));
 export const About = lazyWithPreload(() => import('./pages/public/About'));
 export const Contact = lazyWithPreload(() => import('./pages/public/Contact'));
 export const Testimonials = lazyWithPreload(() => import('./pages/public/Testimonials'));

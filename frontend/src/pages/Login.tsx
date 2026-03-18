@@ -9,6 +9,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
+import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthLayout from '@/layouts/AuthLayout';
 import { OAuthButtons, OAuthDivider } from '@/features/auth/OAuthButtons';
@@ -25,6 +26,7 @@ type FormErrors = Partial<Record<keyof LoginFormData, string>>;
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -113,12 +115,12 @@ export default function Login() {
   };
 
   const inputBaseStyles = `
-    w-full px-4 py-3 border rounded-xl transition-colors
-    bg-slate-50 dark:bg-slate-700 
+    w-full px-4 py-3 border rounded-xl transition-colors text-[16px] sm:text-base
+    bg-white/95 dark:bg-slate-900/65
     text-slate-900 dark:text-white 
-    border-slate-200 dark:border-slate-600 
-    placeholder-slate-400 dark:placeholder-slate-400
-    focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20
+    border-brand-100 dark:border-cyan-400/30
+    placeholder-slate-400 dark:placeholder-slate-500
+    focus:outline-none focus:border-brand-500 dark:focus:border-cyan-300 focus:ring-2 focus:ring-brand-400/20 dark:focus:ring-cyan-300/25
   `;
 
   return (
@@ -132,13 +134,22 @@ export default function Login() {
       </Helmet>
 
       <AuthLayout>
+        <div className="mb-4 md:min-h-[90px]">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-brand-700/85 dark:text-cyan-300/80">
+            Welcome Back
+          </p>
+          <h1 className="mt-1 text-xl sm:text-2xl font-semibold text-slate-900 dark:text-white">
+            Sign in to continue your study flow
+          </h1>
+        </div>
+
         {/* OAuth Buttons - Grid layout */}
         <OAuthButtons />
 
         <OAuthDivider />
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
           {/* Email Field */}
           <div>
             <input
@@ -157,7 +168,7 @@ export default function Login() {
             {errors.email && (
               <p
                 id="email-error"
-                className="mt-1.5 text-sm text-red-500"
+                className="mt-1.5 text-xs sm:text-sm text-red-500"
                 role="alert"
               >
                 {errors.email}
@@ -167,23 +178,33 @@ export default function Login() {
 
           {/* Password Field */}
           <div>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={handlePasswordChange}
-              onBlur={() => handleBlur('password')}
-              placeholder="Password"
-              aria-label="Password"
-              aria-invalid={!!errors.password}
-              aria-describedby={errors.password ? 'password-error' : undefined}
-              autoComplete="current-password"
-              className={`${inputBaseStyles} ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
-            />
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={handlePasswordChange}
+                onBlur={() => handleBlur('password')}
+                placeholder="Password"
+                aria-label="Password"
+                aria-invalid={!!errors.password}
+                aria-describedby={errors.password ? 'password-error' : undefined}
+                autoComplete="current-password"
+                className={`${inputBaseStyles} pr-11 ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/30 dark:focus-visible:ring-cyan-300/30"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             {errors.password && (
               <p
                 id="password-error"
-                className="mt-1.5 text-sm text-red-500"
+                className="mt-1.5 text-xs sm:text-sm text-red-500"
                 role="alert"
               >
                 {errors.password}
@@ -192,20 +213,20 @@ export default function Login() {
           </div>
 
           {/* Remember Me & Forgot Password */}
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 cursor-pointer">
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+            <label className="flex items-center gap-2 cursor-pointer w-full sm:w-auto">
               <input
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 text-cyan-500 rounded bg-slate-50 dark:bg-slate-700 border-slate-300 dark:border-slate-500 focus:ring-cyan-500/20"
+                className="w-4 h-4 text-brand-600 dark:text-cyan-400 rounded bg-white dark:bg-slate-900 border-brand-200 dark:border-cyan-400/35 focus:ring-brand-400/20 dark:focus:ring-cyan-400/20"
                 aria-label="Remember me"
               />
               <span className="text-sm text-slate-600 dark:text-slate-300">Remember me</span>
             </label>
             <Link
               to="/forgot-password"
-              className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-cyan-500 dark:hover:text-cyan-400 transition-colors"
+              className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-cyan-300 transition-colors self-start sm:self-auto"
             >
               Forgot password?
             </Link>
@@ -216,7 +237,7 @@ export default function Login() {
             type="submit"
             disabled={isLoading}
             aria-label={isLoading ? 'Signing in...' : 'Sign in to your account'}
-            className="w-full h-12 flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-white font-medium rounded-full transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full h-12 flex items-center justify-center gap-2 bg-gradient-to-r from-brand-500 via-fuchsia-500 to-orange-400 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500 text-white font-semibold rounded-full transition-all duration-200 shadow-[0_10px_26px_-14px_rgba(236,72,153,0.75)] dark:shadow-[0_10px_26px_-14px_rgba(34,211,238,0.8)] hover:brightness-105 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <>

@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { User, LoginCredentials, RegisterData } from '@/types';
 import api from '@/lib/api';
 import { cachedRequest, clearCache, invalidateCache } from '@/lib/apiCache';
+import { emitQuizSoundPreferencesUpdated } from '@/lib/quizSoundPreferences';
 
 interface AuthContextType {
   user: User | null;
@@ -174,6 +175,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
 
       setUser(userData);
+
+      if (userData?.quizCorrectSound) {
+        emitQuizSoundPreferencesUpdated({
+          correctAnswerSound: userData.quizCorrectSound,
+        });
+      }
     } catch (error: any) {
       const message = String(error?.message || '').toLowerCase();
       if (!message.includes('token refresh failed') && !message.includes('no refresh token available')) {
@@ -202,6 +209,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await queryClient.clear();
     clearCache(); // Clear API request cache
     setUser(userData);
+
+    if (userData?.quizCorrectSound) {
+      emitQuizSoundPreferencesUpdated({
+        correctAnswerSound: userData.quizCorrectSound,
+      });
+    }
   };
 
   const register = async (data: RegisterData) => {

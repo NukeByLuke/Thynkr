@@ -161,11 +161,11 @@ export default function StudyModePage() {
   // Inject header content into DashboardLayout header (avoids double header)
   useEffect(() => {
     setCustomHeaderContent(
-      <div className="flex items-center gap-4 w-full">
+      <div className="flex items-center gap-2.5 sm:gap-4 w-full">
         {/* Left: Back button */}
         <Link
           to={`/courses/${courseId}${shareToken ? `?token=${shareToken}` : ''}`}
-          className="flex items-center gap-1.5 px-2 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-pink-50 dark:hover:bg-cyan-900/20 rounded-lg transition-colors"
+          className="flex items-center gap-1.5 px-2 py-1.5 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-pink-50 dark:hover:bg-cyan-900/20 rounded-lg transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="hidden sm:inline">Back</span>
@@ -174,7 +174,7 @@ export default function StudyModePage() {
         {/* Center: Title */}
         <div className="flex items-center gap-2 min-w-0">
           <Sparkles className="w-4 h-4 text-fuchsia-600 dark:text-cyan-400 flex-shrink-0" />
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+          <h2 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white truncate">
             {course?.title || 'AI Study Mode'}
           </h2>
         </div>
@@ -182,14 +182,14 @@ export default function StudyModePage() {
         {/* Right: Sidebar toggle */}
         <button
           onClick={() => setShowSidebar(prev => !prev)}
-          className="ml-auto hidden md:flex p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          className="ml-auto hidden md:flex p-1.5 sm:p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           title={showSidebar ? 'Hide files' : 'Show files'}
         >
           <Menu className="h-4 w-4" />
         </button>
         <button
           onClick={() => setMobileSidebarOpen(true)}
-          className="ml-auto md:hidden p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          className="ml-auto md:hidden p-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
         >
           <Menu className="h-4 w-4" />
         </button>
@@ -315,7 +315,7 @@ export default function StudyModePage() {
             <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
               <Lock className="h-10 w-10 text-slate-400" />
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-3">
               Study Access Restricted
             </h1>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
@@ -323,7 +323,7 @@ export default function StudyModePage() {
             </p>
             <button
               onClick={() => navigate(-1)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-medium hover:opacity-90 transition-opacity"
+              className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-medium hover:opacity-90 transition-opacity"
             >
               <ArrowLeft className="h-4 w-4" />
               Go Back
@@ -346,7 +346,7 @@ export default function StudyModePage() {
             <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
               <AlertCircle className="h-10 w-10 text-slate-400" />
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-3">
               No Compatible Files
             </h1>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
@@ -355,7 +355,7 @@ export default function StudyModePage() {
             </p>
             <Link
               to={`/courses/${courseId}${shareToken ? `?token=${shareToken}` : ''}`}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-medium hover:opacity-90 transition-opacity"
+              className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-medium hover:opacity-90 transition-opacity"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Course
@@ -381,7 +381,7 @@ export default function StudyModePage() {
         <meta name="twitter:image" content={`${window.location.origin}/brand/og-default.png`} />
       </Helmet>
 
-      <div className="h-full flex flex-col">
+      <div className="min-h-full flex flex-col">
         {/* Main Content */}
         <div className="flex-1 flex overflow-hidden">
           {/* Sidebar - File Selection (Desktop) */}
@@ -432,7 +432,7 @@ export default function StudyModePage() {
                   animate={{ x: 0 }}
                   exit={{ x: -280 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-                  className="md:hidden fixed left-0 top-0 bottom-0 z-50 w-72 bg-white dark:bg-slate-900 shadow-xl flex flex-col"
+                  className="md:hidden fixed left-0 top-0 bottom-0 z-50 w-[min(85vw,18rem)] bg-white dark:bg-slate-900 shadow-xl flex flex-col"
                 >
                   <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
                     <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
@@ -466,7 +466,7 @@ export default function StudyModePage() {
           <div className="flex-1 flex flex-col min-h-0">
             {/* Study Mode Tabs - Quizlet Style */}
             <LayoutGroup>
-              <div className="flex border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 overflow-x-auto scrollbar-hide">
+              <div className="flex border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-1.5 sm:px-2 overflow-x-auto scrollbar-hide">
                 {TABS.map((tab) => {
                   const isActive = activeTab === tab.id;
                   return (
@@ -476,7 +476,7 @@ export default function StudyModePage() {
                       disabled={selectedFileIds.size === 0}
                       whileHover={selectedFileIds.size > 0 ? { y: -2 } : {}}
                       whileTap={selectedFileIds.size > 0 ? { scale: 0.97 } : {}}
-                      className={`relative flex items-center gap-2 px-5 sm:px-8 py-4 text-sm font-bold transition-all whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed ${
+                      className={`relative flex items-center gap-2 px-3 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm font-bold transition-all whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed ${
                         isActive
                           ? 'text-slate-900 dark:text-white'
                           : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
@@ -513,10 +513,10 @@ export default function StudyModePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center"
+                    className="flex flex-col items-center justify-center min-h-[56vh] sm:min-h-[60vh] p-5 sm:p-8 text-center"
                   >
-                    <div className="p-5 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl mb-5">
-                      <Sparkles className="h-14 w-14 text-indigo-500" />
+                    <div className="p-4 sm:p-5 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl mb-5">
+                      <Sparkles className="h-12 w-12 sm:h-14 sm:w-14 text-indigo-500" />
                     </div>
                     <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
                       Select Files to Study
@@ -526,7 +526,7 @@ export default function StudyModePage() {
                     </p>
                     <button
                       onClick={() => setMobileSidebarOpen(true)}
-                      className="md:hidden px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
+                      className="md:hidden w-full sm:w-auto px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
                     >
                       Select Files
                     </button>
@@ -537,15 +537,15 @@ export default function StudyModePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center"
+                    className="flex flex-col items-center justify-center min-h-[56vh] sm:min-h-[60vh] p-5 sm:p-8 text-center"
                   >
                     {isGenerating ? (
                       <>
                         <div className="relative mb-6">
                           <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 rounded-full blur-xl opacity-30" />
-                          <Loader2 className="h-16 w-16 animate-spin text-indigo-600 relative z-10" />
+                          <Loader2 className="h-12 w-12 sm:h-16 sm:w-16 animate-spin text-indigo-600 relative z-10" />
                         </div>
-                        <p className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+                        <p className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white mb-2">
                           Generating {activeTab}...
                         </p>
                         <p className="text-slate-500 dark:text-slate-400">
@@ -554,17 +554,17 @@ export default function StudyModePage() {
                       </>
                     ) : (
                       <>
-                        <div className="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl mb-5">
+                        <div className="p-4 sm:p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl mb-5">
                           {TABS.find(t => t.id === activeTab)?.icon && (
                             <div className={TABS.find(t => t.id === activeTab)!.color}>
                               {(() => {
                                 const Icon = TABS.find(t => t.id === activeTab)!.icon;
-                                return <Icon className="h-14 w-14" />;
+                                return <Icon className="h-12 w-12 sm:h-14 sm:w-14" />;
                               })()}
                             </div>
                           )}
                         </div>
-                        <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-2">
                           Ready to Generate {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
                         </h2>
                         <p className="text-slate-600 dark:text-slate-400 max-w-sm mb-6">
@@ -573,7 +573,7 @@ export default function StudyModePage() {
                         <button
                           onClick={() => generateMutation.mutate({ type: activeTab, refresh: false })}
                           disabled={isGenerating}
-                          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-600 to-fuchsia-600 dark:from-cyan-500 dark:to-violet-500 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-pink-500/30 dark:shadow-cyan-500/30"
+                          className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-600 to-fuchsia-600 dark:from-cyan-500 dark:to-violet-500 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-pink-500/30 dark:shadow-cyan-500/30"
                         >
                           <Sparkles className="h-5 w-5" />
                           Generate {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
@@ -589,27 +589,27 @@ export default function StudyModePage() {
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2, ease: 'easeOut' }}
                   >
-                    <div className="max-w-5xl mx-auto px-2 py-4 sm:px-6 sm:py-6 lg:px-8">
+                    <div className="max-w-5xl mx-auto px-1.5 py-3 sm:px-6 sm:py-6 lg:px-8">
                       <div className="relative rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl shadow-slate-200/20 dark:shadow-slate-900/30 overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-br from-pink-500/[0.02] via-transparent to-fuchsia-500/[0.02] dark:from-cyan-500/[0.02] dark:via-transparent dark:to-violet-500/[0.02] pointer-events-none" />
                         <div className="relative z-10 p-3 sm:p-6 lg:p-8">
                           {/* Book-style page navigation for summary/notes */}
                           {(activeTab === 'summary' || activeTab === 'notes') && studyContent.result.pages && studyContent.result.pages.length > 1 && (
-                            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/60 dark:border-slate-700/60">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-5 sm:mb-6 pb-4 border-b border-slate-200/60 dark:border-slate-700/60">
                               <button
                                 onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
                                 disabled={currentPage === 0}
-                                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-pink-600 dark:hover:text-cyan-400"
+                                className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-pink-600 dark:hover:text-cyan-400"
                               >
                                 <ChevronLeft className="w-4 h-4" />
                                 <span className="hidden sm:inline">Previous</span>
                               </button>
 
-                              <div className="flex items-center gap-2 min-w-0">
-                                <span className="text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">
+                              <div className="w-full sm:w-auto flex items-center justify-center gap-2 min-w-0">
+                                <span className="text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[160px] sm:max-w-xs">
                                   {studyContent.result.pages[currentPage]?.fileName || `File ${currentPage + 1}`}
                                 </span>
-                                <div className="flex items-center gap-1">
+                                <div className="hidden sm:flex items-center gap-1">
                                   {studyContent.result.pages.map((_: any, idx: number) => (
                                     <button
                                       key={idx}
@@ -631,7 +631,7 @@ export default function StudyModePage() {
                               <button
                                 onClick={() => setCurrentPage(p => Math.min(studyContent.result.pages.length - 1, p + 1))}
                                 disabled={currentPage === studyContent.result.pages.length - 1}
-                                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-pink-600 dark:hover:text-cyan-400"
+                                className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-pink-600 dark:hover:text-cyan-400"
                               >
                                 <span className="hidden sm:inline">Next</span>
                                 <ChevronRight className="w-4 h-4" />

@@ -149,17 +149,17 @@ export default function ProfileSettings() {
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 sm:space-y-10">
       {/* Avatar Section */}
       <section>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">Public Profile</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white mb-1">Public Profile</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
           This will be displayed on your profile.
         </p>
         
-        <div className="flex items-center gap-6">
+        <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
           <div className="relative group">
-            <div className="w-24 h-24 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-white/10 shadow-sm flex items-center justify-center">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-white/10 shadow-sm flex items-center justify-center">
               {user?.avatarUrl ? (
                 <img
                   src={toAbsoluteUrl(user.avatarUrl)}
@@ -177,11 +177,11 @@ export default function ProfileSettings() {
               onClick={() => fileInputRef.current?.click()}
               className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl cursor-pointer"
             >
-              <Camera className="w-8 h-8 text-white" />
+              <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </button>
           </div>
           
-          <div className="space-y-3">
+          <div className="w-full space-y-3 sm:w-auto">
              <input
               type="file"
               ref={fileInputRef}
@@ -192,10 +192,11 @@ export default function ProfileSettings() {
                 if (file) uploadAvatarMutation.mutate(file);
               }}
             />
-            <div className="flex gap-3">
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:gap-3">
               <Button 
                 variant="outline" 
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={() => fileInputRef.current?.click()}
                 isLoading={uploadAvatarMutation.isPending}
               >
@@ -206,7 +207,7 @@ export default function ProfileSettings() {
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+                  className="w-full sm:w-auto text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
                   onClick={() => deleteAvatarMutation.mutate()}
                   isLoading={deleteAvatarMutation.isPending}
                 >
@@ -226,9 +227,9 @@ export default function ProfileSettings() {
 
       {/* Basic Info Section */}
       <section>
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">Personal Details</h2>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-5 sm:mb-6">Personal Details</h2>
         <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">First Name</label>
               <input
@@ -266,15 +267,15 @@ export default function ProfileSettings() {
 
           <div className="space-y-2">
              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Username</label>
-             <div className="flex">
-               <span className="inline-flex items-center px-4 rounded-l-xl border border-r-0 border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-sm">
+             <div className="flex flex-col sm:flex-row">
+               <span className="inline-flex items-center px-4 py-2.5 rounded-t-xl sm:rounded-l-xl sm:rounded-r-none border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
                  thynkr.ca/u/
                </span>
                <input
                  name="username"
                  value={formData.username}
                  onChange={handleChange}
-                 className="flex-1 px-4 py-2.5 rounded-r-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                 className="w-full sm:flex-1 px-4 py-2.5 rounded-b-xl sm:rounded-r-xl sm:rounded-l-none border border-slate-200 dark:border-white/10 sm:border-l-0 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
                  placeholder="janedoe"
                />
              </div>
@@ -283,6 +284,7 @@ export default function ProfileSettings() {
           <div className="pt-2">
             <Button 
               type="submit" 
+              className="w-full sm:w-auto"
               disabled={!isDirty || updateProfileMutation.isPending}
               isLoading={updateProfileMutation.isPending}
             >
@@ -297,8 +299,8 @@ export default function ProfileSettings() {
 
       {/* Password Section */}
       <section>
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">Password & Security</h2>
-        <form onSubmit={handlePasswordSubmit} className="space-y-6 max-w-4xl bg-gradient-to-br from-slate-50/90 to-white dark:from-slate-800/70 dark:to-slate-900/70 p-6 md:p-7 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-5 sm:mb-6">Password & Security</h2>
+        <form onSubmit={handlePasswordSubmit} className="space-y-6 max-w-4xl bg-gradient-to-br from-slate-50/90 to-white dark:from-slate-800/70 dark:to-slate-900/70 p-4 sm:p-6 md:p-7 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Current Password</label>
             <div className="relative">
@@ -316,7 +318,7 @@ export default function ProfileSettings() {
             </div>
           </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-700 dark:text-slate-300">New Password</label>
                     <input
@@ -351,6 +353,7 @@ export default function ProfileSettings() {
              <Button 
                type="submit" 
                variant="primary"
+               className="w-full sm:w-auto"
                disabled={!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
                isLoading={changePasswordMutation.isPending}
              >

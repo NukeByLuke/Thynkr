@@ -20,6 +20,7 @@ export default async function supportRoutes(server: FastifyInstance) {
       await sendEmail({
         to: supportRecipient,
         subject: `[Contact] ${body.subject}`,
+        replyTo: `${body.name} <${body.email}>`,
         html: `
           <h2>New Contact Form Submission</h2>
           <p><strong>Name:</strong> ${body.name}</p>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { KeyRound, Loader2, CheckCircle2 } from 'lucide-react';
+import { KeyRound, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import api from '@/lib/api';
 import Logo from '@/components/Logo';
 import toast from 'react-hot-toast';
@@ -12,6 +12,8 @@ export default function ResetPassword() {
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -118,14 +120,22 @@ export default function ResetPassword() {
               <div className="relative">
                 <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 border border-slate-300 dark:border-midnight-blue/30 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-sunrise-pink dark:focus:ring-midnight-cyan focus:border-transparent transition-all"
+                  className="w-full pl-11 pr-11 py-3 border border-slate-300 dark:border-midnight-blue/30 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-sunrise-pink dark:focus:ring-midnight-cyan focus:border-transparent transition-all"
                   placeholder="Enter new password"
                   required
                   minLength={8}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-sunrise-pink/30 dark:focus-visible:ring-midnight-cyan/40"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
                 Must be at least 8 characters
@@ -139,14 +149,22 @@ export default function ResetPassword() {
               <div className="relative">
                 <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
-                  type="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 border border-slate-300 dark:border-midnight-blue/30 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-sunrise-pink dark:focus:ring-midnight-cyan focus:border-transparent transition-all"
+                  className="w-full pl-11 pr-11 py-3 border border-slate-300 dark:border-midnight-blue/30 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-sunrise-pink dark:focus:ring-midnight-cyan focus:border-transparent transition-all"
                   placeholder="Confirm new password"
                   required
                   minLength={8}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-sunrise-pink/30 dark:focus-visible:ring-midnight-cyan/40"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
 

@@ -3,7 +3,7 @@
  * Professional quote generator with PDF and PNG export
  */
 
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Modal, { ModalFooter } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { FileImage, FileText, Sparkles, Zap, Crown } from 'lucide-react';
@@ -90,6 +90,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
   const [isExporting, setIsExporting] = useState(false);
   const quoteRef = useRef<HTMLDivElement>(null);
+  const contentScrollRef = useRef<HTMLDivElement>(null);
 
   const plan = PLANS[selectedPlan];
   const billing = BILLING_CYCLES[billingCycle];
@@ -123,6 +124,14 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
   const billingDiscountAmount = totalDiscountAmount;
   
   const totalCost = targetPrice;
+
+  useEffect(() => {
+    if (!isOpen || !contentScrollRef.current) {
+      return;
+    }
+
+    contentScrollRef.current.scrollTop = 0;
+  }, [isOpen]);
 
   const handleExportPNG = async () => {
     if (!quoteRef.current) return;
@@ -220,24 +229,31 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
       title="Get a Quote"
       description="Configure your plan and export a professional quote"
       size="full"
+      className="flex min-h-0 h-[calc(var(--app-dvh,100dvh)-1.5rem)] sm:h-[calc(var(--app-dvh,100dvh)-2rem)] flex-col"
+      bodyClassName="flex flex-1 min-h-0 flex-col overflow-hidden p-4 sm:p-6"
     >
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-h-[calc(100vh-16rem)] overflow-y-auto">
+      <div
+        ref={contentScrollRef}
+        className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto pr-1"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
+        <div className="grid grid-cols-1 items-start gap-4 pb-2 sm:gap-6 xl:grid-cols-2">
         {/* Left Column: Configuration */}
-        <div className="space-y-4">
+        <div className="order-2 xl:order-1 space-y-4">
           {/* Plan Selection */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+          <div className="rounded-2xl border border-brand-100/70 dark:border-cyan-500/25 bg-gradient-to-br from-brand-50/80 via-fuchsia-50/80 to-orange-50/70 dark:from-cyan-500/10 dark:via-violet-500/10 dark:to-blue-500/10 p-4 sm:p-5">
+            <label className="block text-sm font-semibold text-brand-900 dark:text-cyan-100 mb-3">
               Select Plan
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {(Object.entries(PLANS) as [PlanType, PlanConfig][]).map(([key, planConfig]) => (
               <button
                 key={key}
                 onClick={() => setSelectedPlan(key)}
-                className={`relative p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                className={`relative p-3.5 sm:p-4 rounded-xl border-2 transition-all duration-200 text-left ${
                   selectedPlan === key
-                    ? 'border-brand-500 dark:border-brand-400 bg-brand-50 dark:bg-brand-900/20'
-                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                    ? 'border-brand-400 dark:border-cyan-300/70 bg-white/95 dark:bg-slate-900/80 shadow-[0_10px_24px_-16px_rgba(236,72,153,0.75)] dark:shadow-[0_10px_24px_-16px_rgba(34,211,238,0.85)]'
+                    : 'border-brand-100 dark:border-cyan-500/30 bg-white/75 dark:bg-slate-900/50 hover:border-brand-300 dark:hover:border-cyan-300/50'
                 }`}
               >
                 <div className="flex items-center gap-3 mb-2">
@@ -269,8 +285,8 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
         </div>
 
           {/* Billing Cycle Selection */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+          <div className="rounded-2xl border border-brand-100/70 dark:border-cyan-500/25 bg-gradient-to-br from-brand-50/80 via-fuchsia-50/75 to-orange-50/65 dark:from-cyan-500/10 dark:via-violet-500/10 dark:to-blue-500/10 p-4 sm:p-5">
+            <label className="block text-sm font-semibold text-brand-900 dark:text-cyan-100 mb-3">
               Billing Cycle
             </label>
           <div className="space-y-2">
@@ -281,8 +297,8 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                   onClick={() => setBillingCycle(key)}
                   className={`w-full p-3 rounded-lg border-2 transition-all duration-200 text-left flex items-center justify-between ${
                     billingCycle === key
-                      ? 'border-brand-500 dark:border-brand-400 bg-brand-50 dark:bg-brand-900/20'
-                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                      ? 'border-brand-400 dark:border-cyan-300/70 bg-white/95 dark:bg-slate-900/80 shadow-[0_10px_24px_-16px_rgba(236,72,153,0.75)] dark:shadow-[0_10px_24px_-16px_rgba(34,211,238,0.85)]'
+                      : 'border-brand-100 dark:border-cyan-500/30 bg-white/75 dark:bg-slate-900/50 hover:border-brand-300 dark:hover:border-cyan-300/50'
                   }`}
                 >
                   <span className="font-medium text-slate-900 dark:text-white">{cycle.label}</span>
@@ -301,13 +317,17 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
         {/* Right Column: Quote Preview */}
         <div
           ref={quoteRef}
-          className="bg-white dark:bg-slate-800 rounded-xl border-2 border-slate-200 dark:border-slate-700 p-8 shadow-lg [&.exporting]:bg-white [&.exporting]:border-slate-200"
-          style={{ padding: '2rem', letterSpacing: 'normal', wordSpacing: 'normal' }}
+          className="order-1 xl:order-2 relative mx-auto w-full max-w-2xl overflow-hidden rounded-2xl border border-brand-100/80 dark:border-cyan-400/30 bg-white/95 dark:bg-slate-900/90 p-5 sm:p-8 shadow-[0_25px_65px_-35px_rgba(236,72,153,0.7)] dark:shadow-[0_25px_65px_-35px_rgba(34,211,238,0.8)] [&.exporting]:bg-white [&.exporting]:border-slate-200"
+          style={{ letterSpacing: 'normal', wordSpacing: 'normal' }}
         >
+          <div className="pointer-events-none absolute -top-20 -right-16 h-44 w-44 rounded-full bg-gradient-to-br from-brand-300/35 via-fuchsia-300/25 to-orange-300/20 blur-2xl [.exporting_&]:hidden" />
+          <div className="pointer-events-none absolute -bottom-20 -left-16 h-40 w-40 rounded-full bg-gradient-to-br from-cyan-300/25 via-blue-300/20 to-violet-300/20 blur-2xl [.exporting_&]:hidden" />
+
+          <div className="relative">
           {/* Header */}
           <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-200 dark:border-slate-700 [.exporting_&]:border-slate-200">
             <div>
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-brand-600 to-accent-600 bg-clip-text text-transparent [.exporting_&]:bg-none [.exporting_&]:text-slate-900">
+              <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-brand-600 via-fuchsia-600 to-accent-600 bg-clip-text text-transparent [.exporting_&]:bg-none [.exporting_&]:text-slate-900">
                 THYNKR
               </h3>
               <p className="text-sm text-slate-600 dark:text-slate-400 [.exporting_&]:text-slate-600 mt-1">Pricing Quote</p>
@@ -407,19 +427,21 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
               Questions? Contact us at support@thynkr.ca
             </p>
           </div>
+          </div>
+        </div>
         </div>
       </div>
 
       {/* Export Actions */}
-      <ModalFooter>
-          <Button variant="secondary" onClick={onClose}>
+      <ModalFooter className="mt-4 flex-col sm:flex-row sm:justify-end gap-2.5 bg-gradient-to-r from-brand-50/80 via-fuchsia-50/60 to-accent-50/60 dark:from-cyan-500/10 dark:via-violet-500/10 dark:to-blue-500/10">
+          <Button variant="secondary" onClick={onClose} className="w-full sm:w-auto">
             Close
           </Button>
           <Button
             variant="secondary"
             onClick={handleExportPNG}
             disabled={isExporting}
-            className="flex items-center gap-2"
+            className="w-full sm:w-auto flex items-center justify-center gap-2"
           >
             <FileImage className="w-4 h-4" />
             {isExporting ? 'Exporting...' : 'Download PNG'}
@@ -428,7 +450,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
             variant="primary"
             onClick={handleExportPDF}
             disabled={isExporting}
-            className="flex items-center gap-2"
+            className="w-full sm:w-auto flex items-center justify-center gap-2"
           >
             <FileText className="w-4 h-4" />
             {isExporting ? 'Exporting...' : 'Download PDF'}

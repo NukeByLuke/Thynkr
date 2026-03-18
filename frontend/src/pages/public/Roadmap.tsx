@@ -24,6 +24,8 @@ import {
   Globe,
   Smartphone,
   Trophy,
+  Bell,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 interface RoadmapItem {
@@ -87,20 +89,56 @@ const roadmapItems: RoadmapItem[] = [
     icon: <BarChart3 className="w-5 h-5" />,
     category: 'Features',
   },
-
-  // Planned Features
   {
     title: 'Text-to-Speech Narration',
     description: 'Listen to your summaries with high-quality AI voice narration.',
-    status: 'planned',
+    status: 'in-progress',
     icon: <Headphones className="w-5 h-5" />,
     category: 'AI',
   },
   {
     title: 'AI Tutor Chat',
     description: 'Ask questions and get instant explanations about your study material.',
-    status: 'planned',
+    status: 'in-progress',
     icon: <MessageSquare className="w-5 h-5" />,
+    category: 'AI',
+  },
+  {
+    title: 'Image Uploads in File Library',
+    description: 'Enable JPG, PNG, GIF, and WEBP uploads in Files with reliable previews.',
+    status: 'in-progress',
+    icon: <ImageIcon className="w-5 h-5" />,
+    category: 'UX',
+  },
+  {
+    title: 'Notification Snooze Reliability',
+    description: 'Fix snooze actions so reminder notifications are delayed correctly every time.',
+    status: 'in-progress',
+    icon: <Bell className="w-5 h-5" />,
+    category: 'UX',
+  },
+  {
+    title: 'Markup Rendering Reliability',
+    description: 'Improve markdown/markup rendering so formatting consistently applies across study views.',
+    status: 'in-progress',
+    icon: <Sparkles className="w-5 h-5" />,
+    category: 'UX',
+  },
+  {
+    title: 'Quiz Score Accuracy',
+    description: 'Correct score calculation edge cases introduced by recent test-mode updates.',
+    status: 'in-progress',
+    icon: <BarChart3 className="w-5 h-5" />,
+    category: 'Features',
+  },
+
+  // Planned Features
+  {
+    title: 'AI Podcast Mode',
+    description:
+      'Turn study summaries into back-and-forth podcast-style conversations between AI hosts.',
+    status: 'planned',
+    icon: <Headphones className="w-5 h-5" />,
     category: 'AI',
   },
   {
@@ -247,7 +285,7 @@ export default function Roadmap() {
           <PageContainer.Section className="mb-12">
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
               <Clock className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              In Progress
+              Working On
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {inProgressItems.map((item, index) => (

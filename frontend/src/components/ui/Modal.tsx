@@ -19,6 +19,7 @@ interface ModalProps {
   closeOnOverlayClick?: boolean;
   closeOnEscape?: boolean;
   className?: string;
+  bodyClassName?: string;
 }
 
 /**
@@ -35,6 +36,7 @@ export default function Modal({
   closeOnOverlayClick = true,
   closeOnEscape = true,
   className,
+  bodyClassName,
 }: ModalProps) {
   // Handle escape key
   const handleKeyDown = useCallback(
@@ -69,7 +71,7 @@ export default function Modal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 overflow-y-auto overscroll-contain">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -88,13 +90,13 @@ export default function Modal({
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             className={clsx(
-              'relative w-full',
+              'relative my-auto w-full',
               sizeClasses[size],
               'bg-white/95 dark:bg-zinc-950/95',
               'backdrop-blur-md',
               'rounded-xl shadow-2xl',
               'border border-slate-200 dark:border-slate-800/50',
-              'overflow-hidden',
+              'overflow-hidden max-h-[calc(var(--app-dvh,100dvh)-1.5rem)] sm:max-h-[calc(var(--app-dvh,100dvh)-2rem)]',
               className
             )}
             role="dialog"
@@ -143,7 +145,7 @@ export default function Modal({
             )}
 
             {/* Body */}
-            <div className="p-6">{children}</div>
+            <div className={clsx('p-6', bodyClassName)}>{children}</div>
           </motion.div>
         </div>
       )}

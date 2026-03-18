@@ -510,7 +510,7 @@ export default function ImmersiveStudy() {
     }
 
     return (
-      <div className="flex min-h-[62vh] max-h-[72vh] flex-col bg-[radial-gradient(circle_at_20%_0%,rgba(168,85,247,0.12),transparent_35%),radial-gradient(circle_at_80%_100%,rgba(6,182,212,0.12),transparent_38%)] dark:bg-[radial-gradient(circle_at_20%_0%,rgba(168,85,247,0.16),transparent_35%),radial-gradient(circle_at_80%_100%,rgba(6,182,212,0.18),transparent_38%)]">
+      <div className="flex min-h-[56vh] sm:min-h-[62vh] max-h-[78vh] flex-col bg-[radial-gradient(circle_at_20%_0%,rgba(168,85,247,0.12),transparent_35%),radial-gradient(circle_at_80%_100%,rgba(6,182,212,0.12),transparent_38%)] dark:bg-[radial-gradient(circle_at_20%_0%,rgba(168,85,247,0.16),transparent_35%),radial-gradient(circle_at_80%_100%,rgba(6,182,212,0.18),transparent_38%)]">
         <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6 space-y-4">
           {tutorMessages.map((message) => (
             <div
@@ -524,7 +524,7 @@ export default function ImmersiveStudy() {
               )}
 
               <div
-                className={`max-w-[86%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
+                className={`max-w-[92%] sm:max-w-[86%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
                   message.role === 'user'
                     ? 'rounded-br-md bg-gradient-to-br from-pink-600 to-fuchsia-600 dark:from-cyan-500 dark:to-violet-500 text-white shadow-fuchsia-500/30'
                     : 'rounded-bl-md bg-white/95 dark:bg-slate-900/90 border border-slate-200/70 dark:border-white/10 text-slate-800 dark:text-slate-200'
@@ -571,7 +571,7 @@ export default function ImmersiveStudy() {
           <div ref={tutorEndRef} />
         </div>
 
-        <div className="sticky bottom-0 border-t border-slate-200/80 dark:border-white/10 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl px-3 py-3 sm:px-4 sm:py-4">
+        <div className="sticky bottom-0 border-t border-slate-200/80 dark:border-white/10 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] sm:px-4 sm:pt-4 sm:pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
           {tutorError && <p className="text-xs text-rose-600 dark:text-rose-400 mb-2">{tutorError}</p>}
 
           <div className="relative">
@@ -649,56 +649,58 @@ export default function ImmersiveStudy() {
       />
 
       {/* Main Content */}
-      <div className="h-full overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-4 py-5 sm:px-6 lg:px-8">
+      <div className="min-h-full">
+        <div className="max-w-7xl mx-auto px-3 py-4 sm:px-6 sm:py-5 lg:px-8">
           <div className="mb-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 shadow-sm">
-            <div className="flex flex-wrap items-center gap-2 justify-between">
-              <h2 className="text-base font-semibold text-slate-900 dark:text-white truncate max-w-full sm:max-w-sm lg:max-w-lg">
+            <div className="flex flex-col gap-3">
+              <h2 className="text-sm sm:text-base font-semibold text-slate-900 dark:text-white leading-snug line-clamp-2 sm:line-clamp-1 max-w-full">
                 {selectedFile?.originalName || 'Study file'}
               </h2>
-              <div className="flex items-center gap-1.5">
-                {TABS.map((tab) => {
-                  const Icon = tab.icon;
-                  const isActive = activeTab === tab.id && !isTutorActive;
+              <div className="overflow-x-auto -mx-1 px-1 pb-1">
+                <div className="flex items-center gap-1.5 min-w-max">
+                  {TABS.map((tab) => {
+                    const Icon = tab.icon;
+                    const isActive = activeTab === tab.id && !isTutorActive;
 
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => handleTabChange(tab.id)}
-                      className={`px-3 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 border ${
-                        isActive
-                          ? 'text-pink-700 dark:text-cyan-300 bg-gradient-to-r from-pink-100 to-fuchsia-100 dark:from-violet-500/30 dark:to-cyan-500/30 border-pink-200 dark:border-cyan-500/40'
-                          : 'text-slate-700 dark:text-slate-400 border-transparent hover:bg-pink-50 dark:hover:bg-cyan-900/20 hover:text-pink-900 dark:hover:text-cyan-200'
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => handleTabChange(tab.id)}
+                        className={`shrink-0 px-3 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 border ${
+                          isActive
+                            ? 'text-pink-700 dark:text-cyan-300 bg-gradient-to-r from-pink-100 to-fuchsia-100 dark:from-violet-500/30 dark:to-cyan-500/30 border-pink-200 dark:border-cyan-500/40'
+                            : 'text-slate-700 dark:text-slate-400 border-transparent hover:bg-pink-50 dark:hover:bg-cyan-900/20 hover:text-pink-900 dark:hover:text-cyan-200'
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{tab.shortLabel}</span>
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    onClick={handleTutorEntry}
+                    className="group relative shrink-0 rounded-lg p-[1px] ml-0.5 overflow-hidden transition-transform duration-200 hover:-translate-y-0.5"
+                    title="Chat with AI Tutor"
+                  >
+                    <span className="pointer-events-none absolute inset-0 rounded-lg bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-500 opacity-90 transition-opacity duration-200 group-hover:opacity-100" />
+                    <span
+                      className={`relative inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-[7px] text-xs sm:text-sm font-semibold border transition-colors duration-200 ${
+                        isTutorActive
+                          ? 'bg-white text-slate-950 border-white/90 dark:bg-black dark:text-white dark:border-black/90 shadow-sm'
+                          : 'bg-white/95 dark:bg-slate-950/95 border-slate-200/70 dark:border-white/15 text-slate-900 dark:text-cyan-100'
                       }`}
                     >
-                      <Icon className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">{tab.shortLabel}</span>
-                    </button>
-                  );
-                })}
-
-                <button
-                  onClick={handleTutorEntry}
-                  className="group relative rounded-lg p-[1px] ml-1 overflow-hidden transition-transform duration-200 hover:-translate-y-0.5"
-                  title="Chat with AI Tutor"
-                >
-                  <span className="pointer-events-none absolute inset-0 rounded-lg bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-500 opacity-90 transition-opacity duration-200 group-hover:opacity-100" />
-                  <span
-                    className={`relative inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-[7px] text-xs sm:text-sm font-semibold border transition-colors duration-200 ${
-                      isTutorActive
-                        ? 'bg-white text-slate-950 border-white/90 dark:bg-black dark:text-white dark:border-black/90 shadow-sm'
-                        : 'bg-white/95 dark:bg-slate-950/95 border-slate-200/70 dark:border-white/15 text-slate-900 dark:text-cyan-100'
-                    }`}
-                  >
-                    <Sparkles
-                      className={`w-3.5 h-3.5 ${
-                        isTutorActive ? 'text-slate-900 dark:text-white' : 'text-fuchsia-500 dark:text-cyan-400'
-                      }`}
-                    />
-                    <span className="hidden sm:inline">Chat with AI Tutor</span>
-                    <span className="sm:hidden">Tutor</span>
-                  </span>
-                </button>
+                      <Sparkles
+                        className={`w-3.5 h-3.5 ${
+                          isTutorActive ? 'text-slate-900 dark:text-white' : 'text-fuchsia-500 dark:text-cyan-400'
+                        }`}
+                      />
+                      <span className="hidden sm:inline">Chat with AI Tutor</span>
+                      <span className="sm:hidden">Tutor</span>
+                    </span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -722,7 +724,7 @@ export default function ImmersiveStudy() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.2, ease: 'easeOut' }}
-                  className="p-4 sm:p-5 lg:p-6"
+                  className="p-3.5 sm:p-5 lg:p-6"
                 >
                   {renderTabContent()}
                 </motion.div>
@@ -933,7 +935,7 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
           <iframe
             title="YouTube original content"
             src={youtubeEmbedUrl}
-            className="w-full min-h-[68vh] border-0 bg-black"
+            className="w-full min-h-[52vh] sm:min-h-[68vh] border-0 bg-black"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
           />
@@ -942,7 +944,7 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
             <iframe
               title="Web page original content"
               src={sourceUrl}
-              className="w-full min-h-[68vh] border-0 bg-white dark:bg-slate-900"
+              className="w-full min-h-[52vh] sm:min-h-[68vh] border-0 bg-white dark:bg-slate-900"
               sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
               referrerPolicy="no-referrer"
             />
@@ -955,7 +957,7 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
             <iframe
               title="Office document preview"
               src={officeViewerUrl}
-              className="w-full min-h-[68vh] border-0 bg-white dark:bg-slate-900"
+              className="w-full min-h-[52vh] sm:min-h-[68vh] border-0 bg-white dark:bg-slate-900"
               referrerPolicy="no-referrer"
             />
             {isPowerPoint && (
@@ -968,14 +970,14 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
           <iframe
             title="PDF preview"
             src={previewFileUrl}
-            className="w-full min-h-[68vh] border-0 bg-white dark:bg-slate-900"
+            className="w-full min-h-[52vh] sm:min-h-[68vh] border-0 bg-white dark:bg-slate-900"
           />
         ) : isImage && previewFileUrl ? (
-          <div className="max-h-[72vh] overflow-auto bg-white dark:bg-slate-900 p-2">
+          <div className="max-h-[60vh] sm:max-h-[72vh] overflow-auto bg-white dark:bg-slate-900 p-2">
             <img src={previewFileUrl} alt={file.originalName} className="w-full h-auto" />
           </div>
         ) : isVideo && previewFileUrl ? (
-          <video src={previewFileUrl} controls className="w-full min-h-[48vh] bg-black" />
+          <video src={previewFileUrl} controls className="w-full min-h-[40vh] sm:min-h-[48vh] bg-black" />
         ) : isAudio && previewFileUrl ? (
           <AudioTranscriptPlayer
             audioUrl={previewFileUrl}
@@ -983,7 +985,7 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
             extractedText={file.extractedText || ''}
           />
         ) : file.extractedText && file.extractedText.trim().length > 0 ? (
-          <div className="max-h-[68vh] overflow-y-auto bg-white/90 dark:bg-slate-900/80 p-4">
+          <div className="max-h-[60vh] sm:max-h-[68vh] overflow-y-auto bg-white/90 dark:bg-slate-900/80 p-4">
             <pre className="whitespace-pre-wrap break-words text-sm sm:text-[15px] leading-relaxed text-slate-700 dark:text-slate-200 font-sans">
               {file.extractedText}
             </pre>
@@ -1757,7 +1759,7 @@ interface EmptyStateProps {
 
 function EmptyState({ icon: Icon, title, description }: EmptyStateProps) {
   return (
-    <div className="text-center py-16">
+    <div className="text-center py-12 sm:py-16">
       <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center">
         <Icon className="w-10 h-10 text-slate-400 dark:text-slate-500" />
       </div>
@@ -1787,14 +1789,14 @@ function GeneratePrompt({ type, onGenerate, isGenerating, extraContent }: Genera
   // Show full-screen loader when generating
   if (isGenerating) {
     return (
-      <div className="flex flex-col items-center justify-center py-16">
+      <div className="flex flex-col items-center justify-center py-12 sm:py-16">
         <GenerationLoader isVisible={true} stages={config.stages} size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="text-center py-16">
+    <div className="text-center py-12 sm:py-16">
       <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-pink-500/10 to-fuchsia-500/10 dark:from-cyan-500/10 dark:to-violet-500/10 border border-pink-500/20 dark:border-cyan-500/20 flex items-center justify-center">
         <Icon className="w-10 h-10 text-pink-600 dark:text-cyan-400" />
       </div>

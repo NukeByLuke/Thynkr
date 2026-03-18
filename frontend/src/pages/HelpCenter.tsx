@@ -16,18 +16,18 @@ export default function HelpCenter() {
       </Helmet>
 
       <PageContainer>
-        <div className="max-w-5xl mx-auto py-6 md:py-10 space-y-6">
-          <div className="text-center mb-2">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-violet-500 shadow-lg mb-4">
-              <HelpCircle className="w-8 h-8 text-white" />
+        <div className="max-w-5xl mx-auto py-4 sm:py-6 md:py-10 space-y-5 sm:space-y-6">
+          <div className="text-center mb-1 sm:mb-2">
+            <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-violet-500 shadow-lg mb-3 sm:mb-4">
+              <HelpCircle className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">Help Center</h1>
-            <p className="mt-2 text-slate-500 dark:text-slate-400">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">Help Center</h1>
+            <p className="mt-2 text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
               Quick links for support, billing, and account help.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3">
             <Card variant="glass" padding="md" className="border border-slate-200/80 dark:border-white/10">
               <div className="flex items-start gap-3">
                 <LifeBuoy className="w-5 h-5 text-cyan-500 mt-0.5" />
@@ -38,7 +38,7 @@ export default function HelpCenter() {
                   </p>
                   <Link
                     to="/contact"
-                    className="inline-block mt-3 text-sm font-medium text-cyan-600 dark:text-cyan-400 hover:underline"
+                    className="mt-3 inline-flex min-h-[40px] items-center text-sm font-medium text-cyan-600 dark:text-cyan-400 hover:underline"
                   >
                     Go to contact page
                   </Link>
@@ -56,7 +56,7 @@ export default function HelpCenter() {
                   </p>
                   <Link
                     to="/settings"
-                    className="inline-block mt-3 text-sm font-medium text-violet-600 dark:text-violet-400 hover:underline"
+                    className="mt-3 inline-flex min-h-[40px] items-center text-sm font-medium text-violet-600 dark:text-violet-400 hover:underline"
                   >
                     Open billing settings
                   </Link>
@@ -74,7 +74,7 @@ export default function HelpCenter() {
                   </p>
                   <a
                     href="mailto:support@thynkr.ca"
-                    className="inline-block mt-3 text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
+                    className="mt-3 inline-flex min-h-[40px] items-center text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:underline break-all"
                   >
                     support@thynkr.ca
                   </a>

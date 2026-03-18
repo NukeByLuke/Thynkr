@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   X,
   ChevronLeft,
@@ -23,6 +25,8 @@ import {
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { calculateQuizScore, isQuizAnswerCorrect } from '@/utils/quizAnswerUtils';
+import { normalizeStudyMarkdown } from '@/utils/markdownContent';
 
 type ViewerTab = 'summary' | 'notes' | 'quiz' | 'flashcards';
 
@@ -198,10 +202,7 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
   const getQuizScore = useCallback(() => {
     if (!studyPack?.quiz) return { correct: 0, total: 0 };
     const questions = studyPack.quiz.questions;
-    let correct = 0;
-    questions.forEach((q, i) => {
-      if (quizAnswers[i] === q.correctAnswer) correct++;
-    });
+    const correct = calculateQuizScore(questions, (_question, index) => quizAnswers[index]);
     return { correct, total: questions.length };
   }, [studyPack, quizAnswers]);
 
@@ -247,9 +248,9 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
               </h2>
             )}
             <div className="prose prose-lg dark:prose-invert max-w-none">
-              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-[1.8] text-base">
-                {page.content}
-              </p>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {normalizeStudyMarkdown(page.content || '')}
+              </ReactMarkdown>
             </div>
           </motion.div>
         </div>
@@ -326,9 +327,11 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
                 {page.heading}
               </h3>
             )}
-            <p className="text-gray-600 dark:text-gray-300 leading-[1.7] text-sm line-clamp-4">
-              {page.content}
-            </p>
+            <div className="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-300">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {normalizeStudyMarkdown(page.content || '')}
+              </ReactMarkdown>
+            </div>
             <button
               onClick={() => {
                 setActiveTab('summary');
@@ -403,7 +406,7 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
               <div className="space-y-2">
                 {question.options.map((option, oIndex) => {
                   const isSelected = quizAnswers[qIndex] === option;
-                  const isCorrect = question.correctAnswer === option;
+                  const isCorrect = isQuizAnswerCorrect(option, question);
                   const showResult = showQuizResults;
 
                   return (
@@ -439,13 +442,15 @@ export default function StudyPackViewer({ studyPackId, onClose }: StudyPackViewe
                 })}
               </div>
               {showQuizResults && question.explanation && (
-                <motion.p
+                <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
-                  className="mt-4 text-sm text-gray-600 dark:text-gray-400 italic bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg"
+                  className="mt-4 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg prose prose-sm dark:prose-invert max-w-none"
                 >
-                  💡 {question.explanation}
-                </motion.p>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {normalizeStudyMarkdown(question.explanation)}
+                  </ReactMarkdown>
+                </motion.div>
               )}
             </motion.div>
           ))}

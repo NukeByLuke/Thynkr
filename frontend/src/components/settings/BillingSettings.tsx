@@ -48,9 +48,9 @@ export default function BillingSettings() {
   });
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 sm:space-y-10">
       <section>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">Subscription</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white mb-1">Subscription</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
           Manage your subscription plan and billing details.
         </p>
@@ -72,10 +72,11 @@ export default function BillingSettings() {
             </p>
           </div>
           
-          <div className="shrink-0">
+           <div className="w-full sm:w-auto sm:shrink-0">
              <Button 
                 onClick={() => navigate('/pricing')}
                 variant={user?.role === 'BASIC' ? 'primary' : 'outline'}
+               className="w-full sm:w-auto"
               >
                 {user?.role === 'BASIC' ? 'Upgrade Plan' : 'Change Plan'}
              </Button>
@@ -88,17 +89,17 @@ export default function BillingSettings() {
           <hr className="border-slate-200 dark:border-white/10" />
           
           <section>
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">Payment Method</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white mb-1">Payment Method</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
               Update your payment card and billing address.
             </p>
 
-            <div className="flex items-center justify-between p-4 bg-white/80 dark:bg-slate-900/70 border border-slate-200 dark:border-white/10 rounded-xl">
-               <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-4 p-4 bg-white/80 dark:bg-slate-900/70 border border-slate-200 dark:border-white/10 rounded-xl sm:flex-row sm:items-center sm:justify-between">
+               <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                   <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
                     <CreditCard className="w-5 h-5" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h4 className="text-sm font-medium text-slate-900 dark:text-white">Stripe Secure Payment</h4>
                     <p className="text-xs text-slate-500">Managed via Stripe Customer Portal</p>
                   </div>
@@ -108,7 +109,7 @@ export default function BillingSettings() {
                  size="sm"
                  onClick={() => createPortalMutation.mutate()}
                  isLoading={createPortalMutation.isPending}
-                 className="gap-2"
+                 className="w-full sm:w-auto gap-2"
                >
                  Manage <ExternalLink className="w-3 h-3" />
                </Button>
@@ -118,15 +119,17 @@ export default function BillingSettings() {
           <hr className="border-slate-200 dark:border-white/10" />
 
           <section>
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">Billing History</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white mb-1">Billing History</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
               Download past invoices and receipts.
             </p>
 
             <div className="text-center py-8 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Invoices are emailed to you automatically. <br/>
-                    Check your email or the Stripe portal for history.
+                    Invoices are emailed to you automatically.
+                </p>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  Check your email or the Stripe portal for history.
                 </p>
             </div>
           </section>

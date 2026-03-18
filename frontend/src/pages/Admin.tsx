@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react';
+import { useMemo, useState, lazy, Suspense } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
 
@@ -131,23 +131,75 @@ export default function Admin() {
     setDeleteModalOpen(true);
   };
 
+  const tabItems = useMemo(
+    () => [
+      {
+        id: 'users' as const,
+        icon: Users,
+        label: 'User Management',
+        shortLabel: 'Users',
+        description: 'Search users, manage roles, and review verification states.',
+      },
+      {
+        id: 'courses' as const,
+        icon: BookOpen,
+        label: 'Course Insights',
+        shortLabel: 'Courses',
+        description: 'Track creation trends, visibility mix, and creator performance.',
+      },
+      {
+        id: 'payments' as const,
+        icon: CreditCard,
+        label: 'Payments',
+        shortLabel: 'Payments',
+        description: 'Monitor subscription revenue, plan distribution, and payment history.',
+      },
+      {
+        id: 'logs' as const,
+        icon: FileText,
+        label: 'Logs',
+        shortLabel: 'Logs',
+        description: 'Review admin activity and export operational event history.',
+      },
+      {
+        id: 'system' as const,
+        icon: Server,
+        label: 'System Health',
+        shortLabel: 'System',
+        description: 'Watch infrastructure health, service latency, and resource usage.',
+      },
+    ],
+    []
+  );
+
+  const activeTabMeta = tabItems.find((tab) => tab.id === activeTab);
+
   return (
-    <div className="min-h-app bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 dark:from-slate-950 dark:via-midnight-violet/20 dark:to-slate-950">
-      {/* Header with Glass */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
-        <div className="bg-white/5 dark:bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="admin-shell">
+      <div className="mx-auto w-full max-w-[1400px] px-3 sm:px-5 lg:px-8 py-4 sm:py-6 lg:py-8">
+        {/* Hero */}
+        <div className="admin-hero relative overflow-hidden rounded-3xl px-4 py-5 sm:px-7 sm:py-7">
+          <div className="pointer-events-none absolute -top-16 right-[-4rem] h-44 w-44 rounded-full bg-fuchsia-300/35 dark:bg-cyan-400/20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 left-[-4rem] h-52 w-52 rounded-full bg-orange-300/35 dark:bg-violet-500/20 blur-3xl" />
+          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-600 bg-clip-text text-transparent">Admin Dashboard</h1>
-              <p className="text-slate-300 mt-2">Manage your platform and monitor activity</p>
+              <p className="admin-kicker text-[11px] uppercase tracking-[0.18em]">Control Center</p>
+              <h1 className="admin-heading-gradient mt-1 text-2xl sm:text-3xl lg:text-4xl font-bold">
+                Admin Dashboard
+              </h1>
+              <p className="admin-muted mt-2 max-w-2xl text-sm sm:text-base">
+                Manage your platform, monitor operations, and take action with confidence across desktop and mobile.
+              </p>
+            </div>
+            <div className="admin-soft-chip inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs sm:text-sm admin-muted">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              Live admin controls
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 mt-8">
         {/* Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
           <StatCard
             title="Total Users"
             value={stats?.users.total ?? '-'}
@@ -187,48 +239,36 @@ export default function Admin() {
         </div>
 
         {/* Tabs Navigation */}
-        <div className="bg-white/5 dark:bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-2 mb-6 overflow-x-auto shadow-xl">
-          <div className="flex gap-2 min-w-max relative">
-            <TabButton
-              active={activeTab === 'users'}
-              icon={Users}
-              label="User Management"
-              onClick={() => setActiveTab('users')}
-            />
-            <TabButton
-              active={activeTab === 'courses'}
-              icon={BookOpen}
-              label="Course Insights"
-              onClick={() => setActiveTab('courses')}
-            />
-            <TabButton
-              active={activeTab === 'payments'}
-              icon={CreditCard}
-              label="Payments"
-              onClick={() => setActiveTab('payments')}
-            />
-            <TabButton
-              active={activeTab === 'logs'}
-              icon={FileText}
-              label="Logs"
-              onClick={() => setActiveTab('logs')}
-            />
-            <TabButton
-              active={activeTab === 'system'}
-              icon={Server}
-              label="System Health"
-              onClick={() => setActiveTab('system')}
-            />
+        <div className="admin-tab-track mt-5 rounded-2xl p-2 sm:p-2.5 overflow-x-auto">
+          <div className="flex w-max sm:w-full gap-2">
+            {tabItems.map((tab) => (
+              <TabButton
+                key={tab.id}
+                active={activeTab === tab.id}
+                icon={tab.icon}
+                label={tab.label}
+                shortLabel={tab.shortLabel}
+                onClick={() => setActiveTab(tab.id)}
+              />
+            ))}
           </div>
         </div>
 
         {/* Tab Content */}
-        <div className="bg-white/5 dark:bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+        <div className="admin-surface-strong mt-4 rounded-3xl backdrop-blur-xl shadow-2xl overflow-hidden">
+          <div className="admin-surface-header px-4 py-3 sm:px-6 sm:py-4">
+            <h2 className="admin-title text-base sm:text-lg font-semibold">
+              {activeTabMeta?.label || 'Admin'}
+            </h2>
+            <p className="admin-faint mt-1 text-xs sm:text-sm">
+              {activeTabMeta?.description}
+            </p>
+          </div>
           <Suspense
             fallback={
-              <div className="flex items-center justify-center py-20">
-                <div className="flex items-center gap-2 text-gray-500">
-                  <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="flex items-center justify-center py-16 sm:py-20">
+                <div className="flex items-center gap-2 admin-faint">
+                  <div className="w-5 h-5 border-2 border-fuchsia-500 dark:border-cyan-400 border-t-transparent rounded-full animate-spin" />
                   Loading...
                 </div>
               </div>
@@ -286,7 +326,7 @@ export default function Admin() {
 
       {/* Change Role Modal */}
       <Modal open={roleModalOpen} onClose={() => setRoleModalOpen(false)}>
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
               Change User Role
@@ -350,7 +390,7 @@ export default function Admin() {
 
       {/* Delete User Modal */}
       <Modal open={deleteModalOpen} onClose={() => setDeleteModalOpen(false)}>
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/30">
             <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
           </div>

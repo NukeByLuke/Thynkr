@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
@@ -30,6 +30,8 @@ import {
   ImagePlus,
   GraduationCap,
   User,
+  Search,
+  Loader2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
@@ -71,6 +73,16 @@ interface Course {
   files: CourseFile[];
   createdAt: string;
   updatedAt: string;
+}
+
+interface ExistingLibraryFile {
+  id: string;
+  fileName: string;
+  originalName: string;
+  fileType: string;
+  fileSize: number;
+  status: 'UPLOADED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  createdAt: string;
 }
 
 const CATEGORIES = [
@@ -155,6 +167,9 @@ export default function MyCourseDetail() {
     tab: 'summary' | 'notes' | 'quiz' | 'flashcards';
   } | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showExistingFilesModal, setShowExistingFilesModal] = useState(false);
+  const [existingFileSearch, setExistingFileSearch] = useState('');
+  const [selectedExistingFileIds, setSelectedExistingFileIds] = useState<string[]>([]);
 
   // Check if user can create public courses (Premium/Admin only)
   const isPremium = canCreatePublicCourses(user?.role);
@@ -169,6 +184,16 @@ export default function MyCourseDetail() {
       return response.data;
     },
     enabled: !!id,
+  });
+
+  const { data: existingFilesData, isLoading: isExistingFilesLoading } = useQuery({
+    queryKey: ['files', 'course-attach-picker'],
+    queryFn: async () => {
+      const response = await api.get('/files');
+      return response.data as { files: ExistingLibraryFile[] };
+    },
+    enabled: showExistingFilesModal,
+    staleTime: 30_000,
   });
 
   const updateCourseMutation = useMutation({
@@ -273,6 +298,37 @@ export default function MyCourseDetail() {
     },
   });
 
+  const attachExistingFilesMutation = useMutation({
+    mutationFn: async (fileIds: string[]) => {
+      const response = await api.post(`/user-courses/${id}/files/attach`, { fileIds });
+      return response.data as {
+        files: CourseFile[];
+        failedFiles?: Array<{ fileId: string; name: string; error: string }>;
+      };
+    },
+    onSuccess: (result) => {
+      const addedCount = result.files?.length || 0;
+      const failedCount = result.failedFiles?.length || 0;
+
+      if (addedCount > 0) {
+        toast.success(`${addedCount} file${addedCount === 1 ? '' : 's'} added to this course`);
+      }
+
+      if (failedCount > 0) {
+        toast.error(`${failedCount} file${failedCount === 1 ? '' : 's'} could not be added`);
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['user-course', id] });
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      setShowExistingFilesModal(false);
+      setSelectedExistingFileIds([]);
+      setExistingFileSearch('');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || 'Failed to add existing files');
+    },
+  });
+
   const handleDragStart = useCallback((fileId: string) => {
     setDraggedFileId(fileId);
   }, []);
@@ -332,6 +388,18 @@ export default function MyCourseDetail() {
     if (bannerInputRef.current) {
       bannerInputRef.current.value = '';
     }
+  };
+
+  // Check if file is AI-compatible (matches backend logic)
+  const isAICompatibleFile = (fileType: string): boolean => {
+    const supportedTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/msword',
+      'text/plain',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    ];
+    return supportedTypes.includes(fileType) || fileType.startsWith('text/');
   };
 
   const moveFileUp = (fileId: string) => {
@@ -402,13 +470,71 @@ export default function MyCourseDetail() {
     toast.success('Web link imports coming soon for courses');
   };
 
+  const libraryFiles: ExistingLibraryFile[] = Array.isArray(existingFilesData?.files)
+    ? existingFilesData.files
+    : [];
+
+  const currentCourseFileFingerprints = useMemo(() => {
+    return new Set(
+      (data?.course?.files || []).map(
+        (file: CourseFile) => `${file.originalName}::${file.fileType}::${file.fileSize}`
+      )
+    );
+  }, [data?.course?.files]);
+
+  const attachableLibraryFiles = useMemo(() => {
+    const searchTerm = existingFileSearch.trim().toLowerCase();
+
+    return libraryFiles
+      .filter((file) => file.status !== 'FAILED')
+      .filter(
+        (file) =>
+          !currentCourseFileFingerprints.has(
+            `${file.originalName}::${file.fileType}::${file.fileSize}`
+          )
+      )
+      .filter((file) => {
+        if (!searchTerm) return true;
+
+        return (
+          file.originalName.toLowerCase().includes(searchTerm) ||
+          file.fileType.toLowerCase().includes(searchTerm)
+        );
+      });
+  }, [libraryFiles, currentCourseFileFingerprints, existingFileSearch]);
+
+  const handleOpenExistingFilesModal = () => {
+    setSelectedExistingFileIds([]);
+    setExistingFileSearch('');
+    setShowExistingFilesModal(true);
+  };
+
+  const toggleExistingFileSelection = (fileId: string) => {
+    setSelectedExistingFileIds((prev) =>
+      prev.includes(fileId) ? prev.filter((idValue) => idValue !== fileId) : [...prev, fileId]
+    );
+  };
+
+  const handleAttachExistingFiles = () => {
+    if (selectedExistingFileIds.length === 0) {
+      toast.error('Select at least one file to add');
+      return;
+    }
+
+    attachExistingFilesMutation.mutate(selectedExistingFileIds);
+  };
+
   const course: Course | null = data?.course || null;
 
   if (isLoading) {
     return <LoadingSpinner fullScreen />;
   }
 
-  if (error || !course) {
+  if (!course) {
+    if (!error) {
+      return <LoadingSpinner fullScreen />;
+    }
+
     const status = (error as any)?.response?.status;
     const isAccessDenied = status === 403;
     return (
@@ -442,7 +568,7 @@ export default function MyCourseDetail() {
   const catColor = CATEGORY_COLORS[course.category] || CATEGORY_COLORS.OTHER;
 
   return (
-    <div className="h-full">
+    <div className="min-h-full">
       <Helmet>
         <title>{course.title} — Thynkr</title>
         <meta name="description" content={course.description || `${course.title} on Thynkr — AI-powered study platform`} />
@@ -458,7 +584,7 @@ export default function MyCourseDetail() {
       </Helmet>
       {/* Cover Banner */}
       {course.bannerImage ? (
-        <div className="relative w-full h-40 sm:h-48 bg-slate-100 dark:bg-zinc-900 group">
+        <div className="relative w-full h-36 sm:h-48 bg-slate-100 dark:bg-zinc-900 group">
           <img src={course.bannerImage} alt="" loading="lazy" className="w-full h-full object-cover" />
           {course.isOwner && (
             <>
@@ -472,7 +598,7 @@ export default function MyCourseDetail() {
               <button
                 onClick={() => bannerInputRef.current?.click()}
                 disabled={uploadingBanner}
-                className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-black/55 hover:bg-black/75 backdrop-blur-sm rounded-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
               >
                 <ImagePlus className="h-3.5 w-3.5" />
                 Change cover
@@ -492,7 +618,7 @@ export default function MyCourseDetail() {
           <button
             onClick={() => bannerInputRef.current?.click()}
             disabled={uploadingBanner}
-            className="w-full h-12 flex items-center justify-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.02] border-b border-slate-200/70 dark:border-white/[0.06] opacity-0 hover:opacity-100 transition-all"
+            className="w-full h-11 sm:h-12 flex items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/[0.02] border-b border-slate-200/70 dark:border-white/[0.06] opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
           >
             <ImagePlus className="h-3.5 w-3.5" />
             {uploadingBanner ? 'Uploading...' : 'Add a cover image'}
@@ -502,12 +628,12 @@ export default function MyCourseDetail() {
 
       {/* Header */}
       <div className="border-b border-slate-200/70 dark:border-white/[0.06] bg-white/60 dark:bg-zinc-950/60 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           {/* Breadcrumb */}
-          <div className="pt-5 pb-3">
+          <div className="pt-4 sm:pt-5 pb-2.5 sm:pb-3">
             <Link
               to="/courses"
-              className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Courses
@@ -515,7 +641,7 @@ export default function MyCourseDetail() {
           </div>
 
           {/* Title Row */}
-          <div className="pb-5">
+          <div className="pb-4 sm:pb-5">
             <div className="flex flex-wrap items-center gap-2 mb-2">
               <span className={`px-2.5 py-1 text-[11px] font-semibold rounded-md border ${catColor.bg} ${catColor.text} ${catColor.border}`}>
                 {course.category.replace('_', ' ')}
@@ -535,10 +661,10 @@ export default function MyCourseDetail() {
                 {course.visibility}
               </span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
               {course.title}
             </h1>
-            <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-slate-500 dark:text-slate-400">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
               <span className="flex items-center gap-1.5">
                 <User className="h-3.5 w-3.5" />
                 {course.creator.name}
@@ -557,13 +683,13 @@ export default function MyCourseDetail() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Left Column - Files */}
-          <div className="lg:col-span-2 space-y-5">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-5">
             {/* Description Card */}
             {(course.description || isEditing) && (
-              <div className="rounded-xl border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 p-5">
+              <div className="rounded-xl border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 p-4 sm:p-5">
                 {isEditing ? (
                   <form
                     onSubmit={(e) => {
@@ -595,7 +721,7 @@ export default function MyCourseDetail() {
                         className="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                           Category
@@ -634,18 +760,18 @@ export default function MyCourseDetail() {
                         </select>
                       </div>
                     </div>
-                    <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-white/[0.06]">
+                    <div className="pt-4 border-t border-slate-100 dark:border-white/[0.06] flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5">
                       <button
                         type="button"
                         onClick={() => setIsEditing(false)}
-                        className="px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04] rounded-lg border border-slate-200 dark:border-white/10 transition-colors font-medium"
+                        className="w-full sm:w-auto px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04] rounded-lg border border-slate-200 dark:border-white/10 transition-colors font-medium"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         disabled={updateCourseMutation.isPending}
-                        className="flex items-center gap-1.5 px-4 py-2 text-sm bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 transition-colors font-medium"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 transition-colors font-medium"
                       >
                         <Save className="h-3.5 w-3.5" />
                         {updateCourseMutation.isPending ? 'Saving...' : 'Save'}
@@ -667,7 +793,7 @@ export default function MyCourseDetail() {
 
             {/* Files Section */}
             <div className="rounded-xl border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 overflow-hidden">
-              <div className="p-4 border-b border-slate-100 dark:border-white/[0.06] flex items-center justify-between">
+              <div className="p-3 sm:p-4 border-b border-slate-100 dark:border-white/[0.06] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                   <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
                     Files
@@ -676,29 +802,36 @@ export default function MyCourseDetail() {
                     {course.files.length} file{course.files.length !== 1 ? 's' : ''} in this course
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   {/* Study Button */}
-                  {course.files.some(
-                    (f: CourseFile) =>
-                      f.fileType === 'application/pdf' || f.fileType.startsWith('image/')
-                  ) && (
+                  {course.files.some((f: CourseFile) => isAICompatibleFile(f.fileType)) && (
                     <button
                       onClick={() => navigate(`/courses/${id}/study${shareToken ? `?token=${shareToken}` : ''}`)}
-                      className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
                     >
                       <GraduationCap className="h-4 w-4" />
                       Study
                     </button>
                   )}
                   {course.isOwner && (
-                    <button
-                      onClick={() => setShowUploadModal(true)}
-                      disabled={uploading}
-                      className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 disabled:opacity-50 transition-colors"
-                    >
-                      <Upload className="h-4 w-4" />
-                      {uploading ? `${Math.round(uploadProgress)}%` : 'Upload'}
-                    </button>
+                    <>
+                      <button
+                        onClick={handleOpenExistingFilesModal}
+                        disabled={attachExistingFilesMutation.isPending}
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 disabled:opacity-50 transition-colors"
+                      >
+                        <FileText className="h-4 w-4" />
+                        Add Existing
+                      </button>
+                      <button
+                        onClick={() => setShowUploadModal(true)}
+                        disabled={uploading}
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 disabled:opacity-50 transition-colors"
+                      >
+                        <Upload className="h-4 w-4" />
+                        {uploading ? `${Math.round(uploadProgress)}%` : 'Upload'}
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -720,7 +853,7 @@ export default function MyCourseDetail() {
               )}
 
               {course.files.length === 0 ? (
-                <div className="p-10 text-center">
+                <div className="p-6 sm:p-10 text-center">
                   <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
                     <FileText className="h-6 w-6 text-slate-400" />
                   </div>
@@ -733,13 +866,23 @@ export default function MyCourseDetail() {
                       : 'No files have been added to this course yet'}
                   </p>
                   {course.isOwner && (
-                    <button
-                      onClick={() => setShowUploadModal(true)}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
-                    >
-                      <Upload className="h-4 w-4" />
-                      Upload file
-                    </button>
+                    <div className="flex w-full flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2">
+                      <button
+                        onClick={handleOpenExistingFilesModal}
+                        disabled={attachExistingFilesMutation.isPending}
+                        className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
+                      >
+                        <FileText className="h-4 w-4" />
+                        Add existing
+                      </button>
+                      <button
+                        onClick={() => setShowUploadModal(true)}
+                        className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 px-4 py-2 text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
+                      >
+                        <Upload className="h-4 w-4" />
+                        Upload file
+                      </button>
+                    </div>
                   )}
                 </div>
               ) : (
@@ -752,7 +895,7 @@ export default function MyCourseDetail() {
                       onDragOver={(e) => handleDragOver(e, file.id)}
                       onDragEnd={handleDragEnd}
                       onDrop={() => handleDrop(file.id)}
-                      className={`px-4 py-3 flex items-center gap-3 transition-colors ${
+                      className={`px-3 sm:px-4 py-3 flex items-start sm:items-center gap-2.5 sm:gap-3 transition-colors ${
                         course.isOwner ? 'cursor-grab active:cursor-grabbing' : ''
                       } ${
                         draggedFileId === file.id ? 'opacity-50' : ''
@@ -763,11 +906,11 @@ export default function MyCourseDetail() {
                       } hover:bg-slate-50 dark:hover:bg-white/[0.02]`}
                     >
                       {course.isOwner && (
-                        <div className="flex flex-col items-center gap-0.5">
+                        <div className="flex items-center sm:flex-col gap-0.5">
                           <button
                             onClick={() => moveFileUp(file.id)}
                             disabled={index === 0}
-                            className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="hidden sm:inline-flex p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed"
                           >
                             <ChevronUp className="h-4 w-4" />
                           </button>
@@ -775,20 +918,20 @@ export default function MyCourseDetail() {
                           <button
                             onClick={() => moveFileDown(file.id)}
                             disabled={index === course.files.length - 1}
-                            className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="hidden sm:inline-flex p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed"
                           >
                             <ChevronDown className="h-4 w-4" />
                           </button>
                         </div>
                       )}
 
-                      <div className="p-2 rounded-lg bg-slate-50 dark:bg-white/[0.04]">
+                      <div className="p-1.5 sm:p-2 rounded-lg bg-slate-50 dark:bg-white/[0.04]">
                         {getFileIcon(file.fileType)}
                       </div>
 
                       <div className="flex-1 min-w-0">
                         {editingFileId === file.id ? (
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                             <input
                               type="text"
                               value={editingFileName}
@@ -813,13 +956,13 @@ export default function MyCourseDetail() {
                                   name: editingFileName,
                                 })
                               }
-                              className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                              className="inline-flex w-full sm:w-auto items-center justify-center p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                             >
                               <Save className="h-4 w-4" />
                             </button>
                             <button
                               onClick={() => setEditingFileId(null)}
-                              className="p-2 text-slate-500 hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors"
+                              className="inline-flex w-full sm:w-auto items-center justify-center p-2 text-slate-500 hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors"
                             >
                               <X className="h-4 w-4" />
                             </button>
@@ -829,7 +972,7 @@ export default function MyCourseDetail() {
                             <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
                               {file.name}
                             </p>
-                            <div className="flex items-center gap-2 mt-0.5">
+                            <div className="flex flex-wrap items-center gap-2 mt-0.5">
                               <FileTypeBadge mimeType={file.fileType} className="text-[10px] px-1.5 py-0.5" />
                               <span className="text-xs text-slate-500 dark:text-slate-400">
                                 {formatFileSize(file.fileSize)}
@@ -839,10 +982,10 @@ export default function MyCourseDetail() {
                         )}
                       </div>
 
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-0.5 sm:gap-1 ml-auto sm:ml-0">
                         <button
                           onClick={() => setViewingFile(file)}
-                          className="p-2 text-brand-500 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-colors"
+                          className="p-1.5 sm:p-2 text-brand-500 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-colors"
                           title="View file"
                         >
                           <Eye className="h-4 w-4" />
@@ -864,7 +1007,7 @@ export default function MyCourseDetail() {
                                 setEditingFileId(file.id);
                                 setEditingFileName(file.name);
                               }}
-                              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                              className="p-1.5 sm:p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                               title="Rename"
                             >
                               <Edit2 className="h-4 w-4" />
@@ -875,7 +1018,7 @@ export default function MyCourseDetail() {
                                   deleteFileMutation.mutate(file.id);
                                 }
                               }}
-                              className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                              className="p-1.5 sm:p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                               title="Delete"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -891,9 +1034,9 @@ export default function MyCourseDetail() {
           </div>
 
           {/* Right Column - Sidebar */}
-          <div className="space-y-5">
+          <div className="space-y-4 sm:space-y-5">
             {/* Author Card */}
-            <div className="rounded-xl border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 p-5">
+            <div className="rounded-xl border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 p-4 sm:p-5">
               <h3 className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
                 Course Info
               </h3>
@@ -929,7 +1072,7 @@ export default function MyCourseDetail() {
 
             {/* Actions Card (Owner only) */}
             {course.isOwner && (
-              <div className="rounded-xl border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 p-5">
+              <div className="rounded-xl border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 p-4 sm:p-5">
                 <h3 className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
                   Actions
                 </h3>
@@ -1010,10 +1153,153 @@ export default function MyCourseDetail() {
         </div>
       </div>
 
+      {/* Existing Files Modal */}
+      {showExistingFilesModal && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/[0.08] rounded-xl shadow-2xl w-full max-w-2xl max-h-[calc(100vh-1.5rem)] overflow-hidden flex flex-col">
+            <div className="p-4 sm:p-5 border-b border-slate-200/70 dark:border-white/[0.08]">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Add Existing Files</h2>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                    Reuse files from your study library in this course.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    if (attachExistingFilesMutation.isPending) return;
+                    setShowExistingFilesModal(false);
+                  }}
+                  className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04] rounded-lg transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <input
+                    type="text"
+                    value={existingFileSearch}
+                    onChange={(e) => setExistingFileSearch(e.target.value)}
+                    placeholder="Search your uploaded files..."
+                    className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 dark:border-white/10 rounded-lg bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setSelectedExistingFileIds(attachableLibraryFiles.map((file) => file.id))}
+                    disabled={isExistingFilesLoading || attachableLibraryFiles.length === 0}
+                    className="px-3 py-2 text-xs sm:text-sm rounded-lg border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] disabled:opacity-50"
+                  >
+                    Select all
+                  </button>
+                  <button
+                    onClick={() => setSelectedExistingFileIds([])}
+                    disabled={selectedExistingFileIds.length === 0}
+                    className="px-3 py-2 text-xs sm:text-sm rounded-lg border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] disabled:opacity-50"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 sm:p-5">
+              {isExistingFilesLoading ? (
+                <div className="h-full min-h-[200px] flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Loading your files...
+                </div>
+              ) : attachableLibraryFiles.length === 0 ? (
+                <div className="h-full min-h-[200px] flex items-center justify-center text-center text-slate-500 dark:text-slate-400">
+                  <div>
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300">No reusable files found</p>
+                    <p className="text-xs mt-1">Upload more files in your library or adjust the search.</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {attachableLibraryFiles.map((file) => {
+                    const isSelected = selectedExistingFileIds.includes(file.id);
+
+                    return (
+                      <button
+                        key={file.id}
+                        type="button"
+                        onClick={() => toggleExistingFileSelection(file.id)}
+                        className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                          isSelected
+                            ? 'border-brand-400 dark:border-brand-500 bg-brand-50/60 dark:bg-brand-900/20'
+                            : 'border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/[0.03]'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {}}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              toggleExistingFileSelection(file.id);
+                            }}
+                            className="mt-1 h-4 w-4 rounded border-slate-300 dark:border-slate-600"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
+                              {file.originalName}
+                            </p>
+                            <div className="mt-1 flex flex-wrap items-center gap-2">
+                              <FileTypeBadge mimeType={file.fileType} className="text-[10px] px-1.5 py-0.5" />
+                              <span className="text-xs text-slate-500 dark:text-slate-400">
+                                {formatFileSize(file.fileSize)}
+                              </span>
+                              <span className="text-xs text-slate-500 dark:text-slate-400">
+                                Added {formatDate(file.createdAt)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 sm:p-5 border-t border-slate-200/70 dark:border-white/[0.08] flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {selectedExistingFileIds.length} selected
+              </p>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <button
+                  onClick={() => setShowExistingFilesModal(false)}
+                  disabled={attachExistingFilesMutation.isPending}
+                  className="px-4 py-2 text-sm rounded-lg border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAttachExistingFiles}
+                  disabled={
+                    selectedExistingFileIds.length === 0 || attachExistingFilesMutation.isPending
+                  }
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50"
+                >
+                  {attachExistingFilesMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                  Add selected files
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Share Modal */}
       {showShareModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/[0.08] rounded-xl shadow-2xl w-full max-w-md p-5">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/[0.08] rounded-xl shadow-2xl w-full max-w-md max-h-[calc(100vh-1.5rem)] overflow-y-auto p-4 sm:p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Share Course</h2>
               <button
@@ -1030,19 +1316,19 @@ export default function MyCourseDetail() {
                 : 'Share this private link to give others access.'}
             </p>
 
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3">
               <input
                 type="text"
                 value={shareUrl}
                 readOnly
-                className="flex-1 px-3 py-2 text-sm border border-slate-200 dark:border-white/10 rounded-lg bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white font-mono"
+                className="w-full sm:flex-1 px-3 py-2 text-xs sm:text-sm border border-slate-200 dark:border-white/10 rounded-lg bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white font-mono"
               />
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(shareUrl);
                   toast.success('Link copied!');
                 }}
-                className="p-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
+                className="inline-flex w-full sm:w-auto items-center justify-center p-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
               >
                 <Copy className="h-4 w-4" />
               </button>
@@ -1066,16 +1352,16 @@ export default function MyCourseDetail() {
 
       {/* File Viewer Modal */}
       {viewingFile && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="relative w-full max-w-6xl max-h-[90vh] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/[0.08] rounded-xl shadow-2xl overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 backdrop-blur-sm">
+          <div className="relative w-full max-w-6xl max-h-[95vh] sm:max-h-[90vh] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/[0.08] rounded-xl shadow-2xl overflow-hidden flex flex-col">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-white/[0.06]">
-              <div className="flex items-center gap-3">
+            <div className="flex items-start sm:items-center justify-between gap-2 p-3 sm:p-4 border-b border-slate-100 dark:border-white/[0.06]">
+              <div className="flex items-center gap-3 min-w-0">
                 <div className="p-1.5 rounded-lg bg-slate-50 dark:bg-white/[0.04]">
                   {getFileIcon(viewingFile.fileType)}
                 </div>
-                <div>
-                  <h3 className="text-sm font-medium text-slate-900 dark:text-white">{viewingFile.name}</h3>
+                <div className="min-w-0">
+                  <h3 className="text-sm font-medium text-slate-900 dark:text-white truncate">{viewingFile.name}</h3>
                   <p className="text-xs text-slate-500">{formatFileSize(viewingFile.fileSize)}</p>
                 </div>
               </div>
@@ -1088,7 +1374,7 @@ export default function MyCourseDetail() {
             </div>
 
             {/* Modal Content */}
-            <div className="flex-1 overflow-auto p-4">
+            <div className="flex-1 overflow-auto p-3 sm:p-4">
               <SecureFileViewer
                 fileId={viewingFile.id}
                 fileName={viewingFile.name}

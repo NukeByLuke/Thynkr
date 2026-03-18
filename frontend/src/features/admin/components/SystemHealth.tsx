@@ -362,14 +362,14 @@ export const SystemHealth = () => {
     })) || [];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-4 sm:space-y-5">
       {/* Header with Overall Status */}
-      <div className={`rounded-2xl border p-6 ${getStatusBgColor(overallStatus)}`}>
+      <div className={`rounded-2xl border p-4 sm:p-6 ${getStatusBgColor(overallStatus)}`}>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             {getStatusIcon(overallStatus)}
             <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                 System Health Overview
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -383,16 +383,16 @@ export const SystemHealth = () => {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex gap-1 p-1 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full md:w-auto">
+            <div className="admin-segment grid grid-cols-2 sm:grid-cols-4 gap-1 p-1 rounded-lg w-full sm:w-auto">
               {(['overview', 'cpu', 'memory', 'network'] as const).map((view) => (
                 <button
                   key={view}
                   onClick={() => setMetricsView(view)}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors capitalize ${
+                  className={`px-2.5 py-1.5 text-sm font-medium rounded-md transition-colors capitalize ${
                     metricsView === view
-                      ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                      ? 'admin-segment-btn-active'
+                      : 'admin-segment-btn'
                   }`}
                 >
                   {view}
@@ -402,7 +402,7 @@ export const SystemHealth = () => {
             <button
               onClick={handleRefresh}
               disabled={healthFetching}
-              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+              className="admin-soft-chip flex items-center justify-center gap-2 px-4 py-2 rounded-xl shadow-sm hover:bg-rose-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 w-full sm:w-auto"
             >
               <RefreshCw className={`w-4 h-4 ${healthFetching ? 'animate-spin' : ''}`} />
               Refresh
@@ -412,9 +412,9 @@ export const SystemHealth = () => {
       </div>
 
       {/* Droplet Metrics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-3 sm:gap-4">
         {/* CPU Usage */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+        <div className="admin-surface rounded-2xl p-4 sm:p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div
@@ -428,14 +428,14 @@ export const SystemHealth = () => {
             </div>
             <StatusIndicator value={metrics?.cpu.usage || 0} />
           </div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
             {(metrics?.cpu.usage || 0).toFixed(1)}%
           </p>
           {droplet && <p className="text-xs text-gray-500 mt-1">{droplet.vcpus} vCPUs</p>}
         </div>
 
         {/* Memory Usage */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+        <div className="admin-surface rounded-2xl p-4 sm:p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div
@@ -449,7 +449,7 @@ export const SystemHealth = () => {
             </div>
             <StatusIndicator value={metrics?.memory.percentage || 0} />
           </div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
             {(metrics?.memory.percentage || 0).toFixed(1)}%
           </p>
           <p className="text-xs text-gray-500 mt-1">
@@ -458,7 +458,7 @@ export const SystemHealth = () => {
         </div>
 
         {/* Disk Usage */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+        <div className="admin-surface rounded-2xl p-4 sm:p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div
@@ -472,7 +472,7 @@ export const SystemHealth = () => {
             </div>
             <StatusIndicator value={metrics?.disk.percentage || 0} />
           </div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
             {(metrics?.disk.percentage || 0).toFixed(1)}%
           </p>
           <p className="text-xs text-gray-500 mt-1">
@@ -481,7 +481,7 @@ export const SystemHealth = () => {
         </div>
 
         {/* Bandwidth */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+        <div className="admin-surface rounded-2xl p-4 sm:p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
@@ -505,14 +505,14 @@ export const SystemHealth = () => {
         </div>
 
         {/* Uptime */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+        <div className="admin-surface rounded-2xl p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-3">
             <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
               <Clock className="w-4 h-4 text-purple-600 dark:text-purple-400" />
             </div>
             <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Uptime</span>
           </div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
             {metrics?.uptime.formatted || health?.uptime.formatted || 'N/A'}
           </p>
           <p className="text-xs text-gray-500 mt-1">
@@ -523,13 +523,13 @@ export const SystemHealth = () => {
 
       {/* Charts Section */}
       {metricsView === 'overview' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
           {/* CPU Chart */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white/95 dark:bg-slate-900/80 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               CPU Usage (24h)
             </h3>
-            <div className="h-64">
+            <div className="h-56 sm:h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={cpuChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
@@ -576,11 +576,11 @@ export const SystemHealth = () => {
           </div>
 
           {/* Memory Chart */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white/95 dark:bg-slate-900/80 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Memory Usage (24h)
             </h3>
-            <div className="h-64">
+            <div className="h-56 sm:h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
                   data={memoryChartData}
@@ -632,11 +632,11 @@ export const SystemHealth = () => {
       )}
 
       {metricsView === 'cpu' && (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white/95 dark:bg-slate-900/80 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             CPU Usage Details (24h)
           </h3>
-          <div className="h-80">
+          <div className="h-64 sm:h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={cpuChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -676,11 +676,11 @@ export const SystemHealth = () => {
       )}
 
       {metricsView === 'memory' && (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white/95 dark:bg-slate-900/80 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Memory Usage Details (24h)
           </h3>
-          <div className="h-80">
+          <div className="h-64 sm:h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={memoryChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -720,11 +720,11 @@ export const SystemHealth = () => {
       )}
 
       {metricsView === 'network' && (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white/95 dark:bg-slate-900/80 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Network Bandwidth (24h)
           </h3>
-          <div className="h-80">
+          <div className="h-64 sm:h-80">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={networkChartData}
@@ -787,9 +787,9 @@ export const SystemHealth = () => {
       )}
 
       {/* Application & Database Stats Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
         {/* Database Health */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white/95 dark:bg-slate-900/80 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-4">
             <div
               className={`p-2.5 rounded-xl ${health?.database.status === 'healthy' ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}
@@ -836,7 +836,7 @@ export const SystemHealth = () => {
         </div>
 
         {/* API Health */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white/95 dark:bg-slate-900/80 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-4">
             <div
               className={`p-2.5 rounded-xl ${health?.api.status === 'healthy' ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-amber-100 dark:bg-amber-900/30'}`}
@@ -885,9 +885,9 @@ export const SystemHealth = () => {
         </div>
 
         {/* Activity Summary */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white/95 dark:bg-slate-900/80 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
           <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Activity (Last Hour)</h3>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
               <Users className="w-5 h-5 text-blue-600 dark:text-blue-400 mx-auto mb-1" />
               <p className="text-xl font-bold text-gray-900 dark:text-white">
@@ -924,10 +924,10 @@ export const SystemHealth = () => {
       </div>
 
       {/* Droplet Info & Recent Logs */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
         {/* Droplet Information */}
         {droplet && (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white/95 dark:bg-slate-900/80 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2.5 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
                 <Server className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -937,7 +937,7 @@ export const SystemHealth = () => {
                 <p className="text-sm text-gray-500">{droplet.name}</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <p className="text-xs text-gray-500 uppercase tracking-wider">Status</p>
                 <p className="font-medium text-gray-900 dark:text-white capitalize">
@@ -981,7 +981,7 @@ export const SystemHealth = () => {
         )}
 
         {/* Recent Activity */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white/95 dark:bg-slate-900/80 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Recent Admin Activity
           </h3>
@@ -989,20 +989,20 @@ export const SystemHealth = () => {
             {health?.recentLogs.map((log) => (
               <div
                 key={log.id}
-                className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                className="flex items-start justify-between gap-2 py-2 border-b border-gray-100 dark:border-gray-700 last:border-0"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-start gap-2 sm:gap-3 min-w-0">
                   <span
                     className={`w-2 h-2 rounded-full ${log.status === 'SUCCESS' ? 'bg-emerald-500' : log.status === 'ERROR' ? 'bg-red-500' : 'bg-amber-500'}`}
                   />
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
                     {log.action.replace(/_/g, ' ')}
                   </span>
-                  <span className="text-sm text-gray-500 truncate max-w-[120px]">
-                    {log.userEmail}
+                  <span className="text-xs sm:text-sm text-gray-500 truncate max-w-[120px] sm:max-w-[160px]">
+                    {log.userEmail || 'Unknown user'}
                   </span>
                 </div>
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-400 whitespace-nowrap">
                   {formatDistanceToNow(new Date(log.createdAt), { addSuffix: true })}
                 </span>
               </div>

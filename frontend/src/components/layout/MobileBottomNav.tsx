@@ -178,7 +178,7 @@ const MobileBottomNav = memo(() => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={() => setIsMenuOpen(false)}
-              className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
+              className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
             />
 
             <motion.div
@@ -186,7 +186,7 @@ const MobileBottomNav = memo(() => {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 350, damping: 32 }}
-              className="lg:hidden fixed bottom-0 left-0 right-0 z-[70] rounded-t-[28px] overflow-hidden pb-safe"
+              className="md:hidden fixed bottom-0 left-0 right-0 z-[70] rounded-t-[28px] overflow-hidden pb-safe"
               style={{ background: 'var(--drawer-bg, white)' }}
             >
               {/* Glass background */}
@@ -260,7 +260,7 @@ const MobileBottomNav = memo(() => {
         initial={{ y: 0 }}
         animate={{ y: !isKeyboardOpen ? 0 : 120 }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe"
       >
         {/* Gradient border top */}
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-fuchsia-300/60 to-transparent dark:via-cyan-700/40" />
