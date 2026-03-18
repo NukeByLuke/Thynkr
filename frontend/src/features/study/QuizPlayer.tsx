@@ -579,7 +579,9 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                   Set Up Your Quiz Session
                 </h2>
                 <p className="text-sm text-slate-600 dark:text-slate-300 mt-1.5">
-                  Choose a mode, tune the constraints, and start with a clear game plan.
+                  Choose a mode, then tune difficulty, pacing, and feedback. Higher difficulty
+                  increases reasoning depth, while more questions improve coverage across your
+                  selected files.
                 </p>
               </div>
               <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-900/70 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
@@ -602,7 +604,10 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                   <ShieldCheck className="w-4 h-4" />
                   <span className="font-semibold">Practice</span>
                 </div>
-                <p className="text-xs opacity-90">Instant feedback, no timer pressure, and flexible navigation.</p>
+                <p className="text-xs opacity-90">
+                  Best for learning: instant correctness + explanations, no timer pressure, and
+                  flexible backtracking.
+                </p>
               </button>
 
               <button
@@ -618,7 +623,10 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                   <TimerReset className="w-4 h-4" />
                   <span className="font-semibold">Exam</span>
                 </div>
-                <p className="text-xs opacity-90">Timed run, shuffled questions, and answer review at the end.</p>
+                <p className="text-xs opacity-90">
+                  Best for testing: timed run, shuffled order, locked backtracking, and full review
+                  after submission.
+                </p>
               </button>
             </div>
 
@@ -677,7 +685,9 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                     +
                   </button>
                 </div>
-                <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-2">10-25 questions</p>
+                <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-2">
+                  10-25 questions. Higher counts broaden topic coverage.
+                </p>
               </div>
 
               <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-900/70 p-4">
