@@ -391,7 +391,7 @@ export default function MyCourseDetail() {
   };
 
   // Check if file is AI-compatible (matches backend logic)
-  const isAICompatibleFile = (fileType: string): boolean => {
+  const isAICompatibleFile = (file: CourseFile): boolean => {
     const supportedTypes = [
       'application/pdf',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -401,7 +401,15 @@ export default function MyCourseDetail() {
       'application/vnd.openxmlformats-officedocument.presentationml.presentation',
       'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
     ];
-    return supportedTypes.includes(fileType) || fileType.startsWith('text/');
+    const supportedExtensions = ['.pdf', '.docx', '.doc', '.txt', '.ppt', '.pptx', '.pps', '.ppsx'];
+
+    const normalizedType = (file.fileType || '').toLowerCase().split(';')[0].trim();
+    if (supportedTypes.includes(normalizedType) || normalizedType.startsWith('text/')) {
+      return true;
+    }
+
+    const fileName = (file.originalName || file.name || '').toLowerCase();
+    return supportedExtensions.some((ext) => fileName.endsWith(ext));
   };
 
   const moveFileUp = (fileId: string) => {
@@ -806,7 +814,7 @@ export default function MyCourseDetail() {
                 </div>
                 <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   {/* Study Button */}
-                  {course.files.some((f: CourseFile) => isAICompatibleFile(f.fileType)) && (
+                  {course.files.some((f: CourseFile) => isAICompatibleFile(f)) && (
                     <button
                       onClick={() => navigate(`/courses/${id}/study${shareToken ? `?token=${shareToken}` : ''}`)}
                       className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
