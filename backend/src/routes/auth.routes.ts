@@ -19,6 +19,14 @@ import {
 } from '../schemas/validation.schemas';
 
 const authService = new AuthService();
+const QUIZ_CORRECT_SOUND_OPTIONS = new Set([
+  'ding',
+  'spark',
+  'chime',
+  'arcade',
+  'pop',
+  'off',
+]);
 
 /**
  * Register authentication routes with the Fastify server
@@ -150,7 +158,7 @@ export default async function authRoutes(server: FastifyInstance) {
     handler: async (request: AuthenticatedRequest, reply) => {
       try {
         const userId = request.user!.userId;
-        const { username, avatarUrl, theme, preferredLanguage } = request.body as any;
+        const { username, avatarUrl, theme, preferredLanguage, quizCorrectSound } = request.body as any;
 
         let normalizedLanguage: string | undefined;
         if (preferredLanguage !== undefined) {
@@ -161,11 +169,22 @@ export default async function authRoutes(server: FastifyInstance) {
           normalizedLanguage = candidate || DEFAULT_LANGUAGE;
         }
 
+        let normalizedQuizCorrectSound: string | undefined;
+        if (quizCorrectSound !== undefined) {
+          const candidate = String(quizCorrectSound).trim().toLowerCase();
+          if (!QUIZ_CORRECT_SOUND_OPTIONS.has(candidate)) {
+            return reply.code(400).send({ error: 'Unsupported quiz sound selection' });
+          }
+
+          normalizedQuizCorrectSound = candidate;
+        }
+
         const updateData: Record<string, unknown> = {
           ...(username !== undefined && { username }),
           ...(avatarUrl !== undefined && { avatarUrl }),
           ...(theme !== undefined && { theme }),
           ...(normalizedLanguage !== undefined && { preferredLanguage: normalizedLanguage }),
+          ...(normalizedQuizCorrectSound !== undefined && { quizCorrectSound: normalizedQuizCorrectSound }),
         };
 
         if (Object.keys(updateData).length === 0) {
@@ -183,6 +202,7 @@ export default async function authRoutes(server: FastifyInstance) {
               emailVerified: true,
               createdAt: true,
               preferredLanguage: true,
+              quizCorrectSound: true,
             },
           });
           return reply.send(existing);
@@ -203,6 +223,7 @@ export default async function authRoutes(server: FastifyInstance) {
             emailVerified: true,
             createdAt: true,
             preferredLanguage: true,
+            quizCorrectSound: true,
           },
         });
 
