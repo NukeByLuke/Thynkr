@@ -123,22 +123,25 @@ const playTone = (
 const createPolishedOutputBus = (context: AudioContext, startTime: number): GainNode => {
   const input = context.createGain();
   const compressor = context.createDynamicsCompressor();
+  const makeup = context.createGain();
   const delay = context.createDelay();
   const delayFeedback = context.createGain();
   const delayWet = context.createGain();
   const dry = context.createGain();
 
-  input.gain.setValueAtTime(1.5, startTime);
-  compressor.threshold.setValueAtTime(-24, startTime);
-  compressor.knee.setValueAtTime(18, startTime);
-  compressor.ratio.setValueAtTime(3, startTime);
+  input.gain.setValueAtTime(2.6, startTime);
+  compressor.threshold.setValueAtTime(-18, startTime);
+  compressor.knee.setValueAtTime(16, startTime);
+  compressor.ratio.setValueAtTime(2.2, startTime);
   compressor.attack.setValueAtTime(0.003, startTime);
-  compressor.release.setValueAtTime(0.2, startTime);
+  compressor.release.setValueAtTime(0.18, startTime);
 
-  dry.gain.setValueAtTime(0.95, startTime);
+  makeup.gain.setValueAtTime(2.2, startTime);
+
+  dry.gain.setValueAtTime(1.04, startTime);
   delay.delayTime.setValueAtTime(0.11, startTime);
-  delayFeedback.gain.setValueAtTime(0.16, startTime);
-  delayWet.gain.setValueAtTime(0.24, startTime);
+  delayFeedback.gain.setValueAtTime(0.14, startTime);
+  delayWet.gain.setValueAtTime(0.2, startTime);
 
   input.connect(dry);
   dry.connect(compressor);
@@ -149,7 +152,8 @@ const createPolishedOutputBus = (context: AudioContext, startTime: number): Gain
   delay.connect(delayFeedback);
   delayFeedback.connect(delay);
 
-  compressor.connect(context.destination);
+  compressor.connect(makeup);
+  makeup.connect(context.destination);
 
   return input;
 };
