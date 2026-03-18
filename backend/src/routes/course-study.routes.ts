@@ -28,7 +28,9 @@ const SUPPORTED_FILE_TYPES = [
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/msword',
   'text/plain',
+  'application/vnd.ms-powerpoint',
   'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
 ];
 
 function isAICompatibleFile(fileType: string): boolean {
