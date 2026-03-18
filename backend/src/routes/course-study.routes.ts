@@ -33,8 +33,17 @@ const SUPPORTED_FILE_TYPES = [
   'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
 ];
 
-function isAICompatibleFile(fileType: string): boolean {
-  return SUPPORTED_FILE_TYPES.includes(fileType) || fileType.startsWith('text/');
+const SUPPORTED_FILE_EXTENSIONS = ['.pdf', '.docx', '.doc', '.txt', '.ppt', '.pptx', '.pps', '.ppsx'];
+
+function isAICompatibleFile(fileType: string, fileName?: string): boolean {
+  const normalizedType = (fileType || '').toLowerCase().split(';')[0].trim();
+
+  if (SUPPORTED_FILE_TYPES.includes(normalizedType) || normalizedType.startsWith('text/')) {
+    return true;
+  }
+
+  const normalizedFileName = (fileName || '').toLowerCase();
+  return SUPPORTED_FILE_EXTENSIONS.some((ext) => normalizedFileName.endsWith(ext));
 }
 
 // Generate hash for file combination
@@ -98,6 +107,7 @@ async function verifyCourseAccess(
         select: {
           id: true,
           name: true,
+          originalName: true,
           filePath: true,
           fileType: true,
           fileSize: true,
@@ -209,7 +219,8 @@ export default async function courseStudyRoutes(server: FastifyInstance) {
 
         // Filter to AI-compatible files only
         const compatibleFiles = course.files.filter(
-          (f: any) => validFileIds.includes(f.id) && isAICompatibleFile(f.fileType)
+          (f: any) =>
+            validFileIds.includes(f.id) && isAICompatibleFile(f.fileType, f.originalName || f.name)
         );
 
         if (compatibleFiles.length === 0) {
@@ -415,6 +426,7 @@ export default async function courseStudyRoutes(server: FastifyInstance) {
               select: {
                 id: true,
                 name: true,
+                originalName: true,
                 fileType: true,
                 fileSize: true,
               },
@@ -448,7 +460,9 @@ export default async function courseStudyRoutes(server: FastifyInstance) {
         }
 
         // Get AI-compatible files
-        const aiCompatibleFiles = course.files.filter((f: any) => isAICompatibleFile(f.fileType));
+        const aiCompatibleFiles = course.files.filter((f: any) =>
+          isAICompatibleFile(f.fileType, f.originalName || f.name)
+        );
 
         return reply.send({
           canStudy,
@@ -462,7 +476,7 @@ export default async function courseStudyRoutes(server: FastifyInstance) {
             name: f.name,
             fileType: f.fileType,
             fileSize: f.fileSize,
-            isAICompatible: isAICompatibleFile(f.fileType),
+            isAICompatible: isAICompatibleFile(f.fileType, f.originalName || f.name),
           })),
         });
       } catch (error: any) {
