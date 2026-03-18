@@ -104,26 +104,30 @@ const canonicalizeQuestion = (question: QuizQuestion, index: number): QuizQuesti
   };
 };
 
-const getQuestionTitleStyle = (questionText: string): { fontSize: string; lineHeight: number } => {
+const getQuestionTitleClass = (questionText: string): string => {
   const normalizedLength = questionText.replace(/\s+/g, ' ').trim().length;
 
-  if (normalizedLength > 300) {
-    return { fontSize: 'clamp(0.95rem, 1.45vw, 1.25rem)', lineHeight: 1.34 };
+  if (normalizedLength >= 220) {
+    return 'text-[0.95rem] sm:text-[1.02rem] md:text-[1.08rem] lg:text-[1.14rem] leading-[1.35]';
   }
 
-  if (normalizedLength > 220) {
-    return { fontSize: 'clamp(1rem, 1.6vw, 1.4rem)', lineHeight: 1.32 };
+  if (normalizedLength >= 170) {
+    return 'text-[1rem] sm:text-[1.08rem] md:text-[1.16rem] lg:text-[1.24rem] leading-[1.33]';
   }
 
-  if (normalizedLength > 150) {
-    return { fontSize: 'clamp(1.05rem, 1.8vw, 1.6rem)', lineHeight: 1.28 };
+  if (normalizedLength >= 130) {
+    return 'text-[1.04rem] sm:text-[1.14rem] md:text-[1.24rem] lg:text-[1.34rem] leading-[1.3]';
   }
 
-  if (normalizedLength > 110) {
-    return { fontSize: 'clamp(1.12rem, 2vw, 1.78rem)', lineHeight: 1.24 };
+  if (normalizedLength >= 95) {
+    return 'text-[1.08rem] sm:text-[1.2rem] md:text-[1.32rem] lg:text-[1.44rem] leading-[1.28]';
   }
 
-  return { fontSize: 'clamp(1.2rem, 2.3vw, 2rem)', lineHeight: 1.16 };
+  if (normalizedLength >= 70) {
+    return 'text-[1.12rem] sm:text-[1.28rem] md:text-[1.42rem] lg:text-[1.58rem] leading-[1.24]';
+  }
+
+  return 'text-[1.18rem] sm:text-[1.4rem] md:text-[1.6rem] lg:text-[1.8rem] leading-[1.18]';
 };
 
 export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, isGenerating, onSubmit }: QuizPlayerProps) {
@@ -258,8 +262,8 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   const currentQuestion = quizQuestions[currentIndex];
   const userAnswer = currentQuestion ? answers[currentQuestion.id] : undefined;
   const hasSelectedAnswer = !!userAnswer;
-  const questionTitleStyle = useMemo(
-    () => getQuestionTitleStyle(currentQuestion?.question || ''),
+  const questionTitleClass = useMemo(
+    () => getQuestionTitleClass(currentQuestion?.question || ''),
     [currentQuestion?.question]
   );
 
@@ -910,29 +914,25 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                     components={{
                       p: ({ node, ...props }) => (
                         <p
-                          style={questionTitleStyle}
-                          className="font-bold text-slate-900 dark:text-white mb-2.5 text-balance"
+                          className={`${questionTitleClass} font-bold text-slate-900 dark:text-white mb-2.5 text-balance`}
                           {...props}
                         />
                       ),
                       h1: ({ node, ...props }) => (
                         <h1
-                          style={questionTitleStyle}
-                          className="font-bold text-slate-900 dark:text-white mb-3 text-balance"
+                          className={`${questionTitleClass} font-bold text-slate-900 dark:text-white mb-3 text-balance`}
                           {...props}
                         />
                       ),
                       h2: ({ node, ...props }) => (
                         <h2
-                          style={questionTitleStyle}
-                          className="font-bold text-slate-900 dark:text-white mb-2 text-balance"
+                          className={`${questionTitleClass} font-bold text-slate-900 dark:text-white mb-2 text-balance`}
                           {...props}
                         />
                       ),
                       h3: ({ node, ...props }) => (
                         <h3
-                          style={questionTitleStyle}
-                          className="font-semibold text-slate-900 dark:text-white mb-2"
+                          className={`${questionTitleClass} font-semibold text-slate-900 dark:text-white mb-2`}
                           {...props}
                         />
                       ),
