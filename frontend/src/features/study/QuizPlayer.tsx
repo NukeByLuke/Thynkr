@@ -104,6 +104,24 @@ const canonicalizeQuestion = (question: QuizQuestion, index: number): QuizQuesti
   };
 };
 
+const getQuestionTitleScaleClass = (questionText: string): string => {
+  const normalizedLength = questionText.replace(/\s+/g, ' ').trim().length;
+
+  if (normalizedLength > 280) {
+    return 'text-[1rem] sm:text-[1.12rem] md:text-[1.25rem]';
+  }
+
+  if (normalizedLength > 200) {
+    return 'text-[1.05rem] sm:text-[1.22rem] md:text-[1.38rem]';
+  }
+
+  if (normalizedLength > 140) {
+    return 'text-[1.12rem] sm:text-[1.4rem] md:text-[1.56rem]';
+  }
+
+  return 'text-[1.2rem] sm:text-[1.55rem] md:text-[1.75rem]';
+};
+
 export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, isGenerating, onSubmit }: QuizPlayerProps) {
   const sanitizedQuestions = useMemo(
     () => questions.map((question, index) => canonicalizeQuestion(question, index)),
@@ -236,6 +254,10 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   const currentQuestion = quizQuestions[currentIndex];
   const userAnswer = currentQuestion ? answers[currentQuestion.id] : undefined;
   const hasSelectedAnswer = !!userAnswer;
+  const questionTitleScaleClass = useMemo(
+    () => getQuestionTitleScaleClass(currentQuestion?.question || ''),
+    [currentQuestion?.question]
+  );
 
   const canReveal =
     !!currentQuestion &&
@@ -883,7 +905,10 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                     rehypePlugins={[rehypeHighlight]}
                     components={{
                       p: ({ node, ...props }) => (
-                        <p className="text-[1.2rem] sm:text-[1.55rem] md:text-[1.75rem] font-bold text-slate-900 dark:text-white mb-2.5 text-balance leading-tight" {...props} />
+                        <p
+                          className={`${questionTitleScaleClass} font-bold text-slate-900 dark:text-white mb-2.5 text-balance leading-tight`}
+                          {...props}
+                        />
                       ),
                       h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 text-balance" {...props} />,
                       h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2 text-balance" {...props} />,
