@@ -137,26 +137,26 @@ const createBellOutputBus = (context: AudioContext, startTime: number): GainNode
   const delayWet = context.createGain();
   const dry = context.createGain();
 
-  input.gain.setValueAtTime(0.92, startTime);
+  input.gain.setValueAtTime(1.0, startTime);
 
   highpass.type = 'highpass';
-  highpass.frequency.setValueAtTime(260, startTime);
-  highpass.Q.setValueAtTime(0.78, startTime);
+  highpass.frequency.setValueAtTime(320, startTime);
+  highpass.Q.setValueAtTime(0.72, startTime);
 
   highshelf.type = 'highshelf';
-  highshelf.frequency.setValueAtTime(1850, startTime);
-  highshelf.gain.setValueAtTime(4.2, startTime);
+  highshelf.frequency.setValueAtTime(2200, startTime);
+  highshelf.gain.setValueAtTime(5.6, startTime);
 
-  compressor.threshold.setValueAtTime(-26, startTime);
-  compressor.knee.setValueAtTime(13, startTime);
-  compressor.ratio.setValueAtTime(2.4, startTime);
-  compressor.attack.setValueAtTime(0.004, startTime);
-  compressor.release.setValueAtTime(0.24, startTime);
+  compressor.threshold.setValueAtTime(-24, startTime);
+  compressor.knee.setValueAtTime(12, startTime);
+  compressor.ratio.setValueAtTime(2.5, startTime);
+  compressor.attack.setValueAtTime(0.003, startTime);
+  compressor.release.setValueAtTime(0.21, startTime);
 
-  dry.gain.setValueAtTime(0.97, startTime);
-  delay.delayTime.setValueAtTime(0.145, startTime);
-  delayFeedback.gain.setValueAtTime(0.09, startTime);
-  delayWet.gain.setValueAtTime(0.13, startTime);
+  dry.gain.setValueAtTime(0.98, startTime);
+  delay.delayTime.setValueAtTime(0.125, startTime);
+  delayFeedback.gain.setValueAtTime(0.08, startTime);
+  delayWet.gain.setValueAtTime(0.1, startTime);
 
   input.connect(highpass);
   highpass.connect(highshelf);
@@ -178,22 +178,28 @@ const createBellOutputBus = (context: AudioContext, startTime: number): GainNode
 const createPopOutputBus = (context: AudioContext, startTime: number): GainNode => {
   const input = context.createGain();
   const highpass = context.createBiquadFilter();
+  const lowpass = context.createBiquadFilter();
   const compressor = context.createDynamicsCompressor();
 
-  input.gain.setValueAtTime(0.92, startTime);
+  input.gain.setValueAtTime(1.05, startTime);
 
   highpass.type = 'highpass';
-  highpass.frequency.setValueAtTime(150, startTime);
-  highpass.Q.setValueAtTime(0.6, startTime);
+  highpass.frequency.setValueAtTime(90, startTime);
+  highpass.Q.setValueAtTime(0.72, startTime);
 
-  compressor.threshold.setValueAtTime(-23, startTime);
-  compressor.knee.setValueAtTime(12, startTime);
-  compressor.ratio.setValueAtTime(2.6, startTime);
-  compressor.attack.setValueAtTime(0.003, startTime);
-  compressor.release.setValueAtTime(0.16, startTime);
+  lowpass.type = 'lowpass';
+  lowpass.frequency.setValueAtTime(7800, startTime);
+  lowpass.Q.setValueAtTime(0.45, startTime);
+
+  compressor.threshold.setValueAtTime(-21, startTime);
+  compressor.knee.setValueAtTime(11, startTime);
+  compressor.ratio.setValueAtTime(2.8, startTime);
+  compressor.attack.setValueAtTime(0.002, startTime);
+  compressor.release.setValueAtTime(0.14, startTime);
 
   input.connect(highpass);
-  highpass.connect(compressor);
+  highpass.connect(lowpass);
+  lowpass.connect(compressor);
   compressor.connect(context.destination);
 
   return input;
@@ -249,137 +255,101 @@ const playArcadeSound = (context: AudioContext, startTime: number) => {
   playTone(context, bus, 1318.51, startTime + 0.29, 0.18, 0.055, 'triangle', 1396.91);
 };
 
-const playBellPartial = (
-  context: AudioContext,
-  destination: AudioNode,
-  frequency: number,
-  startTime: number,
-  peakGain: number,
-  decay: number,
-  detuneCents = 0
-): void => {
-  const oscillator = context.createOscillator();
-  const gainNode = context.createGain();
-
-  oscillator.type = 'sine';
-  oscillator.detune.setValueAtTime(detuneCents, startTime);
-  oscillator.frequency.setValueAtTime(frequency, startTime);
-  oscillator.frequency.exponentialRampToValueAtTime(
-    Math.max(20, frequency * 0.997),
-    startTime + decay
-  );
-
-  gainNode.gain.setValueAtTime(0.0001, startTime);
-  gainNode.gain.exponentialRampToValueAtTime(peakGain, startTime + 0.004);
-  gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + decay);
-
-  oscillator.connect(gainNode);
-  gainNode.connect(destination);
-
-  oscillator.start(startTime);
-  oscillator.stop(startTime + decay + 0.03);
-};
-
-const playBellHit = (
+const playDingStrike = (
   context: AudioContext,
   destination: AudioNode,
   baseFrequency: number,
   startTime: number,
   velocity = 1
 ): void => {
-  // Inharmonic partial blend tuned for a cheerful app-style bell ring.
-  playBellPartial(context, destination, baseFrequency, startTime, 0.09 * velocity, 0.88, -1.8);
-  playBellPartial(
-    context,
-    destination,
-    baseFrequency * 2.03,
-    startTime,
-    0.04 * velocity,
-    0.72,
-    1.4
-  );
-  playBellPartial(
-    context,
-    destination,
-    baseFrequency * 2.72,
-    startTime,
-    0.026 * velocity,
-    0.61,
-    -0.9
-  );
-  playBellPartial(
-    context,
-    destination,
-    baseFrequency * 3.84,
-    startTime,
-    0.017 * velocity,
-    0.5,
-    2.4
-  );
-  playBellPartial(
-    context,
-    destination,
-    baseFrequency * 4.18,
-    startTime,
-    0.012 * velocity,
-    0.41,
-    -1.3
-  );
-
-  // Mallet transient for a more convincing bell strike.
+  // Clean high-pitched bell partial stack for a cheerful app-like ding.
   playTone(
     context,
     destination,
-    baseFrequency * 7.8,
+    baseFrequency,
     startTime,
-    0.035,
-    0.009 * velocity,
+    0.34,
+    0.1 * velocity,
+    'sine',
+    baseFrequency * 0.998
+  );
+  playTone(
+    context,
+    destination,
+    baseFrequency * 2.02,
+    startTime + 0.002,
+    0.24,
+    0.046 * velocity,
+    'sine'
+  );
+  playTone(
+    context,
+    destination,
+    baseFrequency * 3.07,
+    startTime + 0.004,
+    0.19,
+    0.026 * velocity,
+    'sine'
+  );
+  playTone(
+    context,
+    destination,
+    baseFrequency * 4.33,
+    startTime + 0.005,
+    0.14,
+    0.017 * velocity,
+    'sine'
+  );
+
+  // Tiny mallet click for definition.
+  playTone(
+    context,
+    destination,
+    baseFrequency * 7.6,
+    startTime,
+    0.02,
+    0.012 * velocity,
     'triangle',
-    baseFrequency * 5.9
+    baseFrequency * 5.4
   );
 };
 
 const playBellDingSound = (context: AudioContext, startTime: number) => {
   const bus = createBellOutputBus(context, startTime);
 
-  // Cheerful "da ding": bright lower bell followed by a higher resolving bell.
-  playBellHit(context, bus, 783.99, startTime, 0.88);
-  playBellHit(context, bus, 1174.66, startTime + 0.17, 1);
+  // High-pitched cheerful "ding ding".
+  playDingStrike(context, bus, 1318.51, startTime, 0.95);
+  playDingStrike(context, bus, 1661.22, startTime + 0.145, 1);
 };
 
 const playPopSound = (context: AudioContext, startTime: number) => {
   const bus = createPopOutputBus(context, startTime);
   const noiseSource = context.createBufferSource();
   const bandpass = context.createBiquadFilter();
-  const lowpass = context.createBiquadFilter();
   const noiseGain = context.createGain();
 
   noiseSource.buffer = getNoiseBuffer(context);
 
   bandpass.type = 'bandpass';
-  bandpass.frequency.setValueAtTime(860, startTime);
-  bandpass.Q.setValueAtTime(1.2, startTime);
-  bandpass.frequency.exponentialRampToValueAtTime(540, startTime + 0.09);
-
-  lowpass.type = 'lowpass';
-  lowpass.frequency.setValueAtTime(5200, startTime);
-  lowpass.frequency.exponentialRampToValueAtTime(2200, startTime + 0.09);
+  bandpass.frequency.setValueAtTime(3200, startTime);
+  bandpass.Q.setValueAtTime(2.3, startTime);
+  bandpass.frequency.exponentialRampToValueAtTime(1400, startTime + 0.022);
 
   noiseGain.gain.setValueAtTime(0.0001, startTime);
-  noiseGain.gain.exponentialRampToValueAtTime(0.2, startTime + 0.003);
-  noiseGain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.09);
+  noiseGain.gain.exponentialRampToValueAtTime(0.2, startTime + 0.0016);
+  noiseGain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.024);
 
   noiseSource.connect(bandpass);
-  bandpass.connect(lowpass);
-  lowpass.connect(noiseGain);
+  bandpass.connect(noiseGain);
   noiseGain.connect(bus);
 
   noiseSource.start(startTime);
-  noiseSource.stop(startTime + 0.1);
+  noiseSource.stop(startTime + 0.03);
 
-  // Low "air push" to make it feel like a real pop, not just hiss.
-  playTone(context, bus, 180, startTime, 0.08, 0.045, 'sine', 72);
-  playTone(context, bus, 1280, startTime, 0.028, 0.014, 'triangle', 780);
+  // Water-droplet body: bright attack with quick resonant downward bloom.
+  playTone(context, bus, 1640, startTime + 0.001, 0.11, 0.12, 'sine', 500);
+  playTone(context, bus, 1120, startTime + 0.003, 0.13, 0.072, 'sine', 340);
+  playTone(context, bus, 420, startTime + 0.028, 0.1, 0.034, 'triangle', 185);
 };
 
 const playFallbackSound = (context: AudioContext, startTime: number): void => {
