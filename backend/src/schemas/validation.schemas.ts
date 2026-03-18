@@ -65,7 +65,16 @@ export const updateProfileSchema = z.object({
     })
     .optional(),
   quizCorrectSound: z
-    .enum(['ding', 'spark', 'chime', 'arcade', 'pop', 'off'])
+    .enum([
+      'wave',
+      'classicding',
+      'spark',
+      'chime',
+      'arcade',
+      'ding',
+      'pop',
+      'off',
+    ])
     .optional(),
 });
 

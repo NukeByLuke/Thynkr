@@ -16,7 +16,15 @@ export interface User {
   role: Role;
   emailVerified: boolean;
   preferredLanguage?: string;
-  quizCorrectSound?: 'ding' | 'spark' | 'chime' | 'arcade' | 'pop' | 'off';
+  quizCorrectSound?:
+    | 'wave'
+    | 'classicding'
+    | 'spark'
+    | 'chime'
+    | 'arcade'
+    | 'ding'
+    | 'pop'
+    | 'off';
   createdAt: string;
   subscription?: {
     status: string;

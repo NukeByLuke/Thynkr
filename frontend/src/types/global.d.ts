@@ -53,7 +53,15 @@ export interface User {
   preferredLanguage?: string;
   ttsVoice?: string;
   ttsSpeed?: number;
-  quizCorrectSound?: 'ding' | 'spark' | 'chime' | 'arcade' | 'pop' | 'off';
+  quizCorrectSound?:
+    | 'wave'
+    | 'classicding'
+    | 'spark'
+    | 'chime'
+    | 'arcade'
+    | 'ding'
+    | 'pop'
+    | 'off';
   role: Role;
   emailVerified: boolean;
   createdAt: string;

@@ -20,10 +20,13 @@ import {
 
 const authService = new AuthService();
 const QUIZ_CORRECT_SOUND_OPTIONS = new Set([
-  'ding',
+  'wave',
+  'classicding',
   'spark',
   'chime',
   'arcade',
+  // Legacy values kept to avoid rejecting existing clients/preferences.
+  'ding',
   'pop',
   'off',
 ]);
