@@ -125,6 +125,48 @@ const createPolishedOutputBus = (context: AudioContext, startTime: number): Gain
   return input;
 };
 
+const createBellOutputBus = (context: AudioContext, startTime: number): GainNode => {
+  const input = context.createGain();
+  const highpass = context.createBiquadFilter();
+  const compressor = context.createDynamicsCompressor();
+  const delay = context.createDelay();
+  const delayFeedback = context.createGain();
+  const delayWet = context.createGain();
+  const dry = context.createGain();
+
+  input.gain.setValueAtTime(0.92, startTime);
+
+  highpass.type = 'highpass';
+  highpass.frequency.setValueAtTime(230, startTime);
+  highpass.Q.setValueAtTime(0.8, startTime);
+
+  compressor.threshold.setValueAtTime(-25, startTime);
+  compressor.knee.setValueAtTime(14, startTime);
+  compressor.ratio.setValueAtTime(2.2, startTime);
+  compressor.attack.setValueAtTime(0.004, startTime);
+  compressor.release.setValueAtTime(0.25, startTime);
+
+  dry.gain.setValueAtTime(0.95, startTime);
+  delay.delayTime.setValueAtTime(0.19, startTime);
+  delayFeedback.gain.setValueAtTime(0.11, startTime);
+  delayWet.gain.setValueAtTime(0.16, startTime);
+
+  input.connect(highpass);
+
+  highpass.connect(dry);
+  dry.connect(compressor);
+
+  highpass.connect(delay);
+  delay.connect(delayWet);
+  delayWet.connect(compressor);
+  delay.connect(delayFeedback);
+  delayFeedback.connect(delay);
+
+  compressor.connect(context.destination);
+
+  return input;
+};
+
 const playSparkSound = (context: AudioContext, startTime: number) => {
   const bus = createPolishedOutputBus(context, startTime);
 
@@ -154,24 +196,111 @@ const playArcadeSound = (context: AudioContext, startTime: number) => {
   playTone(context, bus, 1318.51, startTime + 0.29, 0.18, 0.055, 'triangle', 1396.91);
 };
 
-const playBellStrike = (
+const playBellPartial = (
   context: AudioContext,
   destination: AudioNode,
   frequency: number,
   startTime: number,
-  gain: number
+  peakGain: number,
+  decay: number,
+  detuneCents = 0
 ): void => {
-  playTone(context, destination, frequency, startTime, 0.34, gain, 'sine');
-  playTone(context, destination, frequency * 2, startTime + 0.004, 0.22, gain * 0.32, 'sine');
-  playTone(context, destination, frequency * 3.01, startTime + 0.008, 0.2, gain * 0.2, 'sine');
+  const oscillator = context.createOscillator();
+  const gainNode = context.createGain();
+
+  oscillator.type = 'sine';
+  oscillator.detune.setValueAtTime(detuneCents, startTime);
+  oscillator.frequency.setValueAtTime(frequency, startTime);
+  oscillator.frequency.exponentialRampToValueAtTime(
+    Math.max(20, frequency * 0.997),
+    startTime + decay
+  );
+
+  gainNode.gain.setValueAtTime(0.0001, startTime);
+  gainNode.gain.exponentialRampToValueAtTime(peakGain, startTime + 0.004);
+  gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + decay);
+
+  oscillator.connect(gainNode);
+  gainNode.connect(destination);
+
+  oscillator.start(startTime);
+  oscillator.stop(startTime + decay + 0.03);
+};
+
+const playBellHit = (
+  context: AudioContext,
+  destination: AudioNode,
+  baseFrequency: number,
+  startTime: number,
+  velocity = 1
+): void => {
+  // Inharmonic partial blend to emulate a real metal bell body.
+  playBellPartial(context, destination, baseFrequency, startTime, 0.082 * velocity, 1.2, -2.5);
+  playBellPartial(
+    context,
+    destination,
+    baseFrequency * 2.01,
+    startTime,
+    0.033 * velocity,
+    0.98,
+    1.2
+  );
+  playBellPartial(
+    context,
+    destination,
+    baseFrequency * 2.74,
+    startTime,
+    0.027 * velocity,
+    0.88,
+    -1.1
+  );
+  playBellPartial(
+    context,
+    destination,
+    baseFrequency * 3.76,
+    startTime,
+    0.019 * velocity,
+    0.78,
+    2.8
+  );
+  playBellPartial(
+    context,
+    destination,
+    baseFrequency * 4.07,
+    startTime,
+    0.014 * velocity,
+    0.64,
+    -1.6
+  );
+  playBellPartial(
+    context,
+    destination,
+    baseFrequency * 5.43,
+    startTime,
+    0.0095 * velocity,
+    0.5,
+    0.9
+  );
+
+  // Mallet transient for a more convincing bell strike.
+  playTone(
+    context,
+    destination,
+    baseFrequency * 8.5,
+    startTime,
+    0.045,
+    0.0075 * velocity,
+    'triangle',
+    baseFrequency * 7.2
+  );
 };
 
 const playBellDingSound = (context: AudioContext, startTime: number) => {
-  const bus = createPolishedOutputBus(context, startTime);
+  const bus = createBellOutputBus(context, startTime);
 
-  // "Da ding" shape: lower bell hit, then a brighter resolving bell.
-  playBellStrike(context, bus, 783.99, startTime, 0.11);
-  playBellStrike(context, bus, 1046.5, startTime + 0.16, 0.1);
+  // "Da ding" with two ringing bell strikes: lower, then brighter.
+  playBellHit(context, bus, 739.99, startTime, 0.9);
+  playBellHit(context, bus, 987.77, startTime + 0.21, 1);
 };
 
 const playPopSound = (context: AudioContext, startTime: number) => {
