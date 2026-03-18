@@ -200,13 +200,38 @@ export default function StudyModePage() {
 
   // Generate study content mutation (with share token)
   const generateMutation = useMutation({
-    mutationFn: async ({ type, refresh = false }: { type: StudyTab; refresh?: boolean }) => {
+    mutationFn: async ({
+      type,
+      refresh = false,
+      difficulty,
+      count,
+    }: {
+      type: StudyTab;
+      refresh?: boolean;
+      difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
+      count?: number;
+    }) => {
       const params = [refresh ? 'refresh=true' : '', tokenQuery].filter(Boolean).join('&');
       const url = params ? `/ai/study?${params}` : '/ai/study';
-      const response = await api.post(url, {
+      const payload: {
+        courseId: string | undefined;
+        fileIds: string[];
+        type: StudyTab;
+        difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
+        count?: number;
+      } = {
         courseId,
         fileIds: Array.from(selectedFileIds),
         type,
+      };
+
+      if (type === 'quiz') {
+        if (difficulty) payload.difficulty = difficulty;
+        if (typeof count === 'number') payload.count = count;
+      }
+
+      const response = await api.post(url, {
+        ...payload,
       });
       return response.data;
     },
@@ -531,7 +556,7 @@ export default function StudyModePage() {
                       Select Files
                     </button>
                   </motion.div>
-                ) : !studyContent?.result ? (
+                ) : !studyContent?.result && activeTab !== 'quiz' ? (
                   <motion.div
                     key="generate-prompt"
                     initial={{ opacity: 0, y: 20 }}
@@ -698,8 +723,40 @@ export default function StudyModePage() {
                                 id: q.id || `q-${i}`,
                                 order: q.order ?? i,
                               }))}
-                              onGenerateQuiz={(_difficulty: string, _numQuestions: number) => {
-                                generateMutation.mutate({ type: 'quiz', refresh: true });
+                              fileId={courseId}
+                              onGenerateQuiz={(difficulty: string, numQuestions: number) => {
+                                const normalizedDifficulty = difficulty.toUpperCase() as
+                                  | 'EASY'
+                                  | 'MEDIUM'
+                                  | 'HARD';
+                                generateMutation.mutate({
+                                  type: 'quiz',
+                                  refresh: true,
+                                  difficulty: normalizedDifficulty,
+                                  count: numQuestions,
+                                });
+                              }}
+                              isGenerating={generateMutation.isPending}
+                              onSubmit={handleQuizSubmit}
+                            />
+                          )}
+                          {activeTab === 'quiz' && !studyContent?.result?.questions && (
+                            <QuizPlayer
+                              quizId={`course-${courseId}-quiz`}
+                              title={course?.title || 'Course Quiz'}
+                              questions={[]}
+                              fileId={courseId}
+                              onGenerateQuiz={(difficulty: string, numQuestions: number) => {
+                                const normalizedDifficulty = difficulty.toUpperCase() as
+                                  | 'EASY'
+                                  | 'MEDIUM'
+                                  | 'HARD';
+                                generateMutation.mutate({
+                                  type: 'quiz',
+                                  refresh: true,
+                                  difficulty: normalizedDifficulty,
+                                  count: numQuestions,
+                                });
                               }}
                               isGenerating={generateMutation.isPending}
                               onSubmit={handleQuizSubmit}
