@@ -147,6 +147,18 @@ function CreateCourseModal({ isOpen, onClose, isPremium }: CreateCourseModalProp
     },
     onSuccess: (data) => {
       toast.success('Course created!');
+
+      queryClient.setQueryData(['user-course', data.course.id, null], {
+        course: data.course,
+      });
+      void queryClient.prefetchQuery({
+        queryKey: ['user-course', data.course.id, null],
+        queryFn: async () => {
+          const response = await api.get(`/user-courses/${data.course.id}`);
+          return response.data;
+        },
+      });
+
       queryClient.invalidateQueries({ queryKey: ['courses'] });
       onClose();
       setNewCourse({ title: '', description: '', category: 'OTHER', visibility: 'PRIVATE' });
@@ -161,7 +173,7 @@ function CreateCourseModal({ isOpen, onClose, isPremium }: CreateCourseModalProp
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-sm"
       onClick={onClose}
     >
       <motion.div
@@ -169,7 +181,7 @@ function CreateCourseModal({ isOpen, onClose, isPremium }: CreateCourseModalProp
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        className={`w-full max-w-lg p-6 rounded-2xl shadow-2xl ${
+        className={`w-full max-w-lg max-h-[calc(100vh-1.5rem)] overflow-y-auto p-4 sm:p-6 rounded-2xl shadow-2xl ${
           isDark 
             ? 'bg-slate-900/95 backdrop-blur-xl border border-slate-800' 
             : 'bg-white/95 backdrop-blur-xl border border-slate-200'
@@ -177,17 +189,17 @@ function CreateCourseModal({ isOpen, onClose, isPremium }: CreateCourseModalProp
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 bg-gradient-to-br from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 rounded-xl">
-            <FolderPlus className="h-5 w-5 text-white" />
+        <div className="flex items-start gap-3 mb-5 sm:mb-6">
+          <div className="p-2 sm:p-2.5 bg-gradient-to-br from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 rounded-xl">
+            <FolderPlus className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-white" />
           </div>
-          <div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Create a new set</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Organize your study materials</p>
+          <div className="min-w-0">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Create a new set</h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Organize your study materials</p>
           </div>
           <button
             onClick={onClose}
-            className="ml-auto p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="ml-auto shrink-0 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             <X className="h-5 w-5 text-slate-500" />
           </button>
@@ -319,18 +331,18 @@ function CreateCourseModal({ isOpen, onClose, isPremium }: CreateCourseModalProp
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 sm:gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!newCourse.title || createMutation.isPending}
-              className="px-5 py-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 text-white rounded-xl font-medium text-sm hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full sm:w-auto px-5 py-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 text-white rounded-xl font-medium text-sm hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {createMutation.isPending ? 'Creating...' : 'Create Set'}
             </button>
@@ -361,7 +373,7 @@ function CourseCard({ course, onDelete, onMenuToggle, isMenuOpen }: CourseCardPr
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className="relative group"
+      className="relative group touch-manipulation"
     >
       <Link to={`/courses/${course.id}`}>
         <GlassCard
@@ -369,7 +381,7 @@ function CourseCard({ course, onDelete, onMenuToggle, isMenuOpen }: CourseCardPr
           className="h-full overflow-hidden"
         >
           {/* Cover Image / Gradient Background */}
-          <div className="relative h-32 overflow-hidden">
+          <div className="relative h-28 sm:h-32 overflow-hidden">
             {course.bannerImage || course.coverImage ? (
               <LazyImage
                 src={course.bannerImage || course.coverImage || ''}
@@ -378,7 +390,7 @@ function CourseCard({ course, onDelete, onMenuToggle, isMenuOpen }: CourseCardPr
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-fuchsia-500/20 via-pink-500/20 to-orange-500/20 dark:from-cyan-500/20 dark:via-blue-600/20 dark:to-violet-600/20 flex items-center justify-center">
-                <CategoryIcon className="h-12 w-12 text-slate-400/50 dark:text-slate-600/50" />
+                <CategoryIcon className="h-10 w-10 sm:h-12 sm:w-12 text-slate-400/50 dark:text-slate-600/50" />
               </div>
             )}
             {/* Gradient overlay */}
@@ -398,16 +410,16 @@ function CourseCard({ course, onDelete, onMenuToggle, isMenuOpen }: CourseCardPr
           </div>
 
           {/* Content */}
-          <div className="p-4">
-            <h3 className="font-semibold text-slate-900 dark:text-white line-clamp-1 mb-1">
+          <div className="p-3.5 sm:p-4">
+            <h3 className="font-semibold text-sm sm:text-base text-slate-900 dark:text-white line-clamp-1 mb-1">
               {course.title}
             </h3>
             {course.description && (
-              <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-3">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-3">
                 {course.description}
               </p>
             )}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                 <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800">
                   <CategoryIcon className="h-3 w-3" />
@@ -432,14 +444,14 @@ function CourseCard({ course, onDelete, onMenuToggle, isMenuOpen }: CourseCardPr
               e.stopPropagation();
               onMenuToggle(isMenuOpen ? null : course.id);
             }}
-            className="p-2 rounded-lg bg-slate-900/60 backdrop-blur-md text-white hover:bg-slate-900/80 transition-colors"
+            className="p-2 sm:p-2 rounded-lg bg-slate-900/60 backdrop-blur-md text-white hover:bg-slate-900/80 transition-colors"
           >
             <MoreVertical className="h-4 w-4" />
           </button>
 
           {isMenuOpen && (
             <div
-              className={`absolute right-0 mt-2 w-44 rounded-xl shadow-xl py-1.5 z-20 ${
+              className={`absolute right-0 mt-2 w-40 sm:w-44 rounded-xl shadow-xl py-1.5 z-20 ${
                 isDark 
                   ? 'bg-slate-800 border border-slate-700' 
                   : 'bg-white border border-slate-200'
@@ -448,7 +460,7 @@ function CourseCard({ course, onDelete, onMenuToggle, isMenuOpen }: CourseCardPr
             >
               <Link
                 to={`/courses/${course.id}`}
-                className={`flex items-center gap-2.5 px-3 py-2 text-sm ${
+                className={`flex items-center gap-2.5 px-3 py-2.5 text-sm ${
                   isDark 
                     ? 'text-slate-300 hover:bg-slate-700' 
                     : 'text-slate-700 hover:bg-slate-50'
@@ -464,7 +476,7 @@ function CourseCard({ course, onDelete, onMenuToggle, isMenuOpen }: CourseCardPr
                   toast.success('Link copied!');
                   onMenuToggle(null);
                 }}
-                className={`flex items-center gap-2.5 w-full px-3 py-2 text-sm ${
+                className={`flex items-center gap-2.5 w-full px-3 py-2.5 text-sm ${
                   isDark 
                     ? 'text-slate-300 hover:bg-slate-700' 
                     : 'text-slate-700 hover:bg-slate-50'
@@ -479,7 +491,7 @@ function CourseCard({ course, onDelete, onMenuToggle, isMenuOpen }: CourseCardPr
                   onDelete(course.id);
                   onMenuToggle(null);
                 }}
-                className={`flex items-center gap-2.5 w-full px-3 py-2 text-sm ${
+                className={`flex items-center gap-2.5 w-full px-3 py-2.5 text-sm ${
                   isDark 
                     ? 'text-red-400 hover:bg-red-900/20' 
                     : 'text-red-600 hover:bg-red-50'
@@ -576,11 +588,11 @@ export default function Courses() {
 
       <PageContainer>
         {/* Personalized Header */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <motion.h1
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2"
+            className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-1.5 sm:mb-2"
           >
             {getGreeting()},{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600">
@@ -591,7 +603,7 @@ export default function Courses() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-slate-500 dark:text-slate-400"
+            className="text-sm sm:text-base text-slate-500 dark:text-slate-400"
           >
             What are we learning today?
           </motion.p>
@@ -602,7 +614,7 @@ export default function Courses() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="flex flex-col sm:flex-row gap-3 mb-8"
+          className="flex flex-col sm:flex-row gap-3 mb-6 sm:mb-8"
         >
           {/* Search Bar */}
           <div className="flex-1 relative">
@@ -638,7 +650,7 @@ export default function Courses() {
           {/* Create Button */}
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 text-white rounded-xl font-medium text-sm hover:shadow-lg transition-all whitespace-nowrap"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 text-white rounded-xl font-medium text-sm hover:shadow-lg transition-all whitespace-nowrap"
           >
             <Plus className="h-4 w-4" />
             Create Set
@@ -650,7 +662,7 @@ export default function Courses() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mb-8 -mx-4 px-4 overflow-x-auto scrollbar-hide"
+          className="mb-6 sm:mb-8 -mx-1 sm:-mx-4 px-1 sm:px-4 overflow-x-auto scrollbar-hide"
         >
           <div className="flex gap-2 min-w-max pb-2">
             {CATEGORIES.map((cat) => {
@@ -660,7 +672,7 @@ export default function Courses() {
                 <button
                   key={cat.value}
                   onClick={() => setCategory(cat.value)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all ${
                     isActive
                       ? 'bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 text-white shadow-md'
                       : isDark
@@ -682,15 +694,15 @@ export default function Courses() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
-            className="mb-10"
+            className="mb-8 sm:mb-10"
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                 <Clock className="h-5 w-5 text-pink-600 dark:text-cyan-500" />
                 Jump back in
               </h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {recentCourses.map((course) => (
                 <Link
                   key={course.id}
@@ -699,7 +711,7 @@ export default function Courses() {
                 >
                   <motion.div
                     whileHover={{ scale: 1.02 }}
-                    className={`p-4 rounded-xl transition-all ${
+                    className={`p-3.5 sm:p-4 rounded-xl transition-all ${
                       isDark
                         ? 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50'
                         : 'bg-white/80 hover:bg-white border border-slate-200/50 shadow-sm hover:shadow-md'
@@ -720,7 +732,7 @@ export default function Courses() {
                           {course.filesCount} {course.filesCount === 1 ? 'file' : 'files'}
                         </p>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-pink-600 dark:group-hover:text-cyan-500 transition-colors" />
+                      <ChevronRight className="hidden sm:block h-4 w-4 text-slate-400 group-hover:text-pink-600 dark:group-hover:text-cyan-500 transition-colors" />
                     </div>
                   </motion.div>
                 </Link>
@@ -731,13 +743,13 @@ export default function Courses() {
 
         {/* Main Course Grid */}
         <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <h2 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-pink-600 dark:text-cyan-500" />
               {search || category ? 'Search Results' : 'Your Sets'}
             </h2>
             {courses.length > 0 && (
-              <span className="text-sm text-slate-500 dark:text-slate-400">
+              <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 shrink-0">
                 {courses.length} {courses.length === 1 ? 'set' : 'sets'}
               </span>
             )}
@@ -774,23 +786,23 @@ export default function Courses() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
               {/* Create New Card */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 whileHover={{ y: -4 }}
                 onClick={() => setShowCreateModal(true)}
-                className={`h-full min-h-[200px] rounded-xl border-2 border-dashed cursor-pointer transition-all flex flex-col items-center justify-center gap-3 ${
+                className={`h-full min-h-[170px] sm:min-h-[200px] rounded-xl border-2 border-dashed cursor-pointer transition-all flex flex-col items-center justify-center gap-2.5 sm:gap-3 ${
                   isDark
                     ? 'border-slate-700 hover:border-cyan-500/50 hover:bg-slate-800/50'
                     : 'border-slate-300 hover:border-pink-400 hover:bg-pink-50/50'
                 }`}
               >
-                <div className="p-3 rounded-full bg-gradient-to-br from-fuchsia-500/20 via-pink-500/20 to-orange-500/20 dark:from-cyan-500/20 dark:via-blue-600/20 dark:to-violet-600/20">
-                  <Plus className="h-6 w-6 text-pink-600 dark:text-cyan-500" />
+                <div className="p-2.5 sm:p-3 rounded-full bg-gradient-to-br from-fuchsia-500/20 via-pink-500/20 to-orange-500/20 dark:from-cyan-500/20 dark:via-blue-600/20 dark:to-violet-600/20">
+                  <Plus className="h-5 w-5 sm:h-6 sm:w-6 text-pink-600 dark:text-cyan-500" />
                 </div>
-                <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                <span className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">
                   Create new set
                 </span>
               </motion.div>

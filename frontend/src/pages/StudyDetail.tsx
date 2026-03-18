@@ -16,6 +16,7 @@ import { useStudySession } from '@/hooks/useStudySession';
 import GenerationModal from '@/components/modals/GenerationModal';
 import api from '@/lib/api';
 import { useLayout } from '@/contexts/LayoutContext';
+import { calculateQuizScore } from '@/utils/quizAnswerUtils';
 
 interface UploadedFile {
   id: string;
@@ -292,12 +293,10 @@ export default function StudyDetail() {
                 } else {
                   // Fallback: Calculate score locally if no quiz ID
                   const questions = selectedQuiz?.questions || [];
-                  let score = 0;
-                  questions.forEach((question: any) => {
-                    if (answers[question.id] === question.correctAnswer) {
-                      score++;
-                    }
-                  });
+                  const score = calculateQuizScore(
+                    questions,
+                    (question: any) => answers[question.id]
+                  );
                   const total = questions.length;
                   const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
                   return { score, total, percentage };

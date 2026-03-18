@@ -123,63 +123,70 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   const isDark = theme === 'dark';
 
   return (
-    <div 
-      className={`min-h-app w-full flex items-center justify-center p-4 transition-colors duration-150 ${
+    <div
+      className={`relative min-h-app w-full flex items-center justify-center overflow-hidden px-3 py-4 sm:p-4 transition-colors duration-150 ${
         isDark 
           ? 'bg-slate-950'
           : 'bg-slate-100'
       }`}
     >
+      <div className={`pointer-events-none absolute -top-32 -left-24 h-72 w-72 rounded-full blur-3xl ${isDark ? 'bg-cyan-400/20' : 'bg-brand-300/30'}`} />
+      <div className={`pointer-events-none absolute -bottom-36 -right-24 h-80 w-80 rounded-full blur-3xl ${isDark ? 'bg-violet-400/20' : 'bg-orange-300/30'}`} />
+
       {/* Theme Toggle - Fixed position */}
       <div className="fixed top-4 right-4 z-50">
         <ThemeToggle size="sm" />
       </div>
 
       {/* Two-Panel Container */}
-      <div className={`flex rounded-3xl overflow-hidden max-w-[900px] w-full ${
+      <div className={`relative z-10 flex max-h-[calc(100dvh-1.5rem)] md:max-h-none md:h-[620px] rounded-2xl sm:rounded-3xl overflow-y-auto overflow-x-hidden max-w-[900px] w-full ${
         isDark
-          ? 'shadow-[0_25px_60px_-12px_rgba(0,0,0,0.5)] ring-1 ring-white/10'
-          : 'shadow-[0_25px_60px_-12px_rgba(0,0,0,0.15)] ring-1 ring-black/5'
+          ? 'shadow-[0_30px_70px_-16px_rgba(0,0,0,0.65)] ring-1 ring-cyan-400/20'
+          : 'shadow-[0_24px_64px_-18px_rgba(236,72,153,0.35)] ring-1 ring-brand-100/90'
       }`}>
         {/* Left Panel - Branding */}
         <BrandingPanel isDark={isDark} />
 
         {/* Right Panel - Form */}
         <div 
-          className={`flex-1 p-8 sm:p-10 transition-colors duration-150 ${
+          className={`flex-1 p-4 sm:p-8 md:p-10 transition-colors duration-150 ${
             isDark 
-              ? 'bg-slate-800' 
-              : 'bg-white'
+              ? 'bg-gradient-to-b from-slate-900 to-slate-800' 
+              : 'bg-gradient-to-b from-white via-white to-brand-50/25'
           }`}
         >
           {/* Mobile Logo - Only shown on small screens */}
-          <div className="md:hidden flex items-center justify-center mb-6">
+          <div className="md:hidden flex items-center justify-center mb-4 sm:mb-6">
             <Logo variant="full" size="md" />
           </div>
 
+          <p className={`md:hidden text-center text-[11px] uppercase tracking-[0.18em] mb-3 ${isDark ? 'text-cyan-300/80' : 'text-brand-700/80'}`}>
+            AI-Powered Study Platform
+          </p>
+
           {/* Auth Tabs */}
-          <ThynkrTabs className="mb-8" />
+          <ThynkrTabs className="mb-5 sm:mb-8" />
 
           {/* Form Content - This is what changes between login/signup */}
-          <div className="w-full">
+          <div className="w-full md:min-h-[520px]">
             {children}
           </div>
 
           {/* Terms Footer */}
-          <p className={`mt-8 text-center text-xs leading-relaxed ${
+          <p className={`mt-6 sm:mt-8 text-center text-xs leading-relaxed ${
             isDark ? 'text-slate-400' : 'text-slate-500'
           }`}>
             By signing in you agree to{' '}
             <Link 
               to="/terms" 
-              className="text-cyan-500 hover:underline"
+              className="text-brand-600 dark:text-cyan-400 hover:underline"
             >
               Thynkr's terms of service
             </Link>
             ,{' '}
             <Link 
               to="/privacy" 
-              className="text-cyan-500 hover:underline"
+              className="text-brand-600 dark:text-cyan-400 hover:underline"
             >
               privacy policy
             </Link>
@@ -188,12 +195,34 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
             and{' '}
             <Link 
               to="/cookies" 
-              className="text-cyan-500 hover:underline"
+              className="text-brand-600 dark:text-cyan-400 hover:underline"
             >
               cookie usage
             </Link>
             .
           </p>
+
+          {/* Mobile quick links (desktop links live in branding panel) */}
+          <nav className="mt-4 md:hidden flex items-center justify-center gap-5 text-xs">
+            <Link
+              to="/about"
+              className={isDark ? 'text-slate-400 hover:text-white transition-colors' : 'text-slate-500 hover:text-slate-900 transition-colors'}
+            >
+              About
+            </Link>
+            <Link
+              to="/testimonials"
+              className={isDark ? 'text-slate-400 hover:text-white transition-colors' : 'text-slate-500 hover:text-slate-900 transition-colors'}
+            >
+              Testimonials
+            </Link>
+            <Link
+              to="/contact"
+              className={isDark ? 'text-slate-400 hover:text-white transition-colors' : 'text-slate-500 hover:text-slate-900 transition-colors'}
+            >
+              Contact
+            </Link>
+          </nav>
         </div>
       </div>
     </div>

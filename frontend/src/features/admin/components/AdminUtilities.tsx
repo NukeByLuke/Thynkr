@@ -36,9 +36,9 @@ export const Tooltip = ({ children, content }: { children: React.ReactNode; cont
         {children}
       </div>
       {show && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 text-xs font-medium text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-lg whitespace-nowrap z-50">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 text-xs font-medium text-white bg-slate-900 dark:bg-slate-700 rounded-lg shadow-lg whitespace-nowrap z-50">
           {content}
-          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700" />
+          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900 dark:border-t-slate-700" />
         </div>
       )}
     </div>
@@ -65,11 +65,9 @@ export const StatCard = ({
 }) => {
   // Extract gradient colors for icon styling
   const iconGradient = gradient.replace('bg-gradient-to-br', 'bg-gradient-to-br');
-  
+
   return (
-    <div
-      className="relative overflow-hidden rounded-2xl p-6 bg-zinc-900/60 dark:bg-zinc-950/60 backdrop-blur-md border border-white/10 hover:-translate-y-1 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.3)] hover:border-white/20 transition-all"
-    >
+    <div className="admin-surface relative overflow-hidden rounded-2xl p-4 sm:p-5 backdrop-blur-md hover:-translate-y-1 hover:shadow-xl transition-all">
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/20 -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-white/20 translate-y-1/2 -translate-x-1/2" />
@@ -77,27 +75,37 @@ export const StatCard = ({
 
       <div className="relative">
         <div className="flex items-start justify-between mb-4">
-          <div className={`p-3 rounded-xl ${iconGradient}`}>
-            <Icon className="w-6 h-6 text-white" />
+          <div className={`p-2.5 rounded-xl ${iconGradient}`}>
+            <Icon className="w-5 h-5 text-white" />
           </div>
           <Tooltip content={tooltip}>
-            <Info className="w-4 h-4 text-slate-400 cursor-help hover:text-slate-300 transition-colors" />
+            <Info className="w-4 h-4 text-slate-500 dark:text-slate-400 cursor-help hover:text-fuchsia-600 dark:hover:text-cyan-300 transition-colors" />
           </Tooltip>
         </div>
 
         <div className="space-y-1">
-          <p className="text-sm font-medium text-slate-400">{title}</p>
-          <p className="text-3xl font-bold tracking-tight text-white">{value}</p>
+          <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">{title}</p>
+          <p className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{value}</p>
         </div>
 
         {trend && trendValue && (
-          <div className="flex items-center gap-1 mt-3 text-sm text-slate-400">
+          <div className="mt-3 flex items-center gap-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
             {trend === 'up' ? (
               <TrendingUp className="w-4 h-4 text-green-400" />
             ) : trend === 'down' ? (
               <TrendingDown className="w-4 h-4 text-red-400" />
             ) : null}
-            <span className="font-medium text-white">{trendValue}</span>
+            <span
+              className={`font-semibold ${
+                trend === 'up'
+                  ? 'text-emerald-600 dark:text-emerald-400'
+                  : trend === 'down'
+                    ? 'text-red-600 dark:text-red-400'
+                    : 'text-slate-700 dark:text-slate-300'
+              }`}
+            >
+              {trendValue}
+            </span>
             <span>vs last period</span>
           </div>
         )}
@@ -173,25 +181,32 @@ export const TabButton = ({
   active,
   icon: Icon,
   label,
+  shortLabel,
   onClick,
 }: {
   active: boolean;
   icon: React.ElementType;
   label: string;
+  shortLabel?: string;
   onClick: () => void;
 }) => (
   <motion.button
     onClick={onClick}
     whileHover={{ scale: 1.02 }}
     whileTap={{ scale: 0.98 }}
-    className={`relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+    className={`relative inline-flex min-w-[8.5rem] sm:min-w-0 items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
       active
-        ? 'bg-gradient-to-r from-blue-500/10 to-indigo-500/10 text-white border border-blue-500/30 shadow-lg shadow-blue-500/20'
-        : 'text-slate-400 hover:bg-white/5 hover:text-white hover:border hover:border-white/10'
+        ? 'admin-tab-active'
+        : 'admin-tab-idle'
     }`}
   >
-    <Icon className={`w-4 h-4 ${active ? 'drop-shadow-[0_0_6px_rgba(59,130,246,0.5)]' : ''}`} />
-    {label}
+    <Icon
+      className={`w-4 h-4 ${
+        active ? 'drop-shadow-[0_0_6px_rgba(236,72,153,0.5)] dark:drop-shadow-[0_0_6px_rgba(34,211,238,0.5)]' : ''
+      }`}
+    />
+    <span className="hidden sm:inline">{label}</span>
+    <span className="sm:hidden">{shortLabel || label}</span>
   </motion.button>
 );
 
@@ -219,19 +234,19 @@ export const DateFilterDropdown = ({
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 transition-colors shadow-sm"
+        className="admin-select flex items-center gap-2 px-4 py-2.5 text-sm font-medium hover:border-fuchsia-300 dark:hover:border-cyan-400/40 transition-colors shadow-sm"
       >
-        <Calendar className="w-4 h-4 text-gray-400" />
+        <Calendar className="w-4 h-4 text-slate-500 dark:text-slate-400" />
         {currentLabel}
         <ChevronDown
-          className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-slate-500 dark:text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl z-20 overflow-hidden">
+          <div className="absolute right-0 mt-2 w-48 admin-surface rounded-xl shadow-xl z-20 overflow-hidden">
             {options.map((option) => (
               <button
                 key={option.value}
@@ -239,10 +254,10 @@ export const DateFilterDropdown = ({
                   onChange(option.value);
                   setOpen(false);
                 }}
-                className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                className={`w-full text-left px-4 py-2.5 text-sm hover:bg-rose-50/80 dark:hover:bg-slate-800 transition-colors ${
                   value === option.value
-                    ? 'text-blue-600 dark:text-blue-400 font-medium bg-blue-50 dark:bg-blue-900/20'
-                    : 'text-gray-700 dark:text-gray-300'
+                    ? 'text-fuchsia-700 dark:text-cyan-300 font-medium bg-rose-100/60 dark:bg-cyan-500/10'
+                    : 'text-slate-700 dark:text-slate-300'
                 }`}
               >
                 {option.label}
@@ -276,10 +291,10 @@ export const FilterDropdown = ({
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+        className={`inline-flex h-10 items-center gap-2 px-3 rounded-lg text-sm font-medium transition-colors ${
           value
-            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-            : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+            ? 'bg-rose-100 text-fuchsia-700 dark:bg-cyan-500/15 dark:text-cyan-300'
+            : 'admin-soft-chip text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-slate-800'
         }`}
       >
         {Icon && <Icon className="w-4 h-4" />}
@@ -290,7 +305,7 @@ export const FilterDropdown = ({
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 mt-2 w-44 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl z-20 overflow-hidden">
+          <div className="absolute right-0 sm:right-auto sm:left-0 mt-2 min-w-[10rem] max-w-[14rem] admin-surface rounded-xl shadow-xl z-20 overflow-hidden">
             {options.map((option) => (
               <button
                 key={option.value}
@@ -298,10 +313,10 @@ export const FilterDropdown = ({
                   onChange(option.value);
                   setOpen(false);
                 }}
-                className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                className={`w-full text-left px-4 py-2.5 text-sm hover:bg-rose-50/80 dark:hover:bg-slate-800 transition-colors ${
                   value === option.value
-                    ? 'text-blue-600 dark:text-blue-400 font-medium bg-blue-50 dark:bg-blue-900/20'
-                    : 'text-gray-700 dark:text-gray-300'
+                    ? 'text-fuchsia-700 dark:text-cyan-300 font-medium bg-rose-100/60 dark:bg-cyan-500/10'
+                    : 'text-slate-700 dark:text-slate-300'
                 }`}
               >
                 {option.label}
@@ -329,7 +344,7 @@ export const RowsPerPageDropdown = ({
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+        className="admin-soft-chip inline-flex h-9 items-center gap-2 px-3 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-slate-800 transition-colors"
       >
         {value} rows
         <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} />
@@ -338,7 +353,7 @@ export const RowsPerPageDropdown = ({
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 bottom-full mb-2 w-24 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl z-20 overflow-hidden">
+          <div className="absolute right-0 bottom-full mb-2 w-24 admin-surface rounded-xl shadow-xl z-20 overflow-hidden">
             {options.map((option) => (
               <button
                 key={option}
@@ -346,10 +361,10 @@ export const RowsPerPageDropdown = ({
                   onChange(option);
                   setOpen(false);
                 }}
-                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                className={`w-full text-left px-4 py-2 text-sm hover:bg-rose-50/80 dark:hover:bg-slate-800 transition-colors ${
                   value === option
-                    ? 'text-blue-600 dark:text-blue-400 font-medium bg-blue-50 dark:bg-blue-900/20'
-                    : 'text-gray-700 dark:text-gray-300'
+                    ? 'text-fuchsia-700 dark:text-cyan-300 font-medium bg-rose-100/60 dark:bg-cyan-500/10'
+                    : 'text-slate-700 dark:text-slate-300'
                 }`}
               >
                 {option}
@@ -387,11 +402,11 @@ export const Modal = ({
         <>
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={onClose} />
           <div
-            className="fixed inset-0 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div
-              className={`bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-2xl shadow-2xl ${sizeClasses[size]} w-full overflow-hidden`}
+              className={`admin-surface-strong backdrop-blur-xl rounded-2xl shadow-2xl ${sizeClasses[size]} w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2rem)] overflow-auto`}
             >
               {children}
             </div>
@@ -416,7 +431,7 @@ export const SidePanel = ({
     {open && (
       <>
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={onClose} />
-        <div className="fixed right-0 top-0 h-full w-full max-w-lg bg-white dark:bg-gray-800 shadow-2xl z-50 overflow-y-auto transition-transform">
+        <div className="fixed right-0 top-0 h-[100dvh] w-full sm:max-w-lg bg-white/95 dark:bg-slate-950/90 border-l border-rose-200/70 dark:border-cyan-400/20 shadow-2xl z-50 overflow-y-auto">
           {children}
         </div>
       </>
@@ -452,7 +467,7 @@ export const UserViewPanel = ({
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 to-purple-600">
+      <div className="p-4 sm:p-6 border-b border-cyan-400/20 bg-gradient-to-r from-fuchsia-600 via-rose-500 to-orange-500 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-white">User Details</h2>
           <button
@@ -464,27 +479,27 @@ export const UserViewPanel = ({
           </button>
         </div>
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-2xl font-bold">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-xl sm:text-2xl font-bold">
             {(user.firstName?.[0] || user.email[0]).toUpperCase()}
           </div>
-          <div>
-            <p className="text-xl font-semibold text-white">{fullName}</p>
-            <p className="text-blue-100">{user.email}</p>
+          <div className="min-w-0">
+            <p className="text-lg sm:text-xl font-semibold text-white truncate">{fullName}</p>
+            <p className="text-blue-100 text-sm truncate">{user.email}</p>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-4 sm:p-6 space-y-5 sm:space-y-6">
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <div className="admin-soft-chip p-4 rounded-xl">
             <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
               Role
             </p>
             <RoleBadge role={user.role} />
           </div>
-          <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
+          <div className="admin-soft-chip p-4 rounded-xl">
             <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
               Status
             </p>
@@ -507,7 +522,7 @@ export const UserViewPanel = ({
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
             Subscription
           </h3>
-          <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
+          <div className="admin-soft-chip p-4 rounded-xl">
             <SubscriptionBadge subscription={user.subscription} />
           </div>
         </div>
@@ -518,14 +533,14 @@ export const UserViewPanel = ({
             Account Information
           </h3>
           <div className="space-y-2">
-            <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+            <div className="admin-soft-chip flex justify-between items-center p-3 rounded-lg">
               <span className="text-sm text-gray-500 dark:text-gray-400">Member Since</span>
               <span className="text-sm font-medium text-gray-900 dark:text-white">
                 {new Date(user.createdAt).toLocaleDateString()}
               </span>
             </div>
             {user.lastActiveAt && (
-              <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+              <div className="admin-soft-chip flex justify-between items-center p-3 rounded-lg">
                 <span className="text-sm text-gray-500 dark:text-gray-400">Last Active</span>
                 <span className="text-sm font-medium text-gray-900 dark:text-white">
                   {new Date(user.lastActiveAt).toLocaleDateString()}
@@ -537,7 +552,7 @@ export const UserViewPanel = ({
       </div>
 
       {/* Actions */}
-      <div className="p-6 border-t border-gray-200 dark:border-gray-700 space-y-3">
+      <div className="p-4 sm:p-6 border-t border-rose-200/60 dark:border-cyan-400/20 space-y-2.5 bg-white/80 dark:bg-slate-950/72 backdrop-blur-sm">
         <button
           onClick={onEditRole}
           className="w-full px-4 py-2.5 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"

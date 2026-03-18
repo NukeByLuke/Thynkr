@@ -779,8 +779,37 @@ export default function Files() {
     toast('Processing cancelled - the video may still be added', { icon: '⚠️' });
   };
 
+  const getContextMenuPosition = (x: number, y: number, type: LibraryItemType) => {
+    if (typeof window === 'undefined') {
+      return { x, y };
+    }
+
+    const padding = 8;
+    const menuWidth = Math.min(220, Math.max(180, window.innerWidth - padding * 2));
+    const menuHeight = type === 'file' ? 252 : 176;
+
+    if (window.innerWidth < 640) {
+      return {
+        x: padding,
+        y: Math.max(padding, window.innerHeight - menuHeight - 92),
+      };
+    }
+
+    return {
+      x: Math.min(
+        Math.max(padding, x),
+        Math.max(padding, window.innerWidth - menuWidth - padding)
+      ),
+      y: Math.min(
+        Math.max(padding, y),
+        Math.max(padding, window.innerHeight - menuHeight - padding)
+      ),
+    };
+  };
+
   const openContextMenuAt = (x: number, y: number, item: LibraryItemReference) => {
-    setContextMenu({ x, y, ...item });
+    const position = getContextMenuPosition(x, y, item.type);
+    setContextMenu({ x: position.x, y: position.y, ...item });
   };
 
   const handleContextMenu = (
@@ -1236,17 +1265,17 @@ export default function Files() {
       >
         {/* Drag and Drop Overlay */}
         {isDragging && (
-          <div className="fixed inset-0 bg-pink-500/20 dark:bg-cyan-500/20 backdrop-blur-sm z-40 flex items-center justify-center">
-            <div className="bg-white dark:bg-slate-900 border-4 border-dashed border-pink-500 dark:border-cyan-500 rounded-3xl p-12 text-center">
-              <Upload className="w-20 h-20 text-pink-600 dark:text-cyan-500 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Drop files here</h3>
+          <div className="fixed inset-0 bg-pink-500/20 dark:bg-cyan-500/20 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
+            <div className="w-full max-w-xl bg-white dark:bg-slate-900 border-4 border-dashed border-pink-500 dark:border-cyan-500 rounded-3xl p-7 sm:p-12 text-center">
+              <Upload className="w-14 h-14 sm:w-20 sm:h-20 text-pink-600 dark:text-cyan-500 mx-auto mb-4" />
+              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-2">Drop files here</h3>
               <p className="text-slate-600 dark:text-slate-400">Release to upload</p>
             </div>
           </div>
         )}
         {/* Main Container */}
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-          <div className="rounded-3xl border border-stone-200 dark:border-white/10 bg-white/90 dark:bg-black/70 backdrop-blur-md shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] p-4 sm:p-6 md:p-8 space-y-6">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+          <div className="rounded-3xl border border-stone-200 dark:border-white/10 bg-white/90 dark:bg-black/70 backdrop-blur-md shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] p-3.5 sm:p-6 md:p-8 space-y-5 sm:space-y-6">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400 font-semibold">
@@ -1255,19 +1284,19 @@ export default function Files() {
                 <h1 className="text-3xl sm:text-4xl font-bold text-stone-900 dark:text-stone-100 mt-1">
                   File Library
                 </h1>
-                <p className="text-sm text-stone-600 dark:text-stone-300 mt-2">
+                <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 mt-2">
                   {sortedFiles.length + sortedFolders.length} items in this view
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
+              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400 self-start md:self-auto">
                 <Calendar className="w-3.5 h-3.5" />
                 Sorted by {sortBy === 'recent' ? 'recent' : sortBy}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_auto_auto_auto] gap-3">
-              <div className="relative">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_auto_auto_auto_auto] gap-3">
+              <div className="relative sm:col-span-2 lg:col-span-1">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
                 <input
                   type="text"
@@ -1281,7 +1310,7 @@ export default function Files() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'recent' | 'name' | 'size')}
-                className="h-12 min-w-[160px] rounded-xl border border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900/60 px-3 text-sm text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-300 dark:focus:ring-slate-500"
+                className="h-12 w-full min-w-0 rounded-xl border border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900/60 px-3 text-sm text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-300 dark:focus:ring-slate-500"
                 aria-label="Sort files"
               >
                 <option value="recent">Sort: Last Added</option>
@@ -1295,7 +1324,7 @@ export default function Files() {
                   setContextMenu(null);
                   setShowFilterPanel((prev) => !prev);
                 }}
-                className={`h-12 min-w-[140px] rounded-xl border px-3 text-sm font-semibold inline-flex items-center justify-center gap-2 transition-colors ${
+                className={`h-12 w-full min-w-0 rounded-xl border px-3 text-sm font-semibold inline-flex items-center justify-center gap-2 transition-colors ${
                   showFilterPanel || hasActiveFilters
                     ? 'border-stone-400 dark:border-slate-400 bg-stone-100 dark:bg-slate-800 text-stone-900 dark:text-stone-100'
                     : 'border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900/60 text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-slate-800'
@@ -1312,7 +1341,7 @@ export default function Files() {
 
               <button
                 onClick={() => setShowCreateFolderModal(true)}
-                className="h-12 px-4 rounded-xl border border-stone-300 dark:border-white/20 bg-white dark:bg-slate-900/60 text-stone-700 dark:text-stone-200 text-sm font-semibold hover:bg-stone-50 dark:hover:bg-slate-800 transition-colors"
+                className="h-12 w-full sm:w-auto px-4 rounded-xl border border-stone-300 dark:border-white/20 bg-white dark:bg-slate-900/60 text-stone-700 dark:text-stone-200 text-sm font-semibold hover:bg-stone-50 dark:hover:bg-slate-800 transition-colors"
               >
                 + Folder
               </button>
@@ -1320,38 +1349,38 @@ export default function Files() {
               <button
                 type="button"
                 onClick={openUploadHub}
-                className="h-12 px-5 rounded-xl bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-sm font-semibold hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-2"
+                className="h-12 w-full sm:w-auto px-5 rounded-xl bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-sm font-semibold hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-2"
               >
                 <Upload className="w-4 h-4" />
                 Upload
               </button>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 text-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-sm">
               <button
                 onClick={handleGoBackFolder}
                 disabled={!currentFolderId}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900/60 text-stone-700 dark:text-stone-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-stone-50 dark:hover:bg-slate-800 transition-colors"
+                className="inline-flex items-center justify-center sm:justify-start gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900/60 text-stone-700 dark:text-stone-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-stone-50 dark:hover:bg-slate-800 transition-colors w-full sm:w-auto"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back
               </button>
 
-              <div className="flex flex-wrap items-center gap-1.5 text-stone-500 dark:text-stone-400">
+              <div className="flex items-center gap-1.5 text-stone-500 dark:text-stone-400 min-w-0 overflow-x-auto whitespace-nowrap pb-1 pr-1">
                 <button
                   onClick={() => setCurrentFolderId(null)}
-                  className="inline-flex items-center gap-1 hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
+                  className="inline-flex items-center gap-1 hover:text-stone-900 dark:hover:text-stone-100 transition-colors shrink-0"
                 >
                   <Home className="w-4 h-4" />
                   Root
                 </button>
 
                 {folderPath.map((folder) => (
-                  <div key={folder.id} className="inline-flex items-center gap-1.5">
-                    <ChevronRight className="w-3.5 h-3.5" />
+                  <div key={folder.id} className="inline-flex items-center gap-1.5 shrink-0">
+                    <ChevronRight className="w-3.5 h-3.5 shrink-0" />
                     <button
                       onClick={() => setCurrentFolderId(folder.id)}
-                      className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
+                      className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors max-w-[10rem] sm:max-w-[14rem] truncate"
                     >
                       {folder.name}
                     </button>
@@ -1372,7 +1401,7 @@ export default function Files() {
                   initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
-                  className="rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-slate-900/60 px-4 py-3 flex flex-wrap items-center gap-3"
+                  className="rounded-xl border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-slate-900/60 px-4 py-3 flex flex-wrap items-center gap-2 sm:gap-3"
                 >
                   <span className="text-sm font-semibold text-stone-700 dark:text-stone-200">
                     {selectedItems.size} selected
@@ -1386,14 +1415,14 @@ export default function Files() {
                   <button
                     onClick={handleMassDelete}
                     disabled={massDeleteMutation.isPending}
-                    className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm disabled:opacity-50"
+                    className="sm:ml-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm disabled:opacity-50 w-full sm:w-auto"
                   >
                     <Trash2 className="w-4 h-4" />
                     Delete
                   </button>
                   <button
                     onClick={() => setSelectedItems(new Set())}
-                    className="text-sm text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100"
+                    className="text-sm text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100 w-full sm:w-auto"
                   >
                     Clear
                   </button>
@@ -1434,7 +1463,7 @@ export default function Files() {
                             setDragOverFolderId((previous) => (previous === folder.id ? null : previous));
                           }}
                           onDropCapture={(e) => handleFolderDrop(e, folder.id)}
-                          className={`w-full grid grid-cols-[28px_1fr_auto_32px] items-center gap-3 rounded-xl px-3 sm:px-4 py-3 border transition-colors cursor-pointer ${
+                          className={`w-full grid grid-cols-[28px_minmax(0,1fr)_32px] sm:grid-cols-[28px_minmax(0,1fr)_auto_32px] items-center gap-2 sm:gap-3 rounded-xl px-3 sm:px-4 py-3 border transition-colors cursor-pointer ${
                             isSelected
                               ? 'border-stone-400 dark:border-slate-400 bg-stone-100 dark:bg-slate-800'
                               : isDragOverTarget
@@ -1457,7 +1486,7 @@ export default function Files() {
                                 name: folder.name,
                               })
                             }
-                            className="p-1.5 rounded-md hover:bg-stone-200 dark:hover:bg-slate-700"
+                            className="p-2 sm:p-1.5 rounded-md hover:bg-stone-200 dark:hover:bg-slate-700"
                             aria-label={`Open folder actions for ${folder.name}`}
                           >
                             <MoreVertical className="w-4 h-4 text-stone-500 dark:text-stone-400" />
@@ -1511,7 +1540,7 @@ export default function Files() {
                                 onDragEndCapture={handleItemDragEnd}
                                 onDoubleClick={() => handleFileDoubleClick(file.id)}
                                 onContextMenu={(e) => handleContextMenu(e, 'file', file.id, file.originalName)}
-                                className={`group grid grid-cols-[24px_28px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl px-3 sm:px-4 py-3 border cursor-pointer transition-colors ${
+                                className={`group grid grid-cols-[22px_24px_minmax(0,1fr)_32px] sm:grid-cols-[24px_28px_minmax(0,1fr)_auto] items-center gap-2 sm:gap-3 rounded-xl px-2.5 sm:px-4 py-3 border cursor-pointer transition-colors ${
                                   isSelected
                                     ? 'border-stone-400 dark:border-slate-400 bg-stone-100 dark:bg-slate-800'
                                     : 'border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900/60 hover:bg-stone-50 dark:hover:bg-slate-800/80'
@@ -1525,10 +1554,10 @@ export default function Files() {
                                   className="w-4 h-4 rounded border-stone-300 dark:border-slate-600"
                                 />
 
-                                <FileIcon className={`w-5 h-5 ${iconColor}`} />
+                                <FileIcon className={`w-4 h-4 sm:w-5 sm:h-5 ${iconColor}`} />
 
                                 <div className="min-w-0">
-                                  <p className="text-sm font-semibold text-stone-900 dark:text-stone-100 truncate">{file.originalName}</p>
+                                  <p className="text-sm font-semibold text-stone-900 dark:text-stone-100 truncate pr-1">{file.originalName}</p>
                                   <div className="flex flex-wrap items-center gap-2 mt-1">
                                     <FileTypeBadge mimeType={file.fileType} fileName={file.originalName} />
                                     <span className="text-xs text-stone-500 dark:text-stone-400">{formatDate(file.createdAt)}</span>
@@ -1544,7 +1573,7 @@ export default function Files() {
                                       name: file.originalName,
                                     });
                                   }}
-                                  className="p-1.5 rounded-md hover:bg-stone-200 dark:hover:bg-slate-700"
+                                  className="p-2 sm:p-1.5 rounded-md hover:bg-stone-200 dark:hover:bg-slate-700"
                                 >
                                   <MoreVertical className="w-4 h-4 text-stone-500 dark:text-stone-400" />
                                 </button>
@@ -1556,9 +1585,9 @@ export default function Files() {
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-2xl border border-dashed border-stone-200 dark:border-white/10 p-10 text-center">
-                    <div className="w-14 h-14 rounded-xl bg-stone-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
-                      <FileText className="w-7 h-7 text-stone-400" />
+                  <div className="rounded-2xl border border-dashed border-stone-200 dark:border-white/10 p-6 sm:p-10 text-center">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-stone-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
+                      <FileText className="w-6 h-6 sm:w-7 sm:h-7 text-stone-400" />
                     </div>
                     <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
                       {hasQueryOrFilter ? 'No results found' : 'No files yet'}
@@ -1576,7 +1605,7 @@ export default function Files() {
         <AnimatePresence>
           {showFilterPanel && (
             <div
-              className="fixed inset-0 z-[80] bg-black/30 dark:bg-black/60 backdrop-blur-[1px] flex items-start justify-center px-4 pt-24 pb-6"
+              className="fixed inset-0 z-[80] bg-black/30 dark:bg-black/60 backdrop-blur-[1px] flex items-end sm:items-start justify-center px-4 pt-14 sm:pt-24 pb-4 sm:pb-6"
               onClick={() => setShowFilterPanel(false)}
             >
               <motion.div
@@ -1585,7 +1614,7 @@ export default function Files() {
                 exit={{ opacity: 0, y: -8, scale: 0.98 }}
                 transition={{ duration: 0.16 }}
                 onClick={(event) => event.stopPropagation()}
-                className="w-full max-w-md rounded-2xl border border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-[0_24px_80px_-30px_rgba(15,23,42,0.6)] p-4 sm:p-5"
+                className="w-full max-w-md rounded-2xl border border-stone-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-[0_24px_80px_-30px_rgba(15,23,42,0.6)] p-4 sm:p-5 max-h-[calc(100vh-5rem)] overflow-y-auto"
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
@@ -1657,19 +1686,19 @@ export default function Files() {
                   </label>
                 </div>
 
-                <div className="mt-4 flex items-center justify-end gap-2">
+                <div className="mt-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2">
                   <button
                     type="button"
                     onClick={clearFileFilters}
                     disabled={!hasActiveFilters}
-                    className="h-9 px-3 rounded-lg border border-stone-200 dark:border-white/10 text-sm text-stone-600 dark:text-stone-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-stone-50 dark:hover:bg-slate-800 transition-colors"
+                    className="h-9 px-3 rounded-lg border border-stone-200 dark:border-white/10 text-sm text-stone-600 dark:text-stone-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-stone-50 dark:hover:bg-slate-800 transition-colors w-full sm:w-auto"
                   >
                     Clear filters
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowFilterPanel(false)}
-                    className="h-9 px-3 rounded-lg bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-sm font-semibold hover:opacity-90 transition-opacity"
+                    className="h-9 px-3 rounded-lg bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-sm font-semibold hover:opacity-90 transition-opacity w-full sm:w-auto"
                   >
                     Done
                   </button>
@@ -1682,7 +1711,7 @@ export default function Files() {
         {/* Context Menu */}
         {contextMenu && (
           <div
-            className="fixed bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10 rounded-xl shadow-2xl py-2 z-50 min-w-[180px]"
+            className="fixed bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10 rounded-xl shadow-2xl py-2 z-50 w-[min(92vw,220px)] min-w-[180px]"
             style={{ left: contextMenu.x, top: contextMenu.y }}
           >
             {contextMenu.type === 'file' && (
@@ -1738,12 +1767,12 @@ export default function Files() {
 
         {/* Move Modal */}
         {showMoveModal && moveItem && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4"
+              className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl p-5 sm:p-6 max-w-md w-full"
             >
               <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
                 Move {moveItem.type === 'folder' ? 'Folder' : 'File'}
@@ -1774,21 +1803,21 @@ export default function Files() {
                 ))}
               </select>
 
-              <div className="flex gap-3 justify-end">
+              <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end">
                 <button
                   onClick={() => {
                     setShowMoveModal(false);
                     setMoveItem(null);
                     setMoveTargetFolderId(null);
                   }}
-                  className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors duration-150 active:scale-95"
+                  className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors duration-150 active:scale-95 w-full sm:w-auto"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleConfirmMove}
                   disabled={moveItemMutation.isPending || isMoveDestinationUnchanged}
-                  className="px-6 py-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 hover:shadow-xl text-white rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed font-medium active:scale-95 shadow-sm"
+                  className="px-6 py-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 hover:shadow-xl text-white rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed font-medium active:scale-95 shadow-sm w-full sm:w-auto"
                 >
                   {moveItemMutation.isPending ? 'Moving...' : 'Move'}
                 </button>
@@ -1799,12 +1828,12 @@ export default function Files() {
 
         {/* Rename Modal */}
         {showRenameModal && selectedItem && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4"
+              className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl p-5 sm:p-6 max-w-md w-full"
             >
               <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">
                 Rename {selectedItem.type === 'folder' ? 'Folder' : 'File'}
@@ -1816,13 +1845,13 @@ export default function Files() {
                 className="w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-cyan-500 focus:border-pink-500 dark:focus:border-cyan-500 mb-4"
                 autoFocus
               />
-              <div className="flex gap-3 justify-end">
+              <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end">
                 <button
                   onClick={() => {
                     setShowRenameModal(false);
                     setSelectedItem(null);
                   }}
-                  className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors duration-150 active:scale-95"
+                  className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors duration-150 active:scale-95 w-full sm:w-auto"
                 >
                   Cancel
                 </button>
@@ -1837,7 +1866,7 @@ export default function Files() {
                     }
                   }}
                   disabled={!renameValue.trim() || renameMutation.isPending}
-                  className="px-6 py-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 hover:shadow-xl text-white rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed font-medium active:scale-95 shadow-sm"
+                  className="px-6 py-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 hover:shadow-xl text-white rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed font-medium active:scale-95 shadow-sm w-full sm:w-auto"
                 >
                   {renameMutation.isPending ? 'Saving...' : 'Save'}
                 </button>
@@ -1848,12 +1877,12 @@ export default function Files() {
 
         {/* Create Folder Modal */}
         {showCreateFolderModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4"
+              className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl p-5 sm:p-6 max-w-md w-full"
             >
               <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">
                 Create New Folder
@@ -1871,13 +1900,13 @@ export default function Files() {
                   }
                 }}
               />
-              <div className="flex gap-3 justify-end">
+              <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end">
                 <button
                   onClick={() => {
                     setShowCreateFolderModal(false);
                     setNewFolderName('');
                   }}
-                  className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors duration-150 active:scale-95"
+                  className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors duration-150 active:scale-95 w-full sm:w-auto"
                 >
                   Cancel
                 </button>
@@ -1888,7 +1917,7 @@ export default function Files() {
                     }
                   }}
                   disabled={!newFolderName.trim() || createFolderMutation.isPending}
-                  className="px-6 py-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 hover:shadow-xl text-white rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed font-medium active:scale-95 shadow-sm"
+                  className="px-6 py-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 hover:shadow-xl text-white rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed font-medium active:scale-95 shadow-sm w-full sm:w-auto"
                 >
                   {createFolderMutation.isPending ? 'Creating...' : 'Create'}
                 </button>

@@ -129,9 +129,9 @@ const PaymentMetricCard = ({
   const TrendIcon = trend === 'up' ? ArrowUpRight : trend === 'down' ? ArrowDownRight : Minus;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-200 dark:border-gray-700">
+    <div className="admin-surface rounded-2xl p-4 sm:p-5">
       <div className="flex items-start justify-between mb-3">
-        <div className={`p-2.5 rounded-xl ${colorStyles[color]}`}>
+        <div className={`p-2 sm:p-2.5 rounded-xl ${colorStyles[color]}`}>
           <Icon className="w-5 h-5" />
         </div>
         {trend && trendValue && (
@@ -141,7 +141,7 @@ const PaymentMetricCard = ({
           </div>
         )}
       </div>
-      <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+      <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
       <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{title}</p>
       {subtitle && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{subtitle}</p>}
     </div>
@@ -226,9 +226,9 @@ const PaymentAnalyticsTab = () => {
     : [];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-4 sm:space-y-5">
       {/* Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
         <PaymentMetricCard
           title="Monthly Recurring Revenue"
           value={formatCurrency(summary?.mrr || 0)}
@@ -270,42 +270,42 @@ const PaymentAnalyticsTab = () => {
       </div>
 
       {/* Revenue Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 sm:p-5 text-white">
           <p className="text-blue-100 text-sm font-medium">Revenue This Month</p>
-          <p className="text-3xl font-bold mt-1">
+          <p className="text-2xl sm:text-3xl font-bold mt-1">
             {formatCurrency(summary?.totalRevenueThisMonth || 0)}
           </p>
         </div>
-        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 text-white">
+        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-4 sm:p-5 text-white">
           <p className="text-emerald-100 text-sm font-medium">Last 7 Days</p>
-          <p className="text-3xl font-bold mt-1">
+          <p className="text-2xl sm:text-3xl font-bold mt-1">
             {formatCurrency(summary?.totalRevenue7Days || 0)}
           </p>
         </div>
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-5 text-white">
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-4 sm:p-5 text-white">
           <p className="text-purple-100 text-sm font-medium">All Time Revenue</p>
-          <p className="text-3xl font-bold mt-1">
+          <p className="text-2xl sm:text-3xl font-bold mt-1">
             {formatCurrency(summary?.totalRevenueAllTime || 0)}
           </p>
         </div>
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
         {/* Revenue Chart */}
-        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="admin-surface lg:col-span-2 rounded-2xl p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               Revenue Overview
             </h3>
-            <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-700 rounded-lg">
+            <div className="admin-segment grid grid-cols-2 gap-1 p-1 rounded-lg w-full sm:w-auto">
               <button
                 onClick={() => setChartType('monthly')}
                 className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                   chartType === 'monthly'
-                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    ? 'admin-segment-btn-active'
+                    : 'admin-segment-btn'
                 }`}
               >
                 Monthly
@@ -314,8 +314,8 @@ const PaymentAnalyticsTab = () => {
                 onClick={() => setChartType('daily')}
                 className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                   chartType === 'daily'
-                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    ? 'admin-segment-btn-active'
+                    : 'admin-segment-btn'
                 }`}
               >
                 Daily
@@ -323,7 +323,7 @@ const PaymentAnalyticsTab = () => {
             </div>
           </div>
 
-          <div className="h-72">
+          <div className="h-64 sm:h-72">
             <ResponsiveContainer width="100%" height="100%">
               {chartType === 'monthly' ? (
                 <BarChart
@@ -387,11 +387,11 @@ const PaymentAnalyticsTab = () => {
         </div>
 
         {/* Plan Distribution */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+        <div className="admin-surface rounded-2xl p-4 sm:p-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 sm:mb-6">
             Plan Distribution
           </h3>
-          <div className="h-48">
+          <div className="h-44 sm:h-48">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -411,7 +411,7 @@ const PaymentAnalyticsTab = () => {
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex justify-center gap-6 mt-4">
+          <div className="flex justify-center gap-4 sm:gap-6 mt-4">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-blue-500" />
               <span className="text-sm text-gray-600 dark:text-gray-400">Standard</span>
@@ -425,14 +425,66 @@ const PaymentAnalyticsTab = () => {
       </div>
 
       {/* Recent Payments Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+      <div className="admin-surface rounded-2xl overflow-hidden">
+        <div className="px-4 sm:px-6 py-4 border-b border-rose-200/60 dark:border-cyan-400/20">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Payments</h3>
         </div>
-        <div className="overflow-x-auto">
+
+        <div className="sm:hidden divide-y divide-rose-100 dark:divide-slate-700">
+          {paymentsLoading ? (
+            <div className="px-4 py-8 text-center text-gray-500">
+              <div className="inline-flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                Loading...
+              </div>
+            </div>
+          ) : !recentPayments?.payments?.length ? (
+            <div className="px-4 py-10 text-center">
+              <DollarSign className="w-10 h-10 mx-auto mb-2 text-gray-300 dark:text-gray-600" />
+              <p className="text-gray-500 dark:text-gray-400">No payments yet</p>
+            </div>
+          ) : (
+            recentPayments.payments.slice(0, 6).map((payment) => (
+              <div key={payment.id} className="px-4 py-3 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      {payment.userEmail}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {format(new Date(payment.createdAt), 'MMM d, yyyy')}
+                    </p>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {formatCurrencyDecimal(payment.amount / 100)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
+                      payment.planType === 'PREMIUM'
+                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                    }`}
+                  >
+                    {payment.planType === 'PREMIUM' ? (
+                      <Crown className="w-3 h-3" />
+                    ) : (
+                      <Zap className="w-3 h-3" />
+                    )}
+                    {payment.planType}
+                  </span>
+                  <PaymentStatusBadge status={payment.status} />
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-gray-50 dark:bg-gray-900/50">
+              <tr className="admin-table-head">
                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   User
                 </th>
@@ -450,7 +502,7 @@ const PaymentAnalyticsTab = () => {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+            <tbody className="divide-y divide-rose-100 dark:divide-slate-700">
               {paymentsLoading ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
@@ -474,7 +526,7 @@ const PaymentAnalyticsTab = () => {
                 recentPayments.payments.slice(0, 10).map((payment) => (
                   <tr
                     key={payment.id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                    className="hover:bg-rose-50/50 dark:hover:bg-slate-800/50 transition-colors"
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">

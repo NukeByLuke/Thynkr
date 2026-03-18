@@ -5,6 +5,7 @@ import remarkGfm from 'remark-gfm';
 import { RefreshCw, AlertTriangle, Volume2 } from 'lucide-react';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import { sanitizeTextForTTS } from '@/utils/ttsText';
+import { normalizeStudyMarkdown } from '@/utils/markdownContent';
 
 interface NotesViewProps {
   keyPoints: string[];
@@ -60,7 +61,7 @@ export default function NotesView({
       });
     }
 
-    const normalizedDetailed = (detailed || '').trim();
+    const normalizedDetailed = normalizeStudyMarkdown(detailed || '');
     if (!normalizedDetailed) {
       return cards;
     }

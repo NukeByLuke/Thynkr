@@ -464,6 +464,203 @@ export class CourseService {
     return courseFile;
   }
 
+  private resolveUploadedSourcePath(filePath: string): string | null {
+    const rawPath = String(filePath || '').trim();
+    if (!rawPath || /^https?:\/\//i.test(rawPath)) {
+      return null;
+    }
+
+    if (path.isAbsolute(rawPath)) {
+      return rawPath;
+    }
+
+    const normalized = rawPath.replace(/^[\\/]+/, '');
+    if (normalized.startsWith('uploads/')) {
+      return path.join(process.cwd(), normalized);
+    }
+
+    return path.join(process.cwd(), 'uploads', normalized);
+  }
+
+  async attachExistingFiles(
+    courseId: string,
+    uploadedFileIds: string[],
+    userId: string,
+    userRole: string
+  ) {
+    const uniqueFileIds = Array.from(
+      new Set(
+        (uploadedFileIds || [])
+          .map((value) => String(value || '').trim())
+          .filter(Boolean)
+      )
+    );
+
+    if (uniqueFileIds.length === 0) {
+      throw { statusCode: 400, message: 'At least one file must be selected' };
+    }
+
+    const course = await db.course.findUnique({
+      where: { id: courseId },
+      include: {
+        _count: {
+          select: {
+            files: true,
+          },
+        },
+      },
+    });
+
+    if (!course) {
+      throw { statusCode: 404, message: 'Course not found' };
+    }
+
+    if (course.createdBy !== userId) {
+      throw { statusCode: 403, message: 'You can only edit your own courses' };
+    }
+
+    const limits = this.getTierLimits(userRole);
+    const currentFileCount = course._count?.files || 0;
+    if (currentFileCount + uniqueFileIds.length > limits.maxFiles) {
+      throw {
+        statusCode: 403,
+        message: `File limit reached. Your plan allows ${limits.maxFiles} files per course.`,
+      };
+    }
+
+    type UploadedLibraryFile = {
+      id: string;
+      fileName: string;
+      originalName: string;
+      fileType: string;
+      fileSize: number;
+      filePath: string;
+      extractedText: string | null;
+    };
+
+    const uploadedFiles = (await db.uploadedFile.findMany({
+      where: {
+        id: { in: uniqueFileIds },
+        userId,
+      },
+      select: {
+        id: true,
+        fileName: true,
+        originalName: true,
+        fileType: true,
+        fileSize: true,
+        filePath: true,
+        extractedText: true,
+      },
+    })) as UploadedLibraryFile[];
+
+    if (uploadedFiles.length !== uniqueFileIds.length) {
+      throw { statusCode: 400, message: 'Some selected files are unavailable' };
+    }
+
+    const uploadsDir = path.join(process.cwd(), 'uploads', 'courses');
+    await fs.mkdir(uploadsDir, { recursive: true });
+
+    const uploadedById = new Map<string, UploadedLibraryFile>(
+      uploadedFiles.map((file) => [file.id, file])
+    );
+    const orderedFiles = uniqueFileIds
+      .map((fileId) => uploadedById.get(fileId))
+      .filter((file): file is UploadedLibraryFile => Boolean(file));
+
+    let nextOrder = await this.getNextFileOrder(courseId);
+    const attachedFiles: any[] = [];
+    const failedFiles: Array<{ fileId: string; name: string; error: string }> = [];
+
+    for (const uploadedFile of orderedFiles) {
+
+      try {
+        const sourcePath = this.resolveUploadedSourcePath(uploadedFile.filePath);
+        const hasSourceFile = !!sourcePath;
+        const sourceIsLink = uploadedFile.fileType === 'text/url' || !hasSourceFile;
+
+        let contentType = uploadedFile.fileType || 'application/octet-stream';
+        let originalName = uploadedFile.originalName || uploadedFile.fileName || 'Imported file';
+        let displayName = uploadedFile.originalName || uploadedFile.fileName || 'Imported file';
+
+        const sourceExtension = path.extname(originalName) || path.extname(uploadedFile.fileName || '');
+        const extension = sourceIsLink ? '.txt' : sourceExtension || '.bin';
+        const newFileName = `${courseId}-${Date.now()}-${randomBytes(6).toString('hex')}${extension}`;
+        const destinationPath = path.join(uploadsDir, newFileName);
+        let fileSize = uploadedFile.fileSize || 0;
+
+        if (sourceIsLink) {
+          const textContent = String(
+            uploadedFile.extractedText ||
+              `Imported from study library\n\nSource: ${uploadedFile.filePath || 'N/A'}`
+          ).trim();
+
+          await fs.writeFile(destinationPath, `${textContent}\n`, 'utf-8');
+          fileSize = Buffer.byteLength(`${textContent}\n`, 'utf-8');
+          contentType = 'text/plain';
+
+          const withoutExtension = displayName.replace(/\.[a-z0-9]+$/i, '').trim();
+          displayName = withoutExtension || displayName;
+          originalName = `${displayName}.txt`;
+        } else {
+          try {
+            await fs.access(sourcePath);
+          } catch {
+            throw new Error('Source file is no longer available');
+          }
+
+          await fs.copyFile(sourcePath, destinationPath);
+
+          const destinationStats = await fs.stat(destinationPath);
+          if (destinationStats.size > 0) {
+            fileSize = destinationStats.size;
+          }
+        }
+
+        const attachedFile = await db.courseFile.create({
+          data: {
+            courseId,
+            name: displayName,
+            originalName,
+            fileName: newFileName,
+            filePath: `courses/${newFileName}`,
+            fileType: contentType,
+            fileSize,
+            order: nextOrder,
+          },
+        });
+
+        attachedFiles.push(attachedFile);
+        nextOrder += 1;
+      } catch (error: any) {
+        failedFiles.push({
+          fileId: uploadedFile.id,
+          name: uploadedFile.originalName || uploadedFile.fileName || 'Imported file',
+          error: String(error?.message || 'Failed to attach file'),
+        });
+      }
+    }
+
+    if (attachedFiles.length === 0) {
+      throw {
+        statusCode: 500,
+        message: failedFiles[0]?.error || 'Failed to attach selected files',
+      };
+    }
+
+    logger.info(
+      {
+        courseId,
+        userId,
+        attachedCount: attachedFiles.length,
+        failedCount: failedFiles.length,
+      },
+      'Attached existing files to course'
+    );
+
+    return { attachedFiles, failedFiles };
+  }
+
   async updateFile(
     courseId: string,
     fileId: string,

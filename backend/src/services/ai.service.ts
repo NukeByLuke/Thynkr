@@ -9,6 +9,10 @@ import NodeCache from 'node-cache';
 import crypto from 'crypto';
 import { logger } from '../lib/logger';
 import { DEFAULT_LANGUAGE } from '../constants/language.constants';
+import {
+  normalizeQuizAnswerText,
+  resolveQuizCorrectAnswerText,
+} from '../utils/quiz-answer.utils';
 
 const cache = new NodeCache({ stdTTL: 3600 });
 
@@ -482,16 +486,21 @@ ${preparedText}`;
       // Process questions: handle correctAnswer and shuffle options
       if (parsed.questions) {
         parsed.questions = parsed.questions.map((question) => {
-          if (question.options && question.options.length > 0) {
-            // If correctAnswer is a letter (A, B, C, D), convert to actual option text
-            const letterIndex = ['A', 'B', 'C', 'D'].indexOf(question.correctAnswer?.toUpperCase());
-            if (letterIndex !== -1 && question.options[letterIndex]) {
-              question.correctAnswer = question.options[letterIndex];
-            }
+          const cleanedOptions = (question.options || [])
+            .map((option) => String(option || '').trim())
+            .filter(Boolean);
 
-            // Shuffle options after fixing correctAnswer reference
-            question.options = this.shuffleArray(question.options);
+          if (cleanedOptions.length > 0) {
+            const resolvedCorrect = resolveQuizCorrectAnswerText(question.correctAnswer, cleanedOptions);
+            const matchedCorrectOption =
+              cleanedOptions.find(
+                (option) => normalizeQuizAnswerText(option) === normalizeQuizAnswerText(resolvedCorrect)
+              ) || cleanedOptions[0];
+
+            question.correctAnswer = matchedCorrectOption;
+            question.options = this.shuffleArray(cleanedOptions);
           }
+
           return question;
         });
       }

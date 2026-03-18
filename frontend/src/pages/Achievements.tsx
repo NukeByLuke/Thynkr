@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
 import PageContainer from '@/components/layout/PageContainer';
 import { motion } from 'framer-motion';
@@ -240,26 +241,24 @@ const LevelBanner = ({ level, currentXp, xpForNextLevel, totalXp }: LevelBannerP
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/80 dark:bg-zinc-950/40 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-xl p-4 md:p-6 shadow-lg"
+      className="bg-white/80 dark:bg-zinc-950/40 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-xl p-3.5 sm:p-4 md:p-6 shadow-lg"
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-start gap-3 sm:gap-4">
         {/* Level Badge */}
         <div className="flex-shrink-0">
           <div className="relative">
-            <div className="w-14 h-14 md:w-20 md:h-20 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-[3px] shadow-lg shadow-blue-500/40">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-20 md:h-20 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-[3px] shadow-lg shadow-blue-500/40">
               <div className="w-full h-full rounded-[10px] bg-slate-900 flex items-center justify-center">
                 <div className="text-center">
                   <div className="text-[9px] md:text-[10px] text-slate-400 uppercase tracking-wide">Lvl</div>
-                  <div className="text-xl md:text-3xl font-bold text-white leading-none">{level}</div>
+                  <div className="text-lg sm:text-xl md:text-3xl font-bold text-white leading-none">{level}</div>
                 </div>
               </div>
             </div>
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+            <div
               className="absolute inset-0 rounded-xl"
               style={{
-                background: 'conic-gradient(from 0deg, transparent, rgba(59, 130, 246, 0.5), transparent)',
+                background: 'conic-gradient(from 0deg, transparent, rgba(59, 130, 246, 0.35), transparent)',
                 mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
                 maskComposite: 'exclude',
                 padding: '2px',
@@ -279,7 +278,7 @@ const LevelBanner = ({ level, currentXp, xpForNextLevel, totalXp }: LevelBannerP
             </div>
             <div className="text-right flex-shrink-0">
               <div className="text-[10px] text-slate-500 dark:text-slate-400">Total XP</div>
-              <div className="text-base md:text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-500 dark:from-blue-400 dark:to-indigo-400">
+              <div className="text-sm sm:text-base md:text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-500 dark:from-blue-400 dark:to-indigo-400">
                 {Math.floor(totalXp).toLocaleString()}
               </div>
             </div>
@@ -295,7 +294,7 @@ const LevelBanner = ({ level, currentXp, xpForNextLevel, totalXp }: LevelBannerP
             >
               <motion.div
                 animate={{ x: ['-100%', '200%'] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'linear', repeatDelay: 1 }}
+                transition={{ duration: 0.9, ease: 'easeOut' }}
                 className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-12"
               />
             </motion.div>
@@ -321,7 +320,6 @@ interface AchievementCardProps {
 
 const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) => {
   const [showTooltip, setShowTooltip] = React.useState(false);
-  const [tooltipPosition, setTooltipPosition] = React.useState<'left' | 'right'>('right');
   const [selectedTierIndex, setSelectedTierIndex] = React.useState(0);
   const cardRef = React.useRef<HTMLDivElement>(null);
   
@@ -372,24 +370,6 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
   // Determine config for the TOOLTIP (based on selected history)
   const viewedTierCode = tierHistory[selectedTierIndex] || currentTierCode;
   const tooltipTier = TIER_CONFIG[viewedTierCode];
-
-  // Horizontal tooltip positioning based on card position
-  React.useEffect(() => {
-    if (showTooltip && cardRef.current) {
-      const rect = cardRef.current.getBoundingClientRect();
-      const tooltipWidth = 340; // Estimated tooltip width (w-80 is 320px + padding/border)
-      const margin = 20;
-
-      // Simple space check - prefer right if it fits, otherwise left
-      const spaceRight = window.innerWidth - rect.right;
-      
-      if (spaceRight >= tooltipWidth + margin) {
-        setTooltipPosition('right');
-      } else {
-        setTooltipPosition('left');
-      }
-    }
-  }, [showTooltip]);
   
   // Keyboard navigation for tier cycling with A/D support
   React.useEffect(() => {
@@ -409,18 +389,54 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showTooltip, tierHistory.length]);
 
+  React.useEffect(() => {
+    if (!showTooltip) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowTooltip(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [showTooltip]);
+
+  React.useEffect(() => {
+    if (!showTooltip) return;
+
+    // Prevent background page scrolling while modal is open.
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [showTooltip]);
+
   return (
     <motion.div
       ref={cardRef}
       className="relative group"
-      onHoverStart={() => setShowTooltip(true)}
-      onHoverEnd={() => setShowTooltip(false)}
-      whileHover={{ scale: 1.1, zIndex: 50 }}
+      role="button"
+      tabIndex={0}
+      aria-expanded={showTooltip}
+      onClick={(e) => {
+        e.stopPropagation();
+        setShowTooltip((prev) => !prev);
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setShowTooltip((prev) => !prev);
+        }
+      }}
+      whileHover={undefined}
       transition={{ duration: 0.15, ease: 'easeOut' }}
     >
       {/* Main Square Icon Card (Uses 'tier' - the current status) */}
       <div
-        className={`aspect-square rounded-xl border-2 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-150 ${
+        className={`aspect-square rounded-lg sm:rounded-xl border-[1.5px] sm:border-2 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-150 ${
           isLocked
             ? 'border-slate-400/40 dark:border-slate-600/40 bg-slate-100/50 dark:bg-slate-900/30 shadow-sm grayscale opacity-60'
             : `${tier.border} ${tier.borderHover} ${tier.bg} ${tier.glow}`
@@ -428,120 +444,61 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
       >
         {/* Subtle background glow for unlocked */}
         {!isLocked && (
-          <motion.div
-            animate={{ opacity: [0.2, 0.4, 0.2] }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            className={`absolute inset-0 bg-gradient-to-br ${tier.gradient} opacity-20 blur-lg`}
-          />
+          <div className={`absolute inset-0 bg-gradient-to-br ${tier.gradient} opacity-15 blur-lg`} />
         )}
 
         {/* Diamond pulse animation */}
         {!isLocked && achievement.currentTier === 'DIAMOND' && (
-          <motion.div
-            animate={{ opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="absolute inset-0 bg-gradient-to-br from-cyan-400/20 to-blue-500/20"
-          />
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/20 to-blue-500/20" />
         )}
         
         {/* EPIC Mastery animations */}
         {!isLocked && isMastery && (
           <>
-            {/* Outer glow pulse */}
-            <motion.div
-              animate={{ 
-                opacity: [0.3, 0.6, 0.3],
-                scale: [1, 1.1, 1]
-              }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute inset-0 bg-gradient-to-br from-violet-500/30 via-purple-500/30 to-blue-500/30 blur-xl"
-            />
-            {/* Inner shimmer */}
-            <motion.div
-              animate={{ 
-                opacity: [0.2, 0.5, 0.2],
-                scale: [1, 1.05, 1],
-                rotate: [0, 5, 0]
-              }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-              className="absolute inset-0 bg-gradient-to-br from-violet-400/20 via-purple-400/20 via-indigo-400/20 to-blue-500/20"
-            />
-            {/* Sparkle effect */}
-            <motion.div
-              animate={{ 
-                opacity: [0, 0.8, 0],
-              }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-              className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent"
-            />
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-500/30 via-purple-500/30 to-blue-500/30 blur-xl" />
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-400/20 via-purple-400/20 via-indigo-400/20 to-blue-500/20" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/15 to-transparent" />
           </>
         )}
 
         {/* Shimmer effect on hover for unlocked */}
         {!isLocked && showTooltip && (
-          <>
-            <motion.div
-              initial={{ x: '-150%' }}
-              animate={{ x: '250%' }}
-              transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1.0] }}
-              className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent transform -skew-x-12 blur-sm"
-            />
-          </>
+          <div className="absolute inset-0 w-full bg-gradient-to-r from-transparent via-white/20 dark:via-white/10 to-transparent" />
         )}
 
         {/* Achievement Icon */}
         <div
-          className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center relative z-20 transition-all duration-150 ${
+          className={`w-7 h-7 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center relative z-20 transition-all duration-150 ${
             isLocked 
               ? 'bg-slate-300/50 dark:bg-slate-700/50 opacity-40' 
               : `${tier.iconBg} shadow-xl group-hover:scale-110`
           }`}
         >
           {isLocked ? (
-            <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 dark:text-slate-600" />
+            <Lock className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-slate-400 dark:text-slate-600" />
           ) : (
-            <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow-lg" />
+            <Icon className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-white drop-shadow-lg" />
           )}
         </div>
       </div>
 
-      {/* Horizontal Tooltip with Tier-Specific Colors (Uses 'tooltipTier') */}
-      {showTooltip && (
-        <motion.div
-          initial={{ opacity: 0, x: tooltipPosition === 'left' ? 10 : -10, y: "-50%", scale: 0.95 }}
-          animate={{ opacity: 1, x: 0, y: "-50%", scale: 1 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          className={`absolute ${
-            tooltipPosition === 'left' ? 'right-full mr-4' : 'left-full ml-4'
-          } top-1/2 w-80 pointer-events-auto z-[100]`}
-        >
-          <div className="relative">
-            {/* Tooltip arrow with tier-specific gradient matching TIER_THEMES */}
-            <div 
-              className={`absolute ${
-                tooltipPosition === 'left' ? '-right-1.5' : '-left-1.5'
-              } top-1/2 -translate-y-1/2 w-3 h-3 ${
-                tooltipPosition === 'left' ? 'rotate-45' : '-rotate-45'
-              } bg-gradient-to-br ${
-                isLocked 
-                  ? 'from-slate-500 to-slate-600'
-                  : isMastery
-                    ? 'from-violet-500 to-purple-600'
-                    : viewedTierCode === 'COPPER'
-                      ? 'from-orange-500 to-amber-600'
-                      : viewedTierCode === 'DIAMOND'
-                        ? 'from-cyan-400 to-blue-500'
-                        : viewedTierCode === 'GOLD'
-                          ? 'from-yellow-400 to-amber-500'
-                          : viewedTierCode === 'RUBY'
-                            ? 'from-red-500 to-rose-600'
-                            : 'from-purple-500 to-violet-600'
-              }`}
-            />
-            
-            {/* Tooltip content with tier-specific border matching notification TIER_THEMES */}
-            <div className={`relative rounded-xl overflow-hidden border-2 ${
-              isLocked 
+      {/* Achievement Details Modal */}
+      {showTooltip && typeof document !== 'undefined' && createPortal(
+        <>
+          <div
+            className="fixed inset-0 z-[95] bg-black/35 backdrop-blur-[1px]"
+            onClick={() => setShowTooltip(false)}
+          />
+          <div className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center p-3 sm:p-4">
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.16, ease: 'easeOut' }}
+              onClick={(e) => e.stopPropagation()}
+              className="pointer-events-auto w-full max-w-sm"
+            >
+              <div className={`relative rounded-xl border-2 ${
+              isLocked
                 ? 'border-slate-500/30 shadow-xl shadow-slate-500/10'
                 : isMastery
                   ? 'border-violet-400/50 shadow-2xl shadow-violet-500/30'
@@ -556,10 +513,10 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                           : 'border-purple-500/30 shadow-2xl shadow-purple-500/20'
             }`}>
               {/* Content background with glass effect */}
-              <div className="relative bg-white/70 dark:bg-slate-900/80 backdrop-blur-2xl rounded-xl overflow-hidden border border-white/20 dark:border-white/10">
+              <div className="relative max-h-[82vh] overflow-y-auto bg-white/92 dark:bg-slate-900/90 backdrop-blur-xl rounded-xl border border-white/20 dark:border-white/10">
                 {/* Top gradient accent bar */}
                 <div className={`h-1 w-full bg-gradient-to-r ${
-                  isLocked 
+                  isLocked
                     ? 'from-slate-500 to-slate-600'
                     : isMastery
                       ? 'from-violet-500 via-purple-500 to-blue-600'
@@ -573,8 +530,8 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                               ? 'from-red-500 to-rose-600'
                               : 'from-purple-500 to-violet-600'
                 }`} />
-                
-                <div className="p-5">
+
+                <div className="p-4 sm:p-5">
                 {/* Tier badge and title */}
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex-1">
@@ -588,14 +545,27 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                       </span>
                     )}
                   </div>
-                  <div className={`w-11 h-11 rounded-lg flex items-center justify-center ${
-                    isLocked ? 'bg-slate-200 dark:bg-slate-700/50' : tooltipTier.iconBg
-                  } shadow-lg`}>
-                    {isLocked ? (
-                      <Lock className="w-5 h-5 text-slate-400" />
-                    ) : (
-                      <Icon className="w-5 h-5 text-white" />
-                    )}
+                  <div className="flex items-start gap-2">
+                    <div className={`w-11 h-11 rounded-lg flex items-center justify-center ${
+                      isLocked ? 'bg-slate-200 dark:bg-slate-700/50' : tooltipTier.iconBg
+                    } shadow-lg`}>
+                      {isLocked ? (
+                        <Lock className="w-5 h-5 text-slate-400" />
+                      ) : (
+                        <Icon className="w-5 h-5 text-white" />
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowTooltip(false);
+                      }}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-300/70 dark:border-slate-600 text-slate-500 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+                      aria-label="Close achievement details"
+                    >
+                      x
+                    </button>
                   </div>
                 </div>
                 
@@ -770,7 +740,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                               {progress > 0 && (
                                 <motion.div
                                   animate={{ x: ['-100%', '200%'] }}
-                                  transition={{ duration: 2.5, repeat: Infinity, ease: 'linear', repeatDelay: 1 }}
+                                  transition={{ duration: 0.9, ease: 'easeOut' }}
                                   className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent transform skew-x-12"
                                 />
                               )}
@@ -801,9 +771,11 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                 )}
                 </div>
               </div>
-            </div>
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
+        </>,
+        document.body
       )}
     </motion.div>
   );
@@ -901,7 +873,7 @@ export default function Achievements() {
           Achievements
         </PageContainer.Header>
         <PageContainer.Section>
-          <div className="flex items-center justify-center py-20">
+          <div className="flex items-center justify-center py-12 sm:py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500"></div>
           </div>
         </PageContainer.Section>
@@ -916,7 +888,7 @@ export default function Achievements() {
           Achievements
         </PageContainer.Header>
         <PageContainer.Section>
-          <div className="text-center py-20 text-red-500">
+          <div className="text-center py-12 sm:py-20 text-red-500">
             Failed to load achievements. Please try again.
           </div>
         </PageContainer.Section>
@@ -963,10 +935,10 @@ export default function Achievements() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
-                    className="space-y-3"
+                    className="space-y-3 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white/65 dark:bg-slate-900/50 p-3 sm:p-4"
                   >
                     {/* Category Header */}
-                    <div className="flex items-center gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
+                    <div className="flex items-center gap-3 pb-2.5 border-b border-slate-200 dark:border-slate-800">
                       <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 flex items-center justify-center flex-shrink-0">
                         <CategoryIcon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                       </div>
@@ -984,7 +956,7 @@ export default function Achievements() {
                     </div>
 
                     {/* Achievement Grid */}
-                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2 sm:gap-4">
+                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2 sm:gap-3.5">
                       {categoryAchievements.map((achievement) => (
                         <AchievementCard key={achievement.id} achievement={achievement} />
                       ))}
@@ -995,7 +967,7 @@ export default function Achievements() {
             </div>
           ) : (
             /* Empty State */
-            <div className="text-center py-20 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+            <div className="text-center py-12 sm:py-20 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
               <Trophy className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-slate-900 dark:text-white">
                 No achievements yet

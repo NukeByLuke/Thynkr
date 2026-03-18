@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import { sanitizeTextForTTS } from '@/utils/ttsText';
+import { normalizeStudyMarkdown } from '@/utils/markdownContent';
 
 interface SummaryViewProps {
   content: string;
@@ -15,11 +16,7 @@ interface SummaryViewProps {
 export default function SummaryView({ content, onRegenerate, isRegenerating, error }: SummaryViewProps) {
   // Normalize AI-generated heading markers like "H1:", "H2:", "H3:" into real Markdown
   const normalizedContent = useMemo(() => {
-    return content
-      // Convert lines starting with H{1-6}: Title -> #{1-6} Title
-      .replace(/(^|\n)H([1-6])\s*:\s*(.+)/gm, (_m, p1, lvl, txt) => `${p1}${'#'.repeat(Number(lvl))} ${String(txt).trim()}`)
-      // Also handle forms like "H3 Title" without a colon
-      .replace(/(^|\n)\s*H([1-6])\s+(.+)/gm, (_m, p1, lvl, txt) => `${p1}${'#'.repeat(Number(lvl))} ${String(txt).trim()}`);
+    return normalizeStudyMarkdown(content);
   }, [content]);
 
   const estimatedReadMinutes = useMemo(() => {

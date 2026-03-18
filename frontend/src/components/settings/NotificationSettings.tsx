@@ -58,14 +58,14 @@ export default function NotificationSettings() {
   ] as const;
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 sm:space-y-10">
       <section>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">Notification Style</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white mb-1">Notification Style</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
           Choose how you want to see in-app notifications for achievements and level ups.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 max-w-4xl">
           {modes.map((mode) => {
             const Icon = mode.icon;
             const isSelected = currentMode === mode.id;
@@ -77,7 +77,7 @@ export default function NotificationSettings() {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleModeChange(mode.id)}
                 className={`
-                  relative p-6 rounded-xl border-2 transition-all duration-200 text-left
+                  relative p-4 sm:p-6 rounded-xl border-2 transition-all duration-200 text-left
                   ${isSelected
                     ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20'
                     : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800'
@@ -109,7 +109,7 @@ export default function NotificationSettings() {
                 </div>
 
                 {/* Content */}
-                <h3 className={`font-bold text-lg mb-1 ${isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
+                <h3 className={`mb-1 font-bold text-base sm:text-lg ${isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
                   {mode.name}
                 </h3>
                 <p className={`text-sm ${isSelected ? 'text-slate-600 dark:text-slate-400' : 'text-slate-500 dark:text-slate-500'}`}>
@@ -121,7 +121,7 @@ export default function NotificationSettings() {
         </div>
 
         {/* Preview hint */}
-        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900 max-w-4xl">
+        <div className="mt-6 p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900 max-w-4xl">
           <div className="flex items-start gap-3">
             <Bell className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
             <div className="text-sm">

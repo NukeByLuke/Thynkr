@@ -10,6 +10,8 @@ import {
   RefreshCw,
   HelpCircle,
 } from 'lucide-react';
+import { calculateQuizScore, isQuizAnswerCorrect } from '@/utils/quizAnswerUtils';
+import { playCorrectAnswerDing } from '@/utils/quizSounds';
 
 interface QuizQuestion {
   question: string;
@@ -43,11 +45,7 @@ const StudyQuiz = memo(function StudyQuiz({ data, onRegenerate, isRegenerating =
 
   // Memoize score calculation
   const score = useMemo(() => {
-    let correct = 0;
-    data.questions.forEach((q, i) => {
-      if (answers[i] === q.correctAnswer) correct++;
-    });
-    return correct;
+    return calculateQuizScore(data.questions, (_question, index) => answers[index]);
   }, [answers, data.questions]);
 
   // Memoize handlers
@@ -73,7 +71,11 @@ const StudyQuiz = memo(function StudyQuiz({ data, onRegenerate, isRegenerating =
   const submitQuiz = useCallback(() => {
     setShowResults(true);
     setCurrentQuestion(0);
-  }, []);
+
+    if (score > 0) {
+      playCorrectAnswerDing();
+    }
+  }, [score]);
 
   const resetQuiz = useCallback(() => {
     setAnswers({});
@@ -85,7 +87,7 @@ const StudyQuiz = memo(function StudyQuiz({ data, onRegenerate, isRegenerating =
   // Memoize option class function
   const getOptionClass = useCallback((option: string) => {
     const isSelected = answers[currentQuestion] === option;
-    const isCorrect = option === question.correctAnswer;
+    const isCorrect = isQuizAnswerCorrect(option, question);
 
     if (!showResults) {
       return isSelected
@@ -100,7 +102,7 @@ const StudyQuiz = memo(function StudyQuiz({ data, onRegenerate, isRegenerating =
       return 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300';
     }
     return 'border-gray-200 dark:border-gray-700 opacity-50';
-  }, [answers, currentQuestion, question.correctAnswer, showResults]);
+  }, [answers, currentQuestion, question, showResults]);
 
   const scorePercentage = useMemo(() => 
     Math.round((score / totalQuestions) * 100)
@@ -241,7 +243,7 @@ const StudyQuiz = memo(function StudyQuiz({ data, onRegenerate, isRegenerating =
             <div className="space-y-3">
               {question.options.map((option, i) => {
                 const isSelected = answers[currentQuestion] === option;
-                const isCorrect = option === question.correctAnswer;
+                const isCorrect = isQuizAnswerCorrect(option, question);
 
                 return (
                   <button
@@ -326,11 +328,11 @@ const StudyQuiz = memo(function StudyQuiz({ data, onRegenerate, isRegenerating =
         <div className="flex items-center gap-1 flex-wrap justify-center max-w-xs">
           {data.questions.map((_, i) => {
             const isAnswered = answers[i] !== undefined;
-            const isCorrect = showResults && answers[i] === data.questions[i].correctAnswer;
+            const isCorrect = showResults && isQuizAnswerCorrect(answers[i], data.questions[i]);
             const isWrong =
               showResults &&
               answers[i] !== undefined &&
-              answers[i] !== data.questions[i].correctAnswer;
+              !isQuizAnswerCorrect(answers[i], data.questions[i]);
 
             return (
               <button

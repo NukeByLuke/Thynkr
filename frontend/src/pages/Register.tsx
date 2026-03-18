@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
-import { Check } from 'lucide-react';
+import { Check, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthLayout from '@/layouts/AuthLayout';
 import { OAuthButtons, OAuthDivider } from '@/features/auth/OAuthButtons';
@@ -60,6 +60,7 @@ export default function Register() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   // Password strength
   const passwordStrength = calculatePasswordStrength(formData.password);
@@ -159,12 +160,12 @@ export default function Register() {
     formData.password.length >= 8;
 
   const inputBaseStyles = `
-    w-full px-4 py-3 border rounded-lg transition-colors
-    bg-slate-50 dark:bg-slate-700 
+    w-full px-4 py-3 border rounded-xl transition-colors text-[16px] sm:text-base
+    bg-white/95 dark:bg-slate-900/65
     text-slate-900 dark:text-white 
-    border-slate-200 dark:border-slate-600 
-    placeholder-slate-400 dark:placeholder-slate-400
-    focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20
+    border-brand-100 dark:border-cyan-400/30
+    placeholder-slate-400 dark:placeholder-slate-500
+    focus:outline-none focus:border-brand-500 dark:focus:border-cyan-300 focus:ring-2 focus:ring-brand-400/20 dark:focus:ring-cyan-300/25
   `;
 
   return (
@@ -180,16 +181,16 @@ export default function Register() {
       <AuthLayout>
         {showSuccess ? (
           /* Success Modal */
-          <div className="text-center py-8">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/50">
-              <Check className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
+          <div className="text-center py-6 sm:py-8">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 rounded-full flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/50">
+              <Check className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-600 dark:text-emerald-400" />
             </div>
             
-            <h2 className="text-2xl font-semibold mb-2 text-slate-900 dark:text-white">
+            <h2 className="text-xl sm:text-2xl font-semibold mb-2 text-slate-900 dark:text-white">
               Welcome to THYNKR!
             </h2>
             
-            <p className="mb-8 text-slate-500 dark:text-slate-400">
+            <p className="mb-6 sm:mb-8 text-sm sm:text-base text-slate-500 dark:text-slate-400">
               Your account has been created successfully.
             </p>
             
@@ -203,15 +204,24 @@ export default function Register() {
         ) : (
           /* Registration Form */
           <div>
+            <div className="mb-4 md:min-h-[90px]">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-brand-700/85 dark:text-cyan-300/80">
+                Let&apos;s Build Momentum
+              </p>
+              <h1 className="mt-1 text-xl sm:text-2xl font-semibold text-slate-900 dark:text-white">
+                Create your account and start smarter studying
+              </h1>
+            </div>
+
             {/* OAuth Buttons - Grid layout */}
             <OAuthButtons />
 
             <OAuthDivider />
 
             {/* Register Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
               {/* Name fields - side by side */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <input
                     id="firstName"
@@ -273,18 +283,28 @@ export default function Register() {
 
               {/* Password with strength meter */}
               <div>
-                <input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange('password')}
-                  onBlur={() => handleBlur('password')}
-                  placeholder="Password"
-                  aria-label="Password"
-                  aria-invalid={!!errors.password}
-                  autoComplete="new-password"
-                  className={`${inputBaseStyles} ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
-                />
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={handleChange('password')}
+                    onBlur={() => handleBlur('password')}
+                    placeholder="Password"
+                    aria-label="Password"
+                    aria-invalid={!!errors.password}
+                    autoComplete="new-password"
+                    className={`${inputBaseStyles} pr-11 ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/30 dark:focus-visible:ring-cyan-300/30"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
                 {errors.password && (
                   <p className="mt-1 text-xs text-red-500">
                     {errors.password}
@@ -294,7 +314,7 @@ export default function Register() {
                 {/* Password Strength Meter */}
                 {formData.password && passwordStrength && (
                   <div className="mt-2">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2.5">
                       <div className="flex-1 h-1.5 rounded-full bg-slate-100 dark:bg-slate-600 overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-150 ${
@@ -319,7 +339,7 @@ export default function Register() {
                 type="submit"
                 disabled={isLoading || !isFormValid}
                 aria-label={isLoading ? 'Creating account...' : 'Create free account'}
-                className="w-full h-12 flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-white font-medium rounded-full transition-colors disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:bg-cyan-500"
+                className="w-full h-12 flex items-center justify-center gap-2 bg-gradient-to-r from-brand-500 via-fuchsia-500 to-orange-400 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500 text-white font-semibold rounded-full transition-all duration-200 shadow-[0_10px_26px_-14px_rgba(236,72,153,0.75)] dark:shadow-[0_10px_26px_-14px_rgba(34,211,238,0.8)] hover:brightness-105 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:brightness-100"
               >
                 {isLoading ? (
                   <>

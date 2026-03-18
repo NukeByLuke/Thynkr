@@ -161,6 +161,7 @@ export class AuthService {
         role: user.role,
         emailVerified: user.emailVerified,
         preferredLanguage: user.preferredLanguage,
+        quizCorrectSound: user.quizCorrectSound,
       },
     };
   }

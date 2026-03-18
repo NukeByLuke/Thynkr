@@ -41,6 +41,8 @@ interface NotificationContextType {
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+const NOTIFICATION_AUTO_HIDE_MS = 5000;
+const NOTIFICATION_SNOOZE_MS = 5 * 60 * 1000;
 
 export const useNotifications = () => {
   const context = useContext(NotificationContext);
@@ -56,6 +58,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [queue, setQueue] = useState<Notification[]>([]);
   const [activeNotification, setActiveNotification] = useState<Notification | null>(null);
   const autoHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const snoozeTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   // Track shown notification IDs to prevent duplicates (e.g., from query refetches)
   const shownNotificationIds = useRef<Set<string>>(new Set());
 
@@ -110,7 +113,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (activeNotification && !notificationsPersist) {
       autoHideTimer.current = setTimeout(() => {
         setActiveNotification(null);
-      }, 5000);
+      }, NOTIFICATION_AUTO_HIDE_MS);
     }
 
     return () => {
@@ -119,6 +122,25 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }
     };
   }, [activeNotification, notificationsPersist]);
+
+  useEffect(() => {
+    if (!notificationsEnabled) {
+      setQueue([]);
+      setActiveNotification(null);
+      snoozeTimers.current.forEach((timer) => clearTimeout(timer));
+      snoozeTimers.current.clear();
+    }
+  }, [notificationsEnabled]);
+
+  useEffect(() => {
+    return () => {
+      if (autoHideTimer.current) {
+        clearTimeout(autoHideTimer.current);
+      }
+      snoozeTimers.current.forEach((timer) => clearTimeout(timer));
+      snoozeTimers.current.clear();
+    };
+  }, []);
 
   // Add notification to queue - ONLY for achievements and level ups
   const showNotification = useCallback((notification: Omit<Notification, 'id'>) => {
@@ -139,28 +161,55 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setQueue((prev) => [...prev, newNotification]);
   }, [notificationsEnabled]);
 
-  const dismissNotification = useCallback(() => {
-    if (autoHideTimer.current) {
-      clearTimeout(autoHideTimer.current);
-      autoHideTimer.current = null;
+  const dismissNotification = useCallback((id: string) => {
+    if (activeNotification && id !== activeNotification.id) {
+      return;
     }
-    setActiveNotification(null);
-  }, []);
 
-  const snoozeNotification = useCallback(() => {
-    if (!activeNotification) return;
     if (autoHideTimer.current) {
       clearTimeout(autoHideTimer.current);
       autoHideTimer.current = null;
     }
-    // Move to end of queue
-    setQueue((prev) => [...prev, activeNotification]);
+
+    setActiveNotification(null);
+  }, [activeNotification]);
+
+  const snoozeNotification = useCallback((id: string) => {
+    if (!activeNotification || id !== activeNotification.id) {
+      return;
+    }
+
+    if (autoHideTimer.current) {
+      clearTimeout(autoHideTimer.current);
+      autoHideTimer.current = null;
+    }
+
+    const baseNotification = activeNotification;
+    const snoozeKey = baseNotification.id;
+    const existingSnoozeTimer = snoozeTimers.current.get(snoozeKey);
+    if (existingSnoozeTimer) {
+      clearTimeout(existingSnoozeTimer);
+    }
+
+    const snoozedNotification: Notification = {
+      ...baseNotification,
+      id: `${Date.now()}-${Math.random()}`,
+    };
+
+    const timer = setTimeout(() => {
+      setQueue((prev) => [...prev, snoozedNotification]);
+      snoozeTimers.current.delete(snoozeKey);
+    }, NOTIFICATION_SNOOZE_MS);
+
+    snoozeTimers.current.set(snoozeKey, timer);
     setActiveNotification(null);
   }, [activeNotification]);
 
   const clearAll = useCallback(() => {
     setQueue([]);
     setActiveNotification(null);
+    snoozeTimers.current.forEach((timer) => clearTimeout(timer));
+    snoozeTimers.current.clear();
   }, []);
 
   // Listen for API notifications (achievements, level ups)
@@ -220,8 +269,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       value={{
         notifications,
         showNotification,
-        dismissNotification: () => dismissNotification(),
-        snoozeNotification: () => snoozeNotification(),
+        dismissNotification,
+        snoozeNotification,
         clearAll,
         notificationsEnabled,
         notificationsPersist,
@@ -301,8 +350,8 @@ const TIER_THEMES: Record<AchievementTier, {
 // macOS-style notification in top-right corner (only 1 at a time)
 const NotificationStack: React.FC<{
   notification: Notification | null;
-  onDismiss: () => void;
-  onSnooze: () => void;
+  onDismiss: (id: string) => void;
+  onSnooze: (id: string) => void;
   persist: boolean;
 }> = ({ notification, onDismiss, onSnooze, persist }) => {
   return (
@@ -325,8 +374,8 @@ const NotificationStack: React.FC<{
 // Individual notification card with tier-based styling
 const NotificationCard: React.FC<{
   notification: Notification;
-  onDismiss: () => void;
-  onSnooze: () => void;
+  onDismiss: (id: string) => void;
+  onSnooze: (id: string) => void;
   persist: boolean;
 }> = ({ notification, onDismiss, onSnooze, persist }) => {
   const navigate = useNavigate();
@@ -349,7 +398,7 @@ const NotificationCard: React.FC<{
   const handleClick = () => {
     if (isAchievement) {
       navigate('/achievements');
-      onDismiss();
+      onDismiss(notification.id);
       // Refresh the page to show latest achievements
       window.location.reload();
     }
@@ -417,7 +466,7 @@ const NotificationCard: React.FC<{
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    onSnooze();
+                    onSnooze(notification.id);
                   }}
                   className="w-7 h-7 rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center transition-colors group"
                   title="Snooze (show later)"
@@ -428,7 +477,7 @@ const NotificationCard: React.FC<{
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    onDismiss();
+                    onDismiss(notification.id);
                   }}
                   className="w-7 h-7 rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center transition-colors group"
                   title="Dismiss"

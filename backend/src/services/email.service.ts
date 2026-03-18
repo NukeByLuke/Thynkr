@@ -9,11 +9,39 @@ import { logger } from '../lib/logger';
 
 const resend = new Resend(config.resend.apiKey);
 
+const supportEmail = (process.env.SUPPORT_EMAIL || 'support@thynkr.ca').split(',')[0].trim();
+const emailSignatureName = process.env.EMAIL_SIGNATURE_NAME || 'Thynkr Support';
+const emailSignatureRole = process.env.EMAIL_SIGNATURE_ROLE || 'AI Study Platform Team';
+const emailSignatureWebsite = process.env.EMAIL_SIGNATURE_WEBSITE || config.app.frontendUrl;
+
+function buildEmailSignatureHtml(): string {
+  const website = emailSignatureWebsite.replace(/\/$/, '');
+  const websiteLabel = website.replace(/^https?:\/\//, '');
+
+  return `
+    <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+      <p style="margin: 0 0 8px; color: #374151; font-size: 15px;">Best regards,</p>
+      <p style="margin: 0; color: #111827; font-size: 16px; font-weight: 700;">${emailSignatureName}</p>
+      <p style="margin: 4px 0 8px; color: #6b7280; font-size: 14px;">${emailSignatureRole}</p>
+      <p style="margin: 0; color: #ec4899; font-size: 14px; line-height: 1.6;">
+        <a href="mailto:${supportEmail}" style="color: #ec4899; text-decoration: none;">${supportEmail}</a>
+        &nbsp;&middot;&nbsp;
+        <a href="${website}" style="color: #ec4899; text-decoration: none;">${websiteLabel}</a>
+      </p>
+    </div>
+  `;
+}
+
+function buildEmailSignatureText(): string {
+  return `Best regards,\n${emailSignatureName}\n${emailSignatureRole}\n${supportEmail}\n${emailSignatureWebsite}`;
+}
+
 export interface SendEmailOptions {
   to: string;
   subject: string;
   html: string;
   text?: string;
+  replyTo?: string | string[];
 }
 
 /**
@@ -32,6 +60,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
       subject: options.subject,
       html: options.html,
       text: options.text,
+      replyTo: options.replyTo,
     });
 
     logger.info({ to: options.to, subject: options.subject }, 'Email sent successfully');
@@ -235,6 +264,8 @@ export async function sendVerificationEmail(email: string, token: string): Promi
                 <div class="link-label">Or copy this link:</div>
                 <a href="${verifyUrl}" class="link-url">${verifyUrl}</a>
               </div>
+
+              ${buildEmailSignatureHtml()}
               
               <div class="note">
                 <p>💡 <strong>Didn't create an account?</strong> You can safely ignore this email.</p>
@@ -248,7 +279,7 @@ export async function sendVerificationEmail(email: string, token: string): Promi
         </body>
       </html>
     `,
-    text: `Welcome to Thynkr!\n\nClick here to verify your email: ${verifyUrl}\n\nIf you didn't create an account, you can ignore this email.`,
+    text: `Welcome to Thynkr!\n\nClick here to verify your email: ${verifyUrl}\n\nIf you didn't create an account, you can ignore this email.\n\n${buildEmailSignatureText()}`,
   });
 }
 
@@ -445,6 +476,8 @@ export async function sendPasswordResetEmail(email: string, token: string): Prom
                 <strong>🛡️ Didn't request this?</strong>
                 <p>No worries! You can safely ignore this email. Your password will remain unchanged and your account is secure.</p>
               </div>
+
+              ${buildEmailSignatureHtml()}
             </div>
             <div class="footer">
               <p>© 2026 Thynkr · AI-Powered Study Platform</p>
@@ -454,6 +487,6 @@ export async function sendPasswordResetEmail(email: string, token: string): Prom
         </body>
       </html>
     `,
-    text: `Password Reset Request\n\nClick here to reset your password: ${resetUrl}\n\nThis link expires in 1 hour.\n\nIf you didn't request this, you can ignore this email.`,
+    text: `Password Reset Request\n\nClick here to reset your password: ${resetUrl}\n\nThis link expires in 1 hour.\n\nIf you didn't request this, you can ignore this email.\n\n${buildEmailSignatureText()}`,
   });
 }

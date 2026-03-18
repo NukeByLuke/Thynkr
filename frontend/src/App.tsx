@@ -5,7 +5,7 @@
  */
 
 import { Suspense, useEffect } from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -23,7 +23,7 @@ import {
   Login, Register, AuthCallback, OAuthCallback, ForgotPassword, VerifyEmail, 
   ResetPassword, Pricing, Account, Admin, Study, ImmersiveStudy, Files, 
   Settings, HelpCenter, Courses, MyCourseDetail, StudyModePage, Achievements, 
-  PublicAchievements, NotFound, Privacy, Terms, Cookies, About, Contact, 
+  PublicAchievements, NotFound, Privacy, Terms, Cookies, Landing, About, Contact, 
   Testimonials, Roadmap
 } from './routes';
 
@@ -72,27 +72,13 @@ function AppContent() {
 
   /**
    * Home route component that redirects based on auth status
-   * - If not authenticated: show login page
+   * - If not authenticated: show landing page
    * - If authenticated: redirect to study page
    */
   const HomeRoute = () => {
     const { user, isLoading } = useAuth();
-    const navigate = useNavigate();
-
-    useEffect(() => {
-      if (isLoading) return;
-      
-      if (user) {
-        // Authenticated users go to study page
-        navigate('/study', { replace: true });
-      } else {
-        // Unauthenticated users go to login page
-        navigate('/login', { replace: true });
-      }
-    }, [user, isLoading, navigate]);
-
-    // Show loading while checking auth status
-    return <LoadingSpinner fullScreen />;
+    if (isLoading) return <LoadingSpinner fullScreen />;
+    return user ? <Navigate to="/study" replace /> : <Landing />;
   };
 
   return (
@@ -103,9 +89,6 @@ function AppContent() {
       <GlobalLoadingBar />
       <Suspense fallback={<LoadingSpinner fullScreen />}>
         <Routes>
-            {/* Home route - redirects to login or study based on auth */}
-            <Route path="/" element={<HomeRoute />} />
-            
             {/* Auth routes - no layout */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -117,6 +100,7 @@ function AppContent() {
 
             {/* Public routes with PublicLayout (navbar) */}
             <Route element={<PublicLayout />}>
+              <Route path="/" element={<HomeRoute />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/u/:username" element={<PublicAchievements />} />
               

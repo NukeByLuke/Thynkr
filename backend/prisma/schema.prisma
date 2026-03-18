@@ -47,6 +47,7 @@ model User {
   preferredLanguage    String    @default("en")
   ttsVoice             String    @default("alloy") // TTS voice preference
   ttsSpeed             Float     @default(1.0) // TTS speed preference (0.25-4.0)
+  quizCorrectSound     String    @default("spark") // Correct-answer sound preference
   role                 Role      @default(BASIC)
   emailVerified        Boolean   @default(false)
   emailVerifyToken     String?   @unique

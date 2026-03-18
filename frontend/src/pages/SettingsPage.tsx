@@ -32,7 +32,7 @@ export default function SettingsPage() {
       <PageContainer>
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-5 md:mb-8">
+          <div className="mb-4 sm:mb-6 md:mb-8">
             <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-1.5">
               Settings
             </h1>
@@ -41,11 +41,11 @@ export default function SettingsPage() {
             </p>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:gap-8">
             {/* Mobile: Horizontal scrollable tab bar / Desktop: Sidebar */}
             <nav className="w-full lg:w-72 flex-shrink-0 lg:sticky lg:top-24 lg:self-start">
               {/* Mobile tab strip */}
-              <div className="flex lg:hidden gap-2 overflow-x-auto pb-1 scrollbar-hide">
+              <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1.5 scrollbar-hide lg:hidden">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
@@ -53,7 +53,8 @@ export default function SettingsPage() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl whitespace-nowrap text-sm font-medium transition-all flex-shrink-0 border ${
+                      aria-current={isActive ? 'page' : undefined}
+                      className={`flex flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-xl border px-3 py-2 text-xs font-medium transition-all sm:text-sm ${
                         isActive
                           ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white shadow-sm'
                           : 'bg-transparent border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
@@ -121,7 +122,7 @@ export default function SettingsPage() {
                       </div>
                     }
                   >
-                    <div className="p-4 md:p-8 lg:p-9">
+                    <div className="p-3 sm:p-5 md:p-8 lg:p-9">
                       {activeTab === 'general' && <GeneralSettings />}
                       {activeTab === 'profile' && <ProfileSettings />}
                       {activeTab === 'billing' && <BillingSettings />}

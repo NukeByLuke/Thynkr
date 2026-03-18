@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   X,
   FileText,
@@ -16,6 +18,9 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
+import { calculateQuizScore, isQuizAnswerCorrect } from '@/utils/quizAnswerUtils';
+import { normalizeStudyMarkdown } from '@/utils/markdownContent';
+import { playCorrectAnswerDing } from '@/utils/quizSounds';
 
 type AITab = 'summary' | 'notes' | 'quiz' | 'flashcards';
 
@@ -248,10 +253,7 @@ export default function FileAIViewer({
   const getQuizScore = () => {
     if (!aiContent?.quiz) return { correct: 0, total: 0 };
     const questions = aiContent.quiz.questions;
-    let correct = 0;
-    questions.forEach((q, i) => {
-      if (quizAnswers[i] === q.correctAnswer) correct++;
-    });
+    const correct = calculateQuizScore(questions, (_question, index) => quizAnswers[index]);
     return { correct, total: questions.length };
   };
 
@@ -295,9 +297,11 @@ export default function FileAIViewer({
             Copy
           </button>
         </div>
-        <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
-          {aiContent.summary.content}
-        </p>
+        <div className="prose dark:prose-invert max-w-none text-slate-700 dark:text-slate-300">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {normalizeStudyMarkdown(aiContent.summary.content)}
+          </ReactMarkdown>
+        </div>
       </div>
     );
   };
@@ -343,7 +347,11 @@ export default function FileAIViewer({
             {aiContent.notes.keyPoints.map((point, index) => (
               <li key={index} className="flex items-start gap-2">
                 <ChevronRight className="h-5 w-5 text-cyan-500 flex-shrink-0 mt-0.5" />
-                <span className="text-slate-700 dark:text-slate-300">{point}</span>
+                <div className="prose prose-sm dark:prose-invert max-w-none text-slate-700 dark:text-slate-300">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {normalizeStudyMarkdown(point)}
+                  </ReactMarkdown>
+                </div>
               </li>
             ))}
           </ul>
@@ -354,9 +362,11 @@ export default function FileAIViewer({
           <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">
             Detailed Notes
           </h3>
-          <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
-            {aiContent.notes.detailed}
-          </p>
+          <div className="prose dark:prose-invert max-w-none text-slate-700 dark:text-slate-300">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {normalizeStudyMarkdown(aiContent.notes.detailed)}
+            </ReactMarkdown>
+          </div>
         </div>
       </div>
     );
@@ -424,7 +434,7 @@ export default function FileAIViewer({
               <div className="space-y-2">
                 {question.options.map((option, oIndex) => {
                   const isSelected = quizAnswers[qIndex] === option;
-                  const isCorrect = question.correctAnswer === option;
+                  const isCorrect = isQuizAnswerCorrect(option, question);
                   const showResult = showQuizResults;
 
                   return (
@@ -460,9 +470,11 @@ export default function FileAIViewer({
                 })}
               </div>
               {showQuizResults && question.explanation && (
-                <p className="mt-3 text-sm text-slate-600 dark:text-slate-400 italic">
-                  💡 {question.explanation}
-                </p>
+                <div className="mt-3 text-sm text-slate-600 dark:text-slate-400 prose prose-sm dark:prose-invert max-w-none">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {normalizeStudyMarkdown(question.explanation)}
+                  </ReactMarkdown>
+                </div>
               )}
             </div>
           ))}
@@ -470,7 +482,14 @@ export default function FileAIViewer({
 
         {!showQuizResults ? (
           <button
-            onClick={() => setShowQuizResults(true)}
+            onClick={() => {
+              const { correct } = getQuizScore();
+              setShowQuizResults(true);
+
+              if (correct > 0) {
+                playCorrectAnswerDing();
+              }
+            }}
             disabled={Object.keys(quizAnswers).length !== aiContent.quiz!.questions.length}
             className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl hover:from-cyan-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-500/20"
           >

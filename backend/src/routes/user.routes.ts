@@ -101,6 +101,7 @@ export default async function userRoutes(server: FastifyInstance) {
           preferredLanguage: true,
           ttsVoice: true,
           ttsSpeed: true,
+          quizCorrectSound: true,
           role: true,
           emailVerified: true,
           createdAt: true,
@@ -139,6 +140,7 @@ export default async function userRoutes(server: FastifyInstance) {
           lastName: true,
           role: true,
           preferredLanguage: true,
+          quizCorrectSound: true,
         },
       });
 
