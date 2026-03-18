@@ -1096,18 +1096,18 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
           })}
         </div>
 
-        {/* Explanation - Reserved height to prevent layout shift */}
-        <div className="mt-3 h-[144px]">
+        {/* Explanation panel */}
+        <div className="mt-3">
           {(isRevealed || isSubmitted) ? (
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="h-full overflow-y-auto p-3 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-700"
+              className="p-4 sm:p-5 bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-700 shadow-sm"
             >
-              <div className="flex items-start">
+              <div className="flex items-start gap-2.5">
                 <svg
-                  className="w-4 h-4 text-slate-500 dark:text-slate-400 mt-0.5 mr-2 flex-shrink-0"
+                  className="w-4 h-4 text-slate-500 dark:text-slate-400 mt-0.5 flex-shrink-0"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -1118,14 +1118,14 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                   />
                 </svg>
                 <div className="flex-1">
-                  <p className="font-bold text-slate-900 dark:text-white mb-1.5 text-sm">Explanation</p>
+                  <p className="font-bold text-slate-900 dark:text-white mb-2 text-sm tracking-wide">Explanation</p>
                   <div className="prose prose-sm dark:prose-invert max-w-none">
                     <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     rehypePlugins={[rehypeHighlight]}
                     components={{
                       p: ({ node, ...props }) => (
-                        <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mb-2" {...props} />
+                        <p className="text-slate-700 dark:text-slate-300 text-[0.95rem] leading-7 mb-3" {...props} />
                       ),
                       strong: ({ node, ...props }) => (
                         <strong className="font-bold text-slate-900 dark:text-white" {...props} />
@@ -1161,7 +1161,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             </div>
             </motion.div>
           ) : (
-            <div className="h-full rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50/60 dark:bg-zinc-900/40 flex items-center justify-center px-4">
+            <div className="rounded-2xl border border-slate-200 dark:border-zinc-700 bg-slate-50/60 dark:bg-zinc-900/40 min-h-[96px] flex items-center justify-center px-4 py-5">
               <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
                 {settings.feedbackMode === 'end'
                   ? 'Explanations will unlock after submission in review mode.'
