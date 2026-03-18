@@ -334,10 +334,11 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
     hasSelectedAnswer &&
     (!requiresRevealStep || isRevealed);
   const canGoBackDuringAttempt =
-    !isSubmitted && settings.navigationMode === 'free' && currentIndex > 0;
+    !isSubmitted &&
+    settings.navigationMode === 'free' &&
+    settings.feedbackMode !== 'instant' &&
+    currentIndex > 0;
   const canReviewNavigate = isSubmitted && reviewMode;
-  const showFloatingPrimaryAction =
-    !canReviewNavigate && (canReveal || canNext || canSubmit);
 
   // Track timing when question changes
   useEffect(() => {
@@ -945,7 +946,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
       </div>
 
       {/* Scrollable Content Area */}
-      <div className="flex-1 overflow-y-auto mb-3 pb-16 sm:pb-20 max-w-5xl mx-auto w-full">
+      <div className="flex-1 overflow-y-auto mb-3 pb-8 max-w-5xl mx-auto w-full">
         {/* Question */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -1244,61 +1245,10 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
           )}
         </div>
 
-        {/* Desktop sticky primary action (aligned to quiz content) */}
-        {showFloatingPrimaryAction && (
-          <div className="sticky bottom-3 z-30 hidden sm:flex justify-center pt-4">
-            <div className="flex items-center gap-2 rounded-2xl border border-slate-200 dark:border-white/15 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md shadow-lg px-2.5 py-2">
-              {canGoBackDuringAttempt && (
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handlePrevious}
-                  className="px-5 py-2.5 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-white/15 rounded-xl text-slate-700 dark:text-slate-100 font-semibold hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
-                >
-                  Previous
-                </motion.button>
-              )}
-
-              {canReveal && (
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleRevealAnswer}
-                  className="px-8 py-3 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition-colors text-base"
-                >
-                  Reveal Answer
-                </motion.button>
-              )}
-
-              {canNext && (
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleNext}
-                  className="px-8 py-3 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition-colors text-base"
-                >
-                  Next Question
-                </motion.button>
-              )}
-
-              {canSubmit && (
-                <motion.button
-                  whileHover={!isSubmitting ? { scale: 1.02 } : {}}
-                  whileTap={!isSubmitting ? { scale: 0.95 } : {}}
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
-                  className={`px-8 py-3 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition-colors text-base ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {isSubmitting ? 'Submitting...' : 'Submit Quiz'}
-                </motion.button>
-              )}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Navigation - Sticky Footer */}
-      <div className="sticky bottom-0 z-20 flex-shrink-0 pt-3 pb-2 sm:pb-3 bg-gradient-to-t from-white via-white/95 to-transparent dark:from-slate-950 dark:via-slate-950/95 dark:to-transparent backdrop-blur-sm">
+      <div className="sticky bottom-0 z-20 flex-shrink-0 pt-3 pb-3 bg-white/95 dark:bg-slate-950/95 border-t border-slate-200/80 dark:border-white/10 backdrop-blur-sm">
         {/* Submission Error Display */}
         {submissionError && (
           <div className="flex items-center justify-center gap-2 mb-3 px-4 py-2 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400 text-sm font-medium">
@@ -1345,7 +1295,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handlePrevious}
-                className="sm:hidden px-6 py-3 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-white/15 rounded-xl text-slate-700 dark:text-slate-100 font-semibold hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors w-full"
+                className="px-6 py-3 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-white/15 rounded-xl text-slate-700 dark:text-slate-100 font-semibold hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors w-full sm:w-auto"
               >
                 Previous
               </motion.button>
@@ -1356,7 +1306,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleRevealAnswer}
-                className="sm:hidden px-6 py-3.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition-colors text-base w-full"
+                className="px-6 sm:px-8 py-3.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition-colors text-base w-full sm:w-auto sm:min-w-[220px]"
               >
                 Reveal Answer
               </motion.button>
@@ -1367,7 +1317,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleNext}
-                className="sm:hidden px-6 py-3.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition-colors text-base w-full"
+                className="px-6 sm:px-8 py-3.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition-colors text-base w-full sm:w-auto sm:min-w-[220px]"
               >
                 Next Question
               </motion.button>
@@ -1379,14 +1329,14 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                 whileTap={!isSubmitting ? { scale: 0.95 } : {}}
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className={`sm:hidden px-6 py-3.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition-colors text-base w-full ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`px-6 sm:px-8 py-3.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition-colors text-base w-full sm:w-auto sm:min-w-[220px] ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {isSubmitting ? 'Submitting...' : 'Submit Quiz'}
               </motion.button>
             )}
 
             {!canReveal && !canNext && !canSubmit && (
-              <div className="sm:hidden h-[56px] flex items-center justify-center px-4">
+              <div className="h-[56px] flex items-center justify-center px-4">
                 <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
                   Select an answer to continue.
                 </p>
