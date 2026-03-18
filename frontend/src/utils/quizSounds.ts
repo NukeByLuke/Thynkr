@@ -4,6 +4,8 @@ import {
 } from '@/lib/quizSoundPreferences';
 
 let sharedAudioContext: AudioContext | null = null;
+let cachedNoiseBuffer: AudioBuffer | null = null;
+let cachedNoiseBufferSampleRate: number | null = null;
 
 const DEFAULT_CORRECT_SOUND: QuizCorrectSound = 'spark';
 
@@ -128,6 +130,7 @@ const createPolishedOutputBus = (context: AudioContext, startTime: number): Gain
 const createBellOutputBus = (context: AudioContext, startTime: number): GainNode => {
   const input = context.createGain();
   const highpass = context.createBiquadFilter();
+  const highshelf = context.createBiquadFilter();
   const compressor = context.createDynamicsCompressor();
   const delay = context.createDelay();
   const delayFeedback = context.createGain();
@@ -137,26 +140,31 @@ const createBellOutputBus = (context: AudioContext, startTime: number): GainNode
   input.gain.setValueAtTime(0.92, startTime);
 
   highpass.type = 'highpass';
-  highpass.frequency.setValueAtTime(230, startTime);
-  highpass.Q.setValueAtTime(0.8, startTime);
+  highpass.frequency.setValueAtTime(260, startTime);
+  highpass.Q.setValueAtTime(0.78, startTime);
 
-  compressor.threshold.setValueAtTime(-25, startTime);
-  compressor.knee.setValueAtTime(14, startTime);
-  compressor.ratio.setValueAtTime(2.2, startTime);
+  highshelf.type = 'highshelf';
+  highshelf.frequency.setValueAtTime(1850, startTime);
+  highshelf.gain.setValueAtTime(4.2, startTime);
+
+  compressor.threshold.setValueAtTime(-26, startTime);
+  compressor.knee.setValueAtTime(13, startTime);
+  compressor.ratio.setValueAtTime(2.4, startTime);
   compressor.attack.setValueAtTime(0.004, startTime);
-  compressor.release.setValueAtTime(0.25, startTime);
+  compressor.release.setValueAtTime(0.24, startTime);
 
-  dry.gain.setValueAtTime(0.95, startTime);
-  delay.delayTime.setValueAtTime(0.19, startTime);
-  delayFeedback.gain.setValueAtTime(0.11, startTime);
-  delayWet.gain.setValueAtTime(0.16, startTime);
+  dry.gain.setValueAtTime(0.97, startTime);
+  delay.delayTime.setValueAtTime(0.145, startTime);
+  delayFeedback.gain.setValueAtTime(0.09, startTime);
+  delayWet.gain.setValueAtTime(0.13, startTime);
 
   input.connect(highpass);
+  highpass.connect(highshelf);
 
-  highpass.connect(dry);
+  highshelf.connect(dry);
   dry.connect(compressor);
 
-  highpass.connect(delay);
+  highshelf.connect(delay);
   delay.connect(delayWet);
   delayWet.connect(compressor);
   delay.connect(delayFeedback);
@@ -165,6 +173,51 @@ const createBellOutputBus = (context: AudioContext, startTime: number): GainNode
   compressor.connect(context.destination);
 
   return input;
+};
+
+const createPopOutputBus = (context: AudioContext, startTime: number): GainNode => {
+  const input = context.createGain();
+  const highpass = context.createBiquadFilter();
+  const compressor = context.createDynamicsCompressor();
+
+  input.gain.setValueAtTime(0.92, startTime);
+
+  highpass.type = 'highpass';
+  highpass.frequency.setValueAtTime(150, startTime);
+  highpass.Q.setValueAtTime(0.6, startTime);
+
+  compressor.threshold.setValueAtTime(-23, startTime);
+  compressor.knee.setValueAtTime(12, startTime);
+  compressor.ratio.setValueAtTime(2.6, startTime);
+  compressor.attack.setValueAtTime(0.003, startTime);
+  compressor.release.setValueAtTime(0.16, startTime);
+
+  input.connect(highpass);
+  highpass.connect(compressor);
+  compressor.connect(context.destination);
+
+  return input;
+};
+
+const getNoiseBuffer = (context: AudioContext): AudioBuffer => {
+  if (
+    cachedNoiseBuffer &&
+    cachedNoiseBufferSampleRate === context.sampleRate
+  ) {
+    return cachedNoiseBuffer;
+  }
+
+  const bufferLength = Math.max(1, Math.round(context.sampleRate * 0.2));
+  const buffer = context.createBuffer(1, bufferLength, context.sampleRate);
+  const channel = buffer.getChannelData(0);
+
+  for (let i = 0; i < bufferLength; i += 1) {
+    channel[i] = Math.random() * 2 - 1;
+  }
+
+  cachedNoiseBuffer = buffer;
+  cachedNoiseBufferSampleRate = context.sampleRate;
+  return buffer;
 };
 
 const playSparkSound = (context: AudioContext, startTime: number) => {
@@ -234,81 +287,99 @@ const playBellHit = (
   startTime: number,
   velocity = 1
 ): void => {
-  // Inharmonic partial blend to emulate a real metal bell body.
-  playBellPartial(context, destination, baseFrequency, startTime, 0.082 * velocity, 1.2, -2.5);
+  // Inharmonic partial blend tuned for a cheerful app-style bell ring.
+  playBellPartial(context, destination, baseFrequency, startTime, 0.09 * velocity, 0.88, -1.8);
   playBellPartial(
     context,
     destination,
-    baseFrequency * 2.01,
+    baseFrequency * 2.03,
     startTime,
-    0.033 * velocity,
-    0.98,
-    1.2
+    0.04 * velocity,
+    0.72,
+    1.4
   );
   playBellPartial(
     context,
     destination,
-    baseFrequency * 2.74,
+    baseFrequency * 2.72,
     startTime,
-    0.027 * velocity,
-    0.88,
-    -1.1
+    0.026 * velocity,
+    0.61,
+    -0.9
   );
   playBellPartial(
     context,
     destination,
-    baseFrequency * 3.76,
+    baseFrequency * 3.84,
     startTime,
-    0.019 * velocity,
-    0.78,
-    2.8
-  );
-  playBellPartial(
-    context,
-    destination,
-    baseFrequency * 4.07,
-    startTime,
-    0.014 * velocity,
-    0.64,
-    -1.6
-  );
-  playBellPartial(
-    context,
-    destination,
-    baseFrequency * 5.43,
-    startTime,
-    0.0095 * velocity,
+    0.017 * velocity,
     0.5,
-    0.9
+    2.4
+  );
+  playBellPartial(
+    context,
+    destination,
+    baseFrequency * 4.18,
+    startTime,
+    0.012 * velocity,
+    0.41,
+    -1.3
   );
 
   // Mallet transient for a more convincing bell strike.
   playTone(
     context,
     destination,
-    baseFrequency * 8.5,
+    baseFrequency * 7.8,
     startTime,
-    0.045,
-    0.0075 * velocity,
+    0.035,
+    0.009 * velocity,
     'triangle',
-    baseFrequency * 7.2
+    baseFrequency * 5.9
   );
 };
 
 const playBellDingSound = (context: AudioContext, startTime: number) => {
   const bus = createBellOutputBus(context, startTime);
 
-  // "Da ding" with two ringing bell strikes: lower, then brighter.
-  playBellHit(context, bus, 739.99, startTime, 0.9);
-  playBellHit(context, bus, 987.77, startTime + 0.21, 1);
+  // Cheerful "da ding": bright lower bell followed by a higher resolving bell.
+  playBellHit(context, bus, 783.99, startTime, 0.88);
+  playBellHit(context, bus, 1174.66, startTime + 0.17, 1);
 };
 
 const playPopSound = (context: AudioContext, startTime: number) => {
-  const bus = createPolishedOutputBus(context, startTime);
+  const bus = createPopOutputBus(context, startTime);
+  const noiseSource = context.createBufferSource();
+  const bandpass = context.createBiquadFilter();
+  const lowpass = context.createBiquadFilter();
+  const noiseGain = context.createGain();
 
-  playTone(context, bus, 739.99, startTime, 0.07, 0.07, 'triangle', 830.61);
-  playTone(context, bus, 987.77, startTime + 0.065, 0.09, 0.058, 'triangle', 1108.73);
-  playTone(context, bus, 329.63, startTime, 0.11, 0.018, 'sine', 392);
+  noiseSource.buffer = getNoiseBuffer(context);
+
+  bandpass.type = 'bandpass';
+  bandpass.frequency.setValueAtTime(860, startTime);
+  bandpass.Q.setValueAtTime(1.2, startTime);
+  bandpass.frequency.exponentialRampToValueAtTime(540, startTime + 0.09);
+
+  lowpass.type = 'lowpass';
+  lowpass.frequency.setValueAtTime(5200, startTime);
+  lowpass.frequency.exponentialRampToValueAtTime(2200, startTime + 0.09);
+
+  noiseGain.gain.setValueAtTime(0.0001, startTime);
+  noiseGain.gain.exponentialRampToValueAtTime(0.2, startTime + 0.003);
+  noiseGain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.09);
+
+  noiseSource.connect(bandpass);
+  bandpass.connect(lowpass);
+  lowpass.connect(noiseGain);
+  noiseGain.connect(bus);
+
+  noiseSource.start(startTime);
+  noiseSource.stop(startTime + 0.1);
+
+  // Low "air push" to make it feel like a real pop, not just hiss.
+  playTone(context, bus, 180, startTime, 0.08, 0.045, 'sine', 72);
+  playTone(context, bus, 1280, startTime, 0.028, 0.014, 'triangle', 780);
 };
 
 const playFallbackSound = (context: AudioContext, startTime: number): void => {

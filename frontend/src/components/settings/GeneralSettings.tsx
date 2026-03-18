@@ -31,7 +31,7 @@ const QUIZ_CORRECT_SOUND_OPTIONS: Array<{
   {
     value: 'ding',
     label: 'Bell Ding',
-    description: 'Classic da-ding bell hit with a crisp finish.',
+    description: 'Cheerful app-style da-ding with a bright bell ring.',
   },
   {
     value: 'spark',
@@ -51,7 +51,7 @@ const QUIZ_CORRECT_SOUND_OPTIONS: Array<{
   {
     value: 'pop',
     label: 'Pop',
-    description: 'Short playful blip that stays out of your way.',
+    description: 'Snappy percussive pop with a soft punchy burst.',
   },
   {
     value: 'off',
