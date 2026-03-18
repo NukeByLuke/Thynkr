@@ -242,6 +242,11 @@ export default function Landing() {
         {/* Stats Section - Refined */}
         <section className="py-20 px-6 bg-slate-50 dark:bg-slate-900/30 border-y border-slate-200 dark:border-slate-800">
           <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
+                Real impact from real users
+              </p>
+            </div>
             <div className="grid md:grid-cols-3 gap-12 text-center">
               {stats.map((stat, index) => (
                 <motion.div
@@ -251,7 +256,7 @@ export default function Landing() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
-                  <div className="text-4xl md:text-5xl font-bold text-purple-700 dark:text-blue-400 mb-2">
+                  <div className="text-5xl font-bold text-purple-700 dark:text-blue-400 mb-2">
                     {stat.value}
                   </div>
                   <div className="text-slate-600 dark:text-slate-400 text-sm">{stat.label}</div>
@@ -302,7 +307,7 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* How It Works Section */}
+        {/* How It Works Section - Enhanced with colors */}
         <section id="how-it-works" className="py-24 px-6 bg-slate-50 dark:bg-slate-900/30">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-16">
@@ -314,30 +319,36 @@ export default function Landing() {
               </p>
             </div>
 
-            <div className="space-y-12">
+            <div className="grid md:grid-cols-3 gap-6 mb-8">
               {studyFlow.map((step, index) => (
                 <motion.div
                   key={step.step}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="flex flex-col md:flex-row gap-8 items-start md:items-center"
+                  className="relative group"
                 >
-                  <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800">
-                      <span className="text-lg font-semibold text-purple-700 dark:text-blue-400">
+                  <div className="p-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 hover:border-purple-300 dark:hover:border-blue-600 transition-all duration-300 h-full">
+                    {/* Step number with gradient background */}
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/40 dark:to-purple-900/20 border-2 border-purple-200 dark:border-purple-800 mb-6">
+                      <span className="text-2xl font-bold text-purple-700 dark:text-blue-400">
                         {step.step}
                       </span>
                     </div>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+
+                    {/* Content */}
+                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3 leading-snug">
                       {step.title}
                     </h3>
-                    <p className="text-slate-600 dark:text-slate-400">
+                    <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
                       {step.detail || step.description}
                     </p>
+
+                    {/* Connector line for desktop */}
+                    {index < studyFlow.length - 1 && (
+                      <div className="hidden md:block absolute -right-6 top-1/2 transform -translate-y-1/2 w-12 h-1 bg-gradient-to-r from-purple-200 to-transparent dark:from-purple-800 dark:to-transparent" />
+                    )}
                   </div>
                 </motion.div>
               ))}
@@ -346,14 +357,14 @@ export default function Landing() {
         </section>
 
         {/* Testimonials Section */}
-        <section className="py-24 px-6 bg-white dark:bg-slate-950">
+        <section className="py-24 px-6 bg-slate-50 dark:bg-slate-900/30">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">
-                Loved by students
+              <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">
+                What students are saying
               </h2>
               <p className="text-lg text-slate-600 dark:text-slate-400">
-                See what learners are saying about Thynkr
+                Real feedback from learners using Thynkr
               </p>
             </div>
 
@@ -365,19 +376,21 @@ export default function Landing() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="p-6 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-300"
+                  className="p-6 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-300 bg-white dark:bg-slate-900/50"
                 >
                   <Quote className="h-6 w-6 text-purple-400 dark:text-blue-500 mb-4" />
-                  <p className="text-slate-700 dark:text-slate-200 leading-relaxed mb-6 text-sm">
+                  <p className="text-slate-700 dark:text-slate-200 leading-relaxed mb-6 text-sm italic">
                     "{testimonial.quote}"
                   </p>
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-sm font-medium text-purple-700 dark:text-blue-400">
+                    <div className="h-9 w-9 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-sm font-semibold text-purple-700 dark:text-blue-400">
                       {testimonial.initials}
                     </div>
-                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                      {testimonial.role}
-                    </p>
+                    <div>
+                      <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                        {testimonial.role}
+                      </p>
+                    </div>
                   </div>
                 </motion.div>
               ))}
@@ -385,31 +398,62 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* Company Section - Trust & Partnership */}
-        <section className="py-20 px-6 bg-slate-50 dark:bg-slate-900/30">
+        {/* Companies & Institutions Section */}
+        <section className="py-24 px-6 bg-white dark:bg-slate-950">
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-                Trusted by leading institutions
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">
+                Trusted by learning institutions
               </h2>
-              <p className="text-slate-600 dark:text-slate-400">
-                Powering smarter learning at universities and colleges
+              <p className="text-lg text-slate-600 dark:text-slate-400">
+                Schools and universities transforming student learning outcomes
               </p>
             </div>
 
-            <div className="flex justify-center">
-              <div className="p-8 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-300">
-                <div className="text-center">
-                  <div className="inline-block px-6 py-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 mb-4">
-                    <p className="text-lg font-semibold text-purple-700 dark:text-blue-400">
-                      Red Deer Polytechnic
-                    </p>
+            {/* Featured Partner - Red Deer Polytechnic */}
+            <div className="mb-16 p-8 rounded-xl border-2 border-purple-200 dark:border-purple-800 bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-slate-950">
+              <div className="flex flex-col md:flex-row gap-8 items-center">
+                <div className="flex-1">
+                  <div className="h-24 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center">
+                    <div className="text-center">
+                      <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">Logo Placeholder</p>
+                      <p className="text-xs text-slate-400">Red Deer Polytechnic</p>
+                    </div>
                   </div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    Partnering to enhance student learning outcomes
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+                    Red Deer Polytechnic
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-400 mb-4">
+                    Partnering with Thynkr to enhance student learning outcomes across programs and disciplines.
                   </p>
+                  <div className="flex gap-4 text-sm text-slate-600 dark:text-slate-400">
+                    <span className="font-medium">📍 Red Deer, Alberta</span>
+                  </div>
                 </div>
               </div>
+            </div>
+
+            {/* Other Institutions Grid */}
+            <div className="grid md:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  className="p-6 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-300"
+                >
+                  <div className="h-16 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center mb-4">
+                    <p className="text-xs text-slate-400 text-center">Add institution logo</p>
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 text-center">
+                    Institution {i} - Add details
+                  </p>
+                </motion.div>
+              ))}
             </div>
           </div>
         </section>
