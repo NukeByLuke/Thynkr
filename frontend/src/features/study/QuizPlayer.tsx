@@ -104,6 +104,50 @@ const canonicalizeQuestion = (question: QuizQuestion, index: number): QuizQuesti
   };
 };
 
+const COMPACT_QUESTION_MAX_LENGTH = 130;
+
+const getCompactQuestionText = (questionText: string): string => {
+  const normalized = questionText.replace(/\s+/g, ' ').trim();
+  if (!normalized) {
+    return normalized;
+  }
+
+  let compact = normalized;
+
+  const leadingFillers = [
+    /^according to (?:the|this) (?:text|passage|transcript|lecture|speaker),?\s*/i,
+    /^based on (?:the|this) (?:text|passage|transcript|lecture),?\s*/i,
+    /^from (?:the|this) (?:text|passage|transcript|lecture),?\s*/i,
+    /^in the context of [^,]+,\s*/i,
+  ];
+
+  for (const pattern of leadingFillers) {
+    compact = compact.replace(pattern, '');
+  }
+
+  compact = compact
+    .replace(/\bwhat is the primary difference between\b/gi, "what's the key difference between")
+    .replace(/\bwhich of the following\b/gi, 'which')
+    .replace(
+      /\baccording to (?:some )?(?:historians|researchers|the speaker|the text|the transcript)\b/gi,
+      ''
+    )
+    .replace(/\s+,/g, ',')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+
+  if (compact.length <= COMPACT_QUESTION_MAX_LENGTH) {
+    return compact;
+  }
+
+  const shortened = compact
+    .slice(0, COMPACT_QUESTION_MAX_LENGTH)
+    .replace(/\s+\S*$/, '')
+    .trim();
+
+  return shortened ? `${shortened}...` : compact;
+};
+
 const getQuestionTitleClass = (questionText: string): string => {
   const normalizedLength = questionText.replace(/\s+/g, ' ').trim().length;
 
@@ -262,9 +306,13 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   const currentQuestion = quizQuestions[currentIndex];
   const userAnswer = currentQuestion ? answers[currentQuestion.id] : undefined;
   const hasSelectedAnswer = !!userAnswer;
-  const questionTitleClass = useMemo(
-    () => getQuestionTitleClass(currentQuestion?.question || ''),
+  const compactQuestionText = useMemo(
+    () => getCompactQuestionText(currentQuestion?.question || ''),
     [currentQuestion?.question]
+  );
+  const questionTitleClass = useMemo(
+    () => getQuestionTitleClass(compactQuestionText),
+    [compactQuestionText]
   );
 
   const canReveal =
@@ -969,7 +1017,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                       ),
                     }}
                   >
-                    {currentQuestion.question}
+                    {compactQuestionText}
                   </ReactMarkdown>
                 </div>
                 {/* TTS Button for Question */}
