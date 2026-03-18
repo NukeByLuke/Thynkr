@@ -128,7 +128,7 @@ const createPolishedOutputBus = (context: AudioContext, startTime: number): Gain
   const delayWet = context.createGain();
   const dry = context.createGain();
 
-  input.gain.setValueAtTime(0.9, startTime);
+  input.gain.setValueAtTime(1.5, startTime);
   compressor.threshold.setValueAtTime(-24, startTime);
   compressor.knee.setValueAtTime(18, startTime);
   compressor.ratio.setValueAtTime(3, startTime);
