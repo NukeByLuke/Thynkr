@@ -1,8 +1,10 @@
 export type QuizCorrectSound =
-  | 'ding'
+  | 'wave'
+  | 'classicding'
   | 'spark'
   | 'chime'
   | 'arcade'
+  | 'ding'
   | 'pop'
   | 'off';
 
@@ -14,10 +16,13 @@ const QUIZ_SOUND_PREFERENCES_STORAGE_KEY = 'thynkr:quiz-sound-preferences';
 const QUIZ_SOUND_PREFERENCES_UPDATED_EVENT = 'thynkr:quiz-sound-preferences-updated';
 
 const SUPPORTED_CORRECT_SOUNDS: readonly QuizCorrectSound[] = [
-  'ding',
+  'wave',
+  'classicding',
   'spark',
   'chime',
   'arcade',
+  // Legacy values kept for backwards compatibility with existing accounts.
+  'ding',
   'pop',
   'off',
 ];

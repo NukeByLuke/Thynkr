@@ -29,9 +29,14 @@ const QUIZ_CORRECT_SOUND_OPTIONS: Array<{
   description: string;
 }> = [
   {
-    value: 'ding',
-    label: 'Bell Ding',
-    description: 'Cheerful app-style da-ding with a bright bell ring.',
+    value: 'wave',
+    label: 'Wave',
+    description: 'Imported wave-style success sound.',
+  },
+  {
+    value: 'classicding',
+    label: 'Classic Ding',
+    description: 'Imported classic ding success sound.',
   },
   {
     value: 'spark',
@@ -47,11 +52,6 @@ const QUIZ_CORRECT_SOUND_OPTIONS: Array<{
     value: 'arcade',
     label: 'Arcade',
     description: 'Punchy and game-like for high-energy sessions.',
-  },
-  {
-    value: 'pop',
-    label: 'Pop',
-    description: 'Snappy percussive pop with a soft punchy burst.',
   },
   {
     value: 'off',
