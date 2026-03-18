@@ -17,6 +17,7 @@ import {
   TimerReset,
 } from 'lucide-react';
 import { useTTS } from '@/hooks/useTTS';
+import { playCorrectAnswerDing } from '@/utils/quizSounds';
 
 interface QuizQuestion {
   id: string;
@@ -286,6 +287,17 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
       const result = await onSubmit(answers, timeSpentSeconds, questionTimings);
       setResults(result);
       setIsSubmitted(true);
+
+      if (settings.feedbackMode === 'end') {
+        const correctCount = quizQuestions.reduce((count, question) => {
+          return answers[question.id] === question.correctAnswer ? count + 1 : count;
+        }, 0);
+
+        if (correctCount > 0) {
+          playCorrectAnswerDing();
+        }
+      }
+
       // Success - keep isSubmittingRef locked so no retries
     } catch (error: unknown) {
       // Handle specific error types with user-friendly messages
@@ -307,7 +319,15 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
         setIsSubmitting(false);
       }, 2000); // 2 second cooldown before allowing retry
     }
-  }, [answers, onSubmit, quizStartTime, questionTimings, isSubmitted]);
+  }, [
+    answers,
+    onSubmit,
+    quizStartTime,
+    questionTimings,
+    isSubmitted,
+    settings.feedbackMode,
+    quizQuestions,
+  ]);
 
   // Timer effect
   useEffect(() => {
@@ -371,6 +391,16 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
       }));
     }
   }, [isSubmitted, isRevealed, currentQuestion, requiresRevealStep]);
+
+  const handleRevealAnswer = useCallback(() => {
+    if (!currentQuestion || !userAnswer) return;
+
+    if (userAnswer === currentQuestion.correctAnswer) {
+      playCorrectAnswerDing();
+    }
+
+    setIsRevealed(true);
+  }, [currentQuestion, userAnswer]);
 
   const handleNext = useCallback(() => {
     if (currentIndex < quizQuestions.length - 1) {
@@ -574,7 +604,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                   <Clock className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                   Time Limit
                 </label>
-                <div className="grid grid-cols-5 gap-2">
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                   {(['endless', '5m', '10m', '15m', '20m'] as TimeLimit[]).map((time) => (
                     <motion.button
                       key={time}
@@ -779,14 +809,14 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
       {/* Header - Fixed */}
       <div className="flex-shrink-0 mb-3">
         <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950 p-4 sm:p-5 shadow-sm">
-          <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] font-semibold text-slate-500 dark:text-slate-400 mb-1">
                 Active Attempt
               </p>
-              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{title}</h3>
+              <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white break-words">{title}</h3>
             </div>
-            <div className="flex items-center gap-2 flex-wrap justify-end">
+            <div className="flex items-center gap-2 flex-wrap justify-start sm:justify-end">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200">
                 <Zap className="w-3.5 h-3.5" />
                 {settings.difficulty}
@@ -853,7 +883,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                     rehypePlugins={[rehypeHighlight]}
                     components={{
                       p: ({ node, ...props }) => (
-                        <p className="text-[1.55rem] sm:text-[1.75rem] font-bold text-slate-900 dark:text-white mb-2.5 text-balance leading-tight" {...props} />
+                        <p className="text-[1.2rem] sm:text-[1.55rem] md:text-[1.75rem] font-bold text-slate-900 dark:text-white mb-2.5 text-balance leading-tight" {...props} />
                       ),
                       h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 text-balance" {...props} />,
                       h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2 text-balance" {...props} />,
@@ -1118,7 +1148,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
       </div>
 
       {/* Navigation - Sticky Footer */}
-      <div className="flex-shrink-0 pt-4 pb-2">
+      <div className="sticky bottom-0 z-20 flex-shrink-0 pt-3 pb-2 sm:pb-3 bg-gradient-to-t from-white via-white/95 to-transparent dark:from-slate-950 dark:via-slate-950/95 dark:to-transparent backdrop-blur-sm">
         {/* Submission Error Display */}
         {submissionError && (
           <div className="flex items-center justify-center gap-2 mb-3 px-4 py-2 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400 text-sm font-medium">
@@ -1128,13 +1158,13 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
         )}
 
         {canReviewNavigate ? (
-          <div className="flex items-center justify-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3">
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
               onClick={handlePrevious}
               disabled={currentIndex === 0}
-              className="px-6 py-3 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-white/20 rounded-xl text-slate-700 dark:text-white font-semibold hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="px-6 py-3 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-white/20 rounded-xl text-slate-700 dark:text-white font-semibold hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors w-full sm:w-auto"
             >
               Previous
             </motion.button>
@@ -1144,7 +1174,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               whileTap={{ scale: 0.95 }}
               onClick={handleNext}
               disabled={currentIndex === quizQuestions.length - 1}
-              className="px-6 py-3 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-white/20 rounded-xl text-slate-700 dark:text-white font-semibold hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="px-6 py-3 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-white/20 rounded-xl text-slate-700 dark:text-white font-semibold hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors w-full sm:w-auto"
             >
               Next
             </motion.button>
@@ -1153,19 +1183,19 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setReviewMode(false)}
-              className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-semibold hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
+              className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-semibold hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors w-full sm:w-auto"
             >
               Back to Results
             </motion.button>
           </div>
         ) : (
-          <div className="flex items-center justify-center gap-3 min-h-[72px]">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3 min-h-[72px]">
             {canGoBackDuringAttempt && (
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handlePrevious}
-                className="px-6 py-3 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-white/15 rounded-xl text-slate-700 dark:text-slate-100 font-semibold hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+                className="px-6 py-3 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-white/15 rounded-xl text-slate-700 dark:text-slate-100 font-semibold hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors w-full sm:w-auto"
               >
                 Previous
               </motion.button>
@@ -1175,8 +1205,8 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setIsRevealed(true)}
-                className="px-8 sm:px-10 py-3.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition-colors text-base sm:text-lg"
+                onClick={handleRevealAnswer}
+                className="px-6 sm:px-10 py-3.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition-colors text-base sm:text-lg w-full sm:w-auto"
               >
                 Reveal Answer
               </motion.button>
@@ -1187,7 +1217,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleNext}
-                className="px-8 sm:px-10 py-3.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition-colors text-base sm:text-lg"
+                className="px-6 sm:px-10 py-3.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition-colors text-base sm:text-lg w-full sm:w-auto"
               >
                 Next Question
               </motion.button>
@@ -1199,7 +1229,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                 whileTap={!isSubmitting ? { scale: 0.95 } : {}}
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className={`px-8 sm:px-10 py-3.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition-colors text-base sm:text-lg ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`px-6 sm:px-10 py-3.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition-colors text-base sm:text-lg w-full sm:w-auto ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {isSubmitting ? 'Submitting...' : 'Submit Quiz'}
               </motion.button>
