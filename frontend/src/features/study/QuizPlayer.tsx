@@ -104,22 +104,26 @@ const canonicalizeQuestion = (question: QuizQuestion, index: number): QuizQuesti
   };
 };
 
-const getQuestionTitleScaleClass = (questionText: string): string => {
+const getQuestionTitleStyle = (questionText: string): { fontSize: string; lineHeight: number } => {
   const normalizedLength = questionText.replace(/\s+/g, ' ').trim().length;
 
-  if (normalizedLength > 280) {
-    return 'text-[1rem] sm:text-[1.12rem] md:text-[1.25rem]';
+  if (normalizedLength > 300) {
+    return { fontSize: 'clamp(0.95rem, 1.45vw, 1.25rem)', lineHeight: 1.34 };
   }
 
-  if (normalizedLength > 200) {
-    return 'text-[1.05rem] sm:text-[1.22rem] md:text-[1.38rem]';
+  if (normalizedLength > 220) {
+    return { fontSize: 'clamp(1rem, 1.6vw, 1.4rem)', lineHeight: 1.32 };
   }
 
-  if (normalizedLength > 140) {
-    return 'text-[1.12rem] sm:text-[1.4rem] md:text-[1.56rem]';
+  if (normalizedLength > 150) {
+    return { fontSize: 'clamp(1.05rem, 1.8vw, 1.6rem)', lineHeight: 1.28 };
   }
 
-  return 'text-[1.2rem] sm:text-[1.55rem] md:text-[1.75rem]';
+  if (normalizedLength > 110) {
+    return { fontSize: 'clamp(1.12rem, 2vw, 1.78rem)', lineHeight: 1.24 };
+  }
+
+  return { fontSize: 'clamp(1.2rem, 2.3vw, 2rem)', lineHeight: 1.16 };
 };
 
 export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, isGenerating, onSubmit }: QuizPlayerProps) {
@@ -254,8 +258,8 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   const currentQuestion = quizQuestions[currentIndex];
   const userAnswer = currentQuestion ? answers[currentQuestion.id] : undefined;
   const hasSelectedAnswer = !!userAnswer;
-  const questionTitleScaleClass = useMemo(
-    () => getQuestionTitleScaleClass(currentQuestion?.question || ''),
+  const questionTitleStyle = useMemo(
+    () => getQuestionTitleStyle(currentQuestion?.question || ''),
     [currentQuestion?.question]
   );
 
@@ -906,13 +910,32 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                     components={{
                       p: ({ node, ...props }) => (
                         <p
-                          className={`${questionTitleScaleClass} font-bold text-slate-900 dark:text-white mb-2.5 text-balance leading-tight`}
+                          style={questionTitleStyle}
+                          className="font-bold text-slate-900 dark:text-white mb-2.5 text-balance"
                           {...props}
                         />
                       ),
-                      h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 text-balance" {...props} />,
-                      h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2 text-balance" {...props} />,
-                      h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2" {...props} />,
+                      h1: ({ node, ...props }) => (
+                        <h1
+                          style={questionTitleStyle}
+                          className="font-bold text-slate-900 dark:text-white mb-3 text-balance"
+                          {...props}
+                        />
+                      ),
+                      h2: ({ node, ...props }) => (
+                        <h2
+                          style={questionTitleStyle}
+                          className="font-bold text-slate-900 dark:text-white mb-2 text-balance"
+                          {...props}
+                        />
+                      ),
+                      h3: ({ node, ...props }) => (
+                        <h3
+                          style={questionTitleStyle}
+                          className="font-semibold text-slate-900 dark:text-white mb-2"
+                          {...props}
+                        />
+                      ),
                       strong: ({ node, ...props }) => <strong className="font-extrabold text-slate-900 dark:text-white" {...props} />,
                       em: ({ node, ...props }) => <em className="italic text-slate-700 dark:text-slate-300" {...props} />,
                       ul: ({ node, ...props }) => <ul className="list-disc ml-6 space-y-2 text-slate-700 dark:text-slate-300 marker:text-brand-500 dark:marker:text-accent-400 text-lg" {...props} />,
