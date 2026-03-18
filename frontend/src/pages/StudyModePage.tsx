@@ -714,7 +714,7 @@ export default function StudyModePage() {
                               </motion.div>
                             </AnimatePresence>
                           )}
-                          {activeTab === 'quiz' && studyContent.result.questions && (
+                          {activeTab === 'quiz' && studyContent?.result?.questions && (
                             <QuizPlayer
                               quizId={`course-${courseId}-quiz`}
                               title={course?.title || 'Course Quiz'}
