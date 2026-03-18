@@ -60,6 +60,18 @@ const QUIZ_CORRECT_SOUND_OPTIONS: Array<{
   },
 ];
 
+const normalizeLegacyQuizSound = (sound: QuizCorrectSound): QuizCorrectSound => {
+  if (sound === 'ding') {
+    return 'wave';
+  }
+
+  if (sound === 'pop') {
+    return 'classicding';
+  }
+
+  return sound;
+};
+
 export default function GeneralSettings() {
   const { themeMode, setThemeMode } = useTheme();
   const { user, refetchUser } = useAuth();
@@ -88,7 +100,9 @@ export default function GeneralSettings() {
       setTtsSpeed(cachedPreferences.speed);
     }
     if (cachedQuizSoundPreferences.correctAnswerSound) {
-      setCorrectAnswerSound(cachedQuizSoundPreferences.correctAnswerSound);
+      setCorrectAnswerSound(
+        normalizeLegacyQuizSound(cachedQuizSoundPreferences.correctAnswerSound)
+      );
     }
 
     const loadPreferences = async () => {
@@ -125,7 +139,9 @@ export default function GeneralSettings() {
   useEffect(() => {
     return subscribeToQuizSoundPreferences((preferences) => {
       if (preferences.correctAnswerSound) {
-        setCorrectAnswerSound(preferences.correctAnswerSound);
+        setCorrectAnswerSound(
+          normalizeLegacyQuizSound(preferences.correctAnswerSound)
+        );
       }
     });
   }, []);
@@ -136,8 +152,9 @@ export default function GeneralSettings() {
       return;
     }
 
-    setCorrectAnswerSound(accountSound);
-    emitQuizSoundPreferencesUpdated({ correctAnswerSound: accountSound });
+    const normalizedSound = normalizeLegacyQuizSound(accountSound);
+    setCorrectAnswerSound(normalizedSound);
+    emitQuizSoundPreferencesUpdated({ correctAnswerSound: normalizedSound });
   }, [user?.quizCorrectSound]);
 
   // Save TTS preferences
