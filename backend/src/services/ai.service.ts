@@ -618,7 +618,12 @@ ${preparedText}`;
               return null;
             }
 
-            const explanation = String(question?.explanation || '').trim();
+            let explanation = String(question?.explanation || '').trim();
+            // Force explanation to be just the first sentence to guarantee it's short and never confusing
+            const sentenceMatch = explanation.match(/^.*?[.!?](?:\s|$)/);
+            if (sentenceMatch && sentenceMatch[0].length < explanation.length) {
+              explanation = sentenceMatch[0].trim();
+            }
 
             if (inferredQuestionType === 'FILL_IN_THE_BLANK') {
               const rawCorrectAnswer =
@@ -697,12 +702,10 @@ ${preparedText}`;
             ).length;
             const correctIsUniqueLongest =
               longestOptionsCount === 1 && correctWordCount === maxOptionWords;
-            const extremeLengthGap = maxOptionWords - minOptionWords >= 9;
-            const correctSignificantlyLonger =
-              correctWordCount >= avgDistractorWordCount + 5 ||
-              correctWordCount >= Math.ceil(avgDistractorWordCount * 1.45);
 
-            if (correctIsUniqueLongest && extremeLengthGap && correctSignificantlyLonger) {
+            // Strict enforcement: if the correct answer is literally the longest option (even by 1 word uniquely), reject it.
+            // This forces the AI to keep distractor lengths fully equal or longer.
+            if (correctIsUniqueLongest) {
               rejectedForLengthBias += 1;
               return null;
             }
