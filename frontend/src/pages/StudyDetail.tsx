@@ -264,12 +264,17 @@ export default function StudyDetail() {
               title={selectedFile.originalName}
               questions={selectedQuiz?.questions || []}
               fileId={selectedFile.id}
-              onGenerateQuiz={(difficulty: string, numQuestions: number) => {
+              onGenerateQuiz={(
+                difficulty: string,
+                numQuestions: number,
+                questionTypes: Array<'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_IN_THE_BLANK'>
+              ) => {
                 // Convert difficulty to uppercase for backend API
                 generateQuizMutation.mutate({ 
                   fileId: selectedFile.id, 
                   difficulty: difficulty.toUpperCase(), 
-                  numQuestions 
+                  numQuestions,
+                  questionTypes,
                 });
               }}
               isGenerating={generateQuizMutation.isPending}

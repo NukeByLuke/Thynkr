@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import prisma from '../db/client';
 import { authenticate, AuthenticatedRequest, requireMinRole } from '../middleware/auth.middleware';
 import { checkAIRateLimit, recordAIUsage } from '../middleware/ai-rate-limit.middleware';
-import { AIService, QuizDifficulty } from '../services/ai.service';
+import { AIService, QuizDifficulty, type QuizQuestionType } from '../services/ai.service';
 import { FileProcessorService } from '../services/file-processor.service';
 import { logger } from '../lib/logger';
 import { createHash } from 'crypto';
@@ -34,6 +34,47 @@ const SUPPORTED_FILE_TYPES = [
 ];
 
 const SUPPORTED_FILE_EXTENSIONS = ['.pdf', '.docx', '.doc', '.txt', '.ppt', '.pptx', '.pps', '.ppsx'];
+const SUPPORTED_QUIZ_QUESTION_TYPES: QuizQuestionType[] = [
+  'MULTIPLE_CHOICE',
+  'TRUE_FALSE',
+  'FILL_IN_THE_BLANK',
+];
+
+function normalizeQuizQuestionTypesInput(questionTypes: unknown): QuizQuestionType[] {
+  if (!Array.isArray(questionTypes)) {
+    return [];
+  }
+
+  const mapped = questionTypes
+    .map((value) =>
+      String(value || '')
+        .trim()
+        .toUpperCase()
+        .replace(/[\s-]+/g, '_')
+    )
+    .map((value): QuizQuestionType | null => {
+      if (value === 'MULTIPLE_CHOICE' || value === 'MCQ' || value === 'MULTIPLECHOICE') {
+        return 'MULTIPLE_CHOICE';
+      }
+      if (value === 'TRUE_FALSE' || value === 'TRUEFALSE' || value === 'TF' || value === 'BOOLEAN') {
+        return 'TRUE_FALSE';
+      }
+      if (
+        value === 'FILL_IN_THE_BLANK' ||
+        value === 'FILL_BLANK' ||
+        value === 'FILLINTHEBLANK' ||
+        value === 'SHORT_ANSWER' ||
+        value === 'SHORTANSWER' ||
+        value === 'BLANK'
+      ) {
+        return 'FILL_IN_THE_BLANK';
+      }
+      return null;
+    })
+    .filter((value): value is QuizQuestionType => value !== null);
+
+  return Array.from(new Set(mapped));
+}
 
 function isAICompatibleFile(fileType: string, fileName?: string): boolean {
   const normalizedType = (fileType || '').toLowerCase().split(';')[0].trim();
@@ -146,6 +187,7 @@ interface StudyRequestBody {
   type: 'summary' | 'notes' | 'quiz' | 'flashcards';
   difficulty?: QuizDifficulty;
   count?: number;
+  questionTypes?: string[];
 }
 
 interface SummaryPage {
@@ -231,8 +273,8 @@ export default async function courseStudyRoutes(server: FastifyInstance) {
 
         const fileHash = generateFileHash(compatibleFiles.map((f: any) => f.id));
 
-        // Check cache
-        if (!refresh) {
+        // Check cache (quiz is always generated fresh for better variation)
+        if (!refresh && body.type !== 'quiz') {
           const cached = await db.studyCache.findUnique({
             where: {
               userId_courseId_fileHash_type: {
@@ -318,12 +360,36 @@ export default async function courseStudyRoutes(server: FastifyInstance) {
               .map((f) => `### ${f.fileName}\n\n${f.text}`)
               .join('\n\n---\n\n');
             const difficulty = body.difficulty || 'MEDIUM';
-            const count = Math.min(Math.max(body.count || 10, 5), 20);
-            const quiz = await aiService.generateQuiz(combinedText, count, difficulty, language);
+            const count = Math.min(Math.max(body.count || 10, 5), 40);
+            const normalizedQuestionTypes = normalizeQuizQuestionTypesInput(body.questionTypes);
+            if (
+              Array.isArray(body.questionTypes) &&
+              body.questionTypes.length > 0 &&
+              normalizedQuestionTypes.length === 0
+            ) {
+              return reply.status(400).send({
+                error:
+                  'Invalid questionTypes. Supported values: MULTIPLE_CHOICE, TRUE_FALSE, FILL_IN_THE_BLANK',
+              });
+            }
+
+            const effectiveQuestionTypes =
+              normalizedQuestionTypes.length > 0
+                ? normalizedQuestionTypes
+                : SUPPORTED_QUIZ_QUESTION_TYPES;
+
+            const quiz = await aiService.generateQuiz(
+              combinedText,
+              count,
+              difficulty,
+              language,
+              effectiveQuestionTypes
+            );
             result = {
               title: quiz.title,
               questions: quiz.questions,
               difficulty,
+              questionTypes: effectiveQuestionTypes,
               sourceFiles: fileTexts.map((f) => f.fileName),
             };
             break;
@@ -359,29 +425,31 @@ export default async function courseStudyRoutes(server: FastifyInstance) {
           durationMs,
         });
 
-        // Cache the result
-        await db.studyCache.upsert({
-          where: {
-            userId_courseId_fileHash_type: {
+        // Cache non-quiz results only; quizzes should be fresh per generation.
+        if (body.type !== 'quiz') {
+          await db.studyCache.upsert({
+            where: {
+              userId_courseId_fileHash_type: {
+                userId,
+                courseId: body.courseId,
+                fileHash,
+                type: body.type,
+              },
+            },
+            create: {
               userId,
               courseId: body.courseId,
+              fileIds: compatibleFiles.map((f: any) => f.id),
               fileHash,
               type: body.type,
+              result,
             },
-          },
-          create: {
-            userId,
-            courseId: body.courseId,
-            fileIds: compatibleFiles.map((f: any) => f.id),
-            fileHash,
-            type: body.type,
-            result,
-          },
-          update: {
-            result,
-            updatedAt: new Date(),
-          },
-        });
+            update: {
+              result,
+              updatedAt: new Date(),
+            },
+          });
+        }
 
         return reply.send({
           type: body.type,
@@ -395,6 +463,15 @@ export default async function courseStudyRoutes(server: FastifyInstance) {
         if (error.statusCode) {
           return reply.status(error.statusCode).send({ error: error.message });
         }
+
+        const errorMessage = typeof error?.message === 'string' ? error.message : '';
+        if (errorMessage.toLowerCase().includes('not enough content to generate')) {
+          return reply.status(400).send({ error: errorMessage });
+        }
+        if (errorMessage.toLowerCase().includes('not enough distinct information')) {
+          return reply.status(400).send({ error: errorMessage });
+        }
+
         logger.error({ error, body }, 'Failed to generate study content');
         return reply.status(500).send({ error: 'Failed to generate study content' });
       }

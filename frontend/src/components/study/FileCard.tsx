@@ -108,7 +108,7 @@ export default function FileCard({
       whileHover={{ y: -3, boxShadow: `0 20px 40px -8px ${getHoverShadowColor()}` }}
       whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className={`relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer group transition-all duration-200 will-change-transform ${
+      className={`relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer group transition-all duration-200 ${
         isSelected
           ? 'bg-white dark:bg-zinc-900/80 backdrop-blur-md border-2 border-blue-500/50 shadow-lg shadow-blue-500/20'
           : `bg-white dark:bg-zinc-900/60 backdrop-blur-md border-2 border-slate-200 dark:border-white/10 ${getHoverGlowColor()} shadow-lg`
@@ -122,7 +122,7 @@ export default function FileCard({
             e.stopPropagation();
             setShowMenu(!showMenu);
           }}
-          className="p-1.5 rounded-xl bg-white/90 dark:bg-zinc-900/80 backdrop-blur-sm border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-all duration-150 opacity-0 group-hover:opacity-100 active:scale-95 will-change-transform"
+          className="p-1.5 rounded-xl bg-white/90 dark:bg-zinc-900/80 backdrop-blur-sm border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-all duration-150 opacity-0 group-hover:opacity-100 active:scale-95"
         >
           <MoreVertical className="h-4 w-4 text-slate-700 dark:text-white" />
         </button>

@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply } from 'fastify';
 import { authenticate, AuthenticatedRequest } from '../middleware/auth.middleware';
-import { checkAIRateLimit, recordAIUsage } from '../middleware/ai-rate-limit.middleware';
+import { recordAIUsage } from '../middleware/ai-rate-limit.middleware';
 import { ttsRateLimit } from '../middleware/tts-rate-limit.middleware';
 import { canUseTTS } from '../lib/tier-limits';
 import { TextToSpeechClient } from '@google-cloud/text-to-speech';
@@ -115,12 +115,12 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation: strin
   ]);
 }
 
-// Prefer a single synthesis request for normal payload sizes so the browser gets
-// reliable duration/progress metadata from one complete MP3 file.
-const SINGLE_REQUEST_MAX_CHARS = 1800;
+// Prefer a single synthesis request for short payload sizes.
+// Keep this lower so medium-sized text is chunked in parallel for faster first playback.
+const SINGLE_REQUEST_MAX_CHARS = 900;
 // For longer payloads, split into provider-safe chunks and stitch server-side.
-const CHUNK_TARGET_SIZE = 1800;
-const CHUNK_MIN_SIZE = 600;
+const CHUNK_TARGET_SIZE = 900;
+const CHUNK_MIN_SIZE = 250;
 
 /**
  * Hard split overly long sentence-like content by words when punctuation
@@ -401,7 +401,7 @@ async function generateOrGetCached(text: string, voice: Voice): Promise<Buffer> 
   const chunks = splitTextIntoChunks(text);
   logger.info({ voice, textLength: text.length, chunkCount: chunks.length }, 'Generating TTS in parallel chunks');
 
-  const MAX_PARALLEL = 8;
+  const MAX_PARALLEL = 12;
   const chunkBuffers: Buffer[] = new Array(chunks.length);
 
   for (let i = 0; i < chunks.length; i += MAX_PARALLEL) {
@@ -560,7 +560,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
   server.post(
     '/tts/negotiate',
     {
-      preHandler: [authenticate, ttsRateLimit, checkAIRateLimit],
+      preHandler: [authenticate, ttsRateLimit],
     },
     async (request: AuthenticatedRequest, reply: FastifyReply) => {
       const userId = request.user!.userId;
@@ -684,7 +684,7 @@ export default async function ttsRoutes(server: FastifyInstance) {
   server.post(
     '/tts',
     {
-      preHandler: [authenticate, ttsRateLimit, checkAIRateLimit],
+      preHandler: [authenticate, ttsRateLimit],
     },
     async (request: AuthenticatedRequest, reply: FastifyReply) => {
       const userId = request.user!.userId;

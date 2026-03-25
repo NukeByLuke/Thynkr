@@ -1,89 +1,80 @@
-# Thynkr Project Instructions
+# Thynkr Copilot Instructions
 
-You are an expert full-stack developer working on "Thynkr", an AI-powered study platform.
-Always adhere to the following rules, styles, and workflows.
+You are an expert full-stack developer working on Thynkr, an AI-powered study platform.
+Follow these rules for all work in this repository.
 
-## 1. Project Architecture & Deployment
+## 1. Canonical Domain Policy (Critical)
 
-- **Stack**: React (Vite) + Tailwind CSS (Frontend) | Node.js + Fastify (Backend).
-- **Database**: PostgreSQL (Prisma ORM).
-- **Deployment**: We deploy to **DigitalOcean** using Docker containers.
-- **CI/CD**: Refer to `.github/workflows/deploy.yml`. When modifying build scripts or Dockerfiles, ensure compatibility with the DigitalOcean App Platform/Droplet environment defined there.
+- Thynkr production domain is **thynkr.ca only**.
+- Do not use `thynkr.study` for active app URLs, redirects, canonical links, env defaults, API bases, webhook targets, or docs examples.
+- If you see `thynkr.study` in code or docs, treat it as legacy and update to `thynkr.ca` unless a migration/historical note explicitly requires both domains.
+- For deployment checks and smoke tests, prefer `https://thynkr.ca`.
 
-## 2. Design Philosophy: "Simple & Elegant"
+## 2. Architecture and Deployment
 
-- **Layout**: Minimize vertical space usage. Headers, navbars, and banners should be compact (`h-14` or `h-12` preferred over `h-16`).
-- **Whitespace**: Use whitespace effectively but do not waste screen real estate.
-- **Theme**: Use the **brand color scheme** that matches the logo and THYNKR branding:
-  - **Light Mode**: Pink/Fuchsia/Orange gradients (sunrise/warm tones)
-  - **Dark Mode**: Cyan/Violet/Blue gradients (midnight/cool tones)
-  - **Primary Colors**: `brand` palette (pink-600, fuchsia-600, etc.) for light mode, cyan/violet for dark
-  - **Backgrounds**: Subtle gradient backgrounds using brand colors
-  - **Accents**: Use `accent` (cyan/blue) for highlights and borders
-  - **DO NOT** use plain slate/zinc/gray for main UI elements - always incorporate the brand gradient colors
-- **Simplicity**: Avoid cluttered UIs. Prefer clean lines and distinct actions.
+- Stack: React (Vite) + Tailwind CSS frontend, Node.js + Fastify backend.
+- Database: PostgreSQL with Prisma ORM.
+- Runtime: Docker containers on DigitalOcean.
+- CI/CD compatibility: keep `.github/workflows/deploy.yml`, Dockerfiles, and deployment scripts aligned.
+- Standard deployment path: use repository scripts under `scripts/` (especially `scripts/deploy-now.ps1` when asked to deploy now).
 
-## 3. Component Patterns
+## 3. UI and Product Design
 
-- **Uploads**: ALWAYS use the `UploadModal` component for file inputs. Never use a raw `<input type="file" />` directly in the page.
-  - Users must always have the choice between **"Upload File"** and **"YouTube Link"**.
-- **Buttons**: Use the shared `Button` or `IconButton` components found in `frontend/src/components/ui/`.
-- **API**: Use the configured `api` instance from `@/lib/api` which handles JWT refresh automatically.
+- Design direction: simple, elegant, compact.
+- Keep vertical footprint tight (favor compact headers and controls).
+- Use the Thynkr brand palette:
+  - Light mode: pink/fuchsia/orange gradients.
+  - Dark mode: cyan/violet/blue gradients.
+  - Use brand/accent colors; avoid plain gray/slate-only main surfaces.
+- Avoid clutter and oversized controls.
 
-## 4. Coding Standards
+## 4. Frontend Implementation Rules
 
-- **Package Manager**: Always use `pnpm`.
-- **Types**: Strict TypeScript. Avoid `any`.
-- **Async**: Use `async/await` and proper error handling with `try/catch`.
-- **State**: Use `TanStack Query` for server state and React Context for global UI state.
+- Always use shared UI primitives from `frontend/src/components/ui/` when available.
+- For uploads, use `frontend/src/components/modals/UploadModal.tsx`.
+- Never add raw page-level file input flows that bypass the upload modal pattern.
+- API calls must use `frontend/src/lib/api.ts` configured client.
+- Ensure mobile responsiveness for all UI changes.
+- Prefer `hidden md:flex` style simplifications on small screens over cramped scaling.
 
-## 5. Mobile Responsiveness
+## 5. Backend and API Rules
 
-- Ensure all layouts work on mobile.
-- Use `hidden md:flex` patterns to simplify views on smaller screens rather than just shrinking everything.
+- Use strict TypeScript and avoid `any`.
+- Use async/await with explicit try/catch for failure-prone I/O.
+- Keep validation and error responses consistent with existing route patterns.
+- For server state interactions in frontend, use TanStack Query.
 
-## 6. Audio & TTS Implementation
+## 6. Audio and TTS Rules
 
-- **Architecture**: OpenAI `tts-1` model streamed via Fastify backend (`/api/tts/stream`).
-- **Client-Side Handling**:
-  - Audio speed is handled client-side using `playbackRate` to prevent unnecessary API calls/regeneration.
-  - Duration is estimated (`text.length / 15`) for immediate UI feedback during streaming.
-  - OS Media Controls are integrated via `navigator.mediaSession`.
-- **UX Rules**:
-  - Changing voice regenerates audio but MUST resume from the previous timestamp.
-  - Changing speed MUST be instant (client-side) and NOT regenerate audio.
+- Architecture: OpenAI `tts-1` streamed from backend endpoint `/api/tts/stream`.
+- Speed changes are client-side via `playbackRate` and must be instant.
+- Voice changes may regenerate audio but must resume from prior timestamp.
+- Keep media session integration intact for OS controls.
 
-## 7. File Organization
+## 7. Repository Organization
 
-- **Root Directory**: Keep clean. config files only.
-- **Documentation**: All guides, checklists, and setup info go in `docs/`.
-- **Scripts**: DevOps and utility scripts go in `scripts/`.
-- **Database**: SQL dumps and one-off scripts go in `backend/scripts/sql/`.
+- Keep root clean (top-level config and essential repo files only).
+- Put docs in `docs/`.
+- Put utility and deployment scripts in `scripts/`.
+- Put DB one-off SQL scripts in `backend/scripts/sql/`.
 
-## 8. Git & Workflow
+## 8. Git and Delivery Workflow
 
-- **Commit Messages**: Follow Conventional Commits (e.g., `feat:`, `fix:`, `chore:`, `docs:`).
-- **Templates**: Use the provided Issue and PR templates in `.github/` for structured reporting.
-- **Branching**: Use `feature/` or `fix/` branches for new work.
+- Use Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`).
+- Use feature/fix branches for scoped work.
+- After requested code changes, validate builds/tests that are relevant and report results.
 
-## 9. Terminal Management (CRITICAL)
+## 9. Terminal Usage Rules (Critical)
 
-- **ALWAYS reuse the existing terminal** for sequential commands. DO NOT spawn multiple terminals unnecessarily.
-- **Use `isBackground=false` by default** - only use `isBackground=true` for long-running processes like dev servers, watchers, or Docker builds that take >30 seconds.
-- **One terminal is enough** for most workflows (git, scp, ssh, quick commands).
-- **Only open a new background terminal when**:
-  - Starting a dev server that needs to stay running
-  - Running a Docker build/deploy that will take >1 minute
-  - Running parallel operations that truly cannot be sequential
-- **Chain commands with semicolons** (`;`) in PowerShell instead of opening multiple terminals.
-- **Example of GOOD terminal usage**:
-  - Terminal 1: All git/scp/quick ssh commands (reused throughout session)
-  - Terminal 2 (background): `pnpm dev` server running
-- **Example of BAD terminal usage**:
-  - Terminal 1: git add
-  - Terminal 2: git commit
-  - Terminal 3: git push
-  - Terminal 4: scp file
-  - Terminal 5: ssh command
-  - (This is wasteful and creates clutter - should be ONE terminal)
-- **The user HATES hidden terminals** - minimize terminal count to reduce cognitive load.
+- Reuse the same terminal for sequential commands whenever possible.
+- Default to foreground commands (`isBackground=false`).
+- Use background terminals only for long-running processes (dev servers/watchers/long builds).
+- Avoid opening many terminals for simple sequential tasks.
+- In PowerShell command chains, use semicolons.
+- Minimize hidden terminal clutter.
+
+## 10. Decision Defaults
+
+- If the user asks for deployment, use the standard project deployment script path unless they explicitly request a different method.
+- If domain values are ambiguous, choose `thynkr.ca`.
+- If legacy domain references are discovered during edits, normalize to `thynkr.ca` unless explicitly told not to.

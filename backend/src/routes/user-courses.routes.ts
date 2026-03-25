@@ -611,7 +611,7 @@ export default async function userCoursesRoutes(server: FastifyInstance) {
   server.delete(
     '/user-courses/:id',
     {
-      preHandler: [authenticate, requireMinRole('STANDARD')],
+      preHandler: [authenticate],
     },
     async (request: AuthenticatedRequest, reply) => {
       const { id } = request.params as { id: string };

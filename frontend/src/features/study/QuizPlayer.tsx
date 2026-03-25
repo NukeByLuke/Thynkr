@@ -6,18 +6,25 @@ import rehypeHighlight from 'rehype-highlight';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Clock,
-  Zap,
   Volume2,
   Loader2,
   AlertTriangle,
   SlidersHorizontal,
-  Shuffle,
   ShieldCheck,
-  ArrowRightLeft,
   TimerReset,
 } from 'lucide-react';
 import { useTTS } from '@/hooks/useTTS';
 import { playCorrectAnswerDing } from '@/utils/quizSounds';
+import { isQuizAnswerCorrect as evaluateQuizAnswer } from '@/utils/quizAnswerUtils';
+
+type QuizQuestionType = 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_IN_THE_BLANK';
+
+interface QuizImprovementTips {
+  summary: string;
+  strengths: string[];
+  improvements: string[];
+  nextSteps: string[];
+}
 
 interface QuizQuestion {
   id: string;
@@ -26,6 +33,17 @@ interface QuizQuestion {
   correctAnswer: string;
   explanation: string;
   order: number;
+  questionType?: QuizQuestionType;
+}
+
+interface QuizSubmitResult {
+  score: number;
+  total: number;
+  percentage: number;
+  improvementTips?: QuizImprovementTips;
+  improvementTipsSource?: 'ai' | 'rule-based';
+  aiTipsEligible?: boolean;
+  aiTipsUpgradeMessage?: string;
 }
 
 interface QuizPlayerProps {
@@ -33,26 +51,109 @@ interface QuizPlayerProps {
   title: string;
   questions: QuizQuestion[];
   fileId?: string;
-  onGenerateQuiz?: (difficulty: string, numQuestions: number) => void;
+  onGenerateQuiz?: (
+    difficulty: string,
+    numQuestions: number,
+    questionTypes: QuizQuestionType[]
+  ) => void;
   isGenerating?: boolean;
-  onSubmit: (answers: Record<string, string>, timeSpentSeconds?: number, questionTimings?: Record<string, number>) => Promise<any>;
+  onSubmit: (
+    answers: Record<string, string>,
+    timeSpentSeconds?: number,
+    questionTimings?: Record<string, number>
+  ) => Promise<QuizSubmitResult | Record<string, unknown>>;
 }
 
-type Difficulty = 'easy' | 'medium' | 'hard';
 type TimeLimit = 'endless' | '5m' | '10m' | '15m' | '20m';
 type FeedbackMode = 'instant' | 'end';
 type NavigationMode = 'free' | 'locked';
 type AttemptPreset = 'practice' | 'exam' | 'custom';
 
 interface QuizSettings {
-  difficulty: Difficulty;
   timeLimit: TimeLimit;
   feedbackMode: FeedbackMode;
   navigationMode: NavigationMode;
-  shuffleQuestions: boolean;
 }
 
+const QUESTION_TYPE_OPTIONS: Array<{
+  value: QuizQuestionType;
+  label: string;
+  description: string;
+}> = [
+  {
+    value: 'MULTIPLE_CHOICE',
+    label: 'Multiple Choice',
+    description: '4 options, one best answer.',
+  },
+  {
+    value: 'TRUE_FALSE',
+    label: 'True / False',
+    description: 'Fast fact checks and conceptual contrasts.',
+  },
+  {
+    value: 'FILL_IN_THE_BLANK',
+    label: 'Fill in the Blank',
+    description: 'Recall exact terms without options.',
+  },
+];
+
+const QUESTION_TYPE_LABELS: Record<QuizQuestionType, string> = {
+  MULTIPLE_CHOICE: 'Multiple Choice',
+  TRUE_FALSE: 'True / False',
+  FILL_IN_THE_BLANK: 'Fill in the Blank',
+};
+
 const normalizeOptionText = (value: string): string => value.replace(/\s+/g, ' ').trim();
+
+const normalizeQuestionType = (value: unknown): QuizQuestionType | null => {
+  const normalized = String(value || '')
+    .trim()
+    .toUpperCase()
+    .replace(/[\s-]+/g, '_');
+
+  if (normalized === 'MULTIPLE_CHOICE' || normalized === 'MCQ' || normalized === 'MULTIPLECHOICE') {
+    return 'MULTIPLE_CHOICE';
+  }
+
+  if (normalized === 'TRUE_FALSE' || normalized === 'TRUEFALSE' || normalized === 'TF') {
+    return 'TRUE_FALSE';
+  }
+
+  if (
+    normalized === 'FILL_IN_THE_BLANK' ||
+    normalized === 'FILL_BLANK' ||
+    normalized === 'FILLINTHEBLANK' ||
+    normalized === 'SHORT_ANSWER' ||
+    normalized === 'BLANK'
+  ) {
+    return 'FILL_IN_THE_BLANK';
+  }
+
+  return null;
+};
+
+const inferQuestionType = (question: QuizQuestion, cleanedOptions: string[]): QuizQuestionType => {
+  const explicit = normalizeQuestionType(question.questionType);
+  if (explicit) {
+    return explicit;
+  }
+
+  if (cleanedOptions.length === 2) {
+    const tfKey = cleanedOptions
+      .map((option) => option.toLowerCase())
+      .sort()
+      .join('|');
+    if (tfKey === 'false|true') {
+      return 'TRUE_FALSE';
+    }
+  }
+
+  if (cleanedOptions.length === 0 || /_{3,}/.test(question.question || '') || /\bblank\b/i.test(question.question || '')) {
+    return 'FILL_IN_THE_BLANK';
+  }
+
+  return 'MULTIPLE_CHOICE';
+};
 
 const timeLimitToSeconds = (value: TimeLimit): number | null => {
   if (value === 'endless') return null;
@@ -80,6 +181,40 @@ const canonicalizeQuestion = (question: QuizQuestion, index: number): QuizQuesti
       return true;
     });
 
+  const questionType = inferQuestionType(question, cleanedOptions);
+
+  if (questionType === 'FILL_IN_THE_BLANK') {
+    return {
+      ...question,
+      id: question.id || `q-${index}`,
+      questionType,
+      options: [],
+      correctAnswer: normalizeOptionText(String(question.correctAnswer || '')),
+    };
+  }
+
+  if (questionType === 'TRUE_FALSE') {
+    const trueFalseOptions = ['True', 'False'];
+    const normalizedCorrect = normalizeOptionText(String(question.correctAnswer || ''));
+    const loweredCorrect = normalizedCorrect.toLowerCase();
+    const finalCorrect =
+      loweredCorrect === 'true' || loweredCorrect === 'yes' || loweredCorrect === '1'
+        ? 'True'
+        : loweredCorrect === 'false' || loweredCorrect === 'no' || loweredCorrect === '0'
+        ? 'False'
+        : normalizedCorrect === 'True' || normalizedCorrect === 'False'
+        ? normalizedCorrect
+        : 'True';
+
+    return {
+      ...question,
+      id: question.id || `q-${index}`,
+      questionType,
+      options: trueFalseOptions,
+      correctAnswer: finalCorrect,
+    };
+  }
+
   const normalizedCorrect = normalizeOptionText(String(question.correctAnswer || ''));
   const matchedCorrect = cleanedOptions.find(
     (option) => option.toLowerCase() === normalizedCorrect.toLowerCase()
@@ -99,53 +234,10 @@ const canonicalizeQuestion = (question: QuizQuestion, index: number): QuizQuesti
   return {
     ...question,
     id: question.id || `q-${index}`,
+    questionType,
     options,
     correctAnswer: finalCorrect,
   };
-};
-
-const COMPACT_QUESTION_MAX_LENGTH = 130;
-
-const getCompactQuestionText = (questionText: string): string => {
-  const normalized = questionText.replace(/\s+/g, ' ').trim();
-  if (!normalized) {
-    return normalized;
-  }
-
-  let compact = normalized;
-
-  const leadingFillers = [
-    /^according to (?:the|this) (?:text|passage|transcript|lecture|speaker),?\s*/i,
-    /^based on (?:the|this) (?:text|passage|transcript|lecture),?\s*/i,
-    /^from (?:the|this) (?:text|passage|transcript|lecture),?\s*/i,
-    /^in the context of [^,]+,\s*/i,
-  ];
-
-  for (const pattern of leadingFillers) {
-    compact = compact.replace(pattern, '');
-  }
-
-  compact = compact
-    .replace(/\bwhat is the primary difference between\b/gi, "what's the key difference between")
-    .replace(/\bwhich of the following\b/gi, 'which')
-    .replace(
-      /\baccording to (?:some )?(?:historians|researchers|the speaker|the text|the transcript)\b/gi,
-      ''
-    )
-    .replace(/\s+,/g, ',')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
-
-  if (compact.length <= COMPACT_QUESTION_MAX_LENGTH) {
-    return compact;
-  }
-
-  const shortened = compact
-    .slice(0, COMPACT_QUESTION_MAX_LENGTH)
-    .replace(/\s+\S*$/, '')
-    .trim();
-
-  return shortened ? `${shortened}...` : compact;
 };
 
 const getQuestionTitleClass = (questionText: string): string => {
@@ -174,6 +266,66 @@ const getQuestionTitleClass = (questionText: string): string => {
   return 'text-[1.18rem] sm:text-[1.4rem] md:text-[1.6rem] lg:text-[1.8rem] leading-[1.18]';
 };
 
+const buildFallbackImprovementTips = (input: {
+  score: number;
+  total: number;
+  questions: QuizQuestion[];
+  answers: Record<string, string>;
+}): QuizImprovementTips => {
+  const total = Math.max(1, input.total || 0);
+  const score = Math.max(0, input.score || 0);
+  const percentage = Math.round((score / total) * 100);
+
+  const missedQuestions = input.questions.filter(
+    (question) => !evaluateQuizAnswer(input.answers[question.id], question)
+  );
+
+  const missedTypeCounts = {
+    MULTIPLE_CHOICE: 0,
+    TRUE_FALSE: 0,
+    FILL_IN_THE_BLANK: 0,
+  } as Record<QuizQuestionType, number>;
+
+  missedQuestions.forEach((question) => {
+    const type = question.questionType || inferQuestionType(question, question.options || []);
+    missedTypeCounts[type] += 1;
+  });
+
+  const topWeakType = (Object.keys(missedTypeCounts) as QuizQuestionType[]).sort(
+    (a, b) => missedTypeCounts[b] - missedTypeCounts[a]
+  )[0];
+
+  const typeTip: Record<QuizQuestionType, string> = {
+    MULTIPLE_CHOICE: 'Practice eliminating distractors by identifying why each wrong option is incorrect.',
+    TRUE_FALSE: 'Pay attention to absolute language like "always" or "never" in true/false statements.',
+    FILL_IN_THE_BLANK: 'Use active recall: answer from memory first, then verify with notes.',
+  };
+
+  return {
+    summary:
+      percentage >= 75
+        ? 'Strong result overall. Focus on the few concepts you missed to reach mastery.'
+        : 'Good progress. Targeted review of missed concepts will improve your next attempt quickly.',
+    strengths: [
+      percentage >= 75
+        ? 'You demonstrated solid understanding across most quiz concepts.'
+        : 'You completed the quiz and identified where to focus next.',
+      'You now have clear feedback to guide your next study session.',
+    ],
+    improvements:
+      missedQuestions.length > 0
+        ? [
+            typeTip[topWeakType],
+            'Review each missed question and explain the correct answer in your own words.',
+          ]
+        : ['Keep practicing mixed question formats to maintain retention.'],
+    nextSteps: [
+      'Retake this quiz in 24 hours to reinforce memory through spaced repetition.',
+      'Create a short mistake log with concept, error pattern, and corrected reasoning.',
+    ],
+  };
+};
+
 export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, isGenerating, onSubmit }: QuizPlayerProps) {
   const sanitizedQuestions = useMemo(
     () => questions.map((question, index) => canonicalizeQuestion(question, index)),
@@ -193,13 +345,16 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   const [waitingForGeneration, setWaitingForGeneration] = useState(false);
   const [generationCycleStarted, setGenerationCycleStarted] = useState(false);
   const [settings, setSettings] = useState<QuizSettings>({
-    difficulty: 'medium',
     timeLimit: 'endless',
     feedbackMode: 'instant',
     navigationMode: 'free',
-    shuffleQuestions: false,
   });
   const [numQuestions, setNumQuestions] = useState(10);
+  const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<QuizQuestionType[]>([
+    'MULTIPLE_CHOICE',
+    'TRUE_FALSE',
+    'FILL_IN_THE_BLANK',
+  ]);
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
 
   // Quiz state
@@ -207,7 +362,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<QuizSubmitResult | Record<string, unknown> | null>(null);
   const [reviewMode, setReviewMode] = useState(false);
 
   // New state for delayed feedback
@@ -232,7 +387,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
 
   const initializeQuizSession = useCallback(
     (baseQuestions: QuizQuestion[]) => {
-      const orderedQuestions = settings.shuffleQuestions ? shuffleOnce(baseQuestions) : [...baseQuestions];
+      const orderedQuestions = shuffleOnce(baseQuestions);
       const initialTime = timeLimitToSeconds(settings.timeLimit);
 
       setQuizQuestions(orderedQuestions);
@@ -253,7 +408,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
       setQuizStartTime(Date.now());
       setShowSettings(false);
     },
-    [settings.shuffleQuestions, settings.timeLimit]
+    [settings.timeLimit]
   );
 
   useEffect(() => {
@@ -305,14 +460,31 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   const requiresRevealStep = settings.feedbackMode === 'instant';
   const currentQuestion = quizQuestions[currentIndex];
   const userAnswer = currentQuestion ? answers[currentQuestion.id] : undefined;
-  const hasSelectedAnswer = !!userAnswer;
-  const compactQuestionText = useMemo(
-    () => getCompactQuestionText(currentQuestion?.question || ''),
-    [currentQuestion?.question]
-  );
+  const currentQuestionType: QuizQuestionType = currentQuestion
+    ? currentQuestion.questionType || inferQuestionType(currentQuestion, currentQuestion.options || [])
+    : 'MULTIPLE_CHOICE';
+  const hasSelectedAnswer = !!String(userAnswer || '').trim();
+  const isCurrentAnswerCorrect =
+    !!currentQuestion && evaluateQuizAnswer(userAnswer, currentQuestion);
+  let questionText = currentQuestion?.question || '';
+  
+  // Guard against AI returning a full sentence without a blank
+  if (currentQuestionType === 'FILL_IN_THE_BLANK' && currentQuestion?.correctAnswer) {
+    if (!questionText.includes('_')) {
+      const primaryAnswer = currentQuestion.correctAnswer.split('|')[0];
+      const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`\\b${escapeRegExp(primaryAnswer)}\\b`, 'i');
+      if (regex.test(questionText)) {
+        questionText = questionText.replace(regex, '__________');
+      } else {
+        questionText += " __________.";
+      }
+    }
+  }
+
   const questionTitleClass = useMemo(
-    () => getQuestionTitleClass(compactQuestionText),
-    [compactQuestionText]
+    () => getQuestionTitleClass(questionText),
+    [questionText]
   );
 
   const canReveal =
@@ -371,7 +543,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
 
       if (settings.feedbackMode === 'end') {
         const correctCount = quizQuestions.reduce((count, question) => {
-          return answers[question.id] === question.correctAnswer ? count + 1 : count;
+          return evaluateQuizAnswer(answers[question.id], question) ? count + 1 : count;
         }, 0);
 
         if (correctCount > 0) {
@@ -429,13 +601,17 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   // Memoize handlers to prevent unnecessary re-renders
   const handleStartQuiz = useCallback(() => {
     if (isGenerating) return;
+    if (onGenerateQuiz && fileId && selectedQuestionTypes.length === 0) {
+      setSubmissionError('Select at least one question format to build your quiz.');
+      return;
+    }
 
     if (onGenerateQuiz && fileId) {
       // Trigger quiz generation with current settings
       setWaitingForGeneration(true);
       setGenerationCycleStarted(false);
       setSubmissionError(null);
-      onGenerateQuiz(settings.difficulty, numQuestions);
+      onGenerateQuiz('medium', numQuestions, selectedQuestionTypes);
     } else {
       if (sanitizedQuestions.length === 0) return;
       initializeQuizSession(sanitizedQuestions);
@@ -444,8 +620,8 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
     isGenerating,
     onGenerateQuiz,
     fileId,
-    settings.difficulty,
     numQuestions,
+    selectedQuestionTypes,
     sanitizedQuestions,
     initializeQuizSession,
   ]);
@@ -476,7 +652,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   const handleRevealAnswer = useCallback(() => {
     if (!currentQuestion || !userAnswer) return;
 
-    if (userAnswer === currentQuestion.correctAnswer) {
+    if (evaluateQuizAnswer(userAnswer, currentQuestion)) {
       playCorrectAnswerDing();
     }
 
@@ -499,27 +675,24 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
 
   const applyPreset = useCallback((nextPreset: Exclude<AttemptPreset, 'custom'>) => {
     setPreset(nextPreset);
+    setSelectedQuestionTypes(['MULTIPLE_CHOICE', 'TRUE_FALSE', 'FILL_IN_THE_BLANK']);
 
     if (nextPreset === 'practice') {
       setSettings({
-        difficulty: 'medium',
         timeLimit: 'endless',
         feedbackMode: 'instant',
         navigationMode: 'free',
-        shuffleQuestions: false,
       });
       setNumQuestions(10);
       return;
     }
 
     setSettings({
-      difficulty: 'hard',
       timeLimit: '15m',
       feedbackMode: 'end',
       navigationMode: 'locked',
-      shuffleQuestions: true,
     });
-    setNumQuestions(20);
+    setNumQuestions(25);
   }, []);
 
   const updateSettings = useCallback((next: Partial<QuizSettings>) => {
@@ -528,6 +701,16 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
       ...prev,
       ...next,
     }));
+  }, []);
+
+  const toggleQuestionType = useCallback((questionType: QuizQuestionType) => {
+    setPreset('custom');
+    setSelectedQuestionTypes((prev) => {
+      if (prev.includes(questionType)) {
+        return prev.filter((value) => value !== questionType);
+      }
+      return [...prev, questionType];
+    });
   }, []);
 
   const handleRestart = useCallback(() => {
@@ -561,7 +744,9 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
 
   // If no questions provided yet, or pre-test setup is open
   if (showSettings) {
-    const canStart = (onGenerateQuiz && fileId) || sanitizedQuestions.length > 0;
+    const canStart = onGenerateQuiz && fileId
+      ? selectedQuestionTypes.length > 0
+      : sanitizedQuestions.length > 0;
 
     return (
       <div className="max-w-5xl mx-auto px-2 sm:px-0">
@@ -579,14 +764,13 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                   Set Up Your Quiz Session
                 </h2>
                 <p className="text-sm text-slate-600 dark:text-slate-300 mt-1.5">
-                  Choose a mode, then tune difficulty, pacing, and feedback. Higher difficulty
-                  increases reasoning depth, while more questions improve coverage across your
-                  selected files.
+                  Pick a starting preset, then fine-tune your run. Manual adjustments automatically switch
+                  this session to Custom mode.
                 </p>
               </div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-900/70 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
+              <div className="shrink-0 whitespace-nowrap inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-900/70 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
                 <SlidersHorizontal className="w-3.5 h-3.5" />
-                Pre-Quiz Configuration
+                {preset === 'custom' ? 'Custom Configuration Active' : 'Preset Configuration Active'}
               </div>
             </div>
 
@@ -594,100 +778,150 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               <button
                 onClick={() => applyPreset('practice')}
                 disabled={isGenerating || waitingForGeneration}
-                className={`rounded-2xl border p-4 text-left transition-colors ${
+                className={`rounded-2xl border-2 p-4 text-left transition-colors ${
                   preset === 'practice'
                     ? 'border-emerald-400 bg-emerald-50 text-emerald-900 dark:border-emerald-500/70 dark:bg-emerald-500/10 dark:text-emerald-200'
-                    : 'border-slate-200 bg-white/80 text-slate-700 hover:border-slate-300 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-white/20'
+                    : 'border-slate-200 bg-white/90 text-slate-700 hover:border-slate-300 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-white/20'
                 }`}
               >
-                <div className="flex items-center gap-2 mb-1.5">
-                  <ShieldCheck className="w-4 h-4" />
-                  <span className="font-semibold">Practice</span>
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4" />
+                    <span className="font-semibold">Practice</span>
+                  </div>
+                  {preset === 'practice' && (
+                    <span className="rounded-full bg-emerald-100 dark:bg-emerald-500/20 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em]">
+                      Selected
+                    </span>
+                  )}
                 </div>
-                <p className="text-xs opacity-90">
-                  Best for learning: instant correctness + explanations, no timer pressure, and
-                  flexible backtracking.
+                <p className="text-xs opacity-90 leading-relaxed">
+                  Learn mode with instant correctness checks, visible explanations, and no timer pressure.
+                </p>
+                <p className="text-[11px] mt-2 font-medium opacity-75">
+                  Best for: building confidence and catching mistakes quickly.
                 </p>
               </button>
 
               <button
                 onClick={() => applyPreset('exam')}
                 disabled={isGenerating || waitingForGeneration}
-                className={`rounded-2xl border p-4 text-left transition-colors ${
+                className={`rounded-2xl border-2 p-4 text-left transition-colors ${
                   preset === 'exam'
                     ? 'border-amber-400 bg-amber-50 text-amber-900 dark:border-amber-500/70 dark:bg-amber-500/10 dark:text-amber-200'
-                    : 'border-slate-200 bg-white/80 text-slate-700 hover:border-slate-300 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-white/20'
+                    : 'border-slate-200 bg-white/90 text-slate-700 hover:border-slate-300 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-white/20'
                 }`}
               >
-                <div className="flex items-center gap-2 mb-1.5">
-                  <TimerReset className="w-4 h-4" />
-                  <span className="font-semibold">Exam</span>
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="flex items-center gap-2">
+                    <TimerReset className="w-4 h-4" />
+                    <span className="font-semibold">Exam</span>
+                  </div>
+                  {preset === 'exam' && (
+                    <span className="rounded-full bg-amber-100 dark:bg-amber-500/20 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em]">
+                      Selected
+                    </span>
+                  )}
                 </div>
-                <p className="text-xs opacity-90">
-                  Best for testing: timed run, shuffled order, locked backtracking, and full review
-                  after submission.
+                <p className="text-xs opacity-90 leading-relaxed">
+                  Test mode with a timer, locked backtracking, and full review after submission.
+                </p>
+                <p className="text-[11px] mt-2 font-medium opacity-75">
+                  Best for: realistic exam simulation under pressure.
                 </p>
               </button>
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-2">
-              <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-900/70 p-4">
-                <label className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white mb-2.5">
-                  <Zap className="w-4 h-4 text-amber-500" />
-                  Difficulty
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['easy', 'medium', 'hard'] as Difficulty[]).map((level) => (
-                    <motion.button
-                      key={level}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => updateSettings({ difficulty: level })}
-                      disabled={isGenerating || waitingForGeneration}
-                      className={`rounded-xl py-2.5 text-sm font-semibold border transition-colors ${
-                        settings.difficulty === level
-                          ? 'border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900'
-                          : 'border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-white/15 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
-                      } disabled:opacity-50`}
-                    >
-                      {level.charAt(0).toUpperCase() + level.slice(1)}
-                    </motion.button>
-                  ))}
-                </div>
+            {preset === 'custom' && (
+              <div className="rounded-2xl border border-brand-200/80 dark:border-accent-500/30 bg-brand-50/70 dark:bg-accent-500/10 px-4 py-2.5">
+                <p className="text-xs sm:text-sm font-medium text-brand-800 dark:text-accent-200">
+                  Custom mode is active. Your setting changes override Practice and Exam defaults.
+                </p>
               </div>
+            )}
 
-              <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-900/70 p-4">
-                <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2.5">
+            <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+              <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-900/70 p-3.5">
+                <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
                   Number of Questions
                 </label>
-                <div className="flex items-center justify-center gap-4">
+                <div className="flex items-center justify-center gap-3">
                   <button
                     onClick={() => {
                       setPreset('custom');
                       setNumQuestions((prev) => Math.max(10, prev - 5));
                     }}
                     disabled={isGenerating || waitingForGeneration || numQuestions <= 10}
-                    className="w-10 h-10 rounded-xl border border-slate-300 dark:border-white/15 bg-slate-50 dark:bg-slate-800 text-xl font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40"
+                    className="w-9 h-9 rounded-lg border border-slate-300 dark:border-white/15 bg-slate-50 dark:bg-slate-800 text-lg font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40"
                   >
                     −
                   </button>
-                  <span className="w-20 text-center text-3xl font-bold text-slate-900 dark:text-white tabular-nums">
+                  <span className="w-14 text-center text-2xl font-bold text-slate-900 dark:text-white tabular-nums">
                     {numQuestions}
                   </span>
                   <button
                     onClick={() => {
                       setPreset('custom');
-                      setNumQuestions((prev) => Math.min(25, prev + 5));
+                      setNumQuestions((prev) => Math.min(40, prev + 5));
                     }}
-                    disabled={isGenerating || waitingForGeneration || numQuestions >= 25}
-                    className="w-10 h-10 rounded-xl border border-slate-300 dark:border-white/15 bg-slate-50 dark:bg-slate-800 text-xl font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40"
+                    disabled={isGenerating || waitingForGeneration || numQuestions >= 40}
+                    className="w-9 h-9 rounded-lg border border-slate-300 dark:border-white/15 bg-slate-50 dark:bg-slate-800 text-lg font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40"
                   >
                     +
                   </button>
                 </div>
-                <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-2">
-                  10-25 questions. Higher counts broaden topic coverage.
+                <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-1.5">
+                  10-40 questions. Higher counts broaden topic coverage.
                 </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-900/70 p-4">
+                <label className="flex items-center justify-between text-sm font-semibold text-slate-900 dark:text-white mb-2.5">
+                  <span>Question Types</span>
+                  <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                    {selectedQuestionTypes.length} selected
+                  </span>
+                </label>
+                <div className="grid gap-2">
+                  {QUESTION_TYPE_OPTIONS.map((typeOption) => {
+                    const isActive = selectedQuestionTypes.includes(typeOption.value);
+                    return (
+                      <button
+                        key={typeOption.value}
+                        onClick={() => toggleQuestionType(typeOption.value)}
+                        disabled={isGenerating || waitingForGeneration}
+                        className={`rounded-xl border-2 px-3 py-2 text-left transition-colors ${
+                          isActive
+                            ? 'border-brand-500 bg-brand-50 text-brand-900 dark:border-accent-400 dark:bg-accent-500/20 dark:text-accent-100'
+                            : 'border-slate-300/90 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <span
+                            className={`flex h-4.5 w-4.5 items-center justify-center rounded border-2 ${
+                              isActive
+                                ? 'border-brand-600 bg-brand-600 dark:border-accent-400 dark:bg-accent-400'
+                                : 'border-slate-500 dark:border-slate-400 bg-white dark:bg-slate-950'
+                            }`}
+                            aria-hidden="true"
+                          >
+                            {isActive && (
+                              <svg viewBox="0 0 16 16" className="h-3 w-3 text-white dark:text-slate-900" fill="currentColor">
+                                <path d="M6.2 11.4 2.8 8l1.1-1.1 2.3 2.3 5-5L12.3 5.3z" />
+                              </svg>
+                            )}
+                          </span>
+                          <p className="text-sm font-semibold">{typeOption.label}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+                {selectedQuestionTypes.length === 0 && (
+                  <p className="text-xs text-rose-600 dark:text-rose-300 mt-2">
+                    Select at least one question type to continue.
+                  </p>
+                )}
               </div>
 
               <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-900/70 p-4">
@@ -699,8 +933,6 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                   {(['endless', '5m', '10m', '15m', '20m'] as TimeLimit[]).map((time) => (
                     <motion.button
                       key={time}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.97 }}
                       onClick={() => updateSettings({ timeLimit: time })}
                       disabled={isGenerating || waitingForGeneration}
                       className={`rounded-xl py-2 text-xs sm:text-sm font-semibold border transition-colors ${
@@ -745,34 +977,6 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                     </button>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => updateSettings({ navigationMode: settings.navigationMode === 'free' ? 'locked' : 'free' })}
-                    disabled={isGenerating || waitingForGeneration}
-                    className={`inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold transition-colors ${
-                      settings.navigationMode === 'free'
-                        ? 'border-cyan-400 bg-cyan-50 text-cyan-800 dark:border-cyan-500/60 dark:bg-cyan-500/10 dark:text-cyan-200'
-                        : 'border-slate-300 bg-slate-50 text-slate-600 dark:border-white/15 dark:bg-slate-800 dark:text-slate-300'
-                    }`}
-                  >
-                    <ArrowRightLeft className="w-3.5 h-3.5" />
-                    {settings.navigationMode === 'free' ? 'Backtracking On' : 'Backtracking Off'}
-                  </button>
-
-                  <button
-                    onClick={() => updateSettings({ shuffleQuestions: !settings.shuffleQuestions })}
-                    disabled={isGenerating || waitingForGeneration}
-                    className={`inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold transition-colors ${
-                      settings.shuffleQuestions
-                        ? 'border-violet-400 bg-violet-50 text-violet-800 dark:border-violet-500/60 dark:bg-violet-500/10 dark:text-violet-200'
-                        : 'border-slate-300 bg-slate-50 text-slate-600 dark:border-white/15 dark:bg-slate-800 dark:text-slate-300'
-                    }`}
-                  >
-                    <Shuffle className="w-3.5 h-3.5" />
-                    {settings.shuffleQuestions ? 'Shuffled' : 'Fixed Order'}
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -781,15 +985,19 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                 {preset === 'custom' ? 'Custom setup' : `${preset.charAt(0).toUpperCase() + preset.slice(1)} setup`}:
                 <span className="font-normal text-slate-600 dark:text-slate-300">
                   {' '}
-                  {numQuestions} questions, {settings.difficulty} difficulty,{' '}
-                  {settings.timeLimit === 'endless' ? 'no timer' : settings.timeLimit}, {settings.feedbackMode === 'end' ? 'answers reviewed at end' : 'instant answer reveal'}.
+                  {numQuestions} questions,{' '}
+                  {settings.timeLimit === 'endless' ? 'no timer' : settings.timeLimit}, {settings.feedbackMode === 'end' ? 'answers reviewed at end' : 'instant answer reveal'}, formats: {selectedQuestionTypes.length > 0
+                    ? selectedQuestionTypes
+                        .map((type) =>
+                          QUESTION_TYPE_OPTIONS.find((option) => option.value === type)?.label || type
+                        )
+                        .join(', ')
+                    : 'none selected'}.
                 </span>
               </p>
             </div>
 
             <motion.button
-              whileHover={{ scale: !canStart || isGenerating || waitingForGeneration ? 1 : 1.01 }}
-              whileTap={{ scale: !canStart || isGenerating || waitingForGeneration ? 1 : 0.98 }}
               onClick={handleStartQuiz}
               disabled={!canStart || isGenerating || waitingForGeneration}
               className="w-full rounded-2xl px-6 py-3.5 text-base font-semibold text-white bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-200 dark:text-slate-900 hover:from-slate-800 hover:to-slate-600 dark:hover:from-slate-100 dark:hover:to-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -833,10 +1041,22 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
 
   // Final score screen - show when submitted but NOT in review mode
   if (isSubmitted && results && !reviewMode) {
-    const isPassing = results.percentage >= 70;
+    const finalResults = results as QuizSubmitResult;
+    const finalPercentage = Number(finalResults.percentage || 0);
+    const finalScore = Number(finalResults.score || 0);
+    const finalTotal = Number(finalResults.total || 0);
+    const improvementTips =
+      finalResults.improvementTips ||
+      buildFallbackImprovementTips({
+        score: finalScore,
+        total: finalTotal,
+        questions: quizQuestions,
+        answers,
+      });
+    const isPassing = finalPercentage >= 70;
 
     return (
-      <div className="max-w-lg mx-auto px-2 sm:px-0">
+      <div className="max-w-3xl mx-auto px-2 sm:px-0">
         <div className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950 p-6 sm:p-8 text-center shadow-xl">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className={`w-11 h-11 rounded-full flex items-center justify-center ${isPassing ? 'bg-emerald-100 dark:bg-emerald-500/20' : 'bg-amber-100 dark:bg-amber-500/20'}`}>
@@ -855,10 +1075,10 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
 
           <div className="mb-5">
             <p className={`text-6xl font-bold ${isPassing ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
-              {results.percentage}%
+              {finalPercentage}%
             </p>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
-              {results.score}/{results.total} correct answers
+              {finalScore}/{finalTotal} correct answers
             </p>
           </div>
 
@@ -868,10 +1088,65 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               : 'You can still enter review mode to revisit every question.'}
           </div>
 
+          {improvementTips && (
+            <div className="rounded-2xl border border-brand-200/70 dark:border-accent-500/25 bg-brand-50/70 dark:bg-accent-500/10 p-4 mb-5 text-left space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-bold uppercase tracking-[0.14em] text-brand-700 dark:text-accent-300">
+                  Improvement Tips
+                </p>
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-[0.08em]">
+                  {finalResults.improvementTipsSource === 'ai' ? 'AI coach' : 'smart guide'}
+                </span>
+              </div>
+              {improvementTips.summary && (
+                <p className="text-sm text-slate-700 dark:text-slate-200 leading-6">{improvementTips.summary}</p>
+              )}
+              {improvementTips.strengths?.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-emerald-700 dark:text-emerald-300 mb-1">
+                    Strengths
+                  </p>
+                  <ul className="space-y-1 text-sm text-slate-700 dark:text-slate-200 list-disc pl-5">
+                    {improvementTips.strengths.map((item, index) => (
+                      <li key={`strength-${index}`}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {improvementTips.improvements?.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-amber-700 dark:text-amber-300 mb-1">
+                    Focus Areas
+                  </p>
+                  <ul className="space-y-1 text-sm text-slate-700 dark:text-slate-200 list-disc pl-5">
+                    {improvementTips.improvements.map((item, index) => (
+                      <li key={`improvement-${index}`}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {improvementTips.nextSteps?.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-cyan-700 dark:text-cyan-300 mb-1">
+                    Next Steps
+                  </p>
+                  <ul className="space-y-1 text-sm text-slate-700 dark:text-slate-200 list-disc pl-5">
+                    {improvementTips.nextSteps.map((item, index) => (
+                      <li key={`step-${index}`}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {finalResults.aiTipsUpgradeMessage && (
+                <p className="text-xs text-slate-500 dark:text-slate-300">
+                  {finalResults.aiTipsUpgradeMessage}
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
               onClick={() => {
                 setCurrentIndex(0);
                 setReviewMode(true);
@@ -882,8 +1157,6 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               Review Answers
             </motion.button>
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
               onClick={handleRestart}
               className="px-4 py-3 bg-slate-900 text-white dark:bg-white dark:text-slate-900 rounded-xl text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
             >
@@ -896,30 +1169,31 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   }
 
   return (
-    <div className="flex flex-col h-full max-w-5xl mx-auto px-2 sm:px-0">
+    <div className="relative flex flex-col h-full max-w-6xl mx-auto px-2 sm:px-0">
+      <div className="pointer-events-none absolute inset-x-6 top-8 -z-10 h-40 rounded-full bg-gradient-to-r from-brand-500/12 via-fuchsia-500/12 to-orange-400/12 dark:from-accent-500/12 dark:via-violet-500/12 dark:to-brand-400/12 blur-3xl" />
+      <div className="pointer-events-none absolute inset-x-10 bottom-24 -z-10 h-44 rounded-full bg-gradient-to-r from-orange-400/10 via-brand-500/10 to-pink-500/10 dark:from-violet-500/10 dark:via-accent-500/10 dark:to-brand-400/10 blur-3xl" />
       {/* Header - Fixed */}
       <div className="flex-shrink-0 mb-3">
-        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950 p-4 sm:p-5 shadow-sm">
+        <div className="rounded-3xl border border-brand-200/70 dark:border-accent-500/25 bg-white/80 dark:bg-slate-950/70 backdrop-blur-xl p-4 sm:p-5 shadow-xl shadow-brand-500/10 dark:shadow-accent-500/10">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+              <p className="text-[10px] uppercase tracking-[0.24em] font-semibold text-brand-600 dark:text-accent-300 mb-1">
                 Active Attempt
               </p>
-              <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white break-words">{title}</h3>
+              <h3 className="text-lg sm:text-2xl font-extrabold text-slate-900 dark:text-white break-words">{title}</h3>
             </div>
             <div className="flex items-center gap-2 flex-wrap justify-start sm:justify-end">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200">
-                <Zap className="w-3.5 h-3.5" />
-                {settings.difficulty}
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-50 to-orange-50 dark:from-violet-500/20 dark:to-accent-500/20 border border-brand-200 dark:border-violet-500/30 px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-100">
                 {settings.feedbackMode === 'end' ? 'Review at end' : 'Instant review'}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-50 to-pink-50 dark:from-brand-500/20 dark:to-accent-500/20 border border-brand-200 dark:border-brand-500/30 px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-100">
+                {QUESTION_TYPE_LABELS[currentQuestionType]}
               </span>
             </div>
           </div>
 
           <div className="flex items-center justify-between mb-2">
-            <span className="px-3 py-1 rounded-lg border border-slate-200 dark:border-white/10 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-900">
+            <span className="px-3 py-1 rounded-lg border border-brand-200/70 dark:border-accent-500/30 text-sm font-semibold text-slate-700 dark:text-slate-100 bg-brand-50/80 dark:bg-accent-500/10">
               Question {currentIndex + 1} of {quizQuestions.length}
             </span>
             <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
@@ -927,9 +1201,9 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             </span>
           </div>
 
-          <div className="w-full bg-slate-100 dark:bg-slate-900 rounded-full h-2.5 border border-slate-200 dark:border-white/10 overflow-hidden">
+          <div className="w-full bg-white/80 dark:bg-slate-900/80 rounded-full h-2.5 border border-brand-200/70 dark:border-accent-500/20 overflow-hidden">
             <div
-              className="h-full bg-slate-900 dark:bg-white transition-[width] duration-200"
+              className="h-full bg-gradient-to-r from-brand-500 via-fuchsia-500 to-orange-500 dark:from-accent-400 dark:via-violet-500 dark:to-brand-400 transition-[width] duration-300"
               style={{
                 width: `${((currentIndex + 1) / quizQuestions.length) * 100}%`,
               }}
@@ -956,7 +1230,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
       </div>
 
       {/* Scrollable Content Area */}
-      <div className="flex-1 overflow-y-auto mb-3 pb-8 max-w-5xl mx-auto w-full">
+      <div className="flex-1 overflow-y-auto mb-3 pb-8 max-w-6xl mx-auto w-full">
         {/* Question */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -966,8 +1240,9 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             transition={{ duration: 0.15 }}
             className="relative mb-4"
           >
-            <div className="bg-white dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-white/10 p-5 shadow-sm">
-              <div className="flex items-start gap-3">
+            <div className="relative overflow-hidden rounded-3xl border border-brand-200/70 dark:border-accent-500/25 bg-white/85 dark:bg-slate-950/75 backdrop-blur-xl p-5 sm:p-6 shadow-xl shadow-brand-500/10 dark:shadow-accent-500/10">
+              <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-brand-500 via-fuchsia-500 to-orange-500 dark:from-accent-400 dark:via-violet-500 dark:to-brand-400" />
+              <div className="relative z-10 flex items-start gap-3">
                 <div className="flex-1 prose prose-lg dark:prose-invert max-w-none">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
@@ -1028,7 +1303,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                       ),
                     }}
                   >
-                    {compactQuestionText}
+                    {questionText}
                   </ReactMarkdown>
                 </div>
                 {/* TTS Button for Question */}
@@ -1039,11 +1314,12 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                       stopTTS();
                       setPlayingItem(null);
                     } else {
-                      const cleanText = currentQuestion.question
+                      const cleanText = questionText // use the modified questionText
                         .replace(/#{1,6}\s/g, '')
                         .replace(/\*\*/g, '')
                         .replace(/\*/g, '')
                         .replace(/`/g, '')
+                        .replace(/_{2,}/g, 'blank') // Replace __________ with "blank" for TTS
                         .trim();
                       setPlayingItem(itemId);
                       toggleTTS(cleanText);
@@ -1064,121 +1340,161 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
           </motion.div>
         </AnimatePresence>
 
-        {/* Enhanced Option Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-          {currentQuestion.options.map((option, index) => {
-            const isSelected = userAnswer === option;
-            const isCorrectAnswer = option === currentQuestion.correctAnswer;
-            const shouldRevealCorrectness = isSubmitted || (requiresRevealStep && isRevealed);
-            const isCorrect = shouldRevealCorrectness && isCorrectAnswer;
-            const isWrong = shouldRevealCorrectness && isSelected && !isCorrectAnswer;
-            const keyLabel = ['A', 'B', 'C', 'D'][index];
-
-            return (
-              <motion.button
-                key={index}
-                initial={false}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.1 }}
-                onClick={() => handleAnswerSelect(option)}
-                disabled={isSubmitted || (requiresRevealStep && isRevealed)}
-                whileTap={!isSubmitted && !(requiresRevealStep && isRevealed) ? { scale: 0.98 } : {}}
-                className={`group relative w-full text-left p-3.5 rounded-xl border transition-all duration-150 text-base cursor-pointer ${
-                  isCorrect
-                    ? 'border-emerald-400/70 dark:border-emerald-500/60 bg-emerald-50 dark:bg-emerald-500/10 text-slate-900 dark:text-slate-100'
-                    : isWrong
-                      ? 'border-rose-400/70 dark:border-rose-500/60 bg-rose-50 dark:bg-rose-500/10 text-slate-900 dark:text-slate-100'
-                      : isSelected && !isRevealed
-                        ? 'border-slate-400 dark:border-slate-500 bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-slate-100'
-                        : 'border-slate-200 dark:border-zinc-700 hover:border-slate-300 dark:hover:border-zinc-600 bg-white dark:bg-zinc-900 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-zinc-900'
-                } ${isSubmitted || (requiresRevealStep && isRevealed) ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+        {/* Enhanced Answer Cards */}
+        {currentQuestionType === 'FILL_IN_THE_BLANK' ? (
+          <div className="rounded-3xl border border-brand-200/70 dark:border-accent-500/25 bg-white/90 dark:bg-slate-950/75 p-4 sm:p-5 backdrop-blur-xl">
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+              Your answer
+            </label>
+            <input
+              value={userAnswer || ''}
+              onChange={(event) => handleAnswerSelect(event.target.value)}
+              disabled={isSubmitted || (requiresRevealStep && isRevealed)}
+              placeholder="Type your answer here"
+              className="w-full rounded-xl border border-brand-200 dark:border-accent-500/30 bg-white dark:bg-slate-900 px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500/40 dark:focus:ring-accent-400/40"
+            />
+            {(isSubmitted || (requiresRevealStep && isRevealed)) && (
+              <div
+                className={`mt-3 rounded-xl border px-3 py-2 text-sm ${
+                  isCurrentAnswerCorrect
+                    ? 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200'
+                    : 'border-rose-300 bg-rose-50 text-rose-800 dark:border-rose-500/40 dark:bg-rose-500/10 dark:text-rose-200'
+                }`}
               >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 flex-1 pointer-events-none">
-                    {/* Keyboard Shortcut Keycap */}
-                    <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-zinc-900 text-slate-700 dark:text-white font-bold text-sm border border-slate-300 dark:border-zinc-600 group-hover:border-brand-300 dark:group-hover:border-accent-400 transition-colors duration-150 shadow-sm">
-                      {keyLabel}
-                    </span>
-                    <div className="font-semibold flex-1 text-[0.98rem]">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
-                        rehypePlugins={[rehypeHighlight]}
-                        components={{
-                          p: ({ node, ...props }) => <span className="inline" {...props} />,
-                          strong: ({ node, ...props }) => <strong className="font-bold text-slate-900 dark:text-white" {...props} />,
-                          em: ({ node, ...props }) => <em className="italic" {...props} />,
-                          code: ({ node, ...props }) => (
-                            <code className="bg-slate-200/50 dark:bg-zinc-700/50 text-brand-700 dark:text-accent-300 px-2 py-0.5 rounded text-sm font-mono border border-slate-300 dark:border-zinc-600" {...props} />
-                          ),
-                        }}
-                      >
-                        {option}
-                      </ReactMarkdown>
+                {isCurrentAnswerCorrect
+                  ? 'Correct answer.'
+                  : `Correct answer: ${currentQuestion.correctAnswer?.split('|')[0]}`}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {currentQuestion.options.map((option, index) => {
+              const isSelected = userAnswer === option;
+              const shouldRevealCorrectness = isSubmitted || (requiresRevealStep && isRevealed);
+              const isCorrectAnswer = evaluateQuizAnswer(option, currentQuestion);
+              const isCorrect = shouldRevealCorrectness && isCorrectAnswer;
+              const isWrong = shouldRevealCorrectness && isSelected && !isCorrectAnswer;
+              const keyLabel = String.fromCharCode(65 + index);
+
+              return (
+                <motion.button
+                  key={index}
+                  initial={false}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.1 }}
+                  onClick={() => handleAnswerSelect(option)}
+                  disabled={isSubmitted || (requiresRevealStep && isRevealed)}
+                  className={`group relative w-full overflow-hidden text-left p-4 rounded-2xl border transition-all duration-200 text-base ${
+                    isCorrect
+                      ? 'border-emerald-600 dark:border-emerald-400 bg-emerald-100 dark:bg-emerald-900/45 text-emerald-950 dark:text-emerald-100 shadow-lg shadow-emerald-500/20 ring-1 ring-emerald-500/40 dark:ring-emerald-300/40'
+                      : isWrong
+                        ? 'border-rose-600 dark:border-rose-400 bg-rose-100 dark:bg-rose-900/45 text-rose-950 dark:text-rose-100 shadow-lg shadow-rose-500/20 ring-1 ring-rose-500/40 dark:ring-rose-300/40'
+                        : isSelected && !isRevealed
+                          ? 'border-brand-500 dark:border-accent-400 bg-gradient-to-br from-brand-100 to-orange-100 dark:from-accent-500/25 dark:to-violet-500/25 text-slate-900 dark:text-slate-100 shadow-lg shadow-brand-500/15 ring-1 ring-brand-400/35 dark:ring-accent-300/35'
+                          : 'border-brand-200/70 dark:border-white/10 hover:border-brand-400 dark:hover:border-accent-400/40 bg-white/90 dark:bg-slate-950/70 text-slate-800 dark:text-slate-200 hover:bg-brand-50/70 dark:hover:bg-slate-900/90'
+                  } ${isSubmitted || (requiresRevealStep && isRevealed) ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                >
+                  <div
+                    className={`pointer-events-none absolute inset-y-0 left-0 w-1 opacity-80 ${
+                      isCorrect
+                        ? 'bg-gradient-to-b from-emerald-600 to-emerald-500 dark:from-emerald-400 dark:to-emerald-300'
+                        : isWrong
+                          ? 'bg-gradient-to-b from-rose-600 to-rose-500 dark:from-rose-400 dark:to-rose-300'
+                          : 'bg-gradient-to-b from-brand-500 to-orange-500 dark:from-accent-400 dark:to-violet-500'
+                    }`}
+                  />
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 flex-1 pointer-events-none">
+                      <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-white to-brand-50 dark:from-slate-900 dark:to-accent-500/20 text-slate-700 dark:text-white font-bold text-sm border border-brand-200 dark:border-accent-400/40 transition-colors duration-150 shadow-sm">
+                        {keyLabel}
+                      </span>
+                      <div className="font-semibold flex-1 text-[0.98rem] leading-7">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          rehypePlugins={[rehypeHighlight]}
+                          components={{
+                            p: ({ node, ...props }) => <span className="inline" {...props} />,
+                            strong: ({ node, ...props }) => <strong className="font-bold text-slate-900 dark:text-white" {...props} />,
+                            em: ({ node, ...props }) => <em className="italic" {...props} />,
+                            code: ({ node, ...props }) => (
+                              <code className="bg-slate-200/50 dark:bg-zinc-700/50 text-brand-700 dark:text-accent-300 px-2 py-0.5 rounded text-sm font-mono border border-slate-300 dark:border-zinc-600" {...props} />
+                            ),
+                          }}
+                        >
+                          {option}
+                        </ReactMarkdown>
+                      </div>
                     </div>
-                  </div>
-                  {/* TTS Speaker Button for Option */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const itemId = `option-${currentQuestion.id}-${index}`;
-                      if (playingItem === itemId && isPlaying) {
-                        stopTTS();
-                        setPlayingItem(null);
-                      } else {
-                        const cleanText = option
-                          .replace(/\*\*/g, '')
-                          .replace(/\*/g, '')
-                          .replace(/`/g, '')
-                          .trim();
-                        setPlayingItem(itemId);
-                        toggleTTS(cleanText);
-                      }
-                    }}
-                    disabled={isTTSLoading}
-                    className="flex-shrink-0 p-1.5 text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-cyan-500/20 rounded-md transition-colors disabled:opacity-50 pointer-events-auto"
-                    title="Read option aloud"
-                  >
-                    {isTTSLoading && playingItem === `option-${currentQuestion.id}-${index}` ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Volume2 className="w-4 h-4" />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const itemId = `option-${currentQuestion.id}-${index}`;
+                        if (playingItem === itemId && isPlaying) {
+                          stopTTS();
+                          setPlayingItem(null);
+                        } else {
+                          const cleanText = option
+                            .replace(/\*\*/g, '')
+                            .replace(/\*/g, '')
+                            .replace(/`/g, '')
+                            .trim();
+                          setPlayingItem(itemId);
+                          toggleTTS(cleanText);
+                        }
+                      }}
+                      disabled={isTTSLoading}
+                      className="flex-shrink-0 p-1.5 text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-cyan-500/20 rounded-md transition-colors disabled:opacity-50 pointer-events-auto"
+                      title="Read option aloud"
+                    >
+                      {isTTSLoading && playingItem === `option-${currentQuestion.id}-${index}` ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Volume2 className="w-4 h-4" />
+                      )}
+                    </button>
+                    {shouldRevealCorrectness && (
+                      <>
+                        {isCorrect && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-700 dark:bg-emerald-500 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-white">
+                            <svg
+                              className="w-3.5 h-3.5 flex-shrink-0"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Correct
+                          </span>
+                        )}
+                        {isWrong && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-rose-700 dark:bg-rose-500 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-white">
+                            <svg
+                              className="w-3.5 h-3.5 flex-shrink-0"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Incorrect
+                          </span>
+                        )}
+                      </>
                     )}
-                  </button>
-                  {shouldRevealCorrectness && (
-                    <>
-                      {isCorrect && (
-                        <svg
-                          className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      )}
-                      {isWrong && (
-                        <svg
-                          className="w-5 h-5 sm:w-6 sm:h-6 text-red-600 flex-shrink-0"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      )}
-                    </>
-                  )}
-                </div>
-              </motion.button>
-            );
-          })}
-        </div>
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Explanation panel */}
         <div className="mt-3">
@@ -1187,11 +1503,11 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="p-4 sm:p-5 bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-700 shadow-sm"
+              className="p-4 sm:p-5 bg-white/90 dark:bg-slate-950/80 rounded-3xl border border-brand-200/70 dark:border-accent-500/25 backdrop-blur-xl shadow-xl shadow-brand-500/10 dark:shadow-accent-500/10"
             >
               <div className="flex items-start gap-2.5">
                 <svg
-                  className="w-4 h-4 text-slate-500 dark:text-slate-400 mt-0.5 flex-shrink-0"
+                  className="w-4 h-4 text-brand-600 dark:text-accent-300 mt-0.5 flex-shrink-0"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -1202,7 +1518,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                   />
                 </svg>
                 <div className="flex-1">
-                  <p className="font-bold text-slate-900 dark:text-white mb-2 text-sm tracking-wide">Explanation</p>
+                  <p className="font-bold text-slate-900 dark:text-white mb-2 text-sm tracking-[0.14em] uppercase">Explanation</p>
                   <div className="prose prose-sm dark:prose-invert max-w-none">
                     <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
@@ -1245,7 +1561,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             </div>
             </motion.div>
           ) : (
-            <div className="rounded-2xl border border-slate-200 dark:border-zinc-700 bg-slate-50/60 dark:bg-zinc-900/40 min-h-[96px] flex items-center justify-center px-4 py-5">
+            <div className="rounded-3xl border border-brand-200/70 dark:border-accent-500/25 bg-white/70 dark:bg-slate-950/60 min-h-[96px] flex items-center justify-center px-4 py-5 backdrop-blur-lg">
               <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
                 {settings.feedbackMode === 'end'
                   ? 'Explanations will unlock after submission in review mode.'
@@ -1258,10 +1574,10 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
       </div>
 
       {/* Navigation - Sticky Footer */}
-      <div className="sticky bottom-0 z-20 flex-shrink-0 pt-3 pb-3 bg-white/95 dark:bg-slate-950/95 border-t border-slate-200/80 dark:border-white/10 backdrop-blur-sm">
+      <div className="sticky bottom-0 z-20 flex-shrink-0 mt-2 rounded-2xl border border-brand-200/70 dark:border-accent-500/25 bg-white/85 dark:bg-slate-950/80 backdrop-blur-xl px-3 py-3 shadow-xl shadow-brand-500/10 dark:shadow-accent-500/10">
         {/* Submission Error Display */}
         {submissionError && (
-          <div className="flex items-center justify-center gap-2 mb-3 px-4 py-2 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400 text-sm font-medium">
+          <div className="flex items-center justify-center gap-2 mb-3 px-4 py-2 bg-gradient-to-r from-rose-100 to-red-100 dark:from-rose-500/20 dark:to-red-500/20 border border-rose-300/60 dark:border-rose-400/40 rounded-xl text-rose-700 dark:text-rose-200 text-sm font-medium">
             <AlertTriangle className="w-4 h-4 flex-shrink-0" />
             <span>{submissionError}</span>
           </div>
@@ -1270,30 +1586,24 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
         {canReviewNavigate ? (
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3">
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
               onClick={handlePrevious}
               disabled={currentIndex === 0}
-              className="px-6 py-3 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-white/20 rounded-xl text-slate-700 dark:text-white font-semibold hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors w-full sm:w-auto"
+              className="px-6 py-3 bg-brand-50 dark:bg-slate-900 border border-brand-200 dark:border-accent-500/30 rounded-xl text-slate-700 dark:text-white font-semibold hover:bg-brand-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors w-full sm:w-auto"
             >
               Previous
             </motion.button>
 
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
               onClick={handleNext}
               disabled={currentIndex === quizQuestions.length - 1}
-              className="px-6 py-3 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-white/20 rounded-xl text-slate-700 dark:text-white font-semibold hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors w-full sm:w-auto"
+              className="px-6 py-3 bg-brand-50 dark:bg-slate-900 border border-brand-200 dark:border-accent-500/30 rounded-xl text-slate-700 dark:text-white font-semibold hover:bg-brand-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors w-full sm:w-auto"
             >
               Next
             </motion.button>
 
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
               onClick={() => setReviewMode(false)}
-              className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-semibold hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors w-full sm:w-auto"
+              className="px-6 py-3 bg-gradient-to-r from-brand-600 via-fuchsia-600 to-orange-500 dark:from-accent-500 dark:via-violet-500 dark:to-brand-500 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity w-full sm:w-auto"
             >
               Back to Results
             </motion.button>
@@ -1302,10 +1612,8 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3 min-h-[72px] sm:min-h-0">
             {canGoBackDuringAttempt && (
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.95 }}
                 onClick={handlePrevious}
-                className="px-6 py-3 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-white/15 rounded-xl text-slate-700 dark:text-slate-100 font-semibold hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors w-full sm:w-auto"
+                className="px-6 py-3 bg-brand-50 dark:bg-slate-900 border border-brand-200 dark:border-accent-500/30 rounded-xl text-slate-700 dark:text-slate-100 font-semibold hover:bg-brand-100 dark:hover:bg-slate-800 transition-colors w-full sm:w-auto"
               >
                 Previous
               </motion.button>
@@ -1313,10 +1621,8 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
 
             {canReveal && (
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.95 }}
                 onClick={handleRevealAnswer}
-                className="px-6 sm:px-8 py-3.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition-colors text-base w-full sm:w-auto sm:min-w-[220px]"
+                className="px-6 sm:px-8 py-3.5 bg-gradient-to-r from-brand-600 via-fuchsia-600 to-orange-500 dark:from-accent-500 dark:via-violet-500 dark:to-brand-500 text-white rounded-xl font-bold transition-opacity hover:opacity-90 text-base w-full sm:w-auto sm:min-w-[220px]"
               >
                 Reveal Answer
               </motion.button>
@@ -1324,10 +1630,8 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
 
             {canNext && (
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.95 }}
                 onClick={handleNext}
-                className="px-6 sm:px-8 py-3.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition-colors text-base w-full sm:w-auto sm:min-w-[220px]"
+                className="px-6 sm:px-8 py-3.5 bg-gradient-to-r from-brand-600 via-fuchsia-600 to-orange-500 dark:from-accent-500 dark:via-violet-500 dark:to-brand-500 text-white rounded-xl font-bold transition-opacity hover:opacity-90 text-base w-full sm:w-auto sm:min-w-[220px]"
               >
                 Next Question
               </motion.button>
@@ -1335,11 +1639,9 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
 
             {canSubmit && (
               <motion.button
-                whileHover={!isSubmitting ? { scale: 1.02 } : {}}
-                whileTap={!isSubmitting ? { scale: 0.95 } : {}}
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className={`px-6 sm:px-8 py-3.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition-colors text-base w-full sm:w-auto sm:min-w-[220px] ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`px-6 sm:px-8 py-3.5 bg-gradient-to-r from-brand-600 via-fuchsia-600 to-orange-500 dark:from-accent-500 dark:via-violet-500 dark:to-brand-500 text-white rounded-xl font-bold transition-opacity hover:opacity-90 text-base w-full sm:w-auto sm:min-w-[220px] ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {isSubmitting ? 'Submitting...' : 'Submit Quiz'}
               </motion.button>

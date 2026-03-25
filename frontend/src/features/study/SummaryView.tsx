@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { RefreshCw, AlertTriangle, Volume2 } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Volume2, Download } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
@@ -8,12 +8,27 @@ import { normalizeStudyMarkdown } from '@/utils/markdownContent';
 
 interface SummaryViewProps {
   content: string;
+  fileName?: string;
   onRegenerate?: () => void;
   isRegenerating?: boolean;
   error?: Error | null;
 }
 
-export default function SummaryView({ content, onRegenerate, isRegenerating, error }: SummaryViewProps) {
+function getSummaryExportFileName(fileName?: string): string {
+  const rawName = String(fileName || 'study-summary')
+    .replace(/\.[^./\\]+$/, '')
+    .trim();
+  const safeStem = rawName
+    .replace(/[^a-zA-Z0-9-_ ]+/g, '-')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .toLowerCase();
+
+  return `${safeStem || 'study-summary'}-summary.md`;
+}
+
+export default function SummaryView({ content, fileName, onRegenerate, isRegenerating, error }: SummaryViewProps) {
   // Normalize AI-generated heading markers like "H1:", "H2:", "H3:" into real Markdown
   const normalizedContent = useMemo(() => {
     return normalizeStudyMarkdown(content);
@@ -43,6 +58,23 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
     closeAudioPlayer();
     onRegenerate?.();
   }, [closeAudioPlayer, onRegenerate]);
+
+  const handleExportSummary = useCallback(() => {
+    if (!normalizedContent.trim()) {
+      return;
+    }
+
+    const markdownToExport = `# Summary\n\n${normalizedContent}\n`;
+    const blob = new Blob([markdownToExport], { type: 'text/markdown;charset=utf-8' });
+    const objectUrl = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = objectUrl;
+    anchor.download = getSummaryExportFileName(fileName);
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.URL.revokeObjectURL(objectUrl);
+  }, [fileName, normalizedContent]);
 
   // Show error alert if generation failed
   if (error) {
@@ -92,6 +124,16 @@ export default function SummaryView({ content, onRegenerate, isRegenerating, err
               >
                 <Volume2 className="w-4 h-4" />
                 Listen
+              </button>
+
+              <button
+                onClick={handleExportSummary}
+                disabled={!normalizedContent.trim()}
+                className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold text-pink-700 dark:text-fuchsia-200 hover:text-pink-800 dark:hover:text-fuchsia-100 bg-pink-50 dark:bg-fuchsia-500/15 hover:bg-pink-100 dark:hover:bg-fuchsia-500/25 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Export summary as Markdown"
+              >
+                <Download className="w-4 h-4" />
+                Export
               </button>
 
               {onRegenerate && (

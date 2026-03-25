@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import prisma from '../db/client';
 import { authenticate, AuthenticatedRequest, requireMinRole } from '../middleware/auth.middleware';
 import { checkAIRateLimit, recordAIUsage } from '../middleware/ai-rate-limit.middleware';
-import { AIService, QuizDifficulty } from '../services/ai.service';
+import { AIService, QuizDifficulty, type QuizQuestionType } from '../services/ai.service';
 import { FileProcessorService } from '../services/file-processor.service';
 import { logger } from '../lib/logger';
 import path from 'path';
@@ -30,6 +30,52 @@ const SUPPORTED_FILE_TYPES = [
   'text/plain',
   'application/vnd.openxmlformats-officedocument.presentationml.presentation',
 ];
+const SUPPORTED_QUIZ_QUESTION_TYPES: QuizQuestionType[] = [
+  'MULTIPLE_CHOICE',
+  'TRUE_FALSE',
+  'FILL_IN_THE_BLANK',
+];
+
+function normalizeQuizQuestionTypesInput(questionTypes: unknown): QuizQuestionType[] {
+  const rawValues = Array.isArray(questionTypes)
+    ? questionTypes
+    : typeof questionTypes === 'string'
+    ? questionTypes
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean)
+    : [];
+
+  const mapped = rawValues
+    .map((value) =>
+      String(value || '')
+        .trim()
+        .toUpperCase()
+        .replace(/[\s-]+/g, '_')
+    )
+    .map((value): QuizQuestionType | null => {
+      if (value === 'MULTIPLE_CHOICE' || value === 'MCQ' || value === 'MULTIPLECHOICE') {
+        return 'MULTIPLE_CHOICE';
+      }
+      if (value === 'TRUE_FALSE' || value === 'TRUEFALSE' || value === 'TF' || value === 'BOOLEAN') {
+        return 'TRUE_FALSE';
+      }
+      if (
+        value === 'FILL_IN_THE_BLANK' ||
+        value === 'FILL_BLANK' ||
+        value === 'FILLINTHEBLANK' ||
+        value === 'SHORT_ANSWER' ||
+        value === 'SHORTANSWER' ||
+        value === 'BLANK'
+      ) {
+        return 'FILL_IN_THE_BLANK';
+      }
+      return null;
+    })
+    .filter((value): value is QuizQuestionType => value !== null);
+
+  return Array.from(new Set(mapped));
+}
 
 /**
  * Check if a file type supports AI text extraction
@@ -341,13 +387,13 @@ export default async function courseFileAIRoutes(server: FastifyInstance) {
     async (request: AuthenticatedRequest, reply) => {
       const { fileId } = request.params as { fileId: string };
       const {
-        refresh = false,
         difficulty = 'MEDIUM',
         count = 10,
+        questionTypes,
       } = request.query as {
-        refresh?: boolean;
         difficulty?: QuizDifficulty;
         count?: number;
+        questionTypes?: string | string[];
       };
       const userId = request.user!.userId;
       const userRole = request.user!.role;
@@ -370,29 +416,32 @@ export default async function courseFileAIRoutes(server: FastifyInstance) {
         const validDifficulty: QuizDifficulty = ['EASY', 'MEDIUM', 'HARD'].includes(difficulty)
           ? difficulty
           : 'MEDIUM';
-        const validCount = Math.min(Math.max(Number(count) || 10, 5), 20);
+        const validCount = Math.min(Math.max(Number(count) || 10, 5), 40);
+        const normalizedQuestionTypes = normalizeQuizQuestionTypesInput(questionTypes);
 
-        // Check for cached content (only if not refreshing and params match)
-        if (!refresh) {
-          const existing = await db.courseFileAI.findUnique({
-            where: { fileId },
-            select: { quiz: true, quizGeneratedAt: true },
+        if (questionTypes && normalizedQuestionTypes.length === 0) {
+          return reply.status(400).send({
+            error:
+              'Invalid questionTypes. Supported values: MULTIPLE_CHOICE, TRUE_FALSE, FILL_IN_THE_BLANK',
           });
-
-          if (existing?.quiz) {
-            return reply.send({
-              quiz: existing.quiz,
-              generatedAt: existing.quizGeneratedAt,
-              cached: true,
-            });
-          }
         }
+
+        const effectiveQuestionTypes =
+          normalizedQuestionTypes.length > 0
+            ? normalizedQuestionTypes
+            : SUPPORTED_QUIZ_QUESTION_TYPES;
 
         // Extract text and generate quiz
         const startTime = Date.now();
         const text = await getFileText(fileId, file.filePath, file.fileType);
         const language = await getUserLanguage(userId);
-        const quiz = await aiService.generateQuiz(text, validCount, validDifficulty, language);
+        const quiz = await aiService.generateQuiz(
+          text,
+          validCount,
+          validDifficulty,
+          language,
+          effectiveQuestionTypes
+        );
         const durationMs = Date.now() - startTime;
 
         // Record AI usage for rate limiting
@@ -403,17 +452,32 @@ export default async function courseFileAIRoutes(server: FastifyInstance) {
           where: { fileId },
           create: {
             fileId,
-            quiz: { title: quiz.title, questions: quiz.questions, difficulty: validDifficulty },
+            quiz: {
+              title: quiz.title,
+              questions: quiz.questions,
+              difficulty: validDifficulty,
+              questionTypes: effectiveQuestionTypes,
+            },
             quizGeneratedAt: new Date(),
           },
           update: {
-            quiz: { title: quiz.title, questions: quiz.questions, difficulty: validDifficulty },
+            quiz: {
+              title: quiz.title,
+              questions: quiz.questions,
+              difficulty: validDifficulty,
+              questionTypes: effectiveQuestionTypes,
+            },
             quizGeneratedAt: new Date(),
           },
         });
 
         return reply.send({
-          quiz: { title: quiz.title, questions: quiz.questions, difficulty: validDifficulty },
+          quiz: {
+            title: quiz.title,
+            questions: quiz.questions,
+            difficulty: validDifficulty,
+            questionTypes: effectiveQuestionTypes,
+          },
           generatedAt: new Date(),
           cached: false,
         });
@@ -421,6 +485,15 @@ export default async function courseFileAIRoutes(server: FastifyInstance) {
         if (error.statusCode) {
           return reply.status(error.statusCode).send({ error: error.message });
         }
+
+        const errorMessage = typeof error?.message === 'string' ? error.message : '';
+        if (errorMessage.toLowerCase().includes('not enough content to generate')) {
+          return reply.status(400).send({ error: errorMessage });
+        }
+        if (errorMessage.toLowerCase().includes('not enough distinct information')) {
+          return reply.status(400).send({ error: errorMessage });
+        }
+
         logger.error({ error, fileId }, 'Failed to generate quiz');
         return reply.status(500).send({ error: 'Failed to generate quiz' });
       }
