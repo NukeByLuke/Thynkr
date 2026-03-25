@@ -754,8 +754,7 @@ ${preparedText}`;
           ? `
 - Distractor Quality: For MULTIPLE_CHOICE, distractors must be close competitors to the correct answer.
 - No Giveaways: For MULTIPLE_CHOICE, avoid wording cues that reveal the answer.
-- Option Length: For MULTIPLE_CHOICE, keep options similar in length and detail. CRITICAL: The longest option must NOT always be the correct answer. Intentionally make distractors longer or more detailed than the correct answer on some questions to prevent length-based guessing.
-- Length Balance Rule: Keep MULTIPLE_CHOICE options in a tight range (ideally 7-18 words unless naturally numeric/date-based).`
+- Option Length Equality: For MULTIPLE_CHOICE, ALL 4 options (including the correct answer) MUST be exactly the same length visually and word-count-wise. CRITICAL FAIL IF THE CORRECT ANSWER IS THE LONGEST OPTION.`
           : '';
 
         const externalContextInstruction = allowExternalContext
@@ -794,7 +793,7 @@ CRITICAL REQUIREMENTS:
       - **Misconception-Based Choices**: Use realistic learner mistakes as distractors rather than obviously wrong or absurd options.
       ${multipleChoiceQualityRules}
 - **Accuracy**: Verify every question and answer against trustworthy sources and the provided text. Never generate conflicting questions in the same quiz.
-- **Explanations**: Provide highly professional, educational, and detailed explanations. Do not just state "This is the answer." You must thoroughly explain *why* it is correct based on core concepts, and briefly clarify why major alternatives are incorrect. Aim for 2-4 comprehensive sentences per explanation.
+- **Explanations**: Explanations MUST be ultra-concise and immediately clear. Provide strictly 1 to 2 short sentences maximum. Direct and to the point. Do not write a long paragraph.
 - **Novelty**: Generate a fresh variant with different question wording and alternative distractor framing from typical prior attempts.
 - **Coverage**: Spread questions evenly across different major concepts from the source topic.
 
