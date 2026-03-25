@@ -950,16 +950,20 @@ ${preparedText}`;
 
     const prompt = `${languageInstruction}
 
-You are an expert learning coach. Based on a student's quiz attempt, provide practical and encouraging coaching.
+You are an expert, highly observant, and straightforward learning coach. Based on a student's quiz attempt, provide targeted, specific, and realistic coaching. Do NOT provide generic platitudes. Use the actual content and interaction context to structure your feedback.
 
 You must respond with valid JSON in this exact format:
 {"summary":"short overall feedback","strengths":["strength 1"],"improvements":["improvement 1"],"nextSteps":["step 1"]}
 
 Rules:
-- Keep the feedback concise and actionable.
-- strengths: 2 to 4 bullets.
-- improvements: 2 to 4 bullets focused on missed concepts and habits.
-- nextSteps: 2 to 4 concrete study actions.
+- Give very specific feedback based on exactly what they got correct and incorrect. Identify actual topics from the questions.
+- If the score is 0%, do NOT tell them they "made good progress" or "performed well". Acknowledge realistically that the material was tough, or they ran out of time, or they simply haven't learned it yet.
+- If most or all answers are missing, acknowledge that they skipped questions, ran out of time, or did not attempt, rather than trying to analyze "missed concepts" for blank answers.
+- For "nextSteps", provide concrete, immediate study strategies (e.g., "Review the summary notes on X", "Create flashcards for Y"). Do NOT give generic scheduling advice like "Retake this quiz in 24 hours".
+- Keep bullets concise and actionable.
+- strengths: 1 to 3 positive items. If they scored 0%, strengths could be exposing knowledge gaps or having the courage to try a hard test. No false praise.
+- improvements: 2 to 3 bullets explicitly referencing the subjects, definitions, or topics they failed.
+- nextSteps: 2 to 3 exact, actionable study methods to overcome the knowledge gaps.
 - Do not include markdown, code fences, or extra keys.
 
 Quiz title: ${String(input.title || 'Quiz').trim()}
@@ -978,10 +982,10 @@ ${JSON.stringify(compactQuestionData, null, 2)}
       });
 
       const parsed = this.safeParseJson<QuizImprovementTips>(content, () => ({
-        summary: safePercentage >= 70 ? 'You performed well overall. Keep strengthening weak spots.' : 'You are building progress. Focus on missed concepts and retake after review.',
-        strengths: ['You completed the quiz and identified what you know well.'],
-        improvements: ['Review the questions you missed and compare your answer to the correct one.'],
-        nextSteps: ['Take targeted notes on weak topics and retake the quiz within 24 hours.'],
+        summary: safePercentage >= 70 ? 'You did well on this quiz. Review your missed items to master the material.' : safePercentage === 0 ? 'This was a tough quiz, or you ran out of time. Review your notes and try again.' : 'You have identified knowledge gaps. Use this as a map for your next study session.',
+        strengths: safePercentage === 0 ? ['You established a baseline to measure future progress against.'] : ['You tackled the quiz to identify what you already know.'],
+        improvements: ['Review the specific questions you missed to understand the core concepts.'],
+        nextSteps: ['Read the summary notes on the topics you scored lowest on.', 'Use flashcards to memorize the specific terms you missed.'],
       }));
 
       const normalizeList = (value: unknown, fallback: string): string[] => {
