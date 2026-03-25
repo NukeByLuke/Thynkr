@@ -1000,7 +1000,13 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             <motion.button
               onClick={handleStartQuiz}
               disabled={!canStart || isGenerating || waitingForGeneration}
-              className="w-full rounded-2xl px-6 py-3.5 text-base font-semibold text-white bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-200 dark:text-slate-900 hover:from-slate-800 hover:to-slate-600 dark:hover:from-slate-100 dark:hover:to-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className={`w-full rounded-2xl px-6 py-3.5 text-base font-semibold transition-colors shadow-sm ${
+                isGenerating || waitingForGeneration
+                  ? 'bg-gradient-to-r from-pink-500 to-fuchsia-500 dark:from-cyan-500 dark:to-violet-500 text-white cursor-wait opacity-90'
+                  : !canStart
+                  ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-pink-600 to-fuchsia-600 dark:from-cyan-600 dark:to-violet-600 text-white hover:from-pink-500 hover:to-fuchsia-500 dark:hover:from-cyan-500 dark:hover:to-violet-500'
+              }`}
             >
               {isGenerating || waitingForGeneration ? (
                 <span className="inline-flex items-center justify-center gap-2">
