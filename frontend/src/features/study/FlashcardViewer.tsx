@@ -318,7 +318,7 @@ const FlashcardViewer = memo(function FlashcardViewer({
             <motion.div
               animate={{ rotateY: isFlipped ? 180 : 0 }}
               transition={flipTransition}
-              className="w-full h-full [transform-style:preserve-3d] [will-change:transform]"
+              className="w-full h-full [transform-style:preserve-3d]"
             >
               <div
                 className="absolute w-full h-full bg-gradient-to-br from-amber-50 via-white to-cyan-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 rounded-3xl shadow-2xl border-2 border-slate-200/70 dark:border-white/10 flex items-center justify-center p-8 sm:p-12 overflow-y-auto"

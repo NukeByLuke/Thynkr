@@ -29,6 +29,7 @@ import {
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useLayout } from '@/contexts/LayoutContext';
+import { isQuizAnswerCorrect } from '@/utils/quizAnswerUtils';
 import FileSelectionPane from '@/features/study/FileSelectionPane';
 import SummaryView from '@/features/study/SummaryView';
 import NotesView from '@/features/study/NotesView';
@@ -85,15 +86,11 @@ export default function StudyModePage() {
   // Build query string helper for share token
   const tokenQuery = shareToken ? `token=${shareToken}` : '';
 
-  // Hide the main app sidebar and profile menu for immersive experience
+  // Remove Layout overrides to integrate standard sidebar/header
   useEffect(() => {
-    setHideSidebar(true);
-    setHideProfileMenu(true);
-    return () => {
-      setHideSidebar(false);
-      setCustomHeaderContent(null);
-      setHideProfileMenu(false);
-    };
+    setHideSidebar(false);
+    setHideProfileMenu(false);
+    setCustomHeaderContent(null);
   }, [setHideSidebar, setCustomHeaderContent, setHideProfileMenu]);
 
   // Keyboard navigation (A/D for tabs, Esc to exit)
@@ -158,45 +155,7 @@ export default function StudyModePage() {
     }
   }, [statusData?.files]);
 
-  // Inject header content into DashboardLayout header (avoids double header)
-  useEffect(() => {
-    setCustomHeaderContent(
-      <div className="flex items-center gap-2.5 sm:gap-4 w-full">
-        {/* Left: Back button */}
-        <Link
-          to={`/courses/${courseId}${shareToken ? `?token=${shareToken}` : ''}`}
-          className="flex items-center gap-1.5 px-2 py-1.5 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-pink-50 dark:hover:bg-cyan-900/20 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="hidden sm:inline">Back</span>
-        </Link>
-
-        {/* Center: Title */}
-        <div className="flex items-center gap-2 min-w-0">
-          <Sparkles className="w-4 h-4 text-fuchsia-600 dark:text-cyan-400 flex-shrink-0" />
-          <h2 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white truncate">
-            {course?.title || 'AI Study Mode'}
-          </h2>
-        </div>
-
-        {/* Right: Sidebar toggle */}
-        <button
-          onClick={() => setShowSidebar(prev => !prev)}
-          className="ml-auto hidden md:flex p-1.5 sm:p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          title={showSidebar ? 'Hide files' : 'Show files'}
-        >
-          <Menu className="h-4 w-4" />
-        </button>
-        <button
-          onClick={() => setMobileSidebarOpen(true)}
-          className="ml-auto md:hidden p-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-        >
-          <Menu className="h-4 w-4" />
-        </button>
-      </div>
-    );
-    return () => setCustomHeaderContent(null);
-  }, [courseId, shareToken, course?.title, showSidebar, setCustomHeaderContent]);
+  // No custom header injected so user gets the normal app header
 
   // Generate study content mutation (with share token)
   const generateMutation = useMutation({
@@ -205,11 +164,13 @@ export default function StudyModePage() {
       refresh = false,
       difficulty,
       count,
+      questionTypes,
     }: {
       type: StudyTab;
       refresh?: boolean;
       difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
       count?: number;
+      questionTypes?: Array<'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_IN_THE_BLANK'>;
     }) => {
       const params = [refresh ? 'refresh=true' : '', tokenQuery].filter(Boolean).join('&');
       const url = params ? `/ai/study?${params}` : '/ai/study';
@@ -219,6 +180,7 @@ export default function StudyModePage() {
         type: StudyTab;
         difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
         count?: number;
+        questionTypes?: Array<'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_IN_THE_BLANK'>;
       } = {
         courseId,
         fileIds: Array.from(selectedFileIds),
@@ -228,6 +190,9 @@ export default function StudyModePage() {
       if (type === 'quiz') {
         if (difficulty) payload.difficulty = difficulty;
         if (typeof count === 'number') payload.count = count;
+        if (Array.isArray(questionTypes) && questionTypes.length > 0) {
+          payload.questionTypes = questionTypes;
+        }
       }
 
       const response = await api.post(url, {
@@ -301,7 +266,7 @@ export default function StudyModePage() {
     const questions = studyContent?.result?.questions || [];
     let score = 0;
     questions.forEach((q: any) => {
-      if (answers[q.id] === q.correctAnswer) score++;
+      if (isQuizAnswerCorrect(answers[q.id], q)) score++;
     });
     return {
       score,
@@ -488,51 +453,66 @@ export default function StudyModePage() {
           </AnimatePresence>
 
           {/* Main Study Area */}
-          <div className="flex-1 flex flex-col min-h-0">
-            {/* Study Mode Tabs - Quizlet Style */}
-            <LayoutGroup>
-              <div className="flex border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-1.5 sm:px-2 overflow-x-auto scrollbar-hide">
-                {TABS.map((tab) => {
-                  const isActive = activeTab === tab.id;
-                  return (
-                    <motion.button
-                      key={tab.id}
-                      onClick={() => handleTabChange(tab.id)}
-                      disabled={selectedFileIds.size === 0}
-                      whileHover={selectedFileIds.size > 0 ? { y: -2 } : {}}
-                      whileTap={selectedFileIds.size > 0 ? { scale: 0.97 } : {}}
-                      className={`relative flex items-center gap-2 px-3 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm font-bold transition-all whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed ${
-                        isActive
-                          ? 'text-slate-900 dark:text-white'
-                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                      }`}
-                    >
-                      {isActive && (
-                        <motion.div
-                          layoutId="studyActiveTab"
-                          className="absolute inset-x-2 bottom-0 h-1 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-violet-500 dark:from-cyan-400 dark:via-violet-500 dark:to-fuchsia-500 rounded-full"
-                          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                        />
-                      )}
-                      {isActive && (
-                        <motion.div
-                          layoutId="studyActiveTabBg"
-                          className="absolute inset-1 bg-slate-100/80 dark:bg-slate-800/80 rounded-lg -z-10"
-                          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                        />
-                      )}
-                      <tab.icon className={`h-4 w-4 transition-colors ${isActive ? tab.color : 'text-slate-400'}`} />
-                      <span className="hidden sm:inline">{tab.label}</span>
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </LayoutGroup>
-
-            {/* Content Area - Single scrollable container */}
+          <div className="flex-1 flex flex-col min-h-0 bg-slate-50 dark:bg-slate-950">
             <div className="flex-1 overflow-y-auto">
-              <AnimatePresence mode="wait">
-                {selectedFileIds.size === 0 ? (
+              <div className="max-w-7xl mx-auto px-3 py-4 sm:px-6 sm:py-5 lg:px-8">
+                
+                {/* Header card with title & tabs */}
+                <div className="mb-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 shadow-sm">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => {
+                          setShowSidebar(prev => !prev);
+                          setMobileSidebarOpen(true);
+                        }}
+                        className="md:hidden p-1.5 -ml-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      >
+                        <Menu className="h-5 w-5" />
+                      </button>
+                      <button 
+                        onClick={() => setShowSidebar(prev => !prev)}
+                        className="hidden md:flex p-1.5 -ml-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      >
+                        <Menu className="h-5 w-5" />
+                      </button>
+                      <h2 className="text-sm sm:text-base font-semibold text-slate-900 dark:text-white leading-snug line-clamp-2 sm:line-clamp-1 max-w-full">
+                        {course?.title || 'Course Study'}
+                      </h2>
+                    </div>
+                    
+                    <div className="overflow-x-auto -mx-1 px-1 pb-1">
+                      <div className="flex items-center gap-1.5 min-w-max">
+                        {TABS.map((tab) => {
+                          const Icon = tab.icon;
+                          const isActive = activeTab === tab.id;
+                          return (
+                            <button
+                              key={tab.id}
+                              onClick={() => handleTabChange(tab.id)}
+                              disabled={selectedFileIds.size === 0}
+                              className={`shrink-0 px-3 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 border disabled:opacity-50 disabled:cursor-not-allowed ${
+                                isActive
+                                  ? 'text-pink-700 dark:text-cyan-300 bg-gradient-to-r from-pink-100 to-fuchsia-100 dark:from-violet-500/30 dark:to-cyan-500/30 border-pink-200 dark:border-cyan-500/40'
+                                  : 'text-slate-700 dark:text-slate-400 border-transparent hover:bg-pink-50 dark:hover:bg-cyan-900/20 hover:text-pink-900 dark:hover:text-cyan-200'
+                              }`}
+                            >
+                              <Icon className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">{tab.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Content Area - Card container */}
+                <div className="relative rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl shadow-slate-200/20 dark:shadow-slate-900/30 overflow-hidden min-h-[56vh] sm:min-h-[62vh]">
+                  <div className="absolute inset-0 bg-gradient-to-br from-pink-500/[0.02] via-transparent to-fuchsia-500/[0.02] dark:from-cyan-500/[0.02] dark:via-transparent dark:to-violet-500/[0.02] pointer-events-none" />
+                  <div className="relative z-10 p-3 sm:p-6 lg:p-8">
+                    <AnimatePresence mode="wait">
+                      {selectedFileIds.size === 0 ? (
                   <motion.div
                     key="empty"
                     initial={{ opacity: 0, y: 20 }}
@@ -714,48 +694,32 @@ export default function StudyModePage() {
                               </motion.div>
                             </AnimatePresence>
                           )}
-                          {activeTab === 'quiz' && studyContent?.result?.questions && (
+                          {activeTab === 'quiz' && (
                             <QuizPlayer
                               quizId={`course-${courseId}-quiz`}
                               title={course?.title || 'Course Quiz'}
-                              questions={studyContent.result.questions.map((q: any, i: number) => ({
+                              questions={(studyContent?.result?.questions || []).map((q: any, i: number) => ({
                                 ...q,
                                 id: q.id || `q-${i}`,
                                 order: q.order ?? i,
                               }))}
                               fileId={courseId}
-                              onGenerateQuiz={(difficulty: string, numQuestions: number) => {
+                              onGenerateQuiz={(
+                                difficulty: string,
+                                numQuestions: number,
+                                questionTypes: Array<'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_IN_THE_BLANK'>
+                              ) => {
                                 const normalizedDifficulty = difficulty.toUpperCase() as
                                   | 'EASY'
                                   | 'MEDIUM'
                                   | 'HARD';
+                                generateMutation.reset();
                                 generateMutation.mutate({
                                   type: 'quiz',
                                   refresh: true,
                                   difficulty: normalizedDifficulty,
                                   count: numQuestions,
-                                });
-                              }}
-                              isGenerating={generateMutation.isPending}
-                              onSubmit={handleQuizSubmit}
-                            />
-                          )}
-                          {activeTab === 'quiz' && !studyContent?.result?.questions && (
-                            <QuizPlayer
-                              quizId={`course-${courseId}-quiz`}
-                              title={course?.title || 'Course Quiz'}
-                              questions={[]}
-                              fileId={courseId}
-                              onGenerateQuiz={(difficulty: string, numQuestions: number) => {
-                                const normalizedDifficulty = difficulty.toUpperCase() as
-                                  | 'EASY'
-                                  | 'MEDIUM'
-                                  | 'HARD';
-                                generateMutation.mutate({
-                                  type: 'quiz',
-                                  refresh: true,
-                                  difficulty: normalizedDifficulty,
-                                  count: numQuestions,
+                                  questionTypes,
                                 });
                               }}
                               isGenerating={generateMutation.isPending}
@@ -805,6 +769,9 @@ export default function StudyModePage() {
                   </motion.div>
                 )}
               </AnimatePresence>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

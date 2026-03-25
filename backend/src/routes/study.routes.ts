@@ -10,10 +10,18 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { authenticate, AuthenticatedRequest } from '../middleware/auth.middleware';
+import {
+  authenticate,
+  AuthenticatedRequest,
+  normalizeRole,
+} from '../middleware/auth.middleware';
 import { upload } from '../config/multer.config';
 import { FileProcessorService } from '../services/file-processor.service';
-import { AIService } from '../services/ai.service';
+import {
+  AIService,
+  type QuizImprovementTips,
+  type QuizQuestionType,
+} from '../services/ai.service';
 import prisma from '../db/client';
 import fs from 'fs/promises';
 import path from 'path';
@@ -31,6 +39,173 @@ const aiService = new AIService();
 
 const WEB_FETCH_TIMEOUT_MS = 20000;
 const MAX_WEB_CONTENT_CHARS = 120000;
+const IMAGE_UPLOAD_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp']);
+const SUPPORTED_QUIZ_QUESTION_TYPES: QuizQuestionType[] = [
+  'MULTIPLE_CHOICE',
+  'TRUE_FALSE',
+  'FILL_IN_THE_BLANK',
+];
+
+function isImageUploadFile(file: Express.Multer.File): boolean {
+  const mimeType = String(file?.mimetype || '').toLowerCase();
+  if (mimeType.startsWith('image/')) {
+    return true;
+  }
+
+  const extension = path.extname(String(file?.originalname || '').toLowerCase().trim());
+  return IMAGE_UPLOAD_EXTENSIONS.has(extension);
+}
+
+function resolveImageMimeType(file: Express.Multer.File): string {
+  const mimeType = String(file?.mimetype || '').toLowerCase().trim();
+  if (mimeType.startsWith('image/')) {
+    return mimeType;
+  }
+
+  const extension = path.extname(String(file?.originalname || '').toLowerCase().trim());
+  switch (extension) {
+    case '.jpg':
+    case '.jpeg':
+      return 'image/jpeg';
+    case '.gif':
+      return 'image/gif';
+    case '.webp':
+      return 'image/webp';
+    default:
+      return 'image/png';
+  }
+}
+
+function buildMergedImageBundleName(imageCount: number): string {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  return `image-bundle-${imageCount}-images-${timestamp}.txt`;
+}
+
+function normalizeQuizQuestionTypesInput(questionTypes: unknown): QuizQuestionType[] {
+  if (!Array.isArray(questionTypes)) {
+    return [];
+  }
+
+  const mapped = questionTypes
+    .map((value) =>
+      String(value || '')
+        .trim()
+        .toUpperCase()
+        .replace(/[\s-]+/g, '_')
+    )
+    .map((value): QuizQuestionType | null => {
+      if (value === 'MULTIPLE_CHOICE' || value === 'MCQ' || value === 'MULTIPLECHOICE') {
+        return 'MULTIPLE_CHOICE';
+      }
+      if (value === 'TRUE_FALSE' || value === 'TRUEFALSE' || value === 'TF' || value === 'BOOLEAN') {
+        return 'TRUE_FALSE';
+      }
+      if (
+        value === 'FILL_IN_THE_BLANK' ||
+        value === 'FILL_BLANK' ||
+        value === 'FILLINTHEBLANK' ||
+        value === 'SHORT_ANSWER' ||
+        value === 'SHORTANSWER' ||
+        value === 'BLANK'
+      ) {
+        return 'FILL_IN_THE_BLANK';
+      }
+      return null;
+    })
+    .filter((value): value is QuizQuestionType => value !== null);
+
+  return Array.from(new Set(mapped));
+}
+
+function inferStoredQuizQuestionType(question: { options?: unknown[]; question?: unknown }): QuizQuestionType {
+  const options = Array.isArray(question.options)
+    ? question.options
+        .map((option) => String(option || '').trim().toLowerCase())
+        .filter(Boolean)
+    : [];
+
+  if (options.length === 2) {
+    const sorted = [...options].sort().join('|');
+    if (sorted === 'false|true') {
+      return 'TRUE_FALSE';
+    }
+  }
+
+  const questionText = String(question.question || '').trim();
+  if (options.length === 0 || /_{3,}/.test(questionText) || /\bblank\b/i.test(questionText)) {
+    return 'FILL_IN_THE_BLANK';
+  }
+
+  return 'MULTIPLE_CHOICE';
+}
+
+function buildRuleBasedQuizImprovementTips(input: {
+  score: number;
+  totalQuestions: number;
+  incorrectQuestions: Array<{ question: string; questionType: QuizQuestionType }>;
+}): QuizImprovementTips {
+  const safeTotal = Math.max(1, Math.floor(input.totalQuestions || 0));
+  const safeScore = Math.max(0, Math.floor(input.score || 0));
+  const percentage = Math.round((safeScore / safeTotal) * 100);
+
+  const missedByType = {
+    MULTIPLE_CHOICE: 0,
+    TRUE_FALSE: 0,
+    FILL_IN_THE_BLANK: 0,
+  } as Record<QuizQuestionType, number>;
+
+  input.incorrectQuestions.forEach((question) => {
+    missedByType[question.questionType] += 1;
+  });
+
+  const topWeakType = (Object.keys(missedByType) as QuizQuestionType[]).sort(
+    (a, b) => missedByType[b] - missedByType[a]
+  )[0];
+
+  const typeMessage: Record<QuizQuestionType, string> = {
+    MULTIPLE_CHOICE: 'Work on eliminating close distractors by comparing each option to the core concept.',
+    TRUE_FALSE: 'Watch for absolute words like "always" and "never" before deciding True/False.',
+    FILL_IN_THE_BLANK: 'Practice recalling key terms from memory before checking notes to improve retention.',
+  };
+
+  const strengths: string[] = [];
+  if (percentage >= 85) {
+    strengths.push('Strong performance across the quiz with reliable concept recall.');
+  } else if (percentage >= 65) {
+    strengths.push('Solid baseline understanding with several concepts already mastered.');
+  } else {
+    strengths.push('You completed the quiz and identified the concepts that need focused review.');
+  }
+
+  strengths.push('You now have targeted feedback that can guide your next study session.');
+
+  const improvements: string[] = [];
+  if (input.incorrectQuestions.length > 0) {
+    improvements.push(typeMessage[topWeakType]);
+    improvements.push('Review missed questions and explain the correct answer in your own words.');
+  } else {
+    improvements.push('Maintain consistency by practicing mixed-difficulty question sets.');
+  }
+
+  const nextSteps: string[] = [
+    'Retake this quiz within 24 hours to strengthen retention through spaced repetition.',
+    'Create a short mistake log with the concept, your incorrect answer, and the correct reasoning.',
+  ];
+
+  if (input.incorrectQuestions[0]?.question) {
+    nextSteps.push(`Start by revisiting: "${input.incorrectQuestions[0].question.slice(0, 120)}".`);
+  }
+
+  return {
+    summary:
+      percentage >= 75
+        ? 'Nice work. You are close to mastery; focus on the few remaining weak spots.'
+        : 'Progress is building. Focused review on missed concepts will quickly raise your score.',
+    strengths: strengths.slice(0, 4),
+    improvements: improvements.slice(0, 4),
+    nextSteps: nextSteps.slice(0, 4),
+  };
+}
 
 function decodeHtmlEntities(input: string): string {
   return input
@@ -791,8 +966,12 @@ export default async function studyRoutes(server: FastifyInstance) {
           }
         }
 
-        // Verify we don't exceed limits with multiple files
-        if (uploadCheck.remaining !== undefined && files.length > uploadCheck.remaining) {
+        const allImages = files.every((file) => isImageUploadFile(file));
+        const shouldMergeImagesIntoSingleFile = files.length > 1 && allImages;
+        const effectiveUploadCount = shouldMergeImagesIntoSingleFile ? 1 : files.length;
+
+        // Verify we don't exceed limits with this upload operation
+        if (uploadCheck.remaining !== undefined && effectiveUploadCount > uploadCheck.remaining) {
           // Clean up all uploaded files
           for (const file of files) {
             await fs.unlink(file.path).catch(() => {});
@@ -803,9 +982,110 @@ export default async function studyRoutes(server: FastifyInstance) {
           });
         }
 
-        server.log.info({ fileCount: files.length }, 'Processing uploaded files');
+        server.log.info(
+          { fileCount: files.length, shouldMergeImagesIntoSingleFile },
+          'Processing uploaded files'
+        );
         const uploadedFiles: Awaited<ReturnType<typeof prisma.uploadedFile.create>>[] = [];
         const failedFiles: Array<{ name: string; error: string }> = [];
+
+        if (shouldMergeImagesIntoSingleFile) {
+          const mergedOriginalName = buildMergedImageBundleName(files.length);
+          const mergedStoredFileName = `merged-images-${Date.now()}-${Math.random().toString(36).slice(2, 10)}.txt`;
+          const mergedDiskPath = path.join(process.cwd(), 'uploads', mergedStoredFileName);
+          const mergedPlaceholderText =
+            'Preparing merged image text extraction...\n\nPlease wait while we process all uploaded images.';
+
+          await fs.writeFile(mergedDiskPath, mergedPlaceholderText, 'utf-8');
+
+          const mergedUpload = await prisma.uploadedFile.create({
+            data: {
+              userId: request.user!.userId,
+              folderId,
+              fileName: mergedStoredFileName,
+              originalName: mergedOriginalName,
+              fileType: 'text/plain',
+              fileSize: Buffer.byteLength(mergedPlaceholderText, 'utf-8'),
+              filePath: mergedDiskPath,
+              status: 'PROCESSING',
+              extractedText: null,
+            },
+          });
+
+          uploadedFiles.push(mergedUpload);
+
+          setImmediate(async () => {
+            let language = 'en';
+            try {
+              language = await resolveUserLanguage(request.user!.userId);
+            } catch {
+              language = 'en';
+            }
+
+            const extractedSections: string[] = [];
+            let successfullyExtractedCount = 0;
+
+            for (const [index, file] of files.entries()) {
+              try {
+                const imageBuffer = await fs.readFile(file.path);
+                const imageText = await aiService.extractTextFromImage(
+                  imageBuffer.toString('base64'),
+                  resolveImageMimeType(file),
+                  language
+                );
+
+                if (imageText.trim().length > 0) {
+                  successfullyExtractedCount += 1;
+                  extractedSections.push(
+                    `Image ${index + 1}: ${file.originalname}\n${imageText.trim()}`
+                  );
+                } else {
+                  extractedSections.push(
+                    `Image ${index + 1}: ${file.originalname}\n[No readable text detected]`
+                  );
+                }
+              } catch (error: any) {
+                server.log.error(
+                  { error, fileName: file.originalname, mergedUploadId: mergedUpload.id },
+                  'Failed OCR for image in merged upload'
+                );
+                extractedSections.push(
+                  `Image ${index + 1}: ${file.originalname}\n[Extraction failed]`
+                );
+              } finally {
+                await fs.unlink(file.path).catch(() => {});
+              }
+            }
+
+            const mergedExtractedText = extractedSections.join('\n\n---\n\n').trim();
+            const finalMergedText =
+              mergedExtractedText ||
+              'No readable text was extracted from the uploaded images.';
+
+            try {
+              await fs.writeFile(mergedDiskPath, `${finalMergedText}\n`, 'utf-8');
+              const mergedStats = await fs.stat(mergedDiskPath);
+
+              await prisma.uploadedFile.update({
+                where: { id: mergedUpload.id },
+                data: {
+                  extractedText: finalMergedText,
+                  fileSize: mergedStats.size,
+                  status: successfullyExtractedCount > 0 ? 'COMPLETED' : 'FAILED',
+                },
+              });
+            } catch (error: any) {
+              server.log.error(
+                { error, mergedUploadId: mergedUpload.id },
+                'Failed to finalize merged image upload'
+              );
+              await prisma.uploadedFile.update({
+                where: { id: mergedUpload.id },
+                data: { status: 'FAILED' },
+              });
+            }
+          });
+        } else {
 
         for (const file of files) {
           try {
@@ -819,10 +1099,10 @@ export default async function studyRoutes(server: FastifyInstance) {
               continue;
             }
 
-            const canExtractText = fileProcessor.supportsTextExtraction(
-              file.mimetype,
-              file.originalname
-            );
+            const imageFile = isImageUploadFile(file);
+            const canExtractText =
+              imageFile ||
+              fileProcessor.supportsTextExtraction(file.mimetype, file.originalname);
 
             // Save to database immediately with PROCESSING status
             const uploadedFile = await prisma.uploadedFile.create({
@@ -845,7 +1125,17 @@ export default async function studyRoutes(server: FastifyInstance) {
             if (canExtractText) {
               setImmediate(async () => {
                 try {
-                  const extractedText = await fileProcessor.extractText(file.path, file.mimetype);
+                  const extractedText = imageFile
+                    ? await aiService.extractTextFromImage(
+                        (await fs.readFile(file.path)).toString('base64'),
+                        resolveImageMimeType(file)
+                      )
+                    : await fileProcessor.extractText(file.path, file.mimetype);
+
+                  if (!String(extractedText || '').trim()) {
+                    throw new Error('No readable text extracted');
+                  }
+
                   await prisma.uploadedFile.update({
                     where: { id: uploadedFile.id },
                     data: {
@@ -880,6 +1170,7 @@ export default async function studyRoutes(server: FastifyInstance) {
               error: 'Failed to save uploaded file',
             });
           }
+        }
         }
 
         if (uploadedFiles.length === 0) {
@@ -2272,10 +2563,16 @@ ${studentMessage.slice(0, 1600)}`;
     },
     async (request: AuthenticatedRequest, reply) => {
       const { id } = request.params as { id: string };
-      const { numQuestions = 1, difficulty = 'MEDIUM' } = request.body as {
+      const { numQuestions = 10, questionTypes } = request.body as {
         numQuestions?: number;
-        difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
+        questionTypes?: string[];
       };
+      const difficulty: 'MEDIUM' = 'MEDIUM';
+      const normalizedQuestionTypes = normalizeQuizQuestionTypesInput(questionTypes);
+      const effectiveQuestionTypes =
+        normalizedQuestionTypes.length > 0
+          ? normalizedQuestionTypes
+          : SUPPORTED_QUIZ_QUESTION_TYPES;
 
       // Check if user can access this file
       const hasAccess = await canAccessFile(id, request.user!.userId);
@@ -2296,12 +2593,15 @@ ${studentMessage.slice(0, 1600)}`;
       }
 
       // Validate inputs
-      if (numQuestions < 1 || numQuestions > 20) {
-        return reply.code(400).send({ error: 'Number of questions must be between 1 and 20' });
+      if (numQuestions < 1 || numQuestions > 40) {
+        return reply.code(400).send({ error: 'Number of questions must be between 1 and 40' });
       }
 
-      if (!['EASY', 'MEDIUM', 'HARD'].includes(difficulty)) {
-        return reply.code(400).send({ error: 'Invalid difficulty level' });
+      if (Array.isArray(questionTypes) && questionTypes.length > 0 && normalizedQuestionTypes.length === 0) {
+        return reply.code(400).send({
+          error:
+            'Invalid questionTypes. Supported values: MULTIPLE_CHOICE, TRUE_FALSE, FILL_IN_THE_BLANK',
+        });
       }
 
       const language = await resolveUserLanguage(request.user!.userId);
@@ -2312,7 +2612,8 @@ ${studentMessage.slice(0, 1600)}`;
           file.extractedText,
           numQuestions,
           difficulty,
-          language
+          language,
+          effectiveQuestionTypes
         );
 
         const quiz = await prisma.quiz.create({
@@ -2342,8 +2643,21 @@ ${studentMessage.slice(0, 1600)}`;
         // Track language usage for multilingual achievement
         await trackLanguageUsage(request.user!.userId, language);
 
+        const quizWithQuestionTypes = {
+          ...quiz,
+          questions: quiz.questions.map((question, index) => ({
+            ...question,
+            questionType:
+              generated.questions[index]?.questionType ||
+              inferStoredQuizQuestionType({
+                question: question.question,
+                options: question.options,
+              }),
+          })),
+        };
+
         return reply.send({
-          quiz,
+          quiz: quizWithQuestionTypes,
           ...(activityNotifications.length > 0 && { notifications: activityNotifications }),
         });
       } catch (error: any) {
@@ -2396,13 +2710,35 @@ ${studentMessage.slice(0, 1600)}`;
           language
         );
 
+        const normalizedCards = (Array.isArray(generated.cards) ? generated.cards : [])
+          .map((card) => ({
+            front: String((card as { front?: unknown })?.front ?? '')
+              .replace(/\s+/g, ' ')
+              .trim(),
+            back: String((card as { back?: unknown })?.back ?? '')
+              .replace(/\s+/g, ' ')
+              .trim(),
+          }))
+          .filter((card) => card.front.length > 0 && card.back.length > 0)
+          .slice(0, numCards);
+
+        if (normalizedCards.length === 0) {
+          server.log.error(
+            { fileId: id, generatedTitle: generated?.title },
+            'Flashcard generation produced zero valid cards'
+          );
+          return reply
+            .code(502)
+            .send({ error: 'Failed to generate usable flashcards. Please try again.' });
+        }
+
         const flashcardSet = await prisma.flashcardSet.create({
           data: {
             fileId: file.id,
-            title: generated.title,
+            title: String(generated.title || 'Study Flashcards').trim() || 'Study Flashcards',
             language,
             cards: {
-              create: generated.cards.map((card, index) => ({
+              create: normalizedCards.map((card, index) => ({
                 front: card.front,
                 back: card.back,
                 order: index,
@@ -2438,7 +2774,11 @@ ${studentMessage.slice(0, 1600)}`;
         });
       } catch (error: any) {
         server.log.error({ error, fileId: id }, 'Failed to generate flashcards');
-        return reply.code(500).send({ error: 'Failed to generate flashcards' });
+        const errorMessage = String(error?.message || 'Failed to generate flashcards');
+        const safeMessage = /flashcard/i.test(errorMessage)
+          ? errorMessage
+          : 'Failed to generate flashcards. Please try again.';
+        return reply.code(500).send({ error: safeMessage });
       }
     }
   );
@@ -2522,15 +2862,55 @@ ${studentMessage.slice(0, 1600)}`;
 
       // Calculate score server-side
       let correctCount = 0;
-      const results: Record<string, { correct: boolean; correctAnswer: string }> = {};
+      const results: Record<
+        string,
+        { correct: boolean; correctAnswer: string; questionType: QuizQuestionType }
+      > = {};
+      const questionPerformance: Array<{
+        question: string;
+        questionType: QuizQuestionType;
+        userAnswer: string;
+        correctAnswer: string;
+        isCorrect: boolean;
+        explanation?: string | null;
+      }> = [];
 
-      quiz.questions.forEach((question: any) => {
-        const userAnswer = answers[question.id];
+      const submittedAnswers: Record<string, string> =
+        answers && typeof answers === 'object' ? answers : {};
+
+      const getSubmittedAnswerForQuestion = (question: any, questionIndex: number): string | undefined => {
+        const directIdKey = String(question?.id ?? '').trim();
+        const orderValue = Number.isFinite(Number(question?.order))
+          ? Number(question.order)
+          : questionIndex;
+
+        const candidateKeys = [
+          directIdKey,
+          `q-${orderValue}`,
+          String(orderValue),
+          String(questionIndex),
+        ].filter((value) => value.length > 0);
+
+        for (const key of candidateKeys) {
+          if (Object.prototype.hasOwnProperty.call(submittedAnswers, key)) {
+            return submittedAnswers[key];
+          }
+        }
+
+        return undefined;
+      };
+
+      quiz.questions.forEach((question: any, questionIndex: number) => {
+        const userAnswer = getSubmittedAnswerForQuestion(question, questionIndex);
         const resolvedCorrectAnswer = resolveQuizCorrectAnswerText(
           question.correctAnswer,
           question.options
         );
         const isCorrect = isQuizAnswerCorrect(userAnswer, question.correctAnswer, question.options);
+        const questionType = inferStoredQuizQuestionType({
+          question: question.question,
+          options: question.options,
+        });
 
         if (isCorrect) {
           correctCount++;
@@ -2539,7 +2919,17 @@ ${studentMessage.slice(0, 1600)}`;
         results[question.id] = {
           correct: isCorrect,
           correctAnswer: resolvedCorrectAnswer,
+          questionType,
         };
+
+        questionPerformance.push({
+          question: String(question.question || '').trim(),
+          questionType,
+          userAnswer: String(userAnswer || '').trim(),
+          correctAnswer: String(resolvedCorrectAnswer || '').trim(),
+          isCorrect,
+          explanation: question.explanation,
+        });
       });
 
       const scorePercentage = Math.round((correctCount / quiz.questions.length) * 100);
@@ -2683,6 +3073,47 @@ ${studentMessage.slice(0, 1600)}`;
         ...activityNotifications,
       ];
 
+      const normalizedRole = normalizeRole(request.user!.role);
+      const aiTipsEligible = ['STANDARD', 'PREMIUM', 'ADMIN'].includes(normalizedRole);
+      const fallbackTips = buildRuleBasedQuizImprovementTips({
+        score: correctCount,
+        totalQuestions: quiz.questions.length,
+        incorrectQuestions: questionPerformance
+          .filter((question) => !question.isCorrect)
+          .map((question) => ({
+            question: question.question,
+            questionType: question.questionType,
+          })),
+      });
+
+      let improvementTips: QuizImprovementTips = fallbackTips;
+      let improvementTipsSource: 'ai' | 'rule-based' = 'rule-based';
+
+      if (aiTipsEligible) {
+        try {
+          improvementTips = await aiService.generateQuizImprovementTips(
+            {
+              title: quiz.title,
+              difficulty: quiz.difficulty,
+              score: correctCount,
+              totalQuestions: quiz.questions.length,
+              questions: questionPerformance,
+            },
+            quiz.language || (await resolveUserLanguage(request.user!.userId))
+          );
+          improvementTipsSource = 'ai';
+        } catch (error: any) {
+          server.log.warn(
+            {
+              error: error?.message,
+              quizId: quiz.id,
+              userId: request.user!.userId,
+            },
+            'Falling back to rule-based quiz improvement tips'
+          );
+        }
+      }
+
       return reply.send({
         attempt,
         results,
@@ -2691,6 +3122,15 @@ ${studentMessage.slice(0, 1600)}`;
         percentage: scorePercentage,
         notifications,
         xpGained: unlockedAchievements.reduce((sum, ach) => sum + (ach.xpAwarded || 0), 0),
+        improvementTips,
+        improvementTipsSource,
+        aiTipsEligible,
+        ...(aiTipsEligible
+          ? {}
+          : {
+              aiTipsUpgradeMessage:
+                'Upgrade to Standard or higher for AI-personalized improvement tips after each quiz.',
+            }),
       });
     }
   );

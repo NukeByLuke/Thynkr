@@ -41,7 +41,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const baseStyles = clsx(
       'inline-flex items-center justify-center font-semibold',
-      'rounded-lg transition-[transform,opacity] duration-200 ease-out will-change-transform',
+      'rounded-lg transition-[transform,opacity] duration-200 ease-out',
       'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
       'disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none'
     );

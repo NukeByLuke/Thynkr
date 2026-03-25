@@ -21,6 +21,17 @@ const MAX_INPUT_CHARS = 200000; // Gemini has much higher token limits
 // Model Selection: Gemini 2.5 Flash Lite - latest stable fast model
 const MODEL = 'gemini-2.5-flash-lite';
 
+interface GeminiGenerationConfigOverrides {
+  temperature?: number;
+  topK?: number;
+  topP?: number;
+  maxOutputTokens?: number;
+}
+
+interface GeminiRequestOptions {
+  useGoogleSearch?: boolean;
+}
+
 /**
  * Prompt injection detection patterns for security validation
  */
@@ -41,6 +52,7 @@ const PROMPT_INJECTION_PATTERNS = [
 ];
 
 export type QuizDifficulty = 'EASY' | 'MEDIUM' | 'HARD';
+export type QuizQuestionType = 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_IN_THE_BLANK';
 
 export interface GeneratedSummary {
   content: string;
@@ -52,6 +64,7 @@ export interface GeneratedNotes {
 }
 
 export interface QuizQuestion {
+  questionType?: QuizQuestionType;
   question: string;
   options: string[];
   correctAnswer: string;
@@ -61,6 +74,13 @@ export interface QuizQuestion {
 export interface GeneratedQuiz {
   title: string;
   questions: QuizQuestion[];
+}
+
+export interface QuizImprovementTips {
+  summary: string;
+  strengths: string[];
+  improvements: string[];
+  nextSteps: string[];
 }
 
 export interface Flashcard {
@@ -108,7 +128,12 @@ export class AIService {
    * Call Gemini API directly via REST using service account auth
    * Includes retry logic with exponential backoff for transient failures
    */
-  private async callGemini(prompt: string, maxRetries: number = 3): Promise<string> {
+  private async callGemini(
+    prompt: string,
+    maxRetries: number = 3,
+    generationConfigOverrides?: GeminiGenerationConfigOverrides,
+    requestOptions?: GeminiRequestOptions
+  ): Promise<string> {
     if (!this.authClient) {
       this.authClient = await this.auth.getClient();
     }
@@ -118,15 +143,19 @@ export class AIService {
     }
 
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
-    const requestBody = {
+    const requestBody: any = {
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 16384,
+        temperature: generationConfigOverrides?.temperature ?? 0.7,
+        topK: generationConfigOverrides?.topK ?? 40,
+        topP: generationConfigOverrides?.topP ?? 0.95,
+        maxOutputTokens: generationConfigOverrides?.maxOutputTokens ?? 16384,
       },
     };
+
+    if (requestOptions?.useGoogleSearch) {
+      requestBody.tools = [{ google_search: {} }];
+    }
 
     let lastError: Error | null = null;
     
@@ -308,6 +337,10 @@ Create a comprehensive, visually engaging, and well-structured summary of the fo
 - **Readability**: Use bullet points and short paragraphs to make it easy on the eyes.
 - **Key Takeaways**: End with a section highlighting the top 3-5 most important points.
 - **Tone**: Professional, academic, yet easy to understand.
+- **Format**: Output pure Markdown only. Do NOT output HTML tags such as <h1>, <h2>, <p>, <ul>, <li>, or <strong>.
+- **Study Guide Handling**: If the source is a study guide/worksheet/review packet, do NOT summarize the guide structure or instructions. Summarize the underlying subject matter and concepts the guide is teaching.
+- **Ignore Scaffolding**: Treat headings like "Study Guide", "Instructions", "Review Questions", "Checklist", and grading notes as scaffolding, not core content.
+- **Concept-First Output**: Convert prompts/questions in the source into direct concept explanations.
 
 Text:
 ${preparedText}`;
@@ -393,6 +426,9 @@ Create detailed study notes from the following text. Includes:
    - Use bullet points and numbered lists for clarity.
    - Include examples where relevant to clarify complex ideas.
    - Make the notes visually appealing and easy to skim.
+- **Format**: Output pure Markdown only. Do NOT output HTML tags such as <h1>, <h2>, <p>, <ul>, <li>, or <strong>.
+- **Study Guide Handling**: If the source is a study guide/worksheet/review packet, extract and explain the underlying academic concepts. Do NOT produce notes about the guide's formatting or directions.
+- **Question-to-Concept Conversion**: If the source contains review questions, convert them into concise concept explanations and answer-ready notes.
 ${timestampInstruction}
 
 Text:
@@ -415,32 +451,33 @@ ${preparedText}`;
   }
 
   /**
-   * Generate a quiz with multiple-choice questions using Gemini 2.5 Flash Lite
+   * Generate a quiz using one or more supported question formats.
    */
   async generateQuiz(
     text: string,
     numQuestions: number,
     difficulty: QuizDifficulty,
-    language: string = DEFAULT_LANGUAGE
+    language: string = DEFAULT_LANGUAGE,
+    questionTypes?: QuizQuestionType[]
   ): Promise<GeneratedQuiz> {
     const normalizedLanguage = this.normalizeLanguage(language);
     const preparedText = this.prepareText(text, 120000); // Gemini can handle much more
-    
-    // Estimate max questions based on content length (roughly 1 question per 200 chars of content)
-    const estimatedMaxQuestions = Math.max(10, Math.floor(preparedText.length / 200));
-    const adjustedNumQuestions = Math.min(numQuestions, estimatedMaxQuestions);
-    
-    if (adjustedNumQuestions < numQuestions) {
-      logger.info({ requested: numQuestions, adjusted: adjustedNumQuestions }, 'Reduced question count due to content length');
-    }
-    
-    const cacheKey = `quiz_${normalizedLanguage}_${this.hashText(preparedText)}_${adjustedNumQuestions}_${difficulty}`;
-    const cached = cache.get<GeneratedQuiz>(cacheKey);
+    const requestedQuestionTypes = this.normalizeQuizQuestionTypes(questionTypes);
+    const requestedQuestionTypeSet = new Set<QuizQuestionType>(requestedQuestionTypes);
+    const questionTypeLabelMap: Record<QuizQuestionType, string> = {
+      MULTIPLE_CHOICE: 'Multiple Choice',
+      TRUE_FALSE: 'True/False',
+      FILL_IN_THE_BLANK: 'Fill in the Blank',
+    };
+    const requestedQuestionTypeLabels = requestedQuestionTypes
+      .map((type) => questionTypeLabelMap[type])
+      .join(', ');
 
-    if (cached) {
-      logger.info('Returning cached quiz');
-      return cached;
-    }
+    const targetNumQuestions = Math.min(Math.max(Math.floor(numQuestions) || 10, 1), 40);
+
+    // Estimate question capacity conservatively for source-only generation.
+    const estimatedSourceCapacity = Math.max(3, Math.floor(preparedText.length / 260));
+    const needsWebAugmentation = estimatedSourceCapacity < targetNumQuestions;
 
     const difficultyInstructions: Record<QuizDifficulty, string> = {
       EASY: 'Create straightforward questions testing basic recall and understanding of key facts.',
@@ -449,67 +486,546 @@ ${preparedText}`;
       HARD: 'Create challenging questions requiring deep analysis, synthesis, and critical thinking.',
     };
 
+    const maxAttempts = needsWebAugmentation ? 4 : 3;
+    let bestQuestions: QuizQuestion[] = [];
+    let bestTitle = 'Course Quiz';
+
     try {
       const languageInstruction = this.buildLanguageInstruction(normalizedLanguage);
 
-      const prompt = `${languageInstruction}
+      const callQuizModel = async (prompt: string, useGoogleSearch: boolean): Promise<string> => {
+        try {
+          return await this.callGemini(
+            prompt,
+            3,
+            { temperature: 0.9, topP: 0.98 },
+            { useGoogleSearch }
+          );
+        } catch (error: any) {
+          const message = String(error?.message || '');
+          if (
+            useGoogleSearch &&
+            /google[_\s-]?search|unknown name "tools"|invalid argument|tool/i.test(message)
+          ) {
+            logger.warn(
+              { error: message },
+              'Gemini web grounding unavailable; retrying quiz generation without Google Search tool'
+            );
+            return this.callGemini(prompt, 3, { temperature: 0.9, topP: 0.98 });
+          }
+          throw error;
+        }
+      };
+
+      const normalizeQuestionType = (value: unknown): QuizQuestionType | null => {
+        const normalized = String(value || '')
+          .trim()
+          .toUpperCase()
+          .replace(/[\s-]+/g, '_');
+
+        if (
+          normalized === 'MULTIPLE_CHOICE' ||
+          normalized === 'MCQ' ||
+          normalized === 'MULTIPLECHOICE'
+        ) {
+          return 'MULTIPLE_CHOICE';
+        }
+
+        if (
+          normalized === 'TRUE_FALSE' ||
+          normalized === 'TRUEFALSE' ||
+          normalized === 'TF' ||
+          normalized === 'BOOLEAN'
+        ) {
+          return 'TRUE_FALSE';
+        }
+
+        if (
+          normalized === 'FILL_IN_THE_BLANK' ||
+          normalized === 'FILL_BLANK' ||
+          normalized === 'FILLINTHEBLANK' ||
+          normalized === 'SHORT_ANSWER' ||
+          normalized === 'SHORTANSWER' ||
+          normalized === 'BLANK'
+        ) {
+          return 'FILL_IN_THE_BLANK';
+        }
+
+        return null;
+      };
+
+      const inferQuestionTypeFromShape = (questionText: string, options: string[]): QuizQuestionType => {
+        const optionKey = options
+          .map((option) => normalizeQuizAnswerText(option))
+          .sort()
+          .join('|');
+
+        if (options.length === 2 && optionKey === 'false|true') {
+          return 'TRUE_FALSE';
+        }
+
+        if (options.length === 0 || /\b_{3,}\b/.test(questionText) || /\bblank\b/i.test(questionText)) {
+          return 'FILL_IN_THE_BLANK';
+        }
+
+        return 'MULTIPLE_CHOICE';
+      };
+
+      const normalizeTrueFalseAnswer = (value: unknown): 'True' | 'False' | null => {
+        const normalized = normalizeQuizAnswerText(value);
+        if (['true', 't', 'yes', 'y', '1'].includes(normalized)) {
+          return 'True';
+        }
+        if (['false', 'f', 'no', 'n', '0'].includes(normalized)) {
+          return 'False';
+        }
+        return null;
+      };
+
+      const validateQuestions = (
+        rawQuestions: unknown[],
+        existingQuestionKeys?: Set<string>
+      ): { questions: QuizQuestion[]; rejectedForLengthBias: number; rejectedDuplicateCount: number } => {
+        const seenQuestionKeys = new Set(existingQuestionKeys || []);
+        let rejectedForLengthBias = 0;
+        let rejectedDuplicateCount = 0;
+
+        const questions: QuizQuestion[] = rawQuestions
+          .map((question: any) => {
+            const questionText = String(question?.question || '').replace(/\s+/g, ' ').trim();
+            if (!questionText) {
+              return null;
+            }
+
+            const questionKey = questionText.toLowerCase();
+            if (seenQuestionKeys.has(questionKey)) {
+              rejectedDuplicateCount += 1;
+              return null;
+            }
+
+            const optionCandidates: string[] = (Array.isArray(question?.options)
+              ? question.options
+              : []
+            )
+              .map((option: unknown) => String(option || '').replace(/\s+/g, ' ').trim())
+              .filter((option: string) => Boolean(option));
+            const cleanedOptions: string[] = Array.from(new Set(optionCandidates));
+
+            const explicitQuestionType = normalizeQuestionType(question?.questionType);
+            const inferredQuestionType = explicitQuestionType || inferQuestionTypeFromShape(questionText, cleanedOptions);
+
+            if (!requestedQuestionTypeSet.has(inferredQuestionType)) {
+              return null;
+            }
+
+            const explanation = String(question?.explanation || '').trim();
+
+            if (inferredQuestionType === 'FILL_IN_THE_BLANK') {
+              const rawCorrectAnswer =
+                question?.correctAnswer ?? question?.answer ?? question?.expectedAnswer ?? '';
+              const cleanedCorrectAnswer = String(rawCorrectAnswer || '')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+              if (!cleanedCorrectAnswer) {
+                return null;
+              }
+
+              seenQuestionKeys.add(questionKey);
+
+              return {
+                questionType: 'FILL_IN_THE_BLANK',
+                question: questionText,
+                options: [],
+                correctAnswer: cleanedCorrectAnswer,
+                explanation,
+              } as QuizQuestion;
+            }
+
+            if (inferredQuestionType === 'TRUE_FALSE') {
+              const trueFalseOptions = ['True', 'False'];
+              const resolvedTrueFalseAnswer =
+                normalizeTrueFalseAnswer(question?.correctAnswer) ||
+                normalizeTrueFalseAnswer(resolveQuizCorrectAnswerText(question?.correctAnswer, trueFalseOptions));
+
+              if (!resolvedTrueFalseAnswer) {
+                return null;
+              }
+
+              seenQuestionKeys.add(questionKey);
+
+              return {
+                questionType: 'TRUE_FALSE',
+                question: questionText,
+                options: this.shuffleArray(trueFalseOptions),
+                correctAnswer: resolvedTrueFalseAnswer,
+                explanation,
+              } as QuizQuestion;
+            }
+
+            if (cleanedOptions.length !== 4) {
+              return null;
+            }
+
+            const resolvedCorrect = resolveQuizCorrectAnswerText(question?.correctAnswer, cleanedOptions);
+            const matchedCorrectOption = cleanedOptions.find(
+              (option) => normalizeQuizAnswerText(option) === normalizeQuizAnswerText(resolvedCorrect)
+            );
+
+            if (!matchedCorrectOption) {
+              return null;
+            }
+
+            const getWordCount = (value: string): number =>
+              value
+                .split(/\s+/)
+                .map((word) => word.trim())
+                .filter(Boolean).length;
+
+            const optionWordCounts = cleanedOptions.map((option) => getWordCount(option));
+            const maxOptionWords = Math.max(...optionWordCounts);
+            const minOptionWords = Math.min(...optionWordCounts);
+            const correctWordCount = getWordCount(matchedCorrectOption);
+            const distractorWordCounts = cleanedOptions
+              .filter((option) => option !== matchedCorrectOption)
+              .map((option) => getWordCount(option));
+            const avgDistractorWordCount =
+              distractorWordCounts.reduce((sum, count) => sum + count, 0) /
+              Math.max(1, distractorWordCounts.length);
+            const longestOptionsCount = optionWordCounts.filter(
+              (count) => count === maxOptionWords
+            ).length;
+            const correctIsUniqueLongest =
+              longestOptionsCount === 1 && correctWordCount === maxOptionWords;
+            const extremeLengthGap = maxOptionWords - minOptionWords >= 9;
+            const correctSignificantlyLonger =
+              correctWordCount >= avgDistractorWordCount + 5 ||
+              correctWordCount >= Math.ceil(avgDistractorWordCount * 1.45);
+
+            if (correctIsUniqueLongest && extremeLengthGap && correctSignificantlyLonger) {
+              rejectedForLengthBias += 1;
+              return null;
+            }
+
+            seenQuestionKeys.add(questionKey);
+
+            return {
+              questionType: 'MULTIPLE_CHOICE',
+              question: questionText,
+              options: this.shuffleArray(cleanedOptions),
+              correctAnswer: matchedCorrectOption,
+              explanation,
+            } as QuizQuestion;
+          })
+          .filter((question): question is QuizQuestion => question !== null);
+
+        return {
+          questions,
+          rejectedForLengthBias,
+          rejectedDuplicateCount,
+        };
+      };
+
+      const buildQuizPrompt = (
+        questionCount: number,
+        attemptNumber: number,
+        allowExternalContext: boolean,
+        existingQuestions: string[] = []
+      ): string => {
+        const generationToken = crypto.randomUUID().slice(0, 12);
+        const includeMultipleChoice = requestedQuestionTypeSet.has('MULTIPLE_CHOICE');
+        const includeTrueFalse = requestedQuestionTypeSet.has('TRUE_FALSE');
+        const includeFillInTheBlank = requestedQuestionTypeSet.has('FILL_IN_THE_BLANK');
+        const questionTypeRules = [
+          includeMultipleChoice
+            ? '- MULTIPLE_CHOICE: Use exactly 4 answer options. ONE correct, THREE plausible distractors.'
+            : '',
+          includeTrueFalse
+            ? '- TRUE_FALSE: The `question` text MUST be a single, declarative statement (a fact) that the user must evaluate. NEVER use open-ended questions, and NEVER use phrasing like "Which of the following...". Use exactly two options: "True" and "False".'
+            : '',
+          includeFillInTheBlank
+            ? '- FILL_IN_THE_BLANK: Use no options (empty array). CRITICAL: The `question` text MUST physically contain a blank line "__________" where the missing word belongs. NEVER output a complete sentence without a blank. The exact missing word goes in `correctAnswer`. The correct answer MUST be extremely short (1 to 3 words maximum), ideally a single specific noun, name, date, or core term. You MUST include 2-3 common synonyms separated by a pipe (|) character in the `correctAnswer` field to allow for leniency (e.g. "lengthy|long|extended"). Never obscure long phrases or entire sentences.'
+            : '',
+        ]
+          .filter(Boolean)
+          .join('\n');
+
+        const multipleChoiceQualityRules = includeMultipleChoice
+          ? `
+- Distractor Quality: For MULTIPLE_CHOICE, distractors must be close competitors to the correct answer.
+- No Giveaways: For MULTIPLE_CHOICE, avoid wording cues that reveal the answer.
+- Option Length: For MULTIPLE_CHOICE, keep options similar in length and detail. CRITICAL: The longest option must NOT always be the correct answer. Intentionally make distractors longer or more detailed than the correct answer on some questions to prevent length-based guessing.
+- Length Balance Rule: Keep MULTIPLE_CHOICE options in a tight range (ideally 7-18 words unless naturally numeric/date-based).`
+          : '';
+
+        const externalContextInstruction = allowExternalContext
+          ? `\nWEB AUGMENTATION MODE:\n- Use the provided text as the primary source.\n- If the text lacks enough details to create ${questionCount} strong questions, supplement with reliable mainstream educational knowledge and current web-grounded facts about the same topic.\n- Keep all added facts tightly aligned to the source topic and avoid niche/trivia-only questions.\n- Never contradict the source text.`
+          : '\nSOURCE-ONLY MODE:\n- Build all questions directly from the provided text.';
+
+        const existingQuestionsInstruction =
+          existingQuestions.length > 0
+            ? `\nDo NOT duplicate or paraphrase these already-generated questions:\n${existingQuestions
+                .map((question, index) => `${index + 1}. ${question}`)
+                .join('\n')}`
+            : '';
+
+        return `${languageInstruction}
 
 You are a Senior Academic Content Specialist with expertise in creating highly accurate, context-aware educational assessments.
 
 You must respond with valid JSON in this exact format:
-{"title": "Quiz Title", "questions": [{"question": "Question text?", "options": ["Option A text", "Option B text", "Option C text", "Option D text"], "correctAnswer": "The exact text of the correct option", "explanation": "Why this answer is correct"}]}
+      {"title": "Quiz Title", "questions": [{"questionType": "MULTIPLE_CHOICE|TRUE_FALSE|FILL_IN_THE_BLANK", "question": "Question text", "options": ["Option A", "Option B"], "correctAnswer": "Exact expected answer text", "explanation": "Why this answer is correct"}]}
 
-IMPORTANT: The "correctAnswer" field must contain the EXACT text of the correct option (not just a letter like "A").
+      IMPORTANT: The "correctAnswer" field must contain the EXACT expected answer text (not a letter like "A").
 
-Create a quiz with exactly ${adjustedNumQuestions} multiple-choice questions from the following text.
+      Create a quiz with exactly ${questionCount} questions from the following text.
+      Use ONLY these question types: ${requestedQuestionTypeLabels}.
+Attempt ${attemptNumber}. Generation token: ${generationToken}.
 
 Difficulty level: ${difficulty}
 ${difficultyInstructions[difficulty]}
+${externalContextInstruction}
+${existingQuestionsInstruction}
 
 CRITICAL REQUIREMENTS:
-- **Questions**: Clear, unambiguous, and directly based on the text.
-- **Options**: exactly 4 options per question. ONE correct, THREE plausible distractors. Avoid "All of the above" or "None of the above".
-- **OPTION LENGTH**: ALL four options MUST be similar in length and detail level. Do NOT make the correct answer longer or more detailed than the wrong answers. If the correct answer is a detailed explanation, make the wrong answers equally detailed. If the correct answer is brief, make wrong answers equally brief.
-- **Accuracy**: Verify every question and answer against the source text for 100% factual accuracy.
-- **Explanations**: Provide a clear, helpful explanation for the correct answer.
+- **Questions**: Professional, clear, unambiguous, and perfectly aligned to the source topic. Ensure questions actually test comprehension, not just trivial recall where possible.
+      - **Question Type Rules**:
+      ${questionTypeRules}
+      - **Misconception-Based Choices**: Use realistic learner mistakes as distractors rather than obviously wrong or absurd options.
+      ${multipleChoiceQualityRules}
+- **Accuracy**: Verify every question and answer against trustworthy sources and the provided text. Never generate conflicting questions in the same quiz.
+- **Explanations**: Provide highly professional, educational, and detailed explanations. Do not just state "This is the answer." You must thoroughly explain *why* it is correct based on core concepts, and briefly clarify why major alternatives are incorrect. Aim for 2-4 comprehensive sentences per explanation.
+- **Novelty**: Generate a fresh variant with different question wording and alternative distractor framing from typical prior attempts.
+- **Coverage**: Spread questions evenly across different major concepts from the source topic.
 
-Make the quiz comprehensive and reflective of the material's core concepts.
+Make the quiz exceptionally high quality, strictly formatted, and reflective of the material's core concepts.
 
 Text:
 ${preparedText}`;
+      };
 
-      const content = await this.callGemini(prompt);
-      
-      // Use safe JSON parsing
-      const parsed = this.safeParseJson<GeneratedQuiz>(content);
+      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+        const useGoogleSearch = needsWebAugmentation || attempt > 2;
+        const prompt = buildQuizPrompt(targetNumQuestions, attempt, useGoogleSearch);
 
-      // Process questions: handle correctAnswer and shuffle options
-      if (parsed.questions) {
-        parsed.questions = parsed.questions.map((question) => {
-          const cleanedOptions = (question.options || [])
-            .map((option) => String(option || '').trim())
-            .filter(Boolean);
+        const content = await callQuizModel(prompt, useGoogleSearch);
 
-          if (cleanedOptions.length > 0) {
-            const resolvedCorrect = resolveQuizCorrectAnswerText(question.correctAnswer, cleanedOptions);
-            const matchedCorrectOption =
-              cleanedOptions.find(
-                (option) => normalizeQuizAnswerText(option) === normalizeQuizAnswerText(resolvedCorrect)
-              ) || cleanedOptions[0];
+        // Use safe JSON parsing
+        const parsed = this.safeParseJson<GeneratedQuiz>(content);
+        const rawQuestions = Array.isArray(parsed.questions) ? parsed.questions : [];
+        const { questions: validatedQuestions, rejectedForLengthBias, rejectedDuplicateCount } =
+          validateQuestions(rawQuestions);
 
-            question.correctAnswer = matchedCorrectOption;
-            question.options = this.shuffleArray(cleanedOptions);
-          }
+        if (parsed.title) {
+          bestTitle = String(parsed.title).trim() || bestTitle;
+        }
 
-          return question;
-        });
+        if (validatedQuestions.length > bestQuestions.length) {
+          bestQuestions = validatedQuestions;
+        }
+
+        if (validatedQuestions.length >= targetNumQuestions) {
+          return {
+            title: bestTitle,
+            questions: validatedQuestions.slice(0, targetNumQuestions),
+          };
+        }
+
+        logger.warn(
+          {
+            requested: targetNumQuestions,
+            received: validatedQuestions.length,
+            attempt,
+            usedWebGrounding: useGoogleSearch,
+            rejectedForLengthBias,
+            rejectedDuplicateCount,
+          },
+          'Quiz generation returned fewer valid questions than requested'
+        );
       }
 
-      cache.set(cacheKey, parsed);
-      return parsed;
+      // Top-up pass: if we are still short, ask for only the missing questions with anti-duplication guidance.
+      let mergedQuestions = [...bestQuestions];
+
+      for (let topUpAttempt = 1; topUpAttempt <= 2 && mergedQuestions.length < targetNumQuestions; topUpAttempt += 1) {
+        const missingQuestionCount = targetNumQuestions - mergedQuestions.length;
+        const existingQuestions = mergedQuestions.map((question) => question.question);
+        const topUpPrompt = buildQuizPrompt(
+          missingQuestionCount,
+          maxAttempts + topUpAttempt,
+          true,
+          existingQuestions
+        );
+        const topUpContent = await callQuizModel(topUpPrompt, true);
+        const topUpParsed = this.safeParseJson<GeneratedQuiz>(topUpContent);
+        const topUpRawQuestions = Array.isArray(topUpParsed.questions) ? topUpParsed.questions : [];
+        const existingQuestionKeys = new Set(
+          mergedQuestions.map((question) => question.question.toLowerCase())
+        );
+
+        const {
+          questions: topUpQuestions,
+          rejectedForLengthBias,
+          rejectedDuplicateCount,
+        } = validateQuestions(topUpRawQuestions, existingQuestionKeys);
+
+        if (topUpParsed.title) {
+          bestTitle = String(topUpParsed.title).trim() || bestTitle;
+        }
+
+        if (topUpQuestions.length > 0) {
+          mergedQuestions = [...mergedQuestions, ...topUpQuestions].slice(0, targetNumQuestions);
+        }
+
+        logger.warn(
+          {
+            requested: targetNumQuestions,
+            currentlyAvailable: mergedQuestions.length,
+            topUpAttempt,
+            rejectedForLengthBias,
+            rejectedDuplicateCount,
+          },
+          'Quiz generation top-up attempt completed'
+        );
+      }
+
+      if (mergedQuestions.length === 0) {
+        throw new Error('Failed to generate quiz questions. Please try again.');
+      }
+
+      if (mergedQuestions.length < targetNumQuestions) {
+        logger.warn(
+          {
+            requested: targetNumQuestions,
+            returned: mergedQuestions.length,
+            estimatedSourceCapacity,
+            usedWebAugmentation: true,
+          },
+          'Returning partial quiz because model could not produce the full requested count'
+        );
+      }
+
+      return {
+        title: bestTitle,
+        questions: mergedQuestions,
+      };
     } catch (error: any) {
       logger.error({ error: error.message }, 'Failed to generate quiz');
       throw new Error('Failed to generate quiz. Please try again.');
+    }
+  }
+
+  async generateQuizImprovementTips(
+    input: {
+      title?: string;
+      difficulty: QuizDifficulty | string;
+      score: number;
+      totalQuestions: number;
+      questions: Array<{
+        question: string;
+        questionType?: QuizQuestionType | string;
+        userAnswer?: string | null;
+        correctAnswer: string;
+        isCorrect: boolean;
+        explanation?: string | null;
+      }>;
+    },
+    language: string = DEFAULT_LANGUAGE
+  ): Promise<QuizImprovementTips> {
+    const normalizedLanguage = this.normalizeLanguage(language);
+    const languageInstruction = this.buildLanguageInstruction(normalizedLanguage);
+    const safeTotalQuestions = Math.max(1, Math.floor(input.totalQuestions || 0));
+    const safeScore = Math.max(0, Math.floor(input.score || 0));
+    const safePercentage = Math.round((safeScore / safeTotalQuestions) * 100);
+
+    const compactQuestionData = input.questions.slice(0, 25).map((question) => ({
+      question: String(question.question || '').replace(/\s+/g, ' ').trim(),
+      type: String(question.questionType || 'MULTIPLE_CHOICE')
+        .trim()
+        .toUpperCase(),
+      result: question.isCorrect ? 'correct' : 'incorrect',
+      userAnswer: String(question.userAnswer || '').replace(/\s+/g, ' ').trim(),
+      correctAnswer: String(question.correctAnswer || '').replace(/\s+/g, ' ').trim(),
+      explanation: String(question.explanation || '').replace(/\s+/g, ' ').trim(),
+    }));
+
+    const prompt = `${languageInstruction}
+
+You are an expert learning coach. Based on a student's quiz attempt, provide practical and encouraging coaching.
+
+You must respond with valid JSON in this exact format:
+{"summary":"short overall feedback","strengths":["strength 1"],"improvements":["improvement 1"],"nextSteps":["step 1"]}
+
+Rules:
+- Keep the feedback concise and actionable.
+- strengths: 2 to 4 bullets.
+- improvements: 2 to 4 bullets focused on missed concepts and habits.
+- nextSteps: 2 to 4 concrete study actions.
+- Do not include markdown, code fences, or extra keys.
+
+Quiz title: ${String(input.title || 'Quiz').trim()}
+Difficulty: ${String(input.difficulty || 'MEDIUM').toUpperCase()}
+Score: ${safeScore}/${safeTotalQuestions} (${safePercentage}%)
+
+Question-level results:
+${JSON.stringify(compactQuestionData, null, 2)}
+`;
+
+    try {
+      const content = await this.callGemini(prompt, 2, {
+        temperature: 0.45,
+        topP: 0.9,
+        maxOutputTokens: 1200,
+      });
+
+      const parsed = this.safeParseJson<QuizImprovementTips>(content, () => ({
+        summary: safePercentage >= 70 ? 'You performed well overall. Keep strengthening weak spots.' : 'You are building progress. Focus on missed concepts and retake after review.',
+        strengths: ['You completed the quiz and identified what you know well.'],
+        improvements: ['Review the questions you missed and compare your answer to the correct one.'],
+        nextSteps: ['Take targeted notes on weak topics and retake the quiz within 24 hours.'],
+      }));
+
+      const normalizeList = (value: unknown, fallback: string): string[] => {
+        const list = Array.isArray(value)
+          ? value
+              .map((item) => String(item || '').replace(/\s+/g, ' ').trim())
+              .filter(Boolean)
+              .slice(0, 4)
+          : [];
+        return list.length > 0 ? list : [fallback];
+      };
+
+      return {
+        summary:
+          String(parsed.summary || '').replace(/\s+/g, ' ').trim() ||
+          (safePercentage >= 70
+            ? 'You performed well overall. Keep strengthening weak spots.'
+            : 'You are building progress. Focus on missed concepts and retake after review.'),
+        strengths: normalizeList(
+          parsed.strengths,
+          'You completed the quiz and identified what you know well.'
+        ),
+        improvements: normalizeList(
+          parsed.improvements,
+          'Review missed questions and understand why the correct answer is right.'
+        ),
+        nextSteps: normalizeList(
+          parsed.nextSteps,
+          'Retake the quiz after reviewing your weakest topics.'
+        ),
+      };
+    } catch (error: any) {
+      logger.warn({ error: error?.message }, 'Failed to generate AI quiz improvement tips');
+
+      return {
+        summary:
+          safePercentage >= 70
+            ? 'Nice work. You have a strong base and can improve with targeted review.'
+            : 'You are making progress. A focused review plan will quickly raise your score.',
+        strengths: ['You completed the assessment and generated useful performance data.'],
+        improvements: ['Revisit the concepts behind the questions you missed.'],
+        nextSteps: ['Create a short review list from your missed questions and retake the quiz.'],
+      };
     }
   }
 
@@ -523,10 +1039,11 @@ ${preparedText}`;
   ): Promise<GeneratedFlashcards> {
     const normalizedLanguage = this.normalizeLanguage(language);
     const preparedText = this.prepareText(text, 100000);
-    const cacheKey = `flashcards_${normalizedLanguage}_${this.hashText(preparedText)}_${numCards}`;
+    const targetNumCards = Math.min(Math.max(Math.floor(numCards) || 20, 10), 50);
+    const cacheKey = `flashcards_${normalizedLanguage}_${this.hashText(preparedText)}_${targetNumCards}`;
     const cached = cache.get<GeneratedFlashcards>(cacheKey);
 
-    if (cached) {
+    if (cached && Array.isArray(cached.cards) && cached.cards.length > 0) {
       logger.info('Returning cached flashcards');
       return cached;
     }
@@ -541,32 +1058,210 @@ You are a Senior Academic Researcher specializing in creating effective study fl
 You must respond with valid JSON in this exact format:
 {"title": "Flashcard Set Title", "cards": [{"front": "Question/Concept", "back": "Answer/Explanation"}]}
 
-Create exactly ${numCards} high-quality flashcards from the following text. Each flashcard should:
+Create exactly ${targetNumCards} high-quality flashcards from the following text. Each flashcard should:
 - **Front**: A clear, specific question, term, or concept. Keep it short and punchy.
 - **Back**: A clear, accurate, and easy-to-read explanation.
   - Use bullet points if the answer has multiple parts.
   - Keep it focused on the core concept.
 - **Variety**: Cover definitions, key concepts, cause-and-effect relationships, and major facts.
+- **Study Guide Handling**: If source text is a study guide/review sheet, create cards about the underlying concepts, not about the guide's instructions or worksheet structure.
 
 IMPORTANT: Verify all facts against the provided source material. Ensure the content is easy to read on a card.
 
 Text:
 ${preparedText}`;
 
-      const content = await this.callGemini(prompt);
-      
-      // Use safe JSON parsing with fallback
-      const parsed = this.safeParseJson<GeneratedFlashcards>(content, (rawText) => {
-        const cleaned = rawText.replace(/```json\n?|```\n?/g, '').trim();
-        return { title: 'Flashcards', cards: [{ front: 'Error', back: cleaned }] };
-      });
+      let bestResult = this.buildFallbackFlashcards(preparedText, targetNumCards);
 
-      cache.set(cacheKey, parsed);
-      return parsed;
+      for (let attempt = 1; attempt <= 3; attempt += 1) {
+        const content = await this.callGemini(prompt, 3, { temperature: 0.8, topP: 0.97 });
+
+        // Use safe JSON parsing with fallback
+        const parsed = this.safeParseJson<GeneratedFlashcards>(content, (rawText) => {
+          const cleaned = rawText.replace(/```json\n?|```\n?/g, '').trim();
+          return {
+            title: 'Study Flashcards',
+            cards: [{ front: 'Key Concept', back: cleaned.slice(0, 900) }],
+          };
+        });
+
+        const normalized = this.normalizeGeneratedFlashcards(parsed, targetNumCards, preparedText);
+        if (normalized.cards.length > bestResult.cards.length) {
+          bestResult = normalized;
+        }
+
+        if (normalized.cards.length >= targetNumCards) {
+          bestResult = normalized;
+          break;
+        }
+
+        logger.warn(
+          {
+            requested: targetNumCards,
+            received: normalized.cards.length,
+            attempt,
+          },
+          'Flashcard generation returned fewer cards than requested'
+        );
+      }
+
+      cache.set(cacheKey, bestResult);
+      return bestResult;
     } catch (error: any) {
+      const fallback = this.buildFallbackFlashcards(preparedText, targetNumCards);
+      if (fallback.cards.length > 0) {
+        logger.warn(
+          { error: error.message, fallbackCards: fallback.cards.length },
+          'Gemini flashcard generation failed; using deterministic fallback cards'
+        );
+        cache.set(cacheKey, fallback);
+        return fallback;
+      }
+
       logger.error({ error: error.message }, 'Failed to generate flashcards');
       throw new Error('Failed to generate flashcards. Please try again.');
     }
+  }
+
+  private normalizeGeneratedFlashcards(
+    raw: unknown,
+    targetNumCards: number,
+    sourceText: string
+  ): GeneratedFlashcards {
+    const parsed =
+      raw && typeof raw === 'object' ? (raw as Partial<GeneratedFlashcards>) : ({} as Partial<GeneratedFlashcards>);
+    const rawCards: unknown[] = Array.isArray(parsed.cards) ? parsed.cards : [];
+    const seen = new Set<string>();
+
+    const cards: Flashcard[] = rawCards
+      .map((card) => this.normalizeFlashcard(card))
+      .filter((card): card is Flashcard => {
+        if (!card) {
+          return false;
+        }
+
+        const key = `${card.front.toLowerCase()}__${card.back.toLowerCase()}`;
+        if (seen.has(key)) {
+          return false;
+        }
+
+        seen.add(key);
+        return true;
+      })
+      .slice(0, targetNumCards);
+
+    const titleCandidate = typeof parsed.title === 'string' ? parsed.title.trim() : '';
+    const title = titleCandidate || 'Study Flashcards';
+
+    if (cards.length >= targetNumCards) {
+      return { title, cards };
+    }
+
+    const fallbackSet = this.buildFallbackFlashcards(sourceText, targetNumCards);
+
+    if (cards.length === 0) {
+      return fallbackSet;
+    }
+
+    const mergedCards = [...cards];
+    for (const fallbackCard of fallbackSet.cards) {
+      if (mergedCards.length >= targetNumCards) {
+        break;
+      }
+
+      const key = `${fallbackCard.front.toLowerCase()}__${fallbackCard.back.toLowerCase()}`;
+      if (seen.has(key)) {
+        continue;
+      }
+
+      seen.add(key);
+      mergedCards.push(fallbackCard);
+    }
+
+    return {
+      title,
+      cards: mergedCards,
+    };
+  }
+
+  private normalizeFlashcard(card: unknown): Flashcard | null {
+    if (!card || typeof card !== 'object') {
+      return null;
+    }
+
+    const candidate = card as Record<string, unknown>;
+    const frontRaw =
+      candidate.front ??
+      candidate.question ??
+      candidate.prompt ??
+      candidate.term ??
+      candidate.concept;
+    const backRaw =
+      candidate.back ??
+      candidate.answer ??
+      candidate.response ??
+      candidate.definition ??
+      candidate.explanation;
+
+    const front = String(frontRaw ?? '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const back = String(backRaw ?? '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (!front || !back) {
+      return null;
+    }
+
+    return {
+      front: this.truncateText(front, 220),
+      back: this.truncateText(back, 900),
+    };
+  }
+
+  private buildFallbackFlashcards(sourceText: string, targetNumCards: number): GeneratedFlashcards {
+    const normalizedSource = sourceText.replace(/\r/g, '\n').trim();
+    const sentencePool = normalizedSource
+      .replace(/\n+/g, ' ')
+      .split(/(?<=[.!?])\s+/)
+      .map((segment) => segment.replace(/\s+/g, ' ').trim())
+      .filter((segment) => segment.length >= 35);
+
+    const cards: Flashcard[] = [];
+    const seen = new Set<string>();
+
+    for (const sentence of sentencePool) {
+      if (cards.length >= targetNumCards) {
+        break;
+      }
+
+      const conceptSeed = sentence.split(/[:;,-]/)[0].trim();
+      const promptSeed = conceptSeed.length >= 12 ? conceptSeed : sentence.slice(0, 72).trim();
+      const front = this.truncateText(`Explain: ${promptSeed.replace(/[.?!]$/, '')}`, 140);
+      const back = this.truncateText(sentence, 900);
+      const key = `${front.toLowerCase()}__${back.toLowerCase()}`;
+
+      if (!back || seen.has(key)) {
+        continue;
+      }
+
+      seen.add(key);
+      cards.push({ front, back });
+    }
+
+    if (cards.length === 0 && normalizedSource) {
+      const firstChunk = normalizedSource.replace(/\s+/g, ' ').slice(0, 900).trim();
+      cards.push({
+        front: 'What is the main idea of this material?',
+        back: firstChunk || 'No readable content was available for fallback flashcard generation.',
+      });
+    }
+
+    return {
+      title: 'Study Flashcards',
+      cards: cards.slice(0, targetNumCards),
+    };
   }
 
   /**
@@ -770,6 +1465,112 @@ Rules:
   }
 
   /**
+   * OCR text extraction for uploaded images.
+   */
+  async extractTextFromImage(
+    imageBase64: string,
+    mimeType: string,
+    language: string = DEFAULT_LANGUAGE
+  ): Promise<string> {
+    try {
+      const normalizedImageBase64 = String(imageBase64 || '').replace(/\s+/g, '');
+      if (!normalizedImageBase64) {
+        throw new Error('Image payload is empty.');
+      }
+
+      const normalizedMimeType = String(mimeType || '').toLowerCase().trim() || 'image/png';
+      const normalizedLanguage = this.normalizeLanguage(language);
+      const languageInstruction = this.buildLanguageInstruction(normalizedLanguage);
+
+      if (!this.authClient) {
+        this.authClient = await this.auth.getClient();
+      }
+
+      const tokenResponse = await this.authClient.getAccessToken();
+      if (!tokenResponse.token) {
+        throw new Error('Failed to obtain access token for Gemini API');
+      }
+
+      const requestBody = {
+        contents: [
+          {
+            parts: [
+              {
+                inlineData: {
+                  mimeType: normalizedMimeType,
+                  data: normalizedImageBase64,
+                },
+              },
+              {
+                text: `${languageInstruction}
+
+You are an OCR assistant for study documents.
+
+Extract all visible, readable text from this image.
+Rules:
+- Return plain text only.
+- Preserve logical line breaks.
+- Do not include markdown or JSON.
+- If no readable text is present, return exactly: [NO_TEXT_DETECTED]`,
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          temperature: 0,
+          topK: 32,
+          topP: 0.9,
+          maxOutputTokens: 16384,
+        },
+      };
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 120000);
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${tokenResponse.token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal,
+        }
+      );
+
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`Gemini API error ${response.status}: ${errorBody}`);
+      }
+
+      const data = (await response.json()) as any;
+      const modelText =
+        data?.candidates?.[0]?.content?.parts
+          ?.map((part: any) => String(part?.text || '').trim())
+          .filter(Boolean)
+          .join('\n') || '';
+
+      const cleanedText = modelText
+        .replace(/```[a-z]*\n?/gi, '')
+        .replace(/```/g, '')
+        .trim();
+
+      if (!cleanedText || cleanedText === '[NO_TEXT_DETECTED]') {
+        return '';
+      }
+
+      return cleanedText;
+    } catch (error: any) {
+      logger.error({ error: error.message }, 'Failed to extract text from image');
+      throw new Error(error.message || 'Failed to extract text from image');
+    }
+  }
+
+  /**
    * Truncate text to a maximum length
    */
   private truncateText(text: string, maxLength: number): string {
@@ -785,6 +1586,61 @@ Rules:
    */
   private hashText(text: string): string {
     return crypto.createHash('sha256').update(text).digest('hex').slice(0, 32);
+  }
+
+  private normalizeQuizQuestionTypes(questionTypes?: QuizQuestionType[] | string[]): QuizQuestionType[] {
+    const supportedQuestionTypes: QuizQuestionType[] = [
+      'MULTIPLE_CHOICE',
+      'TRUE_FALSE',
+      'FILL_IN_THE_BLANK',
+    ];
+
+    if (!Array.isArray(questionTypes) || questionTypes.length === 0) {
+      return supportedQuestionTypes;
+    }
+
+    const mapped = questionTypes
+      .map((questionType) =>
+        String(questionType || '')
+          .trim()
+          .toUpperCase()
+          .replace(/[\s-]+/g, '_')
+      )
+      .map((questionType): QuizQuestionType | null => {
+        if (
+          questionType === 'MULTIPLE_CHOICE' ||
+          questionType === 'MCQ' ||
+          questionType === 'MULTIPLECHOICE'
+        ) {
+          return 'MULTIPLE_CHOICE';
+        }
+
+        if (
+          questionType === 'TRUE_FALSE' ||
+          questionType === 'TRUEFALSE' ||
+          questionType === 'TF' ||
+          questionType === 'BOOLEAN'
+        ) {
+          return 'TRUE_FALSE';
+        }
+
+        if (
+          questionType === 'FILL_IN_THE_BLANK' ||
+          questionType === 'FILL_BLANK' ||
+          questionType === 'FILLINTHEBLANK' ||
+          questionType === 'SHORT_ANSWER' ||
+          questionType === 'SHORTANSWER' ||
+          questionType === 'BLANK'
+        ) {
+          return 'FILL_IN_THE_BLANK';
+        }
+
+        return null;
+      })
+      .filter((questionType): questionType is QuizQuestionType => questionType !== null);
+
+    const deduped = Array.from(new Set(mapped));
+    return deduped.length > 0 ? deduped : supportedQuestionTypes;
   }
 
   private normalizeLanguage(language?: string): string {

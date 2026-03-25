@@ -89,12 +89,20 @@ export function useStudySession(options: UseStudySessionOptions = {}) {
       fileId,
       numQuestions,
       difficulty,
+      questionTypes,
     }: {
       fileId: string;
       numQuestions: number;
       difficulty: string;
+      questionTypes?: Array<'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_IN_THE_BLANK'>;
     }) => {
-      const response = await api.post(`/study/files/${fileId}/quiz`, { numQuestions, difficulty });
+      const response = await api.post(`/study/files/${fileId}/quiz`, {
+        numQuestions,
+        difficulty,
+        ...(Array.isArray(questionTypes) && questionTypes.length > 0
+          ? { questionTypes }
+          : {}),
+      });
       return response.data;
     },
     onSuccess: async (data) => {

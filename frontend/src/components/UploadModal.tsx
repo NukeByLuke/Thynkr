@@ -1466,6 +1466,10 @@ export default function UploadModal({
                         PDF, DOCX, PPTX, TXT, Images, Audio/Video • Max 200MB each
                       </div>
 
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                        If you upload multiple images together, they are automatically combined into one study file.
+                      </p>
+
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-4">
                         {currentFolderId
                           ? 'Files will be added to your current folder.'

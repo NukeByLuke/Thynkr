@@ -25,7 +25,6 @@
     @apply backdrop-blur-md bg-white/90 dark:bg-black/75 border border-stone-200 dark:border-white/15 shadow-lg rounded-xl;
     isolation: isolate;
     transform: translateZ(0);
-    will-change: transform;
   }
 
   /* Glass Panel with stronger blur */
@@ -33,7 +32,6 @@
     @apply backdrop-blur-md bg-white/95 dark:bg-black/85 border border-stone-300 dark:border-white/20 shadow-xl rounded-2xl;
     isolation: isolate;
     transform: translateZ(0);
-    will-change: transform;
   }
 
   /* Card - Theme-aware glass card with Sunrise & Midnight styling */
@@ -48,7 +46,6 @@
     transition: transform 0.12s cubic-bezier(0.25, 0.1, 0.25, 1.0),
                 box-shadow 0.12s cubic-bezier(0.25, 0.1, 0.25, 1.0),
                 border-color 0.12s cubic-bezier(0.25, 0.1, 0.25, 1.0);
-    will-change: transform, box-shadow;
   }
 
   /* Typography - Sunrise & Midnight */
@@ -82,7 +79,6 @@
     @apply absolute rounded-full blur-3xl opacity-15 dark:opacity-10 pointer-events-none;
     animation: float 20s ease-in-out infinite;
     transform: translate3d(0, 0, 0);
-    will-change: transform;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     contain: strict;
@@ -179,7 +175,6 @@
   /* Hover glow effects (GPU Optimized) */
   .hover-glow-purple {
     transition: box-shadow 0.15s cubic-bezier(0.25, 0.1, 0.25, 1.0);
-    will-change: box-shadow;
   }
   
   .hover-glow-purple:hover {

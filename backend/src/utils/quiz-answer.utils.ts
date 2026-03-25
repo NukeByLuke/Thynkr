@@ -9,6 +9,44 @@ export function normalizeQuizAnswerText(value: unknown): string {
     .toLowerCase();
 }
 
+function normalizeFreeTextAnswer(value: unknown): string {
+  return normalizeQuizAnswerText(value)
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function normalizeBooleanAnswer(value: unknown): 'true' | 'false' | null {
+  const normalized = normalizeQuizAnswerText(value);
+
+  if (['true', 't', 'yes', 'y', '1'].includes(normalized)) {
+    return 'true';
+  }
+
+  if (['false', 'f', 'no', 'n', '0'].includes(normalized)) {
+    return 'false';
+  }
+
+  return null;
+}
+
+function calculateLevenshteinDistance(a: string, b: string): number {
+  const matrix = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(null));
+  for (let i = 0; i <= a.length; i += 1) matrix[i][0] = i;
+  for (let j = 0; j <= b.length; j += 1) matrix[0][j] = j;
+  for (let i = 1; i <= a.length; i += 1) {
+    for (let j = 1; j <= b.length; j += 1) {
+      const indicator = a[i - 1] === b[j - 1] ? 0 : 1;
+      matrix[i][j] = Math.min(
+        (matrix[i][j - 1] as number) + 1,
+        (matrix[i - 1][j] as number) + 1,
+        (matrix[i - 1][j - 1] as number) + indicator
+      );
+    }
+  }
+  return matrix[a.length][b.length] as number;
+}
+
 function coerceOptions(options: unknown[] | undefined): string[] {
   if (!Array.isArray(options)) {
     return [];
@@ -138,8 +176,59 @@ export function isQuizAnswerCorrect(
     return false;
   }
 
-  if (normalizedSelected === normalizeQuizAnswerText(resolvedCorrect)) {
+  if (normalizedSelected === normalizeQuizAnswerText(resolvedCorrect.split('|')[0])) {
     return true;
+  }
+
+  // Free-text and blank-style answers: compare with punctuation-insensitive normalization.
+  if (safeOptions.length <= 1) {
+    const acceptableAnswers = resolvedCorrect.split('|');
+
+    for (const acceptableAnswer of acceptableAnswers) {
+      const normalizedSelectedBoolean = normalizeBooleanAnswer(selectedAnswer);
+      const normalizedCorrectBoolean = normalizeBooleanAnswer(acceptableAnswer);
+
+      if (
+        normalizedSelectedBoolean &&
+        normalizedCorrectBoolean &&
+        normalizedSelectedBoolean === normalizedCorrectBoolean
+      ) {
+        return true;
+      }
+
+      const normalizedSelectedFreeText = normalizeFreeTextAnswer(selectedAnswer);
+      const normalizedCorrectFreeText = normalizeFreeTextAnswer(acceptableAnswer);
+
+      if (normalizedSelectedFreeText && normalizedCorrectFreeText) {
+        if (normalizedSelectedFreeText === normalizedCorrectFreeText) {
+          return true;
+        }
+
+        // Check substring inclusion for answers >= 4 chars long
+        if (
+          normalizedSelectedFreeText.length >= 4 &&
+          normalizedCorrectFreeText.length >= 4
+        ) {
+          if (
+            normalizedCorrectFreeText.includes(normalizedSelectedFreeText) ||
+            normalizedSelectedFreeText.includes(normalizedCorrectFreeText)
+          ) {
+            return true;
+          }
+        }
+
+        // Check typo tolerance based on Levenshtein distance
+        const distance = calculateLevenshteinDistance(normalizedSelectedFreeText, normalizedCorrectFreeText);
+        const isShortAnswer = Math.max(normalizedSelectedFreeText.length, normalizedCorrectFreeText.length) <= 10;
+        
+        // Allow 1 typo for words up to 10 chars, 2 typos for longer words
+        const allowedTypos = isShortAnswer ? 1 : 2;
+        
+        if (distance <= allowedTypos) {
+          return true;
+        }
+      }
+    }
   }
 
   const selectedIndex = parseQuizAnswerIndex(selectedAnswer, safeOptions.length);

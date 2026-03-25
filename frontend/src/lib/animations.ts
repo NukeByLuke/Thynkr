@@ -61,27 +61,27 @@ export const ANIMATION_CONFIG = {
  */
 export const ANIMATION_CLASSES = {
   // Base transition classes - GPU accelerated properties only
-  base: 'transition-all duration-200 ease-out will-change-transform',
-  fast: 'transition-all duration-150 ease-out will-change-transform',
-  normal: 'transition-all duration-300 ease-out will-change-transform',
+  base: 'transition-all duration-200 ease-out',
+  fast: 'transition-all duration-150 ease-out',
+  normal: 'transition-all duration-300 ease-out',
   
   // Transform-based transitions (GPU accelerated)
-  transform: 'transition-transform duration-200 ease-out will-change-transform',
-  transformFast: 'transition-transform duration-150 ease-out will-change-transform',
+  transform: 'transition-transform duration-200 ease-out',
+  transformFast: 'transition-transform duration-150 ease-out',
   
   // Opacity transitions (GPU accelerated)
   opacity: 'transition-opacity duration-200 ease-out',
   opacityFast: 'transition-opacity duration-150 ease-out',
   
   // Combined transform + opacity (most common)
-  both: 'transition-[transform,opacity] duration-200 ease-out will-change-transform',
-  bothFast: 'transition-[transform,opacity] duration-150 ease-out will-change-transform',
+  both: 'transition-[transform,opacity] duration-200 ease-out',
+  bothFast: 'transition-[transform,opacity] duration-150 ease-out',
   
   // Tactile feedback for clickable elements
-  clickable: 'active:scale-95 transition-transform duration-150 will-change-transform',
-  clickableSubtle: 'active:scale-[0.98] transition-transform duration-150 will-change-transform',
+  clickable: 'active:scale-95 transition-transform duration-150',
+  clickableSubtle: 'active:scale-[0.98] transition-transform duration-150',
   
   // Hover effects
-  hover: 'hover:scale-[1.02] transition-transform duration-200 will-change-transform',
-  hoverLift: 'hover:-translate-y-0.5 transition-transform duration-200 will-change-transform',
+  hover: 'hover:scale-[1.02] transition-transform duration-200',
+  hoverLift: 'hover:-translate-y-0.5 transition-transform duration-200',
 } as const;

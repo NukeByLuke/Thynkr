@@ -13,6 +13,43 @@ const normalizeText = (value: unknown): string =>
     .trim()
     .toLowerCase();
 
+const normalizeFreeText = (value: unknown): string =>
+  normalizeText(value)
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const normalizeBooleanAnswer = (value: unknown): 'true' | 'false' | null => {
+  const normalized = normalizeText(value);
+
+  if (['true', 't', 'yes', 'y', '1'].includes(normalized)) {
+    return 'true';
+  }
+
+  if (['false', 'f', 'no', 'n', '0'].includes(normalized)) {
+    return 'false';
+  }
+
+  return null;
+};
+
+const calculateLevenshteinDistance = (a: string, b: string): number => {
+  const matrix = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(null));
+  for (let i = 0; i <= a.length; i += 1) matrix[i][0] = i;
+  for (let j = 0; j <= b.length; j += 1) matrix[0][j] = j;
+  for (let i = 1; i <= a.length; i += 1) {
+    for (let j = 1; j <= b.length; j += 1) {
+      const indicator = a[i - 1] === b[j - 1] ? 0 : 1;
+      matrix[i][j] = Math.min(
+        (matrix[i][j - 1] as number) + 1,
+        (matrix[i - 1][j] as number) + 1,
+        (matrix[i - 1][j - 1] as number) + indicator
+      );
+    }
+  }
+  return matrix[a.length][b.length] as number;
+};
+
 const cleanOptions = (options?: Array<string | null | undefined>): string[] =>
   (options ?? []).map((option) => String(option ?? '').trim()).filter(Boolean);
 
@@ -128,8 +165,57 @@ export const isQuizAnswerCorrect = (selectedAnswer: unknown, question: QuizQuest
     return false;
   }
 
-  if (normalizedSelected === normalizeText(resolvedCorrect)) {
+  if (normalizeText(normalizedSelected) === normalizeText(resolvedCorrect.split('|')[0])) {
     return true;
+  }
+
+  // Free-text/blank-style answers: compare normalized text and boolean equivalents.
+  if (options.length <= 1) {
+    const acceptableAnswers = resolvedCorrect.split('|');
+
+    for (const acceptableAnswer of acceptableAnswers) {
+      const selectedBoolean = normalizeBooleanAnswer(selectedAnswer);
+      const correctBoolean = normalizeBooleanAnswer(acceptableAnswer);
+
+      if (selectedBoolean && correctBoolean && selectedBoolean === correctBoolean) {
+        return true;
+      }
+
+      const normalizedSelectedFreeText = normalizeFreeText(selectedAnswer);
+      const normalizedCorrectFreeText = normalizeFreeText(acceptableAnswer);
+
+      if (normalizedSelectedFreeText && normalizedCorrectFreeText) {
+        if (normalizedSelectedFreeText === normalizedCorrectFreeText) {
+          return true;
+        }
+
+        // Check substring inclusion for answers >= 4 chars long
+        // Examples: Correct "George Washington", Selected "Washington"
+        // or Correct "Photosynthesis", Selected "Photosynthesis process"
+        if (
+          normalizedSelectedFreeText.length >= 4 &&
+          normalizedCorrectFreeText.length >= 4
+        ) {
+          if (
+            normalizedCorrectFreeText.includes(normalizedSelectedFreeText) ||
+            normalizedSelectedFreeText.includes(normalizedCorrectFreeText)
+          ) {
+            return true;
+          }
+        }
+
+        // Check typo tolerance based on Levenshtein distance
+        const distance = calculateLevenshteinDistance(normalizedSelectedFreeText, normalizedCorrectFreeText);
+        const isShortAnswer = Math.max(normalizedSelectedFreeText.length, normalizedCorrectFreeText.length) <= 10;
+        
+        // Allow 1 typo for words up to 10 chars, 2 typos for longer words
+        const allowedTypos = isShortAnswer ? 1 : 2;
+        
+        if (distance <= allowedTypos) {
+          return true;
+        }
+      }
+    }
   }
 
   const selectedIndex = parseOptionIndex(selectedAnswer, options.length);

@@ -43,6 +43,7 @@ import GenerationLoader from '@/components/ui/GenerationLoader';
 import { useStudySession } from '@/hooks/useStudySession';
 import { useLayout } from '@/contexts/LayoutContext';
 import api from '@/lib/api';
+import { calculateQuizScore } from '@/utils/quizAnswerUtils';
 
 // Types
 interface UploadedFile {
@@ -367,10 +368,7 @@ export default function ImmersiveStudy() {
 
     // Fallback: Calculate score locally
     const questions = selectedQuiz?.questions || [];
-    let score = 0;
-    questions.forEach((q: any) => {
-      if (answers[q.id] === q.correctAnswer) score++;
-    });
+    const score = calculateQuizScore(questions, (question: any) => answers[question.id]);
     return {
       score,
       total: questions.length,
@@ -410,6 +408,7 @@ export default function ImmersiveStudy() {
           return (
             <SummaryView
               content={selectedFile.summary.content}
+              fileName={selectedFile.originalName}
               onRegenerate={() => generateSummaryMutation.mutate({ fileId: selectedFile.id, regenerate: true })}
               isRegenerating={generateSummaryMutation.isPending}
             />
@@ -455,19 +454,35 @@ export default function ImmersiveStudy() {
             extraContent={
               <div className="max-w-xs mx-auto mb-6">
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
-                  Number of cards: <span className="text-indigo-600 dark:text-indigo-400 font-semibold">{numCards}</span>
+                  Number of cards: <span className="text-pink-600 dark:text-cyan-300 font-semibold">{numCards}</span>
                 </label>
-                <input
-                  type="range"
-                  min="10"
-                  max="50"
-                  value={numCards}
-                  onChange={(e) => setNumCards(Number(e.target.value))}
-                  className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                />
-                <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  <span>10</span>
-                  <span>50</span>
+                <div className="flex items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setNumCards((prev) => Math.max(10, prev - 5))}
+                    disabled={numCards <= 10}
+                    className="h-9 min-w-[3.25rem] rounded-lg border border-pink-200 bg-pink-50 text-pink-700 font-semibold transition-colors hover:bg-pink-100 disabled:opacity-40 disabled:cursor-not-allowed dark:border-cyan-500/40 dark:bg-cyan-500/10 dark:text-cyan-200 dark:hover:bg-cyan-500/20"
+                    aria-label="Decrease flashcards by five"
+                  >
+                    -5
+                  </button>
+                  <div className="min-w-[4.5rem] text-center text-base font-bold text-slate-900 dark:text-white tabular-nums">
+                    {numCards}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setNumCards((prev) => Math.min(50, prev + 5))}
+                    disabled={numCards >= 50}
+                    className="h-9 min-w-[3.25rem] rounded-lg border border-pink-200 bg-pink-50 text-pink-700 font-semibold transition-colors hover:bg-pink-100 disabled:opacity-40 disabled:cursor-not-allowed dark:border-cyan-500/40 dark:bg-cyan-500/10 dark:text-cyan-200 dark:hover:bg-cyan-500/20"
+                    aria-label="Increase flashcards by five"
+                  >
+                    +5
+                  </button>
+                </div>
+                <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mt-2">
+                  <span>Min 10</span>
+                  <span>Step 5</span>
+                  <span>Max 50</span>
                 </div>
               </div>
             }
@@ -481,11 +496,16 @@ export default function ImmersiveStudy() {
             title={selectedFile.originalName}
             questions={selectedQuiz?.questions || []}
             fileId={selectedFile.id}
-            onGenerateQuiz={(difficulty: string, numQuestions: number) => {
+            onGenerateQuiz={(
+              difficulty: string,
+              numQuestions: number,
+              questionTypes: Array<'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_IN_THE_BLANK'>
+            ) => {
               generateQuizMutation.mutate({
                 fileId: selectedFile.id,
                 difficulty: difficulty.toUpperCase(),
                 numQuestions,
+                questionTypes,
               });
             }}
             isGenerating={generateQuizMutation.isPending}
