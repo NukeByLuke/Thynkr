@@ -689,14 +689,7 @@ ${preparedText}`;
 
             const optionWordCounts = cleanedOptions.map((option) => getWordCount(option));
             const maxOptionWords = Math.max(...optionWordCounts);
-            const minOptionWords = Math.min(...optionWordCounts);
             const correctWordCount = getWordCount(matchedCorrectOption);
-            const distractorWordCounts = cleanedOptions
-              .filter((option) => option !== matchedCorrectOption)
-              .map((option) => getWordCount(option));
-            const avgDistractorWordCount =
-              distractorWordCounts.reduce((sum, count) => sum + count, 0) /
-              Math.max(1, distractorWordCounts.length);
             const longestOptionsCount = optionWordCounts.filter(
               (count) => count === maxOptionWords
             ).length;
