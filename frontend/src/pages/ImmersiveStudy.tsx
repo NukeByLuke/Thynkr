@@ -350,7 +350,8 @@ export default function ImmersiveStudy() {
   const handleQuizSubmit = useCallback(async (
     answers: Record<string, string>, 
     timeSpentSeconds?: number, 
-    questionTimings?: Record<string, number>
+    questionTimings?: Record<string, number>,
+    usedQuestions?: QuizQuestion[]
   ) => {
     if (selectedQuiz?.id) {
       try {
@@ -366,13 +367,23 @@ export default function ImmersiveStudy() {
       }
     }
 
-    // Fallback: Calculate score locally
-    const questions = selectedQuiz?.questions || [];
-    const score = calculateQuizScore(questions, (question: any) => answers[question.id]);
+    // Fallback: Calculate score locally for temp-quizzes
+    const questions = usedQuestions && usedQuestions.length > 0 ? usedQuestions : selectedQuiz?.questions || [];
+    let score = 0;
+    let actualCount = 0;
+
+    questions.forEach((q: any) => {
+      if (q.id && answers[q.id] !== undefined) {
+        actualCount++;
+        if (isQuizAnswerCorrect(answers[q.id], q)) score++;
+      }
+    });
+
+    const total = actualCount > 0 ? actualCount : questions.length;
     return {
       score,
-      total: questions.length,
-      percentage: questions.length > 0 ? Math.round((score / questions.length) * 100) : 0,
+      total,
+      percentage: total > 0 ? Math.round((score / total) * 100) : 0,
     };
   }, [selectedQuiz]);
 

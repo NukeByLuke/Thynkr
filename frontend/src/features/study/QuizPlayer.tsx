@@ -60,7 +60,8 @@ interface QuizPlayerProps {
   onSubmit: (
     answers: Record<string, string>,
     timeSpentSeconds?: number,
-    questionTimings?: Record<string, number>
+    questionTimings?: Record<string, number>,
+    usedQuestions?: QuizQuestion[]
   ) => Promise<QuizSubmitResult | Record<string, unknown>>;
 }
 
@@ -537,7 +538,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
         : 0;
 
       // Pass time spent and per-question timings to backend
-      const result = await onSubmit(answers, timeSpentSeconds, questionTimings);
+      const result = await onSubmit(answers, timeSpentSeconds, questionTimings, quizQuestions);
       setResults(result);
       setIsSubmitted(true);
 
