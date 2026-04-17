@@ -261,17 +261,28 @@ export default function StudyModePage() {
   const handleQuizSubmit = useCallback(async (
     answers: Record<string, string>,
     _timeSpentSeconds?: number,
-    _questionTimings?: Record<string, number>
+    _questionTimings?: Record<string, number>,
+    usedQuestions?: QuizQuestion[]
   ) => {
-    const questions = studyContent?.result?.questions || [];
+    const questions = usedQuestions || studyContent?.result?.questions || [];
     let score = 0;
+    let actualCount = 0;
+
     questions.forEach((q: any) => {
-      if (isQuizAnswerCorrect(answers[q.id], q)) score++;
+      // If usedQuestions is provided, q.id exists. Otherwise fallback to object reference (which won't work without id, but usedQuestions covers it)
+      if (q.id && answers[q.id] !== undefined) {
+        actualCount++;
+        if (isQuizAnswerCorrect(answers[q.id], q)) score++;
+      } else if (!q.id && answers[q.originalIndex] !== undefined) {
+        // Fallback or ignore
+      }
     });
+
+    const total = actualCount > 0 ? actualCount : questions.length;
     return {
       score,
-      total: questions.length,
-      percentage: questions.length > 0 ? Math.round((score / questions.length) * 100) : 0,
+      total,
+      percentage: total > 0 ? Math.round((score / total) * 100) : 0,
     };
   }, [studyContent]);
 
