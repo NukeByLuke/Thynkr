@@ -43,7 +43,7 @@ import GenerationLoader from '@/components/ui/GenerationLoader';
 import { useStudySession } from '@/hooks/useStudySession';
 import { useLayout } from '@/contexts/LayoutContext';
 import api from '@/lib/api';
-import { calculateQuizScore } from '@/utils/quizAnswerUtils';
+import { isQuizAnswerCorrect } from '@/utils/quizAnswerUtils';
 
 // Types
 interface UploadedFile {
@@ -351,7 +351,7 @@ export default function ImmersiveStudy() {
     answers: Record<string, string>, 
     timeSpentSeconds?: number, 
     questionTimings?: Record<string, number>,
-    usedQuestions?: QuizQuestion[]
+    usedQuestions?: any[]
   ) => {
     if (selectedQuiz?.id) {
       try {

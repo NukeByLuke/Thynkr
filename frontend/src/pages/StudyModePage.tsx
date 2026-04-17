@@ -262,7 +262,7 @@ export default function StudyModePage() {
     answers: Record<string, string>,
     _timeSpentSeconds?: number,
     _questionTimings?: Record<string, number>,
-    usedQuestions?: QuizQuestion[]
+    usedQuestions?: any[]
   ) => {
     const questions = usedQuestions || studyContent?.result?.questions || [];
     let score = 0;
