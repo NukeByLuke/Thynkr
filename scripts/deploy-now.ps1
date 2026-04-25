@@ -24,7 +24,7 @@ try {
 
 Write-Host ""
 Write-Host "This will:" -ForegroundColor Yellow
-Write-Host "  1. Build frontend with Stripe test price IDs"
+Write-Host "  1. Build frontend with Stripe live price IDs"
 Write-Host "  2. Build backend"
 Write-Host "  3. Push to Docker Hub"
 Write-Host "  4. Deploy to your DigitalOcean server"
