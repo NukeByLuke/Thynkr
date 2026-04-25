@@ -40,10 +40,10 @@ Write-Host ""
 Write-Host "[1/5] Building Frontend..." -ForegroundColor Cyan
 docker build `
   --build-arg VITE_API_URL="/api" `
-  --build-arg VITE_STRIPE_PRICE_STANDARD_MONTHLY="price_1SuJ87JuKGUgkYW14X35zJzB" `
-  --build-arg VITE_STRIPE_PRICE_STANDARD_YEARLY="price_1SuJ8cJuKGUgkYW1XkO5aNjn" `
-  --build-arg VITE_STRIPE_PRICE_PREMIUM_MONTHLY="price_1SuJ8zJuKGUgkYW1gMUNkfFa" `
-  --build-arg VITE_STRIPE_PRICE_PREMIUM_YEARLY="price_1SuJ9DJuKGUgkYW10azzNYPK" `
+  --build-arg VITE_STRIPE_PRICE_STANDARD_MONTHLY="price_1T6iAIJuKGUgkYW110eHHbY2" `
+  --build-arg VITE_STRIPE_PRICE_STANDARD_YEARLY="price_1SbckrJuKGUgkYW1xtzor4VE" `
+  --build-arg VITE_STRIPE_PRICE_PREMIUM_MONTHLY="price_1T6iBHJuKGUgkYW12vqcdCUd" `
+  --build-arg VITE_STRIPE_PRICE_PREMIUM_YEARLY="price_1SbcksJuKGUgkYW1k4cxrjI9" `
   -t nukebyluke/thynkr-frontend:latest `
   ./frontend
 
@@ -86,16 +86,6 @@ Write-Host "Connecting to server and updating..." -ForegroundColor Yellow
 # Create deployment script
 $deployScript = @'
 cd /root
-cat >> .env << 'STRIPE_EOF'
-
-STRIPE_SECRET_KEY=sk_test_51SbRAIJuKGUgkYW1WnRsjMKXe7V9eYQnJM8QBRu2HK0kguPgYFDw8ez2ZMf0YJQXbqvWeArESIU3M8V38zgzg4fG00hg5M1zCl
-STRIPE_PUBLISHABLE_KEY=pk_test_51SbRAIJuKGUgkYW13Ena665dDAbUOLx9r4TfAxOW0Q83SHSOfkCugOv9lwFT7GLhYYXB78giq22o0SUehm7oJAvI00D5ydmK5v
-STRIPE_WEBHOOK_SECRET=whsec_f9f4b41a1a6d68009841095f168c0bbebe59b09f746d08e14f45f42c5fca8daf
-STRIPE_PRICE_PRO_MONTHLY=price_1SuJ87JuKGUgkYW14X35zJzB
-STRIPE_PRICE_PRO_YEARLY=price_1SuJ8cJuKGUgkYW1XkO5aNjn
-STRIPE_PRICE_PREMIUM_MONTHLY=price_1SuJ8zJuKGUgkYW1gMUNkfFa
-STRIPE_PRICE_PREMIUM_YEARLY=price_1SuJ9DJuKGUgkYW10azzNYPK
-STRIPE_EOF
 docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 echo "Waiting for services to start..."
