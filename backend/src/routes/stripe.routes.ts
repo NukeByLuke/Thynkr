@@ -284,6 +284,16 @@ async function handleSubscriptionUpdated(subscription: any, server: FastifyInsta
   ]);
 }
 
+function getInvoiceLinePriceId(invoice: any): string | null {
+  const price = invoice.lines?.data?.[0]?.price;
+
+  if (!price) return null;
+  if (typeof price === 'string') return price;
+  if (typeof price === 'object' && typeof price.id === 'string') return price.id;
+
+  return null;
+}
+
 async function handleSubscriptionDeleted(subscription: any, server: FastifyInstance) {
   server.log.info({ subscriptionId: subscription.id }, 'Processing subscription deletion');
   const customer = await stripe.customers.retrieve(subscription.customer);
@@ -322,7 +332,7 @@ async function handleInvoicePaymentSucceeded(invoice: any, server: FastifyInstan
   if (!user) return;
 
   // Record the payment
-  const priceId = invoice.lines?.data?.[0]?.price?.id;
+  const priceId = getInvoiceLinePriceId(invoice);
   const priceInfo = priceId ? getPriceInfo(priceId) : null;
 
   await prisma.payment.create({
@@ -361,7 +371,7 @@ async function handleInvoicePaymentFailed(invoice: any, server: FastifyInstance)
 
   if (user) {
     // Record the failed payment
-    const priceId = invoice.lines?.data?.[0]?.price?.id;
+    const priceId = getInvoiceLinePriceId(invoice);
     const priceInfo = priceId ? getPriceInfo(priceId) : null;
 
     await prisma.payment.create({
