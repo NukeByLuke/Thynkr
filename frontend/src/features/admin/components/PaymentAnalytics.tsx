@@ -444,7 +444,7 @@ const PaymentAnalyticsTab = () => {
               <p className="text-gray-500 dark:text-gray-400">No payments yet</p>
             </div>
           ) : (
-            recentPayments.payments.slice(0, 6).map((payment) => (
+            recentPayments.payments.map((payment) => (
               <div key={payment.id} className="px-4 py-3 space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
