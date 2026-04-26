@@ -523,7 +523,7 @@ const PaymentAnalyticsTab = () => {
                   </td>
                 </tr>
               ) : (
-                recentPayments.payments.slice(0, 10).map((payment) => (
+                recentPayments.payments.map((payment) => (
                   <tr
                     key={payment.id}
                     className="hover:bg-rose-50/50 dark:hover:bg-slate-800/50 transition-colors"
