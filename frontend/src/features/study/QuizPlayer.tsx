@@ -1049,9 +1049,17 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
   // Final score screen - show when submitted but NOT in review mode
   if (isSubmitted && results && !reviewMode) {
     const finalResults = results as QuizSubmitResult;
-    const finalPercentage = Number(finalResults.percentage || 0);
-    const finalScore = Number(finalResults.score || 0);
-    const finalTotal = Number(finalResults.total || 0);
+    const rawScore = Number(finalResults.score || 0);
+    const rawTotal = Number(finalResults.total || 0);
+    const finalScore = Number.isFinite(rawScore) ? Math.max(0, Math.floor(rawScore)) : 0;
+    const finalTotal = Number.isFinite(rawTotal) ? Math.max(0, Math.floor(rawTotal)) : 0;
+    const derivedPercentage =
+      finalTotal > 0 ? Math.round((Math.min(finalScore, finalTotal) / finalTotal) * 100) : 0;
+    const rawPercentage = Number(finalResults.percentage);
+    const finalPercentage =
+      Number.isFinite(rawPercentage) && rawPercentage >= 0
+        ? Math.min(100, Math.round(rawPercentage))
+        : derivedPercentage;
     const improvementTips =
       finalResults.improvementTips ||
       buildFallbackImprovementTips({

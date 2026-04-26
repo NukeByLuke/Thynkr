@@ -74,8 +74,13 @@ export default async function adminRoutes(server: FastifyInstance) {
         prisma.user.count({ where }),
       ]);
 
+      const usersWithLastActive = users.map((user) => ({
+        ...user,
+        lastActiveAt: user.lastLoginAt,
+      }));
+
       return reply.send({
-        users,
+        users: usersWithLastActive,
         pagination: {
           page: parseInt(page),
           limit: parseInt(limit),
@@ -852,6 +857,11 @@ export default async function adminRoutes(server: FastifyInstance) {
       preHandler: [authenticate, requireRole('ADMIN')],
     },
     async (_request: AuthenticatedRequest, reply) => {
+      const now = new Date();
+      const last24Hours = subDays(now, 1);
+      const last7Days = subDays(now, 7);
+      const last30Days = subDays(now, 30);
+
       const [
         totalUsers,
         basicUsers,
@@ -859,6 +869,14 @@ export default async function adminRoutes(server: FastifyInstance) {
         premiumUsers,
         totalContent,
         activeSubscriptions,
+        dailyActiveUsers,
+        weeklyActiveUsers,
+        monthlyActiveUsers,
+        sessions24h,
+        sessions7d,
+        filesUploaded7d,
+        filesUploaded30d,
+        fileSizes,
       ] = await Promise.all([
         prisma.user.count(),
         prisma.user.count({ where: { role: 'BASIC' } }),
@@ -866,7 +884,20 @@ export default async function adminRoutes(server: FastifyInstance) {
         prisma.user.count({ where: { role: 'PREMIUM' } }),
         prisma.content.count({ where: { published: true } }),
         prisma.subscription.count({ where: { status: 'ACTIVE' } }),
+        prisma.user.count({ where: { lastLoginAt: { gte: last24Hours } } }),
+        prisma.user.count({ where: { lastLoginAt: { gte: last7Days } } }),
+        prisma.user.count({ where: { lastLoginAt: { gte: last30Days } } }),
+        prisma.studySession.count({ where: { createdAt: { gte: last24Hours } } }),
+        prisma.studySession.count({ where: { createdAt: { gte: last7Days } } }),
+        prisma.uploadedFile.count({ where: { createdAt: { gte: last7Days } } }),
+        prisma.uploadedFile.count({ where: { createdAt: { gte: last30Days } } }),
+        prisma.uploadedFile.findMany({ select: { fileSize: true } }),
       ]);
+
+      const totalStorageBytes = fileSizes.reduce((sum, file) => sum + (file.fileSize || 0), 0);
+      const avgFileSizeBytes = fileSizes.length > 0 ? Math.round(totalStorageBytes / fileSizes.length) : 0;
+      const avgSessionsPerWeeklyUser =
+        weeklyActiveUsers > 0 ? Number((sessions7d / weeklyActiveUsers).toFixed(1)) : 0;
 
       return reply.send({
         users: {
@@ -880,6 +911,20 @@ export default async function adminRoutes(server: FastifyInstance) {
         },
         subscriptions: {
           active: activeSubscriptions,
+        },
+        activity: {
+          dau: dailyActiveUsers,
+          wau: weeklyActiveUsers,
+          mau: monthlyActiveUsers,
+          sessions24h,
+          sessions7d,
+          avgSessionsPerWeeklyUser,
+        },
+        files: {
+          uploaded7d: filesUploaded7d,
+          uploaded30d: filesUploaded30d,
+          totalStorageBytes,
+          avgFileSizeBytes,
         },
       });
     }
@@ -1179,14 +1224,17 @@ export default async function adminRoutes(server: FastifyInstance) {
       preHandler: [authenticate, requireRole('ADMIN')],
     },
     async (request: AuthenticatedRequest, reply) => {
-      const { page = '1', limit = '20' } = request.query as any;
-      const skip = (parseInt(page) - 1) * parseInt(limit);
+      const { page = '1', limit = '100' } = request.query as any;
+      const parsedPage = Number.isFinite(parseInt(page, 10)) ? Math.max(1, parseInt(page, 10)) : 1;
+      const parsedLimitRaw = Number.isFinite(parseInt(limit, 10)) ? parseInt(limit, 10) : 100;
+      const parsedLimit = Math.min(200, Math.max(1, parsedLimitRaw));
+      const skip = (parsedPage - 1) * parsedLimit;
 
       const [payments, total] = await Promise.all([
         prisma.payment.findMany({
           orderBy: { createdAt: 'desc' },
           skip,
-          take: parseInt(limit),
+          take: parsedLimit,
         }),
         prisma.payment.count(),
       ]);
@@ -1194,10 +1242,10 @@ export default async function adminRoutes(server: FastifyInstance) {
       return reply.send({
         payments,
         pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
+          page: parsedPage,
+          limit: parsedLimit,
           total,
-          pages: Math.ceil(total / parseInt(limit)),
+          pages: Math.ceil(total / parsedLimit),
         },
       });
     }

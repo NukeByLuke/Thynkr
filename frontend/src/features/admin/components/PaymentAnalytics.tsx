@@ -183,7 +183,9 @@ const PaymentAnalyticsTab = () => {
   const { data: recentPayments, isLoading: paymentsLoading } = useQuery<{ payments: Payment[] }>({
     queryKey: ['admin-recent-payments'],
     queryFn: async () => {
-      const res = await api.get('/admin/payments/recent');
+      const res = await api.get('/admin/payments/recent', {
+        params: { page: 1, limit: 200 },
+      });
       return res.data;
     },
   });

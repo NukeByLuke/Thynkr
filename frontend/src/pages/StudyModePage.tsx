@@ -266,19 +266,37 @@ export default function StudyModePage() {
   ) => {
     const questions = usedQuestions || studyContent?.result?.questions || [];
     let score = 0;
-    let actualCount = 0;
 
-    questions.forEach((q: any) => {
-      // If usedQuestions is provided, q.id exists. Otherwise fallback to object reference (which won't work without id, but usedQuestions covers it)
-      if (q.id && answers[q.id] !== undefined) {
-        actualCount++;
-        if (isQuizAnswerCorrect(answers[q.id], q)) score++;
-      } else if (!q.id && answers[q.originalIndex] !== undefined) {
-        // Fallback or ignore
+    const getSubmittedAnswerForQuestion = (question: any, questionIndex: number): string | undefined => {
+      const directIdKey = String(question?.id ?? '').trim();
+      const orderValue = Number.isFinite(Number(question?.order))
+        ? Number(question.order)
+        : questionIndex;
+
+      const candidateKeys = [
+        directIdKey,
+        `q-${orderValue}`,
+        String(orderValue),
+        String(questionIndex),
+      ].filter((value) => value.length > 0);
+
+      for (const key of candidateKeys) {
+        if (Object.prototype.hasOwnProperty.call(answers, key)) {
+          return answers[key];
+        }
+      }
+
+      return undefined;
+    };
+
+    questions.forEach((q: any, index: number) => {
+      const submittedAnswer = getSubmittedAnswerForQuestion(q, index);
+      if (isQuizAnswerCorrect(submittedAnswer, q)) {
+        score++;
       }
     });
 
-    const total = actualCount > 0 ? actualCount : questions.length;
+    const total = questions.length;
     return {
       score,
       total,
