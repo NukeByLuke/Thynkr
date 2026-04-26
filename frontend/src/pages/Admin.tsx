@@ -174,6 +174,22 @@ export default function Admin() {
 
   const activeTabMeta = tabItems.find((tab) => tab.id === activeTab);
 
+  const formatStorage = (bytes?: number) => {
+    const value = Number(bytes || 0);
+    if (value <= 0) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    let size = value;
+    let index = 0;
+
+    while (size >= 1024 && index < units.length - 1) {
+      size /= 1024;
+      index += 1;
+    }
+
+    const rounded = size >= 10 ? Math.round(size) : Number(size.toFixed(1));
+    return `${rounded} ${units[index]}`;
+  };
+
   return (
     <div className="admin-shell">
       <div className="mx-auto w-full max-w-[1400px] px-3 sm:px-5 lg:px-8 py-4 sm:py-6 lg:py-8">
@@ -235,6 +251,42 @@ export default function Admin() {
             trendValue="-3%"
             tooltip="Free tier users"
             gradient="bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-600"
+          />
+          <StatCard
+            title="Daily Active Users"
+            value={stats?.activity?.dau ?? '-'}
+            icon={Users}
+            trend="neutral"
+            trendValue="24h"
+            tooltip="Users active in the last 24 hours"
+            gradient="bg-gradient-to-br from-sky-500 via-cyan-500 to-blue-600"
+          />
+          <StatCard
+            title="Weekly Active Users"
+            value={stats?.activity?.wau ?? '-'}
+            icon={Users}
+            trend="neutral"
+            trendValue="7d"
+            tooltip="Users active in the last 7 days"
+            gradient="bg-gradient-to-br from-indigo-500 via-blue-500 to-cyan-600"
+          />
+          <StatCard
+            title="Study Sessions (7d)"
+            value={stats?.activity?.sessions7d ?? '-'}
+            icon={Server}
+            trend="neutral"
+            trendValue={`${stats?.activity?.avgSessionsPerWeeklyUser ?? 0}/user`}
+            tooltip="Total study sessions in the last 7 days"
+            gradient="bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600"
+          />
+          <StatCard
+            title="Files Uploaded (7d)"
+            value={stats?.files?.uploaded7d ?? '-'}
+            icon={FileText}
+            trend="neutral"
+            trendValue={formatStorage(stats?.files?.totalStorageBytes)}
+            tooltip="Files uploaded in the last 7 days and total storage used"
+            gradient="bg-gradient-to-br from-rose-500 via-fuchsia-500 to-purple-600"
           />
         </div>
 

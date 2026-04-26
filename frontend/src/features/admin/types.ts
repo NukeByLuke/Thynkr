@@ -33,6 +33,20 @@ export interface Stats {
   subscriptions: {
     active: number;
   };
+  activity?: {
+    dau: number;
+    wau: number;
+    mau: number;
+    sessions24h: number;
+    sessions7d: number;
+    avgSessionsPerWeeklyUser: number;
+  };
+  files?: {
+    uploaded7d: number;
+    uploaded30d: number;
+    totalStorageBytes: number;
+    avgFileSizeBytes: number;
+  };
 }
 
 // Tab Types
