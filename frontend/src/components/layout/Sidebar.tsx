@@ -12,10 +12,12 @@ import {
   ChevronRight,
   Shield,
   Settings,
+  Trophy,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Logo from '@/components/Logo';
-import { Courses, Study, Files, Pricing, Admin, Settings as SettingsPage, HelpCenter } from '@/routes';
+import { Courses, Study, Files, Pricing, Admin, Settings as SettingsPage, HelpCenter, Achievements } from '@/routes';
+import api from '@/lib/api';
 
 interface NavLink {
   to: string;
@@ -35,6 +37,7 @@ interface SidebarProps {
 const navLinks: NavLink[] = [
   { to: '/study', icon: GraduationCap, label: 'Study', component: Study },
   { to: '/courses', icon: BookOpen, label: 'Courses', component: Courses },
+  { to: '/achievements', icon: Trophy, label: 'Achievements', component: Achievements },
   { to: '/files', icon: FolderOpen, label: 'Files', component: Files },
   { to: '/pricing', icon: CreditCard, label: 'Pricing', component: Pricing },
   { to: '/admin', icon: Shield, label: 'Admin', component: Admin, adminOnly: true },
@@ -61,8 +64,30 @@ const Sidebar = ({
     if (collapsed !== null) return collapsed !== 'true';
     return window.innerWidth >= 1280;
   });
+  const [unreadAchievements, setUnreadAchievements] = useState(0);
 
   const isExpanded = forceExpanded ?? storedExpanded;
+
+  // Fetch unread achievements count
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const { data } = await api.get('/progress/achievements');
+        if (Array.isArray(data)) {
+          const unread = data.filter((a: any) => a.unlockedAt && !a.viewedAt).length;
+          setUnreadAchievements(unread);
+        }
+      } catch (error) {
+        // Silently fail - achievements count is not critical
+      }
+    };
+
+    if (user) {
+      fetchUnreadCount();
+      const interval = setInterval(fetchUnreadCount, 30000); // Check every 30s
+      return () => clearInterval(interval);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (forceExpanded !== undefined) return;
@@ -79,7 +104,7 @@ const Sidebar = ({
   const userDisplayName = [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username || 'Account';
   const userEmail = user?.email || '';
 
-  const NavItem = ({ link, active }: { link: NavLink; active: boolean }) => {
+  const NavItem = ({ link, active, badge }: { link: NavLink; active: boolean; badge?: number }) => {
     const Icon = link.icon;
 
     return (
@@ -97,9 +122,25 @@ const Sidebar = ({
       >
         {active && isExpanded && <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-full bg-fuchsia-500 dark:bg-accent-400" />}
 
-        <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-fuchsia-600 dark:text-accent-300' : ''}`} />
+        <div className="relative">
+          <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-fuchsia-600 dark:text-accent-300' : ''}`} />
+          {badge !== undefined && badge > 0 && (
+            <span className="absolute -top-2 -right-2 min-w-5 h-5 bg-gradient-to-r from-pink-500 to-orange-500 dark:from-cyan-400 dark:to-blue-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-lg">
+              {badge > 9 ? '9+' : badge}
+            </span>
+          )}
+        </div>
 
-        {isExpanded && <span className="text-sm font-medium whitespace-nowrap">{link.label}</span>}
+        {isExpanded && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium whitespace-nowrap">{link.label}</span>
+            {badge !== undefined && badge > 0 && (
+              <span className="ml-auto text-xs font-bold px-2 py-0.5 bg-gradient-to-r from-pink-500 to-orange-500 dark:from-cyan-400 dark:to-blue-500 text-white rounded-full">
+                {badge > 9 ? '9+' : badge}
+              </span>
+            )}
+          </div>
+        )}
 
         {!isExpanded && (
           <div className={collapsedTooltipClass}>
@@ -159,7 +200,8 @@ const Sidebar = ({
         )}
         {visibleLinks.map((link) => {
           const isLinkActive = isActive(link.to);
-          return <NavItem key={link.to} link={link} active={isLinkActive} />;
+          const badge = link.to === '/achievements' ? unreadAchievements : undefined;
+          return <NavItem key={link.to} link={link} active={isLinkActive} badge={badge} />;
         })}
       </nav>
 
