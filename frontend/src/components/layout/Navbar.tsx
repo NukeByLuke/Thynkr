@@ -14,7 +14,8 @@ import {
   CircleDollarSign,
   GraduationCap,
 } from 'lucide-react';
-import { useState, useMemo, memo } from 'react';
+import { useState, useMemo, memo, useEffect } from 'react';
+import api from '@/lib/api';
 
 // Helper to build absolute URLs for avatar images
 const getAvatarUrl = (avatarUrl?: string) => {
@@ -33,9 +34,31 @@ const Navbar = memo(() => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [unreadAchievements, setUnreadAchievements] = useState(0);
 
   // Memoize avatar URL to prevent recalculation on every render
   const avatarUrl = useMemo(() => getAvatarUrl(user?.avatarUrl), [user?.avatarUrl]);
+
+  // Fetch unread achievements count
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    
+    const fetchUnreadCount = async () => {
+      try {
+        const { data } = await api.get('/progress/achievements');
+        if (Array.isArray(data)) {
+          const unread = data.filter((a: any) => a.unlockedAt && !a.viewedAt).length;
+          setUnreadAchievements(unread);
+        }
+      } catch (error) {
+        // Silently fail - achievements count is not critical
+      }
+    };
+
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30000); // Check every 30s
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
 
   const handleLogout = () => {
     logout();
@@ -84,6 +107,25 @@ const Navbar = memo(() => {
                 >
                   <GraduationCap className="w-4 h-4" />
                   Courses
+                </NavLink>
+
+                <NavLink
+                  to="/achievements"
+                  className={({ isActive }) =>
+                    `text-sm font-semibold px-4 py-2 rounded-2xl transition-all duration-150 flex items-center gap-1.5 relative ${
+                      isActive
+                        ? 'text-white dark:text-white drop-shadow-md bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 shadow-lg'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-white/50 dark:hover:bg-white/5'
+                    }`
+                  }
+                >
+                  <Trophy className="w-4 h-4" />
+                  Achievements
+                  {unreadAchievements > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-pink-500 to-orange-500 dark:from-cyan-400 dark:to-blue-500 rounded-full text-white text-xs font-bold flex items-center justify-center shadow-lg">
+                      {unreadAchievements > 9 ? '9+' : unreadAchievements}
+                    </span>
+                  )}
                 </NavLink>
 
                 <NavLink
@@ -157,16 +199,19 @@ const Navbar = memo(() => {
                         <User className="w-4 h-4" />
                         My Profile
                       </Link>
-                      <button
-                        onClick={() => {
-                          setProfileDropdownOpen(false);
-                          window.location.href = '/achievements';
-                        }}
-                        className="flex items-center gap-2 px-4 py-2 w-full text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-indigo-50/50 dark:hover:bg-white/5 transition-colors"
+                      <Link
+                        to="/achievements"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-indigo-50/50 dark:hover:bg-white/5 transition-colors relative"
+                        onClick={() => setProfileDropdownOpen(false)}
                       >
                         <Trophy className="w-4 h-4" />
-                        Achievements
-                      </button>
+                        <span>Achievements</span>
+                        {unreadAchievements > 0 && (
+                          <span className="ml-auto text-xs font-bold px-2 py-0.5 bg-gradient-to-r from-pink-500 to-orange-500 dark:from-cyan-400 dark:to-blue-500 text-white rounded-full">
+                            {unreadAchievements > 9 ? '9+' : unreadAchievements}
+                          </span>
+                        )}
+                      </Link>
                       <Link
                         to="/settings"
                         className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-indigo-50/50 dark:hover:bg-white/5 transition-colors"
@@ -267,6 +312,23 @@ const Navbar = memo(() => {
                   Courses
                 </Link>
                 <Link
+                  to="/achievements"
+                  className={`flex items-center px-3 py-2 rounded-xl text-base font-medium transition-all duration-150 relative ${
+                    isActive('/achievements')
+                      ? 'text-white dark:text-white bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 shadow-lg'
+                      : 'text-slate-700 dark:text-slate-300 hover:text-pink-600 dark:hover:text-cyan-400 hover:bg-white/50 dark:hover:bg-white/5'
+                  }`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Trophy className="w-4 h-4 mr-2" />
+                  Achievements
+                  {unreadAchievements > 0 && (
+                    <span className="ml-2 text-xs font-bold px-2 py-0.5 bg-gradient-to-r from-pink-500 to-orange-500 dark:from-cyan-400 dark:to-blue-500 text-white rounded-full">
+                      {unreadAchievements > 9 ? '9+' : unreadAchievements}
+                    </span>
+                  )}
+                </Link>
+                <Link
                   to="/pricing"
                   className={`flex items-center px-3 py-2 rounded-xl text-base font-medium transition-all duration-150 ${
                     isActive('/pricing')
@@ -294,16 +356,6 @@ const Navbar = memo(() => {
                   <User className="w-4 h-4 mr-2" />
                   My Profile
                 </Link>
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    window.location.href = '/achievements';
-                  }}
-                  className="flex items-center w-full text-left px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-150"
-                >
-                  <Trophy className="w-4 h-4 mr-2" />
-                  Achievements
-                </button>
                 <Link
                   to="/settings"
                   className="flex items-center px-3 py-2 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-150"
