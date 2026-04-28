@@ -4,10 +4,10 @@
 
 ### AI-Powered Learning Platform for Active Study
 
-[![CI](https://github.com/NukeByLuke/Thynkr/actions/workflows/ci.yml/badge.svg)](https://github.com/NukeByLuke/Thynkr/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/NukeByLuke/Thynkr/actions/workflows/codeql.yml/badge.svg)](https://github.com/NukeByLuke/Thynkr/actions/workflows/codeql.yml)
-[![Deploy](https://github.com/NukeByLuke/Thynkr/actions/workflows/deploy.yml/badge.svg)](https://github.com/NukeByLuke/Thynkr/actions/workflows/deploy.yml)
-[![Lighthouse](https://github.com/NukeByLuke/Thynkr/actions/workflows/lighthouse.yml/badge.svg)](https://github.com/NukeByLuke/Thynkr/actions/workflows/lighthouse.yml)
+[![CI Workflow](https://img.shields.io/badge/CI-Workflow-1f6feb?logo=githubactions&logoColor=white)](https://github.com/NukeByLuke/Thynkr/actions/workflows/ci.yml)
+[![CodeQL Workflow](https://img.shields.io/badge/CodeQL-Workflow-1f6feb?logo=githubactions&logoColor=white)](https://github.com/NukeByLuke/Thynkr/actions/workflows/codeql.yml)
+[![Deploy Workflow](https://img.shields.io/badge/Deploy-Workflow-1f6feb?logo=githubactions&logoColor=white)](https://github.com/NukeByLuke/Thynkr/actions/workflows/deploy.yml)
+[![Lighthouse Workflow](https://img.shields.io/badge/Lighthouse-Workflow-1f6feb?logo=githubactions&logoColor=white)](https://github.com/NukeByLuke/Thynkr/actions/workflows/lighthouse.yml)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-20232A?logo=react&logoColor=61DAFB)
 ![Fastify](https://img.shields.io/badge/Fastify-5-000000?logo=fastify&logoColor=white)
