@@ -82,6 +82,14 @@ graph TD
 - DigitalOcean deployment target
 - GitHub Actions CI/CD
 
+## Tech Arsenal
+
+### Languages & Frontend
+[![Tech Stack](https://skillicons.dev/icons?i=ts,js,python,react,vite,tailwind)](https://skillicons.dev)
+
+### Backend, Data & DevOps
+[![Tech Stack](https://skillicons.dev/icons?i=nodejs,fastify,prisma,postgres,redis,docker,nginx,githubactions,digitalocean)](https://skillicons.dev)
+
 ## Monorepo Layout
 ```text
 thynkr/
