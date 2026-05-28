@@ -135,6 +135,32 @@ export default async function stripeRoutes(server: FastifyInstance) {
       });
 
       if (!user?.subscription?.stripeSubscriptionId) {
+        // Automatically rollback to basic if there is no stripe subscription to cancel but they click Cancel
+        if (user && user.role !== 'BASIC') {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { role: 'BASIC' },
+          });
+
+          if (user.subscription) {
+            await prisma.subscription.update({
+              where: { userId: user.id },
+              data: {
+                status: 'CANCELED',
+                cancelAtPeriodEnd: false,
+                currentPeriodEnd: new Date(),
+                planType: 'BASIC',
+              },
+            });
+          }
+
+          return reply.send({
+            message: 'Manual subscription canceled gracefully',
+            cancelAtPeriodEnd: false,
+            currentPeriodEnd: new Date(),
+          });
+        }
+        
         return reply.code(400).send({ error: 'No active subscription found' });
       }
 
