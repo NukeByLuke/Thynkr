@@ -1,5 +1,6 @@
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import Button from '@/components/ui/Button';
 import Logo from '@/components/Logo';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -31,6 +32,7 @@ const getAvatarUrl = (avatarUrl?: string) => {
 
 const Navbar = memo(() => {
   const { user, isAuthenticated, logout } = useAuth();
+  const { resolvedThemeMode } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -39,6 +41,52 @@ const Navbar = memo(() => {
 
   // Memoize avatar URL to prevent recalculation on every render
   const avatarUrl = useMemo(() => getAvatarUrl(user?.avatarUrl), [user?.avatarUrl]);
+
+  // Theme-aware styling
+  const isSunset = resolvedThemeMode === 'sunset';
+  const isMidnight = resolvedThemeMode === 'midnight';
+
+  // Navbar background gradient - theme aware
+  const navBgClass = `sticky top-0 z-50 bg-gradient-to-b ${
+    isMidnight
+      ? 'from-slate-950 via-slate-950 to-black dark:shadow-cyan-900/20'
+      : isSunset
+      ? 'from-slate-900 via-slate-900/95 to-slate-950 dark:shadow-blue-900/20'
+      : 'from-slate-50 via-white to-white'
+  } border-b ${
+    isMidnight
+      ? 'border-cyan-500/20'
+      : isSunset
+      ? 'border-blue-400/30'
+      : 'border-slate-200/60'
+  } dark:shadow-lg shadow-sm backdrop-blur-xl transition-all duration-300`;
+
+  // Inactive nav item styling - better contrast per theme
+  const inactiveNavClass = `text-sm font-medium px-3.5 py-2 rounded-lg transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap ${
+    isMidnight
+      ? 'text-slate-300 hover:text-cyan-200 hover:bg-cyan-500/10 dark:hover:bg-cyan-500/15'
+      : isSunset
+      ? 'text-slate-400 hover:text-blue-300 hover:bg-blue-500/10 dark:hover:bg-blue-500/15'
+      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+  }`;
+
+  // Active nav item gradient - theme aware
+  const activeGradientClass = isMidnight
+    ? 'from-cyan-500 via-blue-600 to-violet-600'
+    : isSunset
+    ? 'from-blue-500 via-violet-600 to-cyan-500'
+    : 'from-fuchsia-600 via-pink-500 to-orange-500';
+
+  // Mobile menu item styling - theme aware
+  const mobileNavItemClass = (isActive: boolean) => `flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+    isActive
+      ? `text-white bg-gradient-to-r ${activeGradientClass} shadow-md`
+      : isMidnight
+      ? 'text-slate-300 hover:text-cyan-200 hover:bg-cyan-500/10'
+      : isSunset
+      ? 'text-slate-400 hover:text-blue-300 hover:bg-blue-500/10'
+      : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100/80'
+  }`;
 
   // Fetch unread achievements count
   useEffect(() => {
@@ -70,8 +118,17 @@ const Navbar = memo(() => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="sticky top-0 z-50 bg-gradient-to-b from-slate-50 via-white to-white dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 border-b border-slate-200/60 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/40 backdrop-blur-xl">
+    <nav className={navBgClass}>
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        {/* Low-poly accent line for visual polish */}
+        <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r ${
+          isMidnight
+            ? 'from-transparent via-cyan-500/40 to-transparent'
+            : isSunset
+            ? 'from-transparent via-blue-500/40 to-transparent'
+            : 'from-transparent via-fuchsia-300/30 to-transparent'
+        }`} />
+
         <div className="flex justify-between items-center h-14 gap-4">
           {/* Logo - Always visible */}
           <div className="flex items-center flex-shrink-0">
@@ -86,10 +143,10 @@ const Navbar = memo(() => {
                 <NavLink
                   to="/study"
                   className={({ isActive }) =>
-                    `text-sm font-semibold px-3.5 py-2 rounded-lg transition-all duration-150 flex items-center gap-1.5 whitespace-nowrap ${
+                    `text-sm font-semibold px-3.5 py-2 rounded-lg transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap ${
                       isActive
-                        ? 'text-white dark:text-white bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 shadow-md dark:shadow-lg'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60'
+                        ? `text-white bg-gradient-to-r ${activeGradientClass} shadow-md dark:shadow-lg`
+                        : inactiveNavClass
                     }`
                   }
                 >
@@ -100,10 +157,10 @@ const Navbar = memo(() => {
                 <NavLink
                   to="/courses"
                   className={({ isActive }) =>
-                    `text-sm font-semibold px-3.5 py-2 rounded-lg transition-all duration-150 flex items-center gap-1.5 whitespace-nowrap ${
+                    `text-sm font-semibold px-3.5 py-2 rounded-lg transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap ${
                       isActive || location.pathname.startsWith('/courses/')
-                        ? 'text-white dark:text-white bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 shadow-md dark:shadow-lg'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60'
+                        ? `text-white bg-gradient-to-r ${activeGradientClass} shadow-md dark:shadow-lg`
+                        : inactiveNavClass
                     }`
                   }
                 >
@@ -114,31 +171,43 @@ const Navbar = memo(() => {
                 <NavLink
                   to="/achievements"
                   className={({ isActive }) =>
-                    `text-sm font-semibold px-3.5 py-2 rounded-lg transition-all duration-150 flex items-center gap-1.5 whitespace-nowrap relative ${
+                    `text-sm font-semibold px-3.5 py-2 rounded-lg transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap relative ${
                       isActive
-                        ? 'text-white dark:text-white bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 shadow-md dark:shadow-lg'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60'
+                        ? `text-white bg-gradient-to-r ${activeGradientClass} shadow-md dark:shadow-lg`
+                        : inactiveNavClass
                     }`
                   }
                 >
                   <Trophy className="w-4 h-4" />
                   Achievements
                   {unreadAchievements > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-5 h-5 bg-gradient-to-r from-pink-600 to-orange-600 dark:from-cyan-500 dark:to-blue-600 rounded-full text-white text-[10px] font-bold flex items-center justify-center shadow-md">
+                    <span className={`absolute -top-1 -right-1 min-w-5 h-5 bg-gradient-to-r ${
+                      isMidnight
+                        ? 'from-cyan-400 to-blue-500'
+                        : isSunset
+                        ? 'from-blue-400 to-violet-500'
+                        : 'from-pink-600 to-orange-600'
+                    } rounded-full text-white text-[10px] font-bold flex items-center justify-center shadow-md`}>
                       {unreadAchievements > 9 ? '9+' : unreadAchievements}
                     </span>
                   )}
                 </NavLink>
 
-                <div className="w-px h-5 bg-slate-200 dark:bg-slate-700/80 mx-1"></div>
+                <div className={`w-px h-5 mx-1 ${
+                  isMidnight
+                    ? 'bg-cyan-500/30'
+                    : isSunset
+                    ? 'bg-blue-500/40'
+                    : 'bg-slate-200'
+                }`} />
 
                 <NavLink
                   to="/pricing"
                   className={({ isActive }) =>
-                    `text-sm font-semibold px-3.5 py-2 rounded-lg transition-all duration-150 flex items-center gap-1.5 whitespace-nowrap ${
+                    `text-sm font-semibold px-3.5 py-2 rounded-lg transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap ${
                       isActive
-                        ? 'text-white dark:text-white bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 shadow-md dark:shadow-lg'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60'
+                        ? `text-white bg-gradient-to-r ${activeGradientClass} shadow-md dark:shadow-lg`
+                        : inactiveNavClass
                     }`
                   }
                 >
@@ -151,19 +220,19 @@ const Navbar = memo(() => {
                 {/* Public Navigation */}
                 <Link
                   to="/pricing"
-                  className="text-sm font-medium px-3.5 py-2 rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-all"
+                  className={`text-sm font-medium px-3.5 py-2 rounded-lg transition-all duration-200 ${inactiveNavClass}`}
                 >
                   Pricing
                 </Link>
                 <Link
                   to="/about"
-                  className="text-sm font-medium px-3.5 py-2 rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-all"
+                  className={`text-sm font-medium px-3.5 py-2 rounded-lg transition-all duration-200 ${inactiveNavClass}`}
                 >
                   About
                 </Link>
                 <Link
                   to="/contact"
-                  className="text-sm font-medium px-3.5 py-2 rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-all"
+                  className={`text-sm font-medium px-3.5 py-2 rounded-lg transition-all duration-200 ${inactiveNavClass}`}
                 >
                   Contact
                 </Link>
@@ -181,13 +250,25 @@ const Navbar = memo(() => {
                 <div className="hidden md:block relative">
                   <button
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-all"
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      isMidnight
+                        ? 'text-slate-300 hover:text-cyan-200 hover:bg-cyan-500/10'
+                        : isSunset
+                        ? 'text-slate-400 hover:text-blue-300 hover:bg-blue-500/10'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                    }`}
                   >
                     {user?.avatarUrl ? (
                       <img
                         src={avatarUrl}
                         alt="Profile"
-                        className="w-6 h-6 rounded-full object-cover border-1.5 border-slate-300 dark:border-slate-600 shadow-sm"
+                        className={`w-6 h-6 rounded-full object-cover border-1.5 shadow-sm ${
+                          isMidnight
+                            ? 'border-cyan-500/50'
+                            : isSunset
+                            ? 'border-blue-500/50'
+                            : 'border-slate-300'
+                        }`}
                         key={user.avatarUrl}
                       />
                     ) : (
@@ -198,10 +279,22 @@ const Navbar = memo(() => {
 
                   {/* Dropdown Menu */}
                   {profileDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 rounded-xl shadow-lg dark:shadow-2xl dark:shadow-black/60 border border-slate-200/80 dark:border-slate-700/80 py-1 z-[100] backdrop-blur-sm">
+                    <div className={`absolute right-0 mt-2 w-48 rounded-xl shadow-lg border-1.5 py-1 z-[100] backdrop-blur-sm transition-all duration-200 ${
+                      isMidnight
+                        ? 'bg-slate-900/95 dark:shadow-cyan-900/40 border-cyan-500/30'
+                        : isSunset
+                        ? 'bg-slate-800/95 dark:shadow-blue-900/40 border-blue-500/30'
+                        : 'bg-white dark:shadow-2xl dark:shadow-black/60 border-slate-200/80 dark:border-slate-700/80'
+                    }`}>
                       <Link
                         to="/account"
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors"
+                        className={`flex items-center gap-2 px-4 py-2.5 text-sm transition-colors duration-200 ${
+                          isMidnight
+                            ? 'text-slate-200 hover:bg-cyan-500/15'
+                            : isSunset
+                            ? 'text-slate-300 hover:bg-blue-500/15'
+                            : 'text-slate-700 hover:bg-slate-50'
+                        }`}
                         onClick={() => setProfileDropdownOpen(false)}
                       >
                         <User className="w-4 h-4" />
@@ -209,20 +302,38 @@ const Navbar = memo(() => {
                       </Link>
                       <Link
                         to="/achievements"
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors relative group"
+                        className={`flex items-center gap-2 px-4 py-2.5 text-sm transition-colors duration-200 ${
+                          isMidnight
+                            ? 'text-slate-200 hover:bg-cyan-500/15'
+                            : isSunset
+                            ? 'text-slate-300 hover:bg-blue-500/15'
+                            : 'text-slate-700 hover:bg-slate-50'
+                        }`}
                         onClick={() => setProfileDropdownOpen(false)}
                       >
                         <Trophy className="w-4 h-4" />
                         <span>Achievements</span>
                         {unreadAchievements > 0 && (
-                          <span className="ml-auto text-xs font-bold px-2 py-1 bg-gradient-to-r from-pink-500 to-orange-500 dark:from-cyan-400 dark:to-blue-500 text-white rounded-full">
+                          <span className={`ml-auto text-xs font-bold px-2 py-1 rounded-full text-white ${
+                            isMidnight
+                              ? 'bg-gradient-to-r from-cyan-500 to-blue-500'
+                              : isSunset
+                              ? 'bg-gradient-to-r from-blue-500 to-violet-500'
+                              : 'bg-gradient-to-r from-pink-500 to-orange-500'
+                          }`}>
                             {unreadAchievements > 9 ? '9+' : unreadAchievements}
                           </span>
                         )}
                       </Link>
                       <Link
                         to="/settings"
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors"
+                        className={`flex items-center gap-2 px-4 py-2.5 text-sm transition-colors duration-200 ${
+                          isMidnight
+                            ? 'text-slate-200 hover:bg-cyan-500/15'
+                            : isSunset
+                            ? 'text-slate-300 hover:bg-blue-500/15'
+                            : 'text-slate-700 hover:bg-slate-50'
+                        }`}
                         onClick={() => setProfileDropdownOpen(false)}
                       >
                         <Settings className="w-4 h-4" />
@@ -230,10 +341,22 @@ const Navbar = memo(() => {
                       </Link>
                       {user?.role === 'ADMIN' && (
                         <>
-                          <div className="my-1 border-t border-slate-200/50 dark:border-slate-700/50" />
+                          <div className={`my-1 border-t ${
+                            isMidnight
+                              ? 'border-cyan-500/20'
+                              : isSunset
+                              ? 'border-blue-500/20'
+                              : 'border-slate-200/50'
+                          }`} />
                           <Link
                             to="/admin"
-                            className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors"
+                            className={`flex items-center gap-2 px-4 py-2.5 text-sm transition-colors duration-200 ${
+                              isMidnight
+                                ? 'text-slate-200 hover:bg-cyan-500/15'
+                                : isSunset
+                                ? 'text-slate-300 hover:bg-blue-500/15'
+                                : 'text-slate-700 hover:bg-slate-50'
+                            }`}
                             onClick={() => setProfileDropdownOpen(false)}
                           >
                             <Shield className="w-4 h-4" />
@@ -241,10 +364,22 @@ const Navbar = memo(() => {
                           </Link>
                         </>
                       )}
-                      <div className="my-1 border-t border-slate-200/50 dark:border-slate-700/50" />
+                      <div className={`my-1 border-t ${
+                        isMidnight
+                          ? 'border-cyan-500/20'
+                          : isSunset
+                          ? 'border-blue-500/20'
+                          : 'border-slate-200/50'
+                      }`} />
                       <button
                         onClick={handleLogout}
-                        className="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                        className={`flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm transition-colors duration-200 ${
+                          isMidnight
+                            ? 'text-red-400 hover:bg-red-500/15'
+                            : isSunset
+                            ? 'text-red-400 hover:bg-red-500/15'
+                            : 'text-red-600 hover:bg-red-50'
+                        }`}
                       >
                         <LogOut className="w-4 h-4" />
                         Logout
@@ -260,7 +395,13 @@ const Navbar = memo(() => {
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate('/login')}
-                  className="hidden sm:flex text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60 rounded-lg"
+                  className={`hidden sm:flex rounded-lg transition-all duration-200 ${
+                    isMidnight
+                      ? 'text-slate-300 hover:text-cyan-200 hover:bg-cyan-500/10'
+                      : isSunset
+                      ? 'text-slate-400 hover:text-blue-300 hover:bg-blue-500/10'
+                      : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100/80'
+                  }`}
                 >
                   Login
                 </Button>
@@ -268,7 +409,7 @@ const Navbar = memo(() => {
                   variant="primary"
                   size="sm"
                   onClick={() => navigate('/register')}
-                  className="rounded-lg bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 hover:shadow-lg transition-all"
+                  className={`rounded-lg bg-gradient-to-r ${activeGradientClass} hover:shadow-lg transition-all`}
                 >
                   Get Started
                 </Button>
@@ -280,7 +421,13 @@ const Navbar = memo(() => {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white p-2.5 rounded-lg hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-all"
+              className={`p-2.5 rounded-lg transition-all duration-200 ${
+                isMidnight
+                  ? 'text-slate-300 hover:text-cyan-200 hover:bg-cyan-500/10'
+                  : isSunset
+                  ? 'text-slate-400 hover:text-blue-300 hover:bg-blue-500/10'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+              }`}
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -290,7 +437,13 @@ const Navbar = memo(() => {
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200/60 dark:border-slate-800/80 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950 animate-in slide-in-from-top duration-200">
+        <div className={`border-t animate-in slide-in-from-top duration-200 ${
+          isMidnight
+            ? 'border-cyan-500/20 bg-gradient-to-b from-slate-900 to-slate-950'
+            : isSunset
+            ? 'border-blue-500/25 bg-gradient-to-b from-slate-900 to-slate-950'
+            : 'border-slate-200/60 bg-gradient-to-b from-slate-50 to-white'
+        }`}>
           <div className="px-3 pt-3 pb-4 space-y-1.5 max-w-md">
             {isAuthenticated ? (
               <>
@@ -298,11 +451,7 @@ const Navbar = memo(() => {
                 <div className="space-y-1">
                   <Link
                     to="/study"
-                    className={`flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
-                      isActive('/study')
-                        ? 'text-white dark:text-white bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 shadow-md'
-                        : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60'
-                    }`}
+                    className={mobileNavItemClass(isActive('/study'))}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <GraduationCap className="w-4 h-4 mr-2.5" />
@@ -310,11 +459,7 @@ const Navbar = memo(() => {
                   </Link>
                   <Link
                     to="/courses"
-                    className={`flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
-                      isActive('/courses') || location.pathname.startsWith('/courses/')
-                        ? 'text-white dark:text-white bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 shadow-md'
-                        : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60'
-                    }`}
+                    className={mobileNavItemClass(isActive('/courses') || location.pathname.startsWith('/courses/'))}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <BookOpen className="w-4 h-4 mr-2.5" />
@@ -322,28 +467,26 @@ const Navbar = memo(() => {
                   </Link>
                   <Link
                     to="/achievements"
-                    className={`flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative ${
-                      isActive('/achievements')
-                        ? 'text-white dark:text-white bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 shadow-md'
-                        : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60'
-                    }`}
+                    className={`${mobileNavItemClass(isActive('/achievements'))} relative`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Trophy className="w-4 h-4 mr-2.5" />
                     Achievements
                     {unreadAchievements > 0 && (
-                      <span className="ml-auto text-xs font-bold px-2 py-0.5 bg-gradient-to-r from-pink-600 to-orange-600 dark:from-cyan-500 dark:to-blue-600 text-white rounded-full">
+                      <span className={`ml-auto text-xs font-bold px-2 py-0.5 rounded-full text-white ${
+                        isMidnight
+                          ? 'bg-gradient-to-r from-cyan-400 to-blue-500'
+                          : isSunset
+                          ? 'bg-gradient-to-r from-blue-400 to-violet-500'
+                          : 'bg-gradient-to-r from-pink-600 to-orange-600'
+                      }`}>
                         {unreadAchievements > 9 ? '9+' : unreadAchievements}
                       </span>
                     )}
                   </Link>
                   <Link
                     to="/pricing"
-                    className={`flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
-                      isActive('/pricing')
-                        ? 'text-white dark:text-white bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 shadow-md'
-                        : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60'
-                    }`}
+                    className={mobileNavItemClass(isActive('/pricing'))}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <CircleDollarSign className="w-4 h-4 mr-2.5" />
@@ -352,10 +495,22 @@ const Navbar = memo(() => {
                 </div>
                 
                 {/* Account Section */}
-                <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/80">
+                <div className={`pt-2 border-t ${
+                  isMidnight
+                    ? 'border-cyan-500/20'
+                    : isSunset
+                    ? 'border-blue-500/25'
+                    : 'border-slate-200/60'
+                }`}>
                   <Link
                     to="/account"
-                    className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-all"
+                    className={`flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      isMidnight
+                        ? 'text-slate-300 hover:text-cyan-200 hover:bg-cyan-500/10'
+                        : isSunset
+                        ? 'text-slate-400 hover:text-blue-300 hover:bg-blue-500/10'
+                        : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100/80'
+                    }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <User className="w-4 h-4 mr-2.5" />
@@ -363,7 +518,13 @@ const Navbar = memo(() => {
                   </Link>
                   <Link
                     to="/settings"
-                    className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-all"
+                    className={`flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      isMidnight
+                        ? 'text-slate-300 hover:text-cyan-200 hover:bg-cyan-500/10'
+                        : isSunset
+                        ? 'text-slate-400 hover:text-blue-300 hover:bg-blue-500/10'
+                        : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100/80'
+                    }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Settings className="w-4 h-4 mr-2.5" />
@@ -373,7 +534,13 @@ const Navbar = memo(() => {
                   {user?.role === 'ADMIN' && (
                     <Link
                       to="/admin"
-                      className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-all"
+                      className={`flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        isMidnight
+                          ? 'text-slate-300 hover:text-cyan-200 hover:bg-cyan-500/10'
+                          : isSunset
+                          ? 'text-slate-400 hover:text-blue-300 hover:bg-blue-500/10'
+                          : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100/80'
+                      }`}
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Shield className="w-4 h-4 mr-2.5" />
@@ -383,7 +550,13 @@ const Navbar = memo(() => {
                   
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center text-left px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50/80 dark:hover:bg-red-950/30 transition-all"
+                    className={`w-full flex items-center text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      isMidnight
+                        ? 'text-red-400 hover:bg-red-500/15'
+                        : isSunset
+                        ? 'text-red-400 hover:bg-red-500/15'
+                        : 'text-red-600 hover:bg-red-50/80'
+                    }`}
                   >
                     <LogOut className="w-4 h-4 mr-2.5" />
                     Logout
@@ -396,21 +569,39 @@ const Navbar = memo(() => {
                 <div className="space-y-1">
                   <Link
                     to="/pricing"
-                    className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-all"
+                    className={`flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      isMidnight
+                        ? 'text-slate-300 hover:text-cyan-200 hover:bg-cyan-500/10'
+                        : isSunset
+                        ? 'text-slate-400 hover:text-blue-300 hover:bg-blue-500/10'
+                        : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100/80'
+                    }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Pricing
                   </Link>
                   <Link
                     to="/about"
-                    className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-all"
+                    className={`flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      isMidnight
+                        ? 'text-slate-300 hover:text-cyan-200 hover:bg-cyan-500/10'
+                        : isSunset
+                        ? 'text-slate-400 hover:text-blue-300 hover:bg-blue-500/10'
+                        : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100/80'
+                    }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     About
                   </Link>
                   <Link
                     to="/contact"
-                    className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-all"
+                    className={`flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      isMidnight
+                        ? 'text-slate-300 hover:text-cyan-200 hover:bg-cyan-500/10'
+                        : isSunset
+                        ? 'text-slate-400 hover:text-blue-300 hover:bg-blue-500/10'
+                        : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100/80'
+                    }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Contact
@@ -418,17 +609,29 @@ const Navbar = memo(() => {
                 </div>
 
                 {/* Auth Buttons */}
-                <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/80 space-y-1">
+                <div className={`pt-2 border-t space-y-1 ${
+                  isMidnight
+                    ? 'border-cyan-500/20'
+                    : isSunset
+                    ? 'border-blue-500/25'
+                    : 'border-slate-200/60'
+                }`}>
                   <Link
                     to="/login"
-                    className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-all"
+                    className={`flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      isMidnight
+                        ? 'text-slate-300 hover:text-cyan-200 hover:bg-cyan-500/10'
+                        : isSunset
+                        ? 'text-slate-400 hover:text-blue-300 hover:bg-blue-500/10'
+                        : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100/80'
+                    }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Login
                   </Link>
                   <Link
                     to="/register"
-                    className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-white bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 hover:shadow-lg transition-all"
+                    className={`flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-white bg-gradient-to-r ${activeGradientClass} hover:shadow-lg transition-all`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Get Started

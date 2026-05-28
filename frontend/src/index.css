@@ -391,6 +391,17 @@
     background-color: #020617;
   }
 
+  .dark[data-theme='midnight'] body {
+    background: linear-gradient(135deg, #000000 0%, #0a0f1f 25%, #050510 50%, #000814 75%, #000000 100%);
+    background-attachment: fixed;
+  }
+
+  /* Enhance sunset with gradient */
+  .dark[data-theme='sunset'] {
+    background: linear-gradient(135deg, #020617 0%, #0b1626 25%, #0f0f2e 50%, #1a0a3e 75%, #020617 100%);
+    background-attachment: fixed;
+  }
+
   /* Background grid pattern applied to body */
   body::before {
     content: '';

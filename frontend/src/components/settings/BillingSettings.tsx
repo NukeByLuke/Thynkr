@@ -1,7 +1,7 @@
-import { CreditCard, ExternalLink } from 'lucide-react';
+import { CreditCard, ExternalLink, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import Button from '@/components/ui/Button';
@@ -13,6 +13,13 @@ function isValidStripePortalUrl(url: string | undefined): boolean {
   const isDeprecatedTestLoginUrl = /\/p\/login\/test/i.test(url);
 
   return isStripeBillingUrl && !isDeprecatedTestLoginUrl;
+}
+
+interface SubscriptionInfo {
+  status: string;
+  planType: string;
+  cancelAtPeriodEnd?: boolean;
+  currentPeriodEnd?: string;
 }
 
 export default function BillingSettings() {
@@ -27,6 +34,16 @@ export default function BillingSettings() {
   };
 
   const currentPlan = planInfo[user?.role as keyof typeof planInfo] || planInfo.BASIC;
+
+  // Fetch subscription info
+  const { data: subscriptionInfo } = useQuery<SubscriptionInfo>({
+    queryKey: ['subscription-info'],
+    queryFn: async () => {
+      const response = await api.get('/stripe/subscription-info');
+      return response.data;
+    },
+    enabled: user?.role !== 'BASIC',
+  });
 
   const createPortalMutation = useMutation({
     mutationFn: async () => {
@@ -47,6 +64,32 @@ export default function BillingSettings() {
     },
   });
 
+  const cancelSubscriptionMutation = useMutation({
+    mutationFn: async () => {
+      await api.post('/stripe/cancel-subscription');
+    },
+    onSuccess: () => {
+      toast.success('Subscription cancelled at end of billing period');
+      window.location.reload();
+    },
+    onError: () => {
+      toast.error('Failed to cancel subscription');
+    },
+  });
+
+  const reactivateSubscriptionMutation = useMutation({
+    mutationFn: async () => {
+      await api.post('/stripe/reactivate-subscription');
+    },
+    onSuccess: () => {
+      toast.success('Subscription reactivated');
+      window.location.reload();
+    },
+    onError: () => {
+      toast.error('Failed to reactivate subscription');
+    },
+  });
+
   return (
     <div className="space-y-8 sm:space-y-10">
       <section>
@@ -55,7 +98,7 @@ export default function BillingSettings() {
           Manage your subscription plan and billing details.
         </p>
 
-        <div className="bg-gradient-to-br from-slate-50/90 to-white dark:from-slate-900/70 dark:to-slate-900/40 rounded-2xl p-6 border border-slate-200 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+        <div className="bg-gradient-to-br from-slate-50/90 to-white dark:from-slate-900/70 dark:to-slate-900/40 rounded-2xl p-6 border border-slate-200 dark:border-white/10 flex flex-col gap-4 shadow-sm">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
@@ -70,16 +113,47 @@ export default function BillingSettings() {
             <p className="text-slate-500 dark:text-slate-400 text-sm">
               {currentPlan.description}
             </p>
+            
+            {subscriptionInfo?.cancelAtPeriodEnd && (
+              <div className="mt-3 p-3 rounded-lg bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/30 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-orange-800 dark:text-orange-300">
+                  <p className="font-medium">Subscription will cancel on {new Date(subscriptionInfo.currentPeriodEnd || '').toLocaleDateString()}</p>
+                </div>
+              </div>
+            )}
           </div>
           
-           <div className="w-full sm:w-auto sm:shrink-0">
-             <Button 
-                onClick={() => navigate('/pricing')}
-                variant={user?.role === 'BASIC' ? 'primary' : 'outline'}
-               className="w-full sm:w-auto"
-              >
-                {user?.role === 'BASIC' ? 'Upgrade Plan' : 'Change Plan'}
-             </Button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button 
+              onClick={() => navigate('/pricing')}
+              variant={user?.role === 'BASIC' ? 'primary' : 'ghost'}
+              className="flex-1"
+            >
+              {user?.role === 'BASIC' ? 'Upgrade Plan' : 'View Other Plans'}
+            </Button>
+            
+            {user?.role !== 'BASIC' && (
+              subscriptionInfo?.cancelAtPeriodEnd ? (
+                <Button 
+                  onClick={() => reactivateSubscriptionMutation.mutate()}
+                  isLoading={reactivateSubscriptionMutation.isPending}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Reactivate Subscription
+                </Button>
+              ) : (
+                <Button 
+                  onClick={() => cancelSubscriptionMutation.mutate()}
+                  isLoading={cancelSubscriptionMutation.isPending}
+                  variant="outline"
+                  className="flex-1 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10"
+                >
+                  Cancel Subscription
+                </Button>
+              )
+            )}
           </div>
         </div>
       </section>

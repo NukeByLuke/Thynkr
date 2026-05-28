@@ -96,6 +96,7 @@ const Sidebar = ({
 
   const NavItem = ({ link, active, badge }: { link: NavLink; active: boolean; badge?: number }) => {
     const Icon = link.icon;
+    const isMidnight = resolvedThemeMode === 'midnight';
 
     return (
       <Link
@@ -103,11 +104,11 @@ const Sidebar = ({
         onMouseEnter={() => link.component?.preload()}
         onClick={onNavigate}
         className={`
-          relative flex items-center gap-3 rounded-lg group
+          relative flex items-center gap-3 rounded-lg group transition-all duration-150
           ${isExpanded ? 'px-3 py-2.5' : 'justify-center p-2 mx-auto aspect-square w-10'}
           ${active
-            ? 'text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm'
-            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/70 border border-transparent'}
+            ? `text-slate-900 ${isMidnight ? 'dark:text-white dark:bg-slate-800 dark:border-slate-700' : 'dark:text-white'} bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm`
+            : `text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/70 border border-transparent ${isMidnight ? 'dark:hover:bg-slate-800' : ''}`}
         `}
       >
         {active && isExpanded && <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-full bg-fuchsia-500 dark:bg-accent-400" />}
@@ -143,8 +144,16 @@ const Sidebar = ({
 
   return (
     <aside
-      className={`relative z-40 h-full min-h-0 bg-gradient-to-b from-fuchsia-50/80 via-white to-orange-50/60 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 backdrop-blur-xl border-r border-fuchsia-200/70 dark:border-slate-800/80 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.35)] dark:shadow-[0_24px_80px_-32px_rgba(0,0,0,0.7)] flex flex-col overflow-visible ${className}`}
-      style={{ width: isExpanded ? 280 : 80, transition: 'width 140ms ease-out' }}
+      className={`relative z-40 h-full min-h-0 bg-gradient-to-b from-fuchsia-50/80 via-white to-orange-50/60 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 backdrop-blur-xl border-r border-fuchsia-200/70 dark:border-slate-800/80 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.35)] dark:shadow-[0_24px_80px_-32px_rgba(0,0,0,0.7)] flex flex-col overflow-visible transition-colors duration-200 ${className}`}
+      style={{ 
+        width: isExpanded ? 280 : 80, 
+        transition: 'width 140ms ease-out',
+        // Midnight theme specific styling
+        backgroundColor: document.documentElement.getAttribute('data-theme') === 'midnight' 
+          ? '#0f0f1e' 
+          : undefined,
+      }}
+      data-theme={resolvedThemeMode}
     >
       {/* Header */}
       <div className={`h-16 px-4 flex-shrink-0 flex items-center ${isExpanded ? 'justify-between' : 'justify-center'} border-b border-fuchsia-200/70 dark:border-slate-800/80 bg-white/45 dark:bg-slate-950/35`}>

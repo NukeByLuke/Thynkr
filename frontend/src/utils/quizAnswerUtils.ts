@@ -13,11 +13,25 @@ const normalizeText = (value: unknown): string =>
     .trim()
     .toLowerCase();
 
-const normalizeFreeText = (value: unknown): string =>
-  normalizeText(value)
-    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+/**
+ * Normalize fill-in-the-blank answers by removing complex punctuation and symbols
+ * Keeps only letters, numbers, and simple spaces
+ * Examples: "don't" -> "dont", "self-aware" -> "selfaware", "U.S.A." -> "usa"
+ */
+const normalizeFillInBlankAnswer = (value: unknown): string => {
+  const normalized = String(value ?? '')
+    .replace(/[""]/g, '"')
+    .replace(/['']/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+  
+  // Remove complex punctuation but keep spaces for multi-word answers
+  return normalized
+    .replace(/[^\p{L}\p{N}\s]/gu, '')
     .replace(/\s+/g, ' ')
     .trim();
+};
 
 const normalizeBooleanAnswer = (value: unknown): 'true' | 'false' | null => {
   const normalized = normalizeText(value);
@@ -181,8 +195,9 @@ export const isQuizAnswerCorrect = (selectedAnswer: unknown, question: QuizQuest
         return true;
       }
 
-      const normalizedSelectedFreeText = normalizeFreeText(selectedAnswer);
-      const normalizedCorrectFreeText = normalizeFreeText(acceptableAnswer);
+      // For fill-in-the-blank: use stricter normalization that removes punctuation
+      const normalizedSelectedFreeText = normalizeFillInBlankAnswer(selectedAnswer);
+      const normalizedCorrectFreeText = normalizeFillInBlankAnswer(acceptableAnswer);
 
       if (normalizedSelectedFreeText && normalizedCorrectFreeText) {
         if (normalizedSelectedFreeText === normalizedCorrectFreeText) {
@@ -190,8 +205,8 @@ export const isQuizAnswerCorrect = (selectedAnswer: unknown, question: QuizQuest
         }
 
         // Check substring inclusion for answers >= 4 chars long
-        // Examples: Correct "George Washington", Selected "Washington"
-        // or Correct "Photosynthesis", Selected "Photosynthesis process"
+        // Examples: Correct "george washington", Selected "washington"
+        // But require at least 4 characters to avoid false positives
         if (
           normalizedSelectedFreeText.length >= 4 &&
           normalizedCorrectFreeText.length >= 4
@@ -205,14 +220,17 @@ export const isQuizAnswerCorrect = (selectedAnswer: unknown, question: QuizQuest
         }
 
         // Check typo tolerance based on Levenshtein distance
+        // More strict: only allow 1 typo for short words, 2 for longer words
         const distance = calculateLevenshteinDistance(normalizedSelectedFreeText, normalizedCorrectFreeText);
-        const isShortAnswer = Math.max(normalizedSelectedFreeText.length, normalizedCorrectFreeText.length) <= 10;
+        const maxLength = Math.max(normalizedSelectedFreeText.length, normalizedCorrectFreeText.length);
         
-        // Allow 1 typo for words up to 10 chars, 2 typos for longer words
-        const allowedTypos = isShortAnswer ? 1 : 2;
-        
-        if (distance <= allowedTypos) {
-          return true;
+        // Only allow typos if lengths are similar (within 2 chars difference)
+        const lengthDiff = Math.abs(normalizedSelectedFreeText.length - normalizedCorrectFreeText.length);
+        if (lengthDiff <= 2) {
+          const allowedTypos = maxLength <= 5 ? 0 : maxLength <= 10 ? 1 : 2;
+          if (distance <= allowedTypos) {
+            return true;
+          }
         }
       }
     }

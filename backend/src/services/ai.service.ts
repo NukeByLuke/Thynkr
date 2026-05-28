@@ -54,6 +54,29 @@ const PROMPT_INJECTION_PATTERNS = [
 export type QuizDifficulty = 'EASY' | 'MEDIUM' | 'HARD';
 export type QuizQuestionType = 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_IN_THE_BLANK';
 
+/**
+ * Simplify fill-in-the-blank answer words by removing complex punctuation and symbols
+ * Examples: "don't" -> "dont", "self-aware" -> "selfaware", "U.S.A." -> "usa"
+ * Keeps only letters, numbers, and basic word separators
+ */
+function simplifyFillInTheBlankAnswer(answer: string): string {
+  if (!answer) return answer;
+  
+  // Split by pipe (alternative answers)
+  const alternatives = answer.split('|').map(alt => {
+    return alt
+      .trim()
+      .toLowerCase()
+      // Remove complex punctuation (dashes, dots, apostrophes, etc.)
+      .replace(/[^\p{L}\p{N}\s]/gu, '')
+      // Collapse multiple spaces into one
+      .replace(/\s+/g, ' ')
+      .trim();
+  });
+  
+  return alternatives.filter(alt => alt).join('|');
+}
+
 export interface GeneratedSummary {
   content: string;
 }
@@ -637,12 +660,15 @@ ${preparedText}`;
               }
 
               seenQuestionKeys.add(questionKey);
+              
+              // Simplify the answer by removing complex punctuation/symbols
+              const simplifiedAnswer = simplifyFillInTheBlankAnswer(cleanedCorrectAnswer);
 
               return {
                 questionType: 'FILL_IN_THE_BLANK',
                 question: questionText,
                 options: [],
-                correctAnswer: cleanedCorrectAnswer,
+                correctAnswer: simplifiedAnswer,
                 explanation,
               } as QuizQuestion;
             }

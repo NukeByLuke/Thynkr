@@ -72,6 +72,32 @@ export default async function stripeRoutes(server: FastifyInstance) {
     }
   );
 
+  // Get subscription info
+  server.get(
+    '/subscription-info',
+    {
+      preHandler: authenticate,
+    },
+    async (request: AuthenticatedRequest, reply) => {
+      const user = await prisma.user.findUnique({
+        where: { id: request.user!.userId },
+        include: { subscription: true },
+      });
+
+      if (!user?.subscription) {
+        return reply.code(400).send({ error: 'No subscription found' });
+      }
+
+      return reply.send({
+        status: user.subscription.status,
+        planType: user.subscription.planType,
+        billingCycle: user.subscription.billingCycle,
+        cancelAtPeriodEnd: user.subscription.cancelAtPeriodEnd,
+        currentPeriodEnd: user.subscription.currentPeriodEnd,
+      });
+    }
+  );
+
   // Create customer portal session
   server.post(
     '/create-portal-session',
@@ -93,6 +119,156 @@ export default async function stripeRoutes(server: FastifyInstance) {
       });
 
       return reply.send({ url: session.url });
+    }
+  );
+
+  // Cancel subscription
+  server.post(
+    '/cancel-subscription',
+    {
+      preHandler: authenticate,
+    },
+    async (request: AuthenticatedRequest, reply) => {
+      const user = await prisma.user.findUnique({
+        where: { id: request.user!.userId },
+        include: { subscription: true },
+      });
+
+      if (!user?.subscription?.stripeSubscriptionId) {
+        return reply.code(400).send({ error: 'No active subscription found' });
+      }
+
+      // Cancel the subscription at the end of current billing period
+      const subscription = await stripe.subscriptions.update(user.subscription.stripeSubscriptionId, {
+        cancel_at_period_end: true,
+      });
+
+      // Update our database
+      await prisma.subscription.update({
+        where: { userId: user.id },
+        data: { cancelAtPeriodEnd: true },
+      });
+
+      return reply.send({
+        message: 'Subscription canceled',
+        cancelAtPeriodEnd: true,
+        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      });
+    }
+  );
+
+  // Reactivate subscription (undo cancellation)
+  server.post(
+    '/reactivate-subscription',
+    {
+      preHandler: authenticate,
+    },
+    async (request: AuthenticatedRequest, reply) => {
+      const user = await prisma.user.findUnique({
+        where: { id: request.user!.userId },
+        include: { subscription: true },
+      });
+
+      if (!user?.subscription?.stripeSubscriptionId) {
+        return reply.code(400).send({ error: 'No active subscription found' });
+      }
+
+      if (!user.subscription.cancelAtPeriodEnd) {
+        return reply.code(400).send({ error: 'Subscription is not canceled' });
+      }
+
+      // Reactivate the subscription
+      const subscription = await stripe.subscriptions.update(user.subscription.stripeSubscriptionId, {
+        cancel_at_period_end: false,
+      });
+
+      // Update our database
+      await prisma.subscription.update({
+        where: { userId: user.id },
+        data: { cancelAtPeriodEnd: false },
+      });
+
+      return reply.send({
+        message: 'Subscription reactivated',
+        cancelAtPeriodEnd: false,
+        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      });
+    }
+  );
+
+  // Change subscription plan (upgrade/downgrade)
+  server.post(
+    '/change-subscription',
+    {
+      preHandler: authenticate,
+    },
+    async (request: AuthenticatedRequest, reply) => {
+      const { priceId } = request.body as { priceId: string };
+
+      if (!priceId) {
+        return reply.code(400).send({ error: 'Price ID is required' });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: request.user!.userId },
+        include: { subscription: true },
+      });
+
+      if (!user?.subscription?.stripeSubscriptionId) {
+        return reply.code(400).send({ error: 'No active subscription found' });
+      }
+
+      const priceInfo = getPriceInfo(priceId);
+      if (!priceInfo) {
+        return reply.code(400).send({ error: 'Invalid price ID' });
+      }
+
+      try {
+        // Get current subscription to get subscription item ID
+        const subscription = await stripe.subscriptions.retrieve(user.subscription.stripeSubscriptionId);
+        const subscriptionItemId = subscription.items.data[0].id;
+
+        // Update the subscription with the new price
+        const updatedSubscription = await stripe.subscriptions.update(user.subscription.stripeSubscriptionId, {
+          items: [
+            {
+              id: subscriptionItemId,
+              price: priceId,
+            },
+          ],
+          // Proration behavior: immediately charge/credit the difference
+          proration_behavior: 'create_prorations',
+        });
+
+        // Update our database
+        await prisma.$transaction([
+          prisma.subscription.update({
+            where: { userId: user.id },
+            data: {
+              stripePriceId: priceId,
+              planType: priceInfo.role as any,
+              billingCycle: priceInfo.billingCycle as any,
+              currentPeriodStart: new Date(updatedSubscription.current_period_start * 1000),
+              currentPeriodEnd: new Date(updatedSubscription.current_period_end * 1000),
+            },
+          }),
+          prisma.user.update({
+            where: { id: user.id },
+            data: { role: priceInfo.role as any },
+          }),
+        ]);
+
+        return reply.send({
+          message: `Subscription changed to ${priceInfo.role}`,
+          planType: priceInfo.role,
+          billingCycle: priceInfo.billingCycle,
+          currentPeriodEnd: new Date(updatedSubscription.current_period_end * 1000),
+        });
+      } catch (error: any) {
+        return reply.code(400).send({
+          error: error.message || 'Failed to change subscription',
+        });
+      }
     }
   );
 
