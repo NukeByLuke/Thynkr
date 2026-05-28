@@ -21,7 +21,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import Logo from '@/components/Logo';
 import { Courses, Study, Files, Pricing, Admin, Settings as SettingsPage, HelpCenter, Achievements } from '@/routes';
-import api from '@/lib/api';
 
 interface NavLink {
   to: string;
@@ -71,30 +70,9 @@ const Sidebar = ({
     if (collapsed !== null) return collapsed !== 'true';
     return window.innerWidth >= 1280;
   });
-  const [unreadAchievements, setUnreadAchievements] = useState(0);
-
   const isExpanded = forceExpanded ?? storedExpanded;
 
-  // Fetch unread achievements count
-  useEffect(() => {
-    const fetchUnreadCount = async () => {
-      try {
-        const { data } = await api.get('/progress/achievements');
-        if (Array.isArray(data)) {
-          const unread = data.filter((a: any) => a.unlockedAt && !a.viewedAt).length;
-          setUnreadAchievements(unread);
-        }
-      } catch (error) {
-        // Silently fail - achievements count is not critical
-      }
-    };
 
-    if (user) {
-      fetchUnreadCount();
-      const interval = setInterval(fetchUnreadCount, 30000); // Check every 30s
-      return () => clearInterval(interval);
-    }
-  }, [user]);
 
   useEffect(() => {
     if (forceExpanded !== undefined) return;
@@ -214,8 +192,7 @@ const Sidebar = ({
           )}
           {workspaceLinks.map((link) => {
             const isLinkActive = isActive(link.to);
-            const badge = link.to === '/achievements' ? unreadAchievements : undefined;
-            return <NavItem key={link.to} link={link} active={isLinkActive} badge={badge} />;
+            return <NavItem key={link.to} link={link} active={isLinkActive} />;
           })}
         </div>
 
