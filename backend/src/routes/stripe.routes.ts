@@ -164,21 +164,28 @@ export default async function stripeRoutes(server: FastifyInstance) {
         return reply.code(400).send({ error: 'No active subscription found' });
       }
 
-      // Cancel the subscription at the end of current billing period
-      const subscription = await stripe.subscriptions.update(user.subscription.stripeSubscriptionId, {
-        cancel_at_period_end: true,
-      });
+      // Cancel the subscription immediately
+      const subscription = await stripe.subscriptions.cancel(user.subscription.stripeSubscriptionId);
 
       // Update our database
       await prisma.subscription.update({
         where: { userId: user.id },
-        data: { cancelAtPeriodEnd: true },
+        data: { 
+          status: 'CANCELED',
+          cancelAtPeriodEnd: false,
+          currentPeriodEnd: new Date()
+        },
+      });
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { role: 'BASIC' },
       });
 
       return reply.send({
         message: 'Subscription canceled',
-        cancelAtPeriodEnd: true,
-        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        cancelAtPeriodEnd: false,
+        currentPeriodEnd: new Date(),
       });
     }
   );

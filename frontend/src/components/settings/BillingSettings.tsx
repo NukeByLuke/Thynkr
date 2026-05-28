@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { CreditCard, ExternalLink, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -5,6 +6,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import Button from '@/components/ui/Button';
+import Modal, { ModalFooter } from '@/components/ui/Modal';
 
 function isValidStripePortalUrl(url: string | undefined): boolean {
   if (!url) return false;
@@ -35,6 +37,7 @@ interface Invoice {
 export default function BillingSettings() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
   const planInfo = {
     BASIC: { name: 'Basic', description: 'Essential features for casual learners' },
@@ -88,7 +91,7 @@ export default function BillingSettings() {
       await api.post('/stripe/cancel-subscription');
     },
     onSuccess: () => {
-      toast.success('Subscription cancelled at end of billing period');
+      setIsCancelModalOpen(false); toast.success('Subscription cancelled immediately');
       window.location.reload();
     },
     onError: (error: any) => {
@@ -112,7 +115,9 @@ export default function BillingSettings() {
   return (
     <div className="space-y-8 sm:space-y-10">
       <section>
-        <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white mb-1">Subscription</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white mb-1">
+          Subscription
+        </h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
           Manage your subscription plan and billing details.
         </p>
@@ -129,32 +134,33 @@ export default function BillingSettings() {
                 </span>
               )}
             </div>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">
-              {currentPlan.description}
-            </p>
-            
+            <p className="text-slate-500 dark:text-slate-400 text-sm">{currentPlan.description}</p>
+
             {subscriptionInfo?.cancelAtPeriodEnd && (
               <div className="mt-3 p-3 rounded-lg bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/30 flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0" />
                 <div className="text-sm text-orange-800 dark:text-orange-300">
-                  <p className="font-medium">Subscription will cancel on {new Date(subscriptionInfo.currentPeriodEnd || '').toLocaleDateString()}</p>
+                  <p className="font-medium">
+                    Subscription will cancel on{' '}
+                    {new Date(subscriptionInfo.currentPeriodEnd || '').toLocaleDateString()}
+                  </p>
                 </div>
               </div>
             )}
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button 
+            <Button
               onClick={() => navigate('/pricing')}
               variant={user?.role === 'BASIC' ? 'primary' : 'ghost'}
               className="flex-1"
             >
               {user?.role === 'BASIC' ? 'Upgrade Plan' : 'View Other Plans'}
             </Button>
-            
-            {user?.role !== 'BASIC' && (
-              subscriptionInfo?.cancelAtPeriodEnd ? (
-                <Button 
+
+            {user?.role !== 'BASIC' &&
+              (subscriptionInfo?.cancelAtPeriodEnd ? (
+                <Button
                   onClick={() => reactivateSubscriptionMutation.mutate()}
                   isLoading={reactivateSubscriptionMutation.isPending}
                   variant="outline"
@@ -163,16 +169,15 @@ export default function BillingSettings() {
                   Reactivate Subscription
                 </Button>
               ) : (
-                <Button 
-                  onClick={() => cancelSubscriptionMutation.mutate()}
-                  isLoading={cancelSubscriptionMutation.isPending}
+                <Button
+                  onClick={() => setIsCancelModalOpen(true)}
+                  
                   variant="outline"
                   className="flex-1 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10"
                 >
                   Cancel Subscription
                 </Button>
-              )
-            )}
+              ))}
           </div>
         </div>
       </section>
@@ -180,39 +185,45 @@ export default function BillingSettings() {
       {user?.role !== 'BASIC' && (
         <>
           <hr className="border-slate-200 dark:border-white/10" />
-          
+
           <section>
-            <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white mb-1">Payment Method</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white mb-1">
+              Payment Method
+            </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
               Update your payment card and billing address.
             </p>
 
             <div className="flex flex-col gap-4 p-4 bg-white/80 dark:bg-slate-900/70 border border-slate-200 dark:border-white/10 rounded-xl sm:flex-row sm:items-center sm:justify-between">
-               <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
-                    <CreditCard className="w-5 h-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <h4 className="text-sm font-medium text-slate-900 dark:text-white">Stripe Secure Payment</h4>
-                    <p className="text-xs text-slate-500">Managed via Stripe Customer Portal</p>
-                  </div>
-               </div>
-               <Button
-                 variant="ghost"
-                 size="sm"
-                 onClick={() => createPortalMutation.mutate()}
-                 isLoading={createPortalMutation.isPending}
-                 className="w-full sm:w-auto gap-2"
-               >
-                 Manage <ExternalLink className="w-3 h-3" />
-               </Button>
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
+                  <CreditCard className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <h4 className="text-sm font-medium text-slate-900 dark:text-white">
+                    Stripe Secure Payment
+                  </h4>
+                  <p className="text-xs text-slate-500">Managed via Stripe Customer Portal</p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => createPortalMutation.mutate()}
+                isLoading={createPortalMutation.isPending}
+                className="w-full sm:w-auto gap-2"
+              >
+                Manage <ExternalLink className="w-3 h-3" />
+              </Button>
             </div>
           </section>
-          
+
           <hr className="border-slate-200 dark:border-white/10" />
 
           <section>
-            <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white mb-1">Billing History</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white mb-1">
+              Billing History
+            </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
               Download past invoices and receipts.
             </p>
@@ -234,24 +245,39 @@ export default function BillingSettings() {
                   </thead>
                   <tbody>
                     {invoicesInfo.invoices.map((invoice) => (
-                      <tr key={invoice.id} className="border-b border-slate-200 dark:border-slate-800 last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                      <tr
+                        key={invoice.id}
+                        className="border-b border-slate-200 dark:border-slate-800 last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
+                      >
                         <td className="px-4 py-3 whitespace-nowrap text-slate-900 dark:text-slate-300">
                           {new Date(invoice.created).toLocaleDateString()}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap font-medium text-slate-900 dark:text-white">
-                          {(invoice.amountTotal / 100).toLocaleString('en-US', { style: 'currency', currency: invoice.currency.toUpperCase() })}
+                          {(invoice.amountTotal / 100).toLocaleString('en-US', {
+                            style: 'currency',
+                            currency: invoice.currency.toUpperCase(),
+                          })}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            invoice.status === 'paid' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' :
-                            invoice.status === 'open' ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' :
-                            'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
-                          }`}>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              invoice.status === 'paid'
+                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400'
+                                : invoice.status === 'open'
+                                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400'
+                                  : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+                            }`}
+                          >
                             {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                           </span>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-right">
-                          <a href={invoice.hostedInvoiceUrl} target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 font-medium inline-flex items-center gap-1">
+                          <a
+                            href={invoice.hostedInvoiceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 font-medium inline-flex items-center gap-1"
+                          >
                             <ExternalLink className="w-3 h-3" /> View
                           </a>
                         </td>
@@ -262,17 +288,43 @@ export default function BillingSettings() {
               </div>
             ) : (
               <div className="text-center py-8 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                      No invoices found.
-                  </p>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    Your past payments and receipts will appear here.
-                  </p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">No invoices found.</p>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  Your past payments and receipts will appear here.
+                </p>
               </div>
             )}
           </section>
         </>
       )}
+
+      <Modal isOpen={isCancelModalOpen} onClose={() => setIsCancelModalOpen(false)} title="Cancel Subscription?">
+        <div className="p-6">
+          <div className="flex items-center justify-center mb-4 text-orange-500">
+            <AlertCircle className="w-12 h-12" />
+          </div>
+          <p className="text-center text-slate-700 dark:text-slate-300 mb-4">
+            Are you sure you want to cancel your {currentPlan.name} plan?
+          </p>
+          <p className="text-center text-sm text-slate-500 dark:text-slate-400 mb-6">
+            If you proceed, your subscription will be cancelled immediately and you will lose access to premium features. This action cannot be undone.
+          </p>
+        </div>
+        <ModalFooter>
+          <Button variant="ghost" onClick={() => setIsCancelModalOpen(false)} className="flex-1">
+            Keep Plan
+          </Button>
+          <Button
+            onClick={() => {
+              cancelSubscriptionMutation.mutate();
+            }}
+            isLoading={cancelSubscriptionMutation.isPending}
+            className="flex-1 bg-rose-600 hover:bg-rose-700 text-white"
+          >
+            Confirm Cancel
+          </Button>
+        </ModalFooter>
+      </Modal>
     </div>
   );
 }
