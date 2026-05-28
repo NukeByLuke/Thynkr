@@ -90,6 +90,7 @@ services:
       - '443:443'
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /etc/ssl/thynkr:/etc/ssl/thynkr:ro
       - /var/lib/letsencrypt:/var/lib/letsencrypt:ro
       - /var/www/certbot:/var/www/certbot:ro
       - ./nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro

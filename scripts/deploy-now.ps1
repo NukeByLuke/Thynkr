@@ -90,7 +90,7 @@ docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 echo "Waiting for services to start..."
 sleep 10
-'@ + "`ncurl https://$domain/api/health"
+'@ + "`ncurl https://$domain/"
 
 # Fix formatting for Linux
 $deployScript = $deployScript -replace "\r\n", "`n"
