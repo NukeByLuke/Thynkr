@@ -53,9 +53,9 @@ interface ComparisonRow {
 const PLAN_ORDER: PlanId[] = ['basic', 'standard', 'premium'];
 const ANNUAL_DISCOUNT = 17;
 
-const BASIC_UPLOADS = 3;
+const BASIC_STORAGE_GB = 1;
 const BASIC_AI_REQUESTS = 25;
-const STANDARD_UPLOADS = 15;
+const STANDARD_STORAGE_GB = 10;
 const STANDARD_AI_REQUESTS = 500;
 const BASIC_MAX_STORED_FILES = 30;
 const STANDARD_MAX_STORED_FILES = 150;
@@ -89,7 +89,7 @@ function formatLiftCopy(base: number, target: number, label: string): string {
   return `${percent}% more ${label} than Basic`;
 }
 
-const uploadLiftCopy = formatLiftCopy(BASIC_UPLOADS, STANDARD_UPLOADS, 'file uploads');
+const uploadLiftCopy = formatLiftCopy(BASIC_STORAGE_GB, STANDARD_STORAGE_GB, 'storage space');
 const aiLiftCopy = formatLiftCopy(BASIC_AI_REQUESTS, STANDARD_AI_REQUESTS, 'AI requests');
 
 const PLANS: Plan[] = [
@@ -105,7 +105,7 @@ const PLANS: Plan[] = [
     cta: 'Get Started Free',
     features: [
       { label: `${BASIC_AI_REQUESTS} AI requests per month`, included: true },
-      { label: `${BASIC_UPLOADS} file uploads per month`, included: true },
+        { label: `${BASIC_STORAGE_GB}GB storage capacity`, included: true },
       { label: `Up to ${BASIC_MAX_STORED_FILES} stored files total`, included: true },
       { label: 'AI summaries, notes, quizzes, and flashcards', included: true },
       { label: 'Limited text-to-speech access', included: true },
@@ -159,7 +159,7 @@ const PLANS: Plan[] = [
     features: [
       { label: 'Everything in Standard', included: true, emphasis: true },
       { label: 'Unlimited AI requests', included: true, emphasis: true },
-      { label: 'Unlimited uploads', included: true, emphasis: true },
+      { label: 'Unlimited storage', included: true, emphasis: true },
       { label: 'Unlimited text-to-speech', included: true, emphasis: true },
       { label: `Up to ${PREMIUM_MAX_STORED_FILES.toLocaleString()} stored files total`, included: true },
       { label: 'AI Tutor conversations', included: true },
@@ -178,9 +178,9 @@ const COMPARISON_ROWS: ComparisonRow[] = [
     premium: 'Unlimited',
   },
   {
-    feature: 'File uploads / month',
-    basic: BASIC_UPLOADS.toString(),
-    standard: STANDARD_UPLOADS.toString(),
+    feature: 'Storage capacity',
+    basic: `${BASIC_STORAGE_GB}GB`,
+    standard: `${STANDARD_STORAGE_GB}GB`,
     premium: 'Unlimited',
   },
   {
