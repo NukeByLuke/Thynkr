@@ -219,7 +219,7 @@ export default async function stripeRoutes(server: FastifyInstance) {
       return reply.send({
         invoices: invoices.data.map((inv) => ({
           id: inv.id,
-          amountTotal: inv.amount_total,
+          amountTotal: inv.total,
           currency: inv.currency,
           status: inv.status,
           created: new Date(inv.created * 1000).toISOString(),
