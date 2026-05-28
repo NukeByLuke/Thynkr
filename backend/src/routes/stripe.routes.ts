@@ -165,7 +165,7 @@ export default async function stripeRoutes(server: FastifyInstance) {
       }
 
       // Cancel the subscription immediately
-      const subscription = await stripe.subscriptions.cancel(user.subscription.stripeSubscriptionId);
+      await stripe.subscriptions.cancel(user.subscription.stripeSubscriptionId);
 
       // Update our database
       await prisma.subscription.update({
