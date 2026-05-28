@@ -196,6 +196,40 @@ export default async function stripeRoutes(server: FastifyInstance) {
     }
   );
 
+  // Get invoices
+  server.get(
+    '/invoices',
+    {
+      preHandler: authenticate,
+    },
+    async (request: AuthenticatedRequest, reply) => {
+      const user = await prisma.user.findUnique({
+        where: { id: request.user!.userId },
+      });
+
+      if (!user?.stripeCustomerId) {
+        return reply.send({ invoices: [] });
+      }
+
+      const invoices = await stripe.invoices.list({
+        customer: user.stripeCustomerId,
+        limit: 20,
+      });
+
+      return reply.send({
+        invoices: invoices.data.map((inv) => ({
+          id: inv.id,
+          amountTotal: inv.amount_total,
+          currency: inv.currency,
+          status: inv.status,
+          created: new Date(inv.created * 1000).toISOString(),
+          hostedInvoiceUrl: inv.hosted_invoice_url,
+          pdf: inv.invoice_pdf,
+        })),
+      });
+    }
+  );
+
   // Change subscription plan (upgrade/downgrade)
   server.post(
     '/change-subscription',

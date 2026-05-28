@@ -22,6 +22,16 @@ interface SubscriptionInfo {
   currentPeriodEnd?: string;
 }
 
+interface Invoice {
+  id: string;
+  amountTotal: number;
+  currency: string;
+  status: string;
+  created: string;
+  hostedInvoiceUrl: string;
+  pdf: string;
+}
+
 export default function BillingSettings() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -40,6 +50,15 @@ export default function BillingSettings() {
     queryKey: ['subscription-info'],
     queryFn: async () => {
       const response = await api.get('/stripe/subscription-info');
+      return response.data;
+    },
+    enabled: user?.role !== 'BASIC',
+  });
+
+  const { data: invoicesInfo, isLoading: invoicesLoading } = useQuery<{ invoices: Invoice[] }>({
+    queryKey: ['stripe-invoices'],
+    queryFn: async () => {
+      const response = await api.get('/stripe/invoices');
       return response.data;
     },
     enabled: user?.role !== 'BASIC',
@@ -72,8 +91,8 @@ export default function BillingSettings() {
       toast.success('Subscription cancelled at end of billing period');
       window.location.reload();
     },
-    onError: () => {
-      toast.error('Failed to cancel subscription');
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to cancel subscription');
     },
   });
 
@@ -85,8 +104,8 @@ export default function BillingSettings() {
       toast.success('Subscription reactivated');
       window.location.reload();
     },
-    onError: () => {
-      toast.error('Failed to reactivate subscription');
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to reactivate subscription');
     },
   });
 
@@ -198,14 +217,59 @@ export default function BillingSettings() {
               Download past invoices and receipts.
             </p>
 
-            <div className="text-center py-8 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Invoices are emailed to you automatically.
-                </p>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  Check your email or the Stripe portal for history.
-                </p>
-            </div>
+            {invoicesLoading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
+              </div>
+            ) : invoicesInfo?.invoices && invoicesInfo.invoices.length > 0 ? (
+              <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-xs text-slate-500 bg-slate-50 dark:bg-slate-800/50 uppercase border-b border-slate-200 dark:border-slate-800">
+                    <tr>
+                      <th className="px-4 py-3">Date</th>
+                      <th className="px-4 py-3">Amount</th>
+                      <th className="px-4 py-3">Status</th>
+                      <th className="px-4 py-3 text-right">Receipt</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invoicesInfo.invoices.map((invoice) => (
+                      <tr key={invoice.id} className="border-b border-slate-200 dark:border-slate-800 last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                        <td className="px-4 py-3 whitespace-nowrap text-slate-900 dark:text-slate-300">
+                          {new Date(invoice.created).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap font-medium text-slate-900 dark:text-white">
+                          {(invoice.amountTotal / 100).toLocaleString('en-US', { style: 'currency', currency: invoice.currency.toUpperCase() })}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            invoice.status === 'paid' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' :
+                            invoice.status === 'open' ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' :
+                            'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+                          }`}>
+                            {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-right">
+                          <a href={invoice.hostedInvoiceUrl} target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 font-medium inline-flex items-center gap-1">
+                            <ExternalLink className="w-3 h-3" /> View
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                      No invoices found.
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    Your past payments and receipts will appear here.
+                  </p>
+              </div>
+            )}
           </section>
         </>
       )}
