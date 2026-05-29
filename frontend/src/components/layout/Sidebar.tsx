@@ -20,7 +20,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import Logo from '@/components/Logo';
-import { Courses, Study, Files, Pricing, Admin, Settings as SettingsPage, HelpCenter, Achievements } from '@/routes';
+import { Courses, Study, Files, Pricing, Admin, HelpCenter, Achievements } from '@/routes';
 
 interface NavLink {
   to: string;
@@ -44,9 +44,8 @@ const workspaceLinks: NavLink[] = [
   { to: '/files', icon: FolderOpen, label: 'Files', component: Files },
 ];
 
-const accountLinks: NavLink[] = [
+const footerLinks: NavLink[] = [
   { to: '/pricing', icon: CreditCard, label: 'Pricing', component: Pricing },
-  { to: '/settings', icon: Settings, label: 'Settings', component: SettingsPage },
   { to: '/help', icon: CircleHelp, label: 'Help Center', component: HelpCenter },
 ];
 
@@ -205,20 +204,16 @@ const Sidebar = ({
           })}
         </div>
 
-        <div className="space-y-1.5 pt-2 border-t border-fuchsia-200/70 dark:border-slate-800/80">
-          {isExpanded && (
-            <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-              Account
-            </p>
-          )}
-          {accountLinks.map((link) => {
-            const isLinkActive = isActive(link.to);
-            return <NavItem key={link.to} link={link} active={isLinkActive} />;
-          })}
-          {user?.role === 'ADMIN' && (
+        {user?.role === 'ADMIN' && (
+          <div className="space-y-1.5 pt-2 border-t border-fuchsia-200/70 dark:border-slate-800/80">
+            {isExpanded && (
+              <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+                Admin
+              </p>
+            )}
             <NavItem link={adminLink} active={isActive('/admin')} />
-          )}
-        </div>
+          </div>
+        )}
 
         {isExpanded && !isPremium && (
           <div className="rounded-xl bg-gradient-to-br from-fuchsia-500/12 via-white to-orange-500/12 dark:from-cyan-500/15 dark:via-slate-900 dark:to-violet-500/15 border border-fuchsia-200/70 dark:border-cyan-500/25 p-3.5 shadow-sm">
@@ -245,11 +240,12 @@ const Sidebar = ({
 
       {/* Bottom Section */}
       <div className="px-3 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] pt-4 flex-shrink-0 bg-white/35 dark:bg-slate-950/25 border-t border-fuchsia-200/70 dark:border-slate-800/80">
-        {isExpanded && (
-          <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-            Quick actions
-          </p>
-        )}
+        <div className="mb-3 space-y-1.5">
+          {footerLinks.map((link) => {
+            const isLinkActive = isActive(link.to);
+            return <NavItem key={link.to} link={link} active={isLinkActive} />;
+          })}
+        </div>
 
         <div className="flex items-center justify-between gap-2 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/85 dark:bg-slate-950/80 px-2.5 py-2 shadow-sm">
           <button
