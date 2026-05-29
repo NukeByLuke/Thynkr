@@ -215,7 +215,11 @@ const Sidebar = ({
           </div>
         )}
 
-        {isExpanded && !isPremium && (
+      </nav>
+
+      {/* Premium Upsell */}
+      {isExpanded && !isPremium && (
+        <div className="px-3 pb-3 flex-shrink-0">
           <div className="rounded-xl bg-gradient-to-br from-fuchsia-500/12 via-white to-orange-500/12 dark:from-cyan-500/15 dark:via-slate-900 dark:to-violet-500/15 border border-fuchsia-200/70 dark:border-cyan-500/25 p-3.5 shadow-sm">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 rounded-lg bg-gradient-to-br from-fuchsia-500 to-orange-500 dark:from-cyan-400 dark:to-violet-500 p-2 text-white shadow-md">
@@ -235,9 +239,8 @@ const Sidebar = ({
               </div>
             </div>
           </div>
-        )}
-
-      </nav>
+        </div>
+      )}
 
       {/* Bottom Section */}
       <div className="px-3 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] pt-4 flex-shrink-0 bg-white/35 dark:bg-slate-950/25 border-t border-fuchsia-200/70 dark:border-slate-800/80">
