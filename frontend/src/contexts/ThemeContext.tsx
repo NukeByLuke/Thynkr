@@ -25,8 +25,7 @@ function normalizeThemeMode(mode: string | null | undefined): NormalizedThemeMod
   if (!mode) return 'system';
 
   if (mode === 'light' || mode === 'sunrise') return 'sunrise';
-  if (mode === 'dark' || mode === 'sunset' || mode === 'black') return 'sunset';
-  if (mode === 'midnight') return 'midnight';
+  if (mode === 'dark' || mode === 'sunset' || mode === 'black' || mode === 'midnight') return 'sunset';
   return 'system';
 }
 

@@ -85,17 +85,16 @@ const Sidebar = ({
   const isPremium = user?.role === 'PREMIUM' || user?.role === 'ADMIN';
   const userDisplayName = [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username || 'Account';
   const userEmail = user?.email || '';
-  const ThemeIcon = resolvedThemeMode === 'sunrise' ? Sun : resolvedThemeMode === 'sunset' ? Sunset : Moon;
+    const ThemeIcon = resolvedThemeMode === 'sunrise' ? Sun : Sunset;
   const themeActionLabel =
-    resolvedThemeMode === 'sunrise' ? 'Light mode' : resolvedThemeMode === 'sunset' ? 'Dark mode' : 'Midnight mode';
-
+      resolvedThemeMode === 'sunrise' ? 'Light mode' : 'Dark mode';
   const cycleThemeMode = () => {
     setThemeMode(resolvedThemeMode === 'sunrise' ? 'sunset' : 'sunrise');
   };
 
   const NavItem = ({ link, active, badge }: { link: NavLink; active: boolean; badge?: number }) => {
     const Icon = link.icon;
-    const isMidnight = resolvedThemeMode === 'midnight';
+    
 
     return (
       <Link
@@ -106,8 +105,8 @@ const Sidebar = ({
           relative flex items-center gap-3 rounded-[2px] group transition-all duration-150
           ${isExpanded ? 'px-3 py-2.5' : 'justify-center p-2 mx-auto aspect-square w-10'}
           ${active
-            ? `text-slate-900 ${isMidnight ? 'dark:text-white dark:bg-slate-800 dark:border-slate-700' : 'dark:text-white'} bg-fuchsia-50/80 dark:bg-slate-800/60 border border-fuchsia-200/50 dark:border-slate-700/50 shadow-sm`
-            : `text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/70 border border-transparent ${isMidnight ? 'dark:hover:bg-slate-800' : ''}`}
+            ? `text-slate-900 dark:text-white bg-fuchsia-50/80 dark:bg-slate-800/60 border border-fuchsia-200/50 dark:border-slate-700/50 shadow-sm`
+            : `text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/70 border border-transparent `}
         `}
       >
         {active && isExpanded && <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-full bg-fuchsia-500 dark:bg-accent-400" />}
@@ -147,10 +146,7 @@ const Sidebar = ({
       style={{ 
         width: isExpanded ? 280 : 80, 
         transition: 'width 140ms ease-out',
-        // Midnight theme specific styling
-        backgroundColor: document.documentElement.getAttribute('data-theme') === 'midnight' 
-          ? '#0f0f1e' 
-          : undefined,
+        
       }}
       data-theme={resolvedThemeMode}
     >

@@ -273,7 +273,7 @@ export default function GeneralSettings() {
           {([
             { mode: 'sunrise', Icon: Sun, label: 'Sunrise (Light)' },
             { mode: 'sunset', Icon: Sunset, label: 'Sunset (Dark)' },
-            { mode: 'midnight', Icon: Moon, label: 'Midnight (Black)' },
+
             { mode: 'system', Icon: Monitor, label: 'System' },
           ] as const).map(({ mode, Icon, label }) => (
             <button

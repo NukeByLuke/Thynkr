@@ -8,7 +8,7 @@ interface ThemeToggleProps {
   includeMidnight?: boolean;
 }
 
-export default function ThemeToggle({ showLabel = false, size = 'md', includeMidnight = true }: ThemeToggleProps) {
+export default function ThemeToggle({ showLabel = false, size = 'md', includeMidnight = false }: ThemeToggleProps) {
   const { theme, resolvedThemeMode, setThemeMode } = useTheme();
   const isDark = theme === 'dark';
 

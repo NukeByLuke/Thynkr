@@ -64,8 +64,10 @@ export default function ProfileMenu() {
     return role.charAt(0) + role.slice(1).toLowerCase();
   };
 
-  const themeOrder = ['sunrise', 'sunset', 'midnight'] as const;
-  const currentThemeIndex = themeOrder.indexOf(resolvedThemeMode);
+  const themeOrder = ['sunrise', 'sunset'] as const;
+  // If somehow midnight slipped through, map it to sunset for indexing
+  const currentThemeMode = resolvedThemeMode === 'midnight' ? 'sunset' : resolvedThemeMode;
+  const currentThemeIndex = themeOrder.indexOf(currentThemeMode as any);
   const nextThemeMode = themeOrder[(currentThemeIndex + 1) % themeOrder.length];
 
   const cycleThemeMode = () => {
@@ -75,15 +77,13 @@ export default function ProfileMenu() {
   const currentThemeLabel =
     resolvedThemeMode === 'sunrise'
       ? 'Sunrise'
-      : resolvedThemeMode === 'sunset'
-      ? 'Sunset'
-      : 'Midnight';
+      : 'Sunset';
 
   const nextThemeLabel =
-    nextThemeMode === 'sunrise' ? 'Sunrise' : nextThemeMode === 'sunset' ? 'Sunset' : 'Midnight';
+    nextThemeMode === 'sunrise' ? 'Sunrise' : 'Sunset';
 
   const CurrentThemeIcon =
-    resolvedThemeMode === 'sunrise' ? Sun : resolvedThemeMode === 'sunset' ? Sunset : Moon;
+    resolvedThemeMode === 'sunrise' ? Sun : Sunset;
 
   const handleNavigation = (path: string) => {
     setIsOpen(false);
