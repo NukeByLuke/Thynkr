@@ -131,7 +131,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       </div>
 
       {/* Two-Panel Container */}
-      <div className={`relative z-10 flex max-h-[calc(100dvh-1.5rem)] md:max-h-none md:h-[700px] rounded-[2px] overflow-hidden max-w-[900px] w-full border-2 shadow-[0_18px_48px_-18px_rgba(15,23,42,0.35)] ${
+      <div className={`relative z-10 flex max-h-[calc(100dvh-1.5rem)] md:max-h-none md:h-[750px] rounded-[2px] overflow-hidden max-w-[900px] w-full border-2 shadow-[0_18px_48px_-18px_rgba(15,23,42,0.35)] ${
         isDark
           ? 'border-cyan-500/25 bg-slate-950/45 backdrop-blur-md'
           : 'border-fuchsia-200/80 bg-white/60 backdrop-blur-md'
@@ -141,7 +141,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
         {/* Right Panel - Form */}
         <div 
-          className={`flex-1 h-full overflow-y-auto p-4 sm:p-8 md:p-10 transition-colors duration-150 scrollbar-hide ${
+          className={`flex-1 h-full overflow-y-auto p-3 sm:p-6 md:p-8 transition-colors duration-150 scrollbar-hide ${
             isDark 
               ? 'bg-slate-950/78 border-l-2 border-cyan-500/20' 
               : 'bg-white/82 border-l-2 border-fuchsia-100'
@@ -161,7 +161,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           </p>
 
           {/* Auth Tabs */}
-          <ThynkrTabs className="mb-5 sm:mb-8" />
+          <ThynkrTabs className="mb-4 sm:mb-5" />
 
           {/* Form Content - This is what changes between login/signup */}
           <div className="w-full md:min-h-[520px]">
@@ -169,7 +169,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           </div>
 
           {/* Terms Footer */}
-          <p className={`mt-6 sm:mt-8 text-center text-xs leading-relaxed ${
+          <p className={`mt-4 sm:mt-5 text-center text-xs leading-relaxed ${
             isDark ? 'text-slate-400' : 'text-slate-500'
           }`}>
             By signing in you agree to{' '}
@@ -199,7 +199,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           </p>
 
           {/* Mobile quick links (desktop links live in branding panel) */}
-          <nav className="mt-4 md:hidden flex items-center justify-center gap-5 text-xs">
+          <nav className="mt-2 md:hidden flex items-center justify-center gap-5 text-xs">
             <Link
               to="/about"
               className={isDark ? 'text-slate-400 hover:text-white transition-colors' : 'text-slate-500 hover:text-slate-900 transition-colors'}
