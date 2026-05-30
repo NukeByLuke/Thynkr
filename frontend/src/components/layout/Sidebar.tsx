@@ -52,7 +52,7 @@ const footerLinks: NavLink[] = [
 const adminLink: NavLink = { to: '/admin', icon: Shield, label: 'Admin', component: Admin, adminOnly: true };
 
 const collapsedTooltipClass =
-  'absolute left-full top-1/2 -translate-y-1/2 ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-medium rounded-[2px] pointer-events-none whitespace-nowrap z-[120] opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-150';
+  'absolute left-full top-1/2 -translate-y-1/2 ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-medium rounded-[2px] pointer-events-none whitespace-nowrap z-[120] opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-150 shadow-xl';
 
 const Sidebar = ({
   forceExpanded,
@@ -95,6 +95,7 @@ const Sidebar = ({
 
   const NavItem = ({ link, active, badge }: { link: NavLink; active: boolean; badge?: number }) => {
     const Icon = link.icon;
+    const isMidnight = resolvedThemeMode === 'midnight';
 
     return (
       <Link
@@ -102,19 +103,19 @@ const Sidebar = ({
         onMouseEnter={() => link.component?.preload()}
         onClick={onNavigate}
         className={`
-          relative flex items-center gap-3 rounded-[2px] group transition-all duration-150 border-2
+          relative flex items-center gap-3 rounded-[2px] group transition-all duration-150
           ${isExpanded ? 'px-3 py-2.5' : 'justify-center p-2 mx-auto aspect-square w-10'}
           ${active
-            ? 'bg-blue-900 dark:bg-blue-700 border-blue-800 dark:border-blue-600 text-white font-bold'
-            : 'border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:border-slate-400 dark:hover:border-slate-500 font-semibold'}
+            ? `text-slate-900 ${isMidnight ? 'dark:text-white dark:bg-slate-800 dark:border-slate-700' : 'dark:text-white'} bg-fuchsia-50/80 dark:bg-slate-800/60 border border-fuchsia-200/50 dark:border-slate-700/50 shadow-sm`
+            : `text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/70 border border-transparent ${isMidnight ? 'dark:hover:bg-slate-800' : ''}`}
         `}
       >
-        {active && isExpanded && <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 bg-yellow-400 dark:bg-yellow-300" />}
+        {active && isExpanded && <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-full bg-fuchsia-500 dark:bg-accent-400" />}
 
         <div className="relative">
-          <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-white' : 'text-slate-600 dark:text-slate-400'}`} />
+          <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-fuchsia-600 dark:text-accent-300' : ''}`} />
           {badge !== undefined && badge > 0 && (
-            <span className="absolute -top-2 -right-2 min-w-5 h-5 bg-red-600 dark:bg-red-500 text-white text-[10px] font-bold rounded-[2px] flex items-center justify-center px-1">
+            <span className="absolute -top-2 -right-2 min-w-5 h-5 bg-gradient-to-r from-pink-500 to-orange-500 dark:from-cyan-400 dark:to-blue-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-lg">
               {badge > 9 ? '9+' : badge}
             </span>
           )}
@@ -124,7 +125,7 @@ const Sidebar = ({
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium whitespace-nowrap">{link.label}</span>
             {badge !== undefined && badge > 0 && (
-              <span className="ml-auto text-xs font-bold px-2 py-0.5 bg-red-600 dark:bg-red-500 text-white rounded-[2px]">
+              <span className="ml-auto text-xs font-bold px-2 py-0.5 bg-gradient-to-r from-pink-500 to-orange-500 dark:from-cyan-400 dark:to-blue-500 text-white rounded-full">
                 {badge > 9 ? '9+' : badge}
               </span>
             )}
@@ -142,15 +143,19 @@ const Sidebar = ({
 
   return (
     <aside
-      className={`relative z-40 h-full min-h-0 bg-white dark:bg-slate-900 border-r-2 border-slate-300 dark:border-slate-700 flex flex-col overflow-visible transition-colors duration-200 ${className}`}
+      className={`relative z-40 h-full min-h-0 bg-gradient-to-b from-fuchsia-50/80 via-white to-orange-50/60 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 backdrop-blur-xl border-r-2 border-slate-200 dark:border-slate-800 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.35)] dark:shadow-[0_24px_80px_-32px_rgba(0,0,0,0.7)] flex flex-col overflow-visible transition-colors duration-200 ${className}`}
       style={{ 
         width: isExpanded ? 280 : 80, 
         transition: 'width 140ms ease-out',
+        // Midnight theme specific styling
+        backgroundColor: document.documentElement.getAttribute('data-theme') === 'midnight' 
+          ? '#0f0f1e' 
+          : undefined,
       }}
       data-theme={resolvedThemeMode}
     >
       {/* Header */}
-      <div className={`h-16 px-4 flex-shrink-0 flex items-center ${isExpanded ? 'justify-between' : 'justify-center'} border-b-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800`}>
+      <div className={`h-16 px-4 flex-shrink-0 flex items-center ${isExpanded ? 'justify-between' : 'justify-center'} border-b border-fuchsia-100 dark:border-slate-800/60 bg-white/45 dark:bg-slate-950/35`}>
         <Link to="/study" className={`flex items-center gap-0.5 overflow-hidden ${!isExpanded ? 'justify-center' : ''}`}>
           <Logo variant="icon" size="xl" className="flex-shrink-0" />
           {isExpanded && (
@@ -178,15 +183,15 @@ const Sidebar = ({
       </div>
 
       {isExpanded && (
-        <div className="mx-3 mt-3 mb-2 flex-shrink-0 rounded-[2px] border-2 border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 px-3 py-2.5">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-900 dark:text-blue-300 mb-1">Workspace</p>
-          <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{userDisplayName}</p>
-          <p className="text-xs text-slate-600 dark:text-slate-400 truncate">{userEmail}</p>
+        <div className="mx-3 mt-3 mb-2 flex-shrink-0 rounded-[2px] border border-fuchsia-200/30 dark:border-slate-700/40 bg-white/80 dark:bg-slate-900/80 px-3 py-2.5 shadow-sm">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-fuchsia-600 dark:text-cyan-300 mb-1">Workspace</p>
+          <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{userDisplayName}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{userEmail}</p>
         </div>
       )}
 
       {/* Main Navigation */}
-      <nav className={`min-h-0 flex-1 px-3 py-4 space-y-4 ${isExpanded ? 'overflow-y-auto overflow-x-hidden scrollbar-hide' : 'overflow-visible'}`}>
+      <nav className={`min-h-0 flex-1 px-3 py-4 space-y-4 ${isExpanded ? 'overflow-y-auto overflow-x-hidden' : 'overflow-visible'}`}>
         <div className="space-y-1.5">
           {isExpanded && (
             <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
@@ -200,7 +205,7 @@ const Sidebar = ({
         </div>
 
         {user?.role === 'ADMIN' && (
-          <div className="space-y-1.5 pt-2 border-t-2 border-slate-300 dark:border-slate-700">
+          <div className="space-y-1.5 pt-2 border-t border-fuchsia-100 dark:border-slate-800/60">
             {isExpanded && (
               <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
                 Admin
@@ -215,19 +220,19 @@ const Sidebar = ({
       {/* Premium Upsell */}
       {isExpanded && !isPremium && (
         <div className="px-3 pb-3 flex-shrink-0">
-          <div className="rounded-[2px] bg-blue-600 dark:bg-blue-700 border-2 border-blue-800 p-3.5">
+          <div className="rounded-[2px] bg-gradient-to-br from-fuchsia-500/12 via-white to-orange-500/12 dark:from-cyan-500/15 dark:via-slate-900 dark:to-violet-500/15 border border-fuchsia-200/70 dark:border-cyan-500/25 p-3.5 shadow-sm">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 rounded-[2px] bg-blue-800 p-2 text-white">
+              <div className="mt-0.5 rounded-[2px] bg-gradient-to-br from-fuchsia-500 to-orange-500 dark:from-cyan-400 dark:to-violet-500 p-2 text-white shadow-md">
                 <Sparkles className="w-4 h-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="font-bold text-sm text-white">Upgrade to Premium</h3>
-                <p className="mt-1 text-xs leading-snug text-blue-100">
+                <h3 className="font-semibold text-sm text-fuchsia-800 dark:text-cyan-200">Upgrade to Premium</h3>
+                <p className="mt-1 text-xs leading-snug text-slate-600 dark:text-slate-300">
                   Unlock unlimited AI tutoring and advanced analytics.
                 </p>
                 <Link
                   to="/pricing"
-                  className="mt-3 inline-flex items-center justify-center rounded-[2px] bg-yellow-400 hover:bg-yellow-500 px-3 py-2 text-xs font-bold text-blue-900 transition-all"
+                  className="mt-3 inline-flex items-center justify-center rounded-[2px] bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 px-3 py-2 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all"
                 >
                   Get Premium Access
                 </Link>
@@ -238,7 +243,7 @@ const Sidebar = ({
       )}
 
       {/* Bottom Section */}
-      <div className="px-3 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] pt-4 flex-shrink-0 bg-white dark:bg-slate-900 border-t-2 border-slate-300 dark:border-slate-700">
+      <div className="px-3 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] pt-4 flex-shrink-0 bg-white/35 dark:bg-slate-950/25 border-t border-fuchsia-100 dark:border-slate-800/60">
         <div className="mb-3 space-y-1.5">
           {footerLinks.map((link) => {
             const isLinkActive = isActive(link.to);
@@ -246,12 +251,18 @@ const Sidebar = ({
           })}
         </div>
 
-        <div className="flex items-center justify-between gap-2 rounded-[2px] border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-2.5 py-2">
+        <div className="flex items-center justify-between gap-2 rounded-[2px] border border-slate-200/80 dark:border-slate-800/80 bg-white/85 dark:bg-slate-950/80 px-2.5 py-2 shadow-sm">
           <button
             type="button"
             onClick={cycleThemeMode}
             aria-label={themeActionLabel}
-            className="flex h-10 w-10 items-center justify-center rounded-[2px] transition-all border-2 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600"
+            className={`flex h-10 w-10 items-center justify-center rounded-[2px] transition-all border ${
+              resolvedThemeMode === 'sunrise'
+                ? 'bg-amber-500/15 border-amber-200 text-amber-600 dark:bg-amber-400/15 dark:border-amber-400/30 dark:text-amber-300'
+                : resolvedThemeMode === 'sunset'
+                ? 'bg-cyan-500/15 border-cyan-200 text-cyan-600 dark:bg-cyan-400/15 dark:border-cyan-400/30 dark:text-cyan-300'
+                : 'bg-violet-500/15 border-violet-200 text-violet-600 dark:bg-violet-400/15 dark:border-violet-400/30 dark:text-violet-300'
+            }`}
           >
             <ThemeIcon className="h-5 w-5" />
           </button>
@@ -263,10 +274,10 @@ const Sidebar = ({
               onNavigate?.();
             }}
             aria-label="Settings"
-            className={`flex h-10 w-10 items-center justify-center rounded-[2px] transition-all border-2 ${
+            className={`flex h-10 w-10 items-center justify-center rounded-[2px] transition-all border ${
               isActive('/settings')
-                ? 'border-blue-600 dark:border-blue-500 bg-blue-100 dark:bg-blue-800 text-blue-900 dark:text-blue-200'
-                : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600'
+                ? 'bg-fuchsia-500/15 border-fuchsia-200 text-fuchsia-600 dark:bg-cyan-400/15 dark:border-cyan-400/30 dark:text-cyan-300'
+                : 'bg-transparent border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100/90 dark:hover:bg-slate-800/70 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <Settings className="h-5 w-5" />
@@ -279,7 +290,7 @@ const Sidebar = ({
               onNavigate?.();
             }}
             aria-label="Log out"
-            className="flex h-10 w-10 items-center justify-center rounded-[2px] transition-all border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:border-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-700 dark:hover:text-red-300"
+            className="flex h-10 w-10 items-center justify-center rounded-[2px] transition-all border border-transparent text-slate-500 dark:text-slate-400 hover:bg-red-50/90 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400"
           >
             <LogOut className="h-5 w-5" />
           </button>
@@ -290,7 +301,7 @@ const Sidebar = ({
       {showCollapseToggle && forceExpanded === undefined && (
         <button
           onClick={() => setStoredExpanded(!storedExpanded)}
-          className="absolute -right-3 top-20 w-6 h-6 bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-[2px] flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 z-50"
+          className="absolute -right-3 top-20 w-6 h-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 z-50 shadow-md"
           aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
         >
           {isExpanded ? (
