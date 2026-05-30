@@ -134,7 +134,7 @@ export default function Login() {
       </Helmet>
 
       <AuthLayout>
-        <div className="mb-2.5 md:min-h-[66px] pb-2 border-b-2 border-fuchsia-200 dark:border-cyan-500/25">
+        <div className="mb-4 md:min-h-[90px]">
           <p className="text-[11px] uppercase tracking-[0.18em] text-fuchsia-700 dark:text-cyan-300/80">
             Welcome Back
           </p>
@@ -143,14 +143,13 @@ export default function Login() {
           </h1>
         </div>
 
-        <div className="rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 bg-gradient-to-br from-fuchsia-50 via-white to-orange-50 dark:from-cyan-500/10 dark:via-slate-900 dark:to-violet-500/10 p-2 sm:p-2.5">
-          {/* OAuth Buttons - Grid layout */}
-          <OAuthButtons />
+        {/* OAuth Buttons - Grid layout */}
+        <OAuthButtons />
 
-          <OAuthDivider />
+        <OAuthDivider />
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="mt-2 space-y-2 sm:space-y-2.5 rounded-[2px] border-2 border-fuchsia-100 dark:border-cyan-500/20 bg-white/70 dark:bg-slate-950/35 p-2 sm:p-2.5">
+        {/* Login Form */}
+        <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
           {/* Email Field */}
           <div>
             <input
@@ -197,7 +196,7 @@ export default function Login() {
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 p-0.5 text-slate-400 transition-colors hover:text-fuchsia-600 dark:text-slate-500 dark:hover:text-cyan-300 focus:outline-none"
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/30 dark:focus-visible:ring-cyan-300/30"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -214,7 +213,7 @@ export default function Login() {
           </div>
 
           {/* Remember Me & Forgot Password */}
-          <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center justify-between gap-3">
             <label className="flex items-center gap-2 cursor-pointer w-full sm:w-auto">
               <input
                 type="checkbox"
@@ -227,7 +226,7 @@ export default function Login() {
             </label>
             <Link
               to="/forgot-password"
-              className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-fuchsia-600 dark:hover:text-cyan-300 transition-colors self-start sm:self-auto"
+              className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-fuchsia-600 dark:hover:text-cyan-300 transition-colors whitespace-nowrap"
             >
               Forgot password?
             </Link>
@@ -238,7 +237,7 @@ export default function Login() {
             type="submit"
             disabled={isLoading}
             aria-label={isLoading ? 'Signing in...' : 'Sign in to your account'}
-            className="w-full h-10 flex items-center justify-center gap-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500 text-white font-semibold rounded-[2px] border-2 border-fuchsia-700 dark:border-cyan-300 transition-colors duration-200 hover:brightness-105 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full h-11 flex items-center justify-center gap-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500 text-white font-semibold rounded-full border-2 border-fuchsia-700 dark:border-cyan-300 transition-colors duration-200 hover:brightness-105 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <>
@@ -269,8 +268,7 @@ export default function Login() {
               'Sign in'
             )}
           </button>
-          </form>
-        </div>
+        </form>
       </AuthLayout>
     </>
   );
