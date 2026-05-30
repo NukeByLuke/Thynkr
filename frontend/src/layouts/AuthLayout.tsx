@@ -11,6 +11,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import ThemeToggle from '@/components/ThemeToggle';
 import ThynkrTabs from '@/components/ThynkrTabs';
 import Logo from '@/components/Logo';
+import loginBackdrop from '../../../SL-110822-53740-17.jpg';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -21,10 +22,10 @@ interface AuthLayoutProps {
  */
 function BrandingPanel({ isDark }: { isDark: boolean }) {
   return (
-    <div className={`hidden md:flex flex-col items-center justify-between w-[420px] relative overflow-hidden rounded-l-[2px] border-r-2 border-slate-300 dark:border-slate-700 p-10 transition-colors duration-150 ${
+    <div className={`hidden md:flex flex-col items-center justify-between w-[420px] relative overflow-hidden rounded-l-[2px] border-r-2 p-10 transition-colors duration-150 ${
       isDark 
-        ? 'bg-slate-900 text-white' 
-        : 'bg-slate-200 text-slate-900'
+        ? 'bg-white/12 text-white border-cyan-500/20' 
+        : 'bg-white/18 text-slate-900 border-fuchsia-200/60'
     }`}>
 
       {/* Logo and Brand */}
@@ -36,7 +37,7 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
             alt="THYNKR"
             loading="eager"
             fetchPriority="high"
-            className="w-80 h-80 object-contain"
+            className="w-80 h-80 object-contain drop-shadow-[0_14px_30px_rgba(0,0,0,0.12)]"
           />
         </div>
         
@@ -113,22 +114,26 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
   return (
     <div
-      className={`relative min-h-app w-full flex items-center justify-center overflow-hidden px-3 py-4 sm:p-4 transition-colors duration-150 ${
-        isDark 
-          ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950/40'
-          : 'bg-gradient-to-br from-fuchsia-100 via-white to-orange-100'
-      }`}
+      className="relative min-h-app w-full flex items-center justify-center overflow-hidden px-3 py-4 sm:p-4 transition-colors duration-150"
+      style={{
+        backgroundImage: `linear-gradient(${isDark ? '135deg' : '135deg'}, ${isDark ? 'rgba(2,6,23,0.58)' : 'rgba(255,255,255,0.20)'}, ${isDark ? 'rgba(37,99,235,0.16)' : 'rgba(244,114,182,0.14)'}), url(${loginBackdrop})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
     >
+      <div className={`pointer-events-none absolute inset-0 ${isDark ? 'bg-gradient-to-r from-cyan-950/20 via-transparent to-violet-950/25' : 'bg-gradient-to-r from-fuchsia-100/10 via-transparent to-sky-100/12'}`} />
+
       {/* Theme Toggle - Fixed position */}
       <div className="fixed top-4 right-4 z-50">
         <ThemeToggle size="sm" />
       </div>
 
       {/* Two-Panel Container */}
-      <div className={`relative z-10 flex max-h-[calc(100dvh-1.5rem)] md:max-h-none md:h-[620px] rounded-[2px] overflow-y-auto scrollbar-hide overflow-x-hidden max-w-[900px] w-full border-2 ${
+      <div className={`relative z-10 flex max-h-[calc(100dvh-1.5rem)] md:max-h-none md:h-[620px] rounded-[2px] overflow-y-auto scrollbar-hide overflow-x-hidden max-w-[900px] w-full border-2 shadow-[0_18px_48px_-18px_rgba(15,23,42,0.35)] ${
         isDark
-          ? 'border-cyan-500/30 bg-slate-950'
-          : 'border-fuchsia-200 bg-white'
+          ? 'border-cyan-500/25 bg-slate-950/45 backdrop-blur-md'
+          : 'border-fuchsia-200/80 bg-white/60 backdrop-blur-md'
       }`}>
         {/* Left Panel - Branding */}
         <BrandingPanel isDark={isDark} />
@@ -137,8 +142,8 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         <div 
           className={`flex-1 p-4 sm:p-8 md:p-10 transition-colors duration-150 ${
             isDark 
-              ? 'bg-slate-950 border-l-2 border-cyan-500/20' 
-              : 'bg-white border-l-2 border-fuchsia-100'
+              ? 'bg-slate-950/78 border-l-2 border-cyan-500/20' 
+              : 'bg-white/82 border-l-2 border-fuchsia-100'
           }`}
         >
           {/* Mobile Logo - Only shown on small screens */}
