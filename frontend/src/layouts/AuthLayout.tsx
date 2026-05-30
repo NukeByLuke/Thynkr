@@ -35,7 +35,7 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
           alt="THYNKR"
           loading="eager"
           fetchPriority="high"
-          className="w-44 h-44 object-contain drop-shadow-[0_14px_30px_rgba(0,0,0,0.12)]"
+          className="w-60 h-60 object-contain drop-shadow-[0_14px_30px_rgba(0,0,0,0.12)]"
         />
         
         {/* Brand Wordmark */}
@@ -44,7 +44,7 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
           alt="THYNKR"
           loading="eager"
           fetchPriority="high"
-          className="h-10 object-contain"
+          className="h-14 object-contain"
         />
       </div>
 
