@@ -27,15 +27,15 @@ export default function ThynkrTabs({ className = '' }: ThynkrTabsProps) {
 
   return (
     <div 
-      className={`w-full p-0.5 rounded-[2px] flex relative border-2 ${className} ${
+      className={`w-full p-0.5 rounded-[2px] flex relative border ${className} ${
         currentPath === '/register'
-          ? 'border-orange-200 dark:border-cyan-500/30'
-          : 'border-fuchsia-200 dark:border-cyan-400/25'
+          ? 'border-orange-200 dark:border-white/10'
+          : 'border-fuchsia-200 dark:border-white/5'
       } bg-gradient-to-r from-fuchsia-50 via-white to-orange-50 dark:from-cyan-500/10 dark:via-slate-900 dark:to-violet-500/10`}
       role="tablist"
       aria-label="Authentication options"
     >
-      <span className="pointer-events-none absolute left-1/2 top-1 bottom-1 -translate-x-1/2 border-l-2 border-fuchsia-200 dark:border-cyan-500/25" />
+      <span className="pointer-events-none absolute left-1/2 top-1 bottom-1 -translate-x-1/2 border-l-2 border-fuchsia-200 dark:border-white/10" />
       {tabs.map((tab) => {
         const isActive = currentPath === tab.path;
         

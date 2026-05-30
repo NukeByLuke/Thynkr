@@ -163,7 +163,7 @@ export default function Register() {
     w-full px-4 py-3 border rounded-xl transition-colors text-[16px] sm:text-base
     bg-white/95 dark:bg-slate-900/65
     text-slate-900 dark:text-white 
-    border-brand-100 dark:border-cyan-400/30
+    border-brand-100 dark:border-white/10
     placeholder-slate-400 dark:placeholder-slate-500
     focus:outline-none focus:border-brand-500 dark:focus:border-cyan-300 focus:ring-2 focus:ring-brand-400/20 dark:focus:ring-cyan-300/25
   `;

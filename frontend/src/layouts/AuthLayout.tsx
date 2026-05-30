@@ -21,9 +21,9 @@ interface AuthLayoutProps {
  */
 function BrandingPanel({ isDark }: { isDark: boolean }) {
   return (
-    <div className={`hidden md:flex flex-col items-center justify-between w-[380px] pt-8 pb-4 relative overflow-hidden rounded-l-[2px] border-r-2 p-6 transition-colors duration-150 ${
+    <div className={`hidden md:flex flex-col items-center justify-between w-[380px] pt-8 pb-4 relative overflow-hidden rounded-l-[2px] border-r border-r-fuchsia-200/60 dark:border-r-white/5 p-6 transition-colors duration-150 ${
       isDark 
-        ? 'bg-white/12 text-white border-cyan-500/20' 
+        ? 'bg-white/12 text-white border-white/10' 
         : 'bg-white/18 text-slate-900 border-fuchsia-200/60'
     }`}>
 
@@ -130,9 +130,9 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       </div>
 
       {/* Two-Panel Container */}
-      <div className={`relative z-10 flex flex-col md:flex-row max-h-[calc(100dvh-1.5rem)] rounded-[2px] overflow-hidden max-w-[850px] w-full border-2 shadow-[0_18px_48px_-18px_rgba(15,23,42,0.35)] ${
+      <div className={`relative z-10 flex flex-col md:flex-row max-h-[calc(100dvh-1.5rem)] rounded-[2px] overflow-hidden max-w-[850px] w-full border shadow-[0_18px_48px_-18px_rgba(15,23,42,0.35)] ${
         isDark
-          ? 'border-cyan-500/25 bg-slate-950/45 backdrop-blur-md'
+          ? 'border-white/10 bg-slate-950/45 backdrop-blur-md'
           : 'border-fuchsia-200/80 bg-white/60 backdrop-blur-md'
       }`}>
         {/* Left Panel - Branding */}
@@ -142,8 +142,8 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         <div 
           className={`flex-1 p-3 sm:p-4 md:p-5 transition-colors duration-150 scrollbar-hide ${
             isDark 
-              ? 'bg-slate-950/78 border-l-2 border-cyan-500/20' 
-              : 'bg-white/82 border-l-2 border-fuchsia-100'
+              ? 'bg-slate-950/78 border-l border-white/10' 
+              : 'bg-white/82 border-l border-fuchsia-100'
           }`}
           style={{
             scrollbarWidth: 'none',

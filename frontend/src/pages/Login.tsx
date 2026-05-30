@@ -118,7 +118,7 @@ export default function Login() {
     w-full px-4 py-3 border rounded-xl transition-colors text-[16px] sm:text-base
     bg-white/95 dark:bg-slate-900/65
     text-slate-900 dark:text-white 
-    border-brand-100 dark:border-cyan-400/30
+    border-brand-100 dark:border-white/10
     placeholder-slate-400 dark:placeholder-slate-500
     focus:outline-none focus:border-brand-500 dark:focus:border-cyan-300 focus:ring-2 focus:ring-brand-400/20 dark:focus:ring-cyan-300/25
   `;
@@ -218,7 +218,7 @@ export default function Login() {
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 text-fuchsia-600 dark:text-cyan-400 rounded-[2px] bg-white dark:bg-slate-900 border-2 border-fuchsia-200 dark:border-cyan-500/30 focus:ring-0"
+                className="w-4 h-4 text-brand-500 dark:text-cyan-400 rounded-[2px] bg-white dark:bg-slate-900 border border-fuchsia-200 dark:border-white/20 focus:ring-0"
                 aria-label="Remember me"
               />
               <span className="text-sm text-slate-600 dark:text-slate-300">Remember me</span>
