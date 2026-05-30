@@ -251,7 +251,19 @@ const Sidebar = ({
           })}
         </div>
 
-        <div className="flex items-center justify-between gap-2 rounded-[2px] border border-slate-200/80 dark:border-slate-800/80 bg-white/85 dark:bg-slate-950/80 px-2.5 py-2 shadow-sm">
+        <div className={`flex items-center ${isExpanded ? 'justify-between flex-row gap-2 px-2.5 py-2' : 'flex-col gap-3 py-3 px-2'} rounded-[2px] border border-slate-200/80 dark:border-slate-800/80 bg-white/85 dark:bg-slate-950/80 shadow-sm`}>
+          
+          {showCollapseToggle && forceExpanded === undefined && (
+            <button
+              type="button"
+              onClick={() => setStoredExpanded(!storedExpanded)}
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[2px] transition-all border border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100/90 dark:hover:bg-slate-800/70 hover:text-slate-900 dark:hover:text-white"
+              aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+            >
+              {isExpanded ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+            </button>
+          )}
+
           <button
             type="button"
             onClick={cycleThemeMode}
@@ -296,21 +308,6 @@ const Sidebar = ({
           </button>
         </div>
       </div>
-
-      {/* Collapse Toggle */}
-      {showCollapseToggle && forceExpanded === undefined && (
-        <button
-          onClick={() => setStoredExpanded(!storedExpanded)}
-          className="absolute -right-3 top-20 w-6 h-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 z-50 shadow-md"
-          aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
-        >
-          {isExpanded ? (
-            <ChevronLeft className="w-3.5 h-3.5" />
-          ) : (
-            <ChevronRight className="w-3.5 h-3.5" />
-          )}
-        </button>
-      )}
     </aside>
   );
 };
