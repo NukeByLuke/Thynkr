@@ -153,12 +153,6 @@ export default function Register() {
     }
   };
 
-  const isFormValid = 
-    formData.firstName && 
-    formData.lastName && 
-    formData.email && 
-    formData.password.length >= 8;
-
   const inputBaseStyles = `
     w-full px-4 py-3 border rounded-xl transition-colors text-[16px] sm:text-base
     bg-white/95 dark:bg-slate-900/65
