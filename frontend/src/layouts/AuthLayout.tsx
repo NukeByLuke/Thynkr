@@ -5,6 +5,7 @@
  * Centered on screen, no entry animations
  */
 
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '@/contexts/ThemeContext';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -98,12 +99,24 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
+  useEffect(() => {
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, []);
+
   return (
     <div
       className={`relative min-h-app w-full flex items-center justify-center overflow-hidden px-3 py-4 sm:p-4 transition-colors duration-150 ${
         isDark 
-          ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-violet-950/40'
-          : 'bg-gradient-to-br from-fuchsia-100/70 via-white to-orange-100/70'
+          ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950/40'
+          : 'bg-gradient-to-br from-fuchsia-100 via-white to-orange-100'
       }`}
     >
       {/* Theme Toggle - Fixed position */}
@@ -114,8 +127,8 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       {/* Two-Panel Container */}
       <div className={`relative z-10 flex max-h-[calc(100dvh-1.5rem)] md:max-h-none md:h-[620px] rounded-[2px] overflow-y-auto scrollbar-hide overflow-x-hidden max-w-[900px] w-full border-2 ${
         isDark
-          ? 'border-slate-600 bg-slate-900'
-          : 'border-slate-400 bg-white'
+          ? 'border-cyan-500/30 bg-slate-950'
+          : 'border-fuchsia-200 bg-white'
       }`}>
         {/* Left Panel - Branding */}
         <BrandingPanel isDark={isDark} />
@@ -124,8 +137,8 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         <div 
           className={`flex-1 p-4 sm:p-8 md:p-10 transition-colors duration-150 ${
             isDark 
-              ? 'bg-slate-900 border-l-2 border-slate-700' 
-              : 'bg-white border-l-2 border-slate-300'
+              ? 'bg-slate-950 border-l-2 border-cyan-500/20' 
+              : 'bg-white border-l-2 border-fuchsia-100'
           }`}
         >
           {/* Mobile Logo - Only shown on small screens */}

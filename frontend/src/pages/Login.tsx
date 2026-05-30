@@ -118,9 +118,9 @@ export default function Login() {
     w-full px-4 py-3 border-2 rounded-[2px] transition-colors text-[16px] sm:text-base
     bg-white dark:bg-slate-900
     text-slate-900 dark:text-white 
-    border-slate-300 dark:border-slate-700
+    border-fuchsia-200 dark:border-cyan-500/30
     placeholder-slate-400 dark:placeholder-slate-500
-    focus:outline-none focus:border-blue-600 dark:focus:border-blue-400 focus:ring-0
+    focus:outline-none focus:border-fuchsia-500 dark:focus:border-cyan-300 focus:ring-0
   `;
 
   return (
@@ -134,8 +134,8 @@ export default function Login() {
       </Helmet>
 
       <AuthLayout>
-        <div className="mb-4 md:min-h-[90px] pb-4 border-b-2 border-slate-300 dark:border-slate-700">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-brand-700/85 dark:text-cyan-300/80">
+        <div className="mb-4 md:min-h-[90px] pb-4 border-b-2 border-fuchsia-200 dark:border-cyan-500/25">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-fuchsia-700 dark:text-cyan-300/80">
             Welcome Back
           </p>
           <h1 className="mt-1 text-xl sm:text-2xl font-semibold text-slate-900 dark:text-white">
@@ -143,14 +143,14 @@ export default function Login() {
           </h1>
         </div>
 
-        <div className="rounded-[2px] border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-3 sm:p-4">
+        <div className="rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 bg-gradient-to-br from-fuchsia-50 via-white to-orange-50 dark:from-cyan-500/10 dark:via-slate-900 dark:to-violet-500/10 p-3 sm:p-4">
           {/* OAuth Buttons - Grid layout */}
           <OAuthButtons />
 
           <OAuthDivider />
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
+          <form onSubmit={handleSubmit} className="mt-4 space-y-3.5 sm:space-y-4 rounded-[2px] border-2 border-fuchsia-100 dark:border-cyan-500/20 bg-white/70 dark:bg-slate-950/35 p-3 sm:p-4">
           {/* Email Field */}
           <div>
             <input
@@ -197,7 +197,7 @@ export default function Login() {
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-[2px] border-2 border-slate-300 dark:border-slate-700 p-1 text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 focus:outline-none"
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 p-1 text-slate-400 transition-colors hover:text-fuchsia-600 dark:text-slate-500 dark:hover:text-cyan-300 focus:outline-none"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -220,14 +220,14 @@ export default function Login() {
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 text-blue-700 dark:text-blue-400 rounded-[2px] bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 focus:ring-0"
+                className="w-4 h-4 text-fuchsia-600 dark:text-cyan-400 rounded-[2px] bg-white dark:bg-slate-900 border-2 border-fuchsia-200 dark:border-cyan-500/30 focus:ring-0"
                 aria-label="Remember me"
               />
               <span className="text-sm text-slate-600 dark:text-slate-300">Remember me</span>
             </label>
             <Link
               to="/forgot-password"
-              className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-cyan-300 transition-colors self-start sm:self-auto"
+              className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-fuchsia-600 dark:hover:text-cyan-300 transition-colors self-start sm:self-auto"
             >
               Forgot password?
             </Link>
@@ -238,7 +238,7 @@ export default function Login() {
             type="submit"
             disabled={isLoading}
             aria-label={isLoading ? 'Signing in...' : 'Sign in to your account'}
-            className="w-full h-12 flex items-center justify-center gap-2 bg-blue-700 text-white font-semibold rounded-[2px] border-2 border-blue-900 transition-colors duration-200 hover:bg-blue-800 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full h-12 flex items-center justify-center gap-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500 text-white font-semibold rounded-[2px] border-2 border-fuchsia-700 dark:border-cyan-300 transition-colors duration-200 hover:brightness-105 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <>

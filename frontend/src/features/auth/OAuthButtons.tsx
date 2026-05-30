@@ -60,7 +60,7 @@ function GoogleButton() {
       onClick={handleClick}
       disabled={isRedirecting}
       aria-label="Sign in with Google"
-      className="w-full flex items-center justify-center gap-3 h-12 rounded-[2px] border-2 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed bg-white dark:bg-slate-900 border-slate-400 dark:border-slate-600 text-slate-700 dark:text-white font-medium hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-500 dark:hover:border-slate-500"
+      className="w-full flex items-center justify-center gap-3 h-12 rounded-[2px] border-2 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed bg-white dark:bg-slate-900 border-fuchsia-200 dark:border-cyan-500/25 text-slate-700 dark:text-white font-medium hover:bg-fuchsia-50 dark:hover:bg-slate-800 hover:border-fuchsia-300 dark:hover:border-cyan-300"
     >
       {isRedirecting ? (
         <LoadingSpinner />
@@ -111,10 +111,10 @@ export function OAuthDivider() {
   return (
     <div className="relative my-6">
       <div className="absolute inset-0 flex items-center">
-        <span className="w-full border-t-2 border-slate-300 dark:border-slate-700" />
+        <span className="w-full border-t-2 border-fuchsia-200 dark:border-cyan-500/25" />
       </div>
       <div className="relative flex justify-center text-xs uppercase">
-        <span className="px-2 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 tracking-[0.18em] border border-slate-300 dark:border-slate-700 rounded-[2px]">
+        <span className="px-2 bg-white dark:bg-slate-900 text-fuchsia-700 dark:text-cyan-300 tracking-[0.18em] border border-fuchsia-200 dark:border-cyan-500/25 rounded-[2px]">
           or
         </span>
       </div>

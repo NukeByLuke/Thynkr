@@ -29,13 +29,13 @@ export default function ThynkrTabs({ className = '' }: ThynkrTabsProps) {
     <div 
       className={`w-full p-1 rounded-[2px] flex relative border-2 ${className} ${
         currentPath === '/register'
-          ? 'border-slate-500 dark:border-slate-500'
-          : 'border-slate-400 dark:border-slate-600'
-      } bg-slate-100 dark:bg-slate-800`}
+          ? 'border-orange-200 dark:border-cyan-500/30'
+          : 'border-fuchsia-200 dark:border-cyan-400/25'
+      } bg-gradient-to-r from-fuchsia-50 via-white to-orange-50 dark:from-cyan-500/10 dark:via-slate-900 dark:to-violet-500/10`}
       role="tablist"
       aria-label="Authentication options"
     >
-      <span className="pointer-events-none absolute left-1/2 top-1 bottom-1 -translate-x-1/2 border-l-2 border-slate-300 dark:border-slate-600" />
+      <span className="pointer-events-none absolute left-1/2 top-1 bottom-1 -translate-x-1/2 border-l-2 border-fuchsia-200 dark:border-cyan-500/25" />
       {tabs.map((tab) => {
         const isActive = currentPath === tab.path;
         
@@ -51,7 +51,7 @@ export default function ThynkrTabs({ className = '' }: ThynkrTabsProps) {
             {isActive && (
               <motion.div
                 layoutId="tab-pill"
-                className="absolute inset-0 rounded-[2px] bg-blue-700 dark:bg-blue-500 border-2 border-blue-900 dark:border-blue-300"
+                className="absolute inset-0 rounded-[2px] bg-gradient-to-r from-fuchsia-500 via-pink-500 to-orange-400 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500 border-2 border-fuchsia-700 dark:border-cyan-300"
                 transition={{
                   type: 'spring',
                   stiffness: 400,
@@ -65,7 +65,7 @@ export default function ThynkrTabs({ className = '' }: ThynkrTabsProps) {
               className={`relative z-10 font-medium transition-colors duration-200 ${
                 isActive 
                   ? 'text-white'
-                  : 'text-slate-800 dark:text-slate-100 hover:text-slate-900 dark:hover:text-white'
+                  : 'text-slate-700 dark:text-slate-200 hover:text-fuchsia-700 dark:hover:text-cyan-300'
               }`}
             >
               {tab.label}
