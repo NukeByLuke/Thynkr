@@ -339,7 +339,7 @@ export default function Register() {
                 type="submit"
                 disabled={isLoading || !isFormValid}
                 aria-label={isLoading ? 'Creating account...' : 'Create free account'}
-                className="w-full h-12 flex items-center justify-center gap-2 bg-gradient-to-r from-brand-500 via-fuchsia-500 to-orange-400 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500 text-white font-semibold rounded-full transition-all duration-200 shadow-[0_10px_26px_-14px_rgba(236,72,153,0.75)] dark:shadow-[0_10px_26px_-14px_rgba(34,211,238,0.8)] hover:brightness-105 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:brightness-100"
+                className="w-full h-11 flex items-center justify-center gap-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500 text-white font-semibold rounded-full border-2 border-fuchsia-700 dark:border-cyan-300 transition-colors duration-200 hover:brightness-105 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <>
