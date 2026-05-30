@@ -443,7 +443,7 @@ export default function Study() {
               initial={{ scale: 0.95, y: 8 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 8 }}
-              className="w-full max-w-xl rounded-3xl border-2 border-dashed border-violet-500 dark:border-violet-300 bg-white/95 dark:bg-black/90 px-6 py-8 sm:px-10 sm:py-12 text-center shadow-2xl"
+              className="w-full max-w-xl rounded-[2px] border-2 border-dashed border-violet-500 dark:border-violet-300 bg-white/95 dark:bg-black/90 px-6 py-8 sm:px-10 sm:py-12 text-center shadow-2xl"
             >
               <UploadCloud className="w-14 h-14 mx-auto mb-3 text-violet-600 dark:text-violet-300" />
               <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-1">Drop to Create Study Set</h3>
@@ -476,7 +476,7 @@ export default function Study() {
           
           {/* Upload Error Display */}
           {uploadError && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-[2px]">
               <p className="text-sm text-red-700 dark:text-red-400">{uploadError}</p>
             </div>
           )}
@@ -507,7 +507,7 @@ export default function Study() {
               }
             }}
             whileHover={{ scale: 1.005 }}
-            className="w-full mb-7 sm:mb-8 rounded-3xl border border-slate-200 dark:border-white/15 bg-white dark:bg-black p-4 sm:p-6 xl:p-8 shadow-xl text-left relative overflow-hidden group touch-manipulation"
+            className="w-full mb-7 sm:mb-8 rounded-[2px] border border-slate-200 dark:border-white/15 bg-white dark:bg-black p-4 sm:p-6 xl:p-8 shadow-xl text-left relative overflow-hidden group touch-manipulation"
           >
             <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_12%_10%,rgba(236,72,153,0.15),transparent_35%),radial-gradient(circle_at_88%_12%,rgba(168,85,247,0.18),transparent_35%),radial-gradient(circle_at_50%_88%,rgba(59,130,246,0.16),transparent_40%)] dark:bg-[radial-gradient(circle_at_12%_10%,rgba(168,85,247,0.25),transparent_35%),radial-gradient(circle_at_88%_12%,rgba(59,130,246,0.25),transparent_35%),radial-gradient(circle_at_50%_88%,rgba(34,211,238,0.22),transparent_40%)]" />
 
@@ -523,7 +523,7 @@ export default function Study() {
                 </p>
               </div>
 
-              <div className="inline-flex w-full md:w-auto items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-violet-600 text-white font-semibold shadow-lg shadow-violet-500/30">
+              <div className="inline-flex w-full md:w-auto items-center justify-center gap-2 px-5 py-3 rounded-[2px] bg-gradient-to-r from-blue-600 to-violet-600 text-white font-semibold shadow-lg shadow-violet-500/30">
                 <UploadCloud className="w-5 h-5" />
                 Open Upload Hub
               </div>
@@ -538,7 +538,7 @@ export default function Study() {
               className="group card-hover p-4 sm:p-5 text-left transition-[border-color,transform] duration-200 active:scale-95 hover:border-pink-500 dark:hover:border-cyan-500"
             >
               <div className="flex items-center gap-3 sm:gap-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-pink-500/10 to-orange-500/10 dark:from-cyan-500/10 dark:to-violet-500/10 rounded-lg flex items-center justify-center flex-shrink-0 border border-pink-500/20 dark:border-cyan-500/20">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-pink-500/10 to-orange-500/10 dark:from-cyan-500/10 dark:to-violet-500/10 rounded-[2px] flex items-center justify-center flex-shrink-0 border border-pink-500/20 dark:border-cyan-500/20">
                   <FolderOpen className="w-5 h-5 sm:w-6 sm:h-6 text-pink-600 dark:text-cyan-400" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -570,7 +570,7 @@ export default function Study() {
                     onClick={() => navigate(`/study/${file.id}`)}
                     className="w-full flex items-center gap-3 sm:gap-4 p-3.5 sm:p-4 card-hover transition-[border-color,transform] duration-150 group hover:border-pink-500/50 dark:hover:border-violet-500/50 sm:hover:translate-x-1 active:scale-[0.99]"
                   >
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-pink-500/20 to-fuchsia-500/20 dark:from-violet-500/20 dark:to-cyan-500/20 rounded-xl flex items-center justify-center border border-pink-500/20 dark:border-violet-500/20 flex-shrink-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-pink-500/20 to-fuchsia-500/20 dark:from-violet-500/20 dark:to-cyan-500/20 rounded-[2px] flex items-center justify-center border border-pink-500/20 dark:border-violet-500/20 flex-shrink-0">
                       <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-pink-600 dark:text-violet-400" />
                     </div>
                     <div className="flex-1 text-left min-w-0">
@@ -594,7 +594,7 @@ export default function Study() {
           {/* Empty State */}
           {files.length === 0 && (
             <div className="text-center py-10 sm:py-12">
-              <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-pink-500/10 to-fuchsia-500/10 dark:from-cyan-500/10 dark:to-violet-500/10 rounded-2xl flex items-center justify-center mb-5 sm:mb-6">
+              <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-pink-500/10 to-fuchsia-500/10 dark:from-cyan-500/10 dark:to-violet-500/10 rounded-[2px] flex items-center justify-center mb-5 sm:mb-6">
                 <FileText className="h-8 w-8 sm:h-10 sm:w-10 text-pink-600 dark:text-cyan-400" />
               </div>
               <h3 className="text-xl sm:text-2xl font-bold text-heading mb-2">

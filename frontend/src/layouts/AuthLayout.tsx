@@ -21,22 +21,22 @@ interface AuthLayoutProps {
  */
 function BrandingPanel({ isDark }: { isDark: boolean }) {
   return (
-    <div className={`hidden md:flex flex-col items-center justify-between w-[420px] relative overflow-hidden rounded-l-[2px] border-r-2 p-8 transition-colors duration-150 ${
+    <div className={`hidden md:flex flex-col items-center justify-start w-[420px] pt-12 pb-8 relative overflow-hidden rounded-l-[2px] border-r-2 p-8 transition-colors duration-150 ${
       isDark 
         ? 'bg-white/12 text-white border-cyan-500/20' 
         : 'bg-white/18 text-slate-900 border-fuchsia-200/60'
     }`}>
 
       {/* Logo and Brand */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center">
+      <div className="relative z-10 flex-none flex flex-col items-center justify-start">
         {/* Thynkr Logo */}
-        <div className="mb-6">
+        <div className="mb-4">
           <img
             src={isDark ? '/brand/brain-dark.png' : '/brand/brain-light.png'}
             alt="THYNKR"
             loading="eager"
             fetchPriority="high"
-            className="w-72 h-72 object-contain drop-shadow-[0_14px_30px_rgba(0,0,0,0.12)]"
+            className="w-48 h-48 object-contain drop-shadow-[0_14px_30px_rgba(0,0,0,0.12)]"
           />
         </div>
         
@@ -46,7 +46,7 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
           alt="THYNKR"
           loading="eager"
           fetchPriority="high"
-          className="h-14 object-contain"
+          className="h-10 object-contain"
         />
 
         {/* Testimonial Quote */}
@@ -129,7 +129,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       </div>
 
       {/* Two-Panel Container */}
-      <div className={`relative z-10 flex max-h-[calc(100dvh-1.5rem)] md:max-h-none md:h-[720px] rounded-[2px] overflow-hidden max-w-[900px] w-full border-2 shadow-[0_18px_48px_-18px_rgba(15,23,42,0.35)] ${
+      <div className={`relative z-10 flex flex-col md:flex-row max-h-[calc(100dvh-1.5rem)] md:max-h-none md:h-auto  rounded-[2px] overflow-hidden max-w-[900px] w-full border-2 shadow-[0_18px_48px_-18px_rgba(15,23,42,0.35)] ${
         isDark
           ? 'border-cyan-500/25 bg-slate-950/45 backdrop-blur-md'
           : 'border-fuchsia-200/80 bg-white/60 backdrop-blur-md'
@@ -139,7 +139,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
         {/* Right Panel - Form */}
         <div 
-          className={`flex-1 h-full overflow-y-auto p-3 sm:p-4 md:p-5 transition-colors duration-150 scrollbar-hide ${
+          className={`flex-1 p-3 sm:p-4 md:p-5 transition-colors duration-150 scrollbar-hide ${
             isDark 
               ? 'bg-slate-950/78 border-l-2 border-cyan-500/20' 
               : 'bg-white/82 border-l-2 border-fuchsia-100'
@@ -162,7 +162,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           <ThynkrTabs className="mb-2.5 sm:mb-3" />
 
           {/* Form Content - This is what changes between login/signup */}
-          <div className="w-full md:min-h-[490px]">
+          <div className="w-full">
             {children}
           </div>
 

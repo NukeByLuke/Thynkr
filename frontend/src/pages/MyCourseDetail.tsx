@@ -608,7 +608,7 @@ export default function MyCourseDetail() {
               <button
                 onClick={() => bannerInputRef.current?.click()}
                 disabled={uploadingBanner}
-                className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-black/55 hover:bg-black/75 backdrop-blur-sm rounded-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-black/55 hover:bg-black/75 backdrop-blur-sm rounded-[2px] opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
               >
                 <ImagePlus className="h-3.5 w-3.5" />
                 Change cover
@@ -699,7 +699,7 @@ export default function MyCourseDetail() {
           <div className="lg:col-span-2 space-y-4 sm:space-y-5">
             {/* Description Card */}
             {(course.description || isEditing) && (
-              <div className="rounded-xl border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 p-4 sm:p-5">
+              <div className="rounded-[2px] border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 p-4 sm:p-5">
                 {isEditing ? (
                   <form
                     onSubmit={(e) => {
@@ -716,7 +716,7 @@ export default function MyCourseDetail() {
                         type="text"
                         value={editForm.title}
                         onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                        className="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-[2px] bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </div>
                     <div>
@@ -728,7 +728,7 @@ export default function MyCourseDetail() {
                         onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                         rows={4}
                         placeholder="Describe what students will learn..."
-                        className="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                        className="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-[2px] bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
                       />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -739,7 +739,7 @@ export default function MyCourseDetail() {
                         <select
                           value={editForm.category}
                           onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                          className="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                          className="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-[2px] bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
                         >
                           {CATEGORIES.map((cat) => (
                             <option key={cat.value} value={cat.value}>
@@ -761,7 +761,7 @@ export default function MyCourseDetail() {
                             })
                           }
                           disabled={!isPremium && editForm.visibility !== 'PRIVATE'}
-                          className="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 cursor-pointer"
+                          className="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-[2px] bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 cursor-pointer"
                         >
                           <option value="PRIVATE">Private</option>
                           <option value="PUBLIC" disabled={!isPremium}>
@@ -774,14 +774,14 @@ export default function MyCourseDetail() {
                       <button
                         type="button"
                         onClick={() => setIsEditing(false)}
-                        className="w-full sm:w-auto px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04] rounded-lg border border-slate-200 dark:border-white/10 transition-colors font-medium"
+                        className="w-full sm:w-auto px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04] rounded-[2px] border border-slate-200 dark:border-white/10 transition-colors font-medium"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         disabled={updateCourseMutation.isPending}
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 transition-colors font-medium"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2px] hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 transition-colors font-medium"
                       >
                         <Save className="h-3.5 w-3.5" />
                         {updateCourseMutation.isPending ? 'Saving...' : 'Save'}
@@ -802,7 +802,7 @@ export default function MyCourseDetail() {
             )}
 
             {/* Files Section */}
-            <div className="rounded-xl border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 overflow-hidden">
+            <div className="rounded-[2px] border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 overflow-hidden">
               <div className="p-3 sm:p-4 border-b border-slate-100 dark:border-white/[0.06] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                   <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
@@ -817,7 +817,7 @@ export default function MyCourseDetail() {
                   {course.files.some((f: CourseFile) => isAICompatibleFile(f)) && (
                     <button
                       onClick={() => navigate(`/courses/${id}/study${shareToken ? `?token=${shareToken}` : ''}`)}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2px] hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
                     >
                       <GraduationCap className="h-4 w-4" />
                       Study
@@ -828,7 +828,7 @@ export default function MyCourseDetail() {
                       <button
                         onClick={handleOpenExistingFilesModal}
                         disabled={attachExistingFilesMutation.isPending}
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 disabled:opacity-50 transition-colors"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-[2px] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 disabled:opacity-50 transition-colors"
                       >
                         <FileText className="h-4 w-4" />
                         Add Existing
@@ -836,7 +836,7 @@ export default function MyCourseDetail() {
                       <button
                         onClick={() => setShowUploadModal(true)}
                         disabled={uploading}
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 disabled:opacity-50 transition-colors"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-[2px] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 disabled:opacity-50 transition-colors"
                       >
                         <Upload className="h-4 w-4" />
                         {uploading ? `${Math.round(uploadProgress)}%` : 'Upload'}
@@ -864,7 +864,7 @@ export default function MyCourseDetail() {
 
               {course.files.length === 0 ? (
                 <div className="p-6 sm:p-10 text-center">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-[2px] bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
                     <FileText className="h-6 w-6 text-slate-400" />
                   </div>
                   <h3 className="text-sm font-medium text-slate-900 dark:text-white mb-1">
@@ -880,14 +880,14 @@ export default function MyCourseDetail() {
                       <button
                         onClick={handleOpenExistingFilesModal}
                         disabled={attachExistingFilesMutation.isPending}
-                        className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
+                        className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 px-4 py-2 text-sm font-medium rounded-[2px] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
                       >
                         <FileText className="h-4 w-4" />
                         Add existing
                       </button>
                       <button
                         onClick={() => setShowUploadModal(true)}
-                        className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 px-4 py-2 text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
+                        className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 px-4 py-2 text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2px] hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
                       >
                         <Upload className="h-4 w-4" />
                         Upload file
@@ -935,7 +935,7 @@ export default function MyCourseDetail() {
                         </div>
                       )}
 
-                      <div className="p-1.5 sm:p-2 rounded-lg bg-slate-50 dark:bg-white/[0.04]">
+                      <div className="p-1.5 sm:p-2 rounded-[2px] bg-slate-50 dark:bg-white/[0.04]">
                         {getFileIcon(file.fileType)}
                       </div>
 
@@ -946,7 +946,7 @@ export default function MyCourseDetail() {
                               type="text"
                               value={editingFileName}
                               onChange={(e) => setEditingFileName(e.target.value)}
-                              className="flex-1 px-3 py-2 text-sm border border-slate-300/50 dark:border-white/10 rounded-lg bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                              className="flex-1 px-3 py-2 text-sm border border-slate-300/50 dark:border-white/10 rounded-[2px] bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                               autoFocus
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
@@ -966,13 +966,13 @@ export default function MyCourseDetail() {
                                   name: editingFileName,
                                 })
                               }
-                              className="inline-flex w-full sm:w-auto items-center justify-center p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                              className="inline-flex w-full sm:w-auto items-center justify-center p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-[2px] transition-colors"
                             >
                               <Save className="h-4 w-4" />
                             </button>
                             <button
                               onClick={() => setEditingFileId(null)}
-                              className="inline-flex w-full sm:w-auto items-center justify-center p-2 text-slate-500 hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors"
+                              className="inline-flex w-full sm:w-auto items-center justify-center p-2 text-slate-500 hover:bg-white/50 dark:hover:bg-white/5 rounded-[2px] transition-colors"
                             >
                               <X className="h-4 w-4" />
                             </button>
@@ -995,7 +995,7 @@ export default function MyCourseDetail() {
                       <div className="flex items-center gap-0.5 sm:gap-1 ml-auto sm:ml-0">
                         <button
                           onClick={() => setViewingFile(file)}
-                          className="p-1.5 sm:p-2 text-brand-500 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-colors"
+                          className="p-1.5 sm:p-2 text-brand-500 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-[2px] transition-colors"
                           title="View file"
                         >
                           <Eye className="h-4 w-4" />
@@ -1017,7 +1017,7 @@ export default function MyCourseDetail() {
                                 setEditingFileId(file.id);
                                 setEditingFileName(file.name);
                               }}
-                              className="p-1.5 sm:p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                              className="p-1.5 sm:p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-[2px] transition-colors"
                               title="Rename"
                             >
                               <Edit2 className="h-4 w-4" />
@@ -1028,7 +1028,7 @@ export default function MyCourseDetail() {
                                   deleteFileMutation.mutate(file.id);
                                 }
                               }}
-                              className="p-1.5 sm:p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                              className="p-1.5 sm:p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-[2px] transition-colors"
                               title="Delete"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -1046,7 +1046,7 @@ export default function MyCourseDetail() {
           {/* Right Column - Sidebar */}
           <div className="space-y-4 sm:space-y-5">
             {/* Author Card */}
-            <div className="rounded-xl border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 p-4 sm:p-5">
+            <div className="rounded-[2px] border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 p-4 sm:p-5">
               <h3 className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
                 Course Info
               </h3>
@@ -1082,7 +1082,7 @@ export default function MyCourseDetail() {
 
             {/* Actions Card (Owner only) */}
             {course.isOwner && (
-              <div className="rounded-xl border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 p-4 sm:p-5">
+              <div className="rounded-[2px] border border-slate-200/70 dark:border-white/[0.06] bg-white dark:bg-zinc-900/80 p-4 sm:p-5">
                 <h3 className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
                   Actions
                 </h3>
@@ -1100,7 +1100,7 @@ export default function MyCourseDetail() {
                       );
                     }}
                     disabled={toggleVisibilityMutation.isPending}
-                    className="w-full flex items-center justify-between p-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors"
+                    className="w-full flex items-center justify-between p-2.5 rounded-[2px] hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors"
                   >
                     <div className="flex items-center gap-2.5">
                       {course.visibility === 'PUBLIC' ? (
@@ -1138,7 +1138,7 @@ export default function MyCourseDetail() {
                       });
                       setIsEditing(true);
                     }}
-                    className="w-full flex items-center gap-2.5 p-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors"
+                    className="w-full flex items-center gap-2.5 p-2.5 rounded-[2px] hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors"
                   >
                     <Edit2 className="h-4 w-4 text-slate-400" />
                     <span className="text-sm text-slate-700 dark:text-slate-300">
@@ -1149,7 +1149,7 @@ export default function MyCourseDetail() {
                   {/* Share Button */}
                   <button
                     onClick={() => setShowShareModal(true)}
-                    className="w-full flex items-center gap-2.5 p-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors"
+                    className="w-full flex items-center gap-2.5 p-2.5 rounded-[2px] hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors"
                   >
                     <Share2 className="h-4 w-4 text-slate-400" />
                     <span className="text-sm text-slate-700 dark:text-slate-300">
@@ -1166,7 +1166,7 @@ export default function MyCourseDetail() {
       {/* Existing Files Modal */}
       {showExistingFilesModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/[0.08] rounded-xl shadow-2xl w-full max-w-2xl max-h-[calc(100vh-1.5rem)] overflow-hidden flex flex-col">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/[0.08] rounded-[2px] shadow-2xl w-full max-w-2xl max-h-[calc(100vh-1.5rem)] overflow-hidden flex flex-col">
             <div className="p-4 sm:p-5 border-b border-slate-200/70 dark:border-white/[0.08]">
               <div className="flex items-center justify-between gap-3">
                 <div>
@@ -1180,7 +1180,7 @@ export default function MyCourseDetail() {
                     if (attachExistingFilesMutation.isPending) return;
                     setShowExistingFilesModal(false);
                   }}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04] rounded-lg transition-colors"
+                  className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04] rounded-[2px] transition-colors"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -1194,21 +1194,21 @@ export default function MyCourseDetail() {
                     value={existingFileSearch}
                     onChange={(e) => setExistingFileSearch(e.target.value)}
                     placeholder="Search your uploaded files..."
-                    className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 dark:border-white/10 rounded-lg bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white"
+                    className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 dark:border-white/10 rounded-[2px] bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white"
                   />
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setSelectedExistingFileIds(attachableLibraryFiles.map((file) => file.id))}
                     disabled={isExistingFilesLoading || attachableLibraryFiles.length === 0}
-                    className="px-3 py-2 text-xs sm:text-sm rounded-lg border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] disabled:opacity-50"
+                    className="px-3 py-2 text-xs sm:text-sm rounded-[2px] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] disabled:opacity-50"
                   >
                     Select all
                   </button>
                   <button
                     onClick={() => setSelectedExistingFileIds([])}
                     disabled={selectedExistingFileIds.length === 0}
-                    className="px-3 py-2 text-xs sm:text-sm rounded-lg border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] disabled:opacity-50"
+                    className="px-3 py-2 text-xs sm:text-sm rounded-[2px] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] disabled:opacity-50"
                   >
                     Clear
                   </button>
@@ -1239,7 +1239,7 @@ export default function MyCourseDetail() {
                         key={file.id}
                         type="button"
                         onClick={() => toggleExistingFileSelection(file.id)}
-                        className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                        className={`w-full text-left p-3 rounded-[2px] border transition-colors ${
                           isSelected
                             ? 'border-brand-400 dark:border-brand-500 bg-brand-50/60 dark:bg-brand-900/20'
                             : 'border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/[0.03]'
@@ -1286,7 +1286,7 @@ export default function MyCourseDetail() {
                 <button
                   onClick={() => setShowExistingFilesModal(false)}
                   disabled={attachExistingFilesMutation.isPending}
-                  className="px-4 py-2 text-sm rounded-lg border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] disabled:opacity-50"
+                  className="px-4 py-2 text-sm rounded-[2px] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -1295,7 +1295,7 @@ export default function MyCourseDetail() {
                   disabled={
                     selectedExistingFileIds.length === 0 || attachExistingFilesMutation.isPending
                   }
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm rounded-[2px] bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50"
                 >
                   {attachExistingFilesMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                   Add selected files
@@ -1309,12 +1309,12 @@ export default function MyCourseDetail() {
       {/* Share Modal */}
       {showShareModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/[0.08] rounded-xl shadow-2xl w-full max-w-md max-h-[calc(100vh-1.5rem)] overflow-y-auto p-4 sm:p-5">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/[0.08] rounded-[2px] shadow-2xl w-full max-w-md max-h-[calc(100vh-1.5rem)] overflow-y-auto p-4 sm:p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Share Course</h2>
               <button
                 onClick={() => setShowShareModal(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04] rounded-lg transition-colors"
+                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04] rounded-[2px] transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1331,14 +1331,14 @@ export default function MyCourseDetail() {
                 type="text"
                 value={shareUrl}
                 readOnly
-                className="w-full sm:flex-1 px-3 py-2 text-xs sm:text-sm border border-slate-200 dark:border-white/10 rounded-lg bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white font-mono"
+                className="w-full sm:flex-1 px-3 py-2 text-xs sm:text-sm border border-slate-200 dark:border-white/10 rounded-[2px] bg-slate-50 dark:bg-white/[0.03] text-slate-900 dark:text-white font-mono"
               />
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(shareUrl);
                   toast.success('Link copied!');
                 }}
-                className="inline-flex w-full sm:w-auto items-center justify-center p-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
+                className="inline-flex w-full sm:w-auto items-center justify-center p-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2px] hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
               >
                 <Copy className="h-4 w-4" />
               </button>
@@ -1363,11 +1363,11 @@ export default function MyCourseDetail() {
       {/* File Viewer Modal */}
       {viewingFile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 backdrop-blur-sm">
-          <div className="relative w-full max-w-6xl max-h-[95vh] sm:max-h-[90vh] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/[0.08] rounded-xl shadow-2xl overflow-hidden flex flex-col">
+          <div className="relative w-full max-w-6xl max-h-[95vh] sm:max-h-[90vh] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/[0.08] rounded-[2px] shadow-2xl overflow-hidden flex flex-col">
             {/* Modal Header */}
             <div className="flex items-start sm:items-center justify-between gap-2 p-3 sm:p-4 border-b border-slate-100 dark:border-white/[0.06]">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="p-1.5 rounded-lg bg-slate-50 dark:bg-white/[0.04]">
+                <div className="p-1.5 rounded-[2px] bg-slate-50 dark:bg-white/[0.04]">
                   {getFileIcon(viewingFile.fileType)}
                 </div>
                 <div className="min-w-0">
@@ -1377,7 +1377,7 @@ export default function MyCourseDetail() {
               </div>
               <button
                 onClick={() => setViewingFile(null)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04] rounded-lg transition-colors"
+                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04] rounded-[2px] transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
