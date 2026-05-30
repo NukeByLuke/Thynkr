@@ -203,7 +203,6 @@ export default function Login() {
             </div>
             {errors.password && (
               <p
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/30 dark:focus-visible:ring-cyan-300/30"
                 className="mt-1.5 text-xs sm:text-sm text-red-500"
                 role="alert"
               >
