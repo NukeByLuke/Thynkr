@@ -115,12 +115,12 @@ export default function Login() {
   };
 
   const inputBaseStyles = `
-    w-full px-4 py-2.5 border-2 rounded-[2px] transition-colors text-[16px] sm:text-base
-    bg-white dark:bg-slate-900
+    w-full px-4 py-3 border rounded-xl transition-colors text-[16px] sm:text-base
+    bg-white/95 dark:bg-slate-900/65
     text-slate-900 dark:text-white 
-    border-fuchsia-200 dark:border-cyan-500/30
+    border-brand-100 dark:border-cyan-400/30
     placeholder-slate-400 dark:placeholder-slate-500
-    focus:outline-none focus:border-fuchsia-500 dark:focus:border-cyan-300 focus:ring-0
+    focus:outline-none focus:border-brand-500 dark:focus:border-cyan-300 focus:ring-2 focus:ring-brand-400/20 dark:focus:ring-cyan-300/25
   `;
 
   return (
@@ -203,7 +203,7 @@ export default function Login() {
             </div>
             {errors.password && (
               <p
-                id="password-error"
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/30 dark:focus-visible:ring-cyan-300/30"
                 className="mt-1.5 text-xs sm:text-sm text-red-500"
                 role="alert"
               >
