@@ -12,8 +12,6 @@ import ThemeToggle from '@/components/ThemeToggle';
 import ThynkrTabs from '@/components/ThynkrTabs';
 import Logo from '@/components/Logo';
 
-const loginBackdrop = '/image.png';
-
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
@@ -117,7 +115,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
     <div
       className="relative min-h-app w-full flex items-center justify-center overflow-hidden px-3 py-4 sm:p-4 transition-colors duration-150"
       style={{
-        backgroundImage: `linear-gradient(${isDark ? '135deg' : '135deg'}, ${isDark ? 'rgba(2,6,23,0.58)' : 'rgba(255,255,255,0.20)'}, ${isDark ? 'rgba(37,99,235,0.16)' : 'rgba(244,114,182,0.14)'}), url(${loginBackdrop})`,
+        backgroundImage: `linear-gradient(${isDark ? '135deg' : '135deg'}, ${isDark ? 'rgba(2,6,23,0.58)' : 'rgba(255,255,255,0.20)'}, ${isDark ? 'rgba(37,99,235,0.16)' : 'rgba(244,114,182,0.14)'}), url(${isDark ? '/image-dark.png' : '/image.png'})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
