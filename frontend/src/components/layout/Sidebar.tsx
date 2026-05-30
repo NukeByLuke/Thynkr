@@ -90,7 +90,7 @@ const Sidebar = ({
     resolvedThemeMode === 'sunrise' ? 'Light mode' : resolvedThemeMode === 'sunset' ? 'Dark mode' : 'Midnight mode';
 
   const cycleThemeMode = () => {
-    setThemeMode(resolvedThemeMode === 'sunrise' ? 'sunset' : resolvedThemeMode === 'sunset' ? 'midnight' : 'sunrise');
+    setThemeMode(resolvedThemeMode === 'sunrise' ? 'sunset' : 'sunrise');
   };
 
   const NavItem = ({ link, active, badge }: { link: NavLink; active: boolean; badge?: number }) => {
@@ -191,7 +191,7 @@ const Sidebar = ({
       )}
 
       {/* Main Navigation */}
-      <nav className={`min-h-0 flex-1 px-3 py-4 space-y-4 scrollbar-hide ${isExpanded ? 'overflow-y-auto overflow-x-hidden' : 'overflow-visible'}`}>
+      <nav className={`min-h-0 flex-1 px-3 py-4 space-y-4 ${isExpanded ? 'overflow-y-auto overflow-x-hidden' : 'overflow-visible'}`}>
         <div className="space-y-1.5">
           {isExpanded && (
             <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
