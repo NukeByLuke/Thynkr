@@ -131,7 +131,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       </div>
 
       {/* Two-Panel Container */}
-      <div className={`relative z-10 flex max-h-[calc(100dvh-1.5rem)] md:max-h-none md:h-[620px] rounded-[2px] overflow-hidden max-w-[900px] w-full border-2 shadow-[0_18px_48px_-18px_rgba(15,23,42,0.35)] ${
+      <div className={`relative z-10 flex max-h-[calc(100dvh-1.5rem)] md:max-h-none md:h-[700px] rounded-[2px] overflow-hidden max-w-[900px] w-full border-2 shadow-[0_18px_48px_-18px_rgba(15,23,42,0.35)] ${
         isDark
           ? 'border-cyan-500/25 bg-slate-950/45 backdrop-blur-md'
           : 'border-fuchsia-200/80 bg-white/60 backdrop-blur-md'
