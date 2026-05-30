@@ -141,11 +141,15 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
         {/* Right Panel - Form */}
         <div 
-          className={`flex-1 h-full overflow-hidden p-4 sm:p-8 md:p-10 transition-colors duration-150 ${
+          className={`flex-1 h-full overflow-y-auto p-4 sm:p-8 md:p-10 transition-colors duration-150 scrollbar-hide ${
             isDark 
               ? 'bg-slate-950/78 border-l-2 border-cyan-500/20' 
               : 'bg-white/82 border-l-2 border-fuchsia-100'
           }`}
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
         >
           {/* Mobile Logo - Only shown on small screens */}
           <div className="md:hidden flex items-center justify-center mb-4 sm:mb-6">
