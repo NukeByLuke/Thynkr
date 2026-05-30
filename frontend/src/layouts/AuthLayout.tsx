@@ -23,7 +23,7 @@ interface AuthLayoutProps {
  */
 function BrandingPanel({ isDark }: { isDark: boolean }) {
   return (
-    <div className={`hidden md:flex flex-col items-center justify-between w-[420px] relative overflow-hidden rounded-l-[2px] border-r-2 p-10 transition-colors duration-150 ${
+    <div className={`hidden md:flex flex-col items-center justify-between w-[420px] relative overflow-hidden rounded-l-[2px] border-r-2 p-8 transition-colors duration-150 ${
       isDark 
         ? 'bg-white/12 text-white border-cyan-500/20' 
         : 'bg-white/18 text-slate-900 border-fuchsia-200/60'
@@ -32,13 +32,13 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
       {/* Logo and Brand */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center">
         {/* Thynkr Logo */}
-        <div className="mb-8">
+        <div className="mb-6">
           <img
             src={isDark ? '/brand/brain-dark.png' : '/brand/brain-light.png'}
             alt="THYNKR"
             loading="eager"
             fetchPriority="high"
-            className="w-80 h-80 object-contain drop-shadow-[0_14px_30px_rgba(0,0,0,0.12)]"
+            className="w-72 h-72 object-contain drop-shadow-[0_14px_30px_rgba(0,0,0,0.12)]"
           />
         </div>
         
@@ -48,26 +48,26 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
           alt="THYNKR"
           loading="eager"
           fetchPriority="high"
-          className="h-16 object-contain"
+          className="h-14 object-contain"
         />
 
         {/* Testimonial Quote */}
-        <blockquote className={`mt-8 text-center max-w-[280px] ${
+        <blockquote className={`mt-5 text-center max-w-[280px] ${
           isDark ? 'text-stone-400' : 'text-stone-500'
         }`}>
           <p className="text-sm italic leading-relaxed">
-            "Thynkr completely transformed how I study. AI-generated flashcards save me hours."
+            "Thynkr changed the way I study. It made learning simpler and helped me get better grades."
           </p>
-          <footer className={`mt-3 text-xs font-medium ${
+          <footer className={`mt-2 text-xs font-medium ${
             isDark ? 'text-stone-500' : 'text-stone-400'
           }`}>
-            — A happy student
+            — H. Gidda
           </footer>
         </blockquote>
       </div>
 
       {/* Footer Links */}
-      <nav className="relative z-10 flex items-center gap-8 text-sm font-medium">
+      <nav className="relative z-10 flex items-center gap-7 text-sm font-medium">
         <Link
           to="/about"
           className={`transition-colors ${
@@ -131,7 +131,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       </div>
 
       {/* Two-Panel Container */}
-      <div className={`relative z-10 flex max-h-[calc(100dvh-1.5rem)] md:max-h-none md:h-[740px] rounded-[2px] overflow-hidden max-w-[900px] w-full border-2 shadow-[0_18px_48px_-18px_rgba(15,23,42,0.35)] ${
+      <div className={`relative z-10 flex max-h-[calc(100dvh-1.5rem)] md:max-h-none md:h-[720px] rounded-[2px] overflow-hidden max-w-[900px] w-full border-2 shadow-[0_18px_48px_-18px_rgba(15,23,42,0.35)] ${
         isDark
           ? 'border-cyan-500/25 bg-slate-950/45 backdrop-blur-md'
           : 'border-fuchsia-200/80 bg-white/60 backdrop-blur-md'
@@ -141,7 +141,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
         {/* Right Panel - Form */}
         <div 
-          className={`flex-1 h-full overflow-y-auto p-3 sm:p-5 md:p-6 transition-colors duration-150 scrollbar-hide ${
+          className={`flex-1 h-full overflow-y-auto p-3 sm:p-4 md:p-5 transition-colors duration-150 scrollbar-hide ${
             isDark 
               ? 'bg-slate-950/78 border-l-2 border-cyan-500/20' 
               : 'bg-white/82 border-l-2 border-fuchsia-100'
@@ -152,24 +152,24 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           }}
         >
           {/* Mobile Logo - Only shown on small screens */}
-          <div className="md:hidden flex items-center justify-center mb-4 sm:mb-6">
+          <div className="md:hidden flex items-center justify-center mb-3 sm:mb-4">
             <Logo variant="full" size="md" />
           </div>
 
-          <p className={`md:hidden text-center text-[11px] uppercase tracking-[0.18em] mb-2.5 ${isDark ? 'text-cyan-300/80' : 'text-brand-700/80'}`}>
+          <p className={`md:hidden text-center text-[11px] uppercase tracking-[0.18em] mb-2 ${isDark ? 'text-cyan-300/80' : 'text-brand-700/80'}`}>
             AI-Powered Study Platform
           </p>
 
           {/* Auth Tabs */}
-          <ThynkrTabs className="mb-3 sm:mb-4" />
+          <ThynkrTabs className="mb-2.5 sm:mb-3" />
 
           {/* Form Content - This is what changes between login/signup */}
-          <div className="w-full md:min-h-[500px]">
+          <div className="w-full md:min-h-[490px]">
             {children}
           </div>
 
           {/* Terms Footer */}
-          <p className={`mt-3 sm:mt-4 text-center text-xs leading-snug ${
+          <p className={`mt-2.5 sm:mt-3 text-center text-xs leading-snug ${
             isDark ? 'text-slate-400' : 'text-slate-500'
           }`}>
             By signing in you agree to{' '}
@@ -199,7 +199,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           </p>
 
           {/* Mobile quick links (desktop links live in branding panel) */}
-          <nav className="mt-2 md:hidden flex items-center justify-center gap-5 text-xs">
+          <nav className="mt-1.5 md:hidden flex items-center justify-center gap-5 text-xs">
             <Link
               to="/about"
               className={isDark ? 'text-slate-400 hover:text-white transition-colors' : 'text-slate-500 hover:text-slate-900 transition-colors'}
