@@ -27,18 +27,16 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
         : 'bg-white/18 text-slate-900 border-fuchsia-200/60'
     }`}>
 
-      {/* Logo and Brand */}
-      <div className="relative z-10 flex-none flex flex-col items-center justify-start w-full gap-2">
+      {/* Logo and Brand - Pushed down slightly to visually center */}
+      <div className="relative z-10 flex-none flex flex-col items-center justify-center w-full gap-5 mt-6">
         {/* Thynkr Logo */}
-        <div className="mb-2">
-          <img
-            src={isDark ? '/brand/brain-dark.png' : '/brand/brain-light.png'}
-            alt="THYNKR"
-            loading="eager"
-            fetchPriority="high"
-            className="w-32 h-32 object-contain drop-shadow-[0_14px_30px_rgba(0,0,0,0.12)]"
-          />
-        </div>
+        <img
+          src={isDark ? '/brand/brain-dark.png' : '/brand/brain-light.png'}
+          alt="THYNKR"
+          loading="eager"
+          fetchPriority="high"
+          className="w-44 h-44 object-contain drop-shadow-[0_14px_30px_rgba(0,0,0,0.12)]"
+        />
         
         {/* Brand Wordmark */}
         <img
@@ -46,9 +44,12 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
           alt="THYNKR"
           loading="eager"
           fetchPriority="high"
-          className="h-8 object-contain mb-2"
+          className="h-10 object-contain"
         />
+      </div>
 
+      {/* Bottom Content Group */}
+      <div className="relative z-10 flex flex-col items-center gap-7 w-full mb-2">
         {/* Testimonial Quote */}
         <blockquote className={`text-center max-w-[280px] ${
           isDark ? 'text-stone-400' : 'text-stone-500'
@@ -62,10 +63,9 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
             — H. Gidda
           </footer>
         </blockquote>
-      </div>
 
-      {/* Footer Links */}
-      <nav className="relative z-10 flex items-center gap-7 text-sm font-medium">
+        {/* Footer Links */}
+        <nav className="flex items-center gap-7 text-sm font-medium">
         <Link
           to="/about"
           className={`transition-colors ${
@@ -91,6 +91,7 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
           Contact
         </Link>
       </nav>
+      </div>
     </div>
   );
 }
