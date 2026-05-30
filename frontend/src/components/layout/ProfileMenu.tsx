@@ -4,7 +4,6 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import {
   User,
-  Moon,
   Sun,
   Sunset,
   Globe,

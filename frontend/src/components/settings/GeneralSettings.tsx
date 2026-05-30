@@ -1,6 +1,6 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Moon, Sun, Sunset, Monitor, Volume2, Play } from 'lucide-react';
+import { Sun, Sunset, Monitor, Volume2, Play } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
 import { useTTSVoices } from '@/hooks/useTTS';
 import { useEffect, useState } from 'react';

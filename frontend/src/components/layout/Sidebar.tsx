@@ -13,7 +13,6 @@ import {
   Shield,
   Settings,
   Trophy,
-  Moon,
   Sun,
   Sunset,
 } from 'lucide-react';
