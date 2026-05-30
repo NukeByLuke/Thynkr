@@ -21,22 +21,22 @@ interface AuthLayoutProps {
  */
 function BrandingPanel({ isDark }: { isDark: boolean }) {
   return (
-    <div className={`hidden md:flex flex-col items-center justify-start w-[420px] pt-12 pb-8 relative overflow-hidden rounded-l-[2px] border-r-2 p-8 transition-colors duration-150 ${
+    <div className={`hidden md:flex flex-col items-center justify-between w-[380px] pt-8 pb-4 relative overflow-hidden rounded-l-[2px] border-r-2 p-6 transition-colors duration-150 ${
       isDark 
         ? 'bg-white/12 text-white border-cyan-500/20' 
         : 'bg-white/18 text-slate-900 border-fuchsia-200/60'
     }`}>
 
       {/* Logo and Brand */}
-      <div className="relative z-10 flex-none flex flex-col items-center justify-start">
+      <div className="relative z-10 flex-none flex flex-col items-center justify-start w-full gap-2">
         {/* Thynkr Logo */}
-        <div className="mb-4">
+        <div className="mb-2">
           <img
             src={isDark ? '/brand/brain-dark.png' : '/brand/brain-light.png'}
             alt="THYNKR"
             loading="eager"
             fetchPriority="high"
-            className="w-48 h-48 object-contain drop-shadow-[0_14px_30px_rgba(0,0,0,0.12)]"
+            className="w-32 h-32 object-contain drop-shadow-[0_14px_30px_rgba(0,0,0,0.12)]"
           />
         </div>
         
@@ -46,11 +46,11 @@ function BrandingPanel({ isDark }: { isDark: boolean }) {
           alt="THYNKR"
           loading="eager"
           fetchPriority="high"
-          className="h-10 object-contain"
+          className="h-8 object-contain mb-2"
         />
 
         {/* Testimonial Quote */}
-        <blockquote className={`mt-5 text-center max-w-[280px] ${
+        <blockquote className={`text-center max-w-[280px] ${
           isDark ? 'text-stone-400' : 'text-stone-500'
         }`}>
           <p className="text-sm italic leading-relaxed">
@@ -129,7 +129,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       </div>
 
       {/* Two-Panel Container */}
-      <div className={`relative z-10 flex flex-col md:flex-row max-h-[calc(100dvh-1.5rem)] md:max-h-none md:h-auto  rounded-[2px] overflow-hidden max-w-[900px] w-full border-2 shadow-[0_18px_48px_-18px_rgba(15,23,42,0.35)] ${
+      <div className={`relative z-10 flex flex-col md:flex-row max-h-[calc(100dvh-1.5rem)] rounded-[2px] overflow-hidden max-w-[850px] w-full border-2 shadow-[0_18px_48px_-18px_rgba(15,23,42,0.35)] ${
         isDark
           ? 'border-cyan-500/25 bg-slate-950/45 backdrop-blur-md'
           : 'border-fuchsia-200/80 bg-white/60 backdrop-blur-md'
