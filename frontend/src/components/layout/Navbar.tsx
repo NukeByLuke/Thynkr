@@ -49,16 +49,16 @@ const Navbar = memo(() => {
   // Navbar background gradient - theme aware
   const navBgClass = `sticky top-0 z-50 bg-gradient-to-b ${
     isMidnight
-      ? 'from-slate-950 via-slate-950 to-black dark:shadow-cyan-900/20'
+      ? 'from-slate-950/78 via-slate-950/85 to-black/80 dark:shadow-cyan-900/20'
       : isSunset
-      ? 'from-slate-900 via-slate-900/95 to-slate-950 dark:shadow-blue-900/20'
-      : 'from-slate-50 via-white to-white'
-  } border-b ${
+      ? 'from-[#051125]/85 via-slate-900/90 to-slate-950/85 dark:shadow-blue-900/20'
+      : 'from-pink-50/85 via-fuchsia-50/90 to-orange-50/85'
+  } border-b-2 ${
     isMidnight
-      ? 'border-cyan-500/20'
+      ? 'border-cyan-500/25'
       : isSunset
       ? 'border-blue-400/30'
-      : 'border-slate-200/60'
+      : 'border-fuchsia-200/80'
   } dark:shadow-lg shadow-sm backdrop-blur-xl transition-all duration-300`;
 
   // Inactive nav item styling - better contrast per theme
