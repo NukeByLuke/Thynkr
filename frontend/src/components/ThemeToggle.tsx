@@ -5,14 +5,15 @@ import { useTheme } from '@/contexts/ThemeContext';
 interface ThemeToggleProps {
   showLabel?: boolean;
   size?: 'sm' | 'md';
+  includeMidnight?: boolean;
 }
 
-export default function ThemeToggle({ showLabel = false, size = 'md' }: ThemeToggleProps) {
+export default function ThemeToggle({ showLabel = false, size = 'md', includeMidnight = true }: ThemeToggleProps) {
   const { theme, resolvedThemeMode, setThemeMode } = useTheme();
   const isDark = theme === 'dark';
 
-  const themeOrder = ['sunrise', 'sunset', 'midnight'] as const;
-  const currentIndex = themeOrder.indexOf(resolvedThemeMode);
+  const themeOrder = includeMidnight ? (['sunrise', 'sunset', 'midnight'] as const) : (['sunrise', 'sunset'] as const);
+  const currentIndex = themeOrder.indexOf(resolvedThemeMode as any);
   const nextMode = themeOrder[(currentIndex + 1) % themeOrder.length];
 
   const modeLabel =

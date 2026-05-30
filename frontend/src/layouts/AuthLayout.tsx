@@ -127,7 +127,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
       {/* Theme Toggle - Fixed position */}
       <div className="fixed top-4 right-4 z-50">
-        <ThemeToggle size="sm" />
+        <ThemeToggle size="sm" includeMidnight={false} />
       </div>
 
       {/* Two-Panel Container */}
