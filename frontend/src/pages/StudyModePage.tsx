@@ -443,7 +443,7 @@ export default function StudyModePage() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="md:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+                  className="md:hidden fixed inset-0 z-50 bg-black/50"
                   onClick={() => setMobileSidebarOpen(false)}
                 />
                 <motion.aside
@@ -459,7 +459,7 @@ export default function StudyModePage() {
                     </h2>
                     <button
                       onClick={() => setMobileSidebarOpen(false)}
-                      className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      className="p-2 rounded-[2px] border-2 border-slate-300 dark:border-slate-700 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -487,7 +487,7 @@ export default function StudyModePage() {
               <div className="max-w-7xl mx-auto px-3 py-4 sm:px-6 sm:py-5 lg:px-8">
                 
                 {/* Header card with title & tabs */}
-                <div className="mb-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 shadow-sm">
+                <div className="mb-4 rounded-[2px] border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
                       <button 
@@ -495,13 +495,13 @@ export default function StudyModePage() {
                           setShowSidebar(prev => !prev);
                           setMobileSidebarOpen(true);
                         }}
-                        className="md:hidden p-1.5 -ml-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        className="md:hidden p-1.5 -ml-1.5 rounded-[2px] border-2 border-slate-300 dark:border-slate-700 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
                       >
                         <Menu className="h-5 w-5" />
                       </button>
                       <button 
                         onClick={() => setShowSidebar(prev => !prev)}
-                        className="hidden md:flex p-1.5 -ml-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        className="hidden md:flex p-1.5 -ml-1.5 rounded-[2px] border-2 border-slate-300 dark:border-slate-700 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
                       >
                         <Menu className="h-5 w-5" />
                       </button>
@@ -520,10 +520,10 @@ export default function StudyModePage() {
                               key={tab.id}
                               onClick={() => handleTabChange(tab.id)}
                               disabled={selectedFileIds.size === 0}
-                              className={`shrink-0 px-3 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 border disabled:opacity-50 disabled:cursor-not-allowed ${
+                              className={`shrink-0 px-3 sm:px-3.5 py-1.5 rounded-[2px] text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 border-2 disabled:opacity-50 disabled:cursor-not-allowed ${
                                 isActive
-                                  ? 'text-pink-700 dark:text-cyan-300 bg-gradient-to-r from-pink-100 to-fuchsia-100 dark:from-violet-500/30 dark:to-cyan-500/30 border-pink-200 dark:border-cyan-500/40'
-                                  : 'text-slate-700 dark:text-slate-400 border-transparent hover:bg-pink-50 dark:hover:bg-cyan-900/20 hover:text-pink-900 dark:hover:text-cyan-200'
+                                  ? 'text-blue-900 dark:text-blue-200 bg-blue-100 dark:bg-blue-900/40 border-blue-300 dark:border-blue-700'
+                                  : 'text-slate-700 dark:text-slate-400 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
                               }`}
                             >
                               <Icon className="w-3.5 h-3.5" />
@@ -537,8 +537,7 @@ export default function StudyModePage() {
                 </div>
 
                 {/* Content Area - Card container */}
-                <div className="relative rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl shadow-slate-200/20 dark:shadow-slate-900/30 overflow-hidden min-h-[56vh] sm:min-h-[62vh]">
-                  <div className="absolute inset-0 bg-gradient-to-br from-pink-500/[0.02] via-transparent to-fuchsia-500/[0.02] dark:from-cyan-500/[0.02] dark:via-transparent dark:to-violet-500/[0.02] pointer-events-none" />
+                <div className="relative rounded-[2px] bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 overflow-hidden min-h-[56vh] sm:min-h-[62vh]">
                   <div className="relative z-10 p-3 sm:p-6 lg:p-8">
                     <AnimatePresence mode="wait">
                       {selectedFileIds.size === 0 ? (
@@ -549,7 +548,7 @@ export default function StudyModePage() {
                     exit={{ opacity: 0, y: -20 }}
                     className="flex flex-col items-center justify-center min-h-[56vh] sm:min-h-[60vh] p-5 sm:p-8 text-center"
                   >
-                    <div className="p-4 sm:p-5 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl mb-5">
+                    <div className="p-4 sm:p-5 bg-slate-100 dark:bg-slate-800 rounded-[2px] border-2 border-slate-300 dark:border-slate-700 mb-5">
                       <Sparkles className="h-12 w-12 sm:h-14 sm:w-14 text-indigo-500" />
                     </div>
                     <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
@@ -560,7 +559,7 @@ export default function StudyModePage() {
                     </p>
                     <button
                       onClick={() => setMobileSidebarOpen(true)}
-                      className="md:hidden w-full sm:w-auto px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
+                      className="md:hidden w-full sm:w-auto px-5 py-2.5 bg-blue-700 text-white rounded-[2px] border-2 border-blue-900 font-medium hover:bg-blue-800 transition-colors"
                     >
                       Select Files
                     </button>
@@ -576,7 +575,6 @@ export default function StudyModePage() {
                     {isGenerating ? (
                       <>
                         <div className="relative mb-6">
-                          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 rounded-full blur-xl opacity-30" />
                           <Loader2 className="h-12 w-12 sm:h-16 sm:w-16 animate-spin text-indigo-600 relative z-10" />
                         </div>
                         <p className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white mb-2">
@@ -588,7 +586,7 @@ export default function StudyModePage() {
                       </>
                     ) : (
                       <>
-                        <div className="p-4 sm:p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl mb-5">
+                        <div className="p-4 sm:p-5 bg-slate-100 dark:bg-slate-800 rounded-[2px] border-2 border-slate-300 dark:border-slate-700 mb-5">
                           {TABS.find(t => t.id === activeTab)?.icon && (
                             <div className={TABS.find(t => t.id === activeTab)!.color}>
                               {(() => {
@@ -607,7 +605,7 @@ export default function StudyModePage() {
                         <button
                           onClick={() => generateMutation.mutate({ type: activeTab, refresh: false })}
                           disabled={isGenerating}
-                          className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-600 to-fuchsia-600 dark:from-cyan-500 dark:to-violet-500 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-pink-500/30 dark:shadow-cyan-500/30"
+                          className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-6 py-3 bg-blue-700 text-white rounded-[2px] border-2 border-blue-900 font-semibold hover:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <Sparkles className="h-5 w-5" />
                           Generate {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}

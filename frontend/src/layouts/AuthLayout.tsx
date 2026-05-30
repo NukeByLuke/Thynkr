@@ -20,46 +20,22 @@ interface AuthLayoutProps {
  */
 function BrandingPanel({ isDark }: { isDark: boolean }) {
   return (
-    <div className={`hidden md:flex flex-col items-center justify-between w-[420px] relative overflow-hidden rounded-l-3xl p-10 transition-colors duration-150 ${
+    <div className={`hidden md:flex flex-col items-center justify-between w-[420px] relative overflow-hidden rounded-l-[2px] border-r-2 border-slate-300 dark:border-slate-700 p-10 transition-colors duration-150 ${
       isDark 
-        ? 'bg-midnight-violet/20 text-white' 
-        : 'bg-gradient-to-br from-stone-100 to-stone-200 text-stone-900'
+        ? 'bg-slate-900 text-white' 
+        : 'bg-slate-200 text-slate-900'
     }`}>
-      {/* Background Effects - Sunrise & Midnight */}
-      <div className={`absolute inset-0 ${
-        isDark 
-          ? 'bg-[radial-gradient(circle_at_50%_120%,rgba(91,33,182,0.2),rgba(2,6,23,0))]'
-          : 'bg-[radial-gradient(circle_at_50%_120%,rgba(236,72,153,0.12),rgba(253,251,247,0))]'
-      }`} />
-      <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 ${
-        isDark ? 'bg-midnight-cyan/10' : 'bg-sunrise-orange/15'
-      }`} />
-      <div className={`absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 ${
-        isDark ? 'bg-midnight-blue/10' : 'bg-sunrise-fuchsia/15'
-      }`} />
-      {/* Subtle dot-grid overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage: `radial-gradient(circle, ${isDark ? 'white' : 'black'} 1px, transparent 1px)`,
-          backgroundSize: '16px 16px',
-        }}
-      />
 
       {/* Logo and Brand */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center">
         {/* Thynkr Logo */}
-        <div className="mb-8 transform hover:scale-105 transition-transform duration-500">
+        <div className="mb-8">
           <img
             src={isDark ? '/brand/brain-dark.png' : '/brand/brain-light.png'}
             alt="THYNKR"
             loading="eager"
             fetchPriority="high"
-            className={`w-80 h-80 object-contain ${
-              isDark 
-                ? 'drop-shadow-[0_0_30px_rgba(124,58,237,0.5)]' 
-                : 'drop-shadow-[0_0_20px_rgba(124,58,237,0.3)] scale-105'
-            }`}
+            className="w-80 h-80 object-contain"
           />
         </div>
         
@@ -130,19 +106,16 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           : 'bg-slate-100'
       }`}
     >
-      <div className={`pointer-events-none absolute -top-32 -left-24 h-72 w-72 rounded-full blur-3xl ${isDark ? 'bg-cyan-400/20' : 'bg-brand-300/30'}`} />
-      <div className={`pointer-events-none absolute -bottom-36 -right-24 h-80 w-80 rounded-full blur-3xl ${isDark ? 'bg-violet-400/20' : 'bg-orange-300/30'}`} />
-
       {/* Theme Toggle - Fixed position */}
       <div className="fixed top-4 right-4 z-50">
         <ThemeToggle size="sm" />
       </div>
 
       {/* Two-Panel Container */}
-      <div className={`relative z-10 flex max-h-[calc(100dvh-1.5rem)] md:max-h-none md:h-[620px] rounded-2xl sm:rounded-3xl overflow-y-auto overflow-x-hidden max-w-[900px] w-full ${
+      <div className={`relative z-10 flex max-h-[calc(100dvh-1.5rem)] md:max-h-none md:h-[620px] rounded-[2px] overflow-y-auto scrollbar-hide overflow-x-hidden max-w-[900px] w-full border-2 ${
         isDark
-          ? 'shadow-[0_30px_70px_-16px_rgba(0,0,0,0.65)] ring-1 ring-cyan-400/20'
-          : 'shadow-[0_24px_64px_-18px_rgba(236,72,153,0.35)] ring-1 ring-brand-100/90'
+          ? 'border-slate-700 bg-slate-900'
+          : 'border-slate-300 bg-white'
       }`}>
         {/* Left Panel - Branding */}
         <BrandingPanel isDark={isDark} />
@@ -151,8 +124,8 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         <div 
           className={`flex-1 p-4 sm:p-8 md:p-10 transition-colors duration-150 ${
             isDark 
-              ? 'bg-gradient-to-b from-slate-900 to-slate-800' 
-              : 'bg-gradient-to-b from-white via-white to-brand-50/25'
+              ? 'bg-slate-900' 
+              : 'bg-white'
           }`}
         >
           {/* Mobile Logo - Only shown on small screens */}

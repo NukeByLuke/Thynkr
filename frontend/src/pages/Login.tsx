@@ -115,12 +115,12 @@ export default function Login() {
   };
 
   const inputBaseStyles = `
-    w-full px-4 py-3 border rounded-xl transition-colors text-[16px] sm:text-base
-    bg-white/95 dark:bg-slate-900/65
+    w-full px-4 py-3 border-2 rounded-[2px] transition-colors text-[16px] sm:text-base
+    bg-white dark:bg-slate-900
     text-slate-900 dark:text-white 
-    border-brand-100 dark:border-cyan-400/30
+    border-slate-300 dark:border-slate-700
     placeholder-slate-400 dark:placeholder-slate-500
-    focus:outline-none focus:border-brand-500 dark:focus:border-cyan-300 focus:ring-2 focus:ring-brand-400/20 dark:focus:ring-cyan-300/25
+    focus:outline-none focus:border-blue-600 dark:focus:border-blue-400 focus:ring-0
   `;
 
   return (
@@ -196,7 +196,7 @@ export default function Login() {
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/30 dark:focus-visible:ring-cyan-300/30"
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-[2px] border-2 border-slate-300 dark:border-slate-700 p-1 text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 focus:outline-none"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -219,7 +219,7 @@ export default function Login() {
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 text-brand-600 dark:text-cyan-400 rounded bg-white dark:bg-slate-900 border-brand-200 dark:border-cyan-400/35 focus:ring-brand-400/20 dark:focus:ring-cyan-400/20"
+                className="w-4 h-4 text-blue-700 dark:text-blue-400 rounded-[2px] bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 focus:ring-0"
                 aria-label="Remember me"
               />
               <span className="text-sm text-slate-600 dark:text-slate-300">Remember me</span>
@@ -237,7 +237,7 @@ export default function Login() {
             type="submit"
             disabled={isLoading}
             aria-label={isLoading ? 'Signing in...' : 'Sign in to your account'}
-            className="w-full h-12 flex items-center justify-center gap-2 bg-gradient-to-r from-brand-500 via-fuchsia-500 to-orange-400 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500 text-white font-semibold rounded-full transition-all duration-200 shadow-[0_10px_26px_-14px_rgba(236,72,153,0.75)] dark:shadow-[0_10px_26px_-14px_rgba(34,211,238,0.8)] hover:brightness-105 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full h-12 flex items-center justify-center gap-2 bg-blue-700 text-white font-semibold rounded-[2px] border-2 border-blue-900 transition-colors duration-200 hover:bg-blue-800 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <>
