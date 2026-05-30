@@ -12,7 +12,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import ThynkrTabs from '@/components/ThynkrTabs';
 import Logo from '@/components/Logo';
 
-const loginBackdrop = '/SL-110822-53740-17.jpg';
+const loginBackdrop = '/image.png';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
