@@ -29,6 +29,7 @@ import {
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useLayout } from '@/contexts/LayoutContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { isQuizAnswerCorrect } from '@/utils/quizAnswerUtils';
 import FileSelectionPane from '@/features/study/FileSelectionPane';
 import SummaryView from '@/features/study/SummaryView';
@@ -76,6 +77,8 @@ export default function StudyModePage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { setHideSidebar, setCustomHeaderContent, setHideProfileMenu } = useLayout();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
   const [activeTab, setActiveTab] = useState<StudyTab>('summary');
   const [selectedFileIds, setSelectedFileIds] = useState<Set<string>>(new Set());
@@ -400,9 +403,9 @@ export default function StudyModePage() {
         <meta name="twitter:image" content={`${window.location.origin}/brand/og-default.png`} />
       </Helmet>
 
-      <div className="min-h-full flex flex-col">
+      <div className={`min-h-full flex flex-col ${isDark ? 'bg-slate-950' : 'bg-fuchsia-50'}`}>
         {/* Main Content */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className={`flex-1 flex overflow-hidden ${isDark ? 'bg-gradient-to-br from-slate-950 via-slate-950 to-cyan-950/30' : 'bg-gradient-to-br from-fuchsia-50 via-white to-orange-50'}`}>
           {/* Sidebar - File Selection (Desktop) */}
           <AnimatePresence mode="wait">
             {showSidebar && (
@@ -411,9 +414,9 @@ export default function StudyModePage() {
                 animate={{ width: 280, opacity: 1 }}
                 exit={{ width: 0, opacity: 0 }}
                 transition={{ duration: 0.2, ease: 'easeInOut' }}
-                className="hidden md:flex flex-col border-r-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                className="hidden md:flex flex-col border-r-2 border-fuchsia-200 dark:border-cyan-500/25 bg-white/88 dark:bg-slate-900/88 backdrop-blur-sm"
               >
-                <div className="p-4 border-b-2 border-slate-300 dark:border-slate-700">
+                <div className="p-4 border-b-2 border-fuchsia-200 dark:border-cyan-500/25">
                   <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                     Select Files to Study
                   </h2>
@@ -453,13 +456,13 @@ export default function StudyModePage() {
                   transition={{ type: 'spring', stiffness: 400, damping: 35 }}
                   className="md:hidden fixed left-0 top-0 bottom-0 z-50 w-[min(85vw,18rem)] bg-white dark:bg-slate-900 shadow-xl flex flex-col"
                 >
-                  <div className="flex items-center justify-between p-4 border-b-2 border-slate-300 dark:border-slate-700">
+                  <div className="flex items-center justify-between p-4 border-b-2 border-fuchsia-200 dark:border-cyan-500/25">
                     <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                       Select Files
                     </h2>
                     <button
                       onClick={() => setMobileSidebarOpen(false)}
-                      className="p-2 rounded-[2px] border-2 border-slate-400 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                      className="p-2 rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 text-fuchsia-700 dark:text-cyan-300 hover:bg-fuchsia-50 dark:hover:bg-slate-800 transition-colors"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -482,26 +485,26 @@ export default function StudyModePage() {
           </AnimatePresence>
 
           {/* Main Study Area */}
-          <div className="flex-1 flex flex-col min-h-0 bg-slate-50 dark:bg-slate-950">
+          <div className={`flex-1 flex flex-col min-h-0 ${isDark ? 'bg-slate-950/80' : 'bg-fuchsia-50/75'}`}>
             <div className="flex-1 overflow-y-auto">
-              <div className="max-w-7xl mx-auto px-3 py-4 sm:px-6 sm:py-5 lg:px-8">
+              <div className="max-w-7xl mx-auto px-3 py-3 sm:px-5 sm:py-4 lg:px-7">
                 
                 {/* Header card with title & tabs */}
-                <div className="mb-4 rounded-[2px] border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3">
-                  <div className="flex flex-col gap-3">
+                <div className="mb-4 rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 bg-white/88 dark:bg-slate-900/88 backdrop-blur-sm px-3.5 py-3">
+                  <div className="flex flex-col gap-2.5">
                     <div className="flex items-center gap-2">
                       <button 
                         onClick={() => {
                           setShowSidebar(prev => !prev);
                           setMobileSidebarOpen(true);
                         }}
-                        className="md:hidden p-1.5 -ml-1.5 rounded-[2px] border-2 border-slate-300 dark:border-slate-700 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        className="md:hidden p-1.5 -ml-1.5 rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 text-fuchsia-700 dark:text-cyan-300 hover:bg-fuchsia-50 dark:hover:bg-slate-800"
                       >
                         <Menu className="h-5 w-5" />
                       </button>
                       <button 
                         onClick={() => setShowSidebar(prev => !prev)}
-                        className="hidden md:flex p-1.5 -ml-1.5 rounded-[2px] border-2 border-slate-300 dark:border-slate-700 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        className="hidden md:flex p-1.5 -ml-1.5 rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 text-fuchsia-700 dark:text-cyan-300 hover:bg-fuchsia-50 dark:hover:bg-slate-800"
                       >
                         <Menu className="h-5 w-5" />
                       </button>
@@ -511,7 +514,7 @@ export default function StudyModePage() {
                     </div>
                     
                     <div className="overflow-x-auto -mx-1 px-1 pb-1">
-                      <div className="flex items-center gap-1.5 min-w-max">
+                      <div className="flex items-center gap-1 min-w-max">
                         {TABS.map((tab) => {
                           const Icon = tab.icon;
                           const isActive = activeTab === tab.id;
@@ -522,8 +525,8 @@ export default function StudyModePage() {
                               disabled={selectedFileIds.size === 0}
                               className={`shrink-0 px-3 sm:px-3.5 py-1.5 rounded-[2px] text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 border-2 disabled:opacity-50 disabled:cursor-not-allowed ${
                                 isActive
-                                  ? 'text-blue-900 dark:text-blue-200 bg-blue-100 dark:bg-blue-900/40 border-blue-300 dark:border-blue-700'
-                                  : 'text-slate-700 dark:text-slate-400 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
+                                  ? 'text-fuchsia-900 dark:text-cyan-100 bg-fuchsia-100 dark:bg-cyan-500/15 border-fuchsia-300 dark:border-cyan-300'
+                                  : 'text-slate-700 dark:text-slate-300 border-fuchsia-200 dark:border-cyan-500/25 hover:bg-fuchsia-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
                               }`}
                             >
                               <Icon className="w-3.5 h-3.5" />
@@ -537,8 +540,8 @@ export default function StudyModePage() {
                 </div>
 
                 {/* Content Area - Card container */}
-                <div className="relative rounded-[2px] bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 overflow-hidden min-h-[56vh] sm:min-h-[62vh]">
-                  <div className="relative z-10 p-3 sm:p-6 lg:p-8">
+                <div className="relative rounded-[2px] bg-white/88 dark:bg-slate-900/88 border-2 border-fuchsia-200 dark:border-cyan-500/25 overflow-hidden min-h-[54vh] sm:min-h-[60vh] backdrop-blur-sm">
+                  <div className="relative z-10 p-3 sm:p-5 lg:p-6">
                     <AnimatePresence mode="wait">
                       {selectedFileIds.size === 0 ? (
                   <motion.div
@@ -546,7 +549,7 @@ export default function StudyModePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="flex flex-col items-center justify-center min-h-[56vh] sm:min-h-[60vh] p-5 sm:p-8 text-center"
+                    className="flex flex-col items-center justify-center min-h-[54vh] sm:min-h-[58vh] p-5 sm:p-7 text-center"
                   >
                     <div className="p-4 sm:p-5 bg-slate-100 dark:bg-slate-800 rounded-[2px] border-2 border-slate-300 dark:border-slate-700 mb-5">
                       <Sparkles className="h-12 w-12 sm:h-14 sm:w-14 text-indigo-500" />

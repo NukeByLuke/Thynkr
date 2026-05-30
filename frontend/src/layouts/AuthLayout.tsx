@@ -131,7 +131,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       </div>
 
       {/* Two-Panel Container */}
-      <div className={`relative z-10 flex max-h-[calc(100dvh-1.5rem)] md:max-h-none md:h-[750px] rounded-[2px] overflow-hidden max-w-[900px] w-full border-2 shadow-[0_18px_48px_-18px_rgba(15,23,42,0.35)] ${
+      <div className={`relative z-10 flex max-h-[calc(100dvh-1.5rem)] md:max-h-none md:h-[740px] rounded-[2px] overflow-hidden max-w-[900px] w-full border-2 shadow-[0_18px_48px_-18px_rgba(15,23,42,0.35)] ${
         isDark
           ? 'border-cyan-500/25 bg-slate-950/45 backdrop-blur-md'
           : 'border-fuchsia-200/80 bg-white/60 backdrop-blur-md'
@@ -141,7 +141,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
         {/* Right Panel - Form */}
         <div 
-          className={`flex-1 h-full overflow-y-auto p-3 sm:p-6 md:p-8 transition-colors duration-150 scrollbar-hide ${
+          className={`flex-1 h-full overflow-y-auto p-3 sm:p-5 md:p-6 transition-colors duration-150 scrollbar-hide ${
             isDark 
               ? 'bg-slate-950/78 border-l-2 border-cyan-500/20' 
               : 'bg-white/82 border-l-2 border-fuchsia-100'
@@ -156,20 +156,20 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
             <Logo variant="full" size="md" />
           </div>
 
-          <p className={`md:hidden text-center text-[11px] uppercase tracking-[0.18em] mb-3 ${isDark ? 'text-cyan-300/80' : 'text-brand-700/80'}`}>
+          <p className={`md:hidden text-center text-[11px] uppercase tracking-[0.18em] mb-2.5 ${isDark ? 'text-cyan-300/80' : 'text-brand-700/80'}`}>
             AI-Powered Study Platform
           </p>
 
           {/* Auth Tabs */}
-          <ThynkrTabs className="mb-4 sm:mb-5" />
+          <ThynkrTabs className="mb-3 sm:mb-4" />
 
           {/* Form Content - This is what changes between login/signup */}
-          <div className="w-full md:min-h-[520px]">
+          <div className="w-full md:min-h-[500px]">
             {children}
           </div>
 
           {/* Terms Footer */}
-          <p className={`mt-4 sm:mt-5 text-center text-xs leading-relaxed ${
+          <p className={`mt-3 sm:mt-4 text-center text-xs leading-snug ${
             isDark ? 'text-slate-400' : 'text-slate-500'
           }`}>
             By signing in you agree to{' '}

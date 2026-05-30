@@ -27,7 +27,7 @@ export default function ThynkrTabs({ className = '' }: ThynkrTabsProps) {
 
   return (
     <div 
-      className={`w-full p-1 rounded-[2px] flex relative border-2 ${className} ${
+      className={`w-full p-0.5 rounded-[2px] flex relative border-2 ${className} ${
         currentPath === '/register'
           ? 'border-orange-200 dark:border-cyan-500/30'
           : 'border-fuchsia-200 dark:border-cyan-400/25'
@@ -45,7 +45,7 @@ export default function ThynkrTabs({ className = '' }: ThynkrTabsProps) {
             to={tab.path}
             role="tab"
             aria-selected={isActive}
-            className="relative flex-1 py-2.5 sm:py-3 text-sm sm:text-base text-center rounded-[2px] z-10"
+            className="relative flex-1 py-2 sm:py-2.5 text-sm sm:text-base text-center rounded-[2px] z-10"
           >
             {/* Sliding Pill Background */}
             {isActive && (

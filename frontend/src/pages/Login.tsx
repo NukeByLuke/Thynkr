@@ -115,7 +115,7 @@ export default function Login() {
   };
 
   const inputBaseStyles = `
-    w-full px-4 py-3 border-2 rounded-[2px] transition-colors text-[16px] sm:text-base
+    w-full px-4 py-2.5 border-2 rounded-[2px] transition-colors text-[16px] sm:text-base
     bg-white dark:bg-slate-900
     text-slate-900 dark:text-white 
     border-fuchsia-200 dark:border-cyan-500/30
@@ -134,23 +134,23 @@ export default function Login() {
       </Helmet>
 
       <AuthLayout>
-        <div className="mb-4 md:min-h-[90px] pb-4 border-b-2 border-fuchsia-200 dark:border-cyan-500/25">
+        <div className="mb-3 md:min-h-[72px] pb-2.5 border-b-2 border-fuchsia-200 dark:border-cyan-500/25">
           <p className="text-[11px] uppercase tracking-[0.18em] text-fuchsia-700 dark:text-cyan-300/80">
             Welcome Back
           </p>
-          <h1 className="mt-1 text-xl sm:text-2xl font-semibold text-slate-900 dark:text-white">
+          <h1 className="mt-1 text-xl sm:text-2xl font-semibold leading-tight tracking-[-0.02em] text-slate-900 dark:text-white">
             Sign in to continue your study flow
           </h1>
         </div>
 
-        <div className="rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 bg-gradient-to-br from-fuchsia-50 via-white to-orange-50 dark:from-cyan-500/10 dark:via-slate-900 dark:to-violet-500/10 p-3 sm:p-4">
+        <div className="rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 bg-gradient-to-br from-fuchsia-50 via-white to-orange-50 dark:from-cyan-500/10 dark:via-slate-900 dark:to-violet-500/10 p-2.5 sm:p-3">
           {/* OAuth Buttons - Grid layout */}
           <OAuthButtons />
 
           <OAuthDivider />
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="mt-4 space-y-3.5 sm:space-y-4 rounded-[2px] border-2 border-fuchsia-100 dark:border-cyan-500/20 bg-white/70 dark:bg-slate-950/35 p-3 sm:p-4">
+          <form onSubmit={handleSubmit} className="mt-2.5 space-y-2.5 sm:space-y-3 rounded-[2px] border-2 border-fuchsia-100 dark:border-cyan-500/20 bg-white/70 dark:bg-slate-950/35 p-2.5 sm:p-3">
           {/* Email Field */}
           <div>
             <input
@@ -214,7 +214,7 @@ export default function Login() {
           </div>
 
           {/* Remember Me & Forgot Password */}
-          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <label className="flex items-center gap-2 cursor-pointer w-full sm:w-auto">
               <input
                 type="checkbox"
@@ -238,7 +238,7 @@ export default function Login() {
             type="submit"
             disabled={isLoading}
             aria-label={isLoading ? 'Signing in...' : 'Sign in to your account'}
-            className="w-full h-12 flex items-center justify-center gap-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500 text-white font-semibold rounded-[2px] border-2 border-fuchsia-700 dark:border-cyan-300 transition-colors duration-200 hover:brightness-105 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full h-11 flex items-center justify-center gap-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500 text-white font-semibold rounded-[2px] border-2 border-fuchsia-700 dark:border-cyan-300 transition-colors duration-200 hover:brightness-105 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <>
