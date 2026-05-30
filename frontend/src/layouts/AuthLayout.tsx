@@ -11,7 +11,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import ThemeToggle from '@/components/ThemeToggle';
 import ThynkrTabs from '@/components/ThynkrTabs';
 import Logo from '@/components/Logo';
-import loginBackdrop from '../../../SL-110822-53740-17.jpg';
+
+const loginBackdrop = '/SL-110822-53740-17.jpg';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
