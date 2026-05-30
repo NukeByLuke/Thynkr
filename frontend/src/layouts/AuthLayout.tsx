@@ -102,8 +102,8 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
     <div
       className={`relative min-h-app w-full flex items-center justify-center overflow-hidden px-3 py-4 sm:p-4 transition-colors duration-150 ${
         isDark 
-          ? 'bg-slate-950'
-          : 'bg-slate-100'
+          ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-violet-950/40'
+          : 'bg-gradient-to-br from-fuchsia-100/70 via-white to-orange-100/70'
       }`}
     >
       {/* Theme Toggle - Fixed position */}
@@ -114,8 +114,8 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       {/* Two-Panel Container */}
       <div className={`relative z-10 flex max-h-[calc(100dvh-1.5rem)] md:max-h-none md:h-[620px] rounded-[2px] overflow-y-auto scrollbar-hide overflow-x-hidden max-w-[900px] w-full border-2 ${
         isDark
-          ? 'border-slate-700 bg-slate-900'
-          : 'border-slate-300 bg-white'
+          ? 'border-slate-600 bg-slate-900'
+          : 'border-slate-400 bg-white'
       }`}>
         {/* Left Panel - Branding */}
         <BrandingPanel isDark={isDark} />
@@ -124,8 +124,8 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         <div 
           className={`flex-1 p-4 sm:p-8 md:p-10 transition-colors duration-150 ${
             isDark 
-              ? 'bg-slate-900' 
-              : 'bg-white'
+              ? 'bg-slate-900 border-l-2 border-slate-700' 
+              : 'bg-white border-l-2 border-slate-300'
           }`}
         >
           {/* Mobile Logo - Only shown on small screens */}

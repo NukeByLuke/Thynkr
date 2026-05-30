@@ -27,14 +27,15 @@ export default function ThynkrTabs({ className = '' }: ThynkrTabsProps) {
 
   return (
     <div 
-      className={`w-full p-1 rounded-2xl flex relative border ${className} ${
+      className={`w-full p-1 rounded-[2px] flex relative border-2 ${className} ${
         currentPath === '/register'
-          ? 'border-brand-200/80 dark:border-cyan-400/30'
-          : 'border-brand-100/80 dark:border-cyan-400/25'
-      } bg-gradient-to-r from-brand-50/90 via-fuchsia-50/70 to-orange-50/80 dark:from-cyan-500/10 dark:via-blue-500/10 dark:to-violet-500/10`}
+          ? 'border-slate-500 dark:border-slate-500'
+          : 'border-slate-400 dark:border-slate-600'
+      } bg-slate-100 dark:bg-slate-800`}
       role="tablist"
       aria-label="Authentication options"
     >
+      <span className="pointer-events-none absolute left-1/2 top-1 bottom-1 -translate-x-1/2 border-l-2 border-slate-300 dark:border-slate-600" />
       {tabs.map((tab) => {
         const isActive = currentPath === tab.path;
         
@@ -44,13 +45,13 @@ export default function ThynkrTabs({ className = '' }: ThynkrTabsProps) {
             to={tab.path}
             role="tab"
             aria-selected={isActive}
-            className="relative flex-1 py-2.5 sm:py-3 text-sm sm:text-base text-center rounded-xl z-10"
+            className="relative flex-1 py-2.5 sm:py-3 text-sm sm:text-base text-center rounded-[2px] z-10"
           >
             {/* Sliding Pill Background */}
             {isActive && (
               <motion.div
                 layoutId="tab-pill"
-                className="absolute inset-0 rounded-xl bg-gradient-to-r from-brand-500 via-fuchsia-500 to-orange-400 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500 shadow-[0_10px_24px_-14px_rgba(236,72,153,0.7)] dark:shadow-[0_10px_24px_-14px_rgba(34,211,238,0.75)]"
+                className="absolute inset-0 rounded-[2px] bg-blue-700 dark:bg-blue-500 border-2 border-blue-900 dark:border-blue-300"
                 transition={{
                   type: 'spring',
                   stiffness: 400,
@@ -64,7 +65,7 @@ export default function ThynkrTabs({ className = '' }: ThynkrTabsProps) {
               className={`relative z-10 font-medium transition-colors duration-200 ${
                 isActive 
                   ? 'text-white'
-                  : 'text-slate-700 dark:text-slate-200 hover:text-brand-700 dark:hover:text-cyan-300'
+                  : 'text-slate-800 dark:text-slate-100 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               {tab.label}

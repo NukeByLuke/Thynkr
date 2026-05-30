@@ -134,7 +134,7 @@ export default function Login() {
       </Helmet>
 
       <AuthLayout>
-        <div className="mb-4 md:min-h-[90px]">
+        <div className="mb-4 md:min-h-[90px] pb-4 border-b-2 border-slate-300 dark:border-slate-700">
           <p className="text-[11px] uppercase tracking-[0.18em] text-brand-700/85 dark:text-cyan-300/80">
             Welcome Back
           </p>
@@ -143,13 +143,14 @@ export default function Login() {
           </h1>
         </div>
 
-        {/* OAuth Buttons - Grid layout */}
-        <OAuthButtons />
+        <div className="rounded-[2px] border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-3 sm:p-4">
+          {/* OAuth Buttons - Grid layout */}
+          <OAuthButtons />
 
-        <OAuthDivider />
+          <OAuthDivider />
 
-        {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
           {/* Email Field */}
           <div>
             <input
@@ -268,7 +269,8 @@ export default function Login() {
               'Sign in'
             )}
           </button>
-        </form>
+          </form>
+        </div>
       </AuthLayout>
     </>
   );
