@@ -134,11 +134,12 @@ export default function NotesView({
       </div>
 
       {noteCards.length > 0 ? (
-        <div className="space-y-5">
+        <div className="columns-1 md:columns-2 xl:columns-3 gap-5">
           {noteCards.map((card, index) => (
             <article
+              style={{ breakInside: 'avoid', marginBottom: '1.25rem' }}
               key={`${card.title}-${index}`}
-              className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-sm"
+              className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-sm max-h-[500px] overflow-y-auto custom-scrollbar"
             >
               <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
                 <h4 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-white">{card.title}</h4>

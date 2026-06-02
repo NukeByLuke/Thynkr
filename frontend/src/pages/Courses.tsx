@@ -1,6 +1,6 @@
 /**
  * Courses Page - Quizlet-inspired Library Design
- * 
+ *
  * A warm, inviting "library" experience for browsing and managing courses.
  * Features glassmorphism, smooth animations, and a personal touch.
  */
@@ -182,8 +182,8 @@ function CreateCourseModal({ isOpen, onClose, isPremium }: CreateCourseModalProp
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
         className={`w-full max-w-lg max-h-[calc(100vh-1.5rem)] overflow-y-auto p-4 sm:p-6 rounded-[2px] shadow-2xl ${
-          isDark 
-            ? 'bg-slate-900/95 backdrop-blur-xl border border-slate-800' 
+          isDark
+            ? 'bg-slate-900/95 backdrop-blur-xl border border-slate-800'
             : 'bg-white/95 backdrop-blur-xl border border-slate-200'
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -194,8 +194,12 @@ function CreateCourseModal({ isOpen, onClose, isPremium }: CreateCourseModalProp
             <FolderPlus className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-white" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Create a new set</h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Organize your study materials</p>
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+              Create a new set
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              Organize your study materials
+            </p>
           </div>
           <button
             onClick={onClose}
@@ -223,8 +227,8 @@ function CreateCourseModal({ isOpen, onClose, isPremium }: CreateCourseModalProp
                 onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })}
                 placeholder='e.g., "Biology 101 Midterm"'
                 className={`w-full px-4 py-3 rounded-[2px] transition-all focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-cyan-500 ${
-                  isDark 
-                    ? 'bg-slate-800 border border-slate-700 text-white placeholder-slate-500' 
+                  isDark
+                    ? 'bg-slate-800 border border-slate-700 text-white placeholder-slate-500'
                     : 'bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400'
                 }`}
                 required
@@ -243,8 +247,8 @@ function CreateCourseModal({ isOpen, onClose, isPremium }: CreateCourseModalProp
                 placeholder="Add a description..."
                 rows={2}
                 className={`w-full px-4 py-3 rounded-[2px] transition-all resize-none focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-cyan-500 ${
-                  isDark 
-                    ? 'bg-slate-800 border border-slate-700 text-white placeholder-slate-500' 
+                  isDark
+                    ? 'bg-slate-800 border border-slate-700 text-white placeholder-slate-500'
                     : 'bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400'
                 }`}
               />
@@ -259,8 +263,8 @@ function CreateCourseModal({ isOpen, onClose, isPremium }: CreateCourseModalProp
                 value={newCourse.category}
                 onChange={(e) => setNewCourse({ ...newCourse, category: e.target.value })}
                 className={`w-full px-4 py-3 rounded-[2px] transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-cyan-500 ${
-                  isDark 
-                    ? 'bg-slate-800 border border-slate-700 text-white' 
+                  isDark
+                    ? 'bg-slate-800 border border-slate-700 text-white'
                     : 'bg-slate-50 border border-slate-200 text-slate-900'
                 }`}
               >
@@ -277,7 +281,7 @@ function CreateCourseModal({ isOpen, onClose, isPremium }: CreateCourseModalProp
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Visibility
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3">
                 <label
                   className={`flex items-center gap-3 p-3 rounded-[2px] border-2 cursor-pointer transition-all ${
                     newCourse.visibility === 'PRIVATE'
@@ -295,35 +299,13 @@ function CreateCourseModal({ isOpen, onClose, isPremium }: CreateCourseModalProp
                     onChange={() => setNewCourse({ ...newCourse, visibility: 'PRIVATE' })}
                     className="sr-only"
                   />
-                  <Lock className={`h-4 w-4 ${newCourse.visibility === 'PRIVATE' ? 'text-pink-600 dark:text-cyan-500' : 'text-slate-400'}`} />
-                  <span className={`text-sm font-medium ${newCourse.visibility === 'PRIVATE' ? 'text-pink-600 dark:text-cyan-400' : 'text-slate-600 dark:text-slate-400'}`}>
-                    Private
-                  </span>
-                </label>
-
-                <label
-                  className={`flex items-center gap-3 p-3 rounded-[2px] border-2 transition-all ${
-                    !isPremium
-                      ? 'opacity-50 cursor-not-allowed'
-                      : newCourse.visibility === 'PUBLIC'
-                        ? 'border-pink-500 bg-pink-500/10 dark:border-cyan-500 dark:bg-cyan-500/10 cursor-pointer'
-                        : isDark
-                          ? 'border-slate-700 hover:border-slate-600 cursor-pointer'
-                          : 'border-slate-200 hover:border-slate-300 cursor-pointer'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="visibility"
-                    value="PUBLIC"
-                    checked={newCourse.visibility === 'PUBLIC'}
-                    onChange={() => isPremium && setNewCourse({ ...newCourse, visibility: 'PUBLIC' })}
-                    disabled={!isPremium}
-                    className="sr-only"
+                  <Lock
+                    className={`h-4 w-4 ${newCourse.visibility === 'PRIVATE' ? 'text-pink-600 dark:text-cyan-500' : 'text-slate-400'}`}
                   />
-                  <Globe className={`h-4 w-4 ${newCourse.visibility === 'PUBLIC' ? 'text-pink-600 dark:text-cyan-500' : 'text-slate-400'}`} />
-                  <span className={`text-sm font-medium ${newCourse.visibility === 'PUBLIC' ? 'text-pink-600 dark:text-cyan-400' : 'text-slate-600 dark:text-slate-400'}`}>
-                    Public {!isPremium && <span className="text-xs text-orange-500 dark:text-violet-400">(Pro)</span>}
+                  <span
+                    className={`text-sm font-medium ${newCourse.visibility === 'PRIVATE' ? 'text-pink-600 dark:text-cyan-400' : 'text-slate-600 dark:text-slate-400'}`}
+                  >
+                    Private
                   </span>
                 </label>
               </div>
@@ -376,10 +358,7 @@ function CourseCard({ course, onDelete, onMenuToggle, isMenuOpen }: CourseCardPr
       className="relative group touch-manipulation"
     >
       <Link to={`/courses/${course.id}`}>
-        <GlassCard
-          variant="interactive"
-          className="h-full overflow-hidden"
-        >
+        <GlassCard variant="interactive" className="h-full overflow-hidden">
           {/* Cover Image / Gradient Background */}
           <div className="relative h-28 sm:h-32 overflow-hidden">
             {course.bannerImage || course.coverImage ? (
@@ -395,15 +374,21 @@ function CourseCard({ course, onDelete, onMenuToggle, isMenuOpen }: CourseCardPr
             )}
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-            
+
             {/* Visibility badge */}
             <div className="absolute top-3 left-3">
-              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium backdrop-blur-md ${
-                course.visibility === 'PUBLIC'
-                  ? 'bg-emerald-500/80 text-white'
-                  : 'bg-slate-900/60 text-white'
-              }`}>
-                {course.visibility === 'PUBLIC' ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+              <span
+                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium backdrop-blur-md ${
+                  course.visibility === 'PUBLIC'
+                    ? 'bg-emerald-500/80 text-white'
+                    : 'bg-slate-900/60 text-white'
+                }`}
+              >
+                {course.visibility === 'PUBLIC' ? (
+                  <Globe className="h-3 w-3" />
+                ) : (
+                  <Lock className="h-3 w-3" />
+                )}
                 {course.visibility === 'PUBLIC' ? 'Public' : 'Private'}
               </span>
             </div>
@@ -452,18 +437,14 @@ function CourseCard({ course, onDelete, onMenuToggle, isMenuOpen }: CourseCardPr
           {isMenuOpen && (
             <div
               className={`absolute right-0 mt-2 w-40 sm:w-44 rounded-[2px] shadow-xl py-1.5 z-20 ${
-                isDark 
-                  ? 'bg-slate-800 border border-slate-700' 
-                  : 'bg-white border border-slate-200'
+                isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200'
               }`}
               onClick={(e) => e.stopPropagation()}
             >
               <Link
                 to={`/courses/${course.id}`}
                 className={`flex items-center gap-2.5 px-3 py-2.5 text-sm ${
-                  isDark 
-                    ? 'text-slate-300 hover:bg-slate-700' 
-                    : 'text-slate-700 hover:bg-slate-50'
+                  isDark ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-700 hover:bg-slate-50'
                 }`}
               >
                 <Edit className="h-4 w-4" />
@@ -477,9 +458,7 @@ function CourseCard({ course, onDelete, onMenuToggle, isMenuOpen }: CourseCardPr
                   onMenuToggle(null);
                 }}
                 className={`flex items-center gap-2.5 w-full px-3 py-2.5 text-sm ${
-                  isDark 
-                    ? 'text-slate-300 hover:bg-slate-700' 
-                    : 'text-slate-700 hover:bg-slate-50'
+                  isDark ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-700 hover:bg-slate-50'
                 }`}
               >
                 <Share2 className="h-4 w-4" />
@@ -492,9 +471,7 @@ function CourseCard({ course, onDelete, onMenuToggle, isMenuOpen }: CourseCardPr
                   onMenuToggle(null);
                 }}
                 className={`flex items-center gap-2.5 w-full px-3 py-2.5 text-sm ${
-                  isDark 
-                    ? 'text-red-400 hover:bg-red-900/20' 
-                    : 'text-red-600 hover:bg-red-50'
+                  isDark ? 'text-red-400 hover:bg-red-900/20' : 'text-red-600 hover:bg-red-50'
                 }`}
               >
                 <Trash2 className="h-4 w-4" />
@@ -618,11 +595,13 @@ export default function Courses() {
         >
           {/* Search Bar */}
           <div className="flex-1 relative">
-            <div className={`relative rounded-[2px] overflow-hidden ${
-              isDark 
-                ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700/50' 
-                : 'bg-white/80 backdrop-blur-xl border border-slate-200/50 shadow-sm'
-            }`}>
+            <div
+              className={`relative rounded-[2px] overflow-hidden ${
+                isDark
+                  ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700/50'
+                  : 'bg-white/80 backdrop-blur-xl border border-slate-200/50 shadow-sm'
+              }`}
+            >
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
               <input
                 type="text"
@@ -631,8 +610,8 @@ export default function Courses() {
                 onChange={(e) => setSearchInput(e.target.value)}
                 style={{ textIndent: '2rem' }}
                 className={`w-full pl-4 pr-10 py-3 bg-transparent focus:outline-none text-sm relative z-0 ${
-                  isDark 
-                    ? 'text-white placeholder-slate-500' 
+                  isDark
+                    ? 'text-white placeholder-slate-500'
                     : 'text-slate-900 placeholder-slate-400'
                 }`}
               />
@@ -704,11 +683,7 @@ export default function Courses() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {recentCourses.map((course) => (
-                <Link
-                  key={course.id}
-                  to={`/courses/${course.id}`}
-                  className="group"
-                >
+                <Link key={course.id} to={`/courses/${course.id}`} className="group">
                   <motion.div
                     whileHover={{ scale: 1.02 }}
                     className={`p-3.5 sm:p-4 rounded-[2px] transition-all ${
@@ -718,7 +693,9 @@ export default function Courses() {
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-[2px] ${isDark ? 'bg-slate-700' : 'bg-slate-100'}`}>
+                      <div
+                        className={`p-2 rounded-[2px] ${isDark ? 'bg-slate-700' : 'bg-slate-100'}`}
+                      >
                         {(() => {
                           const Icon = categoryIcons[course.category] || Sparkles;
                           return <Icon className="h-4 w-4 text-pink-600 dark:text-cyan-500" />;

@@ -72,7 +72,7 @@ interface UploadedFile {
   }>;
 }
 
-type TabType = 'original' | 'summary' | 'notes' | 'flashcards' | 'quizzes';
+type TabType = 'original' | 'my-notes' | 'my-notes' | 'summary' | 'notes' | 'flashcards' | 'quizzes';
 
 interface TutorChatMessage {
   id: string;
@@ -96,10 +96,12 @@ function normalizeTutorMarkdown(content: string): string {
 // Tab configuration with icons
 const TABS: { id: TabType; label: string; shortLabel: string; icon: typeof BookOpen }[] = [
   { id: 'original', label: 'Original Content', shortLabel: 'Original', icon: FileText },
-  { id: 'summary', label: 'Summary', shortLabel: 'Summary', icon: BookOpen },
-  { id: 'notes', label: 'Notes', shortLabel: 'Notes', icon: FileText },
-  { id: 'flashcards', label: 'Flashcards', shortLabel: 'Cards', icon: Layers },
-  { id: 'quizzes', label: 'Quiz', shortLabel: 'Quiz', icon: Brain },
+  { id: 'summary', label: 'AI Summary', shortLabel: 'AI Summary', icon: BookOpen },
+  { id: 'notes', label: 'AI Notes', shortLabel: 'AI Notes', icon: FileText },
+  { id: 'flashcards', label: 'AI Flashcards', shortLabel: 'AI Cards', icon: Layers },
+  { id: 'my-notes', label: 'My Notes', shortLabel: 'My Notes', icon: FileText },
+  { id: 'my-notes', label: 'My Notes', shortLabel: 'My Notes', icon: FileText },
+  { id: 'quizzes', label: 'AI Quiz', shortLabel: 'AI Quiz', icon: Brain },
 ];
 
 export default function ImmersiveStudy() {
@@ -432,6 +434,58 @@ export default function ImmersiveStudy() {
     }
 
     switch (activeTab) {
+      
+      case 'my-notes':
+        return (
+          <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-12rem)] min-h-[600px]">
+            <div className="flex-1 min-w-0 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+              <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+                <h3 className="font-semibold text-slate-800 dark:text-slate-200">Original Document</h3>
+              </div>
+              <div className="flex-1 overflow-y-auto w-full max-w-full">
+                <OriginalContentPreview file={selectedFile} />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+              <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+                <h3 className="font-semibold text-slate-800 dark:text-slate-200">Note Editor</h3>
+              </div>
+              <textarea 
+                className="flex-1 w-full bg-transparent p-6 resize-none focus:outline-none text-slate-700 dark:text-slate-300 custom-scrollbar"
+                placeholder="Type your notes here... (Saves automatically to your device)"
+                defaultValue={localStorage.getItem('my-notes-' + selectedFile.id) || ''}
+                onChange={(e) => localStorage.setItem('my-notes-' + selectedFile.id, e.target.value)}
+              />
+            </div>
+          </div>
+        );
+
+      
+      case 'my-notes':
+        return (
+          <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-12rem)] min-h-[600px]">
+            <div className="flex-1 min-w-0 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+              <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+                <h3 className="font-semibold text-slate-800 dark:text-slate-200">Original Document</h3>
+              </div>
+              <div className="flex-1 overflow-y-auto w-full max-w-full">
+                <OriginalContentPreview file={selectedFile} />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+              <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+                <h3 className="font-semibold text-slate-800 dark:text-slate-200">Note Editor</h3>
+              </div>
+              <textarea 
+                className="flex-1 w-full bg-transparent p-6 resize-none focus:outline-none text-slate-700 dark:text-slate-300 custom-scrollbar"
+                placeholder="Type your notes here... (Saves automatically to your device)"
+                defaultValue={localStorage.getItem('my-notes-' + selectedFile.id) || ''}
+                onChange={(e) => localStorage.setItem('my-notes-' + selectedFile.id, e.target.value)}
+              />
+            </div>
+          </div>
+        );
+
       case 'original':
         return <OriginalContentPreview file={selectedFile} />;
 

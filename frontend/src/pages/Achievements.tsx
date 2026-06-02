@@ -90,7 +90,7 @@ const TIER_CONFIG = {
     border: 'border-orange-700/60 dark:border-orange-600/40',
     borderHover: 'group-hover:border-orange-600/80 dark:group-hover:border-orange-500/60',
     bg: 'bg-orange-500/5 dark:bg-transparent',
-    text: 'text-orange-800 dark:text-orange-400',
+    text: 'text-slate-900 dark:text-white',
     iconBg: 'bg-gradient-to-br from-orange-600 to-amber-700',
     glow: 'shadow-lg shadow-orange-600/20 hover:shadow-orange-600/40',
     gradient: 'from-orange-700 to-amber-600', 
@@ -101,7 +101,7 @@ const TIER_CONFIG = {
     border: 'border-yellow-600/60 dark:border-yellow-500/40',
     borderHover: 'group-hover:border-yellow-500/80 dark:group-hover:border-yellow-400/60',
     bg: 'bg-yellow-500/5 dark:bg-transparent',
-    text: 'text-yellow-700 dark:text-yellow-400',
+    text: 'text-slate-900 dark:text-white',
     iconBg: 'bg-gradient-to-br from-yellow-500 to-amber-600',
     glow: 'shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/40',
     gradient: 'from-yellow-500 to-amber-600',
@@ -112,7 +112,7 @@ const TIER_CONFIG = {
     border: 'border-red-600/60 dark:border-red-500/40',
     borderHover: 'group-hover:border-red-500/80 dark:group-hover:border-red-400/60',
     bg: 'bg-red-500/5 dark:bg-transparent',
-    text: 'text-red-700 dark:text-red-400',
+    text: 'text-slate-900 dark:text-white',
     iconBg: 'bg-gradient-to-br from-red-500 to-rose-600',
     glow: 'shadow-lg shadow-red-500/20 hover:shadow-red-500/40',
     gradient: 'from-red-500 to-rose-600',
@@ -123,7 +123,7 @@ const TIER_CONFIG = {
     border: 'border-cyan-600/60 dark:border-cyan-500/40',
     borderHover: 'group-hover:border-cyan-500/80 dark:group-hover:border-cyan-400/60',
     bg: 'bg-cyan-500/5 dark:bg-transparent',
-    text: 'text-cyan-700 dark:text-cyan-400',
+    text: 'text-slate-900 dark:text-white',
     iconBg: 'bg-gradient-to-br from-cyan-400 to-blue-600',
     glow: 'shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40',
     gradient: 'from-cyan-400 to-blue-600',
@@ -134,7 +134,7 @@ const TIER_CONFIG = {
     border: 'border-purple-600/60 dark:border-purple-500/40',
     borderHover: 'group-hover:border-purple-500/80 dark:group-hover:border-purple-400/60',
     bg: 'bg-purple-500/5 dark:bg-transparent',
-    text: 'text-purple-700 dark:text-purple-400',
+    text: 'text-slate-900 dark:text-white',
     iconBg: 'bg-gradient-to-br from-purple-600 to-violet-700',
     glow: 'shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40',
     gradient: 'from-purple-600 to-violet-700',
@@ -145,7 +145,7 @@ const TIER_CONFIG = {
     border: 'border-violet-400/80 dark:border-violet-300/60',
     borderHover: 'group-hover:border-violet-300 dark:group-hover:border-violet-200',
     bg: 'bg-gradient-to-br from-violet-500/10 via-purple-500/10 to-blue-500/10',
-    text: 'text-violet-400 dark:text-violet-300',
+    text: 'text-slate-900 dark:text-white',
     iconBg: 'bg-gradient-to-br from-violet-500 via-purple-500 via-indigo-500 to-blue-600',
     glow: 'shadow-2xl shadow-violet-500/60 hover:shadow-violet-400/80',
     gradient: 'from-violet-500 via-purple-500 via-indigo-500 to-blue-600',
@@ -540,7 +540,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                       {achievement.definition.name}
                     </h4>
                     {!isLocked && (
-                      <span className={`inline-block text-xs font-bold px-3 py-1.5 rounded-full bg-gradient-to-r ${tooltipTier.gradient} text-white uppercase tracking-widest shadow-lg ring-1 ring-white/30`}>
+                      <span className={`inline-block text-xs font-bold px-3 py-1.5 rounded-full bg-gradient-to-r ${tooltipTier.gradient} text-white drop-shadow-md uppercase tracking-widest shadow-lg ring-1 ring-white/30`}>
                         {tooltipTier.label}
                       </span>
                     )}

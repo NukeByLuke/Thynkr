@@ -248,54 +248,9 @@ export default function Landing() {
               transition={{ duration: 0.55, delay: 0.1 }}
               className="relative"
             >
-              <div className="rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 bg-white/90 p-4 shadow-[0_24px_90px_-30px_rgba(236,72,153,0.45)] backdrop-blur dark:border-cyan-700/50 dark:bg-slate-900/90 dark:shadow-[0_24px_90px_-40px_rgba(6,182,212,0.55)] sm:p-6">
-                <div className="mb-4 flex items-center gap-2 border-b border-pink-100 pb-3 dark:border-slate-700">
-                  <div className="h-2.5 w-2.5 rounded-full bg-rose-500" />
-                  <div className="h-2.5 w-2.5 rounded-full bg-amber-500" />
-                  <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                  <p className="ml-3 text-xs font-medium text-slate-500 dark:text-slate-400">
-                    thynkr.ca/study
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 bg-gradient-to-br from-pink-50 to-orange-50 p-4 dark:border-cyan-800/70 dark:from-cyan-950/30 dark:to-violet-950/30">
-                    <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-pink-700 dark:bg-slate-900/60 dark:text-cyan-300">
-                      <Upload className="h-3.5 w-3.5" />
-                      Upload complete
-                    </div>
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                      ECON-204 Lecture Pack (36 pages)
-                    </p>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                      Summary, flashcards, and a 20-question quiz are ready.
-                    </p>
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 bg-white/88 p-3 dark:bg-slate-900/88 backdrop-blur-smborder-cyan-800/70 dark:bg-slate-900/80">
-                      <Sparkles className="h-4 w-4 text-pink-600 dark:text-cyan-400" />
-                      <p className="mt-2 text-xs font-semibold text-slate-800 dark:text-slate-100">Summary</p>
-                      <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Key ideas + structure</p>
-                    </div>
-                    <div className="rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 bg-white/88 p-3 dark:bg-slate-900/88 backdrop-blur-smborder-cyan-800/70 dark:bg-slate-900/80">
-                      <Target className="h-4 w-4 text-fuchsia-600 dark:text-violet-400" />
-                      <p className="mt-2 text-xs font-semibold text-slate-800 dark:text-slate-100">Flashcards</p>
-                      <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Active recall set</p>
-                    </div>
-                    <div className="rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 bg-white/88 p-3 dark:bg-slate-900/88 backdrop-blur-smborder-cyan-800/70 dark:bg-slate-900/80">
-                      <Brain className="h-4 w-4 text-orange-600 dark:text-blue-400" />
-                      <p className="mt-2 text-xs font-semibold text-slate-800 dark:text-slate-100">AI Tutor</p>
-                      <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Ask course-specific questions</p>
-                    </div>
-                  </div>
-
-                  <div className="rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 bg-gradient-to-r from-pink-50 to-fuchsia-50 p-3 dark:border-cyan-800/70 dark:from-slate-900 dark:to-slate-900">
-                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                      Next best action: review Quiz Set B before tomorrow's exam.
-                    </p>
-                  </div>
-                </div>
+              <div className="rounded-[4px] border-2 border-fuchsia-200 dark:border-cyan-800 bg-slate-50 dark:bg-slate-900 shadow-[0_24px_90px_-30px_rgba(236,72,153,0.45)] dark:shadow-[0_24px_90px_-40px_rgba(6,182,212,0.55)] overflow-hidden">
+                <img src="/image.png" alt="Thynkr App Screenshot" className="w-full h-auto object-cover dark:hidden" />
+                <img src="/image-dark.png" alt="Thynkr App Screenshot Dark" className="w-full h-auto object-cover hidden dark:block" />
               </div>
             </motion.div>
           </div>
