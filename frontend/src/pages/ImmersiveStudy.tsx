@@ -901,6 +901,13 @@ function getYouTubeEmbedUrl(url: string): string | null {
 }
 
 function OriginalContentPreview({ file }: { file: UploadedFile }) {
+  const [showNotes, setShowNotes] = useState(false);
+  const [localNotes, setLocalNotes] = useState(() => localStorage.getItem('my-notes-' + file.id) || '');
+  const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setLocalNotes(val);
+    localStorage.setItem('my-notes-' + file.id, val);
+  };
   const fileType = (file.fileType || '').toLowerCase();
   const extension = getFileExtension(file.originalName);
   const previewFileUrl = getPreviewFileUrl(file);

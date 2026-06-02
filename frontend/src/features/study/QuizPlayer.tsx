@@ -1195,7 +1195,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               <p className="text-[10px] uppercase tracking-[0.24em] font-semibold text-brand-600 dark:text-accent-300 mb-1">
                 Active Attempt
               </p>
-              <h3 className="text-lg sm:text-2xl font-extrabold text-slate-900 dark:text-white break-words"><><span className="text-brand-600 dark:text-brand-400">AI</span> {title || 'Quiz'}</></h3>
+              <h3 className="text-lg sm:text-2xl font-extrabold text-slate-900 dark:text-white break-words"><span className="text-brand-600 dark:text-brand-400">AI</span> {title || 'Quiz'}</h3>
             </div>
             <div className="flex items-center gap-2 flex-wrap justify-start sm:justify-end">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-50 to-orange-50 dark:from-violet-500/20 dark:to-accent-500/20 border border-brand-200 dark:border-violet-500/30 px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-100">
