@@ -127,7 +127,7 @@ interface CreateCourseModalProps {
   isPremium: boolean;
 }
 
-function CreateCourseModal({ isOpen, onClose, isPremium }: CreateCourseModalProps) {
+function CreateCourseModal({ isOpen, onClose }: CreateCourseModalProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { theme } = useTheme();

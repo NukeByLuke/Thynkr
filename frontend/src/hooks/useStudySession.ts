@@ -13,7 +13,7 @@ export function useStudySession(options: UseStudySessionOptions = {}) {
   const queryKey = options.queryKey || ['study-files'];
 
   const [selectedFile, setSelectedFileState] = useState<any | null>(null);
-  const [activeTab, setActiveTab] = useState<'original' | 'summary' | 'notes' | 'flashcards' | 'quizzes'>('summary');
+  const [activeTab, setActiveTab] = useState<'original' | 'summary' | 'notes' | 'flashcards' | 'quizzes' | 'my-notes'>('summary');
   const [selectedQuiz, setSelectedQuiz] = useState<any | null>(null);
   const [selectedFlashcardSet, setSelectedFlashcardSet] = useState<any | null>(null);
   const [numQuestions, setNumQuestions] = useState(10);
