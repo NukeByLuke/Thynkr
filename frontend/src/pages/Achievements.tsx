@@ -29,6 +29,9 @@ import {
   Library,
   FileText,
   Share2,
+  ChevronLeft,
+  X,
+  ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
@@ -564,7 +567,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                       className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-300/70 dark:border-slate-600 text-slate-500 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
                       aria-label="Close achievement details"
                     >
-                      x
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -593,7 +596,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                           disabled={selectedTierIndex === 0}
                           className="px-2.5 py-1 text-xs font-medium bg-slate-200 dark:bg-slate-700/70 hover:bg-slate-300 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed rounded transition-colors text-slate-700 dark:text-white"
                         >
-                          ←
+                          <ChevronLeft className="w-4 h-4" />
                         </button>
                         <button
                           onClick={(e) => {
@@ -603,7 +606,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                           disabled={selectedTierIndex === tierHistory.length - 1}
                           className="px-2.5 py-1 text-xs font-medium bg-slate-200 dark:bg-slate-700/70 hover:bg-slate-300 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed rounded transition-colors text-slate-700 dark:text-white"
                         >
-                          →
+                          <ChevronRight className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
@@ -619,7 +622,7 @@ const AchievementCard = ({ achievement }: Omit<AchievementCardProps, 'index'>) =
                           initial={{ opacity: 0, x: 0 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.2 }}
-                          className={`p-4 rounded-lg bg-gradient-to-br ${displayConfig.gradient} bg-opacity-10 border-2 ${displayConfig.border}`}
+                          className={`p-4 rounded-lg ${displayConfig.bg} border-2 ${displayConfig.border}`}
                         >
                           <div className="flex items-center justify-between mb-2">
                             <span className={`text-base font-bold ${displayConfig.text}`}>
