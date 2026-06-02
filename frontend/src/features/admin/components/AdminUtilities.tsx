@@ -53,7 +53,6 @@ export const StatCard = ({
   trend,
   trendValue,
   tooltip,
-  gradient,
 }: {
   title: string;
   value: number | string;
@@ -61,54 +60,28 @@ export const StatCard = ({
   trend?: 'up' | 'down' | 'neutral';
   trendValue?: string;
   tooltip: string;
-  gradient: string;
+  gradient?: string;
 }) => {
-  // Extract gradient colors for icon styling
-  const iconGradient = gradient.replace('bg-gradient-to-br', 'bg-gradient-to-br');
-
   return (
-    <div className="admin-surface relative overflow-hidden rounded-2xl p-4 sm:p-5 backdrop-blur-md hover:-translate-y-1 hover:shadow-xl transition-all">
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/20 -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-white/20 translate-y-1/2 -translate-x-1/2" />
-      </div>
-
-      <div className="relative">
-        <div className="flex items-start justify-between mb-4">
-          <div className={`p-2.5 rounded-xl ${iconGradient}`}>
-            <Icon className="w-5 h-5 text-white" />
+    <div className="bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/50 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{title}</p>
+          <div className="mt-1 flex items-baseline gap-2">
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{value}</h3>
+            {trend && trendValue && (
+              <span className={`text-xs font-semibold flex items-center gap-0.5 ${
+                trend === 'up' ? 'text-emerald-500' : trend === 'down' ? 'text-rose-500' : 'text-slate-400'
+              }`}>
+                {trend === 'up' ? <TrendingUp className="w-3 h-3" /> : trend === 'down' ? <TrendingDown className="w-3 h-3" /> : null}
+                {trendValue}
+              </span>
+            )}
           </div>
-          <Tooltip content={tooltip}>
-            <Info className="w-4 h-4 text-slate-500 dark:text-slate-400 cursor-help hover:text-pink-600 dark:hover:text-cyan-300 transition-colors" />
-          </Tooltip>
         </div>
-
-        <div className="space-y-1">
-          <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">{title}</p>
-          <p className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{value}</p>
+        <div className={`p-2 rounded-lg bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300`}>
+          <Icon className="w-5 h-5" />
         </div>
-
-        {trend && trendValue && (
-          <div className="mt-3 flex items-center gap-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            {trend === 'up' ? (
-              <TrendingUp className="w-4 h-4 text-green-400" />
-            ) : trend === 'down' ? (
-              <TrendingDown className="w-4 h-4 text-red-400" />
-            ) : null}
-            <span
-              className={`font-semibold ${
-                trend === 'up'
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : trend === 'down'
-                    ? 'text-red-600 dark:text-red-400'
-                    : 'text-slate-700 dark:text-slate-300'
-              }`}
-            >
-              {trendValue}
-            </span>
-            <span>vs last period</span>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -466,7 +466,9 @@ function CourseCard({ course, onDelete, onMenuToggle, isMenuOpen }: CourseCardPr
               </button>
               <hr className={`my-1.5 ${isDark ? 'border-slate-700' : 'border-slate-200'}`} />
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
                   onDelete(course.id);
                   onMenuToggle(null);
                 }}

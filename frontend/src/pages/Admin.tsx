@@ -194,23 +194,18 @@ export default function Admin() {
     <div className="admin-shell">
       <div className="mx-auto w-full max-w-[1400px] px-3 sm:px-5 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Hero */}
-        <div className="admin-hero relative overflow-hidden rounded-3xl px-4 py-5 sm:px-7 sm:py-7">
-          <div className="pointer-events-none absolute -top-16 right-[-4rem] h-44 w-44 rounded-full bg-fuchsia-300/35 dark:bg-cyan-400/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 left-[-4rem] h-52 w-52 rounded-full bg-orange-300/35 dark:bg-violet-500/20 blur-3xl" />
-          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="admin-kicker text-[11px] uppercase tracking-[0.18em]">Control Center</p>
-              <h1 className="admin-heading-gradient mt-1 text-2xl sm:text-3xl lg:text-4xl font-bold">
-                Admin Dashboard
-              </h1>
-              <p className="admin-muted mt-2 max-w-2xl text-sm sm:text-base">
-                Manage your platform, monitor operations, and take action with confidence across desktop and mobile.
-              </p>
-            </div>
-            <div className="admin-soft-chip inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs sm:text-sm admin-muted">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              Live admin controls
-            </div>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-brand-600 to-accent-600 text-transparent bg-clip-text">
+              Platform Administration
+            </h1>
+            <p className="text-gray-500 mt-1 dark:text-gray-400">
+              Manage users, payments, and system health
+            </p>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-sm font-medium">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            System Operational
           </div>
         </div>
 

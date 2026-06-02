@@ -726,7 +726,16 @@ async function trackStudyActivity(
 
     // Import checkAchievements dynamically to avoid circular dependencies
     const { checkAchievements } = await import('../services/gamification.service');
-    const achievementResults: AchievementResult[] = [];
+    const achievementResults: any[] = [];
+
+    if (fileId) {
+      const sessionCount = await prisma.studySession.count({
+        where: { userId, fileId }
+      });
+      if (sessionCount === 1) {
+        achievementResults.push(await checkAchievements(userId, 'topic_studied', 1));
+      }
+    }
 
     // Update streak
     const today = new Date();
@@ -749,7 +758,7 @@ async function trackStudyActivity(
       });
 
       // Track first day of streak
-      achievementResults.push(await checkAchievements(userId, 'study_streak', 1));
+      achievementResults.push(await checkAchievements(userId, 'study_streak', newCurrentStreak ?? 1, true));
     } else {
       const lastStudy = streak.lastStudyDate ? new Date(streak.lastStudyDate) : null;
       lastStudy?.setHours(0, 0, 0, 0);
@@ -784,7 +793,7 @@ async function trackStudyActivity(
 
       // Track streak only on new days
       if (isNewDay) {
-        achievementResults.push(await checkAchievements(userId, 'study_streak', 1));
+        achievementResults.push(await checkAchievements(userId, 'study_streak', newCurrentStreak ?? 1, true));
       }
     }
 
@@ -2638,7 +2647,8 @@ ${studentMessage.slice(0, 1600)}`;
         });
 
         // Track study activity
-        const activityNotifications = await trackStudyActivity(request.user!.userId, 'QUIZ_ATTEMPT', file.id);
+        const durationMins = Math.max(1, Math.round((timeSpentSeconds || 60) / 60));
+const activityNotifications = await trackStudyActivity(request.user!.userId, 'QUIZ_ATTEMPT', file.id, durationMins);
 
         // Track language usage for multilingual achievement
         await trackLanguageUsage(request.user!.userId, language);
@@ -3065,7 +3075,8 @@ ${studentMessage.slice(0, 1600)}`;
       }
 
       // Track study activity
-      const activityNotifications = await trackStudyActivity(request.user!.userId, 'QUIZ_ATTEMPT', file.id);
+      const durationMins = Math.max(1, Math.round((timeSpentSeconds || 60) / 60));
+const activityNotifications = await trackStudyActivity(request.user!.userId, 'QUIZ_ATTEMPT', file.id, durationMins);
 
       // Map achievements to notifications format for frontend interceptor
       const notifications = [
@@ -3522,3 +3533,5 @@ ${studentMessage.slice(0, 1600)}`;
     }
   );
 }
+
+

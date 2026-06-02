@@ -475,6 +475,7 @@ const PaymentAnalyticsTab = () => {
                       <Zap className="w-3 h-3" />
                     )}
                     {payment.planType}
+                    <span className="opacity-60">({payment.billingCycle?.toLowerCase() || 'monthly'})</span>
                   </span>
                   <PaymentStatusBadge status={payment.status} />
                 </div>

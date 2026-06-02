@@ -334,7 +334,8 @@ function getNextTier(currentTier: AchievementTier): AchievementTier | null {
 export async function checkAchievements(
   userId: string,
   actionType: AchievementAction,
-  value: number = 1
+  value: number = 1,
+  isAbsolute: boolean = false
 ): Promise<{
   tierUnlocked: boolean;
   achievementId?: string;
@@ -388,7 +389,7 @@ export async function checkAchievements(
             },
           },
           data: {
-            currentValue: userAchievement.currentValue + value,
+            currentValue: isAbsolute ? value : userAchievement.currentValue + value,
           },
         });
       }
@@ -619,3 +620,4 @@ export default {
   getLevelProgress,
   ACHIEVEMENTS,
 };
+
