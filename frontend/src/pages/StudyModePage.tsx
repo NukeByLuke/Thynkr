@@ -99,7 +99,13 @@ export default function StudyModePage() {
   // Keyboard navigation (A/D for tabs, Esc to exit)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' || 
+        target.tagName === 'TEXTAREA' || 
+        target.tagName === 'SELECT' || 
+        target.isContentEditable
+      ) return;
       const currentIndex = TABS.findIndex(t => t.id === activeTab);
       const key = e.key.toLowerCase();
 
@@ -247,7 +253,13 @@ export default function StudyModePage() {
   useEffect(() => {
     if (totalPages <= 1) return;
     const handlePageKeys = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' || 
+        target.tagName === 'TEXTAREA' || 
+        target.tagName === 'SELECT' || 
+        target.isContentEditable
+      ) return;
       if (e.key === 'ArrowLeft' && currentPage > 0) {
         e.preventDefault();
         setCurrentPage(prev => prev - 1);

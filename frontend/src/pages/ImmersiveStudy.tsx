@@ -25,6 +25,7 @@ import {
   SkipForward,
   Volume2,
   Clock3,
+  ChevronDown,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
@@ -318,7 +319,13 @@ export default function ImmersiveStudy() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Skip if user is typing in an input
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' || 
+        target.tagName === 'TEXTAREA' || 
+        target.tagName === 'SELECT' || 
+        target.isContentEditable
+      ) {
         return;
       }
 
@@ -908,6 +915,47 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
     setLocalNotes(val);
     localStorage.setItem('my-notes-' + file.id, val);
   };
+
+  const handleExportPdf = () => {
+    const printWindow = window.open('', '', 'width=800,height=600');
+    if (!printWindow) return;
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Study Notes - ${file.originalName}</title>
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; padding: 2rem; max-width: 800px; margin: 0 auto; color: #1e293b; }
+            h1 { font-size: 1.5rem; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0; }
+            pre { white-space: pre-wrap; font-family: inherit; margin: 0; }
+          </style>
+        </head>
+        <body>
+          <h1>Study Notes: ${file.originalName}</h1>
+          <pre>${localNotes}</pre>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
+  };
+
+  const handleExportDoc = () => {
+    const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title></head><body>";
+    const footer = "</body></html>";
+    const sourceHTML = header + "<h1>Study Notes: " + file.originalName + "</h1><pre style='white-space: pre-wrap; font-family: system-ui, sans-serif;'>" + localNotes + "</pre>" + footer;
+    
+    const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+    const fileDownload = document.createElement("a");
+    document.body.appendChild(fileDownload);
+    fileDownload.href = source;
+    fileDownload.download = "notes-" + (file.originalName || 'document') + ".doc";
+    fileDownload.click();
+    document.body.removeChild(fileDownload);
+  };
   const fileType = (file.fileType || '').toLowerCase();
   const extension = getFileExtension(file.originalName);
   const previewFileUrl = getPreviewFileUrl(file);
@@ -1069,7 +1117,31 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
         <div className="flex-1 lg:max-w-md xl:max-w-lg min-w-0 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-700 flex flex-col min-h-[60vh] h-full shadow-sm animate-fade-in relative">
           <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Your Notes</h3>
-            <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider">Auto-saves locally</span>
+                        <div className="flex items-center gap-2">
+              <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider hidden sm:inline-block">Auto-saves locally</span>
+              
+              <div className="relative group">
+                <button className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700">
+                  <Download className="w-3.5 h-3.5" />
+                  Export
+                  <ChevronDown className="w-3.5 h-3.5 opacity-50" />
+                </button>
+                <div className="absolute right-0 mt-1 hidden w-40 flex-col rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 shadow-xl group-hover:flex z-[100]">
+                  <button 
+                    onClick={handleExportPdf}
+                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                  >
+                    Export as PDF
+                  </button>
+                  <button 
+                    onClick={handleExportDoc}
+                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                  >
+                    Export to Google Docs
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
           <textarea 
             className="flex-1 w-full h-[50vh] lg:h-auto bg-transparent p-5 resize-none focus:outline-none text-slate-700 dark:text-slate-300 custom-scrollbar sm:text-lg leading-relaxed placeholder:text-slate-400 dark:placeholder:text-slate-600"
