@@ -111,7 +111,7 @@ export default function SummaryView({ content, fileName, onRegenerate, isRegener
               <p className="text-xs uppercase tracking-[0.22em] font-semibold text-slate-500 dark:text-slate-400 mb-1">
                 AI Study Brief
               </p>
-              <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Summary</h3>
+              <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white"><span className="text-brand-600 dark:text-brand-400">AI</span> Summary</h3>
               <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">Estimated reading time: {estimatedReadMinutes} min</p>
             </div>
 

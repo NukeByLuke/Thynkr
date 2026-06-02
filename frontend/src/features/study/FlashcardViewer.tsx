@@ -95,7 +95,7 @@ const FlashcardViewer = memo(function FlashcardViewer({
 
     openAudioPlayer({
       text: currentCardSpeechText,
-      title: `${title || 'Flashcards'} Audio`,
+      title: `$<><span className="text-brand-600 dark:text-brand-400">AI</span> <><span className="text-brand-600 dark:text-brand-400">AI</span> {title || 'Flashcards'}</></> Audio`,
       autoPlay: true,
     });
   }, [currentCardSpeechText, openAudioPlayer, title]);
