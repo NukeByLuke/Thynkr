@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Info,
   TrendingUp,
   TrendingDown,
   Shield,
@@ -52,14 +51,13 @@ export const StatCard = ({
   icon: Icon,
   trend,
   trendValue,
-  tooltip,
 }: {
   title: string;
   value: number | string;
   icon: React.ElementType;
   trend?: 'up' | 'down' | 'neutral';
   trendValue?: string;
-  tooltip: string;
+  tooltip?: string;
   gradient?: string;
 }) => {
   return (
