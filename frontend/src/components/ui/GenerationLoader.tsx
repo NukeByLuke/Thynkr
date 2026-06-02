@@ -72,7 +72,7 @@ export default function GenerationLoader({
       radius: 100 
     },
     { 
-      color: 'bg-fuchsia-500 dark:bg-violet-500', 
+      color: 'bg-pink-500 dark:bg-violet-500', 
       shadow: 'shadow-fuchsia-500/60 dark:shadow-violet-500/60',
       duration: 3.5, 
       delay: 0.3,
@@ -173,7 +173,7 @@ export default function GenerationLoader({
               duration: 0.3, 
               ease: [0.32, 0.72, 0, 1] 
             }}
-            className="text-xs font-bold uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-pink-600 via-fuchsia-600 to-orange-500 dark:from-cyan-400 dark:via-violet-400 dark:to-blue-400"
+            className="text-xs font-bold uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-pink-600 via-pink-500 to-orange-500 dark:from-cyan-400 dark:via-violet-400 dark:to-blue-400"
             style={{ willChange: 'transform, opacity' }}
           >
             {stages[currentStageIndex]}

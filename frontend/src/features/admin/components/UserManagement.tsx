@@ -509,7 +509,7 @@ export const UserManagement = ({
                     onClick={() => setCurrentPage(pageNum)}
                     className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
                       currentPage === pageNum
-                        ? 'bg-gradient-to-r from-fuchsia-600 to-orange-500 dark:from-cyan-500 dark:to-blue-500 text-white'
+                        ? 'bg-gradient-to-r from-pink-600 to-orange-500 dark:from-cyan-500 dark:to-blue-500 text-white'
                         : 'text-slate-600 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-slate-800'
                     }`}
                   >

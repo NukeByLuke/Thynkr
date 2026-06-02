@@ -135,7 +135,7 @@ export default function Login() {
 
       <AuthLayout>
         <div className="mb-4 md:min-h-[90px]">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-fuchsia-700 dark:text-cyan-300/80">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-pink-600 dark:text-cyan-300/80">
             Welcome Back
           </p>
           <h1 className="mt-1 text-xl sm:text-2xl font-semibold leading-tight tracking-[-0.02em] text-slate-900 dark:text-white">
@@ -225,7 +225,7 @@ export default function Login() {
             </label>
             <Link
               to="/forgot-password"
-              className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-fuchsia-600 dark:hover:text-cyan-300 transition-colors whitespace-nowrap"
+              className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-pink-600 dark:hover:text-cyan-300 transition-colors whitespace-nowrap"
             >
               Forgot password?
             </Link>
@@ -236,7 +236,7 @@ export default function Login() {
             type="submit"
             disabled={isLoading}
             aria-label={isLoading ? 'Signing in...' : 'Sign in to your account'}
-            className="w-full h-11 flex items-center justify-center gap-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500 text-white font-semibold rounded-full border-2 border-fuchsia-700 dark:border-cyan-300 transition-colors duration-200 hover:brightness-105 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full h-11 flex items-center justify-center gap-2 bg-gradient-to-r from-pink-500 via-orange-400 to-amber-500 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500 text-white font-semibold rounded-full border-2 border-pink-600 dark:border-cyan-300 transition-colors duration-200 hover:brightness-105 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <>

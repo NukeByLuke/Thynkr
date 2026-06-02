@@ -79,7 +79,7 @@ export const StatCard = ({
             <Icon className="w-5 h-5 text-white" />
           </div>
           <Tooltip content={tooltip}>
-            <Info className="w-4 h-4 text-slate-500 dark:text-slate-400 cursor-help hover:text-fuchsia-600 dark:hover:text-cyan-300 transition-colors" />
+            <Info className="w-4 h-4 text-slate-500 dark:text-slate-400 cursor-help hover:text-pink-600 dark:hover:text-cyan-300 transition-colors" />
           </Tooltip>
         </div>
 
@@ -256,7 +256,7 @@ export const DateFilterDropdown = ({
                 }}
                 className={`w-full text-left px-4 py-2.5 text-sm hover:bg-rose-50/80 dark:hover:bg-slate-800 transition-colors ${
                   value === option.value
-                    ? 'text-fuchsia-700 dark:text-cyan-300 font-medium bg-rose-100/60 dark:bg-cyan-500/10'
+                    ? 'text-pink-600 dark:text-cyan-300 font-medium bg-rose-100/60 dark:bg-cyan-500/10'
                     : 'text-slate-700 dark:text-slate-300'
                 }`}
               >
@@ -293,7 +293,7 @@ export const FilterDropdown = ({
         onClick={() => setOpen(!open)}
         className={`inline-flex h-10 items-center gap-2 px-3 rounded-lg text-sm font-medium transition-colors ${
           value
-            ? 'bg-rose-100 text-fuchsia-700 dark:bg-cyan-500/15 dark:text-cyan-300'
+            ? 'bg-rose-100 text-pink-600 dark:bg-cyan-500/15 dark:text-cyan-300'
             : 'admin-soft-chip text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-slate-800'
         }`}
       >
@@ -315,7 +315,7 @@ export const FilterDropdown = ({
                 }}
                 className={`w-full text-left px-4 py-2.5 text-sm hover:bg-rose-50/80 dark:hover:bg-slate-800 transition-colors ${
                   value === option.value
-                    ? 'text-fuchsia-700 dark:text-cyan-300 font-medium bg-rose-100/60 dark:bg-cyan-500/10'
+                    ? 'text-pink-600 dark:text-cyan-300 font-medium bg-rose-100/60 dark:bg-cyan-500/10'
                     : 'text-slate-700 dark:text-slate-300'
                 }`}
               >
@@ -363,7 +363,7 @@ export const RowsPerPageDropdown = ({
                 }}
                 className={`w-full text-left px-4 py-2 text-sm hover:bg-rose-50/80 dark:hover:bg-slate-800 transition-colors ${
                   value === option
-                    ? 'text-fuchsia-700 dark:text-cyan-300 font-medium bg-rose-100/60 dark:bg-cyan-500/10'
+                    ? 'text-pink-600 dark:text-cyan-300 font-medium bg-rose-100/60 dark:bg-cyan-500/10'
                     : 'text-slate-700 dark:text-slate-300'
                 }`}
               >
@@ -467,7 +467,7 @@ export const UserViewPanel = ({
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="p-4 sm:p-6 border-b border-cyan-400/20 bg-gradient-to-r from-fuchsia-600 via-rose-500 to-orange-500 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500">
+      <div className="p-4 sm:p-6 border-b border-cyan-400/20 bg-gradient-to-r from-pink-600 via-rose-500 to-orange-500 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-white">User Details</h2>
           <button

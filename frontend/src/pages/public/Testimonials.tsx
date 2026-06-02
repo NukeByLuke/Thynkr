@@ -52,7 +52,7 @@ const testimonials: Testimonial[] = [
     name: 'David Patel',
     role: 'Engineering, 4th Year',
     initials: 'DP',
-    color: 'from-fuchsia-500 to-pink-600',
+    color: 'from-pink-500 to-pink-600',
     rating: 5,
     text: "I was skeptical about AI study tools at first, but Thynkr proved me wrong. The summaries are accurate, the interface is beautiful, and organizing my courses is effortless. It's like having a personal tutor available 24/7.",
   },
@@ -120,7 +120,7 @@ export default function Testimonials() {
             <p className="text-sm text-slate-600 dark:text-slate-400">AI Requests</p>
           </Card>
           <Card padding="lg" className="text-center">
-            <div className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-600 to-pink-600 mb-2">
+            <div className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-600 to-pink-600 mb-2">
               95%
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-400">Would Recommend</p>

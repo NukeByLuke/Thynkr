@@ -119,14 +119,14 @@ const MobileBottomNav = memo(() => {
           {active && (
             <motion.div
               layoutId="nav-active-bg"
-              className="absolute inset-0 -m-1.5 rounded-2xl bg-gradient-to-br from-fuchsia-500/15 to-pink-500/15 dark:from-cyan-500/15 dark:to-blue-500/15"
+              className="absolute inset-0 -m-1.5 rounded-2xl bg-gradient-to-br from-pink-500/15 to-pink-500/15 dark:from-cyan-500/15 dark:to-blue-500/15"
               transition={{ type: 'spring', stiffness: 500, damping: 35 }}
             />
           )}
           <Icon
             className={`w-[22px] h-[22px] transition-all duration-200 relative z-10 ${
               active
-                ? 'text-fuchsia-600 dark:text-cyan-400'
+                ? 'text-pink-600 dark:text-cyan-400'
                 : 'text-slate-500 dark:text-slate-500'
             }`}
             strokeWidth={active ? 2.5 : 1.75}
@@ -135,7 +135,7 @@ const MobileBottomNav = memo(() => {
         <span
           className={`text-[10px] font-semibold tracking-wide transition-colors duration-200 ${
             active
-              ? 'text-fuchsia-600 dark:text-cyan-400'
+              ? 'text-pink-600 dark:text-cyan-400'
               : 'text-slate-400 dark:text-slate-500'
           }`}
         >
@@ -144,7 +144,7 @@ const MobileBottomNav = memo(() => {
         {active && (
           <motion.div
             layoutId="nav-active-dot"
-            className="absolute bottom-1 w-1 h-1 rounded-full bg-gradient-to-r from-fuchsia-500 to-pink-500 dark:from-cyan-400 dark:to-blue-500"
+            className="absolute bottom-1 w-1 h-1 rounded-full bg-gradient-to-r from-pink-500 to-pink-500 dark:from-cyan-400 dark:to-blue-500"
             transition={{ type: 'spring', stiffness: 500, damping: 35 }}
           />
         )}
@@ -193,7 +193,7 @@ const MobileBottomNav = memo(() => {
               <div className="absolute inset-0 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl" />
 
               {/* Gradient top accent */}
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-fuchsia-500 via-pink-500 to-orange-400 dark:from-cyan-400 dark:via-blue-500 dark:to-violet-500" />
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-pink-500 via-pink-500 to-orange-400 dark:from-cyan-400 dark:via-blue-500 dark:to-violet-500" />
 
               <div className="relative px-5 pt-3 pb-5">
                 {/* Drag Handle */}
@@ -208,7 +208,7 @@ const MobileBottomNav = memo(() => {
                     onClick={() => setIsMenuOpen(false)}
                     className="flex items-center gap-3.5 p-3.5 mb-4 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/80 dark:from-slate-800/60 dark:to-slate-900/60 border border-slate-200/60 dark:border-white/8 active:scale-[0.98] transition-transform"
                   >
-                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-fuchsia-500 via-pink-500 to-orange-400 dark:from-cyan-400 dark:via-blue-500 dark:to-violet-600 flex items-center justify-center text-white font-bold text-base flex-shrink-0 shadow-md">
+                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-pink-500 via-pink-500 to-orange-400 dark:from-cyan-400 dark:via-blue-500 dark:to-violet-600 flex items-center justify-center text-white font-bold text-base flex-shrink-0 shadow-md">
                       {user.username?.charAt(0).toUpperCase() ?? user.email?.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">

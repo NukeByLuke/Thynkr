@@ -856,7 +856,7 @@ const CourseInsightsTab = () => {
                           e.stopPropagation();
                           setSelectedCreatorId(creator.userId);
                         }}
-                        className="p-2 rounded-lg hover:bg-rose-50 dark:hover:bg-slate-800 text-slate-500 hover:text-fuchsia-600 dark:hover:text-cyan-300 transition-colors"
+                        className="p-2 rounded-lg hover:bg-rose-50 dark:hover:bg-slate-800 text-slate-500 hover:text-pink-600 dark:hover:text-cyan-300 transition-colors"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
@@ -1038,7 +1038,7 @@ const CourseInsightsTab = () => {
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => handleToggleVisibility(course)}
-                          className="p-1.5 rounded-lg hover:bg-rose-100 dark:hover:bg-slate-700 text-gray-500 hover:text-fuchsia-600 dark:hover:text-cyan-300 transition-colors"
+                          className="p-1.5 rounded-lg hover:bg-rose-100 dark:hover:bg-slate-700 text-gray-500 hover:text-pink-600 dark:hover:text-cyan-300 transition-colors"
                           title={`Make ${course.visibility === 'PUBLIC' ? 'Private' : 'Public'}`}
                         >
                           {course.visibility === 'PUBLIC' ? (
@@ -1161,7 +1161,7 @@ const CourseInsightsTab = () => {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => handleToggleVisibility(course)}
-                        className="p-1.5 rounded-lg hover:bg-rose-100 dark:hover:bg-slate-700 text-gray-500 hover:text-fuchsia-600 dark:hover:text-cyan-300 transition-colors"
+                        className="p-1.5 rounded-lg hover:bg-rose-100 dark:hover:bg-slate-700 text-gray-500 hover:text-pink-600 dark:hover:text-cyan-300 transition-colors"
                       >
                         {course.visibility === 'PUBLIC' ? (
                           <Lock className="w-4 h-4" />
@@ -1223,7 +1223,7 @@ const CourseInsightsTab = () => {
             <button
               onClick={confirmToggleVisibility}
               disabled={toggleVisibilityMutation.isPending}
-              className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-fuchsia-600 to-orange-500 dark:from-cyan-500 dark:to-blue-500 text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
+              className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-orange-500 dark:from-cyan-500 dark:to-blue-500 text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50"
             >
               {toggleVisibilityMutation.isPending ? 'Updating...' : 'Confirm'}
             </button>

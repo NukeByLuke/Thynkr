@@ -318,7 +318,7 @@ export const ActivityLogs = () => {
               </button>
               <button
                 onClick={() => handleExport('json')}
-                className="inline-flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-fuchsia-600 to-orange-500 dark:from-cyan-500 dark:to-blue-500 text-white rounded-lg hover:opacity-90 transition-colors text-sm font-medium"
+                className="inline-flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-pink-600 to-orange-500 dark:from-cyan-500 dark:to-blue-500 text-white rounded-lg hover:opacity-90 transition-colors text-sm font-medium"
               >
                 <Download className="w-4 h-4" />
                 JSON

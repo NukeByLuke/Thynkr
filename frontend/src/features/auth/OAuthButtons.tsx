@@ -114,7 +114,7 @@ export function OAuthDivider() {
         <span className="w-full border-t-2 border-fuchsia-200 dark:border-cyan-500/25" />
       </div>
       <div className="relative flex justify-center text-xs uppercase">
-        <span className="px-2 bg-white dark:bg-slate-900 text-fuchsia-700 dark:text-cyan-300 tracking-[0.12em] border border-fuchsia-200 dark:border-cyan-500/25 rounded-[2px]">
+        <span className="px-2 bg-white dark:bg-slate-900 text-pink-600 dark:text-cyan-300 tracking-[0.12em] border border-fuchsia-200 dark:border-cyan-500/25 rounded-[2px]">
           or
         </span>
       </div>

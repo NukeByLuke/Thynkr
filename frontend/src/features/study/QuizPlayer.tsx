@@ -1006,7 +1006,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
                   ? 'bg-gradient-to-r from-pink-500 to-fuchsia-500 dark:from-cyan-500 dark:to-violet-500 text-white cursor-wait opacity-90'
                   : !canStart
                   ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-pink-600 to-fuchsia-600 dark:from-cyan-600 dark:to-violet-600 text-white hover:from-pink-500 hover:to-fuchsia-500 dark:hover:from-cyan-500 dark:hover:to-violet-500'
+                  : 'bg-gradient-to-r from-pink-500 to-orange-400 dark:from-cyan-600 dark:to-violet-600 text-white hover:from-pink-500 hover:to-fuchsia-500 dark:hover:from-cyan-500 dark:hover:to-violet-500'
               }`}
             >
               {isGenerating || waitingForGeneration ? (
@@ -1195,7 +1195,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               <p className="text-[10px] uppercase tracking-[0.24em] font-semibold text-brand-600 dark:text-accent-300 mb-1">
                 Active Attempt
               </p>
-              <h3 className="text-lg sm:text-2xl font-extrabold text-slate-900 dark:text-white break-words"><span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 dark:from-cyan-400 dark:via-blue-500 dark:to-violet-500 drop-shadow-sm">AI</span> {title || 'Quiz'}</h3>
+              <h3 className="text-lg sm:text-2xl font-extrabold text-slate-900 dark:text-white break-words"><span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-orange-400 to-amber-500 dark:from-cyan-400 dark:via-blue-500 dark:to-violet-500 drop-shadow-sm">AI</span> {title || 'Quiz'}</h3>
             </div>
             <div className="flex items-center gap-2 flex-wrap justify-start sm:justify-end">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-50 to-orange-50 dark:from-violet-500/20 dark:to-accent-500/20 border border-brand-200 dark:border-violet-500/30 px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-100">
@@ -1618,7 +1618,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
 
             <motion.button
               onClick={() => setReviewMode(false)}
-              className="px-6 py-3 bg-gradient-to-r from-brand-600 via-fuchsia-600 to-orange-500 dark:from-accent-500 dark:via-violet-500 dark:to-brand-500 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity w-full sm:w-auto"
+              className="px-6 py-3 bg-gradient-to-r from-brand-600 via-pink-500 to-orange-500 dark:from-accent-500 dark:via-violet-500 dark:to-brand-500 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity w-full sm:w-auto"
             >
               Back to Results
             </motion.button>
@@ -1637,7 +1637,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             {canReveal && (
               <motion.button
                 onClick={handleRevealAnswer}
-                className="px-6 sm:px-8 py-3.5 bg-gradient-to-r from-brand-600 via-fuchsia-600 to-orange-500 dark:from-accent-500 dark:via-violet-500 dark:to-brand-500 text-white rounded-xl font-bold transition-opacity hover:opacity-90 text-base w-full sm:w-auto sm:min-w-[220px]"
+                className="px-6 sm:px-8 py-3.5 bg-gradient-to-r from-brand-600 via-pink-500 to-orange-500 dark:from-accent-500 dark:via-violet-500 dark:to-brand-500 text-white rounded-xl font-bold transition-opacity hover:opacity-90 text-base w-full sm:w-auto sm:min-w-[220px]"
               >
                 Reveal Answer
               </motion.button>
@@ -1646,7 +1646,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
             {canNext && (
               <motion.button
                 onClick={handleNext}
-                className="px-6 sm:px-8 py-3.5 bg-gradient-to-r from-brand-600 via-fuchsia-600 to-orange-500 dark:from-accent-500 dark:via-violet-500 dark:to-brand-500 text-white rounded-xl font-bold transition-opacity hover:opacity-90 text-base w-full sm:w-auto sm:min-w-[220px]"
+                className="px-6 sm:px-8 py-3.5 bg-gradient-to-r from-brand-600 via-pink-500 to-orange-500 dark:from-accent-500 dark:via-violet-500 dark:to-brand-500 text-white rounded-xl font-bold transition-opacity hover:opacity-90 text-base w-full sm:w-auto sm:min-w-[220px]"
               >
                 Next Question
               </motion.button>
@@ -1656,7 +1656,7 @@ export default function QuizPlayer({ title, questions, fileId, onGenerateQuiz, i
               <motion.button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className={`px-6 sm:px-8 py-3.5 bg-gradient-to-r from-brand-600 via-fuchsia-600 to-orange-500 dark:from-accent-500 dark:via-violet-500 dark:to-brand-500 text-white rounded-xl font-bold transition-opacity hover:opacity-90 text-base w-full sm:w-auto sm:min-w-[220px] ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`px-6 sm:px-8 py-3.5 bg-gradient-to-r from-brand-600 via-pink-500 to-orange-500 dark:from-accent-500 dark:via-violet-500 dark:to-brand-500 text-white rounded-xl font-bold transition-opacity hover:opacity-90 text-base w-full sm:w-auto sm:min-w-[220px] ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {isSubmitting ? 'Submitting...' : 'Submit Quiz'}
               </motion.button>

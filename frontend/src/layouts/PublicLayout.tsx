@@ -60,7 +60,7 @@ export default function PublicLayout() {
               {isAuthenticated ? (
                 <Link
                   to="/study"
-                  className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-pink-600 via-fuchsia-600 to-orange-500 px-5 py-2 text-sm font-semibold text-white transition-all duration-200 hover:brightness-105 dark:from-cyan-600 dark:via-violet-600 dark:to-blue-600"
+                  className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-pink-600 via-pink-500 to-orange-500 px-5 py-2 text-sm font-semibold text-white transition-all duration-200 hover:brightness-105 dark:from-cyan-600 dark:via-violet-600 dark:to-blue-600"
                 >
                   Go to Dashboard
                 </Link>
@@ -74,7 +74,7 @@ export default function PublicLayout() {
                   </Link>
                   <Link
                     to="/register"
-                    className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-pink-600 via-fuchsia-600 to-orange-500 px-5 py-2 text-sm font-semibold text-white transition-all duration-200 hover:brightness-105 dark:from-cyan-600 dark:via-violet-600 dark:to-blue-600"
+                    className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-pink-600 via-pink-500 to-orange-500 px-5 py-2 text-sm font-semibold text-white transition-all duration-200 hover:brightness-105 dark:from-cyan-600 dark:via-violet-600 dark:to-blue-600"
                   >
                     Get Started Free
                   </Link>
@@ -142,7 +142,7 @@ export default function PublicLayout() {
                 {isAuthenticated ? (
                   <Link
                     to="/study"
-                    className="block w-full rounded-lg bg-gradient-to-r from-pink-600 via-fuchsia-600 to-orange-500 px-4 py-3 text-center text-base font-semibold text-white transition-all duration-200 hover:brightness-105 dark:from-cyan-600 dark:via-violet-600 dark:to-blue-600"
+                    className="block w-full rounded-lg bg-gradient-to-r from-pink-600 via-pink-500 to-orange-500 px-4 py-3 text-center text-base font-semibold text-white transition-all duration-200 hover:brightness-105 dark:from-cyan-600 dark:via-violet-600 dark:to-blue-600"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Go to Dashboard
@@ -158,7 +158,7 @@ export default function PublicLayout() {
                     </Link>
                     <Link
                       to="/register"
-                      className="block w-full rounded-lg bg-gradient-to-r from-pink-600 via-fuchsia-600 to-orange-500 px-4 py-3 text-center text-base font-semibold text-white transition-all duration-200 hover:brightness-105 dark:from-cyan-600 dark:via-violet-600 dark:to-blue-600"
+                      className="block w-full rounded-lg bg-gradient-to-r from-pink-600 via-pink-500 to-orange-500 px-4 py-3 text-center text-base font-semibold text-white transition-all duration-200 hover:brightness-105 dark:from-cyan-600 dark:via-violet-600 dark:to-blue-600"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Get Started Free

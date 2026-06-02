@@ -128,10 +128,10 @@ export default function NotesView({
       )}
 
       <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900/40 p-5 sm:p-6 overflow-hidden relative">
-        <div className="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-fuchsia-200/40 blur-3xl dark:bg-cyan-500/10" />
+        <div className="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-pink-300/30 blur-3xl dark:bg-cyan-500/10" />
         <div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-orange-200/40 blur-3xl dark:bg-violet-500/10" />
         <h3 className="relative z-10 text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 dark:from-cyan-400 dark:via-blue-500 dark:to-violet-500 drop-shadow-sm">AI</span> Notes
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-orange-400 to-amber-500 dark:from-cyan-400 dark:via-blue-500 dark:to-violet-500 drop-shadow-sm">AI</span> Notes
         </h3>
       </div>
 

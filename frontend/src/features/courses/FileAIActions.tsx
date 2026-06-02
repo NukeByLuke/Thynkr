@@ -117,10 +117,10 @@ export default function FileAIActions({
                 className="group relative w-full rounded-xl p-[1px] overflow-hidden transition-transform duration-300 hover:-translate-y-0.5"
                 title="Chat with AI Tutor"
               >
-                <span className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-500 opacity-90 transition-opacity duration-300 group-hover:opacity-100" />
-                <span className="pointer-events-none absolute inset-0 rounded-xl bg-fuchsia-500/20 blur-md opacity-40 transition-opacity duration-300 group-hover:opacity-80 dark:bg-cyan-500/25" />
+                <span className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-r from-pink-500 via-violet-500 to-cyan-500 opacity-90 transition-opacity duration-300 group-hover:opacity-100" />
+                <span className="pointer-events-none absolute inset-0 rounded-xl bg-pink-500/20 blur-md opacity-40 transition-opacity duration-300 group-hover:opacity-80 dark:bg-cyan-500/25" />
                 <span className="relative flex items-center justify-center gap-2 rounded-[11px] bg-white/95 px-3 py-2 text-xs font-semibold text-slate-900 dark:bg-slate-900/95 dark:text-cyan-100">
-                  <Sparkles className="h-3.5 w-3.5 text-fuchsia-500 transition-transform duration-300 group-hover:scale-110 dark:text-cyan-400" />
+                  <Sparkles className="h-3.5 w-3.5 text-pink-60000 transition-transform duration-300 group-hover:scale-110 dark:text-cyan-400" />
                   Chat with AI Tutor
                 </span>
               </button>

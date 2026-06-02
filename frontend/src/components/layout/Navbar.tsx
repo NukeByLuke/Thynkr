@@ -75,7 +75,7 @@ const Navbar = memo(() => {
     ? 'from-cyan-500 via-blue-600 to-violet-600'
     : isSunset
     ? 'from-blue-500 via-violet-600 to-cyan-500'
-    : 'from-fuchsia-600 via-pink-500 to-orange-500';
+    : 'from-pink-600 via-pink-500 to-orange-500';
 
   // Mobile menu item styling - theme aware
   const mobileNavItemClass = (isActive: boolean) => `flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${

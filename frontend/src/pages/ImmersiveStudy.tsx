@@ -580,7 +580,7 @@ export default function ImmersiveStudy() {
               className={`flex items-end gap-2.5 ${message.role === 'user' ? 'justify-end' : 'justify-start pl-1 sm:pl-2'}`}
             >
               {message.role === 'assistant' && (
-                <div className="h-7 w-7 rounded-full bg-gradient-to-br from-fuchsia-500/80 to-cyan-500/80 text-white flex items-center justify-center shadow-md shadow-fuchsia-500/30">
+                <div className="h-7 w-7 rounded-full bg-gradient-to-br from-pink-500/80 to-cyan-400/80 text-white flex items-center justify-center shadow-md shadow-pink-500/30">
                   <Sparkles className="h-3.5 w-3.5" />
                 </div>
               )}
@@ -588,7 +588,7 @@ export default function ImmersiveStudy() {
               <div
                 className={`max-w-[92%] sm:max-w-[86%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
                   message.role === 'user'
-                    ? 'rounded-br-md bg-gradient-to-br from-pink-600 to-fuchsia-600 dark:from-cyan-500 dark:to-violet-500 text-white shadow-fuchsia-500/30'
+                    ? 'rounded-br-md bg-gradient-to-br from-pink-500 to-orange-400 dark:from-cyan-500 dark:to-violet-500 text-white shadow-pink-500/30'
                     : 'rounded-bl-md bg-white/95 dark:bg-slate-900/90 border border-slate-200/70 dark:border-white/10 text-slate-800 dark:text-slate-200'
                 }`}
               >
@@ -613,7 +613,7 @@ export default function ImmersiveStudy() {
 
           {isTutorTyping && (
             <div className="flex items-end gap-2.5 justify-start pl-1 sm:pl-2">
-              <div className="h-7 w-7 rounded-full bg-gradient-to-br from-fuchsia-500/80 to-cyan-500/80 text-white flex items-center justify-center shadow-md shadow-fuchsia-500/30">
+              <div className="h-7 w-7 rounded-full bg-gradient-to-br from-pink-500/80 to-cyan-400/80 text-white flex items-center justify-center shadow-md shadow-pink-500/30">
                 <Sparkles className="h-3.5 w-3.5" />
               </div>
               <div className="rounded-2xl rounded-bl-md bg-white/95 dark:bg-slate-900/90 border border-slate-200/70 dark:border-white/10 px-4 py-3 shadow-sm">
@@ -621,7 +621,7 @@ export default function ImmersiveStudy() {
                   {[0, 1, 2].map((index) => (
                     <span
                       key={index}
-                      className="h-1.5 w-1.5 rounded-full bg-fuchsia-500 dark:bg-cyan-400 animate-bounce"
+                      className="h-1.5 w-1.5 rounded-full bg-pink-500 dark:bg-cyan-400 animate-bounce"
                       style={{ animationDelay: `${index * 120}ms` }}
                     />
                   ))}
@@ -652,7 +652,7 @@ export default function ImmersiveStudy() {
               }}
               rows={1}
               placeholder="Ask AI Tutor anything about this file..."
-              className="w-full resize-none overflow-hidden rounded-2xl border border-slate-300/80 dark:border-white/15 bg-white dark:bg-slate-900 px-4 py-3 pr-14 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/60 dark:focus:ring-cyan-500/60"
+              className="w-full resize-none overflow-hidden rounded-2xl border border-slate-300/80 dark:border-white/15 bg-white dark:bg-slate-900 px-4 py-3 pr-14 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-pink-500/60 dark:focus:ring-cyan-500/60"
             />
 
             <button
@@ -660,7 +660,7 @@ export default function ImmersiveStudy() {
               disabled={!tutorInput.trim() || isTutorTyping}
               className={`absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-200 ${
                 tutorInput.trim() && !isTutorTyping
-                  ? 'bg-gradient-to-r from-fuchsia-600 to-cyan-500 text-white shadow-lg shadow-fuchsia-500/30 dark:shadow-cyan-500/30 hover:scale-105'
+                  ? 'bg-gradient-to-r from-pink-500 to-cyan-400 text-white shadow-lg shadow-pink-500/30 dark:shadow-cyan-500/30 hover:scale-105'
                   : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed'
               }`}
               title="Send message"
@@ -730,7 +730,7 @@ export default function ImmersiveStudy() {
                         onClick={() => handleTabChange(tab.id)}
                         className={`shrink-0 px-3 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 border ${
                           isActive
-                            ? 'text-pink-700 dark:text-cyan-300 bg-gradient-to-r from-pink-100 to-fuchsia-100 dark:from-violet-500/30 dark:to-cyan-500/30 border-pink-200 dark:border-cyan-500/40'
+                            ? 'text-pink-700 dark:text-cyan-300 bg-gradient-to-r from-pink-100 to-orange-100 dark:from-violet-500/30 dark:to-cyan-500/30 border-pink-200 dark:border-cyan-500/40'
                             : 'text-slate-700 dark:text-slate-400 border-transparent hover:bg-pink-50 dark:hover:bg-cyan-900/20 hover:text-pink-900 dark:hover:text-cyan-200'
                         }`}
                       >
@@ -745,7 +745,7 @@ export default function ImmersiveStudy() {
                     className="group relative shrink-0 rounded-lg p-[1px] ml-0.5 overflow-hidden transition-transform duration-200 hover:-translate-y-0.5"
                     title="Chat with AI Tutor"
                   >
-                    <span className="pointer-events-none absolute inset-0 rounded-lg bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-500 opacity-90 transition-opacity duration-200 group-hover:opacity-100" />
+                    <span className="pointer-events-none absolute inset-0 rounded-lg bg-gradient-to-r from-pink-500 via-violet-500 to-cyan-500 opacity-90 transition-opacity duration-200 group-hover:opacity-100" />
                     <span
                       className={`relative inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-[7px] text-xs sm:text-sm font-semibold border transition-colors duration-200 ${
                         isTutorActive
@@ -755,7 +755,7 @@ export default function ImmersiveStudy() {
                     >
                       <Sparkles
                         className={`w-3.5 h-3.5 ${
-                          isTutorActive ? 'text-slate-900 dark:text-white' : 'text-fuchsia-500 dark:text-cyan-400'
+                          isTutorActive ? 'text-slate-900 dark:text-white' : 'text-pink-60000 dark:text-cyan-400'
                         }`}
                       />
                       <span className="hidden sm:inline">Chat with AI Tutor</span>
@@ -2033,7 +2033,7 @@ function GeneratePrompt({ type, onGenerate, isGenerating, extraContent }: Genera
       <button
         onClick={onGenerate}
         disabled={isGenerating}
-        className="px-6 py-3 bg-gradient-to-r from-pink-600 to-fuchsia-600 hover:from-pink-700 hover:to-fuchsia-700 dark:from-cyan-500 dark:to-violet-500 dark:hover:from-cyan-600 dark:hover:to-violet-600 text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-pink-500/25 dark:shadow-cyan-500/25 hover:shadow-xl hover:shadow-pink-500/30 dark:hover:shadow-cyan-500/30"
+        className="px-6 py-3 bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-700 hover:to-fuchsia-700 dark:from-cyan-500 dark:to-violet-500 dark:hover:from-cyan-600 dark:hover:to-violet-600 text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-pink-500/25 dark:shadow-cyan-500/25 hover:shadow-xl hover:shadow-pink-500/30 dark:hover:shadow-cyan-500/30"
       >
         <span className="flex items-center gap-2">
           <Sparkles className="w-4 h-4" />

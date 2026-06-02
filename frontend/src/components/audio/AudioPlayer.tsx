@@ -656,7 +656,7 @@ export default function AudioPlayer({
                 className={clsx(
                   'inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
                   activeSetting
-                    ? 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300'
+                    ? 'bg-fuchsia-100 text-pink-600 dark:bg-fuchsia-900/40 dark:text-fuchsia-300'
                     : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
                 )}
                 title="Open audio settings"
@@ -713,7 +713,7 @@ export default function AudioPlayer({
                 type="button"
                 onClick={togglePlay}
                 disabled={isLoading}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-pink-600 to-fuchsia-600 text-white shadow-md transition-all hover:scale-105 disabled:opacity-60 disabled:hover:scale-100 dark:from-cyan-500 dark:to-violet-600"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-orange-400 text-white shadow-md transition-all hover:scale-105 disabled:opacity-60 disabled:hover:scale-100 dark:from-cyan-500 dark:to-violet-600"
                 title={isPlaying ? 'Pause' : 'Play'}
               >
                 {isLoading ? (
@@ -750,7 +750,7 @@ export default function AudioPlayer({
                 className={clsx(
                   'rounded-lg px-2 py-1 text-xs font-semibold transition-colors',
                   activeSetting === 'speed'
-                    ? 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300'
+                    ? 'bg-fuchsia-100 text-pink-600 dark:bg-fuchsia-900/40 dark:text-fuchsia-300'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
                 )}
                 title="Playback speed"
@@ -763,7 +763,7 @@ export default function AudioPlayer({
                 className={clsx(
                   'rounded-lg px-2 py-1 text-xs font-semibold transition-colors',
                   activeSetting === 'voice'
-                    ? 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300'
+                    ? 'bg-fuchsia-100 text-pink-600 dark:bg-fuchsia-900/40 dark:text-fuchsia-300'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
                 )}
                 title="Select voice"
@@ -818,7 +818,7 @@ export default function AudioPlayer({
                           className={clsx(
                             'rounded-lg border px-2 py-2 text-left text-xs transition-all',
                             voice === v.id
-                              ? 'border-fuchsia-500 bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-900/20 dark:text-fuchsia-300'
+                              ? 'border-fuchsia-500 bg-fuchsia-50 text-pink-600 dark:bg-fuchsia-900/20 dark:text-fuchsia-300'
                               : 'border-transparent bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
                           )}
                         >
@@ -844,7 +844,7 @@ export default function AudioPlayer({
                           className={clsx(
                             'rounded-lg border px-2 py-2 text-xs font-medium transition-all',
                             Math.abs(speed - s) < 0.01
-                              ? 'border-fuchsia-500 bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-900/20 dark:text-fuchsia-300'
+                              ? 'border-fuchsia-500 bg-fuchsia-50 text-pink-600 dark:bg-fuchsia-900/20 dark:text-fuchsia-300'
                               : 'border-transparent bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
                           )}
                         >
@@ -870,7 +870,7 @@ export default function AudioPlayer({
         <button
           onClick={togglePlay}
           disabled={isLoading}
-          className="p-2 rounded-lg bg-fuchsia-100 dark:bg-violet-900/30 text-fuchsia-600 dark:text-violet-400 hover:bg-fuchsia-200 dark:hover:bg-violet-900/50 transition-colors disabled:opacity-50"
+          className="p-2 rounded-lg bg-fuchsia-100 dark:bg-violet-900/30 text-pink-600 dark:text-violet-400 hover:bg-fuchsia-200 dark:hover:bg-violet-900/50 transition-colors disabled:opacity-50"
         >
           {isLoading ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -885,7 +885,7 @@ export default function AudioPlayer({
             <span>{formatTime(currentTime)}</span>
             <div className="w-20 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-fuchsia-500 dark:bg-violet-500 transition-[width] duration-150 ease-linear"
+                className="h-full bg-pink-500 dark:bg-violet-500 transition-[width] duration-150 ease-linear"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -987,7 +987,7 @@ export default function AudioPlayer({
             className={clsx(
               'p-2 rounded-lg transition-colors',
               activeSetting
-                ? 'bg-fuchsia-100 dark:bg-violet-900/30 text-fuchsia-600 dark:text-violet-400'
+                ? 'bg-fuchsia-100 dark:bg-violet-900/30 text-pink-600 dark:text-violet-400'
                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
             )}
           >
@@ -1009,8 +1009,8 @@ export default function AudioPlayer({
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-sm font-semibold capitalize">{activeSetting} Settings</h3>
                 <div className="flex gap-2 text-xs">
-                     <button onClick={() => setActiveSetting('voice')} className={clsx("px-2 py-1 rounded", activeSetting === 'voice' ? 'bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-600 dark:text-fuchsia-300' : 'text-gray-500')}>Voice</button>
-                     <button onClick={() => setActiveSetting('speed')} className={clsx("px-2 py-1 rounded", activeSetting === 'speed' ? 'bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-600 dark:text-fuchsia-300' : 'text-gray-500')}>Speed</button>
+                     <button onClick={() => setActiveSetting('voice')} className={clsx("px-2 py-1 rounded", activeSetting === 'voice' ? 'bg-fuchsia-100 dark:bg-fuchsia-900/30 text-pink-600 dark:text-fuchsia-300' : 'text-gray-500')}>Voice</button>
+                     <button onClick={() => setActiveSetting('speed')} className={clsx("px-2 py-1 rounded", activeSetting === 'speed' ? 'bg-fuchsia-100 dark:bg-fuchsia-900/30 text-pink-600 dark:text-fuchsia-300' : 'text-gray-500')}>Speed</button>
                 </div>
               </div>
 
@@ -1054,7 +1054,7 @@ export default function AudioPlayer({
                       className={clsx(
                         'px-3 py-2 rounded-lg text-sm font-medium transition-all border',
                         Math.abs(speed - s) < 0.01
-                          ? 'border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-900/20 text-fuchsia-700 dark:text-fuchsia-300 shadow-sm'
+                          ? 'border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-900/20 text-pink-600 dark:text-fuchsia-300 shadow-sm'
                           : 'border-transparent bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                       )}
                     >

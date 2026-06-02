@@ -190,7 +190,7 @@ function CreateCourseModal({ isOpen, onClose }: CreateCourseModalProps) {
       >
         {/* Header */}
         <div className="flex items-start gap-3 mb-5 sm:mb-6">
-          <div className="p-2 sm:p-2.5 bg-gradient-to-br from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 rounded-[2px]">
+          <div className="p-2 sm:p-2.5 bg-gradient-to-br from-pink-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 rounded-[2px]">
             <FolderPlus className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-white" />
           </div>
           <div className="min-w-0">
@@ -324,7 +324,7 @@ function CreateCourseModal({ isOpen, onClose }: CreateCourseModalProps) {
             <button
               type="submit"
               disabled={!newCourse.title || createMutation.isPending}
-              className="w-full sm:w-auto px-5 py-2 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 text-white rounded-[2px] font-medium text-sm hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full sm:w-auto px-5 py-2 bg-gradient-to-r from-pink-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 text-white rounded-[2px] font-medium text-sm hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {createMutation.isPending ? 'Creating...' : 'Create Set'}
             </button>
@@ -368,7 +368,7 @@ function CourseCard({ course, onDelete, onMenuToggle, isMenuOpen }: CourseCardPr
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-fuchsia-500/20 via-pink-500/20 to-orange-500/20 dark:from-cyan-500/20 dark:via-blue-600/20 dark:to-violet-600/20 flex items-center justify-center">
+              <div className="w-full h-full bg-gradient-to-br from-pink-500/20 via-pink-500/20 to-orange-500/20 dark:from-cyan-500/20 dark:via-blue-600/20 dark:to-violet-600/20 flex items-center justify-center">
                 <CategoryIcon className="h-10 w-10 sm:h-12 sm:w-12 text-slate-400/50 dark:text-slate-600/50" />
               </div>
             )}
@@ -572,7 +572,7 @@ export default function Courses() {
             className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-1.5 sm:mb-2"
           >
             {getGreeting()},{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600">
               {firstName}
             </span>
           </motion.h1>
@@ -629,7 +629,7 @@ export default function Courses() {
           {/* Create Button */}
           <button
             onClick={() => setShowCreateModal(true)}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 text-white rounded-[2px] font-medium text-sm hover:shadow-lg transition-all whitespace-nowrap"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-pink-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 text-white rounded-[2px] font-medium text-sm hover:shadow-lg transition-all whitespace-nowrap"
           >
             <Plus className="h-4 w-4" />
             Create Set
@@ -653,7 +653,7 @@ export default function Courses() {
                   onClick={() => setCategory(cat.value)}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 text-white shadow-md'
+                      ? 'bg-gradient-to-r from-pink-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 text-white shadow-md'
                       : isDark
                         ? 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
@@ -776,7 +776,7 @@ export default function Courses() {
                     : 'border-slate-300 hover:border-pink-400 hover:bg-pink-50/50'
                 }`}
               >
-                <div className="p-2.5 sm:p-3 rounded-full bg-gradient-to-br from-fuchsia-500/20 via-pink-500/20 to-orange-500/20 dark:from-cyan-500/20 dark:via-blue-600/20 dark:to-violet-600/20">
+                <div className="p-2.5 sm:p-3 rounded-full bg-gradient-to-br from-pink-500/20 via-pink-500/20 to-orange-500/20 dark:from-cyan-500/20 dark:via-blue-600/20 dark:to-violet-600/20">
                   <Plus className="h-5 w-5 sm:h-6 sm:w-6 text-pink-600 dark:text-cyan-500" />
                 </div>
                 <span className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">

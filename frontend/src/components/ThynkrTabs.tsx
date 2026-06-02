@@ -51,7 +51,7 @@ export default function ThynkrTabs({ className = '' }: ThynkrTabsProps) {
             {isActive && (
               <motion.div
                 layoutId="tab-pill"
-                className="absolute inset-0 rounded-[2px] bg-gradient-to-r from-fuchsia-500 via-pink-500 to-orange-400 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500 border-2 border-fuchsia-700 dark:border-cyan-300"
+                className="absolute inset-0 rounded-[2px] bg-gradient-to-r from-pink-500 via-pink-500 to-orange-400 dark:from-cyan-500 dark:via-blue-500 dark:to-violet-500 border-2 border-pink-600 dark:border-cyan-300"
                 transition={{
                   type: 'spring',
                   stiffness: 400,
@@ -65,7 +65,7 @@ export default function ThynkrTabs({ className = '' }: ThynkrTabsProps) {
               className={`relative z-10 font-medium transition-colors duration-200 ${
                 isActive 
                   ? 'text-white'
-                  : 'text-slate-700 dark:text-slate-200 hover:text-fuchsia-700 dark:hover:text-cyan-300'
+                  : 'text-slate-700 dark:text-slate-200 hover:text-pink-600 dark:hover:text-cyan-300'
               }`}
             >
               {tab.label}

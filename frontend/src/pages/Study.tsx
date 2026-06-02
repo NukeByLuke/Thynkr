@@ -461,7 +461,7 @@ export default function Study() {
 
         {/* Content */}
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 sm:px-6">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-600 via-fuchsia-600 to-orange-600 dark:from-cyan-400 dark:via-violet-400 dark:to-blue-400 bg-clip-text text-transparent mb-1.5">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-600 via-pink-500 to-orange-600 dark:from-cyan-400 dark:via-violet-400 dark:to-blue-400 bg-clip-text text-transparent mb-1.5">
             Study Center
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl">

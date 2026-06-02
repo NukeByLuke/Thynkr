@@ -15,7 +15,7 @@ const tilePositions = [
 
 const tileColorClasses = [
   'from-brand-500 to-fuchsia-500 dark:from-cyan-400 dark:to-blue-500',
-  'from-fuchsia-500 to-orange-400 dark:from-blue-500 dark:to-violet-500',
+  'from-pink-500 to-orange-400 dark:from-blue-500 dark:to-violet-500',
   'from-brand-400 to-fuchsia-400 dark:from-cyan-500 dark:to-blue-400',
   'from-orange-400 to-brand-500 dark:from-violet-500 dark:to-cyan-400',
 ] as const;

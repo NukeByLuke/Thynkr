@@ -108,10 +108,10 @@ const Sidebar = ({
             : `text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/70 border border-transparent `}
         `}
       >
-        {active && isExpanded && <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-full bg-fuchsia-500 dark:bg-accent-400" />}
+        {active && isExpanded && <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-full bg-pink-500 dark:bg-accent-400" />}
 
         <div className="relative">
-          <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-fuchsia-600 dark:text-accent-300' : ''}`} />
+          <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-pink-600 dark:text-accent-300' : ''}`} />
           {badge !== undefined && badge > 0 && (
             <span className="absolute -top-2 -right-2 min-w-5 h-5 bg-gradient-to-r from-pink-500 to-orange-500 dark:from-cyan-400 dark:to-blue-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-lg">
               {badge > 9 ? '9+' : badge}
@@ -179,7 +179,7 @@ const Sidebar = ({
 
       {isExpanded && (
         <div className="mx-3 mt-3 mb-2 flex-shrink-0 rounded-[2px] border border-fuchsia-200/30 dark:border-slate-700/40 bg-white/80 dark:bg-slate-900/80 px-3 py-2.5 shadow-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-fuchsia-600 dark:text-cyan-300 mb-1">Workspace</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-pink-600 dark:text-cyan-300 mb-1">Workspace</p>
           <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{userDisplayName}</p>
           <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{userEmail}</p>
         </div>
@@ -215,9 +215,9 @@ const Sidebar = ({
       {/* Premium Upsell */}
       {isExpanded && !isPremium && (
         <div className="px-3 pb-3 flex-shrink-0">
-          <div className="rounded-[2px] bg-gradient-to-br from-fuchsia-500/12 via-white to-orange-500/12 dark:from-cyan-500/15 dark:via-slate-900 dark:to-violet-500/15 border border-fuchsia-200/70 dark:border-cyan-500/25 p-3.5 shadow-sm">
+          <div className="rounded-[2px] bg-gradient-to-br from-pink-500/12 via-white to-orange-500/12 dark:from-cyan-500/15 dark:via-slate-900 dark:to-violet-500/15 border border-fuchsia-200/70 dark:border-cyan-500/25 p-3.5 shadow-sm">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 rounded-[2px] bg-gradient-to-br from-fuchsia-500 to-orange-500 dark:from-cyan-400 dark:to-violet-500 p-2 text-white shadow-md">
+              <div className="mt-0.5 rounded-[2px] bg-gradient-to-br from-pink-500 to-orange-500 dark:from-cyan-400 dark:to-violet-500 p-2 text-white shadow-md">
                 <Sparkles className="w-4 h-4" />
               </div>
               <div className="min-w-0 flex-1">
@@ -227,7 +227,7 @@ const Sidebar = ({
                 </p>
                 <Link
                   to="/pricing"
-                  className="mt-3 inline-flex items-center justify-center rounded-[2px] bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 px-3 py-2 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all"
+                  className="mt-3 inline-flex items-center justify-center rounded-[2px] bg-gradient-to-r from-pink-600 via-pink-500 to-orange-500 dark:from-cyan-500 dark:via-blue-600 dark:to-violet-600 px-3 py-2 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all"
                 >
                   Get Premium Access
                 </Link>
@@ -283,7 +283,7 @@ const Sidebar = ({
             aria-label="Settings"
             className={`flex h-10 w-10 items-center justify-center rounded-[2px] transition-all border ${
               isActive('/settings')
-                ? 'bg-fuchsia-500/15 border-fuchsia-200 text-fuchsia-600 dark:bg-cyan-400/15 dark:border-cyan-400/30 dark:text-cyan-300'
+                ? 'bg-pink-500/15 border-fuchsia-200 text-pink-600 dark:bg-cyan-400/15 dark:border-cyan-400/30 dark:text-cyan-300'
                 : 'bg-transparent border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100/90 dark:hover:bg-slate-800/70 hover:text-slate-900 dark:hover:text-white'
             }`}
           >

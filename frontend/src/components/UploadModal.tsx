@@ -1994,7 +1994,7 @@ export default function UploadModal({
                               const progressBarClass =
                                 progressFile.status === 'failed'
                                   ? 'h-full rounded-full bg-gradient-to-r from-rose-500 to-red-500'
-                                  : 'h-full rounded-full bg-gradient-to-r from-fuchsia-500 to-cyan-500';
+                                  : 'h-full rounded-full bg-gradient-to-r from-pink-500 to-cyan-500';
 
                               return (
                                 <div

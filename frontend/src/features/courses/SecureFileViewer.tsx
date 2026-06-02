@@ -224,7 +224,7 @@ function AudioViewer({
   // Validate URL before rendering
   if (!url || url === 'undefined' || url === 'null') {
     return (
-      <div className="relative w-full p-8 bg-gradient-to-br from-pink-100 to-fuchsia-100 dark:from-cyan-900/30 dark:to-violet-900/30 rounded-lg">
+      <div className="relative w-full p-8 bg-gradient-to-br from-pink-100 to-orange-100 dark:from-cyan-900/30 dark:to-violet-900/30 rounded-lg">
         <Watermark courseTitle={courseTitle} userId={userId} />
         <div className="flex flex-col items-center gap-4">
           <Music className="w-16 h-16 text-pink-600 dark:text-cyan-400" />
@@ -236,7 +236,7 @@ function AudioViewer({
   }
 
   return (
-    <div className="relative w-full p-8 bg-gradient-to-br from-pink-100 to-fuchsia-100 dark:from-cyan-900/30 dark:to-violet-900/30 rounded-lg">
+    <div className="relative w-full p-8 bg-gradient-to-br from-pink-100 to-orange-100 dark:from-cyan-900/30 dark:to-violet-900/30 rounded-lg">
       <Watermark courseTitle={courseTitle} userId={userId} />
       <div className="flex flex-col items-center gap-4">
         <Music className="w-16 h-16 text-pink-600 dark:text-cyan-400" />

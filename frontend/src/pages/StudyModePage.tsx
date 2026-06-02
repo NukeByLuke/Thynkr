@@ -474,7 +474,7 @@ export default function StudyModePage() {
                     </h2>
                     <button
                       onClick={() => setMobileSidebarOpen(false)}
-                      className="p-2 rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 text-fuchsia-700 dark:text-cyan-300 hover:bg-fuchsia-50 dark:hover:bg-slate-800 transition-colors"
+                      className="p-2 rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 text-pink-600 dark:text-cyan-300 hover:bg-fuchsia-50 dark:hover:bg-slate-800 transition-colors"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -510,13 +510,13 @@ export default function StudyModePage() {
                           setShowSidebar(prev => !prev);
                           setMobileSidebarOpen(true);
                         }}
-                        className="md:hidden p-1.5 -ml-1.5 rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 text-fuchsia-700 dark:text-cyan-300 hover:bg-fuchsia-50 dark:hover:bg-slate-800"
+                        className="md:hidden p-1.5 -ml-1.5 rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 text-pink-600 dark:text-cyan-300 hover:bg-fuchsia-50 dark:hover:bg-slate-800"
                       >
                         <Menu className="h-5 w-5" />
                       </button>
                       <button 
                         onClick={() => setShowSidebar(prev => !prev)}
-                        className="hidden md:flex p-1.5 -ml-1.5 rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 text-fuchsia-700 dark:text-cyan-300 hover:bg-fuchsia-50 dark:hover:bg-slate-800"
+                        className="hidden md:flex p-1.5 -ml-1.5 rounded-[2px] border-2 border-fuchsia-200 dark:border-cyan-500/25 text-pink-600 dark:text-cyan-300 hover:bg-fuchsia-50 dark:hover:bg-slate-800"
                       >
                         <Menu className="h-5 w-5" />
                       </button>

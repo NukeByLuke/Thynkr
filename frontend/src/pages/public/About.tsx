@@ -79,7 +79,7 @@ export default function About() {
 
             {/* Aurora Design System */}
             <Card hover padding="lg" className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-pink-600 text-white mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-pink-600 text-white mb-4">
                 <Palette className="w-8 h-8" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
@@ -170,7 +170,7 @@ export default function About() {
 
               <div className="flex gap-4">
                 <div className="flex-shrink-0">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-fuchsia-500 to-pink-600 flex items-center justify-center text-white">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center text-white">
                     <Zap className="w-5 h-5" />
                   </div>
                 </div>

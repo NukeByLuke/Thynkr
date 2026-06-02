@@ -207,7 +207,7 @@ const StatusBadge = ({ status }: { status: RoadmapItem['status'] }) => {
 
 const CategoryBadge = ({ category }: { category: RoadmapItem['category'] }) => {
   const categoryConfig = {
-    AI: 'bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-700 dark:text-fuchsia-400',
+    AI: 'bg-fuchsia-100 dark:bg-fuchsia-900/30 text-pink-600 dark:text-fuchsia-400',
     Features: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400',
     UX: 'bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400',
     Social: 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400',
@@ -271,7 +271,7 @@ export default function Roadmap() {
             </div>
           </Card>
           <Card variant="glass" padding="lg" className="text-center">
-            <div className="text-3xl font-bold text-fuchsia-600 dark:text-violet-400 mb-2">
+            <div className="text-3xl font-bold text-pink-600 dark:text-violet-400 mb-2">
               {plannedItems.length}
             </div>
             <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">
@@ -321,7 +321,7 @@ export default function Roadmap() {
         {plannedItems.length > 0 && (
           <PageContainer.Section className="mb-12">
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-              <Circle className="w-6 h-6 text-fuchsia-600 dark:text-violet-400" />
+              <Circle className="w-6 h-6 text-pink-600 dark:text-violet-400" />
               Coming Soon
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -333,7 +333,7 @@ export default function Roadmap() {
                   className="relative overflow-hidden border border-slate-200 dark:border-slate-700"
                 >
                   <div className="flex items-start justify-between mb-3">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-pink-600 to-fuchsia-600 dark:from-cyan-500 dark:to-violet-600 text-white">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-pink-500 to-orange-400 dark:from-cyan-500 dark:to-violet-600 text-white">
                       {item.icon}
                     </div>
                     <CategoryBadge category={item.category} />
@@ -388,7 +388,7 @@ export default function Roadmap() {
         {/* Feedback CTA */}
         <div className="mt-16">
           <Card variant="glass" padding="lg" className="text-center">
-            <Sparkles className="w-12 h-12 mx-auto mb-4 text-fuchsia-600 dark:text-cyan-500" />
+            <Sparkles className="w-12 h-12 mx-auto mb-4 text-pink-600 dark:text-cyan-500" />
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
               Have a Feature Request?
             </h2>
@@ -397,7 +397,7 @@ export default function Roadmap() {
             </p>
             <a
               href="/contact"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-600 to-fuchsia-600 dark:from-cyan-500 dark:to-violet-600 text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-orange-400 dark:from-cyan-500 dark:to-violet-600 text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg"
             >
               Contact Us
             </a>

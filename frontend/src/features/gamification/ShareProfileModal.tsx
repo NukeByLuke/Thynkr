@@ -134,7 +134,7 @@ export const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, on
         <div className="bg-slate-100 dark:bg-slate-900 rounded-lg p-4 overflow-hidden">
           {isGenerating ? (
             <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 size={32} className="animate-spin text-fuchsia-500 mb-3" />
+              <Loader2 size={32} className="animate-spin text-pink-60000 mb-3" />
               <span className="text-slate-500 dark:text-slate-400 text-sm">Generating preview...</span>
             </div>
           ) : previewUrl ? (

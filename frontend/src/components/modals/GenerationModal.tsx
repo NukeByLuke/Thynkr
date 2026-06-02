@@ -44,7 +44,7 @@ export default function GenerationModal({ isOpen, type }: GenerationModalProps) 
             >
               {/* Ambient glow effects */}
               <div className="absolute -top-20 -left-20 w-40 h-40 bg-pink-500/20 dark:bg-cyan-500/20 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-fuchsia-500/20 dark:bg-violet-500/20 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-pink-500/20 dark:bg-violet-500/20 rounded-full blur-3xl pointer-events-none" />
 
               {/* Quantum Loader Content */}
               <div className="relative z-10">
