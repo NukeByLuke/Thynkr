@@ -43,11 +43,11 @@ const STD_XP = {
 
 // Mastery XP Rewards (5x Standard approx, flattened for specific scaling)
 const MASTERY_XP = {
-  COPPER: 500,
-  GOLD: 1000,
-  RUBY: 2500,
-  AMETHYST: 5000,
-  DIAMOND: 10000,
+  COPPER: 5000,
+  GOLD: 10000,
+  RUBY: 15000,
+  AMETHYST: 20000,
+  DIAMOND: 25000,
 };
 
 export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
