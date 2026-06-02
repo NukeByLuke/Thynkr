@@ -23,7 +23,7 @@ import {
   Login, Register, AuthCallback, OAuthCallback, ForgotPassword, VerifyEmail, 
   ResetPassword, Pricing, Account, Admin, Study, ImmersiveStudy, Files, 
   Settings, HelpCenter, Courses, MyCourseDetail, StudyModePage, Achievements, 
-  PublicAchievements, NotFound, Privacy, Terms, Cookies, Landing, About, Contact, 
+  PublicAchievements, NotFound, Privacy, Terms, Cookies, About, Contact, 
   Testimonials, Roadmap
 } from './routes';
 
