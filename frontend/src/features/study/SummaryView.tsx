@@ -102,8 +102,8 @@ export default function SummaryView({ content, fileName, onRegenerate, isRegener
   return (
     <div className="max-w-none w-full min-w-0 animate-fade-in space-y-4 sm:space-y-6">
       <div className="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950 shadow-xl">
-        <div className="absolute -top-24 -right-16 h-56 w-56 rounded-full bg-amber-200/40 blur-3xl dark:bg-amber-500/10" />
-        <div className="absolute -bottom-16 -left-12 h-48 w-48 rounded-full bg-cyan-200/40 blur-3xl dark:bg-cyan-500/10" />
+        <div className="absolute -top-24 -right-16 h-56 w-56 rounded-full bg-fuchsia-200/40 blur-3xl dark:bg-cyan-500/10" />
+        <div className="absolute -bottom-16 -left-12 h-48 w-48 rounded-full bg-orange-200/40 blur-3xl dark:bg-violet-500/10" />
 
         <div className="relative z-10 p-4 sm:p-7 lg:p-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 pb-4 border-b border-slate-200 dark:border-white/10">
@@ -111,7 +111,7 @@ export default function SummaryView({ content, fileName, onRegenerate, isRegener
               <p className="text-xs uppercase tracking-[0.22em] font-semibold text-slate-500 dark:text-slate-400 mb-1">
                 AI Study Brief
               </p>
-              <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white"><span className="text-brand-600 dark:text-brand-400">AI</span> Summary</h3>
+              <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white"><span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 dark:from-cyan-400 dark:via-blue-500 dark:to-violet-500 drop-shadow-sm">AI</span> Summary</h3>
               <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">Estimated reading time: {estimatedReadMinutes} min</p>
             </div>
 

@@ -78,7 +78,7 @@ function AppContent() {
   const HomeRoute = () => {
     const { user, isLoading } = useAuth();
     if (isLoading) return <LoadingSpinner fullScreen />;
-    return user ? <Navigate to="/study" replace /> : <Landing />;
+    return user ? <Navigate to="/study" replace /> : <Navigate to="/login" replace />;
   };
 
   return (

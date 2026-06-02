@@ -216,7 +216,7 @@ const FlashcardViewer = memo(function FlashcardViewer({
               Flashcard Studio
             </p>
             <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white truncate">
-              {title || 'Flashcards'}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 dark:from-cyan-400 dark:via-blue-500 dark:to-violet-500 drop-shadow-sm">AI</span> {title || 'Flashcards'}
             </h3>
             <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
               Card {currentIndex + 1} of {displayCards.length}
