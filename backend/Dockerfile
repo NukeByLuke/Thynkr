@@ -3,7 +3,7 @@
 # ============================================
 
 # Stage 1: Dependencies
-FROM node:22-slim AS deps
+FROM node:26-slim AS deps
 WORKDIR /app
 
 # Install pnpm
@@ -20,7 +20,7 @@ COPY package.json pnpm-lock.yaml* ./
 RUN pnpm install --no-frozen-lockfile && pnpm rebuild argon2 || pnpm rebuild argon2
 
 # Stage 2: Builder
-FROM node:22-slim AS builder
+FROM node:26-slim AS builder
 WORKDIR /app
 
 # Install pnpm
@@ -37,7 +37,7 @@ RUN pnpm prisma generate
 RUN NODE_OPTIONS="--max-old-space-size=2048" pnpm build
 
 # Stage 3: Production runner
-FROM node:22-slim AS runner
+FROM node:26-slim AS runner
 WORKDIR /app
 
 # Install system dependencies: wget for healthcheck, openssl, ffmpeg for audio, yt-dlp for YouTube
