@@ -959,6 +959,22 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
     fileDownload.click();
     document.body.removeChild(fileDownload);
   };
+
+  const handleExportTxt = () => {
+    const tempElement = document.createElement("div");
+    tempElement.innerHTML = localNotes;
+    const plainText = tempElement.innerText || tempElement.textContent || "";
+    
+    const blob = new Blob([`Study Notes: ${file.originalName}\n\n${plainText}`], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const fileDownload = document.createElement("a");
+    document.body.appendChild(fileDownload);
+    fileDownload.href = url;
+    fileDownload.download = "notes-" + (file.originalName || 'document') + ".txt";
+    fileDownload.click();
+    document.body.removeChild(fileDownload);
+    URL.revokeObjectURL(url);
+  };
   const fileType = (file.fileType || '').toLowerCase();
   const extension = getFileExtension(file.originalName);
   const previewFileUrl = getPreviewFileUrl(file);
@@ -1142,6 +1158,12 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
                       className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
                     >
                       Export to Docs
+                    </button>
+                    <button 
+                      onClick={handleExportTxt}
+                      className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                    >
+                      Export as TXT
                     </button>
                   </div>
                 </div>
