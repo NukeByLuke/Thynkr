@@ -7,7 +7,9 @@
  * CRITICAL: Layout context management ensures sidebar ALWAYS reappears on navigation away.
  */
 
-import { useEffect, useCallback, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useCallback, useRef, useState, useMemo } from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useParams, Navigate, useSearchParams } from 'react-router-dom';
 import { 
@@ -910,10 +912,9 @@ function getYouTubeEmbedUrl(url: string): string | null {
 function OriginalContentPreview({ file }: { file: UploadedFile }) {
   const [showNotes, setShowNotes] = useState(false);
   const [localNotes, setLocalNotes] = useState(() => localStorage.getItem('my-notes-' + file.id) || '');
-  const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const val = e.target.value;
-    setLocalNotes(val);
-    localStorage.setItem('my-notes-' + file.id, val);
+  const handleQuillChange = (content: string) => {
+    setLocalNotes(content);
+    localStorage.setItem('my-notes-' + file.id, content);
   };
 
   const handleExportPdf = () => {
@@ -926,12 +927,14 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
           <style>
             body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; padding: 2rem; max-width: 800px; margin: 0 auto; color: #1e293b; }
             h1 { font-size: 1.5rem; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0; }
-            pre { white-space: pre-wrap; font-family: inherit; margin: 0; }
+            .notes-content { white-space: pre-wrap; word-wrap: break-word; }
+            .notes-content p { margin: 0 0 1em 0; }
+            .notes-content ul, .notes-content ol { margin-left: 1.5rem; margin-bottom: 1em; }
           </style>
         </head>
         <body>
           <h1>Study Notes: ${file.originalName}</h1>
-          <pre>${localNotes}</pre>
+          <div class="notes-content">${localNotes}</div>
         </body>
       </html>
     `);
@@ -946,7 +949,7 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
   const handleExportDoc = () => {
     const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title></head><body>";
     const footer = "</body></html>";
-    const sourceHTML = header + "<h1>Study Notes: " + file.originalName + "</h1><pre style='white-space: pre-wrap; font-family: system-ui, sans-serif;'>" + localNotes + "</pre>" + footer;
+    const sourceHTML = header + "<h1>Study Notes: " + file.originalName + "</h1><div style='white-space: pre-wrap; font-family: system-ui, sans-serif; word-wrap: break-word;'>" + localNotes + "</div>" + footer;
     
     const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
     const fileDownload = document.createElement("a");
@@ -1143,12 +1146,54 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
               </div>
             </div>
           </div>
-          <textarea 
-            className="flex-1 w-full h-[50vh] lg:h-auto bg-transparent p-5 resize-none focus:outline-none text-slate-700 dark:text-slate-300 custom-scrollbar sm:text-lg leading-relaxed placeholder:text-slate-400 dark:placeholder:text-slate-600"
-            placeholder="Type your study notes here..."
-            value={localNotes}
-            onChange={handleNoteChange}
-          />
+          <div className="flex-1 min-h-[50vh] overflow-hidden custom-quill-container bg-transparent text-slate-700 dark:text-slate-300">
+            <ReactQuill 
+              theme="snow"
+              value={localNotes}
+              onChange={handleQuillChange}
+              className="h-full flex flex-col"
+              placeholder="Type your study notes here..."
+              modules={{
+                toolbar: [
+                  [{ 'header': [1, 2, 3, false] }],
+                  ['bold', 'italic', 'underline', 'strike'],
+                  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                  ['clean']
+                ]
+              }}
+            />
+            <style>{`
+              .custom-quill-container .ql-toolbar {
+                border: none;
+                border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+                background: transparent;
+                padding: 12px;
+              }
+              .dark .custom-quill-container .ql-toolbar .ql-stroke {
+                stroke: #cbd5e1;
+              }
+              .dark .custom-quill-container .ql-toolbar .ql-fill {
+                fill: #cbd5e1;
+              }
+              .dark .custom-quill-container .ql-toolbar .ql-picker {
+                color: #cbd5e1;
+              }
+              .custom-quill-container .ql-container {
+                border: none;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                font-family: inherit;
+                font-size: 1.125rem;
+              }
+              .custom-quill-container .ql-editor {
+                flex: 1;
+                overflow-y: auto;
+                padding: 1.25rem;
+              }
+            `}</style>
+          </div>
         </div>
       )}
     </div>
