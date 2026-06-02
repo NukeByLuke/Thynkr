@@ -1129,19 +1129,21 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
                   Export
                   <ChevronDown className="w-3.5 h-3.5 opacity-50" />
                 </button>
-                <div className="absolute right-0 mt-1 hidden w-40 flex-col rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 shadow-xl group-hover:flex z-[100]">
-                  <button 
-                    onClick={handleExportPdf}
-                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
-                  >
-                    Export as PDF
-                  </button>
-                  <button 
-                    onClick={handleExportDoc}
-                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
-                  >
-                    Export to Google Docs
-                  </button>
+                <div className="absolute right-0 top-full pt-1 hidden group-hover:block z-[100]">
+                  <div className="w-40 flex-col rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 shadow-xl flex">
+                    <button 
+                      onClick={handleExportPdf}
+                      className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                    >
+                      Export as PDF
+                    </button>
+                    <button 
+                      onClick={handleExportDoc}
+                      className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                    >
+                      Export to Google Docs
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
