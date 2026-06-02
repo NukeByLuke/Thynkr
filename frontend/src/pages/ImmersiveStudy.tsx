@@ -1141,7 +1141,7 @@ function OriginalContentPreview({ file }: { file: UploadedFile }) {
                       onClick={handleExportDoc}
                       className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
                     >
-                      Export to Google Docs
+                      Export to Docs
                     </button>
                   </div>
                 </div>
