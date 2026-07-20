@@ -241,7 +241,7 @@ jobs:
         run: echo "No E2E test files found. Skipping E2E test run."
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always() && steps.detect-e2e.outputs.exists == 'true'
         with:
           name: playwright-report
