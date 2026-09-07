@@ -43,7 +43,7 @@
     "ioredis": "^5.9.2",
     "jsonwebtoken": "^9.0.3",
     "jszip": "^3.10.1",
-    "mammoth": "^1.11.0",
+    "mammoth": "^1.12.2",
     "multer": "^2.0.2",
     "node-cache": "^5.1.2",
     "pdf-parse": "^2.4.5",
